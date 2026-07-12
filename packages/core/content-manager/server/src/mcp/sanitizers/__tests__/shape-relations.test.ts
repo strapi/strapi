@@ -419,3 +419,301 @@ describe('shapeRelationsForMcp (real traverseEntity)', () => {
     expect(block.text).toBe('Some quote');
   });
 });
+
+// ---------------------------------------------------------------------------
+// shapeRelationsForMcp — opt-in relation inlining (RBAC-safe, one level deep)
+// ---------------------------------------------------------------------------
+
+describe('shapeRelationsForMcp with opt-in inlining', () => {
+  const useModels = (models: Record<string, unknown>) => {
+    (global as Record<string, unknown>).strapi = {
+      getModel: (uid: string) => models[uid],
+    } as unknown as typeof strapi;
+  };
+
+  const models = {
+    'api::page.page': {
+      uid: 'api::page.page',
+      attributes: {
+        title: { type: 'string' },
+        header: { type: 'relation', relation: 'oneToOne', target: 'api::header.header' },
+        buttons: { type: 'relation', relation: 'oneToMany', target: 'api::button.button' },
+      },
+    },
+    'api::header.header': {
+      uid: 'api::header.header',
+      attributes: {
+        label: { type: 'string' },
+        // The header itself points back to a logo relation — must be stubbed (one level deep).
+        logo: { type: 'relation', relation: 'oneToOne', target: 'api::media.media' },
+      },
+    },
+    'api::button.button': {
+      uid: 'api::button.button',
+      attributes: { text: { type: 'string' } },
+    },
+    'api::media.media': { uid: 'api::media.media', attributes: { url: { type: 'string' } } },
+  };
+
+  // Resolver that "sanitizes" by dropping a pretend non-readable field, mirroring a
+  // target permissionChecker.sanitizeOutput. Relations on the entry are left for the
+  // outer traversal to stub.
+  const inlineRelation = jest.fn(async (_targetUid: string, entry: Record<string, unknown>) => {
+    const { secret, ...rest } = entry;
+    return rest;
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('inlines a named to-one relation while stubbing its own sub-relations', async () => {
+    useModels(models);
+
+    const result = await shapeRelationsForMcp(
+      'api::page.page' as never,
+      {
+        title: 'Home',
+        header: {
+          documentId: 'h1',
+          label: 'Welcome',
+          secret: 'DO NOT LEAK',
+          logo: { documentId: 'm1', url: 'LEAKED-media-url' },
+        },
+      },
+      { inlineRelationKeys: new Set(['header']), inlineRelation }
+    );
+
+    const header = result.header as Record<string, unknown>;
+    // Inlined fields present, non-readable field stripped by the resolver
+    expect(header.label).toBe('Welcome');
+    expect(header.secret).toBeUndefined();
+    // The inlined entry's OWN relation is reduced to an identity stub (one level deep)
+    expect(header.logo).toEqual({ documentId: 'm1' });
+  });
+
+  it('inlines a named to-many relation as an array of sanitized entries', async () => {
+    useModels(models);
+
+    const result = await shapeRelationsForMcp(
+      'api::page.page' as never,
+      {
+        buttons: [
+          { documentId: 'b1', text: 'Go', secret: 'x' },
+          { documentId: 'b2', text: 'Stop', secret: 'y' },
+        ],
+      },
+      { inlineRelationKeys: new Set(['buttons']), inlineRelation }
+    );
+
+    expect(result.buttons).toEqual([
+      { documentId: 'b1', text: 'Go' },
+      { documentId: 'b2', text: 'Stop' },
+    ]);
+  });
+
+  it('leaves relations NOT named in inlineRelationKeys as identity stubs', async () => {
+    useModels(models);
+
+    const result = await shapeRelationsForMcp(
+      'api::page.page' as never,
+      {
+        header: { documentId: 'h1', label: 'Welcome', secret: 'x' },
+        buttons: [{ documentId: 'b1', text: 'Go' }],
+      },
+      { inlineRelationKeys: new Set(['header']), inlineRelation }
+    );
+
+    // header inlined, buttons stubbed
+    expect((result.header as Record<string, unknown>).label).toBe('Welcome');
+    expect(result.buttons).toEqual([{ documentId: 'b1' }]);
+  });
+
+  it('falls back to an identity stub when the resolver returns null (target not readable)', async () => {
+    useModels(models);
+    const denyResolver = jest.fn(async () => null);
+
+    const result = await shapeRelationsForMcp(
+      'api::page.page' as never,
+      { header: { documentId: 'h1', label: 'Welcome' } },
+      { inlineRelationKeys: new Set(['header']), inlineRelation: denyResolver }
+    );
+
+    expect(result.header).toEqual({ documentId: 'h1' });
+  });
+
+  it('to-one named relation with null value stays null (no resolver call)', async () => {
+    useModels(models);
+
+    const result = await shapeRelationsForMcp(
+      'api::page.page' as never,
+      { header: null },
+      { inlineRelationKeys: new Set(['header']), inlineRelation }
+    );
+
+    expect(result.header).toBeNull();
+    expect(inlineRelation).not.toHaveBeenCalled();
+  });
+
+  it('with no options behaves exactly like the default stub shaping', async () => {
+    useModels(models);
+
+    const result = await shapeRelationsForMcp('api::page.page' as never, {
+      header: { documentId: 'h1', label: 'Welcome', secret: 'x' },
+    });
+
+    expect(result.header).toEqual({ documentId: 'h1' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// shapeRelationsForMcp — opt-in relation inlining (RBAC-safe)
+// ---------------------------------------------------------------------------
+
+describe('shapeRelationsForMcp — opt-in inlining', () => {
+  const useModels = (models: Record<string, unknown>) => {
+    (global as Record<string, unknown>).strapi = {
+      getModel: (uid: string) => models[uid],
+    } as unknown as typeof strapi;
+  };
+
+  it('inlines a top-level relation opted into inlining, sanitized via the resolver', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    // Resolver simulates the related type's permissionChecker: strips a non-readable field.
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => {
+      const { email, ...rest } = entry;
+      return rest;
+    });
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { author: { documentId: 'auth1', name: 'Ada', email: 'SECRET' } },
+      { inlineRelationKeys: new Set(['author']), inlineRelation }
+    );
+
+    expect(inlineRelation).toHaveBeenCalledWith('api::author.author', expect.any(Object));
+    expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada' });
+  });
+
+  it('falls back to an identity stub when the resolver returns null (not readable)', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async () => null);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { author: { documentId: 'auth1', name: 'Ada', email: 'SECRET' } },
+      { inlineRelationKeys: new Set(['author']), inlineRelation }
+    );
+
+    expect(result.author).toEqual({ documentId: 'auth1' });
+  });
+
+  it('inlines a to-many relation and stubs the inlined entries own relations (one level)', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
+        },
+      },
+      'api::tag.tag': {
+        uid: 'api::tag.tag',
+        attributes: {
+          label: { type: 'string' },
+          owner: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: {} },
+    });
+
+    // Resolver returns the entry as-is; the OUTER traversal must stub the entry's `owner`.
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      {
+        tags: [
+          { documentId: 'tag1', label: 'A', owner: { documentId: 'auth1', name: 'LEAK' } },
+          { documentId: 'tag2', label: 'B', owner: null },
+        ],
+      },
+      { inlineRelationKeys: new Set(['tags']), inlineRelation }
+    );
+
+    expect(result.tags).toEqual([
+      { documentId: 'tag1', label: 'A', owner: { documentId: 'auth1' } },
+      { documentId: 'tag2', label: 'B', owner: null },
+    ]);
+  });
+
+  it('does NOT inline relations that were not opted in', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+          editor: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      {
+        author: { documentId: 'auth1', name: 'Ada' },
+        editor: { documentId: 'auth2', name: 'Grace' },
+      },
+      { inlineRelationKeys: new Set(['author']), inlineRelation }
+    );
+
+    expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada' });
+    expect(result.editor).toEqual({ documentId: 'auth2' });
+  });
+
+  it('does NOT inline a relation nested inside a component (top-level only)', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: { seo: { type: 'component', component: 'shared.seo' } },
+      },
+      'shared.seo': {
+        uid: 'shared.seo',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { seo: { author: { documentId: 'auth1', name: 'LEAK' } } },
+      // Even though "author" is in the set, it is not a TOP-LEVEL attribute here.
+      { inlineRelationKeys: new Set(['author']), inlineRelation }
+    );
+
+    expect(inlineRelation).not.toHaveBeenCalled();
+    expect((result.seo as Record<string, unknown>).author).toEqual({ documentId: 'auth1' });
+  });
+});

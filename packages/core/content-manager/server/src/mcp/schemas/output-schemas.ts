@@ -3,13 +3,18 @@ import type { Struct } from '@strapi/types';
 
 import { isManyRelationForMcp } from '../sanitizers/shape-relations';
 
-const relationIdentity = z.object({
-  documentId: z.string(),
-  locale: z.string().optional(),
-  __type: z.string().optional(),
-  // Computed publish status preserved on `localizations` entries (calculate, then strip).
-  status: z.string().optional(),
-});
+// `.loose()` so an entry validates as either an identity stub OR a fully inlined,
+// RBAC-sanitized related entry (opt-in via `populate`) — the extra inlined fields pass
+// through instead of being stripped or rejected by the MCP SDK's schema validation.
+const relationIdentity = z
+  .object({
+    documentId: z.string(),
+    locale: z.string().optional(),
+    __type: z.string().optional(),
+    // Computed publish status preserved on `localizations` entries (calculate, then strip).
+    status: z.string().optional(),
+  })
+  .loose();
 
 const buildAttributeSchema = (key: string, attributes: Struct.SchemaAttributes): z.ZodTypeAny => {
   const attribute = attributes[key];
@@ -68,6 +73,9 @@ export const buildDocumentOutputSchema = (
           availableStatus: z.array(z.record(z.string(), z.unknown())).optional(),
         })
         .optional(),
+      // Set when the response exceeded the configured size budget (see enforceResponseBudget).
+      truncated: z.boolean().optional(),
+      notice: z.string().optional(),
     })
     .loose();
 
@@ -88,6 +96,9 @@ export const buildListOutputSchema = (
         pageCount: z.number(),
         total: z.number(),
       }),
+      // Set when the response exceeded the configured size budget (see enforceResponseBudget).
+      truncated: z.boolean().optional(),
+      notice: z.string().optional(),
     })
     .loose();
 
