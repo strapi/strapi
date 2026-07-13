@@ -628,6 +628,9 @@ const getBy = async (
     select: selectFields,
     populate: POPULATE_FIELDS,
     where: whereParams,
+    // Token validation is on the auth path: always use the writer so a
+    // just-created/revoked token isn't read from a lagging replica.
+    writer: true,
   });
 
   if (!token) {

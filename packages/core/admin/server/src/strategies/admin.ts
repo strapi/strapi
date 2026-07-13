@@ -49,7 +49,9 @@ export const authenticate = async (ctx: Context) => {
 
   const user = await strapi.db
     .query('admin::user')
-    .findOne({ where: { id: userId }, populate: ['roles'] });
+    // Authorization read: always use the writer so a just-revoked/deactivated
+    // user isn't authenticated from a lagging replica.
+    .findOne({ where: { id: userId }, populate: ['roles'], writer: true });
 
   if (!user || !(user.isActive === true)) {
     return { authenticated: false };

@@ -17,9 +17,14 @@ export type Params = {
   limit?: number;
   offset?: number;
   count?: boolean;
+  writer?: boolean;
+  replica?: boolean;
 };
 
-export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
+export type FindOneParams = Pick<
+  Params,
+  'where' | 'select' | 'populate' | '_q' | 'orderBy' | 'writer' | 'replica'
+>;
 
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;

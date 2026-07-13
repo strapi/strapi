@@ -84,7 +84,9 @@ export const findMany = async (params = {}): Promise<Permission[]> => {
  * @param user - user
  */
 export const findUserPermissions = async (user: AdminUser): Promise<Permission[]> => {
-  return findMany({ where: { role: { users: { id: user.id } } } });
+  // Authorization read: always use the writer so a just-changed role/permission
+  // isn't evaluated from a lagging replica.
+  return findMany({ where: { role: { users: { id: user.id } } }, writer: true });
 };
 
 const filterPermissionsToRemove = async (permissions: Permission[]) => {

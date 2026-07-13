@@ -87,6 +87,9 @@ class DatabaseSessionProvider implements SessionProvider {
   async findBySessionId(sessionId: string): Promise<SessionData | null> {
     const result = await this.db.query(this.contentType).findOne({
       where: { sessionId },
+      // Auth-critical read (token validation/refresh): always use the writer so
+      // a just-created or revoked session isn't missed on a lagging replica.
+      writer: true,
     });
     return result as SessionData | null;
   }
