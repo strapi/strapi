@@ -9,9 +9,10 @@ import { createEntityManager, EntityManager } from './entity-manager';
 import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import type { Event } from './lifecycles';
-import { createConnection } from './connection';
+import { createConnection, createReadReplicaConnection, type ConnectionConfig } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import { routingCtx } from './routing-context';
 import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
@@ -34,9 +35,26 @@ export type Logger = Record<
 >;
 
 export interface DatabaseConfig {
-  connection: Knex.Config;
+  connection: ConnectionConfig;
   settings: Settings;
   logger?: Logger;
+}
+
+/**
+ * Intent of a query, used to decide whether it may be served by a read replica.
+ * `read` queries (SELECT/count/…) are replica-eligible; `write` queries are not.
+ */
+export type QueryIntent = 'read' | 'write';
+
+/**
+ * Per-query routing controls. `writer`/`replica` are explicit escape hatches
+ * that override automatic routing (`replica` is still ignored inside a
+ * transaction, where the writer must always be used).
+ */
+export interface RoutingOptions {
+  intent?: QueryIntent;
+  writer?: boolean;
+  replica?: boolean;
 }
 
 const afterCreate =
@@ -53,6 +71,10 @@ const afterCreate =
 
 class Database {
   connection: Knex;
+
+  // Optional read-replica (reader endpoint) connection. Undefined unless a
+  // `readReplica` is configured. Reads may be routed here to offload the writer.
+  readConnection?: Knex;
 
   dialect: Dialect;
 
@@ -72,6 +94,21 @@ class Database {
 
   logger: Logger;
 
+  // Request-scoped read/write routing. Consumers wrap a unit of work in
+  // `db.routing.run(cb)` (safe replica reads), `db.routing.withWriterOnly(cb)`
+  // (pin a phase such as authentication to the writer), or declare
+  // auth-sensitive models once with `db.routing.registerWriterModels([...])`.
+  // The dirty-tracking primitives stay module-internal so external code can't
+  // silently defeat read-after-write safety.
+  routing: {
+    run: typeof routingCtx.run;
+    withWriterOnly: typeof routingCtx.withWriterOnly;
+    registerWriterModels: (uids: string[]) => void;
+  };
+
+  // UIDs whose reads must always use the writer (auth-sensitive models).
+  private writerModels = new Set<string>();
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -83,6 +120,12 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+
+    this.routing = {
+      run: routingCtx.run,
+      withWriterOnly: routingCtx.withWriterOnly,
+      registerWriterModels: (uids: string[]) => this.registerWriterModels(uids),
+    };
 
     this.dialect = getDialect(this);
 
@@ -112,6 +155,12 @@ class Database {
     this.metadata = createMetadata([]);
 
     this.connection = createConnection(knexConfig, {
+      pool: { afterCreate: afterCreate(this) },
+    });
+
+    // Reuse the same afterCreate wiring so the reader pool runs the same
+    // per-connection dialect initialization (pg type parsers, search_path).
+    this.readConnection = createReadReplicaConnection(this.config.connection, {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -147,6 +196,12 @@ class Database {
       }
     }
 
+    // Fail fast if a configured read replica is unreachable at startup.
+    if (this.readConnection) {
+      this.logger.debug('Verifying connection to the read replica');
+      await this.readConnection.raw('SELECT 1');
+    }
+
     this.metadata.loadModels(models);
     await validateDatabase(this);
     return this;
@@ -176,6 +231,11 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // A transaction implies a write, so pin the rest of this routing scope to
+    // the writer even if the body only issues raw statements that bypass the
+    // query-builder's own markDirty. Reads after commit stay consistent.
+    routingCtx.markDirty();
+
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()
@@ -220,11 +280,59 @@ class Database {
     return this.connection.client.connectionSettings.schema;
   }
 
+  /**
+   * Decide whether a query may be served by the read replica. The writer is
+   * always used unless every condition for safe replica reads holds: a replica
+   * is configured, we are not inside a transaction, the caller has not forced
+   * the writer, and either the caller forced the replica or this is a `read`
+   * in a clean routing scope (no write has happened yet in this scope).
+   */
+  private shouldRouteToReplica(options?: RoutingOptions): boolean {
+    if (!this.readConnection) {
+      return false;
+    }
+    // Transactions must always run against the writer (read-your-writes).
+    if (transactionCtx.get()) {
+      return false;
+    }
+    // A writer-only phase (e.g. authentication) wins over every other signal,
+    // including a forced replica read.
+    if (routingCtx.isWriterOnly()) {
+      return false;
+    }
+    if (options?.writer) {
+      return false;
+    }
+    if (options?.replica) {
+      return true;
+    }
+    if (options?.intent !== 'read') {
+      return false;
+    }
+    return routingCtx.shouldUseReplica();
+  }
+
+  /**
+   * Declare UIDs whose reads must always be served by the writer (auth-sensitive
+   * models such as users, tokens, sessions, permissions). Registered at
+   * bootstrap by core and plugins; inert when no read replica is configured.
+   */
+  registerWriterModels(uids: string[]) {
+    uids.forEach((uid) => this.writerModels.add(uid));
+  }
+
+  isWriterModel(uid: string): boolean {
+    return this.writerModels.has(uid);
+  }
+
   getConnection(): Knex;
-  getConnection(tableName?: string): Knex.QueryBuilder;
-  getConnection(tableName?: string): Knex | Knex.QueryBuilder {
+  getConnection(tableName?: string, options?: RoutingOptions): Knex.QueryBuilder;
+  getConnection(tableName?: string, options?: RoutingOptions): Knex | Knex.QueryBuilder {
+    const knexConnection = this.shouldRouteToReplica(options)
+      ? (this.readConnection as Knex)
+      : this.connection;
     const schema = this.getSchemaName();
-    const connection = tableName ? this.connection(tableName) : this.connection;
+    const connection = tableName ? knexConnection(tableName) : knexConnection;
     return schema ? connection.withSchema(schema) : connection;
   }
 
@@ -267,7 +375,14 @@ class Database {
 
   async destroy() {
     await this.lifecycles.clear();
-    await this.connection.destroy();
+    // Ensure the reader pool is torn down even if destroying the writer throws.
+    try {
+      await this.connection.destroy();
+    } finally {
+      if (this.readConnection) {
+        await this.readConnection.destroy();
+      }
+    }
   }
 }
 

@@ -281,7 +281,7 @@ class Strapi extends Container implements Core.Strapi {
     this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
-      .add('auth', createAuth())
+      .add('auth', () => createAuth(this))
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
       .add('eventHub', () => createEventHub())

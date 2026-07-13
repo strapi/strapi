@@ -51,6 +51,9 @@ const buildDb = ({ uid = UID, tableName = 'articles', i18n = false }: BuildDbOpt
     getConnection(tableNameArg?: string) {
       return tableNameArg ? connection(tableNameArg) : connection;
     },
+    isWriterModel() {
+      return false;
+    },
     metadata: {
       get(metaUid: string) {
         if (metaUid === uid) {

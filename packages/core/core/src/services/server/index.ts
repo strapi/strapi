@@ -21,7 +21,16 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
+  // Establish the request context and, nested within it, the DB read/write
+  // routing scope so reads in this request may be served by a read replica
+  // until the first write pins the rest of the request to the writer. The
+  // routing scope is only opened when a read replica is configured, so the
+  // default (single-connection) setup is unchanged.
+  app.use((ctx, next) =>
+    requestCtx.run(ctx, () =>
+      strapi.db.readConnection ? strapi.db.routing.run(() => next()) : next()
+    )
+  );
 
   const router = new Router();
 

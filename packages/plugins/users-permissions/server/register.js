@@ -10,6 +10,15 @@ module.exports = ({ strapi }) => {
   strapi.get('auth').register('content-api', authStrategy);
   strapi.sanitizers.add('content-api.output', sanitizers.defaultSanitizeOutput);
 
+  // Auth-sensitive models: reads must always hit the writer so a blocked user or
+  // revoked permission isn't evaluated from a lagging read replica (incl. on
+  // `auth: false` routes like login that bypass the auth phase).
+  strapi.db.routing.registerWriterModels([
+    'plugin::users-permissions.user',
+    'plugin::users-permissions.role',
+    'plugin::users-permissions.permission',
+  ]);
+
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
   }

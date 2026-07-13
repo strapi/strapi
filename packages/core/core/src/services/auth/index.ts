@@ -42,7 +42,7 @@ const validStrategy = (strategy: Strategy) => {
   }
 };
 
-const createAuthentication = (): Authentication => {
+const createAuthentication = (strapi: Core.Strapi): Authentication => {
   const strategies: Record<string, Strategy[]> = {};
 
   return {
@@ -97,7 +97,10 @@ const createAuthentication = (): Authentication => {
       );
 
       for (const strategy of strategiesToUse) {
-        const result = await strategy.authenticate(ctx);
+        // Pin the whole authentication phase to the writer so auth/RBAC reads
+        // are never served stale from a lagging replica. Inert when no read
+        // replica is configured.
+        const result = await strapi.db.routing.withWriterOnly(() => strategy.authenticate(ctx));
 
         const { authenticated = false, credentials, ability = null, error = null } = result || {};
 

@@ -188,7 +188,10 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   const resultQueryAlias = qb.getAlias();
   const aliasedTableName = qb.mustUseAlias() ? alias(resultQueryAlias, tableName) : tableName;
 
-  const resultQuery = db.getConnection(aliasedTableName);
+  // Route the deep-sort wrapper with the same read/write intent as the query it
+  // wraps, so a replica-eligible read isn't forced onto the writer by this
+  // secondary connection.
+  const resultQuery = db.getConnection(aliasedTableName, qb.getRoutingOptions());
 
   // 1. Clone the original query to create the sub-query (referenced as baseQuery) and avoid any mutation on the initial object
   const baseQuery = originalQuery.clone();
