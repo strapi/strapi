@@ -259,9 +259,12 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       // Construct the full path to the unique field within the component.
       const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
 
-      // Extract the values from the repeatable data using the constructed path
+      // Extract the values from the repeatable data using the constructed path.
+      // Use optional chaining so that a missing/empty nested component along the
+      // path resolves to `undefined` instead of throwing
+      // "Cannot read properties of undefined".
       const values = componentContext.repeatableData.map((item) => {
-        return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
+        return pathToCheck.split('.').reduce((acc, key) => acc?.[key], item as any);
       });
 
       // Check if the value is repeated in the current entity
