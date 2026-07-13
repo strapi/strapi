@@ -27,7 +27,7 @@
     "@strapi/strapi": "workspace:*"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.1",
+    "@strapi/design-system": "2.2.2",
     "@strapi/icons": "2.2.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
