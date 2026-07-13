@@ -127,6 +127,9 @@ const addMinLengthValidator = (
  * Adds maxLength validator
  * @returns {StringSchema}
  */
+/** Knex defaults `string` columns to varchar(255); match that when the schema omits maxLength. */
+const SHORT_TEXT_DEFAULT_MAX_LENGTH = 255;
+
 const addMaxLengthValidator = (
   validator: yup.StringSchema,
   {
@@ -141,7 +144,12 @@ const addMaxLengthValidator = (
       | Schema.Attribute.UID;
   }
 ) => {
-  return attr.maxLength && _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
+  const explicitMax = _.isInteger(attr.maxLength) ? attr.maxLength : undefined;
+  const implicitShortTextMax =
+    attr.type === 'string' && explicitMax === undefined ? SHORT_TEXT_DEFAULT_MAX_LENGTH : undefined;
+  const maxLen = explicitMax ?? implicitShortTextMax;
+
+  return maxLen !== undefined ? validator.max(maxLen) : validator;
 };
 
 /**

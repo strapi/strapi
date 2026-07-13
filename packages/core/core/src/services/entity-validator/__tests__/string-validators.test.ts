@@ -303,7 +303,28 @@ describe('String validator', () => {
     ({ isDraft }: { isDraft: boolean }) => {
       const options = { ...mockOptions, isDraft };
 
-      test('it does not validates the maxLength constraint if the attribute maxLength is not an integer', async () => {
+      test('uses implicit varchar(255) max when maxLength is missing or not an integer', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.string(
+            {
+              attr: { type: 'string', maxLength: 'not-an-integer' as unknown as number },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrStringUnique',
+                value: 'test-data',
+              },
+              entity: { id: 1, attrStringUnique: 'other-data' },
+            },
+            options
+          )
+        );
+
+        expect(await validator('a')).toBe('a');
+
+        await expect(validator('x'.repeat(256))).rejects.toBeInstanceOf(errors.YupValidationError);
+      });
+
+      test('allows strings up to explicit integer maxLength when set', async () => {
         const validator = strapiUtils.validateYupSchema(
           Validators.string(
             {
@@ -364,6 +385,72 @@ describe('String validator', () => {
         );
 
         expect(await validator('a')).toBe('a');
+      });
+    }
+  );
+
+  describe.each([{ isDraft: true }, { isDraft: false }])(
+    'implicit short-text max length — $isDraft',
+    ({ isDraft }: { isDraft: boolean }) => {
+      const options = { ...mockOptions, isDraft };
+
+      test('rejects strings longer than 255 chars when maxLength is omitted', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.string(
+            {
+              attr: { type: 'string' },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'title',
+                value: 'x'.repeat(256),
+              },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        await expect(validator('x'.repeat(256))).rejects.toBeInstanceOf(errors.YupValidationError);
+      });
+
+      test('accepts strings of exactly 255 chars when maxLength is omitted', async () => {
+        const value = 'x'.repeat(255);
+        const validator = strapiUtils.validateYupSchema(
+          Validators.string(
+            {
+              attr: { type: 'string' },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'title',
+                value,
+              },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        expect(await validator(value)).toBe(value);
+      });
+
+      test('does not apply implicit limit to long text fields', async () => {
+        const value = 'x'.repeat(500);
+        const validator = strapiUtils.validateYupSchema(
+          Validators.text(
+            {
+              attr: { type: 'text' },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'body',
+                value,
+              },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        expect(await validator(value)).toBe(value);
       });
     }
   );

@@ -308,13 +308,21 @@ const isScalarAttribute = (attribute?: Attribute) => {
 };
 
 const getDoesAttributeRequireValidation = (attribute: Attribute) => {
+  const hasIntegerMaxLength =
+    Object.prototype.hasOwnProperty.call(attribute, 'maxLength') &&
+    _.isInteger(attribute.maxLength);
+
+  const shortTextUsesImplicitMaxLength =
+    attribute.type === 'string' && !hasIntegerMaxLength;
+
   return (
     attribute.required ||
     attribute.unique ||
     Object.prototype.hasOwnProperty.call(attribute, 'max') ||
     Object.prototype.hasOwnProperty.call(attribute, 'min') ||
-    Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
-    Object.prototype.hasOwnProperty.call(attribute, 'minLength')
+    hasIntegerMaxLength ||
+    Object.prototype.hasOwnProperty.call(attribute, 'minLength') ||
+    shortTextUsesImplicitMaxLength
   );
 };
 const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';

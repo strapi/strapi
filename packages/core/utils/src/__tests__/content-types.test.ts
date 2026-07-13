@@ -112,8 +112,8 @@ describe('Content types utils', () => {
   });
 
   describe('getDoesAttributeRequireValidation', () => {
-    test('false for field without constraints', () => {
-      expect(getDoesAttributeRequireValidation({ type: 'string' })).toEqual(false);
+    test('true for short text without explicit maxLength (implicit varchar limit)', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string' })).toEqual(true);
     });
     test('true for required fields', () => {
       expect(getDoesAttributeRequireValidation({ type: 'string', required: true })).toEqual(true);
@@ -133,12 +133,12 @@ describe('Content types utils', () => {
     test('true for fields with a min length', () => {
       expect(getDoesAttributeRequireValidation({ type: 'string', minLength: 10 })).toEqual(true);
     });
-    test('false for non-required fields', () => {
-      expect(getDoesAttributeRequireValidation({ type: 'string', required: false })).toEqual(false);
+    test('true for non-required short text fields (implicit max length still applies)', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', required: false })).toEqual(true);
     });
 
-    test('false for non-unique fields', () => {
-      expect(getDoesAttributeRequireValidation({ type: 'string', unique: false })).toEqual(false);
+    test('true for non-unique short text fields (implicit max length still applies)', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', unique: false })).toEqual(true);
     });
   });
 
