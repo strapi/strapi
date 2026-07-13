@@ -108,7 +108,7 @@ describe('formsAPI', () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires -- isolateModules needs a fresh CommonJS load of the singleton
         const { formsAPI: api } = require('../formAPI');
         const mockCustomField = {
-          type: 'json',
+          type: 'json' as const,
           intlLabel: { id: 'test.cf', defaultMessage: 'Test' },
           options: { base: [], advanced: [] },
         };

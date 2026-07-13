@@ -3,10 +3,19 @@ import path from 'path';
 import _ from 'lodash';
 import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
-import tsUtils from '@strapi/typescript-utils';
 import { env, generateInstallId } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
+
+// Lazy: only resolved when telemetry is enabled and a sender is constructed
+let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
+const tsUtils = (): typeof import('@strapi/typescript-utils') => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return lazyTsUtils as typeof import('@strapi/typescript-utils');
+};
 
 export interface Payload {
   eventProperties?: Record<string, unknown>;
@@ -58,8 +67,8 @@ export default (strapi: Core.Strapi): Sender => {
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
-    useTypescriptOnServer: tsUtils.isUsingTypeScriptSync(serverRootPath),
-    useTypescriptOnAdmin: tsUtils.isUsingTypeScriptSync(adminRootPath),
+    useTypescriptOnServer: tsUtils().isUsingTypeScriptSync(serverRootPath),
+    useTypescriptOnAdmin: tsUtils().isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
   };

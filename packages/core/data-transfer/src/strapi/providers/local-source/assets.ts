@@ -4,7 +4,7 @@ import { stat, createReadStream, ReadStream } from 'fs-extra';
 import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
 
-import type { IAsset, IFile } from '../../../../types';
+import type { IAsset, IFile } from '../../../types';
 
 function getFileStream(
   filepath: string,
@@ -107,7 +107,7 @@ export const createAssetsStream = (
     options.onWarning?.(message);
   };
 
-  const generator: () => AsyncGenerator<IAsset, void> = async function* () {
+  const generator: () => AsyncGenerator<IAsset, void> = async function* generateAssets() {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')
       // Create a query builder instance (default type is 'select')

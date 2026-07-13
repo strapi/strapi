@@ -26,6 +26,9 @@ inputs:
   linear-labels:
     description: 'JSON map of label name → ID (skips team labels API call)'
     required: false
+  linear-triage-state-id:
+    description: 'Linear workflow state ID to assign on ticket creation (falls back to name/type lookup)'
+    required: false
   post-to-notion:
     description: 'Also post to Notion when running weekly-report (true/false)'
     required: false

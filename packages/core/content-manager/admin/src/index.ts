@@ -15,7 +15,7 @@ import 'prismjs';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     const cm = new ContentManagerPlugin();
 
     app.addReducers({

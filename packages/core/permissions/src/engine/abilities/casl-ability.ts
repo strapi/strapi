@@ -64,7 +64,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       const ability = build({ conditionsMatcher });
 
       function decorateCan(originalCan: Ability['can']) {
-        return function (...args: Parameters<Ability['can']>) {
+        return function canWithParametrizedAction(...args: Parameters<Ability['can']>) {
           const [action, ...rest] = args;
           const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
 

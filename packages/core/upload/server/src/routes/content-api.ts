@@ -34,6 +34,21 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
     },
     {
       method: 'GET',
+      path: '/files/page',
+      handler: 'content-api.findPage',
+      request: {
+        query: {
+          fields: validator.queryFields.optional(),
+          populate: validator.queryPopulate.optional(),
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
+        },
+      },
+      response: validator.paginatedFiles,
+    },
+    {
+      method: 'GET',
       path: '/files/:id',
       handler: 'content-api.findOne',
       request: {

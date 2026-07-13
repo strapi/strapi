@@ -1,4 +1,4 @@
-import { renderHook, act } from '@tests/utils';
+import { renderHook, act, waitFor } from '@tests/utils';
 
 import { useFolderNavigation } from '../useFolderNavigation';
 
@@ -34,6 +34,32 @@ describe('useFolderNavigation', () => {
     expect(result.current.currentFolderId).toBe(42);
   });
 
+  it('returns null currentFolderId when folder query param is not a finite number', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: 'abc' } }, mockSetQuery]);
+
+    const { result } = renderHook(() => useFolderNavigation());
+
+    expect(result.current.currentFolderId).toBeNull();
+  });
+
+  it('removes the folder query param when folder value is not a finite number', async () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: 'abc' } }, mockSetQuery]);
+
+    renderHook(() => useFolderNavigation());
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '' }, 'remove');
+    });
+  });
+
+  it('returns null currentFolderId when folder query param is NaN', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: 'NaN' } }, mockSetQuery]);
+
+    const { result } = renderHook(() => useFolderNavigation());
+
+    expect(result.current.currentFolderId).toBeNull();
+  });
+
   it('calls setQuery with folder id as a string when navigateToFolder is called', () => {
     mockUseQueryParams.mockReturnValue([{ query: {} }, mockSetQuery]);
 
@@ -47,5 +73,42 @@ describe('useFolderNavigation', () => {
 
     expect(mockSetQuery).toHaveBeenCalledTimes(1);
     expect(mockSetQuery).toHaveBeenCalledWith({ folder: '7' });
+  });
+
+  it('navigateToRoot removes the folder query param', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: '7' } }, mockSetQuery]);
+
+    const { result } = renderHook(() => useFolderNavigation());
+
+    act(() => {
+      result.current.navigateToRoot();
+    });
+
+    expect(mockSetQuery).toHaveBeenCalledTimes(1);
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '' }, 'remove');
+  });
+
+  it('navigateToFolderId(null) clears the folder param', () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: '7' } }, mockSetQuery]);
+
+    const { result } = renderHook(() => useFolderNavigation());
+
+    act(() => {
+      result.current.navigateToFolderId(null);
+    });
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '' }, 'remove');
+  });
+
+  it('navigateToFolderId(id) sets the folder param to that id', () => {
+    mockUseQueryParams.mockReturnValue([{ query: {} }, mockSetQuery]);
+
+    const { result } = renderHook(() => useFolderNavigation());
+
+    act(() => {
+      result.current.navigateToFolderId(11);
+    });
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ folder: '11' });
   });
 });

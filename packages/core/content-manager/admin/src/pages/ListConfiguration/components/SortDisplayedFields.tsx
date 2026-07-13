@@ -6,7 +6,6 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDoc } from '../../../hooks/useDocument';
-import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
 import { getTranslation } from '../../../utils/translations';
 
@@ -15,26 +14,22 @@ import { DraggableCard, DraggableCardProps } from './DraggableCard';
 import type { ListLayout } from '../../../hooks/useDocumentLayout';
 import type { FormData } from '../ListConfigurationPage';
 
-interface SortDisplayedFieldsProps extends Pick<ListLayout, 'layout'> {}
+interface SortDisplayedFieldsProps extends Pick<ListLayout, 'metadatas'> {}
 
-const SortDisplayedFields = () => {
+const SortDisplayedFields = ({ metadatas }: SortDisplayedFieldsProps) => {
   const { formatMessage } = useIntl();
-  const { model, schema } = useDoc();
+  const { schema } = useDoc();
   const [isDraggingSibling, setIsDraggingSibling] = React.useState(false);
   const [lastAction, setLastAction] = React.useState<string | null>(null);
   const scrollableContainerRef = React.useRef<HTMLDivElement>(null);
 
   const values = useForm<FormData['layout']>(
     'SortDisplayedFields',
-    (state) => state.values.layout ?? []
+    (state) => (state.values as FormData).layout ?? []
   );
   const addFieldRow = useForm('SortDisplayedFields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('SortDisplayedFields', (state) => state.removeFieldRow);
   const moveFieldRow = useForm('SortDisplayedFields', (state) => state.moveFieldRow);
-
-  const { metadata: allMetadata } = useGetContentTypeConfigurationQuery(model, {
-    selectFromResult: ({ data }) => ({ metadata: data?.contentType.metadatas ?? {} }),
-  });
 
   /**
    * This is our list of fields that are not displayed in the current layout
@@ -50,7 +45,7 @@ const SortDisplayedFields = () => {
     return Object.entries(schema.attributes).reduce<Array<FormData['layout'][number]>>(
       (acc, [name, attribute]) => {
         if (!displayedFieldNames.includes(name) && checkIfAttributeIsDisplayable(attribute)) {
-          const { list: metadata } = allMetadata[name];
+          const metadata = metadatas[name] || { label: name };
 
           acc.push({
             name,
@@ -63,7 +58,7 @@ const SortDisplayedFields = () => {
       },
       []
     );
-  }, [allMetadata, values, schema]);
+  }, [metadatas, values, schema]);
 
   const handleAddField = (field: FormData['layout'][number]) => {
     setLastAction('add');

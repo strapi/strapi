@@ -23,16 +23,13 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
 const {
   providers: { createLocalFileSourceProvider },
 } = fileDataTransfer;
-
-const {
-  providers: { createLocalDirectorySourceProvider },
-} = directoryDataTransfer;
 
 const {
   providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
@@ -69,7 +66,9 @@ export default async (opts: CmdOptions) => {
 
   const backupPath = opts.file ?? '';
   const source = (await fs.stat(backupPath)).isDirectory()
-    ? createLocalDirectorySourceProvider({ directory: { path: backupPath } })
+    ? directoryDataTransfer.providers.createLocalDirectorySourceProvider({
+        directory: { path: backupPath },
+      })
     : createLocalFileSourceProvider(getLocalFileSourceOptions(opts));
 
   /**
@@ -138,6 +137,7 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
+    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
     await strapiInstance.telemetry.send(
       'didDEITSProcessStart',
       getTransferTelemetryPayload(engine)
