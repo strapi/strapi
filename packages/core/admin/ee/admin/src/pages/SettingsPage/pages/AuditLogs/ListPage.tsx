@@ -23,12 +23,16 @@ const ListPage = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
   const {
-    allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-    isLoading: isLoadingRBAC,
-  } = useRBAC({
-    ...permissions?.auditLogs,
-    readUsers: permissions?.users.read || [],
-  });
+    allowedActions: { canRead: canReadAuditLogs },
+    isLoading: isLoadingRBACAuditLogs,
+  } = useRBAC(permissions?.auditLogs?.read || []);
+
+  const {
+    allowedActions: { canRead: canReadUsers },
+    isLoading: isLoadingRBACUsers,
+  } = useRBAC(permissions?.users.read || []);
+
+  const isLoadingRBAC = isLoadingRBACAuditLogs || isLoadingRBACUsers;
 
   const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
   const {

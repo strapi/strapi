@@ -108,4 +108,26 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add filter' })).toBeInTheDocument();
   });
+
+  it('should show the User filter option when the user can read admin users', async () => {
+    const { user } = render(<ListPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+
+    expect(await screen.findByRole('option', { name: 'Action' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Date' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'User' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'User' }));
+    await user.click(
+      screen.getByRole('combobox', { name: 'Search and select an option to filter' })
+    );
+
+    expect(await screen.findByRole('option', { name: 'John Doe' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Kai Doe' })).toBeInTheDocument();
+  });
 });
