@@ -299,10 +299,41 @@ describe('transformDocument — components', () => {
 
     const sections = result.sections as any[];
     expect(sections).toHaveLength(2);
-    expect(sections[0]).toMatchObject({ heading: 'First', __temp_key__: 1 });
-    expect(sections[1]).toMatchObject({ heading: 'Second', __temp_key__: 2 });
+    expect(sections[0]).toMatchObject({ heading: 'First', __temp_key__: 'a0' });
+    expect(sections[1]).toMatchObject({ heading: 'Second', __temp_key__: 'a1' });
     // id is in FIELDS_TO_REMOVE so it should be stripped
     expect(sections[0]).not.toHaveProperty('id');
+  });
+
+  test('continues repeatable component temp keys after the base-62 boundary', async () => {
+    const { service, mockStrapi } = makeService();
+    (mockStrapi.getModel as jest.Mock).mockImplementation((uid: string) => {
+      if (uid === MODEL) {
+        return {
+          uid: MODEL,
+          attributes: {
+            sections: { type: 'component', component: 'shared.section', repeatable: true },
+          },
+        };
+      }
+      return { uid, attributes: { heading: { type: 'string' } } };
+    });
+
+    const result = await service.transformDocument(
+      {
+        sections: Array.from({ length: 64 }, (_, index) => ({ heading: `Section ${index}` })),
+      },
+      MODEL as any,
+      TARGET_LOCALE,
+      makeUserAbility()
+    );
+
+    const sections = result.sections as any[];
+    expect(sections).toHaveLength(64);
+    expect(sections[0]).toMatchObject({ __temp_key__: 'a0' });
+    expect(sections[61]).toMatchObject({ __temp_key__: 'az' });
+    expect(sections[62]).toMatchObject({ __temp_key__: 'b00' });
+    expect(sections[63]).toMatchObject({ __temp_key__: 'b01' });
   });
 
   test('strips passwords inside components', async () => {
@@ -369,12 +400,12 @@ describe('transformDocument — dynamic zones', () => {
     expect(body[0]).toMatchObject({
       __component: 'blocks.text',
       content: 'Hello',
-      __temp_key__: 1,
+      __temp_key__: 'a0',
     });
     expect(body[1]).toMatchObject({
       __component: 'blocks.image',
       url: 'https://example.com/img.png',
-      __temp_key__: 2,
+      __temp_key__: 'a1',
     });
     // id is in FIELDS_TO_REMOVE
     expect(body[0]).not.toHaveProperty('id');
