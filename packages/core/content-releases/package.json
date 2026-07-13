@@ -65,8 +65,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/database": "5.50.1",
-    "@strapi/design-system": "2.2.1",
-    "@strapi/icons": "2.2.1",
+    "@strapi/design-system": "2.2.3",
+    "@strapi/icons": "2.2.3",
     "@strapi/types": "5.50.1",
     "@strapi/utils": "5.50.1",
     "date-fns": "2.30.0",
