@@ -139,10 +139,13 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
       // Include design-system so plugin chunks use the same instance and inherit root context
-      dedupe: [...ADMIN_VITE_DEDUPE_MODULES],
+      dedupe: [...ADMIN_VITE_DEDUPE_MODULES, ...getResolvableCodemirrorPackages()],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
-      alias: buildAdminViteResolveAliases(),
+      alias: {
+        ...buildAdminViteResolveAliases(),
+        ...getCodemirrorAliases(),
+      },
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };
