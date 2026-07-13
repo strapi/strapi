@@ -19,6 +19,7 @@ import type { BuildContext } from '../create-build-context';
 import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
+import { getCodemirrorAliases } from '../core/codemirror-packages';
 import { getModulePath } from '../core/resolve-module';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
@@ -39,6 +40,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        ...getCodemirrorAliases(),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],

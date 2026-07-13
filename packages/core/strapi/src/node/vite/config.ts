@@ -2,6 +2,7 @@ import type { InlineConfig, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
+import { getCodemirrorAliases, getResolvableCodemirrorPackages } from '../core/codemirror-packages';
 import { getUserConfig } from '../core/config';
 import { getModulePath } from '../core/resolve-module';
 import { isDesignSystemLinked } from '../core/linked-packages';
@@ -48,6 +49,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // context from the root is not seen by components in plugin chunks.
         // Omit when linked so local changes are picked up (see exclude above)
         ...(!designSystemLinked ? ['@strapi/design-system'] : []),
+        // Pre-bundle CodeMirror so JSONInput and plugin chunks share one @codemirror/state instance
+        ...getResolvableCodemirrorPackages(),
         '@radix-ui/react-tooltip',
         // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
         // is CommonJS-only; pre-bundling converts it to ESM for the browser
@@ -127,6 +130,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-router-dom',
         'styled-components',
         '@strapi/design-system',
+        ...getResolvableCodemirrorPackages(),
         '@radix-ui/react-tooltip',
         'lodash',
       ],
@@ -138,6 +142,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-router-dom': getModulePath('react-router-dom'),
         'styled-components': getModulePath('styled-components'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        ...getCodemirrorAliases(),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
       },
