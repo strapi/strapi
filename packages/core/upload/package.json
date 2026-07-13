@@ -75,7 +75,7 @@
     "@radix-ui/react-toggle-group": "1.1.11",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/database": "5.50.1",
-    "@strapi/design-system": "2.2.1",
+    "@strapi/design-system": "2.2.2",
     "@strapi/icons": "2.2.1",
     "@strapi/provider-upload-local": "5.50.1",
     "@strapi/utils": "5.50.1",
