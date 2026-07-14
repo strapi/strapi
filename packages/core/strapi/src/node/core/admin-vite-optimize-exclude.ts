@@ -1,6 +1,5 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import readPkgUp from 'read-pkg-up';
 
 import { ADMIN_VITE_ALIAS_MODULES } from './admin-vite-alias-modules';
 import { getModule, type PackageJson } from './dependencies';
@@ -10,13 +9,13 @@ const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
 
 /**
  * Packages explicitly pre-bundled or aliased for the admin singleton contract.
- * Never auto-exclude these — they must stay on the include/dedupe path.
+ * Never auto-exclude these — they must stay on the optimizeDeps.include / dedupe path.
+ *
+ * The admin entry host (@strapi/strapi) must never land in optimizeDeps.exclude (#26944, #27014).
+ * CJS-only deps imported by @strapi/admin (e.g. invariant, lodash) belong in optimizeDeps.include
+ * (see vite/config.ts — #26964, #26944, #27014).
  */
-const PINNED_OPTIMIZE_MODULES = new Set<string>([
-  ...ADMIN_VITE_ALIAS_MODULES,
-  // Admin entry host must stay on optimizeDeps include path (@strapi/strapi/admin imports invariant).
-  '@strapi/strapi',
-]);
+const PINNED_OPTIMIZE_MODULES = new Set<string>([...ADMIN_VITE_ALIAS_MODULES, '@strapi/strapi']);
 
 type PackageExportEntry =
   | string
@@ -142,16 +141,14 @@ const getPluginPackageJson = async (
   return getModule(getPluginPackageName(plugin.modulePath), cwd);
 };
 
-const loadAppPackageJson = async (cwd: string): Promise<PackageJson | null> => {
-  const result = await readPkgUp({ cwd });
-
-  return result?.packageJson ?? null;
-};
-
 /**
  * Pre-built ESM libraries with React peers (shared plugin UI kits) are incompatible with
  * Strapi's React/design-system pre-bundling. Skip dep optimization so they resolve through
  * the admin resolve aliases instead of being re-bundled by Vite.
+ *
+ * Only plugin package.json dependencies are scanned — not the app root. Every consumer app
+ * lists @strapi/strapi in dependencies, which matched the ESM+dist+React heuristic and was
+ * wrongly auto-excluded (#26944, #27014). Plugin dependency graphs are the intended scope.
  *
  * @internal
  */
@@ -160,13 +157,6 @@ export const collectAdminOptimizeDepsExclude = async (
   plugins: PluginMeta[]
 ): Promise<string[]> => {
   const candidateNames = new Set<string>();
-  const appPkg = await loadAppPackageJson(cwd);
-
-  if (appPkg) {
-    for (const name of collectDependencyNames(appPkg)) {
-      candidateNames.add(name);
-    }
-  }
 
   for (const plugin of plugins) {
     const pluginPkg = await getPluginPackageJson(plugin, cwd);

@@ -14,12 +14,18 @@ jest.mock('../dependencies', () => ({
   getModule: jest.fn(),
 }));
 
-jest.mock('read-pkg-up', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
+const PINNED_OPTIMIZE_MODULES = [...ADMIN_VITE_ALIAS_MODULES, '@strapi/strapi'] as const;
 
-const readPkgUp = jest.requireMock('read-pkg-up').default as jest.Mock;
+const preBuiltReactPeerPackage = (name: string) => ({
+  name,
+  type: 'module',
+  module: './dist/index.js',
+  files: ['dist'],
+  peerDependencies: {
+    react: '^18.0.0',
+    'react-dom': '^18.0.0',
+  },
+});
 
 const strapiDesignExtendedLike = {
   name: 'strapi-design-extended',
@@ -117,13 +123,6 @@ describe('collectAdminOptimizeDepsExclude', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    readPkgUp.mockResolvedValue({
-      packageJson: {
-        dependencies: {
-          react: '^18.0.0',
-        },
-      },
-    });
   });
 
   it('excludes pre-built React peer libraries from plugin dependencies', async () => {
@@ -157,58 +156,80 @@ describe('collectAdminOptimizeDepsExclude', () => {
     ]);
   });
 
-  it('never excludes pinned admin singleton modules', async () => {
-    readPkgUp.mockResolvedValue({
-      packageJson: {
-        dependencies: Object.fromEntries(ADMIN_VITE_ALIAS_MODULES.map((name) => [name, '1.0.0'])),
-      },
-    });
-
-    getModuleMock.mockImplementation(async (name: string) => {
-      if (ADMIN_VITE_ALIAS_MODULES.includes(name as (typeof ADMIN_VITE_ALIAS_MODULES)[number])) {
-        return {
-          name,
-          type: 'module',
-          module: './dist/index.js',
-          files: ['dist'],
-          peerDependencies: {
-            react: '^18.0.0',
-          },
-        };
-      }
-
-      return null;
-    });
+  it('does not scan app root dependencies for auto-exclude', async () => {
+    getModuleMock.mockResolvedValue(strapiDesignExtendedLike);
 
     await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+    expect(getModuleMock).not.toHaveBeenCalled();
   });
 
-  it('never excludes @strapi/strapi from optimizeDeps when it is an app dependency', async () => {
-    readPkgUp.mockResolvedValue({
-      packageJson: {
-        dependencies: {
-          '@strapi/strapi': '5.50.2',
-        },
+  it('never excludes pinned admin singleton modules from plugin dependencies', async () => {
+    const plugins: PluginMeta[] = [
+      {
+        name: 'my-plugin',
+        importName: 'myPlugin',
+        type: 'module',
+        modulePath: '@org/my-plugin/strapi-admin',
       },
-    });
+    ];
 
     getModuleMock.mockImplementation(async (name: string) => {
-      if (name === '@strapi/strapi') {
+      if (name === '@org/my-plugin') {
         return {
-          name: '@strapi/strapi',
-          type: 'module',
-          module: './dist/index.js',
-          files: ['dist'],
-          peerDependencies: {
-            react: '^18.0.0',
-            'react-dom': '^18.0.0',
-          },
+          dependencies: Object.fromEntries(
+            PINNED_OPTIMIZE_MODULES.map((moduleName) => [moduleName, '1.0.0'])
+          ),
         };
+      }
+
+      if (PINNED_OPTIMIZE_MODULES.includes(name as (typeof PINNED_OPTIMIZE_MODULES)[number])) {
+        return preBuiltReactPeerPackage(name);
       }
 
       return null;
     });
 
-    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+    await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([]);
+  });
+
+  it('does not exclude @strapi/strapi or alias modules for a typical consumer app', async () => {
+    const plugins: PluginMeta[] = [
+      {
+        name: 'users-permissions',
+        importName: 'usersPermissions',
+        type: 'module',
+        modulePath: '@strapi/plugin-users-permissions/strapi-admin',
+      },
+    ];
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@strapi/plugin-users-permissions') {
+        return {
+          dependencies: {
+            '@strapi/design-system': '^2.2.0',
+            '@strapi/strapi': '5.50.2',
+            react: '^18.0.0',
+            'strapi-design-extended': '^0.0.13',
+          },
+        };
+      }
+
+      if (
+        name === '@strapi/strapi' ||
+        ADMIN_VITE_ALIAS_MODULES.includes(name as (typeof ADMIN_VITE_ALIAS_MODULES)[number])
+      ) {
+        return preBuiltReactPeerPackage(name);
+      }
+
+      if (name === 'strapi-design-extended') {
+        return strapiDesignExtendedLike;
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([
+      'strapi-design-extended',
+    ]);
   });
 });
