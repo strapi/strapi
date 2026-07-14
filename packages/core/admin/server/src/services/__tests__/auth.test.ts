@@ -21,7 +21,7 @@ describe('Auth', () => {
       const input = { email: 'test@strapi.io', password: 'pcw123' };
       const res = await checkCredentials(input);
 
-      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email } });
+      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email }, writer: true });
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
@@ -47,7 +47,7 @@ describe('Auth', () => {
       const input = { email: 'test@strapi.io', password: 'wrong-password' };
       const res = await checkCredentials(input);
 
-      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email } });
+      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email }, writer: true });
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
@@ -74,7 +74,7 @@ describe('Auth', () => {
       const input = { email: 'test@strapi.io', password: 'test-password' };
       const res = await checkCredentials(input);
 
-      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email } });
+      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email }, writer: true });
       expect(res).toEqual([null, false, { message: 'User not active' }]);
     });
 
@@ -101,7 +101,7 @@ describe('Auth', () => {
       const input = { email: 'test@strapi.io', password: 'test-password' };
       const res = await checkCredentials(input);
 
-      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email } });
+      expect(findOne).toHaveBeenCalledWith({ where: { email: input.email }, writer: true });
       expect(res).toEqual([null, user]);
     });
   });

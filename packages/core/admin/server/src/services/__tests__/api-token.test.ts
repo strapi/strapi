@@ -1129,6 +1129,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
         populate: ['permissions', 'adminPermissions', 'adminUserOwner'],
+        writer: true,
       });
       // getBy normalizes: adds kind (default content-api for legacy tokens when missing from DB)
       expect(res).toEqual({ ...token, kind: 'content-api', permissions: [] });
@@ -1151,6 +1152,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: 42 },
         populate: ['permissions', 'adminPermissions', 'adminUserOwner'],
+        writer: true,
       });
       expect(res).toEqual(null);
     });
@@ -2122,6 +2124,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         where: { name: token.name },
         populate: ['permissions', 'adminPermissions', 'adminUserOwner'],
+        writer: true,
       });
       // getBy normalizes: adds kind (default content-api for legacy tokens when missing from DB)
       expect(res).toEqual({ ...token, kind: 'content-api', permissions: [] });
@@ -2144,6 +2147,7 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         where: { name: 'unexistant-name' },
         populate: ['permissions', 'adminPermissions', 'adminUserOwner'],
+        writer: true,
       });
       expect(res).toEqual(null);
     });

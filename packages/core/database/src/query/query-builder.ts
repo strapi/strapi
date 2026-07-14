@@ -1,10 +1,11 @@
 import type { Knex } from 'knex';
 import _ from 'lodash/fp';
 
-import type { Database } from '..';
+import type { Database, RoutingOptions } from '..';
 
 import { DatabaseError } from '../errors';
 import { transactionCtx } from '../transaction-context';
+import { routingCtx } from '../routing-context';
 import { isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
@@ -24,6 +25,8 @@ interface State {
   offset: number | null;
   transaction: any;
   forUpdate: boolean;
+  writer: boolean;
+  replica: boolean;
   onConflict: any;
   merge: any;
   ignore: boolean;
@@ -92,6 +95,8 @@ export interface QueryBuilder {
 
   forUpdate(): QueryBuilder;
 
+  getRoutingOptions(): RoutingOptions;
+
   init(params?: any): QueryBuilder;
 
   filters(filters: any): void;
@@ -118,7 +123,7 @@ export interface QueryBuilder {
 
   processSelect(): void;
 
-  getKnexQuery(): Knex.QueryBuilder;
+  getKnexQuery(routing?: RoutingOptions): Knex.QueryBuilder;
 
   execute<T>(options?: { mapResults?: boolean }): Promise<T>;
 
@@ -148,6 +153,8 @@ const createQueryBuilder = (
       offset: null,
       transaction: null,
       forUpdate: false,
+      writer: false,
+      replica: false,
       onConflict: null,
       merge: null,
       ignore: false,
@@ -313,6 +320,22 @@ const createQueryBuilder = (
       return this;
     },
 
+    /**
+     * Routing options derived from the query state. Reads (select/count/max)
+     * are replica-eligible; writes and locking reads (`forUpdate`) go to the
+     * writer. Explicit `writer`/`replica` flags are forwarded as escape hatches.
+     */
+    getRoutingOptions(): RoutingOptions {
+      const isRead =
+        (state.type === 'select' || state.type === 'count' || state.type === 'max') &&
+        !state.forUpdate;
+      return {
+        intent: isRead ? 'read' : 'write',
+        writer: state.writer,
+        replica: state.replica,
+      };
+    },
+
     init(params = {}) {
       const {
         _q: searchQuery,
@@ -324,7 +347,12 @@ const createQueryBuilder = (
         orderBy,
         groupBy,
         populate,
+        writer,
+        replica,
       } = params;
+
+      state.writer = !!writer;
+      state.replica = !!replica;
 
       if (!_.isNil(where)) {
         this.where(where);
@@ -571,14 +599,15 @@ const createQueryBuilder = (
       }
     },
 
-    getKnexQuery() {
+    getKnexQuery(routing?: RoutingOptions) {
       if (!state.type) {
         this.select('*');
       }
 
+      const routingOptions = routing ?? this.getRoutingOptions();
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
-      const qb = db.getConnection(aliasedTableName);
+      const qb = db.getConnection(aliasedTableName, routingOptions);
 
       // The state should always be processed before calling shouldUseSubQuery as it
       // relies on the presence or absence of joins to determine the need of a subquery
@@ -722,10 +751,23 @@ const createQueryBuilder = (
 
     async execute({ mapResults = true } = {}) {
       try {
-        const qb = this.getKnexQuery();
+        const routing = this.getRoutingOptions();
+
+        // A write pins the rest of this routing scope to the writer so a
+        // subsequent read-after-write cannot be served stale by the replica.
+        if (routing.intent === 'write') {
+          routingCtx.markDirty();
+        }
+
+        const qb = this.getKnexQuery(routing);
 
         const transaction = transactionCtx.get();
         if (transaction) {
+          if (state.replica) {
+            db.logger.warn(
+              'A query requested the read replica inside a transaction; using the writer instead.'
+            );
+          }
           qb.transacting(transaction);
         }
 

@@ -116,7 +116,11 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAuthenticatedUser(id) {
-    return strapi.db.query(USER_MODEL_UID).findOne({ where: { id }, populate: ['role'] });
+    // Authorization read: always use the writer so a just-blocked/unconfirmed
+    // user isn't authenticated from a lagging replica.
+    return strapi.db
+      .query(USER_MODEL_UID)
+      .findOne({ where: { id }, populate: ['role'], writer: true });
   },
 
   /**

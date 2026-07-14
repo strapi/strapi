@@ -213,7 +213,14 @@ const getBy = async (
 
   const token = await strapi.db
     .query(TRANSFER_TOKEN_UID)
-    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+    // Token validation is on the auth path: always use the writer so a
+    // just-created/revoked token isn't read from a lagging replica.
+    .findOne({
+      select: SELECT_FIELDS,
+      populate: POPULATE_FIELDS,
+      where: whereParams,
+      writer: true,
+    });
 
   if (!token) {
     return token;

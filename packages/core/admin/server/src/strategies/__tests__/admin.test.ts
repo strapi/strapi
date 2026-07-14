@@ -42,7 +42,7 @@ describe('Admin Auth Strategy', () => {
 
       expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
       expect(isSessionActive).toHaveBeenCalledWith('session-123');
-      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
+      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'], writer: true });
       expect(response).toStrictEqual({
         authenticated: true,
         credentials: user,
@@ -125,7 +125,7 @@ describe('Admin Auth Strategy', () => {
       const response = await adminAuthStrategy.authenticate(ctx);
 
       expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
-      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
+      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'], writer: true });
       expect(response).toStrictEqual({ authenticated: false });
     });
 
@@ -149,7 +149,7 @@ describe('Admin Auth Strategy', () => {
       const response = await adminAuthStrategy.authenticate(ctx);
 
       expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
-      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
+      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'], writer: true });
       expect(response).toStrictEqual({ authenticated: false });
     });
   });

@@ -380,7 +380,7 @@ describe('SessionManager Factory', () => {
       expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret, {
         algorithms: [DEFAULT_ALGORITHM],
       });
-      expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
+      expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId }, writer: true });
 
       expect(result).toEqual({
         isValid: true,
@@ -809,7 +809,7 @@ describe('DatabaseSessionProvider', () => {
 
       const result = await provider.findBySessionId(sessionId);
 
-      expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
+      expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId }, writer: true });
       expect(result).toEqual(expectedResult);
     });
 

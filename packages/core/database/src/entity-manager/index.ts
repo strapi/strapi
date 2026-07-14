@@ -317,7 +317,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(['_q', 'where', 'filters', 'writer', 'replica'], params))
         .count()
         .first()
         .execute<{ count: number }>();

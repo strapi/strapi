@@ -37,6 +37,7 @@ jest.mock('../connection', () => ({
 
     return db;
   }),
+  createReadReplicaConnection: jest.fn(() => undefined),
 }));
 
 jest.mock('../dialects', () => ({

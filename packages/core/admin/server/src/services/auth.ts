@@ -28,7 +28,10 @@ const validatePassword = (password: string, hash: string) => bcrypt.compare(pass
  * @param password the users password
  */
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
-  const user: AdminUser = await strapi.db.query('admin::user').findOne({ where: { email } });
+  // Authentication read: always use the writer to avoid a stale-credential window.
+  const user: AdminUser = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { email }, writer: true });
 
   if (!user || !user.password) {
     return [null, false, { message: 'Invalid credentials' }];
