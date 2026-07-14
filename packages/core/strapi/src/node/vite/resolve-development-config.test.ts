@@ -69,34 +69,35 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     });
   });
 
-  it('wires CodeMirror singleton packages through optimizeDeps, dedupe, and alias', async () => {
+  it('pre-bundles prismjs language plugins for all apps (#26964)', async () => {
     const mockHttpServer = http.createServer();
-    const config = await resolveDevelopmentConfig(buildCtx(mockHttpServer));
-    const codemirrorAliases = getCodemirrorAliases();
-    const codemirrorResolvable = getResolvableCodemirrorPackages();
-    const alias =
-      typeof config.resolve?.alias === 'object' && !Array.isArray(config.resolve.alias)
-        ? config.resolve.alias
-        : {};
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      bundler: 'vite' as const,
+      options: {
+        open: false,
+      },
+      plugins: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
 
-    expect(codemirrorResolvable.length).toBeGreaterThan(0);
+    const config = await resolveDevelopmentConfig(ctx);
+    const include = config.optimizeDeps?.include ?? [];
 
-    for (const pkg of REQUIRED_CODEMIRROR_SINGLETONS) {
-      expect(codemirrorResolvable).toContain(pkg);
-      expect(config.optimizeDeps?.include).toEqual(expect.arrayContaining([pkg]));
-      expect(config.resolve?.dedupe).toEqual(expect.arrayContaining([pkg]));
-      expect(alias).toMatchObject({
-        [pkg]: codemirrorAliases[pkg],
-      });
-    }
-
-    for (const pkg of codemirrorResolvable) {
-      expect(config.optimizeDeps?.include).toEqual(expect.arrayContaining([pkg]));
-      expect(config.resolve?.dedupe).toEqual(expect.arrayContaining([pkg]));
-      expect(alias).toMatchObject({
-        [pkg]: codemirrorAliases[pkg],
-      });
-    }
+    expect(include).toEqual(expect.arrayContaining(['prismjs', 'prismjs/components/*.js']));
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
