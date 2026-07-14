@@ -2846,19 +2846,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/state@npm:6.7.1, @codemirror/state@npm:^6.6.0":
+"@codemirror/state@npm:6.7.1, @codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.2.0, @codemirror/state@npm:^6.6.0":
   version: 6.7.1
   resolution: "@codemirror/state@npm:6.7.1"
   dependencies:
     "@marijn/find-cluster-break": "npm:^1.0.0"
   checksum: 10c0/2490b87759d1f4f27f4573a084414bf30bf9ed5dccaa75485334a2d132c039f2255e3bca564fb07c6760a16bf86cc29532475d9fb75cfdb0771b330fe71be4e7
-  languageName: node
-  linkType: hard
-
-"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.1.4, @codemirror/state@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@codemirror/state@npm:6.2.0"
-  checksum: 10c0/9e1569b3b01a80e634a97816adc82ba938d36d0a0626c82d7ff74faecfd9e1b94b29de58564e0d40b702ac833de34e96448f4ee5c148b68f33c8d7e1c23a3b1b
   languageName: node
   linkType: hard
 
@@ -2874,7 +2867,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:6.43.0":
+"@codemirror/view@npm:6.43.0, @codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.6.0":
   version: 6.43.0
   resolution: "@codemirror/view@npm:6.43.0"
   dependencies:
@@ -2883,17 +2876,6 @@ __metadata:
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
   checksum: 10c0/87d0db936c1148bd573994062d9109b284e1dc023af1db3490c6f27043cd840f91b63b56adfd6763a71c6ac17b9cd98adda92d41cae6d209efe5bc5133c689a3
-  languageName: node
-  linkType: hard
-
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.6.0":
-  version: 6.7.3
-  resolution: "@codemirror/view@npm:6.7.3"
-  dependencies:
-    "@codemirror/state": "npm:^6.1.4"
-    style-mod: "npm:^4.0.0"
-    w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/eaf24f14699e6fb92c9d794acc2a04e18a7a8937d16c93bd3b7ebbe5450a4842a87c1da1f0ef0cc58f14d3933ab40fae0e953105c91140ccd1b1221fdcf330ab
   languageName: node
   linkType: hard
 
