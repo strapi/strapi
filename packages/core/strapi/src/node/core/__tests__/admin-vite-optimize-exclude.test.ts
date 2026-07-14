@@ -182,4 +182,33 @@ describe('collectAdminOptimizeDepsExclude', () => {
 
     await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
   });
+
+  it('never excludes @strapi/strapi from optimizeDeps when it is an app dependency', async () => {
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          '@strapi/strapi': '5.50.2',
+        },
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@strapi/strapi') {
+        return {
+          name: '@strapi/strapi',
+          type: 'module',
+          module: './dist/index.js',
+          files: ['dist'],
+          peerDependencies: {
+            react: '^18.0.0',
+            'react-dom': '^18.0.0',
+          },
+        };
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+  });
 });

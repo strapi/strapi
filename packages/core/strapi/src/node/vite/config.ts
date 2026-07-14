@@ -68,6 +68,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
         // is CommonJS-only; pre-bundling converts it to ESM for the browser
         'lodash',
+        // Pre-bundle invariant: @strapi/strapi/admin imports it; CJS-only without pre-bundling.
+        'invariant',
         // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
         // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
         'prismjs',

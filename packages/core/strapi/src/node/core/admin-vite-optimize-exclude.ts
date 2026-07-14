@@ -12,7 +12,11 @@ const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
  * Packages explicitly pre-bundled or aliased for the admin singleton contract.
  * Never auto-exclude these — they must stay on the include/dedupe path.
  */
-const PINNED_OPTIMIZE_MODULES = new Set<string>(ADMIN_VITE_ALIAS_MODULES);
+const PINNED_OPTIMIZE_MODULES = new Set<string>([
+  ...ADMIN_VITE_ALIAS_MODULES,
+  // Admin entry host must stay on optimizeDeps include path (@strapi/strapi/admin imports invariant).
+  '@strapi/strapi',
+]);
 
 type PackageExportEntry =
   | string
