@@ -71,6 +71,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
         // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
         'prismjs',
+        // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
+        // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
+        // projects blank-crash the admin (#25070, #26964).
+        'prismjs/components/*.js',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -118,7 +122,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'markdown-it-mark',
               'markdown-it-sub',
               'markdown-it-sup',
-              'prismjs/components/*.js',
               'react-colorful',
               'react-dnd-html5-backend',
               'react-window',
