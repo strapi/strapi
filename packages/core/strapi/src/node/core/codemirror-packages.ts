@@ -32,12 +32,5 @@ export const getCodemirrorAliases = (): Record<string, string> => {
 };
 
 export const getResolvableCodemirrorPackages = (): string[] => {
-  return CODEMIRROR_SINGLETON_PACKAGES.filter((pkg) => {
-    try {
-      require.resolve(pkg);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  return Object.keys(getCodemirrorAliases());
 };

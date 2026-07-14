@@ -3,16 +3,11 @@ import fs from 'node:fs/promises';
 import readPkgUp from 'read-pkg-up';
 
 import { ADMIN_VITE_ALIAS_MODULES } from './admin-vite-alias-modules';
+import { getResolvableCodemirrorPackages } from './codemirror-packages';
 import { getModule, type PackageJson } from './dependencies';
 import type { PluginMeta } from './plugins';
 
 const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
-
-/**
- * Packages explicitly pre-bundled or aliased for the admin singleton contract.
- * Never auto-exclude these — they must stay on the include/dedupe path.
- */
-const PINNED_OPTIMIZE_MODULES = new Set<string>(ADMIN_VITE_ALIAS_MODULES);
 
 type PackageExportEntry =
   | string
@@ -175,9 +170,14 @@ export const collectAdminOptimizeDepsExclude = async (
   }
 
   const exclude: string[] = [];
+  // Admin singletons and CodeMirror externals must stay on optimizeDeps include/dedupe path.
+  const pinnedSingletons = new Set<string>([
+    ...ADMIN_VITE_ALIAS_MODULES,
+    ...getResolvableCodemirrorPackages(),
+  ]);
 
   for (const name of candidateNames) {
-    if (PINNED_OPTIMIZE_MODULES.has(name)) {
+    if (pinnedSingletons.has(name)) {
       continue;
     }
 

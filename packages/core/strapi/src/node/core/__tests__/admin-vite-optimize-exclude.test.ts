@@ -14,6 +14,10 @@ jest.mock('../dependencies', () => ({
   getModule: jest.fn(),
 }));
 
+jest.mock('../codemirror-packages', () => ({
+  getResolvableCodemirrorPackages: jest.fn(() => ['@codemirror/state', '@codemirror/view']),
+}));
+
 jest.mock('read-pkg-up', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -166,6 +170,34 @@ describe('collectAdminOptimizeDepsExclude', () => {
 
     getModuleMock.mockImplementation(async (name: string) => {
       if (ADMIN_VITE_ALIAS_MODULES.includes(name as (typeof ADMIN_VITE_ALIAS_MODULES)[number])) {
+        return {
+          name,
+          type: 'module',
+          module: './dist/index.js',
+          files: ['dist'],
+          peerDependencies: {
+            react: '^18.0.0',
+          },
+        };
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+  });
+
+  it('never excludes CodeMirror singleton packages from optimizeDeps', async () => {
+    const codemirrorSingletons = ['@codemirror/state', '@codemirror/view'];
+
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: Object.fromEntries(codemirrorSingletons.map((name) => [name, '1.0.0'])),
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (codemirrorSingletons.includes(name)) {
         return {
           name,
           type: 'module',
