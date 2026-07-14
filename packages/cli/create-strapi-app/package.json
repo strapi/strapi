@@ -48,6 +48,7 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json",
+    "test:unit": "run -T jest",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -67,6 +68,8 @@
     "tar": "7.5.18"
   },
   "devDependencies": {
+    "@strapi/database": "5.50.1",
+    "@strapi/utils": "5.50.1",
     "@types/async-retry": "^1",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "9.0.9",
