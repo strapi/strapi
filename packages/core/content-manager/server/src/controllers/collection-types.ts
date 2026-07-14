@@ -17,6 +17,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import { isContentTypeLocalized } from '../mcp/permissions';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -615,8 +616,16 @@ export default {
 
     const { locale } = await getDocumentLocaleAndStatus(ctx.query, model);
 
+    // Non-localized content types store entries with `locale: null`, so filtering by a
+    // specific locale matches nothing and would incorrectly return 404. Only apply the
+    // locale filter when the content type is actually localized. (GH#26238)
+    const resolvedLocale = isContentTypeLocalized(strapi, model) ? locale : undefined;
+
     // Find locales to delete
-    const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
+    const documentLocales = await documentManager.findLocales(id, model, {
+      populate,
+      locale: resolvedLocale,
+    });
 
     if (documentLocales.length === 0) {
       return ctx.notFound();
@@ -628,7 +637,7 @@ export default {
       }
     }
 
-    const result = await documentManager.delete(id, model, { locale });
+    const result = await documentManager.delete(id, model, { locale: resolvedLocale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
