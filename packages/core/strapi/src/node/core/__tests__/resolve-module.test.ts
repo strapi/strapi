@@ -19,6 +19,9 @@ const loadGetModulePath = (
   return { getModulePath, resolveFromMock };
 };
 
+/** Bare specifiers on optimizeDeps.include that broke pnpm dev without aliases (#27014). */
+const PNPM_OPTIMIZE_RESOLVE_MODULES = ['invariant', 'prismjs'] as const;
+
 describe('getModulePath', () => {
   afterEach(() => {
     jest.resetModules();
@@ -33,6 +36,17 @@ describe('getModulePath', () => {
 
     expect(resolveFromMock).toHaveBeenCalledWith(adminPkgDir, mod);
   });
+
+  it.each(PNPM_OPTIMIZE_RESOLVE_MODULES)(
+    'resolves %s from @strapi/admin closure without bare-specifier failure (#27014)',
+    (mod) => {
+      const { getModulePath, resolveFromMock } = loadGetModulePath();
+
+      expect(() => getModulePath(mod)).not.toThrow();
+      expect(getModulePath(mod)).toMatch(/node_modules/);
+      expect(resolveFromMock).toHaveBeenCalledWith(adminPkgDir, mod);
+    }
+  );
 
   it.each(ADMIN_PINNED_ALIAS_MODULES)(
     'resolves %s to the version pinned by @strapi/admin',
