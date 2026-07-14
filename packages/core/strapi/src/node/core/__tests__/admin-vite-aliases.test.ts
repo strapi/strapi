@@ -11,6 +11,22 @@ import { getModulePath } from '../resolve-module';
 
 const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
 
+/** CJS/UMD deps on optimizeDeps.include must stay aliased for pnpm (#27014). */
+const PNPM_OPTIMIZE_ALIAS_MODULES = ['invariant', 'prismjs', 'lodash'] as const;
+
+describe('ADMIN_VITE_ALIAS_MODULES contract', () => {
+  it.each(PNPM_OPTIMIZE_ALIAS_MODULES)(
+    'includes %s for pnpm optimizeDeps.include resolution (#27014)',
+    (mod) => {
+      expect(ADMIN_VITE_ALIAS_MODULES).toContain(mod);
+    }
+  );
+
+  it('pins invariant alongside other @strapi/admin dependency versions', () => {
+    expect(ADMIN_PINNED_ALIAS_MODULES).toContain('invariant');
+  });
+});
+
 describe('buildAdminViteResolveAliases', () => {
   it('sets an alias for every admin vite alias module via getModulePath', () => {
     const alias = buildAdminViteResolveAliases();
