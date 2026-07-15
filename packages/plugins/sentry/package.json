@@ -60,8 +60,8 @@
   },
   "dependencies": {
     "@sentry/node": "7.112.2",
-    "@strapi/design-system": "2.2.2",
-    "@strapi/icons": "2.2.1"
+    "@strapi/design-system": "2.2.3",
+    "@strapi/icons": "2.2.3"
   },
   "devDependencies": {
     "@strapi/strapi": "5.50.1",
