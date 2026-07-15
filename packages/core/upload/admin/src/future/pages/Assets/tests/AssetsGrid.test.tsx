@@ -12,6 +12,26 @@ jest.mock('../hooks/useFolderNavigation', () => ({
   }),
 }));
 
+jest.mock('../components/Dnd/useAssetDnd', () => ({
+  useFileDraggable: () => ({
+    attributes: {},
+    listeners: {},
+    setNodeRef: jest.fn(),
+    isDragging: false,
+  }),
+  useFolderDraggableDroppable: () => ({
+    draggable: {
+      attributes: {},
+      listeners: {},
+      setNodeRef: jest.fn(),
+      isDragging: false,
+    },
+    droppable: { setNodeRef: jest.fn() },
+    showValidDropHighlight: false,
+    showInvalidDropCursor: false,
+  }),
+}));
+
 jest.mock('@strapi/icons', () => ({
   ...jest.requireActual('@strapi/icons'),
   File: (props: React.SVGProps<SVGSVGElement>) => (
@@ -167,6 +187,36 @@ describe('AssetsGrid', () => {
         asset.formats = null;
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).toBeInTheDocument();
+      });
+
+      it('loads signed remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
+      });
+
+      it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+        // Public/unsigned remote thumbnails are cache-busted, so they must
+        // render without requiring a bucket CORS rule.
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: false,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
+      });
+
+      it('does not set crossOrigin for local assets', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isLocal: true,
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
       });
     });
 

@@ -540,14 +540,15 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
+    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
-      const { where } = params;
-
+      // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
+      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
+      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(pick(['_q', 'where', 'filters'], params))
         .delete()
         .execute<number>({ mapResults: false });
 
@@ -1203,13 +1204,148 @@ export const createEntityManager = (db: Database): EntityManager => {
                 // cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
+
+              // Use id-only comparison so a disconnect item whose id also appears in
+              // the connect array is correctly excluded from deletion (deep-equality
+              // fails because connect items carry extra fields like `position`).
               const relIdsToDelete = toIds(
                 differenceWith(
-                  isEqual,
+                  (a: { id: ID }, b: { id: ID }) => a.id === b.id,
                   cleanRelationData.disconnect,
                   cleanRelationData.connect ?? []
                 )
               );
+
+              // When a connect item's position.before/after references an id that is
+              // about to be deleted (relIdsToDelete), the referenced row won't exist by
+              // the time the adjacentRelations query runs below, causing sortConnectArray
+              // to throw. Rewrite such a position to point at the nearest surviving
+              // neighbor in the relation's current order, so the item lands where the
+              // deleted relation used to be instead of always falling back to the end.
+              const idKey = (value: ID) => String(value);
+              const deletedIds = new Set(relIdsToDelete.map(idKey));
+              let resolvedConnect = cleanRelationData.connect ?? [];
+
+              if (
+                hasOrderColumn(attribute) &&
+                !isEmpty(relIdsToDelete) &&
+                resolvedConnect.some((item) => {
+                  const adjacentId = item.position?.before ?? item.position?.after;
+                  return adjacentId != null && deletedIds.has(idKey(adjacentId));
+                })
+              ) {
+                const currentOrder = await this.createQueryBuilder(joinTable.name)
+                  .select([inverseJoinColumn.name, orderColumnName])
+                  .where({ [joinColumn.name]: id })
+                  .where(joinTable.on || {})
+                  .orderBy(orderColumnName)
+                  .transacting(trx)
+                  .execute<Array<Record<string, any>>>();
+
+                const orderedIds = currentOrder.map((rel) => rel[inverseJoinColumn.name]);
+                const orderedIdKeys = orderedIds.map(idKey);
+                const connectIds = new Set(resolvedConnect.map((item) => idKey(item.id)));
+                const deletedIdsInCurrentOrder = new Set(
+                  orderedIds.map(idKey).filter((orderedId) => deletedIds.has(orderedId))
+                );
+
+                // A neighbor is only a valid fallback target if it survives the delete
+                // and isn't being moved by this connect payload.
+                const findSurvivingNeighbor = (targetId: ID, direction: 1 | -1) => {
+                  let index = orderedIdKeys.indexOf(idKey(targetId));
+                  while (index !== -1) {
+                    index += direction;
+                    const candidate = orderedIds[index];
+                    if (candidate === undefined) {
+                      return undefined;
+                    }
+                    const candidateKey = idKey(candidate);
+                    if (!deletedIds.has(candidateKey) && !connectIds.has(candidateKey)) {
+                      return candidate;
+                    }
+                  }
+                  return undefined;
+                };
+
+                const positionByConnectId = new Map<
+                  ID,
+                  NonNullable<(typeof resolvedConnect)[number]['position']>
+                >();
+                const connectGroups = new Map<
+                  string,
+                  { targetId: ID; before: typeof resolvedConnect; after: typeof resolvedConnect }
+                >();
+
+                const getConnectGroup = (targetId: ID) => {
+                  const targetKey = idKey(targetId);
+                  let group = connectGroups.get(targetKey);
+                  if (!group) {
+                    group = { targetId, before: [], after: [] };
+                    connectGroups.set(targetKey, group);
+                  }
+                  return group;
+                };
+
+                resolvedConnect.forEach((item) => {
+                  const { before, after } = item.position ?? {};
+                  const adjacentId = before ?? after;
+
+                  if (
+                    adjacentId == null ||
+                    !deletedIds.has(idKey(adjacentId)) ||
+                    !deletedIdsInCurrentOrder.has(idKey(adjacentId))
+                  ) {
+                    return;
+                  }
+
+                  const group = getConnectGroup(adjacentId);
+                  if (before) {
+                    group.before.push(item);
+                  } else {
+                    group.after.push(item);
+                  }
+                });
+
+                connectGroups.forEach(({ targetId, before, after }) => {
+                  const previousNeighbor = findSurvivingNeighbor(targetId, -1);
+                  const nextNeighbor = findSurvivingNeighbor(targetId, 1);
+                  let previousPositionId = previousNeighbor;
+
+                  before.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+
+                  after.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+                });
+
+                resolvedConnect = resolvedConnect.map((item) => {
+                  const position = positionByConnectId.get(item.id);
+
+                  if (position) {
+                    return { ...item, position };
+                  }
+
+                  return item;
+                });
+              }
 
               if (!isEmpty(relIdsToDelete)) {
                 await deleteRelations({ id, attribute, db, relIdsToDelete, transaction: trx });
@@ -1251,9 +1387,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                         [joinColumn.name]: id,
                         [inverseJoinColumn.name]: {
                           $in: compact(
-                            cleanRelationData.connect?.map(
-                              (r) => r.position?.after || r.position?.before
-                            )
+                            resolvedConnect.map((r) => r.position?.after || r.position?.before)
                           ),
                         },
                       },
@@ -1288,7 +1422,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   joinTable.orderColumnName,
                   cleanRelationData.options?.strict
                 )
-                  .connect(cleanRelationData.connect ?? [])
+                  .connect(resolvedConnect)
                   .getOrderMap();
 
                 insert.forEach((row) => {

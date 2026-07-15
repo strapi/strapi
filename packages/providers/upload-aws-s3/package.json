@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "5.46.1",
+  "version": "5.50.1",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -42,7 +42,8 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
@@ -56,11 +57,13 @@
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.46.1",
-    "tsconfig": "5.46.1"
+    "@types/node": "20.19.41",
+    "eslint-config-custom": "5.50.1",
+    "jest": "29.6.0",
+    "tsconfig": "5.50.1"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

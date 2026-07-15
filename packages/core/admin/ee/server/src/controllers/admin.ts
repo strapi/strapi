@@ -21,6 +21,7 @@ export default {
           features: strapi.ee.features.list(),
           flags,
           type: strapi.ee.type,
+          planPriceId: strapi.ee.planPriceId,
           ai: {
             enabled: isAILicense && isAIConfigured.enabled,
           },

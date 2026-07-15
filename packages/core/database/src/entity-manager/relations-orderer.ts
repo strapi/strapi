@@ -203,6 +203,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     let idx;
 
     if (r.position?.before) {
+
       const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
         const prevRelation = beforeIdx > 0 ? computedRelations[beforeIdx - 1] : null;
@@ -226,7 +227,6 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
       } else {
         r.order = relation.order;
       }
-
       idx = afterIdx + 1;
     } else if (r.position?.start) {
       if (computedRelations.length > 0) {
