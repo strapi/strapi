@@ -151,7 +151,7 @@ const DynamicComponent = ({
   );
   const isNewItem = useForm(
     'DynamicComponent',
-    (state) => getIn(state.values, componentPath)?.id == null
+    (state) => getIn<{ id?: unknown }>(state.values, componentPath)?.id == null
   );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 

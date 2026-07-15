@@ -1,8 +1,14 @@
 import crypto from 'crypto';
 import type { Modules } from '@strapi/types';
 
+import { resolveAuthCookieName } from './auth-cookie-name';
+
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
-export const SESSION_COOKIE_NAME = 'jwtToken';
+
+export const getAccessCookieName = (): string => {
+  const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
+  return resolveAuthCookieName(configured);
+};
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
 export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;

@@ -21,10 +21,10 @@ import {
 
 import { tours } from './GuidedTour/Tours';
 
-const MainSubNav = styled(DSSubNav)`
+const MainSubNav = styled(DSSubNav)<{ $isFullPage?: boolean }>`
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: ${({ $isFullPage }) => ($isFullPage ? 'visible' : 'hidden')};
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
   flex-direction: column;
@@ -36,13 +36,23 @@ const MainSubNav = styled(DSSubNav)`
     width: ${WIDTH_SIDE_NAVIGATION};
     position: sticky;
     top: 0;
+    overflow: hidden;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
     overscroll-behavior: contain;
   }
 `;
 
-const Main = ({ children, ...props }: { children: React.ReactNode; isFullPage?: boolean }) => (
-  <MainSubNav {...props}>{children}</MainSubNav>
+const Main = ({
+  children,
+  isFullPage,
+  ...props
+}: {
+  children: React.ReactNode;
+  isFullPage?: boolean;
+}) => (
+  <MainSubNav $isFullPage={isFullPage} {...props}>
+    {children}
+  </MainSubNav>
 );
 
 const StyledLink = styled(NavLink)`
