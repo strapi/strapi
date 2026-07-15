@@ -48,6 +48,7 @@ export interface Strapi extends Container {
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
+    expireAt?: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
     subscriptionId?: string | null | undefined;

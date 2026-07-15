@@ -288,6 +288,10 @@ export default Object.freeze({
     return ee.licenseInfo.type;
   },
 
+  get expireAt() {
+    return ee.licenseInfo.expireAt;
+  },
+
   get isTrial() {
     return ee.licenseInfo.isTrial;
   },
