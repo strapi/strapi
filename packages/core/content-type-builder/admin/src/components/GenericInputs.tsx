@@ -58,7 +58,7 @@ interface CustomInputProps<
   description?: TranslationMessage;
   disabled?: boolean;
   error?: string;
-  hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
+  hint?: React.ReactNode;
   intlLabel: TranslationMessage;
   labelAction?: React.ReactNode;
   name: string;

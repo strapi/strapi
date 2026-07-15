@@ -172,28 +172,25 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
                 return (
                   <NestedOption key={child.value} value={child.value}>
                     <Typography>
-                      {
-                        // @ts-expect-error - formatMessage options doesn't expect to be a React component but that's what we need actually for the <i> and <em> components
-                        formatMessage(
-                          {
-                            id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
-                            defaultMessage:
-                              '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
-                          },
-                          {
-                            label: child.label,
-                            name: assignedWorkflowName,
-                            em: (...children) => (
-                              <Typography tag="em" fontWeight="bold">
-                                {children}
-                              </Typography>
-                            ),
-                            i: (...children) => (
-                              <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
-                            ),
-                          }
-                        )
-                      }
+                      {formatMessage(
+                        {
+                          id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
+                          defaultMessage:
+                            '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
+                        },
+                        {
+                          label: child.label,
+                          name: assignedWorkflowName,
+                          em: (...children) => (
+                            <Typography tag="em" fontWeight="bold">
+                              {children}
+                            </Typography>
+                          ),
+                          i: (...children) => (
+                            <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
+                          ),
+                        }
+                      )}
                     </Typography>
                   </NestedOption>
                 );
