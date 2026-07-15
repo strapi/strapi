@@ -110,6 +110,25 @@ export interface Strapi extends Container {
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
+  getCustomizations: () => {
+    apis: Array<{
+      uid: string;
+      customController: boolean;
+      customService: boolean;
+      customRoutes: boolean;
+    }>;
+    counts: { customControllers: number; customServices: number; customRoutes: number };
+    srcIndex: {
+      present: boolean;
+      registerDefined: boolean;
+      registerNonEmpty: boolean;
+      bootstrapDefined: boolean;
+      bootstrapNonEmpty: boolean;
+      destroyDefined: boolean;
+      destroyNonEmpty: boolean;
+      beyondTemplate: boolean;
+    };
+  };
   openAdmin({ isInitialized }: { isInitialized: boolean }): void;
   postListen(): Promise<void>;
   listen(): Promise<void>;
