@@ -9,6 +9,7 @@ import {
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 } from './license';
+import { createEntitlementsRegistry } from './entitlements';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -271,6 +272,8 @@ const list = () => {
 
 const get = (featureName: string) => list().find((feature) => feature.name === featureName);
 
+const entitlements = createEntitlementsRegistry();
+
 export default Object.freeze({
   init,
   checkLicense,
@@ -308,5 +311,10 @@ export default Object.freeze({
     list,
     get,
     isEnabled: (featureName: string) => get(featureName) !== undefined,
+  }),
+
+  entitlements: Object.freeze({
+    register: entitlements.register,
+    list: entitlements.list,
   }),
 });

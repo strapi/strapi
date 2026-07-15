@@ -63,6 +63,20 @@ export interface Strapi extends Container {
       list: () => { name: string; [key: string]: any }[];
       get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
     };
+    entitlements: {
+      register: (input: {
+        feature: string;
+        limits: Array<{
+          key: string;
+          unit?: 'days' | 'count';
+          get: () => number | null | undefined;
+        }>;
+      }) => void;
+      list: () => Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
+    };
   };
   features: Modules.Features.FeaturesService;
   components: Schema.Components;
