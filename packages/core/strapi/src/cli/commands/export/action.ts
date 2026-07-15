@@ -22,6 +22,7 @@ import {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 import { normalizeExportDirFormatOpts } from './validate-dir-format';
@@ -114,6 +115,7 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });

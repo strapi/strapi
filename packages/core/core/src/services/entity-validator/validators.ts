@@ -562,13 +562,12 @@ export const floatValidator = (
   metas: ValidatorMetas<Schema.Attribute.Decimal | Schema.Attribute.Float>,
   options: ValidatorOptions
 ) => {
-  let schema = yup
-    .number()
-    .test(
-      'is-finite-number',
-      '${path} must be a finite number',
-      (value) => value == null || isValidFiniteNumber(value)
-    );
+  let schema = yup.number().test(
+    'is-finite-number',
+    // eslint-disable-next-line no-template-curly-in-string -- Yup interpolates validation path placeholders.
+    '${path} must be a finite number',
+    (value) => value == null || isValidFiniteNumber(value)
+  );
 
   schema = addMinFloatValidator(schema, metas, options);
   schema = addMaxFloatValidator(schema, metas);
@@ -584,6 +583,7 @@ export const bigintegerValidator = (
   const schema = yup
     .mixed()
     .transform((value, originalValue) => toBigIntegerString(originalValue) ?? value)
+    // eslint-disable-next-line no-template-curly-in-string -- Yup interpolates validation path placeholders.
     .test('is-biginteger', '${path} must be a valid integer', (value) => {
       if (value == null) {
         return true;

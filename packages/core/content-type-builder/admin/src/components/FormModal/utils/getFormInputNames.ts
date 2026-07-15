@@ -1,7 +1,15 @@
-export const getFormInputNames = (form: any) =>
-  form.reduce((acc: any, current: any) => {
-    const names = current.items.reduce((acc: any, current: any) => {
-      if (current.name) {
+type FormInput = {
+  name?: string;
+};
+
+type FormSection = {
+  items: FormInput[];
+};
+
+export const getFormInputNames = (form: FormSection[]) =>
+  form.reduce<string[]>((acc, current) => {
+    const names = current.items.reduce<string[]>((acc, current) => {
+      if (current.name !== undefined) {
         acc.push(current.name);
       }
 
