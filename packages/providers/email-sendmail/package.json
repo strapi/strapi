@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendmail",
-  "version": "5.50.1",
+  "version": "5.50.2",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",
@@ -52,9 +52,9 @@
     "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
     "@types/nodemailer": "7.0.11",
-    "eslint-config-custom": "5.50.1",
+    "eslint-config-custom": "5.50.2",
     "jest": "29.6.0",
-    "tsconfig": "5.50.1"
+    "tsconfig": "5.50.2"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
