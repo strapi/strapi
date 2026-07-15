@@ -209,7 +209,10 @@ describe('Auth', () => {
 
       expect(findOne).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
-      expect(updateById).toHaveBeenCalledWith(user.id, { resetPasswordToken });
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        resetPasswordToken,
+        resetPasswordTokenExpiresAt: expect.any(Date),
+      });
     });
 
     test('Will call the send service', async () => {
@@ -307,9 +310,13 @@ describe('Auth', () => {
       }
     });
 
-    test('Changes password and clear reset token', async () => {
+    test('Fails if reset token has expired (#25711)', async () => {
       const resetPasswordToken = '123';
-      const user = { id: 1 };
+      const user = {
+        id: 1,
+        // Expired one minute ago
+        resetPasswordTokenExpiresAt: new Date(Date.now() - 60 * 1000).toISOString(),
+      };
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const updateById = jest.fn(() => Promise.resolve());
@@ -321,6 +328,37 @@ describe('Auth', () => {
           },
         },
         admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+
+      expect.assertions(1);
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+      }
+    });
+
+    test('Changes password and clear reset token', async () => {
+      const resetPasswordToken = '123';
+      const user = {
+        id: 1,
+        // Valid for another hour
+        resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const updateById = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne };
+          },
+        },
+        admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
       } as any;
 
       const input = { resetPasswordToken, password: 'Test1234' };
@@ -329,6 +367,7 @@ describe('Auth', () => {
       expect(updateById).toHaveBeenCalledWith(user.id, {
         password: input.password,
         resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
       });
     });
   });

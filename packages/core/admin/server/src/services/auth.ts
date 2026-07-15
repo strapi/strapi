@@ -2,10 +2,30 @@ import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { expiresInToSeconds } from './token';
 import type { AdminUser } from '../../../shared/contracts/shared';
 import '@strapi/types';
 
 const { ApplicationError } = errors;
+
+// Default lifetime of an admin reset-password token. Overridable via
+// `admin.forgotPassword.tokenExpiresIn` (number of seconds or a shorthand like '15m', '1h').
+const DEFAULT_RESET_PASSWORD_TOKEN_EXPIRES_IN = '1h';
+
+/**
+ * Resolve the reset-password token lifetime, in milliseconds, from config.
+ * Falls back to {@link DEFAULT_RESET_PASSWORD_TOKEN_EXPIRES_IN} for unset/invalid values.
+ */
+const getResetPasswordTokenTTL = (): number => {
+  const configured = strapi.config.get(
+    'admin.forgotPassword.tokenExpiresIn',
+    DEFAULT_RESET_PASSWORD_TOKEN_EXPIRES_IN
+  );
+  const seconds =
+    expiresInToSeconds(configured) ??
+    (expiresInToSeconds(DEFAULT_RESET_PASSWORD_TOKEN_EXPIRES_IN) as number);
+  return seconds * 1000;
+};
 
 /**
  * hashes a password
@@ -60,7 +80,11 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
   }
 
   const resetPasswordToken = getService('token').createToken();
-  await getService('user').updateById(user.id, { resetPasswordToken });
+  const resetPasswordTokenExpiresAt = new Date(Date.now() + getResetPasswordTokenTTL());
+  await getService('user').updateById(user.id, {
+    resetPasswordToken,
+    resetPasswordTokenExpiresAt,
+  });
 
   // Send an email to the admin.
   const url = `${strapi.config.get(
@@ -104,9 +128,25 @@ const resetPassword = async (
     throw new ApplicationError();
   }
 
+  // Reject expired tokens. Tokens without an expiry (e.g. issued before this was
+  // introduced) are treated as expired so they cannot be used indefinitely. (GH#25711)
+  const { resetPasswordTokenExpiresAt } = matchingUser;
+  const isExpired =
+    !resetPasswordTokenExpiresAt || new Date(resetPasswordTokenExpiresAt).getTime() <= Date.now();
+
+  if (isExpired) {
+    // Clear the stale token so it can no longer be retried.
+    await getService('user').updateById(matchingUser.id, {
+      resetPasswordToken: null,
+      resetPasswordTokenExpiresAt: null,
+    });
+    throw new ApplicationError('This reset password token has expired');
+  }
+
   return getService('user').updateById(matchingUser.id, {
     password,
     resetPasswordToken: null,
+    resetPasswordTokenExpiresAt: null,
   });
 };
 
