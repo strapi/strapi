@@ -168,6 +168,9 @@ CLAUDE.local.md
 # Codex
 .agents/
 
+# Superpowers planning docs (specs/plans kept local, not committed) — any depth
+superpowers/
+
 ############################
 # Strapi
 ############################
