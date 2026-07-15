@@ -29498,6 +29498,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin"
   dependencies:
+    "@types/react": "npm:18.3.2"
+    react: "npm:^18.0.0"
     react-intl: "npm:10.1.16"
   languageName: unknown
   linkType: soft

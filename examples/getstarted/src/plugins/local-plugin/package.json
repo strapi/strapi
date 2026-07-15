@@ -4,7 +4,11 @@
   "private": true,
   "description": "This is the description of my plugin.",
   "dependencies": {
+    "react": "^18.0.0",
     "react-intl": "10.1.16"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.2"
   },
   "strapi": {
     "name": "local-plugin",
