@@ -343,7 +343,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const aiResult = (await response.json()) as {
-        localizations: Array<{ locale: string; content: Record<string, unknown> }>;
+        localizations: Array<{ content: Record<string, unknown>; locale: string }>;
       };
 
       // Use populate-builder service for deep populate to fetch all nested fields
