@@ -78,6 +78,15 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
           },
         ]
       : []),
+    ...(window.strapi.isEE
+      ? [
+          {
+            intlLabel: { id: 'Settings.license.title', defaultMessage: 'License' },
+            to: '/settings/license',
+            id: 'license',
+          },
+        ]
+      : []),
   ],
 
   admin: [
