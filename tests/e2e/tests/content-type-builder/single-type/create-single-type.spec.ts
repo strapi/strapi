@@ -26,7 +26,7 @@ test.describe('Create single type with all field types', () => {
   const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
 
   test(
-    'Can create a collection type with all field types',
+    'Can create a single type with all field types',
     { tag: ['@critical'] },
     async ({ page }) => {
       const attributes: AddAttribute[] = [
