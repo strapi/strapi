@@ -166,6 +166,7 @@
     "@types/node": "20.19.41",
     "@types/passport-local": "1.0.36",
     "@types/pluralize": "0.0.32",
+    "@types/react": "18.3.2",
     "@types/react-window": "1.8.8",
     "jest": "29.6.0",
     "koa-body": "6.0.1",

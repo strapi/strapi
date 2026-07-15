@@ -178,6 +178,7 @@
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
+    "@types/react": "18.3.2",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.12",
     "eslint-config-custom": "5.50.1",

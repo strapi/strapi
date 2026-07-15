@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@strapi/strapi": "workspace:*",
+    "@types/react": "18.3.2",
     "eslint": "8.57.1"
   },
   "engines": {

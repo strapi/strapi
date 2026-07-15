@@ -134,6 +134,7 @@
     "@types/mime-types": "2.1.1",
     "@types/node": "20.19.41",
     "@types/node-schedule": "2.1.7",
+    "@types/react": "18.3.2",
     "eslint-config-custom": "5.50.1",
     "jest": "29.6.0",
     "supertest": "7.2.2",
