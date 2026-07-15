@@ -15724,6 +15724,8 @@ __metadata:
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
     "@strapi/cloud-cli": "npm:5.50.1"
+    "@strapi/database": "npm:5.50.1"
+    "@strapi/utils": "npm:5.50.1"
     "@types/async-retry": "npm:^1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
