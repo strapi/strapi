@@ -55,10 +55,28 @@ export default {
       licenseLimitStatus = 'AT_LIMIT';
     }
 
+    const eeInformation = await strapi.db
+      .query('strapi::core-store')
+      .findOne({ where: { key: 'ee_information' } })
+      .then((row: { value: string } | null) => (row ? JSON.parse(row.value) : null))
+      .catch(() => null);
+
+    const licenseMode =
+      strapi.ee.type === 'gold' && process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true'
+        ? 'offline'
+        : 'online';
+
     const data = {
       enforcementUserCount,
       currentActiveUserCount,
       permittedSeats,
+      seats: strapi.ee.seats ?? null,
+      subscriptionId: strapi.ee.subscriptionId ?? null,
+      expireAt: strapi.ee.expireAt ?? null,
+      licenseMode,
+      lastRegistrySyncAt: eeInformation?.lastCheckAt ?? null,
+      usingCachedLicense: Boolean(eeInformation?.error && eeInformation?.license),
+      registrySyncError: eeInformation?.error ?? null,
       shouldNotify,
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
@@ -66,6 +84,7 @@ export default {
       type: strapi.ee.type,
       isTrial: strapi.ee.isTrial,
       features: strapi.ee.features.list() ?? [],
+      entitlements: strapi.ee.entitlements.list(),
     };
 
     return { data };

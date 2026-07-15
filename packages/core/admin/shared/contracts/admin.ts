@@ -215,6 +215,17 @@ export declare namespace GetLicenseLimitInformation {
       shouldStopCreate: boolean;
       type: string;
       isTrial: boolean;
+      seats: number | null;
+      subscriptionId: string | null;
+      expireAt: string | null;
+      licenseMode: 'online' | 'offline';
+      lastRegistrySyncAt: number | null;
+      usingCachedLicense: boolean;
+      registrySyncError: string | null;
+      entitlements: Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
     };
     error?: errors.ApplicationError;
   }
