@@ -69,7 +69,7 @@
     "semver": "7.7.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.9.1",
-    "tar": "7.5.18",
+    "tar": "7.5.19",
     "tar-stream": "2.2.0",
     "ws": "8.21.0"
   },
