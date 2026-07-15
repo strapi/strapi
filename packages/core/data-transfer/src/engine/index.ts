@@ -33,7 +33,7 @@ import type {
   ErrorHandlers,
   ErrorCode,
   StageProgress,
-} from '../../types';
+} from '../types';
 import type { Diff } from '../utils/json';
 
 import { compareSchemas, validateProvider } from './validation';
@@ -881,7 +881,9 @@ class TransferEngine<
           this.panic(error);
         } else {
           this.panic(
-            new Error(`Unknwon error when executing "beforeTransfer" on the ${origin} provider`)
+            new Error(
+              `Unknown error when executing "beforeTransfer" on the ${provider.name} provider`
+            )
           );
         }
       }

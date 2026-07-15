@@ -71,7 +71,8 @@ const useSettingsMenu = (): {
     (state) => state.checkUserHasPermissions
   );
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
-  const settings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+  const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+  const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
 
   /**
@@ -194,5 +195,90 @@ const useSettingsMenu = (): {
   };
 };
 
-export { useSettingsMenu };
+const normalizeSettingsLink = (
+  link: unknown
+): (SettingsMenuLinkWithPermissions | StrapiAppSettingsLink) | null => {
+  if (!link || typeof link !== 'object') {
+    return null;
+  }
+
+  const candidate = link as Partial<SettingsMenuLinkWithPermissions | StrapiAppSettingsLink>;
+
+  if (
+    !candidate.id ||
+    typeof candidate.to !== 'string' ||
+    !candidate.intlLabel?.id ||
+    !candidate.intlLabel.defaultMessage
+  ) {
+    return null;
+  }
+
+  return {
+    ...candidate,
+    permissions: Array.isArray(candidate.permissions) ? candidate.permissions : [],
+  } as SettingsMenuLinkWithPermissions | StrapiAppSettingsLink;
+};
+
+const normalizeSettingsSection = (section: unknown): SettingsMenuSection | null => {
+  if (!section || typeof section !== 'object') {
+    return null;
+  }
+
+  const candidate = section as Partial<SettingsMenuSection>;
+
+  if (!candidate.id || !candidate.intlLabel?.id || !candidate.intlLabel.defaultMessage) {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    intlLabel: candidate.intlLabel,
+    links: Array.isArray(candidate.links)
+      ? candidate.links.map(normalizeSettingsLink).filter(isSettingsLink)
+      : [],
+  };
+};
+
+const isSettingsLink = (
+  link: ReturnType<typeof normalizeSettingsLink>
+): link is SettingsMenuLinkWithPermissions | StrapiAppSettingsLink => {
+  return link !== null;
+};
+
+const normalizeSettings = (settings: unknown): Record<string, SettingsMenuSection> => {
+  const defaultGlobal: SettingsMenuSection = {
+    id: 'global',
+    intlLabel: {
+      id: 'Settings.global',
+      defaultMessage: 'Global Settings',
+    },
+    links: [],
+  };
+
+  if (!settings || typeof settings !== 'object') {
+    return {
+      global: defaultGlobal,
+    };
+  }
+
+  const normalizedSections = Object.entries(settings).reduce<Record<string, SettingsMenuSection>>(
+    (acc, [key, section]) => {
+      const normalizedSection = normalizeSettingsSection(section);
+
+      if (normalizedSection) {
+        acc[key] = normalizedSection;
+      }
+
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...normalizedSections,
+    global: normalizedSections.global ?? defaultGlobal,
+  };
+};
+
+export { useSettingsMenu, normalizeSettings };
 export type { SettingsMenu };

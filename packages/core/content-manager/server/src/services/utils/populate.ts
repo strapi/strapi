@@ -13,6 +13,9 @@ const {
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
+const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
+  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
+
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
 const isMedia = propEq('type', 'media');
@@ -84,7 +87,7 @@ function getPopulateForDZ(
   attribute: Schema.Attribute.DynamicZone,
   options: PopulateOptions,
   level: number
-) {
+): { on: { [key: string]: { populate: { [key: string]: boolean | object } } } } {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
     (acc: any, componentUID: UID.Component) => ({
@@ -162,7 +165,7 @@ const getDeepPopulate = (
     maxLevel = Infinity,
   }: PopulateOptions = {},
   level = 1
-) => {
+): { [key: string]: boolean | object } => {
   if (level > maxLevel) {
     return {};
   }
@@ -302,7 +305,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  */
 const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
 
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
   const cached = draftCountPopulateCache.get(uid);
   if (cached) {
     return cached;
@@ -336,9 +339,21 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           break;
         }
 
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
+          // Draft entries link to draft rows of related documents. Populate documentId/locale
+          // so we can distinguish truly unpublished targets from published documents that
+          // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
+          const fields: string[] = ['documentId'];
+          if (isLocalizedContentType(targetModel)) {
+            fields.push('locale');
+          }
           populateAcc[attributeName] = {
-            count: true,
+            fields,
             filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
           };
           hasRelations = true;

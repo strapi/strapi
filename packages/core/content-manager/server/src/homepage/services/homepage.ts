@@ -8,11 +8,31 @@ import type {
   RecentDocument,
 } from '../../../../shared/contracts/homepage';
 
+import {
+  buildHomepageQueryFields,
+  compactSanitizedFields,
+  resolveReadableMainField,
+  resolveTitleField,
+} from './homepage-query-utils';
+
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
   const permissionService = strapi.admin.services.permission;
+
+  const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
+    const contentType = strapi.contentTypes[uid];
+
+    if (contentType === undefined) {
+      strapi.log.warn(
+        `Skipping homepage content type "${uid}" because it is no longer registered.`
+      );
+      return undefined;
+    }
+
+    return contentType;
+  };
 
   type ContentTypeConfiguration = {
     uid: RecentDocument['contentTypeUid'];
@@ -49,9 +69,27 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    return readPermissions
-      .map((permission) => permission.subject)
-      .filter(Boolean) as RecentDocument['contentTypeUid'][];
+    // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
+    // per role the user belongs to, so a multi-role user gets duplicate subjects.
+    // Using a Set collapses them to unique content type UID.
+    return [
+      ...new Set(
+        readPermissions
+          .map((permission) => permission.subject)
+          .filter((subject): subject is RecentDocument['contentTypeUid'] => {
+            if (!subject) {
+              return false;
+            }
+
+            const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
+            const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
+              | { visible?: boolean }
+              | undefined;
+
+            return contentTypeOptions?.visible !== false;
+          })
+      ),
+    ];
   };
 
   type ContentTypeMeta = {
@@ -62,40 +100,43 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     uid: RecentDocument['contentTypeUid'];
   };
 
+  const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
+  const getPermissionChecker = (uid: string) =>
+    permissionCheckerService.create({
+      userAbility: strapi.requestContext.get()?.state.userAbility,
+      model: uid,
+    });
+
   const getContentTypesMeta = (
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): ContentTypeMeta[] => {
-    return allowedContentTypeUids.map((uid) => {
+    return allowedContentTypeUids.reduce<ContentTypeMeta[]>((acc, uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentType(uid);
-      const fields = ['documentId', 'updatedAt'];
+      const contentType = getRegisteredContentType(uid);
 
-      // Add fields required to get the status if D&P is enabled
+      if (contentType === undefined) {
+        return acc;
+      }
+
+      const mainField = resolveReadableMainField(
+        contentType,
+        configuration,
+        getPermissionChecker(uid)
+      );
+      const fields = buildHomepageQueryFields(contentType, mainField);
       const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
-      if (hasDraftAndPublish) {
-        fields.push('publishedAt');
-      }
 
-      // Only add the main field if it's defined
-      if (configuration?.settings.mainField) {
-        fields.push(configuration.settings.mainField);
-      }
-
-      // Only add locale if it's localized
-      const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
-      if (isLocalized) {
-        fields.push('locale');
-      }
-
-      return {
+      acc.push({
         fields,
-        mainField: configuration!.settings.mainField,
+        mainField,
         contentType,
         hasDraftAndPublish,
         uid,
-      };
-    });
+      });
+
+      return acc;
+    }, []);
   };
 
   const formatDocuments = (
@@ -127,12 +168,27 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
-  const getPermissionChecker = (uid: string) =>
-    permissionCheckerService.create({
-      userAbility: strapi.requestContext.get()?.state.userAbility,
-      model: uid,
+  const sanitizeHomepageQuery = async (
+    meta: ContentTypeMeta,
+    additionalQueryParams?: Record<string, unknown>
+  ) => {
+    const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
+      limit: MAX_DOCUMENTS,
+      fields: meta.fields,
+      ...additionalQueryParams,
+      locale: '*',
     });
+
+    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
+    if (sanitizedFields !== undefined) {
+      permissionQuery.fields = sanitizedFields;
+    }
+
+    return {
+      permissionQuery,
+      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+    };
+  };
 
   return {
     async addStatusToDocuments(documents: RecentDocument[]): Promise<RecentDocument[]> {
@@ -173,7 +229,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const permittedContentTypes = await getPermittedContentTypes();
       const allowedContentTypeUids = draftAndPublishOnly
         ? permittedContentTypes.filter((uid) => {
-            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+            const contentType = getRegisteredContentType(uid);
+
+            return contentType !== undefined && contentTypes.hasDraftAndPublish(contentType);
           })
         : permittedContentTypes;
       // Fetch the configuration for each content type in a single query
@@ -183,17 +241,15 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const recentDocuments = await Promise.all(
         contentTypesMeta.map(async (meta) => {
-          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
-            limit: MAX_DOCUMENTS,
-            fields: meta.fields,
-            ...additionalQueryParams,
-            locale: '*',
-          });
+          const { permissionQuery, titleField } = await sanitizeHomepageQuery(
+            meta,
+            additionalQueryParams
+          );
 
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
           const populate = additionalQueryParams?.populate as string[];
 
-          return formatDocuments(docs, meta, populate);
+          return formatDocuments(docs, { ...meta, mainField: titleField }, populate);
         })
       );
 

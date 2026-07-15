@@ -65,7 +65,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
     };
   };
 
-  const store: CoreStore = function (defaultParams: Partial<Params>) {
+  const store: CoreStore = function createScopedCoreStore(defaultParams: Partial<Params>) {
     return {
       get: (params: Params) => store.get(mergeParams(defaultParams, params)),
       set: (params: Params) => store.set(mergeParams(defaultParams, params)),

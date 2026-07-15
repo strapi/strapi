@@ -10,13 +10,18 @@ import {
 } from '../../../shared/contracts/authentication';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
+import {
+  type GetSessions,
+  type DeleteSession,
+  type DeleteAllSessions,
+} from '../../../shared/contracts/sessions';
 import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
 
 import { adminApi } from './api';
 
 const authService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['User', 'Me', 'ProvidersOptions'],
+    addTagTypes: ['User', 'Me', 'ProvidersOptions', 'Sessions'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -52,6 +57,39 @@ const authService = adminApi
           return res.data;
         },
         invalidatesTags: ['Me'],
+      }),
+      /**
+       * Sessions (active devices)
+       */
+      getActiveSessions: builder.query<GetSessions.Response['data'], void>({
+        query: () => ({
+          method: 'GET',
+          url: '/admin/users/me/sessions',
+        }),
+        transformResponse(res: GetSessions.Response) {
+          return res.data;
+        },
+        providesTags: ['Sessions'],
+      }),
+      revokeSession: builder.mutation<DeleteSession.Response['data'], string>({
+        query: (sessionId) => ({
+          method: 'DELETE',
+          url: `/admin/users/me/sessions/${sessionId}`,
+        }),
+        invalidatesTags: ['Sessions'],
+      }),
+      revokeAllSessions: builder.mutation<
+        DeleteAllSessions.Response['data'],
+        { keepCurrent?: boolean } | void
+      >({
+        query: (body) => ({
+          method: 'DELETE',
+          url: '/admin/users/me/sessions',
+          config: {
+            params: body?.keepCurrent ? { keepCurrent: true } : {},
+          },
+        }),
+        invalidatesTags: ['Sessions'],
       }),
       /**
        * Permissions
@@ -204,6 +242,9 @@ const {
   useCheckPermissionsQuery,
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
+  useGetActiveSessionsQuery,
+  useRevokeSessionMutation,
+  useRevokeAllSessionsMutation,
   useLoginMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
@@ -224,6 +265,9 @@ export {
   useCheckPermissionsQuery,
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
+  useGetActiveSessionsQuery,
+  useRevokeSessionMutation,
+  useRevokeAllSessionsMutation,
   useLoginMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,

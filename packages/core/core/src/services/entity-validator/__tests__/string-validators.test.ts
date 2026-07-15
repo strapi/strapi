@@ -453,4 +453,52 @@ describe('String validator', () => {
       expect(await validator('Strapi')).toBe('Strapi');
     });
   });
+
+  describe('default maxLength behavior (string without maxLength)', () => {
+    const options = { ...mockOptions, isDraft: false };
+
+    test('it fails when string exceeds 255 characters without maxLength', async () => {
+      expect.assertions(1);
+
+      const validator = strapiUtils.validateYupSchema(
+        Validators.string(
+          {
+            attr: { type: 'string' }, // ❗ no maxLength defined
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'a'.repeat(300),
+            },
+            entity: null,
+          },
+          options
+        )
+      );
+
+      try {
+        await validator('a'.repeat(300));
+      } catch (err) {
+        expect(err).toBeInstanceOf(errors.YupValidationError);
+      }
+    });
+
+    test('it passes when string is within 255 characters without maxLength', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.string(
+          {
+            attr: { type: 'string' }, // ❗ no maxLength defined
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'a'.repeat(200),
+            },
+            entity: null,
+          },
+          options
+        )
+      );
+
+      expect(await validator('a'.repeat(200))).toBe('a'.repeat(200));
+    });
+  });
 });
