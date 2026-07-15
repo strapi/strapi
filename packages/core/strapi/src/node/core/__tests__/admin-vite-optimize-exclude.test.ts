@@ -1,0 +1,185 @@
+import {
+  collectAdminOptimizeDepsExclude,
+  getPluginPackageName,
+  hasReactPeerDependency,
+  isEsmPackage,
+  shipsPreBuiltDist,
+  shouldExcludeFromOptimizeDeps,
+} from '../admin-vite-optimize-exclude';
+import { ADMIN_VITE_ALIAS_MODULES } from '../admin-vite-alias-modules';
+import { getModule } from '../dependencies';
+import type { PluginMeta } from '../plugins';
+
+jest.mock('../dependencies', () => ({
+  getModule: jest.fn(),
+}));
+
+jest.mock('read-pkg-up', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+const readPkgUp = jest.requireMock('read-pkg-up').default as jest.Mock;
+
+const strapiDesignExtendedLike = {
+  name: 'strapi-design-extended',
+  type: 'module',
+  files: ['dist'],
+  module: './dist/index.js',
+  exports: {
+    '.': {
+      import: './dist/index.js',
+    },
+  },
+  peerDependencies: {
+    react: '^18.0.0',
+    'react-dom': '^18.0.0',
+    '@strapi/design-system': '^2.2.0',
+  },
+};
+
+describe('admin vite optimize exclude heuristics', () => {
+  it('matches pre-built ESM libraries with React peers', () => {
+    expect(shouldExcludeFromOptimizeDeps(strapiDesignExtendedLike)).toBe(true);
+  });
+
+  it('does not match CommonJS libraries with React peers', () => {
+    expect(
+      shouldExcludeFromOptimizeDeps({
+        name: 'formik',
+        main: 'dist/formik.cjs.production.min.js',
+        peerDependencies: {
+          react: '>=16.8.0',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('does not match ESM React peers that ship source instead of dist', () => {
+    expect(
+      shouldExcludeFromOptimizeDeps({
+        name: 'react-intl',
+        type: 'module',
+        module: './lib/index.js',
+        peerDependencies: {
+          react: '^18.0.0',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('does not match packages without React peers', () => {
+    expect(
+      shouldExcludeFromOptimizeDeps({
+        name: 'lodash',
+        type: 'module',
+        module: './dist/index.js',
+        files: ['dist'],
+      })
+    ).toBe(false);
+  });
+
+  it('extracts scoped plugin package names from admin entry paths', () => {
+    expect(getPluginPackageName('@org/my-plugin/strapi-admin')).toBe('@org/my-plugin');
+    expect(getPluginPackageName('my-plugin/strapi-admin')).toBe('my-plugin');
+  });
+
+  it('detects ESM via type module or exports.import', () => {
+    expect(isEsmPackage({ type: 'module' })).toBe(true);
+    expect(
+      isEsmPackage({
+        exports: {
+          '.': {
+            import: './dist/index.js',
+          },
+        },
+      })
+    ).toBe(true);
+    expect(isEsmPackage({ main: 'index.js' })).toBe(false);
+  });
+
+  it('detects React peer dependencies', () => {
+    expect(hasReactPeerDependency({ peerDependencies: { react: '^18.0.0' } })).toBe(true);
+    expect(hasReactPeerDependency({ peerDependencies: { 'styled-components': '^6.0.0' } })).toBe(
+      false
+    );
+  });
+
+  it('detects dist-based entry points', () => {
+    expect(shipsPreBuiltDist({ module: './dist/index.js' })).toBe(true);
+    expect(shipsPreBuiltDist({ files: ['dist'] })).toBe(true);
+    expect(shipsPreBuiltDist({ module: './lib/index.js' })).toBe(false);
+  });
+});
+
+describe('collectAdminOptimizeDepsExclude', () => {
+  const getModuleMock = getModule as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          react: '^18.0.0',
+        },
+      },
+    });
+  });
+
+  it('excludes pre-built React peer libraries from plugin dependencies', async () => {
+    const plugins: PluginMeta[] = [
+      {
+        name: 'my-plugin',
+        importName: 'myPlugin',
+        type: 'module',
+        modulePath: '@org/my-plugin/strapi-admin',
+      },
+    ];
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@org/my-plugin') {
+        return {
+          dependencies: {
+            'strapi-design-extended': '^0.0.13',
+          },
+        };
+      }
+
+      if (name === 'strapi-design-extended') {
+        return strapiDesignExtendedLike;
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([
+      'strapi-design-extended',
+    ]);
+  });
+
+  it('never excludes pinned admin singleton modules', async () => {
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: Object.fromEntries(ADMIN_VITE_ALIAS_MODULES.map((name) => [name, '1.0.0'])),
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (ADMIN_VITE_ALIAS_MODULES.includes(name as (typeof ADMIN_VITE_ALIAS_MODULES)[number])) {
+        return {
+          name,
+          type: 'module',
+          module: './dist/index.js',
+          files: ['dist'],
+          peerDependencies: {
+            react: '^18.0.0',
+          },
+        };
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+  });
+});

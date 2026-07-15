@@ -200,22 +200,22 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     let idx;
 
     if (r.position?.before) {
-      const { idx: _idx, relation } = findRelation(r.position.before);
+      const { idx: relationIndex, relation } = findRelation(r.position.before);
       if (relation.init) {
         r.order = relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = _idx;
+      idx = relationIndex;
     } else if (r.position?.after) {
-      const { idx: _idx, relation } = findRelation(r.position.after);
+      const { idx: relationIndex, relation } = findRelation(r.position.after);
       if (relation.init) {
         r.order = relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
 
-      idx = _idx + 1;
+      idx = relationIndex + 1;
     } else if (r.position?.start) {
       r.order = 0.5;
       idx = 0;

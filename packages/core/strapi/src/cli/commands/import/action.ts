@@ -23,6 +23,7 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -136,6 +137,7 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
+    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
     await strapiInstance.telemetry.send(
       'didDEITSProcessStart',
       getTransferTelemetryPayload(engine)
