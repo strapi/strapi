@@ -152,12 +152,15 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
 
       // Atomic apply: the release is now done — its title still shows, there is no Publish button or
-      // pending actions left, and its entries report as processed.
+      // pending actions left, and both sides of the mix report as processed.
       await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
       await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
       await expect(
         page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
       ).toBeVisible();
     }
   );
