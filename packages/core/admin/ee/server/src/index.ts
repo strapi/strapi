@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import register from './register';
 import bootstrap from './bootstrap';
 import destroy from './destroy';
@@ -10,7 +11,6 @@ import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
 import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
-import type { Core } from '@strapi/types';
 
 const getAdminEE = () => {
   const eeAdmin = {

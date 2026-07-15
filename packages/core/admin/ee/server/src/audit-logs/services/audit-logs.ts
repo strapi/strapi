@@ -45,7 +45,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     async findMany(query: unknown) {
-      const { results, pagination } = await strapi.db?.query('admin::audit-log').findPage({
+      const { results, pagination } = await strapi.db.query('admin::audit-log').findPage({
         populate: ['user'],
         select: ['action', 'date', 'payload'],
         ...strapi.get('query-params').transform('admin::audit-log', query),
