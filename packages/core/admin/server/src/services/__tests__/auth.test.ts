@@ -340,6 +340,42 @@ describe('Auth', () => {
       }
     });
 
+    test('Fails and clears the token for a legacy token with no expiry (#25711)', async () => {
+      const resetPasswordToken = '123';
+      // A token issued before expiry was introduced: set, but with no expiry.
+      const user = {
+        id: 1,
+        resetPasswordToken,
+      };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const updateById = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne };
+          },
+        },
+        admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+
+      expect.assertions(2);
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+      }
+
+      // The stale token must be cleared so it can no longer be retried.
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
+      });
+    });
+
     test('Changes password and clear reset token', async () => {
       const resetPasswordToken = '123';
       const user = {
