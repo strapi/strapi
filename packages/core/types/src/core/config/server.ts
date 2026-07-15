@@ -1,3 +1,4 @@
+import type { winston } from '@strapi/logger';
 import type { OpenAPI } from './openapi';
 import type { CronTasks } from '../../modules/cron';
 
@@ -14,7 +15,7 @@ export interface Dirs {
   public?: string;
 }
 
-export interface LoggerConfig {
+export interface LoggerConfig extends winston.LoggerOptions {
   level?: string;
   [key: string]: unknown;
 }

@@ -45,6 +45,7 @@ const mariadb = {
   },
 };
 
+/** @type {Record<string, Core.Config.Database['connection']>} */
 const db = {
   mysql,
   sqlite,

@@ -1,11 +1,15 @@
 'use strict';
 
+/** @import { Core } from '@strapi/strapi' */
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
    * your application is initialized.
    *
    * This gives you an opportunity to extend code.
+   *
+   * @param {{ strapi: Core.Strapi }} params
    */
   register({ strapi }) {
     // -------------------------------------------------------------------------
@@ -39,6 +43,8 @@ module.exports = {
    *
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
+   *
+   * @param {{ strapi: Core.Strapi }} params
    */
   async bootstrap({ strapi }) {},
 
@@ -47,6 +53,8 @@ module.exports = {
    * your application gets shut down.
    *
    * This gives you an opportunity to gracefully stop services you run.
+   *
+   * @param {{ strapi: Core.Strapi }} params
    */
   destroy({ strapi }) {},
 };

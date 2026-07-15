@@ -1,3 +1,5 @@
+/** @import { StrapiApp } from '@strapi/strapi/admin' */
+
 import theme from './extensions/theme';
 
 const config = {
@@ -27,6 +29,9 @@ const config = {
   notifications: { releases: false },
 };
 
+/**
+ * @param {StrapiApp} app
+ */
 const bootstrap = (app) => {
   console.log(app);
 };

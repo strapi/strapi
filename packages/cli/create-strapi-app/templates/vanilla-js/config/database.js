@@ -3,6 +3,10 @@
 const path = require('path');
 const { isDatabaseClientKind } = require('@strapi/database');
 
+/**
+ * @param {Core.Config.Shared.ConfigParams} param0
+ * @returns {Core.Config.Database}
+ */
 module.exports = ({ env }) => {
   const client = env('DATABASE_CLIENT', 'sqlite');
 
