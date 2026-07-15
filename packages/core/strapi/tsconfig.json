@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "@strapi/types/globals-server"]
   },
   "include": ["src"],
   "exclude": ["**/__tests__/**"]

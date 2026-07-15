@@ -1,3 +1,5 @@
+/// <reference types="@strapi/types/globals-server" />
+
 import crypto from 'crypto';
 import type { Modules } from '@strapi/types';
 

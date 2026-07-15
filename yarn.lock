@@ -4225,6 +4225,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hapi/bourne@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@hapi/bourne@npm:3.0.0"
+  checksum: 10c0/2e2df62f6bc6f32b980ba5bbdc09200c93c55c8306399ec0f2781da088a82aab699498c89fe94fec4acf770210f9aee28c75bfc2f04044849ac01b034134e717
+  languageName: node
+  linkType: hard
+
 "@hono/node-server@npm:^1.19.9":
   version: 1.19.14
   resolution: "@hono/node-server@npm:1.19.14"
@@ -8949,6 +8956,7 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/types": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
@@ -8963,6 +8971,7 @@ __metadata:
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
+    "@strapi/types": ^5.0.0
     "@testing-library/jest-dom": ^6.0.0
     jest-environment-jsdom: ^29.0.0
     styled-components: ^6.0.0
@@ -9272,7 +9281,6 @@ __metadata:
     jest: "npm:29.6.0"
     jszip: "npm:^3.10.1"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     micromatch: "npm:^4.0.8"
     pluralize: "npm:8.0.0"
@@ -9516,7 +9524,6 @@ __metadata:
     "@types/node": "npm:20.19.41"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.18.1"
     react: "npm:18.3.1"
@@ -9781,8 +9788,6 @@ __metadata:
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
-    koa-session: "npm:7.0.2"
     koa-static: "npm:^5.0.0"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
@@ -10193,7 +10198,6 @@ __metadata:
     eslint-config-custom: "npm:5.50.1"
     json-logic-js: "npm:2.0.5"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     node-schedule: "npm:2.1.1"
     tsconfig: "npm:5.50.1"
@@ -10327,7 +10331,6 @@ __metadata:
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     koa-range: "npm:0.3.0"
     koa-static: "npm:5.0.0"
     lodash: "npm:4.18.1"
@@ -10371,7 +10374,6 @@ __metadata:
     http-errors: "npm:2.0.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     node-machine-id: "npm:1.1.12"
     p-map: "npm:4.0.0"
@@ -15105,7 +15107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"co-body@npm:^6.0.0, co-body@npm:^6.1.0":
+"co-body@npm:^6.0.0":
   version: 6.1.0
   resolution: "co-body@npm:6.1.0"
   dependencies:
@@ -15114,6 +15116,19 @@ __metadata:
     raw-body: "npm:^2.3.3"
     type-is: "npm:^1.6.16"
   checksum: 10c0/54f5aa6e8dcc2961259a6e120807430d3ebe3d3f683e0e5b2747f547d142dfa045b7a0becbc46d13f0cb87b52e99b011090203b447cefc8587e4df1932aa9e2a
+  languageName: node
+  linkType: hard
+
+"co-body@npm:^6.1.0":
+  version: 6.2.0
+  resolution: "co-body@npm:6.2.0"
+  dependencies:
+    "@hapi/bourne": "npm:^3.0.0"
+    inflation: "npm:^2.0.0"
+    qs: "npm:^6.5.2"
+    raw-body: "npm:^2.3.3"
+    type-is: "npm:^1.6.16"
+  checksum: 10c0/3a320d8b324abc14031243f427d2584cfe8f61562204f1a45d0a08bba20fff7122a04883f4d312ba648fb455246030916cacb92c19c6f7b329aaf1de70045e37
   languageName: node
   linkType: hard
 

@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["./src", "./custom.d.ts", "../shared", "./module.d.ts"],
+  "include": ["./src", "../shared"],
   "exclude": ["tests", "**/*.test.*"],
   "compilerOptions": {
     "rootDir": "../",
