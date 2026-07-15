@@ -19,6 +19,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
@@ -130,13 +131,14 @@ const FolderName = styled(Typography)`
 
 interface FolderCardProps {
   folder: Folder;
+  orderedItemKeys: ItemKey[];
 }
 
-const FolderCard = ({ folder }: FolderCardProps) => {
+const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { isFolderSelected, toggleFolder } = useAssetSelection();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -144,20 +146,24 @@ const FolderCard = ({ folder }: FolderCardProps) => {
     showInvalidDropCursor,
   } = useFolderDraggableDroppable(folder);
 
+  const key = folderKey(folder.id);
+
   const setNodeRef = (node: HTMLElement | null) => {
     setDragRef(node);
     setDropRef(node);
   };
 
-  // Grid folder cards have no checkbox: Cmd/Ctrl+click is the additive toggle
-  // (the grid counterpart of the table's folder checkbox). Plain click keeps
-  // navigating; folders stay out of range/select-all, same as the table.
+  // Folders share the selection mechanism with assets (toggle, range,
+  // select-all). Only the plain-click semantic differs: it navigates into the
+  // folder instead of selecting it.
   const handleClick = (e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey) {
-      toggleFolder(folder.id);
-      return;
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else if (e.metaKey || e.ctrlKey) {
+      toggle(key);
+    } else {
+      navigateToFolder(folder);
     }
-    navigateToFolder(folder);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -166,7 +172,7 @@ const FolderCard = ({ folder }: FolderCardProps) => {
       navigateToFolder(folder);
     } else if (e.key === ' ') {
       e.preventDefault();
-      toggleFolder(folder.id);
+      toggle(key);
     }
   };
 
@@ -179,7 +185,7 @@ const FolderCard = ({ folder }: FolderCardProps) => {
       $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
-      $isSelected={isFolderSelected(folder.id)}
+      $isSelected={isSelected(key)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="listitem"
@@ -325,28 +331,29 @@ const NameButton = styled.button`
 
 interface AssetCardProps {
   asset: File;
-  orderedAssetIds: number[];
+  orderedItemKeys: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps) => {
+const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
   const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
 
-  const selected = isSelected(asset.id);
+  const key = assetKey(asset.id);
+  const selected = isSelected(key);
 
   // OS file-manager click semantics (same as the table view): shift selects a
   // range, cmd/ctrl toggles, plain click selects only this card.
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
-      selectRange(orderedAssetIds, asset.id);
+      selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
-      toggle(asset.id);
+      toggle(key);
     } else {
-      selectOnly(asset.id);
+      selectOnly(key);
     }
   };
 
@@ -357,7 +364,7 @@ const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps)
       onAssetItemClick(asset.id);
     } else if (e.key === ' ') {
       e.preventDefault();
-      toggle(asset.id);
+      toggle(key);
     }
   };
 
@@ -371,9 +378,9 @@ const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps)
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (e.shiftKey) {
-      selectRange(orderedAssetIds, asset.id);
+      selectRange(orderedItemKeys, key);
     } else {
-      toggle(asset.id);
+      toggle(key);
     }
   };
 
@@ -447,7 +454,12 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
   const { formatMessage } = useIntl();
 
   const totalItems = folders.length + assets.length;
-  const orderedAssetIds = assets.map((asset) => asset.id);
+
+  // Render order: folders first, then assets — range selection follows it.
+  const orderedItemKeys: ItemKey[] = [
+    ...folders.map((folder) => folderKey(folder.id)),
+    ...assets.map((asset) => assetKey(asset.id)),
+  ];
 
   if (totalItems === 0) {
     return (
@@ -469,7 +481,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
           <Grid.Root gap={4}>
             {folders.map((folder) => (
               <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${folder.id}`}>
-                <FolderCard folder={folder} />
+                <FolderCard folder={folder} orderedItemKeys={orderedItemKeys} />
               </Grid.Item>
             ))}
           </Grid.Root>
@@ -487,7 +499,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
         >
           <AssetCard
             asset={asset}
-            orderedAssetIds={orderedAssetIds}
+            orderedItemKeys={orderedItemKeys}
             onAssetItemClick={onAssetItemClick}
           />
         </Grid.Item>

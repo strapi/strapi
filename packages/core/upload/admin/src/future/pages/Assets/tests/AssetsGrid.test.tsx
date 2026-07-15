@@ -399,5 +399,29 @@ describe('AssetsGrid', () => {
       expect(mockNavigateToFolder).not.toHaveBeenCalled();
       expect(screen.getByText('1 item selected')).toBeInTheDocument();
     });
+
+    it('selects a contiguous range from a folder anchor with Shift+click', async () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      const { user } = setup({ folders, assets: mockAssets });
+
+      // Anchor on the folder (Cmd+click), then Shift+click the second asset card:
+      // folder + first two assets are selected, without navigating.
+      await user.keyboard('{Meta>}');
+      await user.click(screen.getByText('Photos'));
+      await user.keyboard('{/Meta}');
+
+      const assetCards = screen
+        .getAllByRole('listitem')
+        .filter((item) => !item.textContent?.includes('Photos'));
+      await user.keyboard('{Shift>}');
+      await user.click(assetCards[1]);
+      await user.keyboard('{/Shift}');
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
+    });
   });
 });

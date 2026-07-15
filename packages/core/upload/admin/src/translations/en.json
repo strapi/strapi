@@ -253,7 +253,7 @@
   "list.table.header.creationDate": "Creation Date",
   "list.table.header.lastModified": "Last Modified",
   "list.table.header.sort": "Sort on {label}",
-  "list.table.header.select-all": "Select all assets",
+  "list.table.header.select-all": "Select all",
   "list.table.row.select": "Select {name}",
   "list.table.content.empty-label": "This field is empty",
   "list.bulk-actions.label": "Bulk actions",

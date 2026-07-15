@@ -316,33 +316,66 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
     });
 
-    it('selects all assets via the header checkbox and shows indeterminate when partial', async () => {
-      const { user } = setup();
+    it('selects folders and assets via the header checkbox and shows indeterminate when partial', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
 
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeChecked();
-      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
-      // Unchecking one asset leaves the header checkbox in the indeterminate state.
+      // Unchecking one item leaves the header checkbox in the indeterminate state.
       await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
       expect(selectAll).toHaveAttribute('data-state', 'indeterminate');
     });
 
-    it('clears the selection from the header checkbox when all are selected', async () => {
-      const { user } = setup();
+    it('stays indeterminate while a manually checked folder is not part of a full selection', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+      // Selecting every asset but not the folder must not report "all selected".
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image3.png' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Select all' })).toHaveAttribute(
+        'data-state',
+        'indeterminate'
+      );
+    });
+
+    it('clears the selection from the header checkbox when all are selected', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
-      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
       await user.click(selectAll);
       expect(screen.queryByText(/items? selected/)).not.toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).not.toBeChecked();
+    });
+
+    it('selects a contiguous range across folders and assets with Shift+click', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      // Anchor on the folder, then Shift+click the second asset: the folder and
+      // the first two assets end up selected.
+      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+      await user.keyboard('{Shift>}');
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.keyboard('{/Shift}');
+
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
     });
   });
 
