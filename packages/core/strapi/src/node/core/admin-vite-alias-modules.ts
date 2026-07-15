@@ -13,6 +13,7 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   '@reduxjs/toolkit',
   '@strapi/design-system',
   '@radix-ui/react-tooltip',
+  'react-intl',
   'lodash',
 ] as const;
 
@@ -28,5 +29,6 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   '@reduxjs/toolkit',
   'react-redux',
   '@strapi/design-system',
+  'react-intl',
   'lodash',
 ] as const satisfies readonly AdminViteAliasModule[];

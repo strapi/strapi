@@ -80,7 +80,8 @@ module.exports = {
       path.join(__dirname, 'fileTransformer.js'),
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing|msw|@mswjs|until-async|outvariant|strict-event-emitter|headers-polyfill|rettime|@open-draft|is-node-process)/)',
+    // react-intl (and its @formatjs deps) are pure ESM from v8+, so Jest must transform them.
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing|msw|@mswjs|until-async|outvariant|strict-event-emitter|headers-polyfill|rettime|@open-draft|is-node-process|react-intl|@formatjs|intl-messageformat)/)',
   ],
   testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {

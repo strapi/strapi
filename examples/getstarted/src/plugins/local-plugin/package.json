@@ -4,7 +4,7 @@
   "private": true,
   "description": "This is the description of my plugin.",
   "dependencies": {
-    "react-intl": "7.1.14"
+    "react-intl": "10.1.16"
   },
   "strapi": {
     "name": "local-plugin",
