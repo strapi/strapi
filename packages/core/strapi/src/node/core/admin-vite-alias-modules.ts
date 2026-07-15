@@ -14,6 +14,8 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   '@strapi/design-system',
   '@radix-ui/react-tooltip',
   'lodash',
+  'invariant',
+  'prismjs',
 ] as const;
 
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
@@ -29,4 +31,5 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   'react-redux',
   '@strapi/design-system',
   'lodash',
+  'invariant',
 ] as const satisfies readonly AdminViteAliasModule[];

@@ -34,6 +34,7 @@ jest.mock('../../../../../admin/src/reducer', () => ({
 }));
 
 jest.mock('../../../../../admin/src/utils/cookies', () => ({
+  ...jest.requireActual('../../../../../admin/src/utils/cookies'),
   getCookieValue: jest.fn(),
 }));
 
