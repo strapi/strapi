@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
   statuses: read
 
@@ -13,6 +14,23 @@ jobs:
   cron-tasks:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
+
+      - name: Reconcile invalid template issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/issue-template-cron-action.ts
+
       - name: Close inactive "can not reproduce" issues
         uses: actions/github-script@v9
         with:

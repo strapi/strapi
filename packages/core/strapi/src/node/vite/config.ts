@@ -3,6 +3,7 @@ import type { InlineConfig, UserConfig } from 'vite';
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
+import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
@@ -14,6 +15,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
+  const pluginOptimizeDepsExclude = await collectAdminOptimizeDepsExclude(ctx.cwd, ctx.plugins);
+  const optimizeDepsExclude = [
+    ...(designSystemLinked ? ['@strapi/design-system'] : []),
+    ...pluginOptimizeDepsExclude,
+  ];
 
   // Imported dynamically so this file's CJS build resolves Vite's ESM Node API instead of
   // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
@@ -37,8 +43,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
-      // so changes are reflected without clearing node_modules/.strapi/vite cache
-      ...(designSystemLinked && { exclude: ['@strapi/design-system'] }),
+      // so changes are reflected without clearing node_modules/.strapi/vite cache.
+      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
         // even if React dependencies are not direct dependencies
@@ -64,6 +71,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
         // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
         'prismjs',
+        // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
+        // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
+        // projects blank-crash the admin (#25070, #26964).
+        'prismjs/components/*.js',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -111,7 +122,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'markdown-it-mark',
               'markdown-it-sub',
               'markdown-it-sup',
-              'prismjs/components/*.js',
               'react-colorful',
               'react-dnd-html5-backend',
               'react-window',
