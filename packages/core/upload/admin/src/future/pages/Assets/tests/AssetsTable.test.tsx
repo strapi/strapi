@@ -1,5 +1,6 @@
 import { userEvent } from '@testing-library/user-event';
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { AssetsTable } from '../components/AssetsTable';
 import { BulkActionsBar } from '../components/BulkActionsBar';
@@ -268,11 +269,19 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeInTheDocument();
     });
 
-    it('renders a disabled checkbox on folder rows', () => {
-      setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+    it('toggles folder selection via the folder checkbox and counts it in the bar', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
       const folderCheckbox = screen.getByRole('checkbox', { name: 'Select Photos' });
-      expect(folderCheckbox).toBeDisabled();
+      expect(folderCheckbox).toBeEnabled();
+
+      await user.click(folderCheckbox);
+
+      expect(folderCheckbox).toBeChecked();
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+
+      await user.click(folderCheckbox);
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
     it('selects an asset when its row body is clicked', async () => {
@@ -307,33 +316,66 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
     });
 
-    it('selects all assets via the header checkbox and shows indeterminate when partial', async () => {
-      const { user } = setup();
+    it('selects folders and assets via the header checkbox and shows indeterminate when partial', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
 
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeChecked();
-      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
-      // Unchecking one asset leaves the header checkbox in the indeterminate state.
+      // Unchecking one item leaves the header checkbox in the indeterminate state.
       await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
       expect(selectAll).toHaveAttribute('data-state', 'indeterminate');
     });
 
-    it('clears the selection from the header checkbox when all are selected', async () => {
-      const { user } = setup();
+    it('stays indeterminate while a manually checked folder is not part of a full selection', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+      // Selecting every asset but not the folder must not report "all selected".
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image3.png' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Select all' })).toHaveAttribute(
+        'data-state',
+        'indeterminate'
+      );
+    });
+
+    it('clears the selection from the header checkbox when all are selected', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
-      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
       await user.click(selectAll);
       expect(screen.queryByText(/items? selected/)).not.toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).not.toBeChecked();
+    });
+
+    it('selects a contiguous range across folders and assets with Shift+click', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      // Anchor on the folder, then Shift+click the second asset: the folder and
+      // the first two assets end up selected.
+      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+      await user.keyboard('{Shift>}');
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.keyboard('{/Shift}');
+
+      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
     });
   });
 
@@ -394,16 +436,84 @@ describe('AssetsTable', () => {
       });
     });
 
-    it('shows an info toast when Delete is clicked', async () => {
+    it('opens a confirm dialog when Delete is clicked and cancels without deleting', async () => {
       const { user } = setup();
 
       await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Delete' }));
 
-      expect(mockToggleNotification).toHaveBeenCalledWith({
-        type: 'info',
-        message: "Bulk delete isn't available yet",
-      });
+      expect(await screen.findByText('Delete 1 item?')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
+      // Selection untouched, nothing sent.
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('deletes the selected assets on confirm, toasts, and clears the selection', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: '2 items have been deleted',
+        })
+      );
+      expect(requestBody).toEqual({ fileIds: [1, 2], folderIds: [] });
+      // Selection cleared → bar gone.
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the dialog open and the selection on a failed bulk delete', async () => {
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          () => HttpResponse.json({ error: { message: 'boom' } }, { status: 500 }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while deleting the items.',
+        })
+      );
+      // Dialog stays open for a direct retry (Confirm again) or Cancel. While
+      // the modal is open the page behind it is aria-hidden, so the bar can
+      // only be asserted after closing.
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      // Selection kept for retry.
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
     it('hides Create metadata when AI metadata is unavailable', async () => {

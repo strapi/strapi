@@ -22,7 +22,7 @@ import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
-import { getSelectAllState } from '../utils/selection';
+import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
@@ -171,28 +171,29 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
 
 interface AssetRowProps {
   asset: File;
-  orderedAssetIds: number[];
+  orderedItemKeys: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) => {
+const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
   const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
 
-  const selected = isSelected(asset.id);
+  const key = assetKey(asset.id);
+  const selected = isSelected(key);
 
   // Click semantics: plain click selects one; cmd/ctrl toggles; shift selects a contiguous
   // range (anchor → target), replacing the current selection.
   const handleRowClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
-      selectRange(orderedAssetIds, asset.id);
+      selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
-      toggle(asset.id);
+      toggle(key);
     } else {
-      selectOnly(asset.id);
+      selectOnly(key);
     }
   };
 
@@ -203,7 +204,7 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
       onAssetItemClick(asset.id);
     } else if (e.key === ' ') {
       e.preventDefault();
-      toggle(asset.id);
+      toggle(key);
     }
   };
 
@@ -215,9 +216,9 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (e.shiftKey) {
-      selectRange(orderedAssetIds, asset.id);
+      selectRange(orderedItemKeys, key);
     } else {
-      toggle(asset.id);
+      toggle(key);
     }
   };
 
@@ -315,12 +316,14 @@ const FolderTr = styled(StyledTr)`
 
 interface FolderRowProps {
   folder: Folder;
+  orderedItemKeys: ItemKey[];
 }
 
-const FolderRow = ({ folder }: FolderRowProps) => {
+const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
@@ -329,10 +332,37 @@ const FolderRow = ({ folder }: FolderRowProps) => {
     showInvalidDropCursor,
   } = useFolderDraggableDroppable(folder);
 
+  const key = folderKey(folder.id);
+
+  // Folders share the selection mechanism with assets. Only the plain-click
+  // semantic differs: it navigates into the folder instead of selecting it.
+  const handleRowClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else if (e.metaKey || e.ctrlKey) {
+      toggle(key);
+    } else {
+      navigateToFolder(folder);
+    }
+  };
+
+  // Enter navigates into the folder, Space toggles selection (same as assets).
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggle(key);
+    }
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else {
+      toggle(key);
     }
   };
 
@@ -348,19 +378,19 @@ const FolderRow = ({ folder }: FolderRowProps) => {
       $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
+      $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
       onDragStart={(e) => e.preventDefault()}
-      onClick={() => navigateToFolder(folder)}
+      onClick={handleRowClick}
       onKeyDown={handleKeyDown}
     >
-      {/* TODO: Folder selection is out of scope — checkbox is shown but inert. */}
       {!isMobile && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
-              disabled
-              checked={false}
+              checked={isSelected(key)}
+              onClick={handleCheckboxClick}
               aria-label={formatMessage(
                 {
                   id: getTranslationKey('list.table.row.select'),
@@ -438,7 +468,7 @@ interface AssetsTableProps {
 export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
-  const { selectedIds, selectAll, clear } = useAssetSelection();
+  const { selectedKeys, selectAll, clear } = useAssetSelection();
 
   const visibleHeaders = isMobile
     ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
@@ -451,14 +481,18 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
 
   const totalRows = folders.length + assets.length;
 
-  const orderedAssetIds = assets.map((asset) => asset.id);
-  const { allSelected, isIndeterminate } = getSelectAllState(selectedIds, orderedAssetIds);
+  // Render order: folders first, then assets — range selection follows it.
+  const orderedItemKeys: ItemKey[] = [
+    ...folders.map((folder) => folderKey(folder.id)),
+    ...assets.map((asset) => assetKey(asset.id)),
+  ];
+  const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {
     if (allSelected) {
       clear();
     } else {
-      selectAll(orderedAssetIds);
+      selectAll(orderedItemKeys);
     }
   };
 
@@ -471,11 +505,11 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
               <Flex>
                 <Checkbox
                   checked={isIndeterminate ? 'indeterminate' : allSelected}
-                  disabled={orderedAssetIds.length === 0}
+                  disabled={orderedItemKeys.length === 0}
                   onCheckedChange={handleSelectAll}
                   aria-label={formatMessage({
                     id: getTranslationKey('list.table.header.select-all'),
-                    defaultMessage: 'Select all assets',
+                    defaultMessage: 'Select all',
                   })}
                 />
               </Flex>
@@ -523,13 +557,17 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         ) : (
           <>
             {folders.map((folder) => (
-              <FolderRow key={`folder-${folder.id}`} folder={folder} />
+              <FolderRow
+                key={`folder-${folder.id}`}
+                folder={folder}
+                orderedItemKeys={orderedItemKeys}
+              />
             ))}
             {assets.map((asset) => (
               <AssetRow
                 key={asset.id}
                 asset={asset}
-                orderedAssetIds={orderedAssetIds}
+                orderedItemKeys={orderedItemKeys}
                 onAssetItemClick={onAssetItemClick}
               />
             ))}

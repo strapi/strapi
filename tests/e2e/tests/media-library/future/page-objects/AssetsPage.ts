@@ -175,6 +175,34 @@ export class AssetsPage {
     return this.page.getByRole('grid').getByRole('row').filter({ hasText: name }).first();
   }
 
+  /**
+   * Toggle an asset's selection checkbox in table view (additive).
+   */
+  async selectAsset(name: string) {
+    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+  }
+
+  /**
+   * The floating bulk action bar (visible only when at least one asset is selected).
+   */
+  getBulkActionsBar() {
+    return this.page.getByRole('region', { name: 'Bulk actions' });
+  }
+
+  /**
+   * Delete the currently selected assets through the bulk action bar,
+   * confirming the dialog. Resolves once the success notification shows.
+   */
+  async bulkDeleteSelection() {
+    await this.getBulkActionsBar().getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Confirm' }).click();
+    const notification = this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .first();
+    await notification.waitFor({ state: 'visible' });
+  }
+
   async switchToGridView() {
     await this.gridViewButton.click();
   }

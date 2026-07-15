@@ -11,10 +11,12 @@ import {
 import {
   clearSelection,
   createEmptySelection,
+  getIdsOfKind,
   selectAll as selectAllState,
   selectOnly as selectOnlyState,
   selectRange as selectRangeState,
   toggleSelection,
+  type ItemKey,
   type SelectionState,
 } from '../utils/selection';
 
@@ -23,23 +25,29 @@ import {
  * is page-scoped and reset on folder navigation / view switch.
  *
  * The actual computation lives in `../utils/selection.ts` (pure + unit-tested);
- * this hook is a thin React wrapper. Range / select-all receive the ordered id
- * array from the caller (AssetsTable owns the rendered `assets` order), keeping
+ * this hook is a thin React wrapper. Assets and folders share one mechanism —
+ * items are tracked as namespaced keys (`asset:1` / `folder:1`) so toggle, range
+ * and select-all behave the same for both. Range / select-all receive the
+ * ordered key array from the caller (the view owns the rendered order), keeping
  * the context data-source-agnostic.
  */
 export interface AssetSelection {
-  /** Selected asset ids only (folders are never selectable for now). */
+  /** Every selected item key (assets and folders), render-order agnostic. */
+  selectedKeys: Set<ItemKey>;
+  /** Selected asset ids, derived from {@link selectedKeys}. */
   selectedIds: Set<number>;
-  anchorId: number | null;
-  isSelected: (id: number) => boolean;
-  /** Additive toggle (Cmd/Ctrl+click, row checkbox). */
-  toggle: (id: number) => void;
-  /** Plain click — replaces the selection with a single id. */
-  selectOnly: (id: number) => void;
+  /** Selected folder ids, derived from {@link selectedKeys}. */
+  selectedFolderIds: Set<number>;
+  anchorKey: ItemKey | null;
+  isSelected: (key: ItemKey) => boolean;
+  /** Additive toggle (Cmd/Ctrl+click, item checkbox). */
+  toggle: (key: ItemKey) => void;
+  /** Plain click — replaces the selection with a single item. */
+  selectOnly: (key: ItemKey) => void;
   /** Shift+click — selects the contiguous range from the anchor to the target. */
-  selectRange: (orderedIds: number[], targetId: number) => void;
-  /** Header checkbox — selects every rendered asset. */
-  selectAll: (orderedIds: number[]) => void;
+  selectRange: (orderedKeys: ItemKey[], targetKey: ItemKey) => void;
+  /** Header checkbox — selects every rendered item (folders and assets). */
+  selectAll: (orderedKeys: ItemKey[]) => void;
   /** Close button / folder navigation / view switch. */
   clear: () => void;
 }
@@ -53,26 +61,46 @@ interface AssetSelectionProviderProps {
 export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
 
-  const isSelected = useCallback((id: number) => state.selectedIds.has(id), [state.selectedIds]);
+  const isSelected = useCallback(
+    (key: ItemKey) => state.selectedKeys.has(key),
+    [state.selectedKeys]
+  );
 
-  const toggle = useCallback((id: number) => setState((prev) => toggleSelection(prev, id)), []);
+  const toggle = useCallback((key: ItemKey) => setState((prev) => toggleSelection(prev, key)), []);
 
-  const selectOnly = useCallback((id: number) => setState((prev) => selectOnlyState(prev, id)), []);
-
-  const selectRange = useCallback(
-    (orderedIds: number[], targetId: number) =>
-      setState((prev) => selectRangeState(prev, orderedIds, targetId)),
+  const selectOnly = useCallback(
+    (key: ItemKey) => setState((prev) => selectOnlyState(prev, key)),
     []
   );
 
-  const selectAll = useCallback((orderedIds: number[]) => setState(selectAllState(orderedIds)), []);
+  const selectRange = useCallback(
+    (orderedKeys: ItemKey[], targetKey: ItemKey) =>
+      setState((prev) => selectRangeState(prev, orderedKeys, targetKey)),
+    []
+  );
+
+  const selectAll = useCallback(
+    (orderedKeys: ItemKey[]) => setState(selectAllState(orderedKeys)),
+    []
+  );
 
   const clear = useCallback(() => setState(clearSelection()), []);
 
+  const selectedIds = useMemo(
+    () => getIdsOfKind(state.selectedKeys, 'asset'),
+    [state.selectedKeys]
+  );
+  const selectedFolderIds = useMemo(
+    () => getIdsOfKind(state.selectedKeys, 'folder'),
+    [state.selectedKeys]
+  );
+
   const value = useMemo<AssetSelection>(
     () => ({
-      selectedIds: state.selectedIds,
-      anchorId: state.anchorId,
+      selectedKeys: state.selectedKeys,
+      selectedIds,
+      selectedFolderIds,
+      anchorKey: state.anchorKey,
       isSelected,
       toggle,
       selectOnly,
@@ -81,8 +109,10 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       clear,
     }),
     [
-      state.selectedIds,
-      state.anchorId,
+      state.selectedKeys,
+      selectedIds,
+      selectedFolderIds,
+      state.anchorKey,
       isSelected,
       toggle,
       selectOnly,
