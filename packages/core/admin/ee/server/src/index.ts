@@ -77,7 +77,7 @@ const getAdminEE = () => {
       if (isAuditLogsEnabled) {
         strapi.get('audit-logs-lifecycle').destroy();
       }
-      await eeAdmin.destroy({ strapi });
+      await eeAdmin.destroy();
     },
   };
 };
