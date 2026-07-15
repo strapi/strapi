@@ -2,7 +2,7 @@ import { useState, type MouseEvent } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Button, Dialog, Flex, IconButton, Typography } from '@strapi/design-system';
-import { Cross, Folder, Sparkle, Trash, WarningCircle } from '@strapi/icons';
+import { ArrowRight, Cross, Sparkle, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -11,10 +11,12 @@ import { useBulkDeleteItemsMutation } from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
+import { BulkMoveDialog } from './BulkMoveDialog';
+
 /**
  * Floating bulk action bar for the future Media Library.
  *
- * TODO: Move / create-metadata controls are styled stubs (toast on click)
+ * TODO: create-metadata control is a styled stub (toast on click)
  */
 const Bar = styled(Flex)`
   position: fixed;
@@ -23,8 +25,9 @@ const Bar = styled(Flex)`
   transform: translateX(-50%);
   z-index: ${({ theme }) => theme.zIndices.popover};
   align-items: center;
-  gap: ${({ theme }) => theme.spaces[4]};
-  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  gap: ${({ theme }) => theme.spaces[2]};
+  padding: ${({ theme }) =>
+    `${theme.spaces[3]} ${theme.spaces[2]} ${theme.spaces[3]} ${theme.spaces[6]}`};
   background: ${({ theme }) => theme.colors.neutral0};
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -41,6 +44,7 @@ const VerticalDivider = styled(Box)`
   width: 1px;
   align-self: stretch;
   background: ${({ theme }) => theme.colors.neutral150};
+  margin-left: ${({ theme }) => theme.spaces[1]};
 `;
 
 export const BulkActionsBar = () => {
@@ -50,6 +54,7 @@ export const BulkActionsBar = () => {
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
 
@@ -120,7 +125,7 @@ export const BulkActionsBar = () => {
         defaultMessage: 'Bulk actions',
       })}
     >
-      <Typography fontWeight="bold" textColor="neutral800">
+      <Typography fontWeight="bold" textColor="neutral800" marginRight={4}>
         {formatMessage(
           {
             id: getTranslationKey('list.bulk-actions.selected-count'),
@@ -151,22 +156,17 @@ export const BulkActionsBar = () => {
         )}
 
         <IconButton
-          variant="ghost"
+          variant="tertiary"
           disabled={isDeleting}
           label={formatMessage({
             id: getTranslationKey('list.bulk-actions.move'),
             defaultMessage: 'Move',
           })}
-          onClick={() =>
-            showStubNotification(
-              'list.bulk-actions.move-not-available',
-              "Bulk move isn't available yet"
-            )
-          }
+          onClick={() => setIsMoveDialogOpen(true)}
         >
-          {/* TODO(design): Figma move icon — no exact @strapi/icons match; using Folder */}
-          <Folder />
+          <ArrowRight />
         </IconButton>
+        <BulkMoveDialog open={isMoveDialogOpen} onClose={() => setIsMoveDialogOpen(false)} />
 
         <Dialog.Root
           open={isDeleteDialogOpen}
