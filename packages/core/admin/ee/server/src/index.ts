@@ -9,7 +9,10 @@ import routes from './routes';
 import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
-import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
+import {
+  createAuditLogsLifecycleService,
+  DEFAULT_RETENTION_DAYS as AUDIT_LOGS_DEFAULT_RETENTION_DAYS,
+} from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
 
 const getAdminEE = () => {
@@ -52,6 +55,22 @@ const getAdminEE = () => {
         strapi.add('audit-logs-lifecycle', auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
+
+        strapi.ee.entitlements.register({
+          feature: 'audit-logs',
+          limits: [
+            {
+              key: 'retentionDays',
+              unit: 'days',
+              get() {
+                const featureConfig = strapi.ee.features.get('audit-logs');
+                const licenseRetentionDays =
+                  typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : null;
+                return licenseRetentionDays ?? AUDIT_LOGS_DEFAULT_RETENTION_DAYS;
+              },
+            },
+          ],
+        });
       }
     },
     async destroy({ strapi }: { strapi: Core.Strapi }) {
