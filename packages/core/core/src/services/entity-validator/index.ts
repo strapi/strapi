@@ -50,6 +50,7 @@ interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> extends With
 interface ValidatorContext {
   isDraft?: boolean;
   locale?: string | null;
+  strictRelations?: boolean;
 }
 
 interface ModelValidatorMetas extends WithComponentContext {
@@ -235,15 +236,82 @@ const createDzValidator =
     return validator;
   };
 
-const createRelationValidator = ({
-  updatedAttribute,
-}: ValidatorMeta<Schema.Attribute.Relation>) => {
-  let validator;
+/**
+ * A relation/media value can be supplied in several shapes: a bare id, an array of ids,
+ * or a connect/set object (`{ connect: [...] }` / `{ set: [...] }`). This normalises all
+ * of them to "does this attach at least one entry?" so required validation is consistent
+ * regardless of the input shape (mirrors `buildRelationsStore`'s source extraction).
+ */
+const hasRelationValue = (value: unknown): boolean => {
+  if (isNil(value)) {
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (isObject(value)) {
+    const connect = (value as { connect?: unknown }).connect;
+    const set = (value as { set?: unknown }).set;
+
+    if (!isNil(connect)) {
+      return Array.isArray(connect) ? connect.length > 0 : true;
+    }
+    if (!isNil(set)) {
+      return Array.isArray(set) ? set.length > 0 : true;
+    }
+
+    // Any other object shape (e.g. a bare `{ id }`) counts as a value.
+    return true;
+  }
+
+  return true;
+};
+
+const createMediaAttributeValidator = (
+  { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Media>,
+  options: ValidatorContext
+): strapiUtils.yup.AnySchema => {
+  let validator: strapiUtils.yup.AnySchema = attr.multiple
+    ? yup.array().of(yup.mixed())
+    : yup.mixed();
+
+  // Relational required constraints are only enforced under the strictRelations flag,
+  // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+  if (options.strictRelations && !options.isDraft && attr.required) {
+    // A media value can arrive as an id, an array, or a connect/set object, so a simple
+    // `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+    validator = validator.test('required-media', `${updatedAttribute.name} must be defined.`, () =>
+      hasRelationValue(updatedAttribute.value)
+    );
+  }
+
+  return validator;
+};
+
+const createRelationValidator = (
+  { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
+  options: ValidatorContext
+): strapiUtils.yup.AnySchema => {
+  let validator: strapiUtils.yup.AnySchema;
 
   if (Array.isArray(updatedAttribute.value)) {
     validator = yup.array().of(yup.mixed());
   } else {
     validator = yup.mixed();
+  }
+
+  // Relational required constraints are only enforced under the strictRelations flag,
+  // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+  if (options.strictRelations && !options.isDraft && attr.required) {
+    // A relation value can arrive as an id, an array, or a connect/set object, so a
+    // simple `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+    validator = validator.test(
+      'required-relation',
+      `${updatedAttribute.name} must be defined.`,
+      () => hasRelationValue(updatedAttribute.value)
+    );
   }
 
   return validator;
@@ -283,7 +351,13 @@ const createAttributeValidator =
     }
 
     if (isMediaAttribute(metas.attr)) {
-      validator = yup.mixed();
+      validator = createMediaAttributeValidator(
+        {
+          attr: metas.attr as Schema.Attribute.Media,
+          updatedAttribute: metas.updatedAttribute,
+        },
+        options
+      );
     } else if (isScalarAttribute(metas.attr)) {
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
@@ -332,10 +406,13 @@ const createAttributeValidator =
 
         validator = createDzValidator(createOrUpdate)(metas, options);
       } else if (metas.attr.type === 'relation') {
-        validator = createRelationValidator({
-          attr: metas.attr,
-          updatedAttribute: metas.updatedAttribute,
-        });
+        validator = createRelationValidator(
+          {
+            attr: metas.attr,
+            updatedAttribute: metas.updatedAttribute,
+          },
+          options
+        );
       }
 
       validator = preventCast(validator);
@@ -416,6 +493,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
       {
         isDraft: options?.isDraft ?? false,
         locale: options?.locale ?? null,
+        strictRelations: options?.strictRelations ?? false,
       }
     )
       .test(
