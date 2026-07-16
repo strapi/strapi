@@ -273,9 +273,12 @@ const createMediaAttributeValidator = (
   { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Media>,
   options: ValidatorContext
 ): strapiUtils.yup.AnySchema => {
-  let validator: strapiUtils.yup.AnySchema = attr.multiple
-    ? yup.array().of(yup.mixed())
-    : yup.mixed();
+  // Media values arrive in several shapes (a bare id, an array of ids, or a
+  // `{ connect }` / `{ set }` object on update). `yup.mixed()` accepts all of them;
+  // coercing `multiple` media to `yup.array()` would reject the connect/set object
+  // syntax that update requests legitimately send. Required-ness is asserted below
+  // via `hasRelationValue`, which understands every shape.
+  let validator: strapiUtils.yup.AnySchema = yup.mixed();
 
   // Relational required constraints are only enforced under the strictRelations flag,
   // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
