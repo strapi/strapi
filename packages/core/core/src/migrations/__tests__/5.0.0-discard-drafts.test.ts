@@ -496,5 +496,64 @@ describe('5.0.0-discard-drafts migration', () => {
       expect(draftRelations.map((row) => row.tag_id)).toEqual([20, 30, 10]);
       expect(draftRelations.map((row) => row.article_order)).toEqual([1, 2, 3]);
     });
+
+    it('falls back to source id tie-breaker when both order columns are null', async () => {
+      await knexConnection(JOIN_TABLE).delete();
+      await knexConnection(JOIN_TABLE).insert([
+        { tag_id: 30, article_id: 1, tag_order: null, article_order: null },
+        { tag_id: 10, article_id: 1, tag_order: null, article_order: null },
+        { tag_id: 20, article_id: 1, tag_order: null, article_order: null },
+      ]);
+
+      const db = buildMigrationDb({ includeTags: true });
+      setupStrapi(db, { includeTags: true });
+
+      await runDiscardDraftsMigration(knexConnection, db);
+
+      const draftRelations = await getDraftArticleTagOrder(knexConnection);
+
+      // No order values → sort by tag_id (tieBreakerColumn)
+      expect(draftRelations.map((row) => row.tag_id)).toEqual([10, 20, 30]);
+      expect(draftRelations.map((row) => row.article_order)).toEqual([1, 2, 3]);
+    });
+
+    it('uses source id tie-breaker when fallback order values are duplicated', async () => {
+      await knexConnection(JOIN_TABLE).delete();
+      // Same tag_order on every row → article_order must be derived via tag_id
+      await knexConnection(JOIN_TABLE).insert([
+        { tag_id: 30, article_id: 1, tag_order: 1, article_order: null },
+        { tag_id: 10, article_id: 1, tag_order: 1, article_order: null },
+        { tag_id: 20, article_id: 1, tag_order: 1, article_order: null },
+      ]);
+
+      const db = buildMigrationDb({ includeTags: true });
+      setupStrapi(db, { includeTags: true });
+
+      await runDiscardDraftsMigration(knexConnection, db);
+
+      const draftRelations = await getDraftArticleTagOrder(knexConnection);
+
+      expect(draftRelations.map((row) => row.tag_id)).toEqual([10, 20, 30]);
+      expect(draftRelations.map((row) => row.article_order)).toEqual([1, 2, 3]);
+    });
+
+    it('no-ops relation cloning when the published entry has no relations', async () => {
+      await knexConnection(JOIN_TABLE).delete();
+
+      const db = buildMigrationDb({ includeTags: true });
+      setupStrapi(db, { includeTags: true });
+
+      await runDiscardDraftsMigration(knexConnection, db);
+
+      const draftArticle = await knexConnection('articles').whereNull('published_at').first();
+      const draftRelations = await knexConnection(JOIN_TABLE).where({
+        article_id: draftArticle.id,
+      });
+      const publishedRelations = await knexConnection(JOIN_TABLE).where({ article_id: 1 });
+
+      expect(draftArticle?.document_id).toBe('doc1');
+      expect(publishedRelations).toHaveLength(0);
+      expect(draftRelations).toHaveLength(0);
+    });
   });
 });
