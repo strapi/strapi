@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, JSONInput, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Textarea, Typography } from '@strapi/design-system';
 import { Download, Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -99,14 +99,7 @@ const DebugDumpPage = () => {
             })}
           </Typography>
           {dump !== undefined && (
-            <Box
-              hasRadius
-              background="neutral0"
-              shadow="tableShadow"
-              padding={4}
-              maxHeight="480px"
-              overflow="auto"
-            >
+            <Box hasRadius background="neutral0" shadow="tableShadow" padding={4}>
               <Flex justifyContent="flex-end" gap={2} paddingBottom={2}>
                 <Button variant="tertiary" onClick={handleCopy} startIcon={<Duplicate />}>
                   {formatMessage({ id: 'Settings.debug-dump.copy', defaultMessage: 'Copy' })}
@@ -118,15 +111,14 @@ const DebugDumpPage = () => {
                   })}
                 </Button>
               </Flex>
-              <JSONInput
+              <Textarea
                 value={serialized}
-                disabled
+                readOnly
                 aria-label={formatMessage({
                   id: 'Settings.debug-dump.preview-label',
                   defaultMessage: 'Debug dump preview',
                 })}
-                minHeight="24rem"
-                maxHeight="48rem"
+                rows={20}
               />
             </Box>
           )}

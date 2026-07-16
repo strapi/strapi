@@ -11,21 +11,6 @@ jest.mock('../../../../../services/admin', () => ({
   useLazyGetDebugDumpQuery: () => [trigger, { data: undefined, isFetching: false }],
 }));
 
-/**
- * In this monorepo's dev `node_modules` layout, `@strapi/design-system`'s `JSONInput`
- * (via `@uiw/react-codemirror`) ends up loading two incompatible copies of
- * `@codemirror/state`, which makes CodeMirror's own `instanceof` extension checks throw
- * as soon as it mounts under jsdom. It renders fine in the real, webpack-bundled admin
- * (Content Manager's JSON field already ships it), so stub it here to keep this suite
- * focused on `DebugDumpPage`'s own logic rather than a third-party editor's mount.
- */
-jest.mock('@strapi/design-system', () => ({
-  ...jest.requireActual('@strapi/design-system'),
-  JSONInput: ({ value, 'aria-label': ariaLabel }: { value?: string; 'aria-label'?: string }) => (
-    <pre aria-label={ariaLabel}>{value}</pre>
-  ),
-}));
-
 const generateDump = async (user: ReturnType<typeof render>['user']) => {
   const generateButton = await screen.findByRole('button', { name: /generate/i });
   await user.click(generateButton);
@@ -37,6 +22,12 @@ describe('DebugDumpPage', () => {
     const { user } = render(<DebugDumpPage />);
     await generateDump(user);
     expect(await screen.findByRole('button', { name: /download/i })).toBeInTheDocument();
+
+    const preview = await screen.findByRole('textbox', { name: /debug dump preview/i });
+    expect(preview).toHaveValue(
+      JSON.stringify({ dumpVersion: 1, strapi: { edition: 'CE' } }, null, 2)
+    );
+    expect(preview).toHaveAttribute('readonly');
   });
 
   it('notifies and shows no preview when generation fails', async () => {
