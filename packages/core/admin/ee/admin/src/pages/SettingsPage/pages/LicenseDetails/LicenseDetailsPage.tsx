@@ -169,6 +169,20 @@ const LicenseDetailsPage = () => {
                   }
                 )}
               />
+              <Detail
+                label={{ id: 'Settings.license.mode', defaultMessage: 'Mode' }}
+                value={
+                  license.licenseMode === 'offline'
+                    ? formatMessage({
+                        id: 'Settings.license.mode.offline',
+                        defaultMessage: 'Offline',
+                      })
+                    : formatMessage({
+                        id: 'Settings.license.mode.online',
+                        defaultMessage: 'Online',
+                      })
+                }
+              />
               {license.licenseMode === 'online' ? (
                 <>
                   <Detail
@@ -214,20 +228,6 @@ const LicenseDetailsPage = () => {
                   }
                 />
               )}
-              <Detail
-                label={{ id: 'Settings.license.mode', defaultMessage: 'Mode' }}
-                value={
-                  license.licenseMode === 'offline'
-                    ? formatMessage({
-                        id: 'Settings.license.mode.offline',
-                        defaultMessage: 'Offline',
-                      })
-                    : formatMessage({
-                        id: 'Settings.license.mode.online',
-                        defaultMessage: 'Online',
-                      })
-                }
-              />
               {license.subscriptionId && (
                 <Detail
                   label={{ id: 'Settings.license.subscription', defaultMessage: 'Subscription ID' }}
