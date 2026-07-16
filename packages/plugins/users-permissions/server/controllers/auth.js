@@ -447,6 +447,13 @@ module.exports = ({ strapi }) => ({
 
         await validateCallback(customCallback, providers[provider]);
 
+        // Persist across the provider redirect round-trip (request state alone is lost).
+        ctx.session = ctx.session || {};
+        ctx.session.grant = ctx.session.grant || {};
+        ctx.session.grant.dynamic = {
+          ...(ctx.session.grant.dynamic || {}),
+          callback: customCallback,
+        };
         ctx.state.oauthConnect = { callback: customCallback };
       } catch (e) {
         throw new ValidationError('Invalid callback URL provided', { callback: customCallback });

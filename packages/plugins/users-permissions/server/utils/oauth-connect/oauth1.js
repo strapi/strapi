@@ -9,7 +9,12 @@ const encode = (str) =>
     (c) => `%${c.codePointAt(0).toString(16).toUpperCase()}`
   );
 
-const sortKeys = (keys) => keys.sort((a, b) => a.localeCompare(b));
+const sortKeys = (keys) =>
+  keys.sort((a, b) => {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
 
 /**
  * OAuth 1.0 (RFC 5849) request signature — HMAC-SHA1 is required by the protocol.
@@ -123,16 +128,21 @@ const twitterGet = async ({
   qs = {},
 }) => {
   const target = new URL(url);
+  const signedParams = {};
+
   Object.entries(qs).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
-      target.searchParams.set(key, String(value));
+      const stringValue = String(value);
+      target.searchParams.set(key, stringValue);
+      // RFC 5849 §3.4.1: base-string URI excludes the query; params are signed separately.
+      signedParams[key] = stringValue;
     }
   });
 
   const authorization = buildOAuth1Header({
     method: 'GET',
-    url: target.origin + target.pathname + target.search,
-    params: {},
+    url: target.origin + target.pathname,
+    params: signedParams,
     consumerKey,
     clientCredential,
     token: accessToken,

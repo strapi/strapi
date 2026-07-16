@@ -1,5 +1,7 @@
 'use strict';
 
+const { errors } = require('@strapi/utils');
+
 const builtinProviderEndpoints = require('./providers');
 const oauth1 = require('./oauth1');
 const oauth2 = require('./oauth2');
@@ -25,15 +27,32 @@ const parseConnectPath = (requestPath, apiPrefix) => {
   };
 };
 
+/**
+ * Resolve OAuth endpoint config from built-ins, falling back to store-defined
+ * endpoints so custom providers registered via providers-registry still work.
+ */
 const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
   const defaults = builtinProviderEndpoints[providerName];
-  if (!defaults) {
+  const endpoints = defaults || {
+    oauth: storedConfig.oauth,
+    authorize_url: storedConfig.authorize_url,
+    access_url: storedConfig.access_url,
+    request_url: storedConfig.request_url,
+    scope_delimiter: storedConfig.scope_delimiter,
+    token_endpoint_auth_method: storedConfig.token_endpoint_auth_method,
+  };
+
+  if (endpoints.oauth === 1) {
+    if (!endpoints.request_url || !endpoints.authorize_url || !endpoints.access_url) {
+      return null;
+    }
+  } else if (!endpoints.authorize_url || !endpoints.access_url) {
     return null;
   }
 
   return {
     name: providerName,
-    ...defaults,
+    ...endpoints,
     key: storedConfig.key,
     secret: storedConfig.secret,
     scope: storedConfig.scope,
@@ -63,6 +82,11 @@ const redirectWithPayload = (ctx, callbackUrl, payload) => {
   ctx.redirect(url.toString());
 };
 
+const preserveGrantDynamic = (ctx) => {
+  const dynamic = ctx.session.grant?.dynamic;
+  return dynamic ? { dynamic } : {};
+};
+
 const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
   const requestToken = await oauth1.requestToken({
     requestUrl: provider.request_url,
@@ -72,6 +96,7 @@ const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
   });
 
   ctx.session.grant = {
+    ...preserveGrantDynamic(ctx),
     provider: parsed.provider,
     request: requestToken,
   };
@@ -83,6 +108,7 @@ const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
 const startOAuth2Flow = (ctx, provider, parsed, redirectUri) => {
   const state = oauth2.generateState();
   ctx.session.grant = {
+    ...preserveGrantDynamic(ctx),
     provider: parsed.provider,
     state,
   };
@@ -137,7 +163,8 @@ const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => 
     throw new Error('OAuth2 missing code parameter');
   }
 
-  if (session.state && queryState !== session.state) {
+  // Reject when session state is missing (not only on mismatch) to close login-CSRF.
+  if (!session.state || queryState !== session.state) {
     throw new Error('OAuth2 state mismatch');
   }
 
@@ -174,13 +201,14 @@ const createOAuthConnectMiddleware = () => {
 
     const storedConfig = storedProviders?.[parsed.provider];
     if (!storedConfig?.enabled) {
-      throw new strapi.errors.ApplicationError('This provider is disabled');
+      throw new errors.ApplicationError('This provider is disabled');
     }
 
     const { getService } = require('..');
     const redirectUri = getService('providers').buildRedirectUri(parsed.provider);
 
-    const callbackOverride = ctx.state.oauthConnect?.callback;
+    const callbackOverride =
+      ctx.state.oauthConnect?.callback ?? ctx.session.grant?.dynamic?.callback;
     const effectiveConfig = callbackOverride
       ? { ...storedConfig, callback: callbackOverride }
       : storedConfig;
@@ -188,7 +216,7 @@ const createOAuthConnectMiddleware = () => {
     const provider = buildProviderConfig(parsed.provider, effectiveConfig, redirectUri);
 
     if (!provider) {
-      throw new strapi.errors.ApplicationError('Unknown OAuth provider');
+      throw new errors.ApplicationError('Unknown OAuth provider');
     }
 
     ctx.session.grant = ctx.session.grant || {};
@@ -202,14 +230,14 @@ const createOAuthConnectMiddleware = () => {
 
     const callbackUrl = effectiveConfig.callback;
     if (!callbackUrl) {
-      throw new strapi.errors.ApplicationError('Provider callback URL is not configured');
+      throw new errors.ApplicationError('Provider callback URL is not configured');
     }
 
     try {
       if (provider.oauth === 1) {
-        return handleOAuth1Callback(ctx, provider, callbackUrl);
+        return await handleOAuth1Callback(ctx, provider, callbackUrl);
       }
-      return handleOAuth2Callback(ctx, provider, callbackUrl, redirectUri);
+      return await handleOAuth2Callback(ctx, provider, callbackUrl, redirectUri);
     } catch (err) {
       ctx.session.grant = {};
       return redirectWithPayload(ctx, callbackUrl, {
