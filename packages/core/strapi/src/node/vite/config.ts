@@ -1,7 +1,10 @@
 import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
-import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
+import {
+  ADMIN_VITE_DEDUPE_MODULES,
+  ADMIN_VITE_SINGLETON_MODULES,
+} from '../core/admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
@@ -77,6 +80,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
         // projects blank-crash the admin (#25070, #26964).
         'prismjs/components/*.js',
+        ...ADMIN_VITE_SINGLETON_MODULES,
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why

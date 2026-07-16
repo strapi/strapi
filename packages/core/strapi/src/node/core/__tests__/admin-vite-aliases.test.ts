@@ -5,9 +5,10 @@ import {
   ADMIN_PINNED_ALIAS_MODULES,
   ADMIN_VITE_ALIAS_MODULES,
   ADMIN_VITE_DEDUPE_MODULES,
+  ADMIN_VITE_SINGLETON_MODULES,
 } from '../admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../admin-vite-aliases';
-import { getModulePath } from '../resolve-module';
+import { getModulePath, getModulePathFrom } from '../resolve-module';
 
 const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
 
@@ -36,8 +37,22 @@ describe('buildAdminViteResolveAliases', () => {
     }
   });
 
-  it('uses the same module list for aliases and vite resolve.dedupe', () => {
-    expect(ADMIN_VITE_DEDUPE_MODULES).toBe(ADMIN_VITE_ALIAS_MODULES);
+  it('aliases CodeMirror singletons from @strapi/design-system', () => {
+    const alias = buildAdminViteResolveAliases();
+
+    for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
+      expect(alias[mod]).toBe(getModulePathFrom('@strapi/design-system', mod));
+    }
+  });
+
+  it('includes alias and singleton modules in vite resolve.dedupe', () => {
+    for (const mod of ADMIN_VITE_ALIAS_MODULES) {
+      expect(ADMIN_VITE_DEDUPE_MODULES).toContain(mod);
+    }
+
+    for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
+      expect(ADMIN_VITE_DEDUPE_MODULES).toContain(mod);
+    }
   });
 
   it.each(ADMIN_PINNED_ALIAS_MODULES)(
