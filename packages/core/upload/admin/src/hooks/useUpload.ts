@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { useFetchClient, FetchClient, adminApi } from '@strapi/admin/strapi-admin';
+import { adminApi } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useStore } from 'react-redux';
 
 import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
+import { uploadFileViaXHR } from '../future/services/uploadFileViaXHR';
 import { pluginId } from '../pluginId';
 
 const endpoint = `/${pluginId}`;
@@ -15,12 +16,18 @@ interface Asset extends Omit<File, 'id' | 'hash'> {
   hash?: File['hash'];
 }
 
+interface StoreState {
+  admin_app: {
+    token?: string | null;
+  };
+}
+
 const uploadAssets = (
   assets: Asset | Asset[],
   folderId: number | null,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
-  post: FetchClient['post']
+  token: string | null | undefined
 ): Promise<CreateFile.Response['data']> => {
   const assetsArray = Array.isArray(assets) ? assets : [assets];
   const formData = new FormData();
@@ -46,13 +53,20 @@ const uploadAssets = (
   });
 
   /**
-   * onProgress is not possible using native fetch
-   * need to look into an alternative to make it work
-   * perhaps using xhr like Axios does
+   * Native fetch cannot report upload progress, so upload via the shared XHR
+   * service and surface its byte-level progress as a 0-100 percentage.
    */
-  return post<CreateFile.Response['data'], CreateFile.Request['body']>(endpoint, formData, {
+  return uploadFileViaXHR<CreateFile.Response['data']>(
+    `${window.strapi.backendURL}${endpoint}`,
+    token,
+    formData,
     signal,
-  }).then((res) => res.data);
+    (loaded, total) => {
+      if (total > 0) {
+        onProgress(Math.round((loaded / total) * 100));
+      }
+    }
+  );
 };
 
 export const useUpload = () => {
@@ -61,7 +75,7 @@ export const useUpload = () => {
   const queryClient = useQueryClient();
   const abortController = new AbortController();
   const signal = abortController.signal;
-  const { post } = useFetchClient();
+  const store = useStore<StoreState>();
 
   const mutation = useMutation<
     CreateFile.Response['data'],
@@ -69,7 +83,7 @@ export const useUpload = () => {
     { assets: Asset | Asset[]; folderId: number | null }
   >(
     ({ assets, folderId }) => {
-      return uploadAssets(assets, folderId, signal, setProgress, post);
+      return uploadAssets(assets, folderId, signal, setProgress, store.getState().admin_app?.token);
     },
     {
       onSuccess() {
