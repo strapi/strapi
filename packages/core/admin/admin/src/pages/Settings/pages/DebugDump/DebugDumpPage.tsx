@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Textarea, Typography } from '@strapi/design-system';
-import { Download, Duplicate } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { Box, Button, Flex, LinkButton, Textarea, Typography } from '@strapi/design-system';
+import { Download, Duplicate, ExternalLink } from '@strapi/icons';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
@@ -22,6 +22,49 @@ const DebugDumpPage = () => {
     () => (dump === undefined ? '' : JSON.stringify(dump, null, 2)),
     [dump]
   );
+
+  // Support channels depend on the edition: Growth/Enterprise (EE) route to Strapi
+  // Support, Community (CE) to the community channels.
+  const isEnterprise = window.strapi.isEE;
+  const supportLinks: Array<{ id: string; href: string; label: MessageDescriptor }> = isEnterprise
+    ? [
+        {
+          id: 'strapi-support',
+          href: 'https://support.strapi.io',
+          label: { id: 'Settings.debug-dump.support.strapi', defaultMessage: 'Strapi Support' },
+        },
+        {
+          id: 'github-issues',
+          href: 'https://github.com/strapi/strapi/issues',
+          label: {
+            id: 'Settings.debug-dump.support.github-issues',
+            defaultMessage: 'GitHub Issues',
+          },
+        },
+      ]
+    : [
+        {
+          id: 'discord',
+          href: 'https://discord.strapi.io',
+          label: { id: 'Settings.debug-dump.support.discord', defaultMessage: 'Discord' },
+        },
+        {
+          id: 'github-discussions',
+          href: 'https://github.com/strapi/strapi/discussions',
+          label: {
+            id: 'Settings.debug-dump.support.github-discussions',
+            defaultMessage: 'GitHub Discussions',
+          },
+        },
+        {
+          id: 'github-issues',
+          href: 'https://github.com/strapi/strapi/issues',
+          label: {
+            id: 'Settings.debug-dump.support.github-issues',
+            defaultMessage: 'GitHub Issues',
+          },
+        },
+      ];
 
   const handleGenerate = async () => {
     const result = await triggerGetDump();
@@ -91,6 +134,46 @@ const DebugDumpPage = () => {
       />
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
+          <Box hasRadius background="neutral0" shadow="tableShadow" padding={4}>
+            <Flex direction="column" alignItems="start" gap={3}>
+              <Flex direction="column" alignItems="start" gap={1}>
+                <Typography variant="delta" tag="h2">
+                  {formatMessage(
+                    isEnterprise
+                      ? {
+                          id: 'Settings.debug-dump.support.enterprise',
+                          defaultMessage: 'Get help from Strapi Support',
+                        }
+                      : {
+                          id: 'Settings.debug-dump.support.community',
+                          defaultMessage: 'Get help from the community',
+                        }
+                  )}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {formatMessage({
+                    id: 'Settings.debug-dump.support.description',
+                    defaultMessage:
+                      'Generate the export below, then share it with us through one of these channels.',
+                  })}
+                </Typography>
+              </Flex>
+              <Flex gap={2} wrap="wrap">
+                {supportLinks.map((link) => (
+                  <LinkButton
+                    key={link.id}
+                    variant="secondary"
+                    href={link.href}
+                    endIcon={<ExternalLink />}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {formatMessage(link.label)}
+                  </LinkButton>
+                ))}
+              </Flex>
+            </Flex>
+          </Box>
           <Typography variant="pi" textColor="neutral600">
             {formatMessage({
               id: 'Settings.debug-dump.description',

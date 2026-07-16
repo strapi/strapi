@@ -83,6 +83,44 @@ describe('DebugDumpPage', () => {
     createObjectURLSpy.mockRestore();
   });
 
+  it('shows the community support links by default (CE)', async () => {
+    render(<DebugDumpPage />);
+
+    expect(await screen.findByRole('link', { name: /discord/i })).toHaveAttribute(
+      'href',
+      'https://discord.strapi.io'
+    );
+    expect(screen.getByRole('link', { name: /github discussions/i })).toHaveAttribute(
+      'href',
+      'https://github.com/strapi/strapi/discussions'
+    );
+    expect(screen.getByRole('link', { name: /github issues/i })).toHaveAttribute(
+      'href',
+      'https://github.com/strapi/strapi/issues'
+    );
+    expect(screen.queryByRole('link', { name: /strapi support/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the Strapi Support links for EE (Growth/Enterprise)', async () => {
+    const original = window.strapi.isEE;
+    window.strapi.isEE = true;
+    try {
+      render(<DebugDumpPage />);
+
+      expect(await screen.findByRole('link', { name: /strapi support/i })).toHaveAttribute(
+        'href',
+        'https://support.strapi.io'
+      );
+      expect(screen.getByRole('link', { name: /github issues/i })).toHaveAttribute(
+        'href',
+        'https://github.com/strapi/strapi/issues'
+      );
+      expect(screen.queryByRole('link', { name: /discord/i })).not.toBeInTheDocument();
+    } finally {
+      window.strapi.isEE = original;
+    }
+  });
+
   /**
    * Server-side gating (i.e. that the `/admin/debug-dump` route itself enforces
    * `admin::debug-dump.read`) is covered by `tests/api/core/admin/admin-debug-dump.test.api.ts`.
