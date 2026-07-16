@@ -21,6 +21,7 @@ import type {
   TelemetryProperties,
   UpdateProjectSettings,
   GetGuidedTourMeta,
+  DebugDump,
 } from '../../../shared/contracts/admin';
 
 // Lazy: only resolved on first GET /admin/project-type request
@@ -159,6 +160,12 @@ export default {
         useYarn,
       },
     } satisfies Information.Response;
+  },
+
+  async debugDump() {
+    const data = await getService('debug-dump').generate();
+
+    return { data } satisfies DebugDump.Response;
   },
 
   async plugins(ctx: Context) {

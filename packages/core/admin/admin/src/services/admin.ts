@@ -7,6 +7,7 @@ import {
   type Plugins,
   type GetLicenseLimitInformation,
   GetGuidedTourMeta,
+  type DebugDump,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
@@ -123,6 +124,15 @@ const admin = adminApi
         }),
         providesTags: ['GuidedTourMeta'],
       }),
+      getDebugDump: builder.query<DebugDump.Response['data'], void>({
+        query: () => ({
+          url: '/admin/debug-dump',
+          method: 'GET',
+        }),
+        transformResponse(res: DebugDump.Response) {
+          return res.data;
+        },
+      }),
     }),
     overrideExisting: false,
   });
@@ -137,6 +147,7 @@ const {
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
+  useLazyGetDebugDumpQuery,
 } = admin;
 
 export {
@@ -149,6 +160,7 @@ export {
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
+  useLazyGetDebugDumpQuery,
 };
 
 export type { ConfigurationLogo };
