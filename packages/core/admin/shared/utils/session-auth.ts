@@ -129,6 +129,10 @@ export const buildSessionMetadataFromContext = (ctx: Context) =>
  * SSO assigns deviceId server-side, so the client-provided value may not match
  * the active session row. Prefer the deviceId stored on the session backing
  * the current access token when available.
+ *
+ * Relies on `ctx.state.session.id` from the admin auth strategy — the logout
+ * route requires authentication, so the Authorization-header re-parse is not
+ * needed here.
  */
 export const resolveLogoutDeviceId = async (
   ctx: Context,
@@ -136,26 +140,12 @@ export const resolveLogoutDeviceId = async (
 ): Promise<string | undefined> => {
   const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
   const clientDeviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
-
-  let currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
-
-  if (!currentSessionId) {
-    const authorization = ctx.request.header.authorization;
-    const token =
-      authorization?.startsWith('Bearer ') || authorization?.startsWith('bearer ')
-        ? authorization.split(/\s+/)[1]
-        : undefined;
-
-    if (token) {
-      const sessionManager = getSessionManager();
-      const result = sessionManager?.('admin').validateAccessToken(token);
-      if (result?.isValid) {
-        currentSessionId = result.payload.sessionId;
-      }
-    }
-  }
+  const currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
 
   if (!currentSessionId) {
+    strapi.log.debug(
+      'resolveLogoutDeviceId: no ctx.state.session.id; falling back to client deviceId'
+    );
     return clientDeviceId;
   }
 
@@ -164,6 +154,9 @@ export const resolveLogoutDeviceId = async (
   });
 
   if (session?.userId !== userId || session?.origin !== ADMIN_ORIGIN) {
+    strapi.log.debug(
+      'resolveLogoutDeviceId: access-token session missing or not owned; falling back to client deviceId'
+    );
     return clientDeviceId;
   }
 
