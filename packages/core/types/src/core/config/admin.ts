@@ -15,6 +15,7 @@ export interface AuthSessions {
 }
 
 export interface AuthCookie {
+  name?: string;
   secure?: boolean;
   domain?: string;
   path?: string;

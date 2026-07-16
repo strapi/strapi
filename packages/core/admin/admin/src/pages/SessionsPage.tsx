@@ -198,17 +198,12 @@ const SessionsPage = () => {
       />
       <Layouts.Content>
         <Box background="neutral0" hasRadius shadow="filterShadow">
-          <Table colCount={5} rowCount={sessions.length}>
+          <Table colCount={4} rowCount={sessions.length}>
             <Thead>
               <Tr>
                 <Th>
                   <Typography variant="sigma">
                     {formatMessage({ id: 'Settings.sessions.device', defaultMessage: 'Device' })}
-                  </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma">
-                    {formatMessage({ id: 'Settings.sessions.ip', defaultMessage: 'IP address' })}
                   </Typography>
                 </Th>
                 <Th>
@@ -257,9 +252,6 @@ const SessionsPage = () => {
                         </Badge>
                       )}
                     </Flex>
-                  </Td>
-                  <Td>
-                    <Typography textColor="neutral800">{session.ip ?? '-'}</Typography>
                   </Td>
                   <Td>
                     <Typography textColor="neutral800">
