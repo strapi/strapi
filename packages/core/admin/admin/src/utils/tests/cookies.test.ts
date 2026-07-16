@@ -2,7 +2,7 @@ import { getCookieValue, setCookie, deleteCookie } from '../cookies';
 
 describe('Cookie Utilities', () => {
   beforeEach(() => {
-    // Clear all cookies before each test
+    // Clear all cookies before each test (jsdom ignores Path, so a single expire is enough)
     document.cookie.split(';').forEach((cookie) => {
       const [name] = cookie.split('=');
       document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
@@ -67,6 +67,36 @@ describe('Cookie Utilities', () => {
       process.env = { ...ORIGINAL_ENV, STRAPI_ADMIN_AUTH_COOKIE_NAME: 'my_custom_auth_cookie' };
 
       expect(loadAuthCookieName()).toBe('my_custom_auth_cookie');
+    });
+  });
+
+  describe('AUTH_COOKIE_PATH', () => {
+    const ORIGINAL_ENV = process.env;
+
+    afterEach(() => {
+      process.env = ORIGINAL_ENV;
+    });
+
+    const loadAuthCookiePath = (): string => {
+      let path = '';
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        path = require('../cookies').AUTH_COOKIE_PATH;
+      });
+      return path;
+    };
+
+    it('should default to /admin', () => {
+      process.env = { ...ORIGINAL_ENV };
+      delete process.env.STRAPI_ADMIN_AUTH_COOKIE_PATH;
+
+      expect(loadAuthCookiePath()).toBe('/admin');
+    });
+
+    it('should use STRAPI_ADMIN_AUTH_COOKIE_PATH when set', () => {
+      process.env = { ...ORIGINAL_ENV, STRAPI_ADMIN_AUTH_COOKIE_PATH: '/strapi-de/admin' };
+
+      expect(loadAuthCookiePath()).toBe('/strapi-de/admin');
     });
   });
 });

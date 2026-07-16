@@ -99,10 +99,12 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     STRAPI_ANALYTICS_URL: process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io',
   });
 
-  // NOTE: Transports `admin.auth.cookie.name` into the bundle; always assigned so an
-  // ambient STRAPI_ADMIN_AUTH_COOKIE_NAME cannot make the bundle disagree with the server.
+  // NOTE: Transports `admin.auth.cookie.name` / `path` into the bundle; always assigned so
+  // ambient STRAPI_ADMIN_AUTH_COOKIE_* env vars cannot make the bundle disagree with the server.
   env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
+  env.STRAPI_ADMIN_AUTH_COOKIE_PATH =
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') || '';
 
   const envKeys = Object.keys(env);
 

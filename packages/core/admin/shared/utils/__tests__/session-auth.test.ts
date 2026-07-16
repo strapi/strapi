@@ -1,5 +1,6 @@
-import { getAccessCookieName, resolveLogoutDeviceId } from '../session-auth';
+import { getAccessCookieName, getAccessCookiePath, resolveLogoutDeviceId } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
+import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
 
 describe('getAccessCookieName', () => {
   beforeEach(() => {
@@ -31,6 +32,28 @@ describe('getAccessCookieName', () => {
     } finally {
       process.env = ORIGINAL_ENV;
     }
+  });
+});
+
+describe('getAccessCookiePath', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: jest.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('defaults to /admin', () => {
+    expect(getAccessCookiePath()).toBe(DEFAULT_AUTH_COOKIE_PATH);
+  });
+
+  test('uses the admin.auth.cookie.path config', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.path' ? '/strapi-de/admin' : undefined
+    ) as any;
+
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
   });
 });
 
