@@ -123,7 +123,7 @@ describe('create-strapi-app', () => {
     }
   });
 
-  it('does not write a Yarn config for npm projects', async () => {
+  it('does not write a Yarn config or .npmrc for npm projects', async () => {
     const projectDir = mkProjectDir();
     try {
       await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
@@ -131,6 +131,9 @@ describe('create-strapi-app', () => {
         .end();
 
       expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+      // npm install must use default peer resolution so the lockfile works with
+      // plain `npm ci` (#27019) — do not force legacy-peer-deps via .npmrc
+      expect(fs.existsSync(path.join(projectDir, '.npmrc'))).toBe(false);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
