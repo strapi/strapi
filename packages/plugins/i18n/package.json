@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.50.1",
+  "version": "5.50.2",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -63,7 +63,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.3",
     "@strapi/icons": "2.2.3",
-    "@strapi/utils": "5.50.1",
+    "@strapi/utils": "5.50.2",
     "lodash": "4.18.1",
     "qs": "6.15.3",
     "react-intl": "6.6.2",
@@ -72,11 +72,11 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.50.1",
-    "@strapi/admin-test-utils": "5.50.1",
-    "@strapi/content-manager": "5.50.1",
-    "@strapi/database": "5.50.1",
-    "@strapi/types": "5.50.1",
+    "@strapi/admin": "5.50.2",
+    "@strapi/admin-test-utils": "5.50.2",
+    "@strapi/content-manager": "5.50.2",
+    "@strapi/database": "5.50.2",
+    "@strapi/types": "5.50.2",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
