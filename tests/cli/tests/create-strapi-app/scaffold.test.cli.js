@@ -134,6 +134,13 @@ describe('create-strapi-app', () => {
       // npm install must use default peer resolution so the lockfile works with
       // plain `npm ci` (#27019) — do not force legacy-peer-deps via .npmrc
       expect(fs.existsSync(path.join(projectDir, '.npmrc'))).toBe(false);
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      // Align with @strapi/* peer ranges so strict npm peer resolution succeeds
+      expect(pkg.dependencies['react-router-dom']).toBe('^6.30.3');
+      expect(pkg.dependencies.react).toBe('^18.0.0');
+      expect(pkg.dependencies['react-dom']).toBe('^18.0.0');
+      expect(pkg.dependencies['styled-components']).toBe('^6.0.0');
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
