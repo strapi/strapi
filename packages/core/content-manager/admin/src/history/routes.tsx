@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { type PathRouteProps } from 'react-router-dom';
+import { type RouteObject } from 'react-router-dom';
 
 const ProtectedHistoryPage = React.lazy(() =>
   import('./pages/History').then((mod) => ({ default: mod.ProtectedHistoryPage }))
@@ -10,7 +10,7 @@ const ProtectedHistoryPage = React.lazy(() =>
 /**
  * These routes will be merged with the rest of the Content Manager routes
  */
-const routes: PathRouteProps[] = [
+const routes: RouteObject[] = [
   {
     path: ':collectionType/:slug/:id/history',
     Component: ProtectedHistoryPage,

@@ -287,7 +287,7 @@ type MultiSelectInputProps = Omit<Extract<InputProps, { type: 'enumeration' }>, 
 };
 
 const MultiSelectInput = ({ hint, label, name, options, ...props }: MultiSelectInputProps) => {
-  const field = useField(name);
+  const field = useField<string[]>(name);
 
   return (
     <Field.Root name={name} hint={hint} error={field.error}>

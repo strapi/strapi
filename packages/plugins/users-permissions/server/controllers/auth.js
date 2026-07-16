@@ -41,7 +41,6 @@ const extractDeviceId = (requestBody) => {
 
 const buildSessionMetadataFromContext = (ctx) =>
   buildSessionMetadata({
-    ip: ctx.request.ip,
     userAgent: ctx.request.headers['user-agent'],
   });
 

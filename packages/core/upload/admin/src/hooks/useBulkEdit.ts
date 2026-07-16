@@ -1,4 +1,4 @@
-import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { type FetchResponse, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
@@ -27,11 +27,14 @@ export const useBulkEdit = () => {
   const { post } = useFetchClient();
 
   const bulkEditQuery = ({ updates }: BulkEditParams) => {
-    return post('/upload/actions/bulk-update', { updates });
+    return post<BulkUpdateFiles.Response['data'], BulkUpdateFiles.Request['body']>(
+      '/upload/actions/bulk-update',
+      { updates }
+    );
   };
 
   const mutation = useMutation<
-    BulkUpdateFiles.Response,
+    FetchResponse<BulkUpdateFiles.Response['data']>,
     BulkUpdateFiles.Response['error'],
     BulkEditParams
   >(bulkEditQuery, {

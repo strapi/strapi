@@ -28,18 +28,20 @@ import {
 } from '@strapi/design-system';
 import {
   ArrowLineRight,
+  ArrowsCounterClockwise,
+  Crop,
   Download,
   FileError,
   Link,
   Trash,
   WarningCircle,
-  ArrowsCounterClockwise,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
+import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
   useGetAssetQuery,
@@ -58,9 +60,13 @@ import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 
+import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
 
-import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
+import type {
+  AssetWithPopulatedCreatedBy,
+  FocalPoint,
+} from '../../../../../../../shared/contracts/files';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
@@ -253,6 +259,36 @@ const DrawerBusyOverlay = styled(Flex)`
   background: ${({ theme }) => theme.colors.neutral0};
   opacity: 0.7;
 `;
+
+/**
+ * Map the drawer-scoped mutation flags to a single i18n message for the busy
+ * overlay loader. Returns `null` when nothing is in flight.
+ */
+const getBusyMessage = (state: {
+  isDeleting: boolean;
+  isReplacing: boolean;
+  isCropCopying: boolean;
+}): { id: string; defaultMessage: string } | null => {
+  if (state.isDeleting) {
+    return {
+      id: getTranslationKey('asset-details.delete.loading'),
+      defaultMessage: 'Deleting the file…',
+    };
+  }
+  if (state.isCropCopying) {
+    return {
+      id: getTranslationKey('asset-details.crop.loading'),
+      defaultMessage: 'Saving the cropped copy…',
+    };
+  }
+  if (state.isReplacing) {
+    return {
+      id: getTranslationKey('asset-details.replace.loading'),
+      defaultMessage: 'Replacing the file…',
+    };
+  }
+  return null;
+};
 
 const StyledWarning = styled(WarningCircle)`
   width: 1.6rem;
@@ -604,6 +640,37 @@ const ReplaceAssetButton = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * AssetImageActions - crop and replace buttons overlaid on the image preview.
+ * -----------------------------------------------------------------------------------------------*/
+
+interface AssetImageActionsProps {
+  onCrop?: () => void;
+}
+
+const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
+  const { formatMessage } = useIntl();
+  const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
+
+  return (
+    <Flex direction="column" gap={2}>
+      <IconButton
+        withTooltip={false}
+        label={formatMessage({
+          id: getTranslationKey('asset-details.crop.trigger'),
+          defaultMessage: 'Crop',
+        })}
+        variant="tertiary"
+        onClick={onCrop}
+        disabled={isSubmitting || !onCrop}
+      >
+        <Crop />
+      </IconButton>
+      <ReplaceAssetButton />
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * AssetDetails
  * -----------------------------------------------------------------------------------------------*/
 
@@ -626,6 +693,9 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const [updateAsset] = useUpdateAssetMutation();
   const [replaceMutation, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const [deleteMutation, { isLoading: isDeleting }] = useDeleteAssetMutation();
+  const [uploadCroppedCopy, { isLoading: isCropCopying }] = useUploadFileSilentlyMutation();
+
+  const [isCropOpen, setIsCropOpen] = React.useState(false);
 
   // In-drawer toast slot
   const [drawerToast, setDrawerToast] = React.useState<DrawerToast | null>(null);
@@ -652,15 +722,14 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   };
 
   const handleSubmit = async (values: AssetFormState) => {
-    const res = await updateAsset({
-      id: asset.id,
-      fileInfo: {
-        name: values.name,
-        caption: values.caption,
-        alternativeText: values.alternativeText,
-        folder: values.folder,
-      },
-    });
+    const fileInfo = {
+      name: values.name,
+      caption: values.caption,
+      alternativeText: values.alternativeText,
+      folder: values.folder,
+    };
+
+    const res = await updateAsset({ id: asset.id, fileInfo });
 
     if ('error' in res) {
       notify({
@@ -741,6 +810,67 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     closeDetails();
   };
 
+  const notifyCropError = () => {
+    notify({
+      type: 'danger',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.error'),
+        defaultMessage: 'Failed to crop the file.',
+      }),
+    });
+  };
+
+  // Apply: replace the original binary with the cropped file + focal point.
+  // Close the editor first so the drawer's busy overlay is visible while the
+  // mutation runs (the editor renders in a Portal above the drawer).
+  const handleCropApply = async (file: globalThis.File, focalPoint: FocalPoint) => {
+    setIsCropOpen(false);
+    const res = await replaceMutation({
+      id: asset.id,
+      file,
+      fileInfo: { focalPoint },
+    });
+    if ('error' in res) {
+      notifyCropError();
+      return;
+    }
+    notify({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.success'),
+        defaultMessage: 'File cropped.',
+      }),
+    });
+  };
+
+  // Save as copy: upload the cropped file as a new asset in the same folder.
+  const handleCropSaveAsCopy = async (file: globalThis.File, focalPoint: FocalPoint) => {
+    setIsCropOpen(false);
+    // Silent single-file upload (no global progress dialog). Carry over the
+    // source asset's caption/alt so the copy keeps its metadata.
+    const res = await uploadCroppedCopy({
+      file,
+      fileInfo: {
+        name: asset.name,
+        caption: asset.caption ?? '',
+        alternativeText: asset.alternativeText ?? '',
+        folder: initialValues.folder,
+        focalPoint,
+      },
+    });
+    if ('error' in res) {
+      notifyCropError();
+      return;
+    }
+    notify({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.copy-success'),
+        defaultMessage: 'Copy created.',
+      }),
+    });
+  };
+
   const operations = React.useMemo<AssetOperations>(
     () => ({
       replaceAsset: handleReplace,
@@ -763,6 +893,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
           <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
             {({ modified, isSubmitting, values, resetForm }) => {
               const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
+              const busyMessage = getBusyMessage({ isDeleting, isReplacing, isCropCopying });
               return (
                 <>
                   {/* Guards every close path (X button, ESC, route change, browser
@@ -770,18 +901,17 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                 `onProceed` resets the form so the held navigation can complete.
                 Lives inside <Form> so it can read the form context. */}
                   <Blocker onProceed={resetForm} />
-                  {isReplacing || isDeleting ? (
+                  {isCropOpen && isImage ? (
+                    <AssetCropEditor
+                      asset={asset}
+                      onClose={() => setIsCropOpen(false)}
+                      onApply={handleCropApply}
+                      onSaveAsCopy={handleCropSaveAsCopy}
+                    />
+                  ) : null}
+                  {busyMessage ? (
                     <DrawerBusyOverlay>
-                      <Loader>
-                        {formatMessage({
-                          id: getTranslationKey(
-                            isDeleting
-                              ? 'asset-details.delete.loading'
-                              : 'asset-details.replace.loading'
-                          ),
-                          defaultMessage: isDeleting ? 'Deleting the file…' : 'Replacing the file…',
-                        })}
-                      </Loader>
+                      <Loader>{formatMessage(busyMessage)}</Loader>
                     </DrawerBusyOverlay>
                   ) : null}
                   {drawerToast ? (
@@ -799,11 +929,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                     <AssetPreview
                       asset={asset}
                       actions={
-                        isImage ? (
-                          <Flex direction="column" gap={2}>
-                            <ReplaceAssetButton />
-                          </Flex>
-                        ) : null
+                        isImage ? <AssetImageActions onCrop={() => setIsCropOpen(true)} /> : null
                       }
                     />
                     <Flex
