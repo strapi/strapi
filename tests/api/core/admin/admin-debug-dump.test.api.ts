@@ -48,6 +48,28 @@ describe('Admin | debug-dump', () => {
     const res = await rq({ method: 'GET', url: '/admin/debug-dump' });
     expect(res.statusCode).toBe(200);
     expect(res.body.data.dumpVersion).toBe(1);
+
+    const serialized = JSON.stringify(res.body.data);
+
+    // server.app.keys is always populated in a generated app; it must never appear
+    // verbatim in the dump, and its config node must be redacted wholesale.
+    const appKeys = strapi.config.get('server.app.keys') as string[];
+    expect(Array.isArray(appKeys)).toBe(true);
+    expect(appKeys.length).toBeGreaterThan(0);
+    appKeys.forEach((key) => {
+      expect(typeof key).toBe('string');
+      expect(serialized).not.toContain(key);
+    });
+    expect(res.body.data.config.server.app.keys).toBe('[REDACTED]');
+
+    // The admin JWT secret (if configured) must also not leak.
+    const jwtSecret = strapi.config.get('admin.auth.secret');
+    if (typeof jwtSecret === 'string' && jwtSecret.length > 0) {
+      expect(serialized).not.toContain(jwtSecret);
+    }
+
+    // The license key must never be present.
+    expect(serialized).not.toContain('licenseKey');
   });
 
   test('a user without admin::debug-dump.read is forbidden', async () => {
