@@ -70,7 +70,7 @@ export default {
       )
       .catch(() => null);
 
-    const licenseMode =
+    const licenseMode: 'online' | 'offline' =
       strapi.ee.type === 'gold' && process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true'
         ? 'offline'
         : 'online';
@@ -83,7 +83,7 @@ export default {
         ? lastRegistrySyncAt + REGISTRY_CHECK_INTERVAL_MS
         : null;
 
-    const data = {
+    const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
       permittedSeats: permittedSeats ?? null,
@@ -99,9 +99,12 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type,
+      type: strapi.ee.type ?? null,
       isTrial: strapi.ee.isTrial,
-      features: strapi.ee.features.list() ?? [],
+      // `features.list()` is loosely typed at the source (`{ name: string; [k]: any }[]`);
+      // narrow it to the contract's named-feature union so consumers (e.g. useLicenseLimits) keep their types.
+      features: (strapi.ee.features.list() ??
+        []) as GetLicenseLimitInformation.Response['data']['features'],
       entitlements: strapi.ee.entitlements.list(),
     };
 
