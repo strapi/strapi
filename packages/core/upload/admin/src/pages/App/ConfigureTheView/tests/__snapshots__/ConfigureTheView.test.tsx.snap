@@ -323,6 +323,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c2 {
+  position: relative;
   overflow-x: hidden;
 }
 
@@ -605,7 +606,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     </div>
                     <div
                       aria-autocomplete="none"
-                      aria-controls="radix-:r2:"
+                      aria-controls=":r2:"
                       aria-describedby=":r0:-hint"
                       aria-expanded="false"
                       aria-labelledby=":r0:-label"
@@ -678,7 +679,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     </div>
                     <div
                       aria-autocomplete="none"
-                      aria-controls="radix-:r5:"
+                      aria-controls=":r5:"
                       aria-describedby=":r3:-hint"
                       aria-expanded="false"
                       aria-labelledby=":r3:-label"

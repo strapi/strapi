@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
 import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -7,8 +9,8 @@ import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
-const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
-const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
+const BILLING_SELF_HOSTED_URL = 'mailto:sales@strapi.io';
+const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -60,15 +62,14 @@ export const AdminSeatInfoEE = () => {
               {
                 permittedSeats,
                 enforcementUserCount,
-                text: (chunks) =>
-                  (
-                    <Typography
-                      fontWeight="semiBold"
-                      textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
-                    >
-                      {chunks}
-                    </Typography>
-                  ) as any,
+                text: (chunks: ReactNode) => (
+                  <Typography
+                    fontWeight="semiBold"
+                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
+                  >
+                    {chunks}
+                  </Typography>
+                ),
               }
             )}
           </Typography>
@@ -85,17 +86,17 @@ export const AdminSeatInfoEE = () => {
         )}
       </Flex>
       {type === 'gold' ? (
-        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />}>
+        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />} target="_blank">
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.support',
             defaultMessage: 'Contact sales',
           })}
         </Link>
       ) : (
-        <Link href={MANAGE_SEATS_URL} isExternal endIcon={<ExternalLink />}>
+        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />} target="_blank">
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.add-seats',
-            defaultMessage: 'Manage seats',
+            defaultMessage: 'Manage subscription',
           })}
         </Link>
       )}

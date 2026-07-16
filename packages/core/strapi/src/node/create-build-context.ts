@@ -4,7 +4,6 @@ import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import type { Core, Modules } from '@strapi/types';
-import type { Server } from 'node:http';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -19,8 +18,6 @@ interface BaseOptions {
   sourcemaps?: boolean;
   bundler?: 'webpack' | 'vite';
   open?: boolean;
-  hmrServer?: Server;
-  hmrClientPort?: number;
 }
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
@@ -102,10 +99,15 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     STRAPI_ANALYTICS_URL: process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io',
   });
 
+  // NOTE: Transports `admin.auth.cookie.name` into the bundle; always assigned so an
+  // ambient STRAPI_ADMIN_AUTH_COOKIE_NAME cannot make the bundle disagree with the server.
+  env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
+
   const envKeys = Object.keys(env);
 
   if (envKeys.length > 0) {
-    logger.info(
+    logger.debug(
       [
         'Including the following ENV variables as part of the JS bundle:',
         ...envKeys.map((key) => `    - ${key}`),

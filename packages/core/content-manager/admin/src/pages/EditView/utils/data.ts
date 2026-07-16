@@ -19,9 +19,9 @@ type Predicate = <TAttribute extends Schema.Attribute.AnyAttribute>(
   value: Schema.Attribute.Value<TAttribute>
 ) => boolean;
 type Transform = <TAttribute extends Schema.Attribute.AnyAttribute>(
-  value: any,
+  value: Schema.Attribute.Value<TAttribute>,
   attribute: TAttribute
-) => any;
+) => unknown;
 type AnyData = Omit<Document, 'id'>;
 
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
@@ -77,6 +77,15 @@ const traverseData =
          * We also don't want to transform null or undefined values.
          */
         if (BLOCK_LIST_ATTRIBUTE_KEYS.includes(key) || value === null || value === undefined) {
+          acc[key] = value;
+          return acc;
+        }
+
+        // The schema may not contain the attribute when historical data references a
+        // component or field that no longer exists (e.g. a component detached from a
+        // dynamic zone via the content-type-builder). Pass the value through so the
+        // History view can still render the rest of the document.
+        if (!attribute) {
           acc[key] = value;
           return acc;
         }

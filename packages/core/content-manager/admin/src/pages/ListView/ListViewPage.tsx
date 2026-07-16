@@ -16,7 +16,6 @@ import {
   Layouts,
   useTable,
   useIsMobile,
-  useIsDesktop,
   useClipboard,
   tours,
 } from '@strapi/admin/strapi-admin';
@@ -60,7 +59,7 @@ import { DocumentStatus } from '../EditView/components/DocumentStatus';
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
-import { CellContent } from './components/TableCells/CellContent';
+import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
 import type { Modules } from '@strapi/types';
@@ -74,6 +73,20 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
+type ListViewQuery = {
+  filters?: {
+    $and?: Array<{
+      __status?: {
+        $eq?: unknown;
+      };
+    }>;
+  };
+  plugins?: Record<string, unknown>;
+  page?: string;
+  pageSize?: string;
+  sort?: string;
+};
+
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -82,7 +95,6 @@ const ListViewPage = () => {
   const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
-  const isDesktop = useIsDesktop();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
@@ -125,7 +137,10 @@ const ListViewPage = () => {
     null
   );
 
-  const mapDisplayedHeaders = (headers: ListFieldLayout[]) => headers.map((header) => header.name);
+  const mapDisplayedHeaders = React.useCallback(
+    (headers: ListFieldLayout[]) => headers.map((header) => header.name),
+    []
+  );
 
   const displayedHeaders: ListFieldLayout[] = React.useMemo(() => {
     if (
@@ -149,13 +164,16 @@ const ListViewPage = () => {
     );
   }, [displayedHeaderNames, schema, list, listViewConversionContext]);
 
-  const handleSetHeaders = (headers: string[]) => {
-    setDisplayedHeaderNames(headers);
-  };
+  const handleSetHeaders = React.useCallback(
+    (headers: string[]) => {
+      setDisplayedHeaderNames(headers);
+    },
+    [setDisplayedHeaderNames]
+  );
 
-  const handleResetHeaders = () => {
+  const handleResetHeaders = React.useCallback(() => {
     setDisplayedHeaderNames(mapDisplayedHeaders(list.layout));
-  };
+  }, [list.layout, mapDisplayedHeaders, setDisplayedHeaderNames]);
 
   /**
    * If the persistent displayedHeaders are not yet initialized, set them to list.layout
@@ -169,7 +187,7 @@ const ListViewPage = () => {
     if (!displayedHeaderNames) {
       handleResetHeaders();
     }
-  }, [list.layout]);
+  }, [displayedHeaderNames, handleResetHeaders, list.layout]);
 
   React.useEffect(() => {
     if (!schema?.attributes) return;
@@ -183,14 +201,9 @@ const ListViewPage = () => {
     if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
       handleSetHeaders(allowedDisplayHeaders);
     }
-  }, [displayedHeaderNames]);
+  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
 
-  const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
-    page?: string;
-    pageSize?: string;
-    sort?: string;
-  }>({
+  const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
     pageSize: list.settings.pageSize.toString(),
     sort: list.settings.defaultSortBy
@@ -199,7 +212,28 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
+  const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
+  const hasStatusFilter = Boolean(
+    query.filters?.$and?.some(
+      (filter) => filter.__status?.$eq !== undefined && filter.__status.$eq !== null
+    )
+  );
+
+  // If a __status filter becomes active while sort=status:* is in the URL, strip the status sort.
+  React.useEffect(() => {
+    if (
+      hasStatusFilter &&
+      typeof query.sort === 'string' &&
+      /(?:^|,)\s*status:/i.test(query.sort)
+    ) {
+      const cleaned = query.sort
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+        .join(',');
+      setQuery({ sort: cleaned || undefined }, 'push', true);
+    }
+  }, [hasStatusFilter, query.sort, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
@@ -284,7 +318,7 @@ const ListViewPage = () => {
           defaultMessage: 'status',
         }),
         searchable: false,
-        sortable: false,
+        sortable: !hasStatusFilter,
       } satisfies ListFieldLayout);
     }
 
@@ -292,6 +326,7 @@ const ListViewPage = () => {
   }, [
     displayedHeaders,
     formatMessage,
+    hasStatusFilter,
     list,
     runHookWaterfall,
     schema?.options?.draftAndPublish,
@@ -320,6 +355,37 @@ const ListViewPage = () => {
       search: stringify({ plugins: query.plugins }),
     });
   };
+
+  /**
+   * The entry link is rendered on the first non-interactive column *that has a
+   * value for the row* (resolved per row, so an empty cell — rendered as "-" —
+   * is skipped and the next candidate carries the link instead). Any scalar
+   * column qualifies — text, numbers, dates (createdAt/updatedAt), `id`, and
+   * `documentId` (its id text becomes the link, the copy button stays separate).
+   * Only genuinely interactive cells are skipped: relations, media, components,
+   * dynamic zones (they embed their own links/menus), plugin-formatted columns
+   * (`cellFormatter`), and the synthetic `status` column.
+   */
+  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  const linkCandidates = tableHeaders.filter(
+    ({ name, attribute, cellFormatter }) =>
+      name !== 'status' &&
+      typeof cellFormatter !== 'function' &&
+      attribute &&
+      !NON_LINKABLE_TYPES.includes(attribute.type)
+  );
+
+  // The link column for a given row: the first candidate that actually has a
+  // value (uses CellContent's own hasContent so it matches the "-" the cell
+  // would otherwise render). documentId is checked directly (its own cell).
+  const getRowLinkField = (row: (typeof results)[number]) =>
+    linkCandidates.find((header) => {
+      if (header.name === 'documentId') {
+        return Boolean(row.documentId);
+      }
+      const value = row[header.name.split('.')[0]];
+      return hasContent(value, header.mainField, header.attribute);
+    })?.name;
 
   const isEmptyState = !isFetching && results.length === 0;
 
@@ -367,7 +433,7 @@ const ListViewPage = () => {
 
   const actions =
     list.settings.filterable && schema ? (
-      <Filters.Root schema={schema}>
+      <Filters.Root schema={schema} layout={list}>
         <Layouts.Action
           endActions={endActions}
           startActions={startActions}
@@ -441,6 +507,7 @@ const ListViewPage = () => {
                   <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
                   <Table.Body>
                     {results.map((row) => {
+                      const rowLinkField = getRowLinkField(row);
                       return (
                         <Table.Row
                           cursor="pointer"
@@ -473,12 +540,32 @@ const ListViewPage = () => {
                               );
                             }
                             if (header.name === 'documentId') {
+                              // When documentId is the primary link column, only its
+                              // id text becomes the link; the copy button stays outside.
+                              const isDocumentIdLink =
+                                header.name === rowLinkField && Boolean(row.documentId);
                               return (
                                 <Table.Cell key={header.name}>
                                   <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
-                                    <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
-                                      {row.documentId || '-'}
-                                    </Typography>
+                                    {isDocumentIdLink ? (
+                                      <Typography
+                                        tag={ReactRouterLink}
+                                        to={{
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }}
+                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                        textColor="neutral800"
+                                        maxWidth="30rem"
+                                        ellipsis
+                                      >
+                                        {row.documentId}
+                                      </Typography>
+                                    ) : (
+                                      <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                        {row.documentId || '-'}
+                                      </Typography>
+                                    )}
                                     {row.documentId && (
                                       <IconButton
                                         variant="ghost"
@@ -510,6 +597,14 @@ const ListViewPage = () => {
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
                                   {...header}
+                                  linkTo={
+                                    header.name === rowLinkField
+                                      ? {
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }
+                                      : undefined
+                                  }
                                 />
                               </Table.Cell>
                             );

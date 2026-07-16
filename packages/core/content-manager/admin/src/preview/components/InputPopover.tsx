@@ -154,7 +154,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
               transform={`translate(${iframeRect.left + popoverField.position.left}px, ${iframeRect.top + popoverField.position.top}px)`}
             />
           </Popover.Trigger>
-          <Popover.Content sideOffset={4}>
+          <Popover.Content sideOffset={4} style={{ zIndex: 5 }}>
             <Box padding={4} width="400px">
               {/* @ts-expect-error the types of `attribute` clash for some reason */}
               <InputRenderer

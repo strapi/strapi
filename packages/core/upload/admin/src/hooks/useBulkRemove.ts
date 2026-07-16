@@ -1,4 +1,9 @@
-import { useNotification, useFetchClient, adminApi } from '@strapi/admin/strapi-admin';
+import {
+  type FetchResponse,
+  useNotification,
+  useFetchClient,
+  adminApi,
+} from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 import { useDispatch } from 'react-redux';
@@ -37,11 +42,14 @@ export const useBulkRemove = () => {
       return acc;
     }, {});
 
-    return post('/upload/actions/bulk-delete', payload);
+    return post<BulkDeleteFiles.Response['data'] | BulkDeleteFolders.Response['data']>(
+      '/upload/actions/bulk-delete',
+      payload
+    );
   };
 
   const mutation = useMutation<
-    BulkDeleteFiles.Response | BulkDeleteFolders.Response,
+    FetchResponse<BulkDeleteFiles.Response['data'] | BulkDeleteFolders.Response['data']>,
     BulkDeleteFiles.Response['error'] | BulkDeleteFolders.Response['error'],
     Array<FileWithType | FolderDefinition>
   >(bulkRemoveQuery, {

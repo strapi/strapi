@@ -1,5 +1,7 @@
 import knex from 'knex';
 import { Database, DatabaseConfig } from '../index';
+import createQueryBuilder from '../query/query-builder';
+import type { Model } from '../types';
 
 // create an in-memory db connection to test
 jest.mock('../connection', () => ({
@@ -41,6 +43,7 @@ jest.mock('../dialects', () => ({
   getDialect: jest.fn(() => ({
     configure: jest.fn(),
     initialize: jest.fn(),
+    useReturning: () => false,
   })),
 }));
 
@@ -126,6 +129,21 @@ describe('Database', () => {
       const db = new Database(configConnectionFunction);
       expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/experimental/));
     });
+
+    it('should call dialect.configure with connection object when connection function is resolved', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
+      const createConnectionSpy = require('../connection').createConnection;
+      createConnectionSpy.mockClear();
+
+      const db = new Database(configConnectionFunction);
+      expect(createConnectionSpy).toHaveBeenCalledTimes(1);
+
+      const knexConfig = createConnectionSpy.mock.calls[0][0];
+      const wrappedConnectionFn = knexConfig.connection;
+      expect(typeof wrappedConnectionFn).toBe('function');
+      const conn = await wrappedConnectionFn();
+      expect(db.dialect.configure).toHaveBeenCalledWith(conn);
+    });
   });
 
   describe('Connection', () => {
@@ -198,6 +216,260 @@ describe('Database', () => {
 
         await db.destroy();
       });
+
+      it(`should not call commit on transactor already finalised (avoid double finalisation) with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        const commitSpy = jest.fn();
+        const trx = {
+          commit: commitSpy,
+          rollback: jest.fn(),
+          isCompleted: () => true,
+        };
+        const transactionOverride = jest.fn(async () => trx);
+        Object.defineProperty(db.connection, 'transaction', {
+          value: transactionOverride,
+          configurable: true,
+        });
+
+        const result = await db.transaction(async () => 'ok');
+        expect(result).toBe('ok');
+        expect(commitSpy).toHaveBeenCalledTimes(0);
+
+        await db.destroy();
+      });
+
+      it(`should not call rollback on transactor already finalised (avoid double finalisation) with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        const rollbackSpy = jest.fn();
+        const trx = {
+          commit: jest.fn(),
+          rollback: rollbackSpy,
+          isCompleted: () => true,
+        };
+        const transactionOverride = jest.fn(async () => trx);
+        Object.defineProperty(db.connection, 'transaction', {
+          value: transactionOverride,
+          configurable: true,
+        });
+
+        try {
+          await db.transaction(async () => {
+            throw new Error('test');
+          });
+        } catch {
+          // ignore
+        }
+        expect(rollbackSpy).toHaveBeenCalledTimes(0);
+
+        await db.destroy();
+      });
     });
+  });
+});
+
+const articleModelForPaginationTests: Model = {
+  uid: 'api::article.article',
+  singularName: 'article',
+  tableName: 'articles',
+  attributes: {
+    id: { type: 'integer' },
+    title: { type: 'string' },
+  },
+};
+
+/** Draft & publish fields required for `orderBy: { status }` (virtual sort → CASE expression). */
+const articleWithStatusSortModel: Model = {
+  uid: 'api::articlestatus.articlestatus',
+  singularName: 'articlestatus',
+  tableName: 'article_statuses',
+  attributes: {
+    id: { type: 'integer' },
+    documentId: { type: 'string' },
+    publishedAt: { type: 'datetime' },
+    title: { type: 'string' },
+  },
+};
+
+/** Synthetic table without PK `id` — documents `ensurePaginationOrderStability` early-return. */
+const modelWithoutIdAttribute: Model = {
+  uid: 'internal::noid.entry',
+  singularName: 'noidentry',
+  tableName: 'noid_entries',
+  attributes: {
+    slug: { type: 'string' },
+  },
+};
+
+const paginationQueryBuilderConfig: DatabaseConfig = {
+  connection: {
+    client: 'sqlite',
+    connection: { filename: ':memory:' },
+    useNullAsDefault: true,
+  },
+  settings: { migrations: { dir: 'migrations' } },
+};
+
+describe('Query builder pagination order stability (GH #26030)', () => {
+  let db: Database;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+
+    db = new Database(paginationQueryBuilderConfig);
+    await db.init({ models: [articleModelForPaginationTests] });
+  });
+
+  it('appends primary key ASC to ORDER BY when using LIMIT/OFFSET without deep sort', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 20,
+        orderBy: { title: 'asc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('order by');
+    expect(lower).toContain('`t0`.`id` asc');
+  });
+
+  it('appends primary key when there is no user order (empty orderBy)', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: [],
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('order by');
+    expect(lower).toContain('`t0`.`id` asc');
+  });
+
+  it('does not duplicate id when orderBy already ends with id', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { id: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const idAscMatches = sql.match(/`t0`\.`id` asc/gi) ?? [];
+    expect(idAscMatches.length).toBeLessThanOrEqual(1);
+  });
+
+  it('emits join order columns before root id tie-break (relation-style loads)', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: [],
+      })
+      .join({
+        alias: 't1',
+        referencedTable: 'articles_shops_lnk',
+        referencedColumn: 'article_id',
+        rootColumn: 'id',
+        rootTable: 't0',
+        orderBy: { link_ord: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    const pivotIdx = lower.indexOf('`t1`.`link_ord` desc');
+    const idIdx = lower.indexOf('`t0`.`id` asc');
+    expect(pivotIdx).toBeGreaterThan(-1);
+    expect(idIdx).toBeGreaterThan(-1);
+    expect(pivotIdx).toBeLessThan(idIdx);
+  });
+
+  it('appends id tie-break after status (CASE) sort when paginated', async () => {
+    const dbWithStatus = new Database(paginationQueryBuilderConfig);
+    await dbWithStatus.init({ models: [articleWithStatusSortModel] });
+
+    const qb = createQueryBuilder(articleWithStatusSortModel.uid, dbWithStatus)
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { status: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('case when');
+    expect(lower).toContain('`t0`.`id` asc');
+    expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
+
+    await dbWithStatus.destroy();
+  });
+
+  it('includes status CASE in SELECT and id tie-break when paginated with a join (DISTINCT)', async () => {
+    const dbWithStatus = new Database(paginationQueryBuilderConfig);
+    await dbWithStatus.init({ models: [articleWithStatusSortModel] });
+
+    const qb = createQueryBuilder(articleWithStatusSortModel.uid, dbWithStatus)
+      .join({
+        alias: 't1',
+        referencedTable: 'articles_authors_lnk',
+        referencedColumn: 'article_id',
+        rootColumn: 'id',
+        rootTable: 't0',
+      })
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { status: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+    const orderIdx = lower.indexOf(' order by ');
+    const beforeOrder = orderIdx >= 0 ? lower.slice(0, orderIdx) : lower;
+
+    expect(lower).toContain('distinct');
+    expect(beforeOrder).toContain('case when');
+    expect(lower).toContain('`t0`.`id` asc');
+    expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
+
+    await dbWithStatus.destroy();
+  });
+
+  it('does not append id tie-break when the model has no id attribute', async () => {
+    const dbNoId = new Database(paginationQueryBuilderConfig);
+    await dbNoId.init({ models: [modelWithoutIdAttribute] });
+
+    const qb = createQueryBuilder(modelWithoutIdAttribute.uid, dbNoId)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: { slug: 'asc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+    expect(lower).toContain('order by');
+    expect(lower).not.toContain('`t0`.`id`');
+
+    await dbNoId.destroy();
   });
 });

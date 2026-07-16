@@ -15,7 +15,6 @@ import {
   Tbody,
   Td,
   Tooltip,
-  IconButton,
   Thead,
   Tr,
   RawTrProps,
@@ -43,7 +42,6 @@ import { createContext } from './Context';
 
 interface BaseRow {
   id: string | number;
-  [key: string]: any;
 }
 
 interface TableHeader<TData = object, THeader = object> {
@@ -70,7 +68,17 @@ interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TR
   selectRow: (row: TRow | TRow[]) => void;
 }
 
-const [TableProvider, useTable] = createContext<TableContextValue<any, any>>('Table');
+type DefaultTableHeader = TableHeader<BaseRow, object>;
+type DefaultTableContextValue = TableContextValue<BaseRow, DefaultTableHeader>;
+
+const [TableProvider, useTable] = createContext<DefaultTableContextValue>('Table');
+
+const GenericTableProvider = TableProvider as <
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+>(
+  props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
+) => React.ReactElement;
 
 interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
   extends Partial<
@@ -120,7 +128,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   };
 
   return (
-    <TableProvider
+    <GenericTableProvider
       colCount={colCount}
       hasHeaderCheckbox={hasHeaderCheckbox}
       setHasHeaderCheckbox={setHasHeaderCheckbox}
@@ -133,7 +141,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
       selectRow={selectRow}
     >
       {children}
-    </TableProvider>
+    </GenericTableProvider>
   );
 };
 
@@ -181,7 +189,10 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   const isSorted = sortBy === name;
 
   const sortLabel = formatMessage(
-    { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+    {
+      id: 'components.TableHeader.sort',
+      defaultMessage: 'Sort on {label}',
+    },
     { label }
   );
 
@@ -409,7 +420,11 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
   const { formatMessage } = useIntl();
 
   const handleSelectRow = () => {
-    selectRow(rows.find((row) => row.id === id));
+    const row = rows.find((row) => row.id === id);
+
+    if (row !== undefined) {
+      selectRow(row);
+    }
   };
 
   const isChecked = selectedRows.findIndex((row) => row.id === id) > -1;

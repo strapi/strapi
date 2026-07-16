@@ -14,12 +14,13 @@ This action checks a PR labels, milestone and status to validate it is ready for
 2. The PR should have one and only one `source: *` label.
 3. The PR should have one and only one `pr: *` label.
 4. PRs targeting `develop` must have a milestone defined.
+5. Community PRs must not target `main`.
 
 ## Contributing
 
 ### Requirements
 
-- The code is compatible with Node 20, 22, and 24
+- The code is compatible with Node 22, 24, and 26
 
 ### Dependencies
 

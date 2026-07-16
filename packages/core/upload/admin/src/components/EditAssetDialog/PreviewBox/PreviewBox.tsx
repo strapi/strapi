@@ -7,7 +7,7 @@ import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
-import { AssetType } from '../../../enums';
+import { ASSET_TYPES } from '../../../enums';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useTracking } from '../../../hooks/useTracking';
@@ -283,7 +283,7 @@ export const PreviewBox = ({
 
             {canCopyLink && <CopyLinkButton url={assetUrl!} />}
 
-            {canUpdate && asset.mime?.includes(AssetType.Image) && (
+            {canUpdate && asset.mime?.includes(ASSET_TYPES.Image) && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
                 onClick={handleCropStart}
@@ -292,7 +292,7 @@ export const PreviewBox = ({
               </IconButton>
             )}
 
-            {canUpdate && asset.mime?.includes(AssetType.Image) && (
+            {canUpdate && asset.mime?.includes(ASSET_TYPES.Image) && (
               <IconButton
                 label={formatMessage({
                   id: getTrad('control-card.set-focal-point'),

@@ -8,6 +8,7 @@ import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
+import { normalizeXToOneRelationValue } from '../utils/xto-one';
 
 const { isPolymorphic } = relations;
 
@@ -75,6 +76,9 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
       const isPolymorphicRelation = isPolymorphic(attribute);
       const getIds = getRelationIds(idMap, source);
 
+      // Collapse a "relates to one" payload to a single entry first.
+      const normalizedValue = normalizeXToOneRelationValue(attribute, value as any);
+
       // Transform the relation documentId to entity id
       const newRelation = await mapRelation((relation) => {
         if (!relation || !relation.documentId) {
@@ -121,7 +125,7 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
           return newRelation;
         });
-      }, value as any);
+      }, normalizedValue as any);
 
       set(key, newRelation as any);
     },
