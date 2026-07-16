@@ -9055,7 +9055,7 @@ __metadata:
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9174,7 +9174,7 @@ __metadata:
     slate-react: "npm:0.98.4"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9282,7 +9282,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9376,7 +9376,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -9519,7 +9519,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     koa: ^2.15.2
@@ -9619,7 +9619,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
@@ -9664,7 +9664,7 @@ __metadata:
     debug: "npm:4.3.4"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -9901,7 +9901,7 @@ __metadata:
     styled-components: "npm:6.4.1"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10192,7 +10192,7 @@ __metadata:
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
     undici: "npm:6.27.0"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -10336,7 +10336,7 @@ __metadata:
     sharp: "npm:0.34.5"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10370,7 +10370,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -32660,14 +32660,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.25.67":
-  version: 3.25.67
-  resolution: "zod@npm:3.25.67"
-  checksum: 10c0/80a0cab3033272c4ab9312198081f0c4ea88e9673c059aa36dc32024906363729db54bdb78f3dc9d5529bd1601f74974d5a56c0a23e40c6f04a9270c9ff22336
-  languageName: node
-  linkType: hard
-
-"zod@npm:^3.19.1, zod@npm:^3.24.1":
+"zod@npm:3.25.76, zod@npm:^3.19.1, zod@npm:^3.24.1":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c

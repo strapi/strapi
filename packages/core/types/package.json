@@ -72,7 +72,7 @@
     "typedoc": "0.28.19",
     "typedoc-github-wiki-theme": "2.1.0",
     "typedoc-plugin-markdown": "4.11.0",
-    "zod": "3.25.67"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
