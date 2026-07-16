@@ -1,16 +1,96 @@
 import type { Context } from 'koa';
+import fse from 'fs-extra';
 
-import { serveStatic } from '../serve-admin-panel';
+import registerAdminPanelRoute, { serveStatic } from '../serve-admin-panel';
 
 jest.mock('koa-static', () => {
   return jest.fn(() => jest.fn());
 });
+
+jest.mock('fs-extra', () => ({
+  ...jest.requireActual('fs-extra'),
+  pathExistsSync: jest.fn(() => true),
+  createReadStream: jest.fn(() => 'index-html-stream'),
+}));
 
 const koaStatic = jest.requireMock('koa-static');
 
 describe('serveAdminPanel route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('admin shell cache headers', () => {
+    const createStrapi = () => {
+      let registeredRoutes: any[] = [];
+      const strapi = {
+        dirs: { dist: { root: '/tmp/strapi-dist' } },
+        config: { admin: { path: '/admin' } },
+        server: {
+          routes: (routes: any[]) => {
+            registeredRoutes = routes;
+          },
+        },
+      };
+      return { strapi, getRoutes: () => registeredRoutes };
+    };
+
+    test('SPA fallback revalidates the HTML shell', async () => {
+      const { strapi, getRoutes } = createStrapi();
+      registerAdminPanelRoute({ strapi: strapi as any });
+
+      const [spaFallback] = getRoutes()[0].handler;
+      const headers: Record<string, string> = {};
+      const ctx = {
+        method: 'GET',
+        body: null,
+        status: 404,
+        type: undefined as string | undefined,
+        set: (key: string, value: string) => {
+          headers[key.toLowerCase()] = value;
+        },
+      };
+      const next = jest.fn(async () => undefined);
+
+      await spaFallback(ctx as unknown as Context, next);
+
+      expect(fse.createReadStream).toHaveBeenCalled();
+      expect(headers['cache-control']).toBe('no-cache');
+      expect(headers['surrogate-control']).toBe('no-store');
+    });
+
+    test('static HTML responses revalidate; hashed assets stay immutable', () => {
+      const { strapi, getRoutes } = createStrapi();
+      registerAdminPanelRoute({ strapi: strapi as any });
+
+      expect(koaStatic).toHaveBeenCalled();
+      const options = koaStatic.mock.calls[0][1];
+      expect(options.maxage).toBe(0);
+
+      const htmlHeaders: Record<string, string> = {};
+      options.setHeaders(
+        {
+          setHeader: (key: string, value: string) => {
+            htmlHeaders[key.toLowerCase()] = value;
+          },
+        },
+        '/tmp/build/index.html'
+      );
+      expect(htmlHeaders['cache-control']).toBe('no-cache');
+      expect(htmlHeaders['surrogate-control']).toBe('no-store');
+
+      const assetHeaders: Record<string, string> = {};
+      options.setHeaders(
+        {
+          setHeader: (key: string, value: string) => {
+            assetHeaders[key.toLowerCase()] = value;
+          },
+        },
+        '/tmp/build/layout-abc123.js'
+      );
+      expect(assetHeaders['cache-control']).toBe('public, max-age=31536000, immutable');
+      expect(assetHeaders['surrogate-control']).toBeUndefined();
+    });
   });
 
   describe('serveStatic', () => {

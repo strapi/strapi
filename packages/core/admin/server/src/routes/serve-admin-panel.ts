@@ -4,6 +4,15 @@ import fse from 'fs-extra';
 import koaStatic from 'koa-static';
 import type { Core } from '@strapi/types';
 
+const ADMIN_SHELL_CACHE_CONTROL = 'no-cache';
+const ADMIN_SHELL_SURROGATE_CONTROL = 'no-store';
+const HASHED_ASSET_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+
+const applyAdminShellCacheHeaders = (setHeader: (name: string, value: string) => void) => {
+  setHeader('Cache-Control', ADMIN_SHELL_CACHE_CONTROL);
+  setHeader('Surrogate-Control', ADMIN_SHELL_SURROGATE_CONTROL);
+};
+
 const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
   let buildDir = resolve(strapi.dirs.dist.root, 'build');
 
@@ -22,6 +31,9 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
       return;
     }
 
+    applyAdminShellCacheHeaders((name, value) => {
+      ctx.set(name, value);
+    });
     ctx.type = 'html';
     ctx.body = fse.createReadStream(join(buildDir, 'index.html'));
   };
@@ -33,15 +45,19 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
       handler: [
         serveAdminMiddleware,
         serveStatic(buildDir, {
-          maxage: 31536000,
+          maxage: 0,
           defer: false,
           index: 'index.html',
           setHeaders(res: any, path: any) {
             const ext = extname(path);
-            // publicly cache static files to avoid unnecessary network & disk access
-            if (ext !== '.html') {
-              res.setHeader('cache-control', 'public, max-age=31536000, immutable');
+            if (ext === '.html') {
+              applyAdminShellCacheHeaders((name, value) => {
+                res.setHeader(name, value);
+              });
+              return;
             }
+
+            res.setHeader('Cache-Control', HASHED_ASSET_CACHE_CONTROL);
           },
         }),
       ],
