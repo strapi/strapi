@@ -1,17 +1,6 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Flex,
-  Grid,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Typography,
-} from '@strapi/design-system';
+import { Flex, Grid, Table, Tbody, Td, Th, Thead, Tr, Typography } from '@strapi/design-system';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layout';
@@ -42,6 +31,21 @@ const FEATURE_LABELS: Record<string, MessageDescriptor> = {
   'cms-ai': { id: 'Settings.license.feature.cms-ai', defaultMessage: 'AI' },
 };
 
+// Entitlement limit key -> display label. Only known limit keys are mapped;
+// unmapped keys fall back to rendering just the value.
+const LIMIT_LABELS: Record<string, MessageDescriptor> = {
+  numberOfWorkflows: {
+    id: 'Settings.license.limit.numberOfWorkflows',
+    defaultMessage: 'Workflows',
+  },
+  stagesPerWorkflow: {
+    id: 'Settings.license.limit.stagesPerWorkflow',
+    defaultMessage: 'Stages per workflow',
+  },
+  maximumReleases: { id: 'Settings.license.limit.maximumReleases', defaultMessage: 'Releases' },
+  retentionDays: { id: 'Settings.license.limit.retentionDays', defaultMessage: 'Retention' },
+};
+
 const LicenseDetailsPage = () => {
   const { formatMessage, formatDate } = useIntl();
   const { license, isLoading, isError } = useLicenseLimits();
@@ -56,21 +60,48 @@ const LicenseDetailsPage = () => {
 
   const entitlementsByFeature = new Map(license.entitlements.map((e) => [e.feature, e.limits]));
 
-  const formatLimit = (limits: (typeof license.entitlements)[number]['limits']): string =>
-    limits
-      .map((limit) => {
-        if (limit.value === null) {
-          return formatMessage({ id: 'Settings.license.unlimited', defaultMessage: 'Unlimited' });
-        }
-        if (limit.unit === 'days') {
-          return formatMessage(
-            { id: 'Settings.license.limit.days', defaultMessage: '{value} days' },
-            { value: limit.value }
-          );
-        }
-        return String(limit.value);
-      })
-      .join(' / ');
+  const formatDays = (value: number): string => {
+    if (value >= 365) {
+      return formatMessage(
+        {
+          id: 'Settings.license.limit.years',
+          defaultMessage: '~{years, plural, one {# year} other {# years}}',
+        },
+        { years: Math.round(value / 365) }
+      );
+    }
+    if (value >= 60) {
+      return formatMessage(
+        {
+          id: 'Settings.license.limit.months',
+          defaultMessage: '~{months, plural, one {# month} other {# months}}',
+        },
+        { months: Math.round(value / 30) }
+      );
+    }
+    return formatMessage(
+      {
+        id: 'Settings.license.limit.days',
+        defaultMessage: '{days, plural, one {# day} other {# days}}',
+      },
+      { days: value }
+    );
+  };
+
+  const formatLimitValue = (
+    limit: (typeof license.entitlements)[number]['limits'][number]
+  ): string => {
+    if (limit.value === null) {
+      return formatMessage({ id: 'Settings.license.unlimited', defaultMessage: 'Unlimited' });
+    }
+    if (limit.unit === 'days') {
+      return formatDays(limit.value);
+    }
+    return formatMessage(
+      { id: 'Settings.license.limit.count', defaultMessage: '{value, number}' },
+      { value: limit.value }
+    );
+  };
 
   return (
     <Page.Main>
@@ -129,22 +160,60 @@ const LicenseDetailsPage = () => {
                   { id: 'Settings.license.seats.count', defaultMessage: '{used} / {total}' },
                   {
                     used: license.currentActiveUserCount,
-                    total: license.permittedSeats ?? '∞',
+                    total:
+                      license.permittedSeats ??
+                      formatMessage({
+                        id: 'Settings.license.seats.unlimited',
+                        defaultMessage: '∞',
+                      }),
                   }
                 )}
               />
-              <Detail
-                label={{ id: 'Settings.license.expiry', defaultMessage: 'Expires' }}
-                value={
-                  license.expireAt
-                    ? formatDate(new Date(license.expireAt), {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })
-                    : formatMessage({ id: 'Settings.license.expiry.none', defaultMessage: '—' })
-                }
-              />
+              {license.licenseMode === 'online' ? (
+                <>
+                  <Detail
+                    label={{ id: 'Settings.license.lastCheckin', defaultMessage: 'Last check-in' }}
+                    value={
+                      license.lastRegistrySyncAt
+                        ? formatDate(new Date(license.lastRegistrySyncAt), {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })
+                        : formatMessage({
+                            id: 'Settings.license.checkin.never',
+                            defaultMessage: 'Not yet',
+                          })
+                    }
+                  />
+                  <Detail
+                    label={{ id: 'Settings.license.nextCheckin', defaultMessage: 'Next check-in' }}
+                    value={
+                      license.nextRegistrySyncAt
+                        ? formatDate(new Date(license.nextRegistrySyncAt), {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })
+                        : formatMessage({
+                            id: 'Settings.license.checkin.never',
+                            defaultMessage: 'Not yet',
+                          })
+                    }
+                  />
+                </>
+              ) : (
+                <Detail
+                  label={{ id: 'Settings.license.expiry', defaultMessage: 'Expires' }}
+                  value={
+                    license.expireAt
+                      ? formatDate(new Date(license.expireAt), {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })
+                      : formatMessage({ id: 'Settings.license.expiry.none', defaultMessage: '—' })
+                  }
+                />
+              )}
               <Detail
                 label={{ id: 'Settings.license.mode', defaultMessage: 'Mode' }}
                 value={
@@ -171,13 +240,16 @@ const LicenseDetailsPage = () => {
                 {formatMessage({
                   id: 'Settings.license.cached-warning',
                   defaultMessage:
-                    'Using a cached license — the license registry was unreachable at the last check.',
+                    'Using a cached license. The license registry was unreachable at the last check.',
                 })}
               </Typography>
             )}
           </Flex>
 
-          <Box
+          <Flex
+            direction="column"
+            alignItems="stretch"
+            gap={4}
             hasRadius
             background="neutral0"
             shadow="tableShadow"
@@ -233,21 +305,31 @@ const LicenseDetailsPage = () => {
                         </Typography>
                       </Td>
                       <Td>
-                        <Typography>
-                          {limits && limits.length
-                            ? formatLimit(limits)
-                            : formatMessage({
-                                id: 'Settings.license.limit.none',
-                                defaultMessage: '—',
-                              })}
-                        </Typography>
+                        {limits && limits.length ? (
+                          <Flex direction="column" alignItems="start" gap={1}>
+                            {limits.map((limit) => (
+                              <Typography key={limit.key} variant="pi">
+                                {LIMIT_LABELS[limit.key]
+                                  ? `${formatMessage(LIMIT_LABELS[limit.key])}: ${formatLimitValue(limit)}`
+                                  : formatLimitValue(limit)}
+                              </Typography>
+                            ))}
+                          </Flex>
+                        ) : (
+                          <Typography>
+                            {formatMessage({
+                              id: 'Settings.license.limit.none',
+                              defaultMessage: '—',
+                            })}
+                          </Typography>
+                        )}
                       </Td>
                     </Tr>
                   );
                 })}
               </Tbody>
             </Table>
-          </Box>
+          </Flex>
         </Flex>
       </Layouts.Content>
     </Page.Main>
