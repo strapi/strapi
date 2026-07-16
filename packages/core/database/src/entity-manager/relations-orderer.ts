@@ -203,7 +203,6 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     let idx;
 
     if (r.position?.before) {
-
       const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
         const prevRelation = beforeIdx > 0 ? computedRelations[beforeIdx - 1] : null;
