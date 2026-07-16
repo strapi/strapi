@@ -86,6 +86,7 @@ export const useUpload = () => {
       return uploadAssets(assets, folderId, signal, setProgress, store.getState().admin_app?.token);
     },
     {
+      mutationKey: [pluginId, 'upload'],
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });

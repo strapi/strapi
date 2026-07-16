@@ -1,3 +1,5 @@
+import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+
 import type { File } from '../../../../shared/contracts/files';
 
 /**
@@ -44,7 +46,7 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
  * @throws {UploadAbortedError} When the signal aborts.
  * @throws {UploadFileError} On a non-2xx response or network error.
  */
-export const uploadFileViaXHR = <T = File>(
+const sendUploadViaXHR = <T>(
   url: string,
   token: string | null | undefined,
   formData: FormData,
@@ -111,4 +113,32 @@ export const uploadFileViaXHR = <T = File>(
 
     xhr.send(formData);
   });
+};
+
+export const uploadFileViaXHR = async <T = File>(
+  url: string,
+  token: string | null | undefined,
+  formData: FormData,
+  signal: AbortSignal,
+  onProgress?: UploadProgressCallback
+): Promise<T> => {
+  try {
+    return await sendUploadViaXHR<T>(url, token, formData, signal, onProgress);
+  } catch (error) {
+    if (!(error instanceof UploadFileError) || error.status !== 401) {
+      throw error;
+    }
+
+    try {
+      const refreshedToken = await attemptTokenRefresh();
+
+      return await sendUploadViaXHR<T>(url, refreshedToken, formData, signal, onProgress);
+    } catch (refreshError) {
+      if (refreshError instanceof UploadFileError) {
+        throw refreshError;
+      }
+
+      throw error;
+    }
+  }
 };
