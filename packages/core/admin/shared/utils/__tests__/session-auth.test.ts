@@ -83,6 +83,19 @@ describe('resolveLogoutDeviceId', () => {
     expect(logDebug).toHaveBeenCalled();
   });
 
+  test('falls back when the session origin is not admin', async () => {
+    findOne.mockResolvedValue({
+      userId: '42',
+      origin: 'users-permissions',
+      deviceId: 'up-device',
+    });
+
+    await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
+      'client-device'
+    );
+    expect(logDebug).toHaveBeenCalled();
+  });
+
   test('falls back when the owned session has no deviceId string', async () => {
     findOne.mockResolvedValue({
       userId: '42',
