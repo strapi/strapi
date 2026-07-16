@@ -9110,7 +9110,7 @@ __metadata:
     open: "npm:8.4.2"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
-    tar: "npm:7.5.18"
+    tar: "npm:7.5.20"
     tsconfig: "npm:5.50.2"
     xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
@@ -9422,7 +9422,7 @@ __metadata:
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.9.1"
-    tar: "npm:7.5.18"
+    tar: "npm:7.5.20"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -15743,7 +15743,7 @@ __metadata:
     rollup: "npm:4.60.4"
     semver: "npm:7.7.4"
     sort-package-json: "npm:2.10.0"
-    tar: "npm:7.5.18"
+    tar: "npm:7.5.20"
     tsconfig: "npm:5.50.2"
   bin:
     create-strapi-app: ./bin/index.js
@@ -29673,7 +29673,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
-    tar: "npm:7.5.18"
+    tar: "npm:7.5.20"
     tsx: "npm:4.22.4"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -30358,16 +30358,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:7.5.18":
-  version: 7.5.18
-  resolution: "tar@npm:7.5.18"
+"tar@npm:7.5.20":
+  version: 7.5.20
+  resolution: "tar@npm:7.5.20"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/88ba2ed1103fc31663c4edd41cc05ce1993bd335d3570863a34f6cdfcf393719025ebf0f041bc0260f13d07a8eb87ae704cac802fda63d136235ecf9799b7b76
+  checksum: 10c0/4df4335c6d958b76adf1eaced55889dec3ca1c51f450658a074af80694bb0d9c154a8e93fdf4da617372d1575b121295379993961bbe4cd4b0867c0e5689846a
   languageName: node
   linkType: hard
 
