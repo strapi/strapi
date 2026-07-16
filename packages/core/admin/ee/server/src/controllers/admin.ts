@@ -75,13 +75,20 @@ export default {
         ? 'offline'
         : 'online';
 
-    // Registry re-check cron cadence ('0 0 */12 * * *').
+    // Registry re-check cron cadence ('0 0 */12 * * *', shifted to the startup time -> every 12h).
     const REGISTRY_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
     const lastRegistrySyncAt: number | null = eeInformation?.lastCheckAt ?? null;
-    const nextRegistrySyncAt =
-      licenseMode === 'online' && typeof lastRegistrySyncAt === 'number'
-        ? lastRegistrySyncAt + REGISTRY_CHECK_INTERVAL_MS
-        : null;
+    let nextRegistrySyncAt: number | null = null;
+    if (licenseMode === 'online' && typeof lastRegistrySyncAt === 'number') {
+      // Step forward from the last check-in in 12h increments until we land in the
+      // future, so a stale last check-in never reports a "next check-in" in the past.
+      const now = Date.now();
+      let next = lastRegistrySyncAt + REGISTRY_CHECK_INTERVAL_MS;
+      while (next <= now) {
+        next += REGISTRY_CHECK_INTERVAL_MS;
+      }
+      nextRegistrySyncAt = next;
+    }
 
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,

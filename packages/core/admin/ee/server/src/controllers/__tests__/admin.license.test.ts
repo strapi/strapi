@@ -116,8 +116,9 @@ describe('licenseLimitInformation (extended fields)', () => {
     expect(data.registrySyncError).toBeNull();
   });
 
-  it('computes nextRegistrySyncAt as lastCheckAt + 12h when online', async () => {
-    const lastCheckAt = 1700000000000;
+  it('rolls nextRegistrySyncAt forward to the next future 12h check-in when online', async () => {
+    const interval = 12 * 60 * 60 * 1000;
+    const lastCheckAt = 1700000000000; // in the past
     createStrapiMock({
       stored: { value: JSON.stringify({ license: 'signed', lastCheckAt }) },
     });
@@ -127,8 +128,28 @@ describe('licenseLimitInformation (extended fields)', () => {
     });
 
     const data = (await adminController.licenseLimitInformation()).data as any;
+    const now = Date.now();
     expect(data.licenseMode).toBe('online');
-    expect(data.nextRegistrySyncAt).toBe(lastCheckAt + 12 * 60 * 60 * 1000);
+    // last check-in is reported as stored; next is the first future 12h boundary
+    expect(data.lastRegistrySyncAt).toBe(lastCheckAt);
+    expect(data.nextRegistrySyncAt).toBeGreaterThan(now);
+    expect((data.nextRegistrySyncAt - lastCheckAt) % interval).toBe(0);
+    expect(data.nextRegistrySyncAt - interval).toBeLessThanOrEqual(now);
+  });
+
+  it('keeps nextRegistrySyncAt at lastCheckAt + 12h when that is still in the future', async () => {
+    const interval = 12 * 60 * 60 * 1000;
+    const lastCheckAt = Date.now() - 60 * 1000; // a minute ago
+    createStrapiMock({
+      stored: { value: JSON.stringify({ license: 'signed', lastCheckAt }) },
+    });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 3,
+      getDisabledUserList: async () => [],
+    });
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.nextRegistrySyncAt).toBe(lastCheckAt + interval);
   });
 
   it('sets nextRegistrySyncAt to null when offline', async () => {
