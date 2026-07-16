@@ -1,12 +1,12 @@
 {
   "name": "check-pr-status",
-  "version": "5.49.0",
+  "version": "5.50.2",
   "private": true,
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
     "build": "NODE_ENV=production ncc build index.js -o dist --minify",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify"
   },
   "dependencies": {
@@ -14,6 +14,8 @@
     "@actions/github": "6.0.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "0.38.2"
+    "@types/jest": "29.5.2",
+    "@vercel/ncc": "0.38.2",
+    "jest": "29.6.0"
   }
 }

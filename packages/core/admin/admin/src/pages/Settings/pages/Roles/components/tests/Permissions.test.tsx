@@ -7,6 +7,8 @@ import { Permissions, type PermissionsAPI } from '../Permissions';
 
 import layout from './test-data.json';
 
+import type { Permission as AuthPermission } from '../../../../../../features/Auth';
+
 const COLUMN_HEADERS = ['Create', 'Read', 'Update', 'Delete', 'Publish'];
 
 const COLLECTION_TYPES = layout.sections.collectionTypes.subjects.map(
@@ -164,7 +166,7 @@ const i18nLayout = {
     plugins: { subjects: [] },
     settings: { subjects: [] },
   },
-} as any;
+} as unknown as React.ComponentProps<typeof Permissions>['layout'];
 
 const makePermission = (locales: string[] | null) => ({
   id: 1,
@@ -173,7 +175,7 @@ const makePermission = (locales: string[] | null) => ({
   action: READ_ACTION,
   actionParameters: {},
   subject: ARTICLE_UID,
-  properties: { fields: ['title'], locales } as any,
+  properties: { fields: ['title'], locales },
   conditions: [],
 });
 
@@ -242,5 +244,64 @@ describe('hasLocaleValidationErrors() — ref API', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Select fr Read permission' }));
 
     expect(ref.current!.hasLocaleValidationErrors()).toBe(true);
+  });
+});
+
+/**
+ * Regression test for CMS-627.
+ *
+ * On the Create/Edit Admin Token screen the permission matrix is rendered with
+ * `userPermissions` so selections are restricted to what the token owner is
+ * allowed to grant. In that mode the per-subcategory "Select all" checkbox for
+ * plugins/settings did nothing: plugin/setting permissions are stored with
+ * `subject: null` and their real action id is the full `plugin::` leaf segment,
+ * but the parent-checkbox reducer treated the category as the subject and the UI
+ * subcategory as the action, so the owner-permission lookup never matched and
+ * every leaf was filtered out.
+ *
+ * "Select all" must now select the subcategory actions the owner holds, while
+ * still leaving out any action the owner does not have.
+ */
+describe('Permissions — "Select all" in Admin Token mode (userPermissions provided)', () => {
+  const settingPermission = (action: string): AuthPermission => ({
+    action,
+    subject: null,
+    properties: {},
+    conditions: [],
+  });
+
+  it('selects the owner-granted actions of a settings subcategory and skips the rest', async () => {
+    // Owner holds Create/Read/Update for i18n locales, but NOT Delete.
+    const userPermissions: AuthPermission[] = [
+      settingPermission('plugin::i18n.locale.create'),
+      settingPermission('plugin::i18n.locale.read'),
+      settingPermission('plugin::i18n.locale.update'),
+    ];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    // Go to the Settings tab and open the Internationalization category.
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: /Internationalization/ }));
+
+    const create = screen.getByLabelText('Create');
+    const read = screen.getByLabelText('Read');
+    const update = screen.getByLabelText('Update');
+    const del = screen.getByLabelText('Delete');
+
+    // The granted actions are enabled; the ungranted one is disabled.
+    expect(create).not.toBeChecked();
+    expect(del).toBeDisabled();
+
+    // Click the subcategory "Select all".
+    await user.click(screen.getByLabelText('Select all'));
+
+    // Owner-granted actions get selected; the ungranted "Delete" stays unchecked.
+    expect(create).toBeChecked();
+    expect(read).toBeChecked();
+    expect(update).toBeChecked();
+    expect(del).not.toBeChecked();
   });
 });

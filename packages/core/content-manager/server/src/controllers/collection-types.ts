@@ -190,7 +190,9 @@ const removeStatusFromSort = (sort: unknown): unknown => {
   }
 
   if (typeof sort === 'object' && sort !== null) {
-    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    const rest = { ...(sort as Record<string, unknown>) };
+    delete rest.status;
+
     return Object.keys(rest).length ? rest : undefined;
   }
 

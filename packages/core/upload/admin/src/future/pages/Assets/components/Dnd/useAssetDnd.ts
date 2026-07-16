@@ -90,7 +90,6 @@ export const useFolderDraggableDroppable = (folder: {
   });
 
   const activeData = active?.data.current as DragItemData | undefined;
-  const activeItems = activeData ? [activeData] : [];
 
   const isValidDropTarget = useMemo(() => {
     if (!activeData || (activeData.id === folder.id && activeData.kind === 'folder')) {
@@ -98,11 +97,11 @@ export const useFolderDraggableDroppable = (folder: {
     }
 
     return canDropItemOnFolder({
-      items: activeItems,
+      items: [activeData],
       targetFolderId: folder.id,
       folderStructure,
     });
-  }, [activeData, activeItems, folder.id, folderStructure]);
+  }, [activeData, folder.id, folderStructure]);
 
   const isOver = droppable.isOver;
   const showValidDropHighlight = isOver && isValidDropTarget;

@@ -475,6 +475,96 @@ describe('Validate visitors util', () => {
       );
     });
 
+    test.each<[label: string, populateValue: unknown]>([
+      ['boolean true', true],
+      ['boolean false', false],
+      ['empty object', {}],
+      ['populate array', ['title']],
+      ['number', 42],
+    ])(
+      'throws ValidationError for non-wildcard polymorphic nested populate value (%s)',
+      async (_label, populateValue) => {
+        const dynamicZoneModel: any = {
+          uid: 'api::article.article',
+          modelType: 'contentType',
+          kind: 'collectionType',
+          info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+          options: {},
+          attributes: {
+            id: { type: 'integer' },
+            contentBlocks: {
+              type: 'dynamiczone',
+              components: ['default.component'],
+            },
+          },
+        };
+
+        const models = {
+          'api::article.article': dynamicZoneModel,
+          'default.component': {
+            uid: 'default.component',
+            modelType: 'component',
+            info: { singularName: 'component', pluralName: 'components' },
+            options: {},
+            attributes: { title: { type: 'string' } },
+          },
+        };
+
+        const ctxDynamic: any = {
+          schema: dynamicZoneModel,
+          getModel: (uid: string) => models[uid as keyof typeof models],
+        };
+
+        await expect(
+          validators.defaultValidatePopulate(ctxDynamic, {
+            contentBlocks: { populate: populateValue },
+          })
+        ).rejects.toThrow(ValidationError);
+      }
+    );
+
+    test.each([null, undefined])(
+      'allows nil polymorphic nested populate value (%s)',
+      async (populateValue) => {
+        const dynamicZoneModel: any = {
+          uid: 'api::article.article',
+          modelType: 'contentType',
+          kind: 'collectionType',
+          info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+          options: {},
+          attributes: {
+            id: { type: 'integer' },
+            contentBlocks: {
+              type: 'dynamiczone',
+              components: ['default.component'],
+            },
+          },
+        };
+
+        const models = {
+          'api::article.article': dynamicZoneModel,
+          'default.component': {
+            uid: 'default.component',
+            modelType: 'component',
+            info: { singularName: 'component', pluralName: 'components' },
+            options: {},
+            attributes: { title: { type: 'string' } },
+          },
+        };
+
+        const ctxDynamic: any = {
+          schema: dynamicZoneModel,
+          getModel: (uid: string) => models[uid as keyof typeof models],
+        };
+
+        await expect(
+          validators.defaultValidatePopulate(ctxDynamic, {
+            contentBlocks: { populate: populateValue },
+          })
+        ).resolves.toBeDefined();
+      }
+    );
+
     const withDynamicZonePopulateCtx = () => {
       const dynamicZoneModel: any = {
         uid: 'api::withdynamiczone.withdynamiczone',

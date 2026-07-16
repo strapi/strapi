@@ -4,14 +4,20 @@ import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useQuery, useQueryClient } from 'react-query';
 
-import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { getTrad } from '../utils';
+
+import type {
+  AIMetadataJob,
+  GetLatestAIMetadataJob,
+} from '../../../shared/contracts/ai-metadata-jobs';
 
 const fetchLatestJob = async (
   get: ReturnType<typeof useFetchClient>['get']
 ): Promise<AIMetadataJob | null> => {
   try {
-    const { data } = await get('/upload/actions/generate-ai-metadata/latest');
+    const { data } = await get<GetLatestAIMetadataJob.Response['data']>(
+      '/upload/actions/generate-ai-metadata/latest'
+    );
     return data;
   } catch {
     // Return null on any error - UI treats this as "no active job"
