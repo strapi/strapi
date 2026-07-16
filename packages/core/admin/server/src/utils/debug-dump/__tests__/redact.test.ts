@@ -54,4 +54,38 @@ describe('debug-dump scrub', () => {
   it('redacts non-plain-object values (e.g. a Buffer) instead of walking or passing them through', () => {
     expect((scrub({ blob: Buffer.from('x') }) as any).blob).toBe(REDACTED);
   });
+
+  it('does not redact semver version strings', () => {
+    expect(scrub({ version: '18.3.1', strapi: '5.50.1' })).toEqual({
+      version: '18.3.1',
+      strapi: '5.50.1',
+    });
+  });
+
+  it('still redacts a real JWT (eyJ-prefixed header segment)', () => {
+    const jwt = 'eyJhbGciOi.eyJzdWIiOi.SflKxwRJSM';
+    expect(scrub({ note: jwt })).toEqual({ note: REDACTED });
+  });
+
+  it('relativizes absolute paths under the home dir', () => {
+    expect(scrub('/home/alice/proj/ca.pem', { homeDir: '/home/alice' })).toBe('<home>/proj/ca.pem');
+  });
+
+  it('prefers appRoot over homeDir when a path falls under both', () => {
+    expect(scrub('/home/alice/app/x', { appRoot: '/home/alice/app', homeDir: '/home/alice' })).toBe(
+      '<app>/x'
+    );
+  });
+
+  it('leaves a system path outside app/home untouched', () => {
+    expect(scrub('/var/log/strapi/app.log', { appRoot: '/srv/app', homeDir: '/home/deploy' })).toBe(
+      '/var/log/strapi/app.log'
+    );
+  });
+
+  it('never writes through the __proto__ setter', () => {
+    const r = scrub({ ['__proto__']: { polluted: true }, safe: 1 });
+    expect(({} as any).polluted).toBeUndefined();
+    expect(r).toEqual({ safe: 1 });
+  });
 });
