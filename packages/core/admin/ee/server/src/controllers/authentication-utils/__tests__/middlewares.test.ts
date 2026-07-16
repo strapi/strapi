@@ -28,10 +28,9 @@ jest.mock('../../../../../../shared/utils/session-auth', () => {
   };
 });
 
-const {
-  getSessionManager,
-  buildCookieOptionsWithExpiry,
-} = jest.requireMock('../../../../../../shared/utils/session-auth') as {
+const { getSessionManager, buildCookieOptionsWithExpiry } = jest.requireMock(
+  '../../../../../../shared/utils/session-auth'
+) as {
   getSessionManager: jest.Mock;
   buildCookieOptionsWithExpiry: jest.Mock;
 };
