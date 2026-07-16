@@ -110,6 +110,8 @@ export interface Strapi extends Container {
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
+  // Keep this shape in sync with `detectCustomizations` in
+  // @strapi/core (packages/core/core/src/utils/detect-customizations.ts).
   getCustomizations: () => {
     apis: Array<{
       uid: string;

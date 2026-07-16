@@ -38,6 +38,10 @@ describe('isLifecycleNonEmpty', () => {
       })
     ).toBe(true);
   });
+
+  it('is false for an empty body despite a commented destructured param', () => {
+    expect(isLifecycleNonEmpty(function register(/* { strapi } */) {})).toBe(false);
+  });
 });
 
 describe('detectCustomizations', () => {
@@ -50,33 +54,27 @@ describe('detectCustomizations', () => {
   } as unknown as Core.Strapi;
 
   describe('service heuristic (Critical fix)', () => {
-    // Faithful to the real `createCoreService` output: CRUD methods live on
-    // the service's DIRECT prototype (the base service instance), and the
-    // only own key — on both the base service and a default user service —
-    // is `contentType`. A plain object literal with methods as own keys
-    // would not exercise the bug this heuristic fixes.
-    const makeService = (extra: Record<string, unknown> = {}) => {
-      const classProto = { find() {}, findOne() {}, create() {}, update() {}, delete() {} };
-      const baseService = Object.setPrototypeOf(
-        { contentType: { uid: contentTypeUid } },
-        classProto
-      );
-      return Object.setPrototypeOf({ contentType: { uid: contentTypeUid }, ...extra }, baseService);
-    };
-
-    it('does not flag a default factory-shaped service as custom', () => {
+    it('does not flag a default factory-minted service as custom', () => {
+      const service = factories.createCoreService(contentTypeUid)({ strapi: minimalStrapi });
       const strapi = makeStrapi({
         controllers: { [contentTypeUid]: {} },
-        services: { [contentTypeUid]: makeService() },
+        services: { [contentTypeUid]: service },
         apis: { a: { routes: {} } },
       });
       expect(detectCustomizations(strapi).apis[0].customService).toBe(false);
     });
 
     it('flags a service with an extra own method as custom', () => {
+      // A cfg-built custom service carries the user method as an OWN key absent
+      // from its factory prototype. Start from a real factory service and add
+      // one, so the fixture stays faithful to createCoreService's output shape.
+      const service = factories.createCoreService(contentTypeUid)({
+        strapi: minimalStrapi,
+      }) as Record<string, unknown>;
+      service.myCustomMethod = () => {};
       const strapi = makeStrapi({
         controllers: { [contentTypeUid]: {} },
-        services: { [contentTypeUid]: makeService({ myCustomMethod() {} }) },
+        services: { [contentTypeUid]: service },
         apis: { a: { routes: {} } },
       });
       expect(detectCustomizations(strapi).apis[0].customService).toBe(true);
@@ -171,6 +169,32 @@ describe('detectCustomizations', () => {
       const src = detectCustomizations(strapi).srcIndex;
       expect(src.destroyDefined).toBe(true);
       expect(src.beyondTemplate).toBe(true);
+    });
+
+    it('does not flag the default template (commented destructured params) as beyond template', () => {
+      const strapi = makeStrapi({
+        app: {
+          register(/* { strapi } */) {},
+          bootstrap(/* { strapi } */) {},
+        },
+      });
+      const src = detectCustomizations(strapi).srcIndex;
+      expect(src.registerNonEmpty).toBe(false);
+      expect(src.bootstrapNonEmpty).toBe(false);
+      expect(src.beyondTemplate).toBe(false);
+    });
+
+    it('flags a non-empty body even when the param region contains a brace', () => {
+      const doThing = () => {};
+      const strapi = makeStrapi({
+        app: {
+          register(/* { strapi } */) {},
+          bootstrap(/* { strapi } */) {
+            doThing();
+          },
+        },
+      });
+      expect(detectCustomizations(strapi).srcIndex.beyondTemplate).toBe(true);
     });
   });
 

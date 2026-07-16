@@ -13,7 +13,12 @@ export const isLifecycleNonEmpty = (fn: unknown): boolean => {
     return false;
   }
   const source = Function.prototype.toString.call(fn);
-  const body = source.slice(source.indexOf('{') + 1, source.lastIndexOf('}'));
+  // The body starts at the first `{` AFTER the parameter list closes, not the
+  // first `{` overall: a real lifecycle signature like `register({ strapi })`
+  // or the template's `register(/*{ strapi }*/)` puts a `{` in the params/comment.
+  const parenEnd = source.indexOf(')');
+  const bodyStart = source.indexOf('{', parenEnd === -1 ? 0 : parenEnd);
+  const body = bodyStart === -1 ? '' : source.slice(bodyStart + 1, source.lastIndexOf('}'));
   // strip line + block comments, then whitespace
   const stripped = body
     .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -63,6 +68,8 @@ const hasCustomRoutes = (strapi: Core.Strapi, apiName: string): boolean => {
   });
 };
 
+// Return shape is mirrored in @strapi/types Core.Strapi['getCustomizations'];
+// keep the two in sync.
 export const detectCustomizations = (strapi: Core.Strapi) => {
   const controllers = strapi.controllers ?? {};
   const services = strapi.services ?? {};
