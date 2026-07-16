@@ -160,8 +160,8 @@ describe('document-metadata service', () => {
       const { service, findMany } = createServiceWithQuery();
 
       await service.getManyAvailableStatus('api::article.article', [
-        { id: 1, documentId: 'doc-1', locale: null, publishedAt: null },
-        { id: 2, documentId: 'doc-2', locale: null, publishedAt: null },
+        { id: 1, documentId: 'doc-1', publishedAt: null },
+        { id: 2, documentId: 'doc-2', publishedAt: null },
       ]);
 
       expect(whereOf(findMany).locale).toBeUndefined();
@@ -180,7 +180,7 @@ describe('document-metadata service', () => {
 
       await service.getManyAvailableStatus('api::article.article', [
         { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
-        { id: 2, documentId: 'doc-2', locale: null, publishedAt: null },
+        { id: 2, documentId: 'doc-2', publishedAt: null },
       ]);
 
       expect(whereOf(findMany).locale).toBeUndefined();
