@@ -131,6 +131,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`
         );
+        result.error = error.message; // record why we fell back so usingCachedLicense is derivable
         return storedInfo.license;
       }
 

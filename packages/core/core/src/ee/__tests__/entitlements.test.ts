@@ -35,6 +35,15 @@ describe('entitlements registry', () => {
     expect(registry.list()[0].limits[0].value).toBeNull();
   });
 
+  it('normalizes a NaN resolved value to null', () => {
+    const registry = createEntitlementsRegistry();
+    registry.register({
+      feature: 'x',
+      limits: [{ key: 'k', get: () => NaN }],
+    });
+    expect(registry.list()[0].limits[0].value).toBeNull();
+  });
+
   it('upserts by feature (re-register replaces, never duplicates)', () => {
     const registry = createEntitlementsRegistry();
     registry.register({ feature: 'f', limits: [{ key: 'k', get: () => 1 }] });

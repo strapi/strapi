@@ -1,5 +1,6 @@
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
+import type { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
 
 export default {
@@ -58,7 +59,15 @@ export default {
     const eeInformation = await strapi.db
       .query('strapi::core-store')
       .findOne({ where: { key: 'ee_information' } })
-      .then((row: { value: string } | null) => (row ? JSON.parse(row.value) : null))
+      .then((row: { value: string } | null) =>
+        row
+          ? (JSON.parse(row.value) as {
+              license?: string | null;
+              error?: string;
+              lastCheckAt?: number;
+            })
+          : null
+      )
       .catch(() => null);
 
     const licenseMode =
@@ -66,15 +75,24 @@ export default {
         ? 'offline'
         : 'online';
 
+    // Registry re-check cron cadence ('0 0 */12 * * *').
+    const REGISTRY_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
+    const lastRegistrySyncAt: number | null = eeInformation?.lastCheckAt ?? null;
+    const nextRegistrySyncAt =
+      licenseMode === 'online' && typeof lastRegistrySyncAt === 'number'
+        ? lastRegistrySyncAt + REGISTRY_CHECK_INTERVAL_MS
+        : null;
+
     const data = {
       enforcementUserCount,
       currentActiveUserCount,
-      permittedSeats,
+      permittedSeats: permittedSeats ?? null,
       seats: strapi.ee.seats ?? null,
       subscriptionId: strapi.ee.subscriptionId ?? null,
       expireAt: strapi.ee.expireAt ?? null,
       licenseMode,
-      lastRegistrySyncAt: eeInformation?.lastCheckAt ?? null,
+      lastRegistrySyncAt,
+      nextRegistrySyncAt,
       usingCachedLicense: Boolean(eeInformation?.error && eeInformation?.license),
       registrySyncError: eeInformation?.error ?? null,
       shouldNotify,
@@ -87,6 +105,6 @@ export default {
       entitlements: strapi.ee.entitlements.list(),
     };
 
-    return { data };
+    return { data } satisfies GetLicenseLimitInformation.Response;
   },
 };

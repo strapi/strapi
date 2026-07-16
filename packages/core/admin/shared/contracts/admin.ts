@@ -201,16 +201,13 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (
-        | SSOFeature
-        | AuditLogsFeature
-        | ReviewWorkflowsFeature
-        | ContentReleasesFeature
-        | ContentHistoryFeature
-      )[];
+      // `strapi.ee.features.list()` is loosely typed at the source (`Array<{ name: string; [key: string]: any }>`);
+      // the frontend only ever reads `feature.name`, so the contract mirrors that shape instead of lying with a
+      // named-feature union no other consumer needs.
+      features: Array<{ name: string; [key: string]: unknown }>;
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
-      permittedSeats: number;
+      permittedSeats: number | null;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
       type: string;
@@ -220,6 +217,7 @@ export declare namespace GetLicenseLimitInformation {
       expireAt: string | null;
       licenseMode: 'online' | 'offline';
       lastRegistrySyncAt: number | null;
+      nextRegistrySyncAt: number | null;
       usingCachedLicense: boolean;
       registrySyncError: string | null;
       entitlements: Array<{

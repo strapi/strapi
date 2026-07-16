@@ -87,4 +87,60 @@ describe('licenseLimitInformation (extended fields)', () => {
     expect(data.usingCachedLicense).toBe(true);
     expect(data.registrySyncError).toBe('network');
   });
+
+  it('does not flag usingCachedLicense when there is an error but no cached license', async () => {
+    createStrapiMock({
+      stored: { value: JSON.stringify({ error: 'network', lastCheckAt: 1 }) },
+    });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 0,
+      getDisabledUserList: async () => [],
+    });
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.usingCachedLicense).toBe(false);
+    expect(data.registrySyncError).toBe('network');
+  });
+
+  it('does not flag usingCachedLicense when there is a license but no error', async () => {
+    createStrapiMock({
+      stored: { value: JSON.stringify({ license: 'signed', lastCheckAt: 1 }) },
+    });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 0,
+      getDisabledUserList: async () => [],
+    });
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.usingCachedLicense).toBe(false);
+    expect(data.registrySyncError).toBeNull();
+  });
+
+  it('computes nextRegistrySyncAt as lastCheckAt + 12h when online', async () => {
+    const lastCheckAt = 1700000000000;
+    createStrapiMock({
+      stored: { value: JSON.stringify({ license: 'signed', lastCheckAt }) },
+    });
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 3,
+      getDisabledUserList: async () => [],
+    });
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.licenseMode).toBe('online');
+    expect(data.nextRegistrySyncAt).toBe(lastCheckAt + 12 * 60 * 60 * 1000);
+  });
+
+  it('sets nextRegistrySyncAt to null when offline', async () => {
+    createStrapiMock({ stored: null });
+    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+    (global.strapi as any).service = () => ({
+      getCurrentActiveUserCount: async () => 0,
+      getDisabledUserList: async () => [],
+    });
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.licenseMode).toBe('offline');
+    expect(data.nextRegistrySyncAt).toBeNull();
+  });
 });
