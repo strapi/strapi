@@ -99,7 +99,7 @@
     "react-select": "5.8.0",
     "sharp": "0.34.5",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@strapi/admin": "5.50.2",
