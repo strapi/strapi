@@ -33,20 +33,4 @@ export const getEERoutes = (): RouteObject[] => [
         },
       ]
     : []),
-  ...(window.strapi.isEE
-    ? [
-        {
-          path: 'license',
-          lazy: async () => {
-            const { LicenseDetailsPage } = await import(
-              './pages/LicenseDetails/LicenseDetailsPage'
-            );
-
-            return {
-              Component: LicenseDetailsPage,
-            };
-          },
-        },
-      ]
-    : []),
 ];
