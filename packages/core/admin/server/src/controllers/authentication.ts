@@ -352,9 +352,10 @@ export default {
       if (sessionManager) {
         const userId = String(ctx.state.user.id);
         const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
+        const sessionId = (ctx.state.session as { id?: string } | undefined)?.id;
 
         if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
-          const deviceId = await resolveLogoutDeviceId(ctx, userId);
+          const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
           await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
         } else {
           await sessionManager('admin').invalidateRefreshToken(userId);

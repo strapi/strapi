@@ -130,27 +130,22 @@ export const buildSessionMetadataFromContext = (ctx: Context) =>
  * the active session row. Prefer the deviceId stored on the session backing
  * the current access token when available.
  *
- * Relies on `ctx.state.session.id` from the admin auth strategy — the logout
- * route requires authentication, so the Authorization-header re-parse is not
- * needed here.
+ * Callers should pass `ctx.state.session.id` from the admin auth strategy and
+ * the already-parsed body `deviceId` — the logout route requires authentication,
+ * so sessionId is expected to be present.
  */
 export const resolveLogoutDeviceId = async (
-  ctx: Context,
-  userId: string
+  userId: string,
+  sessionId: string | undefined,
+  clientDeviceId: string | undefined
 ): Promise<string | undefined> => {
-  const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
-  const clientDeviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
-  const currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
-
-  if (!currentSessionId) {
-    strapi.log.debug(
-      'resolveLogoutDeviceId: no ctx.state.session.id; falling back to client deviceId'
-    );
+  if (!sessionId) {
+    strapi.log.debug('resolveLogoutDeviceId: no sessionId; falling back to client deviceId');
     return clientDeviceId;
   }
 
   const session = await strapi.db.query(SESSION_CONTENT_TYPE).findOne({
-    where: { sessionId: currentSessionId },
+    where: { sessionId },
   });
 
   if (session?.userId !== userId || session?.origin !== ADMIN_ORIGIN) {
