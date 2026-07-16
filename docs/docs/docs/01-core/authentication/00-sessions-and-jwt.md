@@ -83,7 +83,7 @@ Configuration:
 - Cookie options:
   - `admin.auth.cookie.name` (default `jwtToken`) — name of the non-httpOnly access-token cookie used for session logins (when `rememberMe` is false) and EE SSO handoff. Rename to avoid collisions with another app on a shared parent domain that sets a `jwtToken` cookie. Requires an admin rebuild after change (value is inlined into the admin bundle at build time).
   - `admin.auth.cookie.domain` (or `admin.auth.domain`) — applied to `strapi_admin_refresh`
-  - `admin.auth.cookie.path` (default `/admin`) — applied to `strapi_admin_refresh`
+  - `admin.auth.cookie.path` (default `/admin`) — applied to `strapi_admin_refresh` and to the non-httpOnly access-token cookie written by the admin client (and EE SSO). Requires an admin rebuild after change (value is inlined into the admin bundle at build time). Use a distinct path per instance when hosting multiple Strapis under the same parent domain.
   - `admin.auth.cookie.sameSite` (default `lax`) — applied to `strapi_admin_refresh`
 
 Key files:

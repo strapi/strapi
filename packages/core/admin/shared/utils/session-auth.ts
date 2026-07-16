@@ -2,12 +2,18 @@ import crypto from 'crypto';
 import type { Modules } from '@strapi/types';
 
 import { resolveAuthCookieName } from './auth-cookie-name';
+import { resolveAuthCookiePath } from './auth-cookie-path';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
 export const getAccessCookieName = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
   return resolveAuthCookieName(configured);
+};
+
+export const getAccessCookiePath = (): string => {
+  const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
+  return resolveAuthCookiePath(configured);
 };
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
@@ -21,7 +27,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
 
   const domain: string | undefined =
     strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
-  const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+  const path = getAccessCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
