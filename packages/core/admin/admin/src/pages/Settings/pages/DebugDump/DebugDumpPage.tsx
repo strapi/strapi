@@ -8,12 +8,14 @@ import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
+import { useClipboard } from '../../../../hooks/useClipboard';
 import { useLazyGetDebugDumpQuery } from '../../../../services/admin';
 
 const DebugDumpPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const [triggerGetDump, { isFetching }] = useLazyGetDebugDumpQuery();
+  const { copy } = useClipboard();
   const [dump, setDump] = React.useState<unknown>(undefined);
 
   const serialized = React.useMemo(
@@ -25,6 +27,14 @@ const DebugDumpPage = () => {
     const result = await triggerGetDump();
     if ('data' in result && result.data) {
       setDump(result.data);
+    } else {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'Settings.debug-dump.error',
+          defaultMessage: 'Failed to generate the debug dump. Check the server logs and try again.',
+        }),
+      });
     }
   };
 
@@ -33,20 +43,22 @@ const DebugDumpPage = () => {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `strapi-debug-dump-${new Date().toISOString()}.json`;
+    anchor.download = `strapi-debug-dump-${new Date().toISOString().replace(/:/g, '-')}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(serialized);
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.debug-dump.copied',
-        defaultMessage: 'Copied to clipboard',
-      }),
-    });
+    const didCopy = await copy(serialized);
+    if (didCopy) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'Settings.debug-dump.copied',
+          defaultMessage: 'Copied to clipboard',
+        }),
+      });
+    }
   };
 
   return (
