@@ -27,7 +27,7 @@ describe('serveAdminPanel route', () => {
         dirs: { dist: { root: '/tmp/strapi-dist' } },
         config: { admin: { path: '/admin' } },
         server: {
-          routes: (routes: any[]) => {
+          routes(routes: any[]) {
             registeredRoutes = routes;
           },
         },
@@ -46,7 +46,7 @@ describe('serveAdminPanel route', () => {
         body: null,
         status: 404,
         type: undefined as string | undefined,
-        set: (key: string, value: string) => {
+        set(key: string, value: string) {
           headers[key.toLowerCase()] = value;
         },
       };
@@ -60,7 +60,7 @@ describe('serveAdminPanel route', () => {
     });
 
     test('static HTML responses revalidate; hashed assets stay immutable', () => {
-      const { strapi, getRoutes } = createStrapi();
+      const { strapi } = createStrapi();
       registerAdminPanelRoute({ strapi: strapi as any });
 
       expect(koaStatic).toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe('serveAdminPanel route', () => {
       const htmlHeaders: Record<string, string> = {};
       options.setHeaders(
         {
-          setHeader: (key: string, value: string) => {
+          setHeader(key: string, value: string) {
             htmlHeaders[key.toLowerCase()] = value;
           },
         },
@@ -82,7 +82,7 @@ describe('serveAdminPanel route', () => {
       const assetHeaders: Record<string, string> = {};
       options.setHeaders(
         {
-          setHeader: (key: string, value: string) => {
+          setHeader(key: string, value: string) {
             assetHeaders[key.toLowerCase()] = value;
           },
         },
