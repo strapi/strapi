@@ -1,9 +1,9 @@
 import { redirectWithAuth } from '../middlewares';
 
-const buildSessionMetadataFromContext = jest.fn(() => ({
+const buildSessionMetadataFromContext = jest.fn().mockReturnValue({
   deviceName: 'Chrome on macOS',
   loginAt: '2026-07-01T12:00:00.000Z',
-}));
+});
 
 jest.mock('../utils', () => ({
   __esModule: true,

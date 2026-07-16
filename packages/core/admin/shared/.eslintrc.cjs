@@ -16,6 +16,7 @@ const config = {
       rules: {
         '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/ban-types': 'off',
+        '@typescript-eslint/no-empty-interface': 'off',
         'import/order': 'off',
         'import/first': 'off',
         'node/no-extraneous-import': 'off',
