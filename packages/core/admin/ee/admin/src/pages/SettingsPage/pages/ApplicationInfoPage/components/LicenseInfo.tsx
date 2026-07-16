@@ -45,7 +45,7 @@ const LIMIT_LABELS: Record<string, MessageDescriptor> = {
 };
 
 const LicenseInfoEE = () => {
-  const { formatMessage, formatDate } = useIntl();
+  const { formatMessage, formatDate, formatRelativeTime } = useIntl();
   const { license, isLoading, isError } = useLicenseLimits();
 
   if (isLoading) {
@@ -99,6 +99,22 @@ const LicenseInfoEE = () => {
       { id: 'Settings.license.limit.count', defaultMessage: '{value, number}' },
       { value: limit.value }
     );
+  };
+
+  // The next check-in is shown relative ("in about 11 hours") rather than as an
+  // absolute timestamp: on a 12h cadence the next check is usually the same
+  // calendar day, which reads as a flipped AM/PM when shown as a date.
+  const formatNextCheckin = (timestamp: number | null): string => {
+    if (typeof timestamp !== 'number') {
+      return formatMessage({ id: 'Settings.license.checkin.never', defaultMessage: 'Not yet' });
+    }
+    const diffMs = timestamp - Date.now();
+    const diffHours = Math.round(diffMs / (60 * 60 * 1000));
+    if (Math.abs(diffHours) >= 1) {
+      return formatRelativeTime(diffHours, 'hour', { numeric: 'auto' });
+    }
+    const diffMinutes = Math.round(diffMs / (60 * 1000));
+    return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
   };
 
   return (
@@ -165,17 +181,7 @@ const LicenseInfoEE = () => {
               />
               <Detail
                 label={{ id: 'Settings.license.nextCheckin', defaultMessage: 'Next check-in' }}
-                value={
-                  license.nextRegistrySyncAt
-                    ? formatDate(new Date(license.nextRegistrySyncAt), {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      })
-                    : formatMessage({
-                        id: 'Settings.license.checkin.never',
-                        defaultMessage: 'Not yet',
-                      })
-                }
+                value={formatNextCheckin(license.nextRegistrySyncAt)}
               />
             </>
           ) : (
