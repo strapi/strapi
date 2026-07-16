@@ -4,7 +4,7 @@ import { getInstallArgs } from '../get-package-manager-args';
 
 jest.mock('execa');
 
-const mockedExeca = execa as jest.MockedFunction<typeof execa>;
+const mockedExeca = execa as unknown as jest.Mock;
 
 describe('getInstallArgs', () => {
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('getInstallArgs', () => {
   });
 
   it('does not pass --legacy-peer-deps for npm', async () => {
-    mockedExeca.mockResolvedValue({ stdout: '10.9.2' } as execa.ExecaReturnValue);
+    mockedExeca.mockResolvedValue({ stdout: '10.9.2' });
 
     const { cmdArgs } = await getInstallArgs('npm');
 
@@ -21,7 +21,7 @@ describe('getInstallArgs', () => {
   });
 
   it('keeps yarn classic network timeout', async () => {
-    mockedExeca.mockResolvedValue({ stdout: '1.22.22' } as execa.ExecaReturnValue);
+    mockedExeca.mockResolvedValue({ stdout: '1.22.22' });
 
     const { cmdArgs } = await getInstallArgs('yarn');
 
@@ -29,7 +29,7 @@ describe('getInstallArgs', () => {
   });
 
   it('does not add extra args for yarn 4+', async () => {
-    mockedExeca.mockResolvedValue({ stdout: '4.12.0' } as execa.ExecaReturnValue);
+    mockedExeca.mockResolvedValue({ stdout: '4.12.0' });
 
     const { cmdArgs, envArgs } = await getInstallArgs('yarn');
 
@@ -38,7 +38,7 @@ describe('getInstallArgs', () => {
   });
 
   it('does not add extra args for pnpm', async () => {
-    mockedExeca.mockResolvedValue({ stdout: '10.25.0' } as execa.ExecaReturnValue);
+    mockedExeca.mockResolvedValue({ stdout: '10.25.0' });
 
     const { cmdArgs } = await getInstallArgs('pnpm');
 
