@@ -226,4 +226,14 @@ export const ROUTES_CE = (): RouteObject[] => [
     },
     path: 'purchase-content-history',
   },
+  {
+    lazy: async () => {
+      const { ProtectedDebugDumpPage } = await import('./pages/DebugDump/DebugDumpPage');
+
+      return {
+        Component: ProtectedDebugDumpPage,
+      };
+    },
+    path: 'debug-dump',
+  },
 ];

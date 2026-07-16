@@ -98,6 +98,10 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    'debug-dump': {
+      main: [{ action: 'admin::debug-dump.read', subject: null }],
+      read: [{ action: 'admin::debug-dump.read', subject: null }],
+    },
     plugins: {
       main: [{ action: 'admin::marketplace.read', subject: null }],
       read: [{ action: 'admin::marketplace.read', subject: null }],
@@ -181,6 +185,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       },
       to: '/settings/list-plugins',
       id: 'plugins',
+    },
+    {
+      intlLabel: { id: 'Settings.debug-dump.title', defaultMessage: 'Debug & support' },
+      to: '/settings/debug-dump',
+      id: 'debug-dump',
     },
     // If the Enterprise/Cloud feature is not enabled and if the config doesn't disable it, we promote the Enterprise/Cloud feature by displaying them in the settings menu.
     // Disable this by adding "promoteEE: false" to your `./config/admin.js` file
