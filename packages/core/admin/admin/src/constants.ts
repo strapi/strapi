@@ -154,15 +154,11 @@ export interface SettingsMenuLink
 export type SettingsMenu = {
   admin: SettingsMenuLink[];
   global: SettingsMenuLink[];
+  applicationInfo: SettingsMenuLink[];
 };
 
 export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
-    {
-      intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
-      to: '/settings/application-infos',
-      id: '000-application-infos',
-    },
     {
       intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
       to: '/settings/webhooks',
@@ -185,11 +181,6 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       },
       to: '/settings/list-plugins',
       id: 'plugins',
-    },
-    {
-      intlLabel: { id: 'Settings.debug-dump.title', defaultMessage: 'Debug & support' },
-      to: '/settings/debug-dump',
-      id: 'debug-dump',
     },
     // If the Enterprise/Cloud feature is not enabled and if the config doesn't disable it, we promote the Enterprise/Cloud feature by displaying them in the settings menu.
     // Disable this by adding "promoteEE: false" to your `./config/admin.js` file
@@ -244,5 +235,18 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           },
         ]
       : []),
+  ],
+
+  applicationInfo: [
+    {
+      intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
+      to: '/settings/application-infos',
+      id: '000-application-infos',
+    },
+    {
+      intlLabel: { id: 'Settings.debug-dump.title', defaultMessage: 'Debug & support' },
+      to: '/settings/debug-dump',
+      id: 'debug-dump',
+    },
   ],
 });

@@ -81,7 +81,11 @@ const useSettingsMenu = (): {
    */
   const ceLinks = React.useMemo(() => SETTINGS_LINKS_CE(), []);
 
-  const { admin: adminLinks, global: globalLinks } = useEnterprise(
+  const {
+    admin: adminLinks,
+    global: globalLinks,
+    applicationInfo: applicationInfoLinks,
+  } = useEnterprise(
     ceLinks,
     async () => (await import('../../../ee/admin/src/constants')).SETTINGS_LINKS_EE(),
     {
@@ -89,11 +93,13 @@ const useSettingsMenu = (): {
         return {
           admin: [...eeLinks.admin, ...ceLinks.admin],
           global: [...ceLinks.global, ...eeLinks.global],
+          applicationInfo: [...ceLinks.applicationInfo, ...eeLinks.applicationInfo],
         };
       },
       defaultValue: {
         admin: [],
         global: [],
+        applicationInfo: [],
       },
     }
   );
@@ -160,13 +166,16 @@ const useSettingsMenu = (): {
     const { global, ...otherSections } = settings;
     const sections = formatLinks([
       {
+        id: 'application-info',
+        intlLabel: { id: 'Settings.application-info', defaultMessage: 'Application Info' },
+        links: sortBy(applicationInfoLinks.map(addPermissions), (link) => link.id).map((link) => ({
+          ...link,
+          hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
+        })),
+      },
+      {
         ...global,
-        links: sortBy([...global.links, ...globalLinks.map(addPermissions)], (link) => link.id).map(
-          (link) => ({
-            ...link,
-            hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
-          })
-        ),
+        links: sortBy([...global.links, ...globalLinks.map(addPermissions)], (link) => link.id),
       },
       {
         id: 'permissions',
@@ -180,6 +189,7 @@ const useSettingsMenu = (): {
   }, [
     adminLinks,
     globalLinks,
+    applicationInfoLinks,
     settings,
     shouldUpdateStrapi,
     addPermissions,

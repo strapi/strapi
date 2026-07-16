@@ -113,6 +113,7 @@
   "Settings.adminTokens.editPage.title": "Edit Admin Token",
   "Settings.adminTokens.emptyStateLayout": "You don't have any content yet...",
   "Settings.adminTokens.title": "Admin Tokens",
+  "Settings.application-info": "Application Info",
   "Settings.application.customization": "Customization",
   "Settings.application.customization.auth-logo.carousel-hint": "Replace the logo in the authentication pages",
   "Settings.application.customization.carousel-hint": "Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)",

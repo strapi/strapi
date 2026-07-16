@@ -78,15 +78,6 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
           },
         ]
       : []),
-    ...(window.strapi.isEE
-      ? [
-          {
-            intlLabel: { id: 'Settings.license.title', defaultMessage: 'License' },
-            to: '/settings/license',
-            id: 'license',
-          },
-        ]
-      : []),
   ],
 
   admin: [
@@ -97,6 +88,18 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
             to: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
             id: 'auditLogs',
             licenseOnly: true,
+          },
+        ]
+      : []),
+  ],
+
+  applicationInfo: [
+    ...(window.strapi.isEE
+      ? [
+          {
+            intlLabel: { id: 'Settings.license.title', defaultMessage: 'License' },
+            to: '/settings/license',
+            id: 'license',
           },
         ]
       : []),
