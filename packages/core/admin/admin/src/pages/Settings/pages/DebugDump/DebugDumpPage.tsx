@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, JSONInput, Typography } from '@strapi/design-system';
 import { Download, Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -50,15 +50,15 @@ const DebugDumpPage = () => {
 
   const handleCopy = async () => {
     const didCopy = await copy(serialized);
-    if (didCopy) {
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'Settings.debug-dump.copied',
-          defaultMessage: 'Copied to clipboard',
-        }),
-      });
-    }
+    toggleNotification({
+      type: didCopy ? 'success' : 'danger',
+      message: didCopy
+        ? formatMessage({ id: 'Settings.debug-dump.copied', defaultMessage: 'Copied to clipboard' })
+        : formatMessage({
+            id: 'Settings.debug-dump.copy-failed',
+            defaultMessage: 'Could not copy to clipboard',
+          }),
+    });
   };
 
   return (
@@ -118,11 +118,16 @@ const DebugDumpPage = () => {
                   })}
                 </Button>
               </Flex>
-              <Box tag="pre" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                <Typography variant="pi" tag="code">
-                  {serialized}
-                </Typography>
-              </Box>
+              <JSONInput
+                value={serialized}
+                disabled
+                aria-label={formatMessage({
+                  id: 'Settings.debug-dump.preview-label',
+                  defaultMessage: 'Debug dump preview',
+                })}
+                minHeight="24rem"
+                maxHeight="48rem"
+              />
             </Box>
           )}
         </Flex>
