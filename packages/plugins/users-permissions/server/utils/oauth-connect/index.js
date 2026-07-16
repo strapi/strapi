@@ -1,6 +1,6 @@
 'use strict';
 
-const oauthProviders = require('./providers');
+const builtinProviderEndpoints = require('./providers');
 const oauth1 = require('./oauth1');
 const oauth2 = require('./oauth2');
 
@@ -26,7 +26,7 @@ const parseConnectPath = (requestPath, apiPrefix) => {
 };
 
 const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
-  const defaults = oauthProviders[providerName];
+  const defaults = builtinProviderEndpoints[providerName];
   if (!defaults) {
     return null;
   }
@@ -61,6 +61,97 @@ const redirectWithPayload = (ctx, callbackUrl, payload) => {
 
   url.search = params.toString();
   ctx.redirect(url.toString());
+};
+
+const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
+  const requestToken = await oauth1.requestToken({
+    requestUrl: provider.request_url,
+    redirectUri,
+    consumerKey: provider.key,
+    clientCredential: provider.secret,
+  });
+
+  ctx.session.grant = {
+    provider: parsed.provider,
+    request: requestToken,
+  };
+
+  const authorizeUrl = `${provider.authorize_url}?oauth_token=${encodeURIComponent(requestToken.oauth_token)}`;
+  return ctx.redirect(authorizeUrl);
+};
+
+const startOAuth2Flow = (ctx, provider, parsed, redirectUri) => {
+  const state = oauth2.generateState();
+  ctx.session.grant = {
+    provider: parsed.provider,
+    state,
+  };
+
+  let authorizeUrl = oauth2.buildAuthorizeUrl(provider, {
+    key: provider.key,
+    redirectUri,
+    scope: provider.scope,
+    subdomain: provider.subdomain,
+  });
+
+  authorizeUrl += `&state=${encodeURIComponent(state)}`;
+  return ctx.redirect(authorizeUrl);
+};
+
+const handleOAuth1Callback = async (ctx, provider, callbackUrl) => {
+  const session = ctx.session.grant || {};
+  const { oauth_token: oauthToken, oauth_verifier: oauthVerifier } = ctx.query;
+  const requestToken = session.request;
+
+  if (!requestToken?.oauth_token || oauthToken !== requestToken.oauth_token) {
+    throw new Error('OAuth1 token mismatch');
+  }
+
+  const tokenResponse = await oauth1.accessToken({
+    accessUrl: provider.access_url,
+    consumerKey: provider.key,
+    clientCredential: provider.secret,
+    oauthToken,
+    oauthVerifier,
+    oauthTokenCredential: requestToken.oauth_token_secret,
+  });
+
+  const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
+  ctx.session.grant = {};
+  return redirectWithPayload(ctx, callbackUrl, payload);
+};
+
+const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => {
+  const session = ctx.session.grant || {};
+  const { code, state: queryState, error, error_description: errorDescription } = ctx.query;
+
+  if (error) {
+    ctx.session.grant = {};
+    return redirectWithPayload(ctx, callbackUrl, {
+      error,
+      error_description: errorDescription,
+    });
+  }
+
+  if (!code) {
+    throw new Error('OAuth2 missing code parameter');
+  }
+
+  if (session.state && queryState !== session.state) {
+    throw new Error('OAuth2 state mismatch');
+  }
+
+  const tokenResponse = await oauth2.exchangeAuthorizationCode(provider, {
+    key: provider.key,
+    secret: provider.secret,
+    redirectUri,
+    code,
+    subdomain: provider.subdomain,
+  });
+
+  const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
+  ctx.session.grant = {};
+  return redirectWithPayload(ctx, callbackUrl, payload);
 };
 
 const createOAuthConnectMiddleware = () => {
@@ -104,37 +195,9 @@ const createOAuthConnectMiddleware = () => {
 
     if (!parsed.isCallback) {
       if (provider.oauth === 1) {
-        const requestToken = await oauth1.requestToken({
-          requestUrl: provider.request_url,
-          redirectUri,
-          consumerKey: provider.key,
-          consumerSecret: provider.secret,
-        });
-
-        ctx.session.grant = {
-          provider: parsed.provider,
-          request: requestToken,
-        };
-
-        const authorizeUrl = `${provider.authorize_url}?oauth_token=${encodeURIComponent(requestToken.oauth_token)}`;
-        return ctx.redirect(authorizeUrl);
+        return startOAuth1Flow(ctx, provider, parsed, redirectUri);
       }
-
-      const state = oauth2.generateState();
-      ctx.session.grant = {
-        provider: parsed.provider,
-        state,
-      };
-
-      let authorizeUrl = oauth2.buildAuthorizeUrl(provider, {
-        key: provider.key,
-        redirectUri,
-        scope: provider.scope,
-        subdomain: provider.subdomain,
-      });
-
-      authorizeUrl += `&state=${encodeURIComponent(state)}`;
-      return ctx.redirect(authorizeUrl);
+      return startOAuth2Flow(ctx, provider, parsed, redirectUri);
     }
 
     const callbackUrl = effectiveConfig.callback;
@@ -144,58 +207,9 @@ const createOAuthConnectMiddleware = () => {
 
     try {
       if (provider.oauth === 1) {
-        const session = ctx.session.grant || {};
-        const { oauth_token: oauthToken, oauth_verifier: oauthVerifier } = ctx.query;
-        const requestToken = session.request;
-
-        if (!requestToken?.oauth_token || oauthToken !== requestToken.oauth_token) {
-          throw new Error('OAuth1 token mismatch');
-        }
-
-        const tokenResponse = await oauth1.accessToken({
-          accessUrl: provider.access_url,
-          consumerKey: provider.key,
-          consumerSecret: provider.secret,
-          oauthToken,
-          oauthVerifier,
-          oauthTokenSecret: requestToken.oauth_token_secret,
-        });
-
-        const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
-        ctx.session.grant = {};
-        return redirectWithPayload(ctx, callbackUrl, payload);
+        return handleOAuth1Callback(ctx, provider, callbackUrl);
       }
-
-      const session = ctx.session.grant || {};
-      const { code, state: queryState, error, error_description: errorDescription } = ctx.query;
-
-      if (error) {
-        ctx.session.grant = {};
-        return redirectWithPayload(ctx, callbackUrl, {
-          error,
-          error_description: errorDescription,
-        });
-      }
-
-      if (!code) {
-        throw new Error('OAuth2 missing code parameter');
-      }
-
-      if (session.state && queryState !== session.state) {
-        throw new Error('OAuth2 state mismatch');
-      }
-
-      const tokenResponse = await oauth2.exchangeAuthorizationCode(provider, {
-        key: provider.key,
-        secret: provider.secret,
-        redirectUri,
-        code,
-        subdomain: provider.subdomain,
-      });
-
-      const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
-      ctx.session.grant = {};
-      return redirectWithPayload(ctx, callbackUrl, payload);
+      return handleOAuth2Callback(ctx, provider, callbackUrl, redirectUri);
     } catch (err) {
       ctx.session.grant = {};
       return redirectWithPayload(ctx, callbackUrl, {

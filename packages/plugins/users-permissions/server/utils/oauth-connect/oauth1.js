@@ -1,24 +1,35 @@
 'use strict';
 
-const crypto = require('crypto');
-const { URLSearchParams } = require('url');
+const crypto = require('node:crypto');
+const { URLSearchParams } = require('node:url');
 
 const encode = (str) =>
   encodeURIComponent(str).replace(
     /[!'()*]/g,
-    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
+    (c) => `%${c.codePointAt(0).toString(16).toUpperCase()}`
   );
+
+const sortKeys = (keys) => keys.sort((a, b) => a.localeCompare(b));
+
+/**
+ * OAuth 1.0 (RFC 5849) request signature — HMAC-SHA1 is required by the protocol.
+ * This is not password storage or user-credential hashing (those use bcrypt).
+ */
+const signRfc5849BaseString = (signatureBaseString, signingMaterial) => {
+  // codeql[js/insufficient-password-hash] OAuth 1.0 signing material, not user password storage
+  return crypto.createHmac('sha1', signingMaterial).update(signatureBaseString).digest('base64');
+};
 
 const buildOAuth1Header = ({
   method,
   url,
   params,
   consumerKey,
-  consumerSecret,
+  clientCredential,
   token,
-  tokenSecret,
+  tokenCredential,
 }) => {
-  const oauthParams = {
+  const requestParameters = {
     oauth_consumer_key: consumerKey,
     oauth_nonce: crypto.randomBytes(16).toString('hex'),
     oauth_signature_method: 'HMAC-SHA1',
@@ -28,19 +39,17 @@ const buildOAuth1Header = ({
     ...params,
   };
 
-  const paramString = Object.keys(oauthParams)
-    .sort()
-    .map((key) => `${encode(key)}=${encode(oauthParams[key])}`)
+  const paramString = sortKeys(Object.keys(requestParameters))
+    .map((key) => `${encode(key)}=${encode(requestParameters[key])}`)
     .join('&');
 
-  const baseString = [method.toUpperCase(), encode(url), encode(paramString)].join('&');
-  const signingKey = `${encode(consumerSecret)}&${encode(tokenSecret || '')}`;
-  const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
+  const signatureBaseString = [method.toUpperCase(), encode(url), encode(paramString)].join('&');
+  const signingMaterial = `${encode(clientCredential)}&${encode(tokenCredential || '')}`;
+  const signature = signRfc5849BaseString(signatureBaseString, signingMaterial);
 
-  const headerParams = { ...oauthParams, oauth_signature: signature };
-  const header = `OAuth ${Object.keys(headerParams)
-    .sort()
-    .map((key) => `${encode(key)}="${encode(headerParams[key])}"`)
+  const headerParameters = { ...requestParameters, oauth_signature: signature };
+  const header = `OAuth ${sortKeys(Object.keys(headerParameters))
+    .map((key) => `${encode(key)}="${encode(headerParameters[key])}"`)
     .join(', ')}`;
 
   return header;
@@ -50,9 +59,9 @@ const oauth1Request = async ({
   method,
   url,
   consumerKey,
-  consumerSecret,
+  clientCredential,
   token,
-  tokenSecret,
+  tokenCredential,
   params = {},
 }) => {
   const authorization = buildOAuth1Header({
@@ -60,9 +69,9 @@ const oauth1Request = async ({
     url,
     params,
     consumerKey,
-    consumerSecret,
+    clientCredential,
     token,
-    tokenSecret,
+    tokenCredential,
   });
 
   const response = await fetch(url, {
@@ -78,39 +87,39 @@ const oauth1Request = async ({
   return Object.fromEntries(new URLSearchParams(text));
 };
 
-const requestToken = async ({ requestUrl, redirectUri, consumerKey, consumerSecret }) =>
+const requestToken = async ({ requestUrl, redirectUri, consumerKey, clientCredential }) =>
   oauth1Request({
     method: 'POST',
     url: requestUrl,
     consumerKey,
-    consumerSecret,
+    clientCredential,
     params: { oauth_callback: redirectUri },
   });
 
 const accessToken = async ({
   accessUrl,
   consumerKey,
-  consumerSecret,
+  clientCredential,
   oauthToken,
   oauthVerifier,
-  oauthTokenSecret,
+  oauthTokenCredential,
 }) =>
   oauth1Request({
     method: 'POST',
     url: accessUrl,
     consumerKey,
-    consumerSecret,
+    clientCredential,
     token: oauthToken,
-    tokenSecret: oauthTokenSecret,
+    tokenCredential: oauthTokenCredential,
     params: { oauth_verifier: oauthVerifier },
   });
 
 const twitterGet = async ({
   url,
   accessToken,
-  accessSecret,
+  accessCredential,
   consumerKey,
-  consumerSecret,
+  clientCredential,
   qs = {},
 }) => {
   const target = new URL(url);
@@ -125,9 +134,9 @@ const twitterGet = async ({
     url: target.origin + target.pathname + target.search,
     params: {},
     consumerKey,
-    consumerSecret,
+    clientCredential,
     token: accessToken,
-    tokenSecret: accessSecret,
+    tokenCredential: accessCredential,
   });
 
   const response = await fetch(target, {

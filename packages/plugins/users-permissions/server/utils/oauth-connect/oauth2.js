@@ -1,6 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const formatScope = (scope, delimiter = ',') => {
   if (Array.isArray(scope)) {
@@ -29,7 +29,7 @@ const buildAuthorizeUrl = (provider, { key, redirectUri, scope, subdomain }) => 
     params.delete('client_id');
     params.set('app_id', key);
     if (formattedScope) {
-      params.set('scope', formattedScope.replace(/ /g, ','));
+      params.set('scope', formattedScope.replaceAll(' ', ','));
     }
   }
 

@@ -139,9 +139,9 @@ const initProviders = ({ baseURL }) => ({
       const { body } = await twitterGet({
         url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
         accessToken,
-        accessSecret: query.access_secret,
+        accessCredential: query.access_secret,
         consumerKey: providers.twitter.key,
-        consumerSecret: providers.twitter.secret,
+        clientCredential: providers.twitter.secret,
         qs: { include_email: 'true', screen_name: query['raw[screen_name]'] },
       });
 

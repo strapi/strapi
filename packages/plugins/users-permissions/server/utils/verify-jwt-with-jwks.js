@@ -1,6 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 const jwt = require('jsonwebtoken');
 
 const jwkToKeyObject = (jwk) => crypto.createPublicKey({ key: jwk, format: 'jwk' });
