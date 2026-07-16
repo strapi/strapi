@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 
-import { within } from '@testing-library/react';
 import { act, render, screen } from '@tests/utils';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';

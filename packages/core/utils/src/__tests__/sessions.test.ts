@@ -10,7 +10,6 @@ describe('sessions utils', () => {
           createdAt: '2026-06-12T10:00:00.000Z',
           metadata: {
             loginAt: '2026-06-12T08:00:00.000Z',
-            ip: '127.0.0.1',
             deviceName: 'Chrome on macOS',
           },
         },
@@ -32,7 +31,6 @@ describe('sessions utils', () => {
         sessionId: 'session-b',
         metadata: {
           loginAt: 123,
-          ip: null,
           deviceName: false,
         },
       });

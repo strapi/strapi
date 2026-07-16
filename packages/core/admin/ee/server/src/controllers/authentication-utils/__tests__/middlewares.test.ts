@@ -26,6 +26,7 @@ jest.mock('../../../../../../shared/utils/session-auth', () => ({
   generateDeviceId: jest.fn(() => 'sso-device-id'),
   buildCookieOptionsWithExpiry: jest.fn(() => ({})),
   buildSessionMetadataFromContext: (ctx: unknown) => buildSessionMetadataFromContext(ctx),
+  getAccessCookieName: jest.fn(() => 'jwtToken'),
   REFRESH_COOKIE_NAME: 'strapi_admin_refresh',
 }));
 

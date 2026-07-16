@@ -62,9 +62,9 @@ interface IDefaultLink {
      */
     type: string;
     /**
-     * Reference ID of the entity
+     * Reference ID of the entity (numeric row id, or document id for joinColumn targets)
      */
-    ref: number;
+    ref: number | string;
     /**
      * Field used to hold the link in the entity
      */
@@ -86,9 +86,9 @@ interface IDefaultLink {
      */
     type: string;
     /**
-     * Reference ID of the entity
+     * Reference ID of the entity (numeric row id, or document id for joinColumn targets)
      */
-    ref: number;
+    ref: number | string;
     /**
      * Field used to hold the link in the entity
      */

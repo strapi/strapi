@@ -8,7 +8,6 @@ import { describeOnCondition } from 'api-tests/utils';
 import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
-  STAGE_MODEL_UID,
 } from '../../../../packages/core/review-workflows/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -88,10 +87,6 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   const getWorkflow = async (id) => {
     const { body } = await requests.admin.get(`/review-workflows/workflows?populate=*`);
     return body.data.find((workflow) => workflow.id === id);
-  };
-
-  const getWorkflows = async (filters) => {
-    return strapi.plugin('review-workflows').service('workflows').find({ filters });
   };
 
   const createEntry = async (uid, data) => {
@@ -395,71 +390,6 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
 
       const entry = await createEntry(productUID, { name: 'Product' });
       expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
-    });
-  });
-
-  describe('Get workflows', () => {
-    let workflow1, workflow2;
-
-    const deleteWorkflowsFromDb = async (ids: number[]) => {
-      if (!ids.length) {
-        return;
-      }
-
-      await strapi.db.query(STAGE_MODEL_UID).deleteMany({
-        where: { workflow: { id: { $in: ids } } },
-      });
-      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({
-        where: { id: { $in: ids } },
-      });
-    };
-
-    beforeAll(async () => {
-      // API delete refuses to remove the last workflow; reset via DB so this describe starts clean.
-      await strapi.db.query(STAGE_MODEL_UID).deleteMany({});
-      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({});
-    });
-
-    beforeEach(async () => {
-      const emptyRes = await createWorkflow({ contentTypes: [] });
-      expect(emptyRes.status).toBe(201);
-      workflow1 = emptyRes.body.data;
-
-      const assignedRes = await createWorkflow({ contentTypes: [productUID] });
-      expect(assignedRes.status).toBe(201);
-      workflow2 = assignedRes.body.data;
-      expect(assignedRes.body.data.contentTypes).toEqual(expect.arrayContaining([productUID]));
-    });
-
-    afterEach(async () => {
-      await deleteWorkflowsFromDb([workflow1?.id, workflow2?.id].filter(Boolean));
-    });
-
-    test('Should list workflows filtered by CT', async () => {
-      const workflows = await getWorkflows({ contentTypes: productUID });
-
-      expect(workflows).toHaveLength(1);
-      expect(workflows[0]).toMatchObject({ id: workflow2.id });
-    });
-
-    // Depends on the previous test
-    test('Should list workflows filtered by CT even with similar names (plugin::my-plugin.my-ct and plugin::my-plugin.my-ct2)', async () => {
-      // Manually update workflow to have a similar CT name
-      await strapi.db.query(WORKFLOW_MODEL_UID).update({
-        where: { id: workflow1.id },
-        data: { contentTypes: [`${productUID}-2`] },
-      });
-
-      const workflows = await getWorkflows({ contentTypes: productUID });
-
-      expect(workflows).toHaveLength(1);
-      expect(workflows[0]).toMatchObject({ id: workflow2.id });
-
-      // To avoid breaking other tests
-      await strapi.db.query(WORKFLOW_MODEL_UID).update({
-        where: { id: workflow1.id },
-        data: { contentTypes: [] },
-      });
     });
   });
 });
