@@ -65,7 +65,7 @@
     "rollup": "4.60.4",
     "semver": "7.7.4",
     "sort-package-json": "2.10.0",
-    "tar": "7.5.18"
+    "tar": "7.5.20"
   },
   "devDependencies": {
     "@strapi/database": "5.50.2",

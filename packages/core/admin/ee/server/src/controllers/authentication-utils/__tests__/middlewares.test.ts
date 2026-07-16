@@ -1,51 +1,86 @@
 import { redirectWithAuth } from '../middlewares';
-
-const buildSessionMetadataFromContext = jest.fn().mockReturnValue({
-  deviceName: 'Chrome on macOS',
-  loginAt: '2026-07-01T12:00:00.000Z',
-});
+import { DEFAULT_AUTH_COOKIE_NAME } from '../../../../../../shared/utils/auth-cookie-name';
+import { REFRESH_COOKIE_NAME } from '../../../../../../shared/utils/session-auth';
 
 jest.mock('../utils', () => ({
   __esModule: true,
   default: {
-    getPrefixedRedirectUrls: () => ({
+    getPrefixedRedirectUrls: jest.fn(() => ({
       success: '/admin/auth/login/success',
       error: '/admin/auth/login/error',
-    }),
+    })),
   },
 }));
 
-jest.mock('../../../utils', () => ({
-  getService: () => ({
-    sanitizeUser: (user: { id: number }) => user,
-  }),
-}));
+jest.mock('../../../../../../shared/utils/session-auth', () => {
+  const actual = jest.requireActual('../../../../../../shared/utils/session-auth');
+  return {
+    ...actual,
+    getSessionManager: jest.fn(),
+    generateDeviceId: jest.fn(() => 'device-id'),
+    buildCookieOptionsWithExpiry: jest.fn(() => ({
+      httpOnly: true,
+      secure: false,
+      overwrite: true,
+      path: '/admin',
+      sameSite: 'lax',
+    })),
+  };
+});
 
-jest.mock('../../../../../../shared/utils/session-auth', () => ({
-  getSessionManager: jest.fn(),
-  generateDeviceId: jest.fn(() => 'sso-device-id'),
-  buildCookieOptionsWithExpiry: jest.fn(() => ({})),
-  buildSessionMetadataFromContext: (ctx: unknown) => buildSessionMetadataFromContext(ctx),
-  getAccessCookieName: jest.fn(() => 'jwtToken'),
-  REFRESH_COOKIE_NAME: 'strapi_admin_refresh',
-}));
-
-const { getSessionManager } = jest.requireMock('../../../../../../shared/utils/session-auth');
+const { getSessionManager, buildCookieOptionsWithExpiry } = jest.requireMock(
+  '../../../../../../shared/utils/session-auth'
+) as {
+  getSessionManager: jest.Mock;
+  buildCookieOptionsWithExpiry: jest.Mock;
+};
 
 describe('redirectWithAuth', () => {
-  const generateRefreshToken = jest.fn();
-  const generateAccessToken = jest.fn();
+  const user = { id: 42, email: 'admin@example.com' };
+  const sanitizeUser = jest.fn((u: unknown) => ({ ...(u as object), sanitized: true }));
+  const generateRefreshToken = jest.fn(async () => ({
+    token: 'refresh-token',
+    absoluteExpiresAt: '2099-01-01T00:00:00.000Z',
+  }));
+  const generateAccessToken = jest.fn(async () => ({ token: 'access-token' }));
+
+  const createCtx = (overrides: Record<string, unknown> = {}) => {
+    const cookiesSet = jest.fn();
+    const redirect = jest.fn();
+    return {
+      params: { provider: 'google' },
+      state: { user },
+      request: {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      },
+      cookies: { set: cookiesSet },
+      redirect,
+      cookiesSet,
+      ...overrides,
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // unit.setup.js rewrites strapi.service('admin::x') → strapi.admin.services.x
     global.strapi = {
+      admin: {
+        services: {
+          user: { sanitizeUser },
+        },
+      },
       config: {
-        get(key: string) {
+        get: jest.fn((key: string, defaultValue?: unknown) => {
           if (key === 'admin.auth.cookie.secure') return false;
           if (key === 'admin.auth.domain') return undefined;
+          if (key === 'admin.auth.cookie.name') return undefined;
+          if (key === 'admin.auth.cookie.path') return defaultValue;
           return undefined;
-        },
+        }),
       },
       log: { error: jest.fn() },
       eventHub: { emit: jest.fn() },
@@ -55,38 +90,78 @@ describe('redirectWithAuth', () => {
       generateRefreshToken,
       generateAccessToken,
     }));
-
-    generateRefreshToken.mockResolvedValue({
-      token: 'refresh-token',
-      absoluteExpiresAt: new Date(Date.now() + 60_000).toISOString(),
-    });
-    generateAccessToken.mockResolvedValue({ token: 'access-token' });
   });
 
   test('stores session metadata from the SSO callback request', async () => {
-    const ctx = {
-      params: { provider: 'google' },
-      state: { user: { id: 42 } },
-      request: {
-        headers: {
-          'user-agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-      },
-      cookies: { set: jest.fn() },
-      redirect: jest.fn(),
-    } as any;
+    const ctx = createCtx();
 
-    await redirectWithAuth(ctx, jest.fn());
+    await redirectWithAuth(ctx as any, jest.fn());
 
-    expect(buildSessionMetadataFromContext).toHaveBeenCalledWith(ctx);
-    expect(generateRefreshToken).toHaveBeenCalledWith('42', 'sso-device-id', {
+    expect(generateRefreshToken).toHaveBeenCalledWith('42', 'device-id', {
       type: 'refresh',
-      metadata: {
+      metadata: expect.objectContaining({
         deviceName: 'Chrome on macOS',
-        loginAt: '2026-07-01T12:00:00.000Z',
-      },
+        loginAt: expect.any(String),
+      }),
     });
     expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/success');
+  });
+
+  test('sets the access cookie path to /admin by default', async () => {
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(global.strapi.log.error).not.toHaveBeenCalled();
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      DEFAULT_AUTH_COOKIE_NAME,
+      'access-token',
+      expect.objectContaining({
+        httpOnly: false,
+        path: '/admin',
+        overwrite: true,
+      })
+    );
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/success');
+  });
+
+  test('respects admin.auth.cookie.path for the access cookie', async () => {
+    (global.strapi.config.get as jest.Mock).mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'admin.auth.cookie.path') return '/custom-admin';
+        if (key === 'admin.auth.cookie.secure') return false;
+        if (key === 'admin.auth.cookie.name') return undefined;
+        if (key === 'admin.auth.domain') return undefined;
+        return defaultValue;
+      }
+    );
+
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      DEFAULT_AUTH_COOKIE_NAME,
+      'access-token',
+      expect.objectContaining({
+        path: '/custom-admin',
+      })
+    );
+  });
+
+  test('still sets the refresh cookie via buildCookieOptionsWithExpiry', async () => {
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(buildCookieOptionsWithExpiry).toHaveBeenCalledWith(
+      'refresh',
+      '2099-01-01T00:00:00.000Z'
+    );
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      REFRESH_COOKIE_NAME,
+      'refresh-token',
+      expect.objectContaining({ path: '/admin' })
+    );
   });
 });
