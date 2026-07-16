@@ -147,12 +147,6 @@ const LicenseInfoEE = () => {
                   })
             }
           />
-          {license.subscriptionId && (
-            <Detail
-              label={{ id: 'Settings.license.subscription', defaultMessage: 'Subscription ID' }}
-              value={license.subscriptionId}
-            />
-          )}
           {license.licenseMode === 'online' ? (
             <>
               <Detail
@@ -196,6 +190,12 @@ const LicenseInfoEE = () => {
                     })
                   : formatMessage({ id: 'Settings.license.expiry.none', defaultMessage: '—' })
               }
+            />
+          )}
+          {license.subscriptionId && (
+            <Detail
+              label={{ id: 'Settings.license.subscription', defaultMessage: 'Subscription ID' }}
+              value={license.subscriptionId}
             />
           )}
         </Grid.Root>
