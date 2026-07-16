@@ -245,3 +245,55 @@ export declare namespace GetGuidedTourMeta {
     error?: errors.ApplicationError;
   }
 }
+
+/**
+ * /debug-dump - assemble a redacted diagnostic payload for Strapi Support
+ */
+export interface DebugDumpPayload {
+  dumpVersion: 1;
+  generatedAt: string;
+  strapi: {
+    version: string | null;
+    edition: 'EE' | 'CE';
+    projectType: string;
+    environment: string;
+    autoReload: boolean;
+  };
+  license?: {
+    type: string | null | undefined;
+    isTrial: boolean;
+    expireAt: string | null;
+    seats: number | null;
+    subscriptionId: string | null;
+    features: unknown[];
+    entitlements: unknown[];
+  };
+  system: {
+    nodeVersion: string;
+    os: { type: string; platform: string; arch: string; release: string };
+    isHostedOnStrapiCloud: boolean;
+  };
+  database: { client: string; schema?: string; displayName?: string };
+  plugins: string[];
+  providers: { upload: { name: unknown; isPrivate: boolean }; email: { name: unknown } };
+  contentModel: {
+    counts: { contentTypes: number; components: number };
+    contentTypes: unknown[];
+    components: unknown[];
+  };
+  customizations: unknown;
+  config: Record<string, unknown>;
+  packageJson: Record<string, unknown>;
+  env: Record<string, string | undefined>;
+}
+
+export declare namespace DebugDump {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: DebugDumpPayload;
+    error?: errors.ApplicationError;
+  }
+}
