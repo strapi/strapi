@@ -22,6 +22,17 @@ import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-ma
 
 const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
 
+/**
+ * When npm is the package manager, scaffolding installs with --legacy-peer-deps
+ * (see get-package-manager-args.ts). The lockfile that npm writes under legacy
+ * peer-dep resolution is incompatible with `npm ci`'s strict validation unless
+ * the same flag is set in the project config. Per the npm docs:
+ *   "if you used --legacy-peer-deps you must provide the same flags to npm ci"
+ * Writing .npmrc with legacy-peer-deps=true ensures `npm ci` (used by
+ * CI/CD pipelines and Docker) succeeds on a fresh scaffold.
+ */
+const npmRcConfig = 'legacy-peer-deps=true\n';
+
 const getUserAgentPackageManagerVersion = (packageManager: Scope['packageManager']) => {
   const userAgent = process.env.npm_config_user_agent ?? '';
   const [agent] = userAgent.split(' ');
@@ -162,6 +173,13 @@ async function createApp(scope: Scope) {
       !(await fse.pathExists(join(rootPath, '.yarnrc.yml')))
     ) {
       await fse.writeFile(join(rootPath, '.yarnrc.yml'), yarnNodeModulesConfig);
+    }
+
+    // Write .npmrc so that `npm ci` uses the same --legacy-peer-deps resolution
+    // strategy that was used during scaffolding install, preventing lockfile
+    // mismatch errors (e.g. zod@3 vs zod@4) in CI/CD pipelines and Docker.
+    if (packageManager === 'npm' && !(await fse.pathExists(join(rootPath, '.npmrc')))) {
+      await fse.writeFile(join(rootPath, '.npmrc'), npmRcConfig);
     }
 
     await writePnpmWorkspaceConfig(scopeWithPnpmVersion, pnpmVersion);
