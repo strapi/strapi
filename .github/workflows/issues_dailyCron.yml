@@ -3,8 +3,10 @@ name: 'Daily Cron - 00:00'
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
   statuses: read
 
@@ -12,19 +14,76 @@ jobs:
   cron-tasks:
     runs-on: ubuntu-latest
     steps:
-      - name: check for inactive issues that can't be reproduced
-        uses: actions-cool/issues-helper@v3
+      - name: Checkout base branch
+        uses: actions/checkout@v4
         with:
-          actions: 'close-issues'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'status: can not reproduce'
-          inactive-day: 14
-          close-reason: 'completed'
-          body: |
-            Hello!
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
+
+      - name: Reconcile invalid template issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/issue-template-cron-action.ts
+
+      - name: Close inactive "can not reproduce" issues
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const inactiveDays = 14;
+            const label = 'status: can not reproduce';
+            const cutoff = new Date(Date.now() - inactiveDays * 24 * 60 * 60 * 1000);
+            const closeComment = `Hello!
 
             As we have not received any new or updated information to reproduce this issue in the last 14 days we are marking this issue as closed. Should you have new information please feel free to respond and we will consider reopening it.
 
             If anyone else have updated information for this issue, please open up a new bug report and simply reference this closed bug report so that we can get any new information you may have. If you have questions please refer to the [contributor's guide](https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue) on opening issues.
 
-            Thank you and have a great day!
+            Thank you and have a great day!`;
+
+            let closed = 0;
+
+            for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              labels: label,
+              per_page: 100,
+            })) {
+              for (const issue of response.data) {
+                if (issue.pull_request) {
+                  continue;
+                }
+
+                if (new Date(issue.updated_at) > cutoff) {
+                  continue;
+                }
+
+                core.info(`Closing inactive issue #${issue.number} (last updated ${issue.updated_at})`);
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  body: closeComment,
+                });
+
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+
+                closed += 1;
+              }
+            }
+
+            core.info(`Closed ${closed} inactive issue(s) with label "${label}"`);

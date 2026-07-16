@@ -135,4 +135,33 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('menuitem', { name: 'Remove from release' }).click();
     await expect(row).not.toBeVisible();
   });
+
+  // Critical path #23 (workflows.releases-atomic-publish): the seeded release contains a mix of
+  // publish and unpublish actions. Applying it must execute every action in one atomic operation.
+  test(
+    'a release mixing publish and unpublish actions is applied atomically',
+    { tag: ['@release'] },
+    async ({ page }) => {
+      // Confirm the release is genuinely mixed: grouped by action it shows both publish and unpublish.
+      await page.getByLabel('Group by').click();
+      await page.getByRole('option', { name: 'Actions' }).click();
+      await expect(page.getByRole('separator', { name: 'publish', exact: true })).toBeVisible();
+      await expect(page.getByRole('separator', { name: 'unpublish' })).toBeVisible();
+
+      // Apply the whole release in one action.
+      await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
+
+      // Atomic apply: the release is now done — its title still shows, there is no Publish button or
+      // pending actions left, and both sides of the mix report as processed.
+      await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
+      await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
+      ).toBeVisible();
+    }
+  );
 });

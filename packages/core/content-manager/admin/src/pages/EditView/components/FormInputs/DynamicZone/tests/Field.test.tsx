@@ -4,8 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
-const TEST_NAME = 'DynamicZoneComponent';
-
 /**
  * We _could_ unmock this and use it, but it requires more
  * harnessing then is necessary and it's not worth it for these

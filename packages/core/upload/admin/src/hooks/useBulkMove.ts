@@ -1,4 +1,4 @@
-import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { type FetchResponse, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
@@ -46,11 +46,14 @@ export const useBulkMove = () => {
       return acc;
     }, {});
 
-    return post('/upload/actions/bulk-move', { ...payload, destinationFolderId });
+    return post<BulkMoveFiles.Response['data'] | BulkMoveFolders.Response['data']>(
+      '/upload/actions/bulk-move',
+      { ...payload, destinationFolderId }
+    );
   };
 
   const mutation = useMutation<
-    BulkMoveFolders.Response | BulkMoveFiles.Response,
+    FetchResponse<BulkMoveFiles.Response['data'] | BulkMoveFolders.Response['data']>,
     BulkMoveFolders.Response['error'] | BulkMoveFiles.Response['error'],
     BulkMoveParams
   >(bulkMoveQuery, {

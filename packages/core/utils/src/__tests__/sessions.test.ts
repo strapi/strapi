@@ -10,7 +10,6 @@ describe('sessions utils', () => {
           createdAt: '2026-06-12T10:00:00.000Z',
           metadata: {
             loginAt: '2026-06-12T08:00:00.000Z',
-            ip: '127.0.0.1',
             deviceName: 'Chrome on macOS',
           },
         },
@@ -24,7 +23,6 @@ describe('sessions utils', () => {
         current: true,
         loginAt: '2026-06-12T08:00:00.000Z',
         lastActiveAt: '2026-06-12T10:00:00.000Z',
-        ip: '127.0.0.1',
       });
     });
 
@@ -33,7 +31,6 @@ describe('sessions utils', () => {
         sessionId: 'session-b',
         metadata: {
           loginAt: 123,
-          ip: null,
           deviceName: false,
         },
       });
@@ -45,15 +42,13 @@ describe('sessions utils', () => {
         current: false,
         loginAt: undefined,
         lastActiveAt: undefined,
-        ip: undefined,
       });
     });
   });
 
   describe('buildSessionMetadata', () => {
-    it('captures login time, ip, and a derived device label', () => {
+    it('captures login time and a derived device label without ip', () => {
       const result = buildSessionMetadata({
-        ip: '10.0.0.1',
         userAgent:
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         loginAt: '2026-06-12T08:00:00.000Z',
@@ -61,9 +56,9 @@ describe('sessions utils', () => {
 
       expect(result).toEqual({
         loginAt: '2026-06-12T08:00:00.000Z',
-        ip: '10.0.0.1',
         deviceName: 'Chrome on macOS',
       });
+      expect(result).not.toHaveProperty('ip');
     });
   });
 

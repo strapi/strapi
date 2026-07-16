@@ -25,7 +25,7 @@ const SortDisplayedFields = ({ metadatas }: SortDisplayedFieldsProps) => {
 
   const values = useForm<FormData['layout']>(
     'SortDisplayedFields',
-    (state) => state.values.layout ?? []
+    (state) => (state.values as FormData).layout ?? []
   );
   const addFieldRow = useForm('SortDisplayedFields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('SortDisplayedFields', (state) => state.removeFieldRow);

@@ -14,6 +14,7 @@ PORT=1337
 APP_KEYS=<%= appKeys %>
 API_TOKEN_SALT=<%= apiTokenSalt %>
 ADMIN_JWT_SECRET=<%= adminJwtToken %>
+JWT_SECRET=<%= jwtSecret %>
 TRANSFER_TOKEN_SALT=<%= transferTokenSalt %>
 ENCRYPTION_KEY=<%= encryptionKey %>
 
@@ -36,6 +37,7 @@ export function generateDotEnv(scope: Scope) {
     apiTokenSalt: generateASecret(),
     transferTokenSalt: generateASecret(),
     adminJwtToken: generateASecret(),
+    jwtSecret: generateASecret(),
     encryptionKey: generateASecret(),
     database: {
       client: scope.database.client,
