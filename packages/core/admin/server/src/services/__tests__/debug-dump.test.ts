@@ -51,7 +51,12 @@ const makeStrapi = () =>
     db: { getInfo: () => ({ client: 'sqlite', schema: undefined, displayName: '.tmp/data.db' }) },
     plugins: { 'users-permissions': {}, i18n: {} },
     plugin: () => ({ provider: { isPrivate: () => false } }),
-    contentTypes: {},
+    contentTypes: {
+      'api::a.a': {
+        uid: 'api::a.a',
+        attributes: { token: { type: 'string', default: 'SHOULD_BE_HIDDEN' } },
+      },
+    },
     components: {},
     getCustomizations: () => ({
       apis: [],
@@ -94,6 +99,13 @@ describe('debug-dump service', () => {
     expect(dump.config['plugin::email'].providerOptions).toBe(REDACTED);
     // non-secret config survives
     expect(dump.config.server.port).toBe(1337);
+  });
+
+  it('redacts secret-named attributes in content-type schemas', async () => {
+    const strapi = makeStrapi();
+    const dump = (await debugDumpService({ strapi }).generate()) as any;
+
+    expect(JSON.stringify(dump.contentModel.contentTypes)).not.toContain('SHOULD_BE_HIDDEN');
   });
 
   it('omits the license section in CE', async () => {

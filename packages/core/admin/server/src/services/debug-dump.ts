@@ -27,6 +27,7 @@ const SENSITIVE_CONFIG_PATHS = [
 const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async generate(): Promise<DebugDumpPayload> {
     const appRoot: string = strapi.config.get('dirs.app.root', '') as string;
+    const homeDir = os.homedir();
 
     const packageJson = (strapi.config.get('info', {}) ?? {}) as Record<string, unknown>;
 
@@ -45,6 +46,7 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
     }
     const fullConfig = scrub(rawConfig, {
       appRoot,
+      homeDir,
       extraPaths: SENSITIVE_CONFIG_PATHS,
     }) as Record<string, unknown>;
 
@@ -90,12 +92,12 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
           contentTypes: Object.keys(strapi.contentTypes).length,
           components: Object.keys(strapi.components).length,
         },
-        contentTypes: Object.values(strapi.contentTypes),
-        components: Object.values(strapi.components),
+        contentTypes: scrub(Object.values(strapi.contentTypes), { appRoot, homeDir }) as unknown[],
+        components: scrub(Object.values(strapi.components), { appRoot, homeDir }) as unknown[],
       },
       customizations: strapi.getCustomizations(),
       config: fullConfig,
-      packageJson: scrub(packageJson, { appRoot }) as Record<string, unknown>,
+      packageJson: scrub(packageJson, { appRoot, homeDir }) as Record<string, unknown>,
       env,
     };
 
