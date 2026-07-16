@@ -1,7 +1,15 @@
-import type { Context } from 'koa';
+import type { Context, Next } from 'koa';
 import fse from 'fs-extra';
+import type { Core } from '@strapi/types';
 
 import registerAdminPanelRoute, { serveStatic } from '../serve-admin-panel';
+
+type AdminPanelRoute = {
+  method: string;
+  path: string;
+  handler: Array<(ctx: Context, next: Next) => Promise<void> | void>;
+  config: { auth: boolean };
+};
 
 jest.mock('koa-static', () => {
   return jest.fn(() => jest.fn());
@@ -22,12 +30,12 @@ describe('serveAdminPanel route', () => {
 
   describe('admin shell cache headers', () => {
     const createStrapi = () => {
-      let registeredRoutes: any[] = [];
+      let registeredRoutes: AdminPanelRoute[] = [];
       const strapi = {
         dirs: { dist: { root: '/tmp/strapi-dist' } },
         config: { admin: { path: '/admin' } },
         server: {
-          routes(routes: any[]) {
+          routes(routes: AdminPanelRoute[]) {
             registeredRoutes = routes;
           },
         },
@@ -37,7 +45,7 @@ describe('serveAdminPanel route', () => {
 
     test('SPA fallback revalidates the HTML shell', async () => {
       const { strapi, getRoutes } = createStrapi();
-      registerAdminPanelRoute({ strapi: strapi as any });
+      registerAdminPanelRoute({ strapi: strapi as unknown as Core.Strapi });
 
       const [spaFallback] = getRoutes()[0].handler;
       const headers: Record<string, string> = {};
@@ -61,7 +69,7 @@ describe('serveAdminPanel route', () => {
 
     test('static HTML responses revalidate; hashed assets stay immutable', () => {
       const { strapi } = createStrapi();
-      registerAdminPanelRoute({ strapi: strapi as any });
+      registerAdminPanelRoute({ strapi: strapi as unknown as Core.Strapi });
 
       expect(koaStatic).toHaveBeenCalled();
       const options = koaStatic.mock.calls[0][1];

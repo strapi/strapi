@@ -1,3 +1,4 @@
+import type { ServerResponse } from 'http';
 import type { Context, Next } from 'koa';
 import { resolve, join, extname, basename } from 'path';
 import fse from 'fs-extra';
@@ -48,7 +49,7 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
           maxage: 0,
           defer: false,
           index: 'index.html',
-          setHeaders(res: any, path: any) {
+          setHeaders(res: ServerResponse, path: string) {
             const ext = extname(path);
             if (ext === '.html') {
               applyAdminShellCacheHeaders((name, value) => {
