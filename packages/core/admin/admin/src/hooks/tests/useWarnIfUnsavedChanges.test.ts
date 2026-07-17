@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { useWarnIfUnsavedChanges } from '../useWarnIfUnsavedChanges';
 
 const dispatchBeforeUnload = () => {
-  const event = new Event('beforeunload', { cancelable: true }) as any;
+  const event = new Event('beforeunload', { cancelable: true }) as BeforeUnloadEvent;
   Object.defineProperty(event, 'returnValue', {
     value: undefined,
     writable: true,

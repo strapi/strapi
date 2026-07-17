@@ -158,18 +158,23 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
+  }
+}
+
+class InvalidPopulateError extends ValidationError {
+  constructor() {
+    super('Invalid populate parameter. Expected a string, an array of strings, a populate object');
   }
 }
 
@@ -232,7 +237,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isString(trimmed)) {
-      throw new Error('Invalid sort query');
+      throw new ValidationError('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
@@ -240,7 +245,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const field = rawField.trim();
 
     if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+      throw new ValidationError('Field cannot be empty');
     }
 
     validateOrder(order.trim());
@@ -270,7 +275,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           transformedSort[field] = trimmedOrder;
         }
       } else {
-        throw Error(`Invalid sort type expected object or string got ${typeof order}`);
+        throw new ValidationError(
+          `Invalid sort type expected object or string got ${typeof order}`
+        );
       }
     }
 
@@ -363,14 +370,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       );
     }
   };
-
-  class InvalidPopulateError extends Error {
-    constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
-    }
-  }
 
   // NOTE: we could support foo.* or foo.bar.* etc later on
   const convertPopulateQueryParams = (
@@ -771,15 +770,26 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
-      params;
+    const {
+      _q: searchQuery,
+      sort,
+      filters,
+      fields,
+      populate,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+      ...rest
+    } = params;
 
     if (!isNil(status)) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(_q)) {
-      query._q = _q;
+    if (!isNil(searchQuery)) {
+      query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);

@@ -98,3 +98,4 @@ export {
   getVarDependencyPath,
   serializeConditionDependency,
 };
+export type { JsonLogicCondition };

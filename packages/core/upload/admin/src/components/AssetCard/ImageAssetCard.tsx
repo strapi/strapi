@@ -12,6 +12,7 @@ interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'chil
   alt: string;
   updatedAt?: string;
   isUrlSigned: boolean;
+  crossOrigin?: 'anonymous' | 'use-credentials';
 }
 
 export const ImageAssetCard = ({
@@ -21,6 +22,7 @@ export const ImageAssetCard = ({
   size = 'M',
   alt,
   isUrlSigned,
+  crossOrigin,
   selected = false,
   ...props
 }: ImageAssetCardProps) => {
@@ -36,7 +38,7 @@ export const ImageAssetCard = ({
 
   return (
     <AssetCardBase {...props} selected={selected} subtitle={subtitle} variant="Image">
-      <CardAsset src={thumbnailUrl} size={size} alt={alt} />
+      <CardAsset src={thumbnailUrl} size={size} alt={alt} crossOrigin={crossOrigin} />
     </AssetCardBase>
   );
 };

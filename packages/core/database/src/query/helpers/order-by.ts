@@ -269,7 +269,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     // Notes:
     // - Only select the first row for each partition
     // - Since we're applying the "where" statement directly on baseQuery (and not on resultQuery), we're using an inner join to avoid unwanted rows
-    .innerJoin(selectRowsAsNumberedPartitions, function () {
+    .innerJoin(selectRowsAsNumberedPartitions, function joinPartitionedRows() {
       this
         // Only select rows that are returned by T
         .on(`${partitionedQueryAlias}.id`, `${resultQueryAlias}.id`)
