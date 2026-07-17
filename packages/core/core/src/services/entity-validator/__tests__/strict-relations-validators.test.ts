@@ -261,6 +261,9 @@ describe('Entity validator - strictRelations', () => {
       ).rejects.toMatchObject({ name: 'ValidationError' });
     });
 
+    // Behaviour 1: a bare `{ connect: [] }` on UPDATE adds nothing and removes nothing,
+    // so it can't be what empties a required field → treated as a no-op that passes.
+    // (The admin CM can emit this when it diffs an unchanged relation field.)
     test('strict + non-draft + { connect: [] } → passes (no-op)', async () => {
       global.strapi.getModel = () => requiredRelationModel;
 
@@ -270,6 +273,61 @@ describe('Entity validator - strictRelations', () => {
         { strictRelations: true }
       );
       expect(data).toEqual({ author: { connect: [] } });
+    });
+
+    // Behaviour 1 (counterpart): on CREATION there is no existing value to keep, so an
+    // empty connect leaves the field genuinely empty and must be rejected.
+    test('strict + non-draft + { connect: [] } on CREATION → throws', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityCreation(
+          requiredRelationModel,
+          { author: { connect: [] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    // Behaviour 1 (non-empty side): a connect that actually attaches an entry passes,
+    // proving the no-op carve-out only applies to the empty case.
+    test('strict + non-draft + { connect: [id] } → passes', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        requiredRelationModel,
+        { author: { connect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ author: { connect: [1] } });
+    });
+
+    // Behaviour 2 (write-time half): a disconnect-only update can't be resolved without a
+    // DB read of the current relations, so at WRITE time it deliberately passes. The
+    // authoritative empty-check happens at publish (see the integration test
+    // `strict-relations-publish.test.api.js`), which validates against populated DB state.
+    test('strict + non-draft + { disconnect: [id] } → passes (needs DB read; deferred to publish)', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        requiredRelationModel,
+        { author: { disconnect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ author: { disconnect: [1] } });
+    });
+
+    // Behaviour 2 also holds for media.
+    test('strict + non-draft + media { disconnect: [id] } → passes (needs DB read)', async () => {
+      global.strapi.getModel = () => singleMediaModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        singleMediaModel,
+        { cover: { disconnect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ cover: { disconnect: [1] } });
     });
   });
 
