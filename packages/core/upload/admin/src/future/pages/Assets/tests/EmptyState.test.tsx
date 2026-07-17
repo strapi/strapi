@@ -8,7 +8,7 @@ describe('EmptyState', () => {
 
     expect(screen.getByText('No assets yet')).toBeInTheDocument();
     expect(
-      screen.getByText('Get started by uploading items or creating the folder.')
+      screen.getByText('Get started by uploading assets or creating a folder.')
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add assets' })).toBeInTheDocument();
   });

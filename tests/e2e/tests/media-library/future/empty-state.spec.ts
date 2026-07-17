@@ -25,7 +25,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       // Fresh library: designed empty state instead of a bare message.
       await expect(page.getByText('No assets yet')).toBeVisible();
       await expect(
-        page.getByText('Get started by uploading items or creating the folder.')
+        page.getByText('Get started by uploading assets or creating a folder.')
       ).toBeVisible();
 
       // "Add assets" opens the same file picker as New > File upload.

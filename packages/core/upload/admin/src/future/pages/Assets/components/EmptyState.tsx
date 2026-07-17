@@ -30,7 +30,7 @@ export const EmptyState = ({ onAddAssets }: EmptyStateProps) => {
         <Typography textColor="neutral600">
           {formatMessage({
             id: getTranslationKey('list.empty.description'),
-            defaultMessage: 'Get started by uploading items or creating the folder.',
+            defaultMessage: 'Get started by uploading assets or creating a folder.',
           })}
         </Typography>
       </Flex>
