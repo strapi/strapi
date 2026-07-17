@@ -11,10 +11,11 @@ import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
 
 interface State {
-  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
+  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
   select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
+  min: string | null;
   first: boolean;
   data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
   where: Record<string, unknown>[];
@@ -73,6 +74,8 @@ export interface QueryBuilder {
   count(count?: string): QueryBuilder;
 
   max(column: string): QueryBuilder;
+
+  min(column: string): QueryBuilder;
 
   where(where?: object): QueryBuilder;
 
@@ -139,6 +142,7 @@ const createQueryBuilder = (
       select: [],
       count: null,
       max: null,
+      min: null,
       first: false,
       data: null,
       where: [],
@@ -259,6 +263,13 @@ const createQueryBuilder = (
     max(column: string) {
       state.type = 'max';
       state.max = column;
+
+      return this;
+    },
+
+    min(column: string) {
+      state.type = 'min';
+      state.min = column;
 
       return this;
     },
@@ -549,12 +560,25 @@ const createQueryBuilder = (
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
-        // Only include column-based orderBy entries (skip raw expressions like status)
+        // Only include column-based orderBy entries here (raw expressions are handled below)
         const orderByColumns = state.orderBy
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
         state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+
+        // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
+        // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
+        // plain columns, so add them explicitly — using the same builder/alias as the ORDER BY
+        // so the rendered SQL matches and PostgreSQL accepts the query. The deep-sort path
+        // dedupes via row numbering instead of DISTINCT, so it strips these out later.
+        const rawOrderByExpressions = state.orderBy
+          .filter((ob: any) => 'rawExpression' in ob)
+          .map((ob: any) =>
+            helpers.buildStatusSortExpression(db, tableName, this.alias, ob.isI18n)
+          );
+
+        state.select = [...state.select, ...rawOrderByExpressions];
       }
     },
 
@@ -598,6 +622,11 @@ const createQueryBuilder = (
         case 'max': {
           const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
           qb.max({ max: dbColumnName });
+          break;
+        }
+        case 'min': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.min));
+          qb.min({ min: dbColumnName });
           break;
         }
         case 'insert': {

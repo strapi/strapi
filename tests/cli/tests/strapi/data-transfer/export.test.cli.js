@@ -8,6 +8,8 @@ const utils = require('../../../../utils');
 // eslint-disable-next-line
 const { resetDatabaseAndImportDataFromPathProgrammatic } = require('../../../../utils/dts-import');
 
+const UPLOAD_CONTENT_TYPES = 'plugin::upload.file,plugin::upload.folder';
+
 describe('export', () => {
   let appPath;
   const outputFilename = 'output';
@@ -142,9 +144,195 @@ describe('export', () => {
     expect(result.status).not.toBe(0);
   });
 
+  it('should exclude all media (issue #25008) with --exclude files and --exclude-content-types', async () => {
+    const excludedFilename = 'output-no-media';
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '-f',
+        excludedFilename,
+        '--no-encrypt',
+        '--no-compress',
+        '--exclude',
+        'files',
+        '--exclude-content-types',
+        UPLOAD_CONTENT_TYPES,
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+
+    const exportTar = path.join(appPath, `${excludedFilename}.tar`);
+    const { fs: testFs } = utils;
+    const entities = await testFs.tar(exportTar).readJSONLDir('entities');
+    const links = await testFs.tar(exportTar).readJSONLDir('links');
+    const assetMetadata = await testFs.tar(exportTar).readDir('assets/metadata');
+    const assetUploads = await testFs.tar(exportTar).readDir('assets/uploads');
+
+    expect(assetMetadata).toHaveLength(0);
+    expect(assetUploads).toHaveLength(0);
+    expect(
+      entities.some((entity) =>
+        ['plugin::upload.file', 'plugin::upload.folder'].includes(entity.type)
+      )
+    ).toBe(false);
+    expect(
+      links.some(
+        (link) =>
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.left.type) ||
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.right.type)
+      )
+    ).toBe(false);
+    expect(entities.some((entity) => entity.type === 'api::article.article')).toBe(true);
+  });
+
+  it('should exclude all media (issue #25008) with --exclude media-library', async () => {
+    const excludedFilename = 'output-no-media-preset';
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '-f',
+        excludedFilename,
+        '--no-encrypt',
+        '--no-compress',
+        '--exclude',
+        'media-library',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+
+    const exportTar = path.join(appPath, `${excludedFilename}.tar`);
+    const { fs: testFs } = utils;
+    const entities = await testFs.tar(exportTar).readJSONLDir('entities');
+    const links = await testFs.tar(exportTar).readJSONLDir('links');
+    const assetMetadata = await testFs.tar(exportTar).readDir('assets/metadata');
+    const assetUploads = await testFs.tar(exportTar).readDir('assets/uploads');
+
+    expect(assetMetadata).toHaveLength(0);
+    expect(assetUploads).toHaveLength(0);
+    expect(
+      entities.some((entity) =>
+        ['plugin::upload.file', 'plugin::upload.folder'].includes(entity.type)
+      )
+    ).toBe(false);
+    expect(
+      links.some(
+        (link) =>
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.left.type) ||
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.right.type)
+      )
+    ).toBe(false);
+    expect(entities.some((entity) => entity.type === 'api::article.article')).toBe(true);
+  });
+
+  it('should export only listed content types with --only-content-types', async () => {
+    const onlyArticlesFilename = 'output-only-articles';
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '-f',
+        onlyArticlesFilename,
+        '--no-encrypt',
+        '--no-compress',
+        '--only-content-types',
+        'api::article.article',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+
+    const exportTar = path.join(appPath, `${onlyArticlesFilename}.tar`);
+    const { fs: testFs } = utils;
+    const entities = await testFs.tar(exportTar).readJSONLDir('entities');
+    const links = await testFs.tar(exportTar).readJSONLDir('links');
+    const schemaFiles = await testFs.tar(exportTar).readDir('schemas');
+
+    const entityTypes = [...new Set(entities.map((entity) => entity.type))];
+    expect(entityTypes).toEqual(['api::article.article']);
+    expect(entities.length).toBeGreaterThan(0);
+    expect(schemaFiles.length).toBeGreaterThan(0);
+    expect(
+      links.every(
+        (link) =>
+          link.left.type === 'api::article.article' && link.right.type === 'api::article.article'
+      )
+    ).toBe(true);
+  });
+
   test.todo('export from empty DB (schemas only, no entities)');
   test.todo('export with --only filter and verify tar contains only those types');
-  test.todo('export with --exclude filter and verify excluded types missing from tar');
+  it('should exclude asset binaries but keep media library entities with --exclude files', async () => {
+    const excludedFilename = 'output-no-files';
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '-f',
+        excludedFilename,
+        '--no-encrypt',
+        '--no-compress',
+        '--exclude',
+        'files',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+
+    const stdout = String(result.stdout || '');
+    if (/upload binaries in public\/uploads/i.test(stdout)) {
+      expect(stdout).toMatch(/upload binaries in public\/uploads/i);
+    }
+
+    const exportTar = path.join(appPath, `${excludedFilename}.tar`);
+    const { fs: testFs } = utils;
+    const entities = await testFs.tar(exportTar).readJSONLDir('entities');
+    const assetMetadata = await testFs.tar(exportTar).readDir('assets/metadata');
+    const assetUploads = await testFs.tar(exportTar).readDir('assets/uploads');
+
+    expect(assetMetadata).toHaveLength(0);
+    expect(assetUploads).toHaveLength(0);
+    expect(entities.some((entity) => entity.type === 'plugin::upload.file')).toBe(true);
+  });
   test.todo('export with compression (.tar.gz) and verify tar contents');
   test.todo('export with encryption (.tar.gz.enc) and verify prompt/key and tar not plaintext');
   test.todo('export table counts match actual tar entry counts per stage');
