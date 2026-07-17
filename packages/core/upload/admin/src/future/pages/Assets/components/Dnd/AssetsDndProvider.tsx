@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import {
   DndContext,
@@ -19,8 +27,11 @@ import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
 import { getTranslationKey } from '../../../../utils/translations';
+import { useAssetSelectionOptional } from '../../hooks/useAssetSelection';
 
-import { parseFolderTargetId } from './dndIds';
+import { buildDragSet } from './buildDragSet';
+import { computeValidDropTargets } from './computeValidDropTargets';
+import { parseFolderTargetId, parseFolderTreeTargetId } from './dndIds';
 import { DragOverlayChip } from './DragOverlayChip';
 
 import type { DragItemData } from '../../../../types/dnd';
@@ -33,6 +44,8 @@ import type { DragItemData } from '../../../../types/dnd';
 interface AssetsDndContextValue {
   isInternalDragActive: boolean;
   isMovePending: boolean;
+  /** O(1) lookup of whether the current drag set may drop on this destination. */
+  isValidDropTarget: (targetFolderId: number | null) => boolean;
 }
 
 const AssetsDndContext = createContext<AssetsDndContextValue | null>(null);
@@ -57,22 +70,43 @@ interface AssetsDndProviderProps {
   children: ReactNode;
 }
 
-const getDragItems = (activeData: DragItemData | undefined): DragItemData[] => {
-  if (!activeData) {
-    return [];
+interface DragSession {
+  items: DragItemData[];
+  fromSelection: boolean;
+}
+
+const resolveDestination = (
+  overId: string | number
+): { destinationFolderId: number | null } | null => {
+  const inView = parseFolderTargetId(overId);
+
+  if (inView != null) {
+    return { destinationFolderId: inView };
   }
 
-  // TODO: include selectedItems from active data for multi-drag payload members.
-  return [activeData];
+  const tree = parseFolderTreeTargetId(overId);
+
+  if (tree === 'root') {
+    return { destinationFolderId: null };
+  }
+
+  if (typeof tree === 'number') {
+    return { destinationFolderId: tree };
+  }
+
+  return null;
 };
 
 export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const selection = useAssetSelectionOptional();
   const { data: folderStructure = [] } = useGetFolderStructureQuery();
   const [bulkMove, { isLoading: isMovePending }] = useBulkMoveMutation();
-  const [activeItem, setActiveItem] = useState<DragItemData | null>(null);
+  const [dragItems, setDragItems] = useState<DragItemData[]>([]);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
+  // Sync session for drag-end — state alone can lag one render behind dragStart.
+  const dragSessionRef = useRef<DragSession>({ items: [], fromSelection: false });
 
   const announceToLiveRegion = useCallback((message: string) => {
     setLiveAnnouncement('');
@@ -85,36 +119,63 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
     })
   );
 
-  const contextValue = useMemo<AssetsDndContextValue>(
-    () => ({
-      isInternalDragActive: activeItem !== null,
-      isMovePending,
-    }),
-    [activeItem, isMovePending]
+  const validDropTargets = useMemo(
+    () => computeValidDropTargets(dragItems, folderStructure),
+    [dragItems, folderStructure]
   );
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const data = event.active.data.current as DragItemData | undefined;
-    setActiveItem(data ?? null);
+  const isValidDropTarget = useCallback(
+    (targetFolderId: number | null) => validDropTargets.has(targetFolderId),
+    [validDropTargets]
+  );
+
+  const contextValue = useMemo<AssetsDndContextValue>(
+    () => ({
+      isInternalDragActive: dragItems.length > 0,
+      isMovePending,
+      isValidDropTarget,
+    }),
+    [dragItems.length, isMovePending, isValidDropTarget]
+  );
+
+  const clearDragState = useCallback(() => {
+    dragSessionRef.current = { items: [], fromSelection: false };
+    setDragItems([]);
   }, []);
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const data = event.active.data.current as DragItemData | undefined;
+
+      if (!data) {
+        clearDragState();
+        return;
+      }
+
+      const { items, fromSelection } = buildDragSet(data, selection?.selectedKeys);
+      dragSessionRef.current = { items, fromSelection };
+      setDragItems(items);
+    },
+    [clearDragState, selection?.selectedKeys]
+  );
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
-      const { active, over } = event;
-      setActiveItem(null);
+      const { over } = event;
+      const { items, fromSelection } = dragSessionRef.current;
+      clearDragState();
 
-      if (isMovePending || !over) {
+      if (isMovePending || !over || items.length === 0) {
         return;
       }
 
-      const targetFolderId = parseFolderTargetId(over.id);
-      const activeData = active.data.current as DragItemData | undefined;
+      const destination = resolveDestination(over.id);
 
-      if (targetFolderId == null || !activeData) {
+      if (!destination) {
         return;
       }
 
-      const items = getDragItems(activeData);
+      const { destinationFolderId: targetFolderId } = destination;
 
       if (
         !canDropItemOnFolder({
@@ -138,6 +199,10 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
 
       try {
         await bulkMove({ ...payload, destinationFolderId: targetFolderId }).unwrap();
+
+        if (fromSelection) {
+          selection?.clear();
+        }
 
         announceToLiveRegion(successMessage);
 
@@ -167,16 +232,18 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
     [
       announceToLiveRegion,
       bulkMove,
+      clearDragState,
       folderStructure,
       formatMessage,
       isMovePending,
+      selection,
       toggleNotification,
     ]
   );
 
   const handleDragCancel = useCallback(() => {
-    setActiveItem(null);
-  }, []);
+    clearDragState();
+  }, [clearDragState]);
 
   const announcements = useMemo(
     () => ({
@@ -201,19 +268,19 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           });
         }
 
-        const targetFolderId = parseFolderTargetId(over.id);
+        const destination = resolveDestination(over.id);
         const activeData = active.data.current as DragItemData | undefined;
 
-        if (targetFolderId == null || !activeData) {
+        if (!destination || !activeData) {
           return '';
         }
 
-        const items = getDragItems(activeData);
+        const { items } = buildDragSet(activeData, selection?.selectedKeys);
 
         if (
           !canDropItemOnFolder({
             items,
-            targetFolderId,
+            targetFolderId: destination.destinationFolderId,
             folderStructure,
           })
         ) {
@@ -231,7 +298,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           defaultMessage: 'Drag cancelled.',
         }),
     }),
-    [folderStructure, formatMessage]
+    [folderStructure, formatMessage, selection?.selectedKeys]
   );
 
   return (
@@ -249,11 +316,11 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
         </VisuallyHidden>
         <Box position="relative">{children}</Box>
         <DragOverlay dropAnimation={null}>
-          {activeItem ? <DragOverlayChip item={activeItem} /> : null}
+          {dragItems.length > 0 ? <DragOverlayChip items={dragItems} /> : null}
         </DragOverlay>
       </DndContext>
     </AssetsDndContext.Provider>
   );
 };
 
-// TODO: FolderTree droppables + keyboard move path.
+// TODO: keyboard move path.

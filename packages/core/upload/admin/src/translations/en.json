@@ -198,6 +198,8 @@
   "dnd.announce.invalid-drop": "Cannot move item to this folder.",
   "dnd.announce.move-failure": "Move failed. {message}",
   "dnd.announce.cancel": "Drag cancelled.",
+  "dnd.overlay.folders": "{count, plural, one {# folder} other {# folders}}",
+  "dnd.overlay.files": "{count, plural, one {# file} other {# files}}",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button": "Upload {number, plural, one {# asset} other {# assets}} to the library",
   "modal.upload-list.sub-header-subtitle": "Manage the assets before adding them to the Media Library",

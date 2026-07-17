@@ -3,10 +3,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
 import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import { useGetFolderStructureQuery } from '../../../../services/folders';
 import { getTranslationKey } from '../../../../utils/translations';
+import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
+import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
+
+import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
 import type { FolderNode } from '../../../../../../../shared/contracts/folders';
 
@@ -14,7 +18,12 @@ import type { FolderNode } from '../../../../../../../shared/contracts/folders';
  * RowButton — shared row styling aligned with admin SubNav.Link
  * -----------------------------------------------------------------------------------------------*/
 
-const RowButton = styled.button<{ $isActive: boolean }>`
+const RowButton = styled.button<{
+  $isActive: boolean;
+  $isValidDropTarget?: boolean;
+  $isInvalidDropCursor?: boolean;
+  $isMovePending?: boolean;
+}>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]};
@@ -22,23 +31,72 @@ const RowButton = styled.button<{ $isActive: boolean }>`
   min-height: 3.2rem;
   padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
   border: 0;
-  background: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary100 : 'transparent')};
+  background: ${({ $isActive, $isValidDropTarget, theme }) => {
+    if ($isValidDropTarget) {
+      return theme.colors.primary100;
+    }
+
+    return $isActive ? theme.colors.primary100 : 'transparent';
+  }};
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.colors.primary700 : theme.colors.neutral800};
   border-radius: ${({ theme }) => theme.borderRadius};
-  cursor: pointer;
+  cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropCursor ? 'not-allowed' : 'pointer';
+  }};
   text-align: left;
   font: inherit;
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      outline: 1px dashed ${theme.colors.primary600};
+      outline-offset: -1px;
+    `}
 
   &:hover {
-    background: ${({ $isActive, theme }) =>
-      $isActive ? theme.colors.primary100 : theme.colors.neutral100};
+    background: ${({ $isActive, $isValidDropTarget, theme }) => {
+      if ($isValidDropTarget) {
+        return theme.colors.primary100;
+      }
+
+      return $isActive ? theme.colors.primary100 : theme.colors.neutral100;
+    }};
   }
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.primary600};
     outline-offset: -2px;
   }
+`;
+
+const TreeRow = styled(Flex)<{
+  $isValidDropTarget?: boolean;
+  $isInvalidDropCursor?: boolean;
+  $isMovePending?: boolean;
+}>`
+  cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropCursor ? 'not-allowed' : 'default';
+  }};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  border-radius: ${({ theme }) => theme.borderRadius};
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      background: ${theme.colors.primary100};
+      outline: 1px dashed ${theme.colors.primary600};
+      outline-offset: -1px;
+    `}
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -105,9 +163,21 @@ const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: numb
     });
   }, []);
 
+  const expandFolder = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      if (prev.has(id)) {
+        return prev;
+      }
+
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
   const isExpanded = useCallback((id: number) => expandedIds.has(id), [expandedIds]);
 
-  return { isExpanded, toggleExpanded };
+  return { isExpanded, toggleExpanded, expandFolder };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -181,34 +251,62 @@ interface FolderTreeItemProps {
   currentFolderId: number | null;
   isExpanded: (id: number) => boolean;
   onToggle: (id: number) => void;
+  onExpand: (id: number) => void;
   onSelect: (folderId: number) => void;
+  isMovePending: boolean;
 }
 
-const FolderTreeItem = ({
-  node,
+interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
+  id: number;
+  name: string;
+  folderChildren: FolderNode[];
+}
+
+const FolderTreeItemInner = ({
+  id,
+  name,
+  folderChildren,
   level,
   currentFolderId,
   isExpanded,
   onToggle,
+  onExpand,
   onSelect,
-}: FolderTreeItemProps) => {
+  isMovePending,
+}: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
-
-  if (node.id == null) {
-    return null;
-  }
-
-  const id = node.id;
-  const name = node.name ?? '';
-  const hasChildren = (node.children?.length ?? 0) > 0;
+  const hasChildren = folderChildren.length > 0;
   const isFolderExpanded = isExpanded(id);
   const isActive = currentFolderId === id;
+
+  const {
+    droppable: { setNodeRef },
+    isOver,
+    showValidDropHighlight,
+    showInvalidDropCursor,
+  } = useFolderTreeDroppable({ id, name });
+
+  const handleExpand = useCallback(() => onExpand(id), [id, onExpand]);
+
+  useSpringLoadedExpand({
+    isOver,
+    canExpand: hasChildren && !isFolderExpanded,
+    onExpand: handleExpand,
+  });
 
   // TODO: full `role="tree"` + arrow-key treeview navigation before revamp GA
   // if an accessibility audit requires it (v1 is button rows only).
   return (
     <li>
-      <Flex alignItems="center" paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`} gap={1}>
+      <TreeRow
+        ref={setNodeRef}
+        alignItems="center"
+        paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`}
+        gap={1}
+        $isValidDropTarget={showValidDropHighlight}
+        $isInvalidDropCursor={showInvalidDropCursor}
+        $isMovePending={isMovePending}
+      >
         <IconButton
           label={formatMessage(
             {
@@ -234,6 +332,9 @@ const FolderTreeItem = ({
           <RowButton
             type="button"
             $isActive={isActive}
+            $isValidDropTarget={showValidDropHighlight}
+            $isInvalidDropCursor={showInvalidDropCursor}
+            $isMovePending={isMovePending}
             aria-current={isActive ? 'page' : undefined}
             onClick={() => onSelect(id)}
             data-testid={`folder-tree-node-${id}`}
@@ -242,11 +343,11 @@ const FolderTreeItem = ({
             <TruncatedFolderName name={name} isActive={isActive} />
           </RowButton>
         </Box>
-      </Flex>
+      </TreeRow>
 
       {hasChildren && isFolderExpanded && (
         <NavList>
-          {node.children.map((child) => (
+          {folderChildren.map((child) => (
             <FolderTreeItem
               key={child.id ?? child.name}
               node={child}
@@ -254,12 +355,29 @@ const FolderTreeItem = ({
               currentFolderId={currentFolderId}
               isExpanded={isExpanded}
               onToggle={onToggle}
+              onExpand={onExpand}
               onSelect={onSelect}
+              isMovePending={isMovePending}
             />
           ))}
         </NavList>
       )}
     </li>
+  );
+};
+
+const FolderTreeItem = ({ node, ...props }: FolderTreeItemProps) => {
+  if (node.id == null) {
+    return null;
+  }
+
+  return (
+    <FolderTreeItemInner
+      {...props}
+      id={node.id}
+      name={node.name ?? ''}
+      folderChildren={node.children ?? []}
+    />
   );
 };
 
@@ -310,9 +428,23 @@ interface FolderTreeProps {
 export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
-  const { isExpanded, toggleExpanded } = useExpandedFolders(folderStructure, currentFolderId);
+  const { isExpanded, toggleExpanded, expandFolder } = useExpandedFolders(
+    folderStructure,
+    currentFolderId
+  );
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
 
   const isHomeActive = currentFolderId == null;
+  const homeLabel = formatMessage({
+    id: getTranslationKey('sidebar.home'),
+    defaultMessage: 'Home',
+  });
+
+  const {
+    droppable: { setNodeRef: setHomeDropRef },
+    showValidDropHighlight: showHomeValidDropHighlight,
+    showInvalidDropCursor: showHomeInvalidDropCursor,
+  } = useFolderTreeDroppable({ id: null, name: homeLabel });
 
   return (
     <SidebarNav
@@ -335,18 +467,19 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
 
       <SidebarBody direction="column" alignItems="stretch" gap={1} padding={3}>
         <RowButton
+          ref={setHomeDropRef}
           type="button"
           $isActive={isHomeActive}
+          $isValidDropTarget={showHomeValidDropHighlight}
+          $isInvalidDropCursor={showHomeInvalidDropCursor}
+          $isMovePending={isMovePending}
           aria-current={isHomeActive ? 'page' : undefined}
           onClick={() => onSelectFolder(null)}
           data-testid="folder-tree-home"
         >
           <House aria-hidden width="1.6rem" height="1.6rem" />
           <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
-            {formatMessage({
-              id: getTranslationKey('sidebar.home'),
-              defaultMessage: 'Home',
-            })}
+            {homeLabel}
           </Typography>
         </RowButton>
 
@@ -413,7 +546,9 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
                   currentFolderId={currentFolderId}
                   isExpanded={isExpanded}
                   onToggle={toggleExpanded}
+                  onExpand={expandFolder}
                   onSelect={onSelectFolder}
+                  isMovePending={isMovePending}
                 />
               ))}
             </NavList>
