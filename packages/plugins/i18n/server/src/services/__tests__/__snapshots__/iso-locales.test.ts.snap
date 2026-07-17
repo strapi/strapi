@@ -3,12 +3,12 @@
 exports[`ISO locales getIsoLocales 1`] = `
 [
   {
-    "code": "abk",
-    "name": "Abkhazian (Abkhazia)"
+    "code": "ab",
+    "name": "Abkhazian (Abkhazia)",
   },
   {
     "code": "ady",
-    "name": "Adyghe (West Circassian)"
+    "name": "Adyghe (West Circassian)",
   },
   {
     "code": "af",
@@ -188,7 +188,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "kbd",
-    "name": "Kabardian (East Circassian)"
+    "name": "Kabardian (East Circassian)",
   },
   {
     "code": "ksf",
