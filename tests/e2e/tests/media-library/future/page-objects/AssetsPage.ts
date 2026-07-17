@@ -203,6 +203,24 @@ export class AssetsPage {
     await notification.waitFor({ state: 'visible' });
   }
 
+  /**
+   * Move the currently selected items through the bulk action bar: open the
+   * "Move elements to" modal, pick the destination in the Location select and
+   * submit. Resolves once the success notification shows.
+   */
+  async bulkMoveSelectionTo(destinationName: string) {
+    await this.getBulkActionsBar().getByRole('button', { name: 'Move' }).click();
+    const dialog = this.page.getByRole('dialog', { name: 'Move elements to' });
+    await dialog.getByRole('combobox').click();
+    await this.page.getByRole('option', { name: destinationName }).click();
+    await dialog.getByRole('button', { name: 'Move' }).click();
+    const notification = this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .first();
+    await notification.waitFor({ state: 'visible' });
+  }
+
   async switchToGridView() {
     await this.gridViewButton.click();
   }

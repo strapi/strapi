@@ -424,16 +424,112 @@ describe('AssetsTable', () => {
       });
     });
 
-    it('shows an info toast when Move is clicked', async () => {
+    it('opens the move dialog when Move is clicked and cancels without moving', async () => {
       const { user } = setup();
 
       await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
-      expect(mockToggleNotification).toHaveBeenCalledWith({
-        type: 'info',
-        message: "Bulk move isn't available yet",
-      });
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+      expect(screen.getByText('Location')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
+      // Selection untouched, nothing sent.
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('moves the selection to the picked folder, toasts, and clears the selection', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.get(
+          '*/upload/folder-structure',
+          () =>
+            HttpResponse.json({
+              data: [
+                { id: 1, name: 'Marketing team', children: [] },
+                { id: 2, name: 'Tech', children: [{ id: 3, name: 'Logos', children: [] }] },
+              ],
+            }),
+          { once: true }
+        ),
+        http.post(
+          '*/upload/actions/bulk-move',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      // Pick the destination folder in the Location select (defaults to the root).
+      // Nested folders show their full ancestry so same-named folders stay
+      // distinguishable.
+      await user.click(await screen.findByRole('combobox'));
+      expect(await screen.findByRole('option', { name: 'Tech / Logos' })).toBeInTheDocument();
+      await user.click(screen.getByRole('option', { name: 'Marketing team' }));
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: '2 elements have been moved from Media Library to Marketing team',
+        })
+      );
+      expect(requestBody).toEqual({ fileIds: [1, 2], folderIds: [], destinationFolderId: 1 });
+      // Selection cleared → bar gone, dialog closed.
+      expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the move dialog open, keeps the selection, and surfaces the server message on a failed bulk move', async () => {
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-move',
+          () =>
+            HttpResponse.json(
+              { error: { message: 'folders cannot be moved inside themselves' } },
+              { status: 400 }
+            ),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      // Move to the root (default destination) — the request itself fails. The
+      // bar's Move icon is aria-hidden behind the modal, so the role query only
+      // matches the modal's submit button.
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      // The actionable server message is shown, not the generic fallback.
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'folders cannot be moved inside themselves',
+        })
+      );
+      // Modal stays open for a retry or Cancel.
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      // Selection kept for retry.
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
     it('opens a confirm dialog when Delete is clicked and cancels without deleting', async () => {
