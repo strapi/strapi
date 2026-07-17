@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 import {
@@ -14,9 +14,11 @@ import { styled } from 'styled-components';
 
 import {
   useBulkMoveMutation,
-  useGetAllFoldersQuery,
   useGetFolderQuery,
+  useGetFolderStructureQuery,
 } from '../../../services/folders';
+import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
+import { getBulkMoveErrorMessage } from '../../../utils/getBulkMoveErrorMessage';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -42,7 +44,7 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
   const { toggleNotification } = useNotification();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
-  const { data: folders = [] } = useGetAllFoldersQuery(undefined, { skip: !open });
+  const { data: folderStructure = [] } = useGetFolderStructureQuery(undefined, { skip: !open });
   const { data: currentFolder } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
@@ -63,10 +65,16 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
     defaultMessage: 'Media Library',
   });
 
-  // Moving a folder into itself is invalid — hide selected folders from the options.
-  // Deeper cases (moving into a descendant) are caught by the server and surface
-  // through the error path.
-  const destinationOptions = folders.filter((folder) => !selectedFolderIds.has(folder.id));
+  // Options carry the full ancestry ("About / Images" vs "Tech / Images") so
+  // same-named folders stay distinguishable, listed depth-first under their
+  // parent. Selected folders and their descendants are pruned during the same
+  // single walk — an item can't be moved into itself or below itself (the
+  // server would reject it). Memoized: large libraries shouldn't re-walk the
+  // tree on every dialog render.
+  const destinationOptions = useMemo(
+    () => flattenFolderStructure(folderStructure, selectedFolderIds),
+    [folderStructure, selectedFolderIds]
+  );
 
   const count = selectedIds.size + selectedFolderIds.size;
 
@@ -83,15 +91,20 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
         folderIds: Array.from(selectedFolderIds),
         destinationFolderId,
       }).unwrap();
-    } catch {
+    } catch (error) {
       // Keep the modal open and the selection intact so the user can retry
-      // (e.g. after picking a valid destination) or cancel.
+      // (e.g. after picking a valid destination) or cancel. Surface the server
+      // message when there is one — it carries actionable causes like moving a
+      // folder into its own descendant or a name collision in the destination.
       toggleNotification({
         type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('list.bulk-actions.move.error'),
-          defaultMessage: 'An error occurred while moving the items.',
-        }),
+        message: getBulkMoveErrorMessage(
+          error,
+          formatMessage({
+            id: getTranslationKey('list.bulk-actions.move.error'),
+            defaultMessage: 'An error occurred while moving the items.',
+          })
+        ),
       });
       return;
     }
@@ -100,7 +113,7 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
     const destinationName =
       destinationFolderId === null
         ? rootLabel
-        : (destinationOptions.find((folder) => folder.id === destinationFolderId)?.name ??
+        : (destinationOptions.find((option) => option.id === destinationFolderId)?.label ??
           rootLabel);
 
     toggleNotification({
@@ -152,9 +165,9 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
               disabled={isMoving}
             >
               <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
-              {destinationOptions.map((folder) => (
-                <SingleSelectOption key={folder.id} value={String(folder.id)}>
-                  {folder.name}
+              {destinationOptions.map((option) => (
+                <SingleSelectOption key={option.id} value={String(option.id)}>
+                  {option.label}
                 </SingleSelectOption>
               ))}
             </SingleSelect>

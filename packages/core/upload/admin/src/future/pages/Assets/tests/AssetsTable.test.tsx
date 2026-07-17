@@ -445,12 +445,12 @@ describe('AssetsTable', () => {
       let requestBody: unknown;
       server.use(
         http.get(
-          '*/upload/folders',
+          '*/upload/folder-structure',
           () =>
             HttpResponse.json({
               data: [
-                { id: 1, name: 'Marketing team', pathId: 1, path: '/1' },
-                { id: 2, name: 'Tech', pathId: 2, path: '/2' },
+                { id: 1, name: 'Marketing team', children: [] },
+                { id: 2, name: 'Tech', children: [{ id: 3, name: 'Logos', children: [] }] },
               ],
             }),
           { once: true }
@@ -472,8 +472,11 @@ describe('AssetsTable', () => {
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
       // Pick the destination folder in the Location select (defaults to the root).
+      // Nested folders show their full ancestry so same-named folders stay
+      // distinguishable.
       await user.click(await screen.findByRole('combobox'));
-      await user.click(await screen.findByRole('option', { name: 'Marketing team' }));
+      expect(await screen.findByRole('option', { name: 'Tech / Logos' })).toBeInTheDocument();
+      await user.click(screen.getByRole('option', { name: 'Marketing team' }));
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
       await waitFor(() =>
@@ -488,11 +491,15 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
-    it('keeps the move dialog open and the selection on a failed bulk move', async () => {
+    it('keeps the move dialog open, keeps the selection, and surfaces the server message on a failed bulk move', async () => {
       server.use(
         http.post(
           '*/upload/actions/bulk-move',
-          () => HttpResponse.json({ error: { message: 'boom' } }, { status: 500 }),
+          () =>
+            HttpResponse.json(
+              { error: { message: 'folders cannot be moved inside themselves' } },
+              { status: 400 }
+            ),
           { once: true }
         )
       );
@@ -508,10 +515,11 @@ describe('AssetsTable', () => {
       expect(await screen.findByText('Move elements to')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
+      // The actionable server message is shown, not the generic fallback.
       await waitFor(() =>
         expect(mockToggleNotification).toHaveBeenCalledWith({
           type: 'danger',
-          message: 'An error occurred while moving the items.',
+          message: 'folders cannot be moved inside themselves',
         })
       );
       // Modal stays open for a retry or Cancel.
