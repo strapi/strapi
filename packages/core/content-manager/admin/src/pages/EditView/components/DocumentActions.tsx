@@ -904,10 +904,15 @@ const PublishAction: DocumentActionComponent = ({
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
         if (idToPublish === 'create' && !fromRelationModal) {
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
+          navigate(
+            {
+              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+              search: rawQuery,
+            },
+            // Replace the `create` entry so navigating back returns to the list
+            // view instead of a stale create form (matches the save behaviour).
+            { replace: true }
+          );
         } else if (fromRelationModal) {
           const newRelation = {
             documentId: res.data.documentId,
