@@ -145,7 +145,7 @@ const createComponentValidator =
       updatedAttribute,
       componentContext,
     }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
-    { isDraft }: ValidatorContext
+    options: ValidatorContext
   ): strapiUtils.yup.AnySchema => {
     const model = strapi.getModel(attr.component);
     if (!model) {
@@ -161,7 +161,7 @@ const createComponentValidator =
           yup.lazy((item) =>
             createModelValidator(createOrUpdate)(
               { componentContext, model, data: item },
-              { isDraft }
+              options
             ).notNull()
           ) as any
         );
@@ -171,7 +171,7 @@ const createComponentValidator =
         updatedAttribute,
       });
 
-      if (!isDraft) {
+      if (!options.isDraft) {
         validator = addMinMax(validator, { attr, updatedAttribute });
       }
 
@@ -184,11 +184,11 @@ const createComponentValidator =
         data: updatedAttribute.value,
         componentContext,
       },
-      { isDraft }
+      options
     );
 
     validator = addRequiredValidation(createOrUpdate)(validator, {
-      attr: { required: !isDraft && attr.required },
+      attr: { required: !options.isDraft && attr.required },
       updatedAttribute,
     });
 
@@ -199,7 +199,7 @@ const createDzValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
     { attr, updatedAttribute, componentContext }: ValidatorMeta,
-    { isDraft }: ValidatorContext
+    options: ValidatorContext
   ): strapiUtils.yup.AnySchema => {
     let validator;
 
@@ -215,10 +215,7 @@ const createDzValidator =
 
         return model
           ? schema.concat(
-              createModelValidator(createOrUpdate)(
-                { model, data: item, componentContext },
-                { isDraft }
-              )
+              createModelValidator(createOrUpdate)({ model, data: item, componentContext }, options)
             )
           : schema;
       }) as any // FIXME: yup v1
@@ -229,7 +226,7 @@ const createDzValidator =
       updatedAttribute,
     });
 
-    if (!isDraft) {
+    if (!options.isDraft) {
       validator = addMinMax(validator, { attr, updatedAttribute });
     }
 
@@ -269,56 +266,96 @@ const hasRelationValue = (value: unknown): boolean => {
   return true;
 };
 
-const createMediaAttributeValidator = (
-  { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Media>,
-  options: ValidatorContext
-): strapiUtils.yup.AnySchema => {
-  // Media values arrive in several shapes (a bare id, an array of ids, or a
-  // `{ connect }` / `{ set }` object on update). `yup.mixed()` accepts all of them;
-  // coercing `multiple` media to `yup.array()` would reject the connect/set object
-  // syntax that update requests legitimately send. Required-ness is asserted below
-  // via `hasRelationValue`, which understands every shape.
-  let validator: strapiUtils.yup.AnySchema = yup.mixed();
+/**
+ * Decides whether a required media/relation value should be rejected as empty,
+ * mirroring the scalar `required` semantics:
+ *
+ * - creation (`notNil` analogue): an absent key is a failure — the field must be
+ *   populated, so anything without a value (`undefined`/`null`/`[]`/empty `set`/`connect`)
+ *   is rejected.
+ * - update (`notNull` analogue): an absent key keeps the existing value, so it passes.
+ *   Only reject when the request is present AND leaves the field empty. A bare
+ *   `{ connect: [] }` (no `set`) neither adds nor removes anything → treated as a no-op
+ *   that passes; `{ set: [] }` / `null` / `[]` explicitly empty the field → rejected.
+ *   Note: disconnect-only updates can't be validated without a DB read of the current
+ *   state and fall through to a pass (documented limitation, tied to the null→[] follow-up).
+ */
+const relationRequiredFails = (createOrUpdate: CreateOrUpdate, value: unknown): boolean => {
+  if (createOrUpdate === 'update') {
+    // Absent key on update = keep the existing value.
+    if (value === undefined) {
+      return false;
+    }
 
-  // Relational required constraints are only enforced under the strictRelations flag,
-  // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
-  if (options.strictRelations && !options.isDraft && attr.required) {
-    // A media value can arrive as an id, an array, or a connect/set object, so a simple
-    // `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
-    validator = validator.test('required-media', `${updatedAttribute.name} must be defined.`, () =>
-      hasRelationValue(updatedAttribute.value)
-    );
+    // A connect-only empty is a no-op, not an emptying operation.
+    if (isObject(value) && !isNil((value as { connect?: unknown }).connect)) {
+      const connect = (value as { connect?: unknown }).connect;
+      const hasSet = !isNil((value as { set?: unknown }).set);
+      if (!hasSet && Array.isArray(connect) && connect.length === 0) {
+        return false;
+      }
+    }
   }
 
-  return validator;
+  return !hasRelationValue(value);
 };
 
-const createRelationValidator = (
-  { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
-  options: ValidatorContext
-): strapiUtils.yup.AnySchema => {
-  let validator: strapiUtils.yup.AnySchema;
+const createMediaAttributeValidator =
+  (createOrUpdate: CreateOrUpdate) =>
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Media>,
+    options: ValidatorContext
+  ): strapiUtils.yup.AnySchema => {
+    // Media values arrive in several shapes (a bare id, an array of ids, or a
+    // `{ connect }` / `{ set }` object on update). `yup.mixed()` accepts all of them;
+    // coercing `multiple` media to `yup.array()` would reject the connect/set object
+    // syntax that update requests legitimately send. Required-ness is asserted below
+    // via `relationRequiredFails`, which understands every shape.
+    let validator: strapiUtils.yup.AnySchema = yup.mixed();
 
-  if (Array.isArray(updatedAttribute.value)) {
-    validator = yup.array().of(yup.mixed());
-  } else {
-    validator = yup.mixed();
-  }
+    // Relational required constraints are only enforced under the strictRelations flag,
+    // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+    if (options.strictRelations && !options.isDraft && attr.required) {
+      // A media value can arrive as an id, an array, or a connect/set object, so a simple
+      // `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      validator = validator.test(
+        'required-media',
+        `${updatedAttribute.name} must be defined.`,
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value)
+      );
+    }
 
-  // Relational required constraints are only enforced under the strictRelations flag,
-  // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
-  if (options.strictRelations && !options.isDraft && attr.required) {
-    // A relation value can arrive as an id, an array, or a connect/set object, so a
-    // simple `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
-    validator = validator.test(
-      'required-relation',
-      `${updatedAttribute.name} must be defined.`,
-      () => hasRelationValue(updatedAttribute.value)
-    );
-  }
+    return validator;
+  };
 
-  return validator;
-};
+const createRelationValidator =
+  (createOrUpdate: CreateOrUpdate) =>
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
+    options: ValidatorContext
+  ): strapiUtils.yup.AnySchema => {
+    let validator: strapiUtils.yup.AnySchema;
+
+    if (Array.isArray(updatedAttribute.value)) {
+      validator = yup.array().of(yup.mixed());
+    } else {
+      validator = yup.mixed();
+    }
+
+    // Relational required constraints are only enforced under the strictRelations flag,
+    // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+    if (options.strictRelations && !options.isDraft && attr.required) {
+      // A relation value can arrive as an id, an array, or a connect/set object, so a
+      // simple `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      validator = validator.test(
+        'required-relation',
+        `${updatedAttribute.name} must be defined.`,
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value)
+      );
+    }
+
+    return validator;
+  };
 
 const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
@@ -354,7 +391,7 @@ const createAttributeValidator =
     }
 
     if (isMediaAttribute(metas.attr)) {
-      validator = createMediaAttributeValidator(
+      validator = createMediaAttributeValidator(createOrUpdate)(
         {
           attr: metas.attr as Schema.Attribute.Media,
           updatedAttribute: metas.updatedAttribute,
@@ -409,7 +446,7 @@ const createAttributeValidator =
 
         validator = createDzValidator(createOrUpdate)(metas, options);
       } else if (metas.attr.type === 'relation') {
-        validator = createRelationValidator(
+        validator = createRelationValidator(createOrUpdate)(
           {
             attr: metas.attr,
             updatedAttribute: metas.updatedAttribute,

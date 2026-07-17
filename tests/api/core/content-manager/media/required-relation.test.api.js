@@ -59,12 +59,62 @@ const oneToManyCT = {
   },
 };
 
+// A component carrying a required relation, used to prove required media/relations
+// are enforced when nested inside components and dynamic zones (PR #27028 review, Fix 2:
+// the flag used to be dropped when recursing into component/DZ validators).
+const metaComponent = {
+  displayName: 'rel-meta',
+  category: 'default',
+  attributes: {
+    owner: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'api::rel-author.rel-author',
+      required: true,
+    },
+  },
+};
+
+const withComponentCT = {
+  displayName: 'rel-with-comp',
+  singularName: 'rel-with-comp',
+  pluralName: 'rel-with-comps',
+  draftAndPublish: true,
+  attributes: {
+    meta: {
+      type: 'component',
+      repeatable: false,
+      component: 'default.rel-meta',
+      required: true,
+    },
+  },
+};
+
+const withDzCT = {
+  displayName: 'rel-with-dz',
+  singularName: 'rel-with-dz',
+  pluralName: 'rel-with-dzs',
+  draftAndPublish: true,
+  attributes: {
+    zone: {
+      type: 'dynamiczone',
+      components: ['default.rel-meta'],
+      required: true,
+    },
+  },
+};
+
 const AUTHOR_UID = 'api::rel-author.rel-author';
 const OTO_UID = 'api::rel-oto.rel-oto';
 const OTM_UID = 'api::rel-otm.rel-otm';
+const WITH_COMP_UID = 'api::rel-with-comp.rel-with-comp';
+const WITH_DZ_UID = 'api::rel-with-dz.rel-with-dz';
 
 const createEntry = (uid, body = {}, qs = {}) =>
   rq.post(`/content-manager/collection-types/${uid}`, { body, qs });
+
+const updateEntry = (uid, documentId, body = {}, qs = {}) =>
+  rq.put(`/content-manager/collection-types/${uid}/${documentId}`, { body, qs });
 
 const publishEntry = (uid, documentId) =>
   rq.post(`/content-manager/collection-types/${uid}/${documentId}/actions/publish`);
@@ -76,8 +126,11 @@ describe('Required relation field validation (issues #15445 / #19433)', () => {
   beforeAll(async () => {
     await builder
       .addContentType(authorCT)
+      .addComponent(metaComponent)
       .addContentType(oneToOneCT)
       .addContentType(oneToManyCT)
+      .addContentType(withComponentCT)
+      .addContentType(withDzCT)
       .build();
 
     strapi = await createStrapiInstance();
@@ -143,6 +196,72 @@ describe('Required relation field validation (issues #15445 / #19433)', () => {
       expect(creation.statusCode).toBe(201);
 
       const res = await publishEntry(OTO_UID, creation.body.data.documentId);
+      expect(res.statusCode).toBe(200);
+    });
+
+    // PR #27028 review, Fix 1: a partial update that OMITS the required relation must not
+    // be rejected — an absent key keeps the existing value (mirrors scalar `notNull` on update).
+    test('partial update omitting the required relation on a populated entry → 200', async () => {
+      const creation = await createEntry(OTO_UID, { author: authorId }, { populate: ['author'] });
+      expect(creation.statusCode).toBe(201);
+      const { documentId } = creation.body.data;
+
+      // Update another field only — no `author` key in the payload.
+      const res = await updateEntry(OTO_UID, documentId, {}, { populate: ['author'] });
+      expect(res.statusCode).toBe(200);
+
+      // The relation is preserved, and the entry still publishes.
+      const pub = await publishEntry(OTO_UID, documentId);
+      expect(pub.statusCode).toBe(200);
+    });
+
+    // PR #27028 review, Fix 2: required relations nested in a component / dynamic zone must
+    // be enforced (the flag used to be dropped when recursing into nested validators).
+    test('publishing a component with an empty required nested relation → 400', async () => {
+      const creation = await createEntry(
+        WITH_COMP_UID,
+        { meta: { owner: null } },
+        { populate: ['meta'] }
+      );
+      expect(creation.statusCode).toBe(201);
+
+      const res = await publishEntry(WITH_COMP_UID, creation.body.data.documentId);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('happy path: publishing a component with a populated nested relation → 200', async () => {
+      const creation = await createEntry(
+        WITH_COMP_UID,
+        { meta: { owner: authorId } },
+        { populate: ['meta'] }
+      );
+      expect(creation.statusCode).toBe(201);
+
+      const res = await publishEntry(WITH_COMP_UID, creation.body.data.documentId);
+      expect(res.statusCode).toBe(200);
+    });
+
+    test('publishing a dynamic zone with an empty required nested relation → 400', async () => {
+      const creation = await createEntry(
+        WITH_DZ_UID,
+        { zone: [{ __component: 'default.rel-meta', owner: null }] },
+        { populate: ['zone'] }
+      );
+      expect(creation.statusCode).toBe(201);
+
+      const res = await publishEntry(WITH_DZ_UID, creation.body.data.documentId);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('happy path: publishing a dynamic zone with a populated nested relation → 200', async () => {
+      const creation = await createEntry(
+        WITH_DZ_UID,
+        { zone: [{ __component: 'default.rel-meta', owner: authorId }] },
+        { populate: ['zone'] }
+      );
+      expect(creation.statusCode).toBe(201);
+
+      const res = await publishEntry(WITH_DZ_UID, creation.body.data.documentId);
       expect(res.statusCode).toBe(200);
     });
   });
