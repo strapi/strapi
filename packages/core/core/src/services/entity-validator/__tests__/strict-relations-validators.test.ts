@@ -303,31 +303,116 @@ describe('Entity validator - strictRelations', () => {
       expect(data).toEqual({ author: { connect: [1] } });
     });
 
-    // Behaviour 2 (write-time half): a disconnect-only update can't be resolved without a
-    // DB read of the current relations, so at WRITE time it deliberately passes. The
-    // authoritative empty-check happens at publish (see the integration test
-    // `strict-relations-publish.test.api.js`), which validates against populated DB state.
-    test('strict + non-draft + { disconnect: [id] } → passes (needs DB read; deferred to publish)', async () => {
+    // Behaviour 2: disconnect-only on a TO-ONE relation deterministically empties it
+    // (a to-one holds at most one target), so it is rejected at write time — no DB read needed.
+    test('strict + non-draft + to-one { disconnect: [id] } → throws (deterministically empties)', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          requiredRelationModel,
+          { author: { disconnect: [1] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    // Same for SINGLE media (holds at most one file).
+    test('strict + non-draft + single media { disconnect: [id] } → throws', async () => {
+      global.strapi.getModel = () => singleMediaModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          singleMediaModel,
+          { cover: { disconnect: [1] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    // The Content Manager initializes relations as `{ connect: [], disconnect: [] }` and
+    // keeps `connect: []` when the user only removes entries — so the real admin payload
+    // for "remove the relation" is `{ connect: [], disconnect: [id] }`. It must be treated
+    // as disconnect-only (the empty connect adds nothing) and rejected on a to-one.
+    test('strict + non-draft + CM shape { connect: [], disconnect: [id] } on to-one → throws', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          requiredRelationModel,
+          { author: { connect: [], disconnect: [{ id: 1 }] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    test('strict + non-draft + CM shape { connect: [], disconnect: [id] } on single media → throws', async () => {
+      global.strapi.getModel = () => singleMediaModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          singleMediaModel,
+          { cover: { connect: [], disconnect: [{ id: 1 }] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    // Regression guard: the CM sends `{ connect: [], disconnect: [] }` for every UNTOUCHED
+    // relation on save. Nothing is added or removed → pure no-op → must keep passing,
+    // or every non-D&P save of an unmodified required relation would break.
+    test('strict + non-draft + CM untouched shape { connect: [], disconnect: [] } → passes (no-op)', async () => {
       global.strapi.getModel = () => requiredRelationModel;
 
       const data = await entityValidator.validateEntityUpdate(
         requiredRelationModel,
-        { author: { disconnect: [1] } },
+        { author: { connect: [], disconnect: [] } },
         { strictRelations: true }
       );
-      expect(data).toEqual({ author: { disconnect: [1] } });
+      expect(data).toEqual({ author: { connect: [], disconnect: [] } });
     });
 
-    // Behaviour 2 also holds for media.
-    test('strict + non-draft + media { disconnect: [id] } → passes (needs DB read)', async () => {
-      global.strapi.getModel = () => singleMediaModel;
+    // CM shape on a TO-MANY still passes at write time (other entries may remain).
+    test('strict + non-draft + CM shape { connect: [], disconnect: [id] } on to-many → passes', async () => {
+      global.strapi.getModel = () => requiredManyRelationModel;
 
       const data = await entityValidator.validateEntityUpdate(
-        singleMediaModel,
-        { cover: { disconnect: [1] } },
+        requiredManyRelationModel,
+        { authors: { connect: [], disconnect: [{ id: 1 }] } },
         { strictRelations: true }
       );
-      expect(data).toEqual({ cover: { disconnect: [1] } });
+      expect(data).toEqual({ authors: { connect: [], disconnect: [{ id: 1 }] } });
+    });
+
+    // Behaviour 2 (to-many half): a disconnect-only update on a TO-MANY relation can't be
+    // resolved without a DB read (other entries may remain), so at write time it passes.
+    // The authoritative empty-check happens at publish for D&P types (see the integration
+    // test `strict-relations-publish.test.api.js`), which validates the populated draft.
+    test('strict + non-draft + to-many { disconnect: [id] } → passes (needs DB read)', async () => {
+      global.strapi.getModel = () => requiredManyRelationModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        requiredManyRelationModel,
+        { authors: { disconnect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ authors: { disconnect: [1] } });
+    });
+
+    // And for MULTIPLE media (to-many) — disconnect-only passes at write time.
+    test('strict + non-draft + multiple media { disconnect: [id] } → passes (needs DB read)', async () => {
+      global.strapi.getModel = () => multipleMediaModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        multipleMediaModel,
+        { gallery: { disconnect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ gallery: { disconnect: [1] } });
     });
   });
 

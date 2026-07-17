@@ -29,6 +29,13 @@
  * preserves the value. This is pre-existing media behaviour (reproduces with the flag off and
  * with an optional field), not something strictRelations introduces; the media cases below
  * assert the actual behaviour rather than assuming media mirrors relations.
+ *
+ * DISCONNECT-ONLY on TO-ONE / SINGLE-MEDIA is rejected at WRITE time (not deferred): a to-one
+ * relation or single media holds at most one entry, so `{ disconnect: [...] }` (no `connect`/
+ * `set`) always empties it — deterministic without a DB read. This matters for NON-D&P types,
+ * which have no publish gate, so a write-time reject is the only backstop. Covered below with a
+ * non-D&P content type (update returns 400 directly). To-many disconnect-only still passes at
+ * write time (other entries may remain) and relies on the publish gate for D&P types.
  */
 
 const fs = require('fs');
@@ -82,9 +89,42 @@ const singleMediaCT = {
   },
 };
 
+// Non-D&P types: writes are always non-draft (no publish gate), so strictRelations is
+// enforced directly on update — the write-time reject is the only backstop for these.
+const noDpOneToOneCT = {
+  displayName: 'nodp-oto',
+  singularName: 'nodp-oto',
+  pluralName: 'nodp-otos',
+  draftAndPublish: false,
+  attributes: {
+    author: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'api::pub-author.pub-author',
+      required: true,
+    },
+  },
+};
+
+const noDpSingleMediaCT = {
+  displayName: 'nodp-media',
+  singularName: 'nodp-media',
+  pluralName: 'nodp-medias',
+  draftAndPublish: false,
+  attributes: {
+    cover: {
+      type: 'media',
+      multiple: false,
+      required: true,
+    },
+  },
+};
+
 const AUTHOR_UID = 'api::pub-author.pub-author';
 const OTO_UID = 'api::pub-oto.pub-oto';
 const MEDIA_UID = 'api::pub-media.pub-media';
+const NODP_OTO_UID = 'api::nodp-oto.nodp-oto';
+const NODP_MEDIA_UID = 'api::nodp-media.nodp-media';
 
 const createEntry = (uid, body = {}, qs = {}) =>
   rq.post(`/content-manager/collection-types/${uid}`, { body, qs });
@@ -131,6 +171,8 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
       .addContentType(authorCT)
       .addContentType(oneToOneCT)
       .addContentType(singleMediaCT)
+      .addContentType(noDpOneToOneCT)
+      .addContentType(noDpSingleMediaCT)
       .build();
 
     strapi = await createStrapiInstance();
@@ -332,6 +374,111 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
 
         const publish = await publishEntry(MEDIA_UID, documentId);
         expect(publish.statusCode).toBe(200);
+      });
+    });
+
+    // Non-D&P types have no publish gate: a write is always non-draft, so strictRelations is
+    // enforced on the update itself. A disconnect-only on a to-one/single field deterministically
+    // empties it, so the update must be rejected here (there is no later backstop).
+    describe('Non-D&P disconnect-only (write-time is the only gate)', () => {
+      test('to-one relation disconnect-only → update 400', async () => {
+        const author = await createEntry(AUTHOR_UID, { name: 'Grace' });
+        const authorDocId = author.body.data.documentId;
+
+        const creation = await createEntry(
+          NODP_OTO_UID,
+          { author: author.body.data.id },
+          { populate: ['author'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        // Non-draft update that empties the required to-one relation → rejected at write time.
+        const update = await updateEntry(
+          NODP_OTO_UID,
+          documentId,
+          { author: { disconnect: [authorDocId] } },
+          { populate: ['author'] }
+        );
+        expect(update.statusCode).toBe(400);
+      });
+
+      test('single media disconnect-only → update 400', async () => {
+        const upload = await uploadImg();
+        expect(upload.statusCode).toBe(201);
+        const fileId = upload.body[0].id;
+
+        const creation = await createEntry(
+          NODP_MEDIA_UID,
+          { cover: fileId },
+          { populate: ['cover'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        const update = await updateEntry(
+          NODP_MEDIA_UID,
+          documentId,
+          { cover: { disconnect: [fileId] } },
+          { populate: ['cover'] }
+        );
+        expect(update.statusCode).toBe(400);
+      });
+
+      // The admin CM initializes relations as `{ connect: [], disconnect: [] }` and keeps
+      // `connect: []` when the user only removes entries, so this is the payload shape a
+      // real "remove the relation and save" produces. It must be rejected the same way as
+      // the bare disconnect-only form.
+      test('CM shape { connect: [], disconnect: [id] } on to-one relation → update 400', async () => {
+        const author = await createEntry(AUTHOR_UID, { name: 'Hedy' });
+        const authorDocId = author.body.data.documentId;
+
+        const creation = await createEntry(
+          NODP_OTO_UID,
+          { author: author.body.data.id },
+          { populate: ['author'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        const update = await updateEntry(
+          NODP_OTO_UID,
+          documentId,
+          { author: { connect: [], disconnect: [authorDocId] } },
+          { populate: ['author'] }
+        );
+        expect(update.statusCode).toBe(400);
+      });
+
+      // Regression guard: the CM sends `{ connect: [], disconnect: [] }` for every UNTOUCHED
+      // relation on save — nothing added or removed. Rejecting it would break every non-D&P
+      // save of an entry whose required relation is simply left as-is.
+      test('CM untouched shape { connect: [], disconnect: [] } on to-one relation → update 200', async () => {
+        const author = await createEntry(AUTHOR_UID, { name: 'Barbara' });
+
+        const creation = await createEntry(
+          NODP_OTO_UID,
+          { author: author.body.data.id },
+          { populate: ['author'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        const update = await updateEntry(
+          NODP_OTO_UID,
+          documentId,
+          { author: { connect: [], disconnect: [] } },
+          { populate: ['author'] }
+        );
+        expect(update.statusCode).toBe(200);
+
+        // The relation is still attached after the no-op save. Read at the DB level: the
+        // CM count metadata is unreliable for non-D&P → D&P relations (it status-filters
+        // the target), while the join row is the ground truth.
+        const row = await strapi.db
+          .query(NODP_OTO_UID)
+          .findOne({ where: { documentId }, populate: ['author'] });
+        expect(row.author).not.toBe(null);
       });
     });
   });

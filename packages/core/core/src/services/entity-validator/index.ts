@@ -14,6 +14,7 @@ type CreateOrUpdate = 'creation' | 'update';
 
 const { yup, validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
+const { isAnyToOne } = strapiUtils.relations;
 const { ValidationError } = strapiUtils.errors;
 
 type ID = { id: string | number };
@@ -267,6 +268,38 @@ const hasRelationValue = (value: unknown): boolean => {
 };
 
 /**
+ * A disconnect-only update payload removes entries without adding or replacing any:
+ * actual removals in `disconnect`, no `set`, and no effective additions in `connect`.
+ * `connect` counts as "no additions" when absent OR an empty array — the Content Manager
+ * initializes every relation as `{ connect: [], disconnect: [] }` and keeps `connect: []`
+ * in place when the user only removes entries, so `{ connect: [], disconnect: [id] }`
+ * is the shape real admin saves produce. A payload with empty `disconnect` (nothing
+ * removed) is NOT disconnect-only — it's the CM's untouched-relation no-op.
+ */
+const isDisconnectOnly = (value: unknown): boolean => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const { connect, set, disconnect } = value as {
+    connect?: unknown;
+    set?: unknown;
+    disconnect?: unknown;
+  };
+
+  if (!isNil(set)) {
+    return false;
+  }
+
+  const hasAdditions = !isNil(connect) && (!Array.isArray(connect) || connect.length > 0);
+  if (hasAdditions) {
+    return false;
+  }
+
+  return !isNil(disconnect) && (!Array.isArray(disconnect) || disconnect.length > 0);
+};
+
+/**
  * Decides whether a required media/relation value should be rejected as empty,
  * mirroring the scalar `required` semantics:
  *
@@ -277,14 +310,30 @@ const hasRelationValue = (value: unknown): boolean => {
  *   Only reject when the request is present AND leaves the field empty. A bare
  *   `{ connect: [] }` (no `set`) neither adds nor removes anything → treated as a no-op
  *   that passes; `{ set: [] }` / `null` / `[]` explicitly empty the field → rejected.
- *   Note: disconnect-only updates can't be validated without a DB read of the current
- *   state and fall through to a pass (documented limitation, tied to the null→[] follow-up).
+ *
+ * `isToOne` marks a to-one relation / single media, which can hold at most one entry.
+ * For those, a disconnect-only update (`{ disconnect: [...] }` with no `connect`/`set`)
+ * always leaves the field empty — no DB read needed — so it is rejected on non-draft
+ * updates. To-many fields can still hold other entries after a disconnect, so their
+ * resulting state can't be known without a DB read and they fall through to a pass
+ * (publish re-validates the populated draft for D&P types; documented limitation for
+ * non-D&P, tied to the null→[] follow-up).
  */
-const relationRequiredFails = (createOrUpdate: CreateOrUpdate, value: unknown): boolean => {
+const relationRequiredFails = (
+  createOrUpdate: CreateOrUpdate,
+  value: unknown,
+  isToOne: boolean
+): boolean => {
   if (createOrUpdate === 'update') {
     // Absent key on update = keep the existing value.
     if (value === undefined) {
       return false;
+    }
+
+    if (isDisconnectOnly(value)) {
+      // A disconnect on a to-one/single field deterministically empties it; on a to-many
+      // field the resulting state depends on the current DB rows, so we can't reject here.
+      return isToOne;
     }
 
     // A connect-only empty is a no-op, not an emptying operation.
@@ -318,10 +367,12 @@ const createMediaAttributeValidator =
     if (options.strictRelations && !options.isDraft && attr.required) {
       // A media value can arrive as an id, an array, or a connect/set object, so a simple
       // `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      // Single media holds at most one file, so a disconnect-only update always empties it.
+      const isToOne = !attr.multiple;
       validator = validator.test(
         'required-media',
         `${updatedAttribute.name} must be defined.`,
-        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value)
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value, isToOne)
       );
     }
 
@@ -347,10 +398,12 @@ const createRelationValidator =
     if (options.strictRelations && !options.isDraft && attr.required) {
       // A relation value can arrive as an id, an array, or a connect/set object, so a
       // simple `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      // A to-one relation holds at most one target, so a disconnect-only update always empties it.
+      const isToOne = isAnyToOne(attr);
       validator = validator.test(
         'required-relation',
         `${updatedAttribute.name} must be defined.`,
-        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value)
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value, isToOne)
       );
     }
 
