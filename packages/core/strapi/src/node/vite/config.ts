@@ -43,6 +43,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
+      // Contract (#26964, #26944, #27014):
+      // - CJS packages imported by @strapi/admin MUST be in optimizeDeps.include (invariant, lodash, …).
+      // - The admin entry host (@strapi/strapi) MUST NOT be in optimizeDeps.exclude.
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
       // so changes are reflected without clearing node_modules/.strapi/vite cache.
       // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
@@ -68,11 +71,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle CodeMirror so JSONInput and plugin chunks share one @codemirror/state instance
         ...getResolvableCodemirrorPackages(),
         '@radix-ui/react-tooltip',
-        // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
-        // is CommonJS-only; pre-bundling converts it to ESM for the browser
+        // CJS-only; required for @strapi/admin in dev (#26944, #26964, #27014).
         'lodash',
-        // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
-        // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
+        'invariant',
+        // UMD; without pre-bundling plugin chunks get empty namespace → "Prism is not defined" (#26964).
         'prismjs',
         // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
         // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app

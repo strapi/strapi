@@ -9,6 +9,18 @@ import type { PluginMeta } from './plugins';
 
 const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
 
+/**
+ * Packages explicitly pre-bundled or aliased for the admin singleton contract.
+ * Never auto-exclude these — they must stay on the optimizeDeps.include / dedupe path.
+ *
+ * The admin entry host (@strapi/strapi) must never land in optimizeDeps.exclude (#26944, #27014).
+ * CJS-only deps imported by @strapi/admin (e.g. invariant, lodash) belong in optimizeDeps.include
+ * (see vite/config.ts — #26964, #26944, #27014).
+ */
+const PINNED_OPTIMIZE_MODULES = new Set<string>([...ADMIN_VITE_ALIAS_MODULES, '@strapi/strapi']);
+
+const isOfficialStrapiPackage = (name: string): boolean => name.startsWith('@strapi/');
+
 type PackageExportEntry =
   | string
   | {
@@ -144,6 +156,10 @@ const loadAppPackageJson = async (cwd: string): Promise<PackageJson | null> => {
  * Strapi's React/design-system pre-bundling. Skip dep optimization so they resolve through
  * the admin resolve aliases instead of being re-bundled by Vite.
  *
+ * Scans app and plugin dependency trees (#26944). Official @strapi/* packages and pinned
+ * singletons are never auto-excluded — @strapi/strapi matches the heuristic but must stay on
+ * the optimizeDeps.include path (#26944, #27014).
+ *
  * @internal
  */
 export const collectAdminOptimizeDepsExclude = async (
@@ -177,7 +193,7 @@ export const collectAdminOptimizeDepsExclude = async (
   ]);
 
   for (const name of candidateNames) {
-    if (pinnedSingletons.has(name)) {
+    if (PINNED_OPTIMIZE_MODULES.has(name) || isOfficialStrapiPackage(name)) {
       continue;
     }
 
