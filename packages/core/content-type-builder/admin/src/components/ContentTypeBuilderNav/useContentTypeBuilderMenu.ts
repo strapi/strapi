@@ -11,6 +11,7 @@ import { useDataManager } from '../DataManager/useDataManager';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import type { Status } from '../../types';
+import type { OpenModalCreateSchemaPayload } from '../FormModalNavigation/FormModalNavigationProvider';
 
 type Link = {
   name: string;
@@ -66,7 +67,7 @@ export const useContentTypeBuilderMenu = () => {
       kind: 'collectionType',
       actionType: 'create',
       forTarget: 'contentType',
-    };
+    } satisfies OpenModalCreateSchemaPayload;
 
     onOpenModalCreateSchema(nextState);
   };
@@ -79,7 +80,7 @@ export const useContentTypeBuilderMenu = () => {
       kind: 'singleType',
       actionType: 'create',
       forTarget: 'contentType',
-    };
+    } satisfies OpenModalCreateSchemaPayload;
 
     onOpenModalCreateSchema(nextState);
   };
@@ -89,10 +90,10 @@ export const useContentTypeBuilderMenu = () => {
 
     const nextState = {
       modalType: 'component',
-      kind: null,
+      kind: 'collectionType',
       actionType: 'create',
       forTarget: 'component',
-    };
+    } satisfies OpenModalCreateSchemaPayload;
 
     onOpenModalCreateSchema(nextState);
   };

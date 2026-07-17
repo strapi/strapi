@@ -14,5 +14,6 @@ module.exports = ({ env }) => ({
   flags: {
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
+    docLinks: env.bool('FLAG_DOC_LINKS', true),
   },
 });

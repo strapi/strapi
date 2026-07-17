@@ -12,6 +12,7 @@ import {
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
+import upperFirst from 'lodash/upperFirst';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -31,7 +32,7 @@ import type { ComponentPickerProps } from './ComponentPicker';
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
-  componentUid: string;
+  componentUid?: string;
   disabled?: boolean;
   index: number;
   name: string;
@@ -77,7 +78,7 @@ const DynamicComponent = ({
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
 
-  const { mainField = 'id' } = components[componentUid]?.settings ?? {};
+  const { mainField = 'id' } = componentUid ? (components[componentUid]?.settings ?? {}) : {};
 
   const mainFieldValue = useForm('DynamicComponent', (state) =>
     getIn(state.values, `${name}.${index}.${mainField}`)
@@ -87,6 +88,16 @@ const DynamicComponent = ({
   const displayTitle = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
   const { icon, displayName } = React.useMemo(() => {
+    if (!componentUid) {
+      return {
+        icon: null,
+        displayName: formatMessage({
+          id: getTranslation('components.DynamicZone.unknown-component'),
+          defaultMessage: 'Unknown component',
+        }),
+      };
+    }
+
     const [category] = componentUid.split('.');
     const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
       (component) => component.uid === componentUid
@@ -140,7 +151,7 @@ const DynamicComponent = ({
   );
   const isNewItem = useForm(
     'DynamicComponent',
-    (state) => getIn(state.values, componentPath)?.id == null
+    (state) => getIn<{ id?: unknown }>(state.values, componentPath)?.id == null
   );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 
@@ -271,7 +282,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
@@ -293,7 +304,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
@@ -339,7 +350,7 @@ const DynamicComponent = ({
                   <DynamicComponentFields
                     componentUid={componentUid}
                     index={index}
-                    layout={components[componentUid]?.layout}
+                    layout={componentUid ? components[componentUid]?.layout : undefined}
                     name={name}
                   >
                     {children}
@@ -386,7 +397,7 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
 `;
 
 interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
-  componentUid: string;
+  componentUid?: string;
   index: number;
   layout?: EditFieldLayout[][];
   name: string;

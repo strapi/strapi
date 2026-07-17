@@ -43,6 +43,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     replace: jest.Mock;
   };
 
+  let fileService: {
+    signFileUrls: jest.Mock;
+    upload: jest.Mock;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -64,15 +69,15 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       replace: jest.fn(),
     };
 
+    fileService = {
+      upload: jest.fn().mockResolvedValue([{}]),
+      signFileUrls: jest.fn((file) => Promise.resolve({ ...file, isUrlSigned: true })),
+    };
+
     mockGetService.mockImplementation((serviceName: string) => {
       if (serviceName === 'aiMetadata') return mockAiMetadataService;
       if (serviceName === 'upload') return uploadService;
-      if (serviceName === 'file') {
-        return {
-          upload: jest.fn().mockResolvedValue([{}]),
-          signFileUrls: jest.fn((file) => Promise.resolve(file)),
-        };
-      }
+      if (serviceName === 'file') return fileService;
       if (serviceName === 'metrics') {
         return {
           trackUsage: jest.fn().mockResolvedValue(undefined),
@@ -128,12 +133,101 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         files: { files: { filepath: '/tmp/test.jpg', mimetype: 'image/jpeg' } },
       } as any,
       forbidden: jest.fn(),
+      query: { id: '7' },
     } as any;
 
     ctxBulk = {
       state: { userAbility: {}, user: { id: 42 } },
       request: { body: {} },
     } as any;
+  });
+
+  describe('replaceFile', () => {
+    it('accepts a single replacement file received as an array', async () => {
+      const replacementFile = {
+        filepath: '/tmp/replacement.pdf',
+        originalFilename: 'replacement.pdf',
+        mimetype: 'application/pdf',
+      };
+
+      mockContext.query = { id: '1' } as any;
+      mockContext.request!.body = {
+        fileInfo: ['{"name":"replacement.pdf","folder":null}'],
+      };
+      mockContext.request!.files = { files: [replacementFile] } as any;
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [replacementFile],
+        filteredBody: {
+          fileInfo: {
+            name: 'replacement.pdf',
+            folder: null,
+          },
+        },
+        errors: [],
+      });
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: {
+          name: 'replacement.pdf',
+          folder: null,
+          alternativeText: '',
+          caption: '',
+          focalPoint: null,
+        },
+      });
+
+      uploadService.replace.mockResolvedValue({
+        id: 1,
+        name: 'replacement.pdf',
+      });
+
+      await adminUploadController.replaceFile(mockContext as Context);
+
+      expect(mockPrepareUploadRequest).toHaveBeenCalledWith(
+        replacementFile,
+        mockContext.request!.body,
+        strapi
+      );
+      expect(uploadService.replace).toHaveBeenCalledWith(
+        '1',
+        {
+          data: {
+            fileInfo: {
+              name: 'replacement.pdf',
+              folder: null,
+              alternativeText: '',
+              caption: '',
+              focalPoint: null,
+            },
+          },
+          file: replacementFile,
+        },
+        { user: { id: 1 } }
+      );
+      expect(mockContext.body).toEqual({
+        id: 1,
+        name: 'replacement.pdf',
+        cleaned: true,
+        isUrlSigned: true,
+      });
+    });
+
+    it('rejects multiple replacement files', async () => {
+      mockContext.query = { id: '1' } as any;
+      mockContext.request!.files = {
+        files: [
+          { filepath: '/tmp/first.jpg', originalFilename: 'first.jpg', mimetype: 'image/jpeg' },
+          { filepath: '/tmp/second.jpg', originalFilename: 'second.jpg', mimetype: 'image/jpeg' },
+        ],
+      } as any;
+
+      await expect(adminUploadController.replaceFile(mockContext as Context)).rejects.toThrow(
+        'Cannot replace a file with multiple ones'
+      );
+
+      expect(mockPrepareUploadRequest).not.toHaveBeenCalled();
+      expect(uploadService.replace).not.toHaveBeenCalled();
+    });
   });
 
   describe('uploadFiles - Security Filtering', () => {
@@ -533,8 +627,8 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(mockFindEntityAndCheckPermissions).toHaveBeenCalledTimes(2);
 
       expect(ctxBulk.body).toEqual([
-        { id: 1, caption: 'A', cleaned: true },
-        { id: 2, alternativeText: 'B', cleaned: true },
+        { id: 1, caption: 'A', cleaned: true, isUrlSigned: true },
+        { id: 2, alternativeText: 'B', cleaned: true, isUrlSigned: true },
       ]);
     });
 
@@ -580,10 +674,10 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       await adminUploadController.bulkUpdateFileInfo(ctxBulk as Context);
 
       expect(sanitizeOutput).toHaveBeenCalledWith(
-        { id: 10, caption: 'X' },
+        { id: 10, caption: 'X', isUrlSigned: true },
         { action: ACTIONS.read }
       );
-      expect(ctxBulk.body).toEqual([{ ok: true, id: 10, caption: 'X' }]);
+      expect(ctxBulk.body).toEqual([expect.objectContaining({ ok: true, id: 10, caption: 'X' })]);
     });
 
     it('passes the authenticated user to updateFileInfo', async () => {
@@ -617,6 +711,26 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         },
         { user: { id: 42 } }
       );
+    });
+  });
+
+  describe('updateFileInfo', () => {
+    it('updates a file, sanitizes outputs, and returns the signed file', async () => {
+      mockValidateUploadBody.mockResolvedValue({
+        id: 7,
+        fileInfo: {
+          name: 'fileA.jpg',
+          alternativeText: 'hello',
+          caption: 'A',
+        },
+      } as any);
+
+      uploadService.updateFileInfo.mockResolvedValue({ id: 7 });
+
+      await adminUploadController.updateFileInfo(mockContext as Context);
+
+      expect(fileService.signFileUrls).toHaveBeenCalledWith({ id: 7 });
+      expect(mockContext.body).toEqual(expect.objectContaining({ id: 7, isUrlSigned: true }));
     });
   });
 });

@@ -15,7 +15,9 @@ interface EditorApi {
   scrollIntoView: (args?: Parameters<HTMLElement['scrollIntoView']>[0]) => void;
 }
 
-interface EditorProps extends Omit<FieldValue, 'initialValue'>, Omit<InputProps, 'type' | 'label'> {
+interface EditorProps
+  extends Omit<FieldValue<string>, 'initialValue'>,
+    Omit<InputProps, 'type' | 'label'> {
   editorRef: React.MutableRefObject<EditorFromTextArea>;
   isPreviewMode?: boolean;
   isExpandMode?: boolean;
