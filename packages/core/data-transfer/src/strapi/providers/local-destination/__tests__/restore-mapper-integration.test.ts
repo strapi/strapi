@@ -91,6 +91,7 @@ const buildStrapi = () =>
   ({
     getModel: jest.fn((uid: string) => schemas[uid]),
     db: {
+      dialect: { client: 'postgres' },
       transaction,
       lifecycles: { enable: jest.fn(), disable: jest.fn() },
     },

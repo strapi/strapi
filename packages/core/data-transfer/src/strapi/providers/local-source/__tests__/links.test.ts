@@ -1,10 +1,14 @@
 import { collect } from '../../../../__tests__/test-utils';
+import { DEFAULT_DETAILED_WARNING_LIMIT } from '../../../../utils/capped-warnings';
 import { createLinksStream, formatOrphanedLinksExportSummary } from '../links';
 
 describe('createLinksStream', () => {
-  test('warns for each omitted orphan link and emits a summary when the stream completes', async () => {
-    const joinTableRows = [{ chapter_id: 1, node_id: 99, chapter_ord: 1 }];
-    const onWarning = jest.fn();
+  const buildStrapiWithOrphans = (orphanCount: number) => {
+    const joinTableRows = Array.from({ length: orphanCount }, (_, index) => ({
+      chapter_id: 1,
+      node_id: 100 + index,
+      chapter_ord: index + 1,
+    }));
 
     const connection = {
       client: { connectionSettings: {} },
@@ -33,7 +37,13 @@ describe('createLinksStream', () => {
             }
 
             if (joinMode === 'left') {
-              resolve(joinTableRows);
+              resolve(
+                joinTableRows.map((row) => ({
+                  ...row,
+                  __left_exists: row.chapter_id,
+                  __right_exists: null,
+                }))
+              );
               return;
             }
 
@@ -45,7 +55,7 @@ describe('createLinksStream', () => {
       },
     };
 
-    const strapi = {
+    return {
       contentTypes: {
         'api::chapter.chapter': {},
       },
@@ -80,6 +90,11 @@ describe('createLinksStream', () => {
         query: jest.fn(),
       },
     } as unknown as import('@strapi/types').Core.Strapi;
+  };
+
+  test('warns for each omitted orphan link and emits a summary when the stream completes', async () => {
+    const onWarning = jest.fn();
+    const strapi = buildStrapiWithOrphans(1);
 
     const links = await collect(createLinksStream(strapi, { onWarning }));
 
@@ -87,8 +102,27 @@ describe('createLinksStream', () => {
     expect(onWarning).toHaveBeenCalledTimes(2);
     expect(onWarning).toHaveBeenNthCalledWith(
       1,
-      expect.stringContaining('Omitting link api::chapter.chapter:1 -> api::node.node:99')
+      expect.stringContaining('Omitting link api::chapter.chapter:1 -> api::node.node:100')
     );
     expect(onWarning).toHaveBeenNthCalledWith(2, formatOrphanedLinksExportSummary(1));
+  });
+
+  test('caps detailed orphan warnings and still emits the full summary count', async () => {
+    const onWarning = jest.fn();
+    const orphanCount = DEFAULT_DETAILED_WARNING_LIMIT + 5;
+    const strapi = buildStrapiWithOrphans(orphanCount);
+
+    await collect(createLinksStream(strapi, { onWarning }));
+
+    const detailedWarnings = onWarning.mock.calls.filter(([message]) =>
+      String(message).startsWith('Omitting link ')
+    );
+    const suppressionWarnings = onWarning.mock.calls.filter(([message]) =>
+      String(message).includes('Further detailed warnings suppressed')
+    );
+
+    expect(detailedWarnings).toHaveLength(DEFAULT_DETAILED_WARNING_LIMIT);
+    expect(suppressionWarnings).toHaveLength(1);
+    expect(onWarning).toHaveBeenLastCalledWith(formatOrphanedLinksExportSummary(orphanCount));
   });
 });

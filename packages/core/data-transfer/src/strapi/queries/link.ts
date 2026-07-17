@@ -6,6 +6,11 @@ import { ILink } from '../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
+const TARGET_EXISTS_ALIAS = '__target_exists';
+const LEFT_EXISTS_ALIAS = '__left_exists';
+const RIGHT_EXISTS_ALIAS = '__right_exists';
+const EXISTENCE_CHECK_CHUNK_SIZE = 1000;
+
 const getMetadataTableName = (strapi: Core.Strapi, uid: string) => {
   const metadata = strapi.db.metadata.get(uid);
 
@@ -16,45 +21,98 @@ const getMetadataTableName = (strapi: Core.Strapi, uid: string) => {
   return metadata.tableName;
 };
 
-const entityExists = async (
+const refKey = (ref: number | string) => `${typeof ref}:${ref}`;
+
+/**
+ * Batch-load which refs exist for a content type. Handles numeric `id` refs and
+ * string `documentId` refs separately, chunked to keep `IN (...)` lists bounded.
+ */
+const loadExistingRefs = async (
   strapi: Core.Strapi,
   uid: string,
-  ref: number | string | null | undefined
-) => {
-  if (ref == null) {
-    return false;
+  refs: Array<number | string>
+): Promise<Set<string>> => {
+  const existing = new Set<string>();
+  const uniqueRefs = [...new Set(refs)];
+  const numericIds = uniqueRefs.filter((ref): ref is number => typeof ref === 'number');
+  const documentIds = uniqueRefs.filter((ref): ref is string => typeof ref === 'string');
+
+  for (let i = 0; i < numericIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
+    const chunk = numericIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
+    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+      select: ['id'],
+      where: { id: { $in: chunk } },
+    });
+
+    for (const row of rows) {
+      existing.add(refKey(row.id as number));
+    }
   }
 
-  const where = typeof ref === 'number' ? { id: ref } : { documentId: ref };
+  for (let i = 0; i < documentIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
+    const chunk = documentIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
+    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+      select: ['id', 'documentId'],
+      where: { documentId: { $in: chunk } },
+    });
 
-  const entry = await strapi.db.query(uid as UID.Schema).findOne({ select: ['id'], where });
+    for (const row of rows) {
+      if (row.documentId != null) {
+        existing.add(refKey(row.documentId as string));
+      }
+    }
+  }
 
-  return entry != null;
+  return existing;
 };
 
-const linkReferencesExistingEntities = async (strapi: Core.Strapi, link: ILink) => {
-  const leftExists = await entityExists(strapi, link.left.type, link.left.ref);
-  const rightExists = await entityExists(strapi, link.right.type, link.right.ref);
+/**
+ * Filter morph links in batches. The morph owner (`left`) is not checked:
+ * morphColumn rows come from the owner table itself, and morph join-table
+ * owners are FK-backed. Only dynamic morph targets (`right`) need existence
+ * checks, and those have no DB-level FK.
+ */
+const filterMorphLinksByTargetExistence = async function* filterMorphLinksByTargetExistence(
+  strapi: Core.Strapi,
+  links: ILink[],
+  onOrphanedLink?: (link: ILink) => void
+): AsyncGenerator<ILink> {
+  const refsByType = new Map<string, Array<number | string>>();
 
-  return leftExists && rightExists;
+  for (const link of links) {
+    const { type, ref } = link.right;
+
+    if (ref == null || type == null) {
+      onOrphanedLink?.(link);
+    } else {
+      const bucket = refsByType.get(type) ?? [];
+      bucket.push(ref);
+      refsByType.set(type, bucket);
+    }
+  }
+
+  const existingByType = new Map<string, Set<string>>();
+
+  for (const [type, refs] of refsByType) {
+    existingByType.set(type, await loadExistingRefs(strapi, type, refs));
+  }
+
+  for (const link of links) {
+    const { type, ref } = link.right;
+
+    if (ref == null || type == null) {
+      // already reported above
+    } else if (existingByType.get(type)?.has(refKey(ref))) {
+      yield link;
+    } else {
+      onOrphanedLink?.(link);
+    }
+  }
 };
 
 export interface LinkQueryOptions {
   onOrphanedLink?: (link: ILink) => void;
 }
-
-const yieldLinkIfEntitiesExist = async (
-  strapi: Core.Strapi,
-  link: ILink,
-  onOrphanedLink?: (link: ILink) => void
-) => {
-  if (await linkReferencesExistingEntities(strapi, link)) {
-    return link;
-  }
-
-  onOrphanedLink?.(link);
-  return null;
-};
 
 const aliasColumn = (tableAlias: string, column: string) => `${tableAlias}.${column}`;
 
@@ -106,47 +164,32 @@ export const createLinkQuery = (
         const targetTable = addSchema(getMetadataTableName(strapi, target));
         const targetReferencedColumn = aliasColumn(targetAlias, referencedColumn);
 
-        if (onOrphanedLink) {
-          const orphanQb = connection
-            .queryBuilder()
-            .select(`${ownerAlias}.id`, `${ownerAlias}.${joinColumnName} as ${joinColumnName}`)
-            .from({ [ownerAlias]: ownerTable })
-            .leftJoin(
-              { [targetAlias]: targetTable },
-              aliasColumn(ownerAlias, joinColumnName),
-              targetReferencedColumn
-            )
-            .whereNotNull(aliasColumn(ownerAlias, joinColumnName))
-            .whereNull(targetReferencedColumn);
-
-          if (trx) {
-            orphanQb.transacting(trx);
-          }
-
-          const orphanedEntries = await orphanQb;
-
-          for (const entry of orphanedEntries) {
-            const ref = entry[joinColumnName];
-
-            onOrphanedLink({
-              kind,
-              relation,
-              left: { type: uid, ref: entry.id, field: fieldName },
-              right: { type: target, ref },
-            });
-          }
-        }
-
+        // One LEFT JOIN classifies valid vs orphan rows (avoids a second full scan).
+        // When warnings are not requested, INNER JOIN skips orphans at the DB.
         const qb = connection
           .queryBuilder()
-          .select(`${ownerAlias}.id`, `${ownerAlias}.${joinColumnName} as ${joinColumnName}`)
-          .from({ [ownerAlias]: ownerTable })
-          .innerJoin(
+          .select(
+            `${ownerAlias}.id`,
+            `${ownerAlias}.${joinColumnName} as ${joinColumnName}`,
+            ...(onOrphanedLink ? [{ [TARGET_EXISTS_ALIAS]: targetReferencedColumn }] : [])
+          )
+          .from({ [ownerAlias]: ownerTable });
+
+        if (onOrphanedLink) {
+          qb.leftJoin(
             { [targetAlias]: targetTable },
             aliasColumn(ownerAlias, joinColumnName),
             targetReferencedColumn
-          )
-          .whereNotNull(aliasColumn(ownerAlias, joinColumnName));
+          );
+        } else {
+          qb.innerJoin(
+            { [targetAlias]: targetTable },
+            aliasColumn(ownerAlias, joinColumnName),
+            targetReferencedColumn
+          );
+        }
+
+        qb.whereNotNull(aliasColumn(ownerAlias, joinColumnName));
 
         if (trx) {
           qb.transacting(trx);
@@ -157,13 +200,18 @@ export const createLinkQuery = (
 
         for (const entry of entries) {
           const ref = entry[joinColumnName];
-
-          yield {
+          const link: ILink = {
             kind,
             relation,
             left: { type: uid, ref: entry.id, field: fieldName },
             right: { type: target, ref },
           };
+
+          if (onOrphanedLink && entry[TARGET_EXISTS_ALIAS] == null) {
+            onOrphanedLink(link);
+          } else {
+            yield link;
+          }
         }
       }
 
@@ -177,8 +225,6 @@ export const createLinkQuery = (
           morphColumn,
           inverseOrderColumnName,
         } = attribute.joinTable;
-
-        const qb = connection.queryBuilder().from(addSchema(name));
 
         type Columns = {
           left: { ref: string | null; order?: string };
@@ -258,11 +304,23 @@ export const createLinkQuery = (
             };
           };
 
+          const selectColumns = [
+            ...selectAliasedColumns(joinAlias, validColumns),
+            ...(onOrphanedLink
+              ? [
+                  { [LEFT_EXISTS_ALIAS]: leftReferencedColumn },
+                  { [RIGHT_EXISTS_ALIAS]: rightReferencedColumn },
+                ]
+              : []),
+          ];
+
+          const joinQb = connection
+            .queryBuilder()
+            .select(selectColumns)
+            .from({ [joinAlias]: joinTable });
+
           if (onOrphanedLink) {
-            const orphanQb = connection
-              .queryBuilder()
-              .select(selectAliasedColumns(joinAlias, validColumns))
-              .from({ [joinAlias]: joinTable })
+            joinQb
               .leftJoin(
                 { [leftAlias]: leftTable },
                 aliasColumn(joinAlias, joinColumn.name),
@@ -272,49 +330,44 @@ export const createLinkQuery = (
                 { [rightAlias]: rightTable },
                 aliasColumn(joinAlias, inverseJoinColumn.name),
                 rightReferencedColumn
+              );
+          } else {
+            joinQb
+              .innerJoin(
+                { [leftAlias]: leftTable },
+                aliasColumn(joinAlias, joinColumn.name),
+                leftReferencedColumn
               )
-              .where((builder) => {
-                builder.whereNull(leftReferencedColumn).orWhereNull(rightReferencedColumn);
-              });
-
-            if (trx) {
-              orphanQb.transacting(trx);
-            }
-
-            const orphanedEntries = await orphanQb;
-
-            for (const entry of orphanedEntries) {
-              onOrphanedLink(buildJoinTableLink(entry));
-            }
+              .innerJoin(
+                { [rightAlias]: rightTable },
+                aliasColumn(joinAlias, inverseJoinColumn.name),
+                rightReferencedColumn
+              );
           }
-
-          const qb = connection
-            .queryBuilder()
-            .select(selectAliasedColumns(joinAlias, validColumns))
-            .from({ [joinAlias]: joinTable })
-            .innerJoin(
-              { [leftAlias]: leftTable },
-              aliasColumn(joinAlias, joinColumn.name),
-              leftReferencedColumn
-            )
-            .innerJoin(
-              { [rightAlias]: rightTable },
-              aliasColumn(joinAlias, inverseJoinColumn.name),
-              rightReferencedColumn
-            );
 
           if (trx) {
-            qb.transacting(trx);
+            joinQb.transacting(trx);
           }
 
-          const entries = await qb;
+          const entries = await joinQb;
 
           for (const entry of entries) {
-            yield buildJoinTableLink(entry);
+            const link = buildJoinTableLink(entry);
+
+            if (
+              onOrphanedLink &&
+              (entry[LEFT_EXISTS_ALIAS] == null || entry[RIGHT_EXISTS_ALIAS] == null)
+            ) {
+              onOrphanedLink(link);
+            } else {
+              yield link;
+            }
           }
         }
 
         if (kind === 'relation.morph') {
+          const qb = connection.queryBuilder().from(addSchema(name));
+
           columns.left.ref = joinColumn.name;
 
           columns.right.ref = morphColumn.idColumn.name;
@@ -339,6 +392,7 @@ export const createLinkQuery = (
 
           // TODO: stream the query to improve performances
           const entries = await qb;
+          const morphLinks: ILink[] = [];
 
           for (const entry of entries) {
             if (columns.left.ref) {
@@ -365,19 +419,15 @@ export const createLinkQuery = (
               right.field = entry[columns.right.field as string];
             }
 
-            const link: ILink = {
+            morphLinks.push({
               kind,
               relation,
               left: clone(left as ILink['left']),
               right: clone(right as ILink['right']),
-            };
-
-            const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
-
-            if (validLink) {
-              yield validLink;
-            }
+            });
           }
+
+          yield* filterMorphLinksByTargetExistence(strapi, morphLinks, onOrphanedLink);
         }
       }
 
@@ -396,23 +446,14 @@ export const createLinkQuery = (
         }
 
         const entries = await qb;
+        const morphLinks: ILink[] = entries.map((entry: Record<string, unknown>) => ({
+          kind,
+          relation,
+          left: { type: uid, ref: entry.id as number, field: fieldName },
+          right: { type: entry[typeColumn.name] as string, ref: entry[idColumn.name] as number },
+        }));
 
-        for (const entry of entries) {
-          const ref = entry[idColumn.name];
-
-          const link = {
-            kind,
-            relation,
-            left: { type: uid, ref: entry.id, field: fieldName },
-            right: { type: entry[typeColumn.name], ref },
-          };
-
-          const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
-
-          if (validLink) {
-            yield validLink;
-          }
-        }
+        yield* filterMorphLinksByTargetExistence(strapi, morphLinks, onOrphanedLink);
       }
     }
 

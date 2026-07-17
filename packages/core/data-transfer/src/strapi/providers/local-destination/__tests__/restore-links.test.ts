@@ -5,6 +5,7 @@ import {
   createLinksWriteStream,
   formatSkippedLinksRestoreSummary,
 } from '../strategies/restore/links';
+import { DEFAULT_DETAILED_WARNING_LIMIT } from '../../../../utils/capped-warnings';
 import type { ILink, Transaction } from '../../../../../types';
 
 const insert = jest.fn();
@@ -23,16 +24,21 @@ beforeEach(() => {
   insert.mockResolvedValue(undefined);
 });
 
-const strapi = {
-  db: {
-    metadata: {
-      get: () => ({ attributes: {} }),
+const createStrapi = (client = 'postgres') =>
+  ({
+    db: {
+      dialect: { client },
+      metadata: {
+        get: () => ({ attributes: {} }),
+      },
     },
-  },
-} as unknown as Core.Strapi;
+  }) as unknown as Core.Strapi;
+
+const strapi = createStrapi('postgres');
 
 const strapiWithLocalizationsJoinColumn = {
   db: {
+    dialect: { client: 'postgres' },
     metadata: {
       get: () => ({
         attributes: {
@@ -61,11 +67,12 @@ const transaction = {
   rollback: jest.fn(),
 } as unknown as Transaction;
 
-const createLink = (): ILink => ({
+const createLink = (overrides?: Partial<ILink>): ILink => ({
   kind: 'relation.basic',
   relation: 'oneToOne',
   left: { type: 'test.component', ref: 1, field: 'related' },
   right: { type: 'api::foo.foo', ref: 100 },
+  ...overrides,
 });
 
 const writeLink = (stream: Writable, link: ILink) =>
@@ -173,7 +180,7 @@ describe('createLinksWriteStream', () => {
     expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
   });
 
-  test('Should continue inserting links after a foreign key failure in the same transaction', async () => {
+  test('Should continue inserting links after a foreign key failure in the same transaction on postgres', async () => {
     let aborted = false;
     const trx = {
       raw: jest.fn(async (sql: string) => {
@@ -240,6 +247,52 @@ describe('createLinksWriteStream', () => {
     expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
     expect(trx.raw).toHaveBeenCalledWith(expect.stringMatching(/^SAVEPOINT /));
     expect(trx.raw).toHaveBeenCalledWith(expect.stringMatching(/^ROLLBACK TO SAVEPOINT /));
+  });
+
+  test('Should not use savepoints on mysql', async () => {
+    const trx = {
+      raw: jest.fn().mockResolvedValue({ rows: [] }),
+    };
+
+    transaction.attach.mockImplementationOnce(async (callback: (t?: unknown) => unknown) =>
+      callback(trx)
+    );
+
+    const mappings: Record<string, Record<number, number>> = {
+      'test.component': { 1: 11 },
+      'api::foo.foo': { 100: 200 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const mysqlStrapi = createStrapi('mysql');
+
+    const stream = createLinksWriteStream(mapID, mysqlStrapi, transaction, jest.fn());
+    await writeLink(stream, createLink());
+
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(trx.raw).not.toHaveBeenCalled();
+  });
+
+  test('Should not use savepoints on sqlite', async () => {
+    const trx = {
+      raw: jest.fn().mockResolvedValue({ rows: [] }),
+    };
+
+    transaction.attach.mockImplementationOnce(async (callback: (t?: unknown) => unknown) =>
+      callback(trx)
+    );
+
+    const mappings: Record<string, Record<number, number>> = {
+      'test.component': { 1: 11 },
+      'api::foo.foo': { 100: 200 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const sqliteStrapi = createStrapi('sqlite');
+
+    const stream = createLinksWriteStream(mapID, sqliteStrapi, transaction, jest.fn());
+    await writeLink(stream, createLink());
+
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(trx.raw).not.toHaveBeenCalled();
   });
 
   test('Should skip with a warning when the insert hits an aborted transaction error', async () => {
@@ -325,5 +378,41 @@ describe('createLinksWriteStream', () => {
 
     expect(onWarning).toHaveBeenCalledTimes(2);
     expect(onWarning).toHaveBeenLastCalledWith(formatSkippedLinksRestoreSummary(1, 0));
+  });
+
+  test('Should cap detailed skip warnings and still emit the full summary', async () => {
+    const mappings: Record<string, Record<number, number>> = {
+      'api::foo.foo': Object.fromEntries(
+        Array.from({ length: DEFAULT_DETAILED_WARNING_LIMIT + 3 }, (_, i) => [100 + i, 200 + i])
+      ),
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const onWarning = jest.fn();
+    const stream = createLinksWriteStream(mapID, strapi, transaction, onWarning);
+
+    for (let i = 0; i < DEFAULT_DETAILED_WARNING_LIMIT + 3; i += 1) {
+      await writeLink(
+        stream,
+        createLink({
+          left: { type: 'test.component', ref: i + 1, field: 'related' },
+          right: { type: 'api::foo.foo', ref: 100 + i },
+        })
+      );
+    }
+
+    await finishStream(stream);
+
+    const detailedWarnings = onWarning.mock.calls.filter(([message]) =>
+      String(message).startsWith('Skipping link ')
+    );
+    const suppressionWarnings = onWarning.mock.calls.filter(([message]) =>
+      String(message).includes('Further detailed warnings suppressed')
+    );
+
+    expect(detailedWarnings).toHaveLength(DEFAULT_DETAILED_WARNING_LIMIT);
+    expect(suppressionWarnings).toHaveLength(1);
+    expect(onWarning).toHaveBeenLastCalledWith(
+      formatSkippedLinksRestoreSummary(DEFAULT_DETAILED_WARNING_LIMIT + 3, 0)
+    );
   });
 });

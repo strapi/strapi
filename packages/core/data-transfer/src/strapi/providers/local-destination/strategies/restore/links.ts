@@ -4,6 +4,7 @@ import type { Knex } from 'knex';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../types';
+import { createCappedWarningReporter } from '../../../../../utils/capped-warnings';
 import { createLinkQuery } from '../../../../queries/link';
 import { resolveLinkRef } from './resolve-link-ref';
 
@@ -30,6 +31,8 @@ const isForeignKeyConstraintError = (e: Error) => {
 const isAbortedTransactionError = (e: Error) => {
   return isErrorWithCode(e) && e.code === '25P02';
 };
+
+const isPostgresDialect = (strapi: Core.Strapi) => strapi.db?.dialect?.client === 'postgres';
 
 const withSavepoint = async <T>(trx: Knex.Transaction, fn: () => Promise<T>) => {
   const savepoint = `sp_${randomUUID().replace(/-/g, '')}`;
@@ -74,6 +77,11 @@ export const createLinksWriteStream = (
 ) => {
   let skippedUnmapped = 0;
   let skippedForeignKey = 0;
+  const warnings = createCappedWarningReporter(onWarning);
+  // Only PostgreSQL aborts the surrounding transaction on a statement error
+  // (25P02). MySQL and SQLite keep the transaction usable after an FK failure,
+  // so per-link savepoints are unnecessary there.
+  const useSavepoints = isPostgresDialect(strapi);
 
   return new Writable({
     objectMode: true,
@@ -100,7 +108,7 @@ export const createLinksWriteStream = (
             ...(mappedRightRef === undefined ? [`${right.type}:${originalRightRef}`] : []),
           ].join(' and ');
 
-          onWarning?.(
+          warnings.warn(
             `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} because ${missingRefs} was not transferred during the entities stage.`
           );
 
@@ -112,7 +120,7 @@ export const createLinksWriteStream = (
         right.ref = mappedRightRef;
 
         try {
-          if (trx) {
+          if (trx && useSavepoints) {
             await withSavepoint(trx, () => query().insert(link));
           } else {
             await query().insert(link);
@@ -120,7 +128,7 @@ export const createLinksWriteStream = (
         } catch (e) {
           if (e instanceof Error) {
             if (isForeignKeyConstraintError(e) || isAbortedTransactionError(e)) {
-              onWarning?.(
+              warnings.warn(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
               );
               skippedForeignKey += 1;

@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 import type { Core } from '@strapi/types';
 
 import type { ILink } from '../../../types';
+import { createCappedWarningReporter } from '../../../utils/capped-warnings';
 import { createLinkQuery } from '../../queries/link';
 
 const formatOrphanedExportLinkWarning = (link: ILink) =>
@@ -19,11 +20,12 @@ export const createLinksStream = (
 ) => {
   const uids = [...Object.keys(strapi.contentTypes), ...Object.keys(strapi.components)] as string[];
   let orphanedLinkCount = 0;
+  const warnings = createCappedWarningReporter(options.onWarning);
 
   const query = createLinkQuery(strapi, undefined, {
     onOrphanedLink(link) {
       orphanedLinkCount += 1;
-      options.onWarning?.(formatOrphanedExportLinkWarning(link));
+      warnings.warn(formatOrphanedExportLinkWarning(link));
     },
   });
 

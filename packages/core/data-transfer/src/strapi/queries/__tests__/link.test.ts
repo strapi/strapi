@@ -60,11 +60,11 @@ describe('createLinkQuery', () => {
   const createQueryBuilderMock = ({
     rows,
     filterInnerJoin,
-    filterLeftJoin,
+    annotateLeftJoin,
   }: {
     rows: Record<string, unknown>[];
     filterInnerJoin?: (row: Record<string, unknown>) => boolean;
-    filterLeftJoin?: (row: Record<string, unknown>) => boolean;
+    annotateLeftJoin?: (row: Record<string, unknown>) => Record<string, unknown>;
   }) => {
     let joinMode: 'inner' | 'left' | null = null;
 
@@ -89,8 +89,8 @@ describe('createLinkQuery', () => {
           return;
         }
 
-        if (joinMode === 'left' && filterLeftJoin) {
-          resolve(rows.filter(filterLeftJoin));
+        if (joinMode === 'left' && annotateLeftJoin) {
+          resolve(rows.map(annotateLeftJoin));
           return;
         }
 
@@ -112,16 +112,19 @@ describe('createLinkQuery', () => {
   }) => {
     const connection = {
       client: { connectionSettings: {} },
-      queryBuilder: () =>
+      queryBuilder: jest.fn(() =>
         createQueryBuilderMock({
           rows: joinTableRows,
           filterInnerJoin: (row) =>
             existingLeftIds.has(row.chapter_id as number) &&
             existingRightIds.has(row.node_id as number),
-          filterLeftJoin: (row) =>
-            !existingLeftIds.has(row.chapter_id as number) ||
-            !existingRightIds.has(row.node_id as number),
-        }),
+          annotateLeftJoin: (row) => ({
+            ...row,
+            __left_exists: existingLeftIds.has(row.chapter_id as number) ? row.chapter_id : null,
+            __right_exists: existingRightIds.has(row.node_id as number) ? row.node_id : null,
+          }),
+        })
+      ),
     };
 
     return {
@@ -312,19 +315,33 @@ describe('createLinkQuery', () => {
     ]);
   });
 
-  test('invokes onOrphanedLink when a join-table link references a missing entity', async () => {
+  test('uses a single left-join query when reporting orphaned join-table links', async () => {
     const onOrphanedLink = jest.fn();
     const strapi = buildJoinTableStrapi({
-      joinTableRows: [{ chapter_id: 1, node_id: 99, chapter_ord: 1 }],
+      joinTableRows: [
+        { chapter_id: 1, node_id: 2, chapter_ord: 1 },
+        { chapter_id: 1, node_id: 99, chapter_ord: 2 },
+      ],
       existingLeftIds: new Set([1]),
+      existingRightIds: new Set([2]),
     });
+
+    const queryBuilder = strapi.db.connection.queryBuilder as jest.Mock;
+    const links = [];
 
     for await (const link of createLinkQuery(strapi, undefined, { onOrphanedLink })().generateAll(
       'api::chapter.chapter'
     )) {
-      expect(link).toBeDefined();
+      links.push(link);
     }
 
+    expect(queryBuilder).toHaveBeenCalledTimes(1);
+    expect(links).toEqual([
+      expect.objectContaining({
+        left: expect.objectContaining({ ref: 1 }),
+        right: expect.objectContaining({ ref: 2 }),
+      }),
+    ]);
     expect(onOrphanedLink).toHaveBeenCalledTimes(1);
     expect(onOrphanedLink).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -332,5 +349,105 @@ describe('createLinkQuery', () => {
         right: expect.objectContaining({ type: 'api::node.node', ref: 99 }),
       })
     );
+  });
+
+  test('batch-checks morph targets instead of per-link existence queries', async () => {
+    const onOrphanedLink = jest.fn();
+    const findMany = jest.fn().mockResolvedValue([{ id: 10 }]);
+    const findOne = jest.fn();
+
+    const morphRows = [
+      {
+        entity_id: 1,
+        related_id: 10,
+        related_type: 'api::article.article',
+        field: 'cover',
+        order: 1,
+      },
+      {
+        entity_id: 1,
+        related_id: 99,
+        related_type: 'api::article.article',
+        field: 'cover',
+        order: 2,
+      },
+      {
+        entity_id: 2,
+        related_id: 20,
+        related_type: 'api::category.category',
+        field: 'cover',
+        order: 1,
+      },
+    ];
+
+    const connection = {
+      client: { connectionSettings: {} },
+      queryBuilder() {
+        const qb: Record<string, unknown> = {
+          from: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          transacting: jest.fn().mockReturnThis(),
+          then(resolve: (value: unknown) => void) {
+            resolve(morphRows);
+          },
+        };
+        return qb;
+      },
+    };
+
+    const strapi = {
+      db: {
+        connection,
+        metadata: {
+          get: jest.fn(() => ({
+            tableName: 'files',
+            attributes: {
+              related: {
+                type: 'relation',
+                relation: 'morphToMany',
+                owner: true,
+                joinTable: {
+                  name: 'files_related_morphs',
+                  joinColumn: { name: 'entity_id' },
+                  morphColumn: {
+                    idColumn: { name: 'related_id' },
+                    typeColumn: { name: 'related_type' },
+                  },
+                },
+              },
+            },
+          })),
+        },
+        query: jest.fn(() => ({ findMany, findOne })),
+      },
+    } as unknown as import('@strapi/types').Core.Strapi;
+
+    const links = [];
+
+    for await (const link of createLinkQuery(strapi, undefined, { onOrphanedLink })().generateAll(
+      'plugin::upload.file'
+    )) {
+      links.push(link);
+    }
+
+    expect(findOne).not.toHaveBeenCalled();
+    expect(findMany).toHaveBeenCalledTimes(2);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: { $in: expect.arrayContaining([10, 99]) } },
+      })
+    );
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: { $in: [20] } },
+      })
+    );
+    expect(links).toEqual([
+      expect.objectContaining({
+        left: expect.objectContaining({ ref: 1 }),
+        right: expect.objectContaining({ type: 'api::article.article', ref: 10 }),
+      }),
+    ]);
+    expect(onOrphanedLink).toHaveBeenCalledTimes(2);
   });
 });
