@@ -106,6 +106,46 @@ describe('pinVersions prompt', () => {
     expect(project.strapiVersion.raw).toBe('4.26.1');
   });
 
+  it('leaves non-lockstep @strapi dependencies unchanged when pinning', async () => {
+    const strapiVersion = '5.0.0';
+    const strapiVersionRange = `^${strapiVersion}`;
+
+    const project = createProject({
+      name: 'test-app',
+      version: '0.1.0',
+      dependencies: {
+        '@strapi/strapi': strapiVersionRange,
+        '@strapi/admin': strapiVersionRange,
+        '@strapi/data-transfer': strapiVersionRange,
+        '@strapi/design-system': '^2.2.0',
+      },
+      devDependencies: {
+        '@strapi/types': strapiVersionRange,
+        '@strapi/icons': '^2.2.0',
+      },
+    });
+
+    assertAppProject(project);
+
+    await pinVersions(project, {
+      logger,
+      confirm: jest.fn().mockResolvedValue(true),
+      target: Version.RELEASE_TYPES.Patch,
+    });
+
+    const packageJSON = JSON.parse(
+      vol.readFileSync(path.join(cwd, 'package.json'), 'utf-8').toString()
+    );
+
+    expect(packageJSON.dependencies['@strapi/strapi']).toBe(strapiVersion);
+    expect(packageJSON.dependencies['@strapi/admin']).toBe(strapiVersion);
+    expect(packageJSON.dependencies['@strapi/data-transfer']).toBe(strapiVersion);
+    expect(packageJSON.dependencies['@strapi/design-system']).toBe('^2.2.0');
+    expect(packageJSON.devDependencies['@strapi/types']).toBe(strapiVersion);
+    expect(packageJSON.devDependencies['@strapi/icons']).toBe('^2.2.0');
+    expect(project.strapiVersion.raw).toBe(strapiVersion);
+  });
+
   it('aborts when the user declines pinning', async () => {
     const project = createProject({
       name: 'test-app',
