@@ -91,6 +91,37 @@ describe('strapi-dependencies', () => {
         '@strapi/types': '4.26.1',
       });
     });
+
+    it('skips packages with a different major version than the pin target', () => {
+      const packageJSON = {
+        name: 'test-app',
+        version: '0.1.0',
+        dependencies: {
+          '@strapi/strapi': '^5.33.0',
+          '@strapi/design-system': '^2.2.0',
+          '@strapi/icons': '^2.2.0',
+        },
+        devDependencies: {
+          '@strapi/types': '^5.33.0',
+        },
+      };
+
+      const unpinned = findUnpinnedStrapiDependencies(
+        packageJSON.dependencies,
+        packageJSON.devDependencies
+      );
+
+      const updated = pinStrapiDependencies(packageJSON, '5.50.1', unpinned);
+
+      expect(updated.dependencies).toEqual({
+        '@strapi/strapi': '5.50.1',
+        '@strapi/design-system': '^2.2.0',
+        '@strapi/icons': '^2.2.0',
+      });
+      expect(updated.devDependencies).toEqual({
+        '@strapi/types': '5.50.1',
+      });
+    });
   });
 
   describe('getStrapiPinTargetVersion', () => {
