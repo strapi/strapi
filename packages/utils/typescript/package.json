@@ -52,7 +52,7 @@
     "cli-table3": "0.6.5",
     "fs-extra": "11.3.4",
     "lodash": "4.18.1",
-    "prettier": "3.3.3",
+    "prettier": "3.8.3",
     "typescript": "5.9.3"
   },
   "devDependencies": {
