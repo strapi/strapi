@@ -501,9 +501,7 @@ const copyMorphToOneRelation = async (
     where: { id: targetEntryId },
     data: {
       [attributeName]:
-        morphId != null && morphType != null
-          ? { id: morphId, [typeField]: morphType }
-          : null,
+        morphId != null && morphType != null ? { id: morphId, [typeField]: morphType } : null,
     },
   });
 };
