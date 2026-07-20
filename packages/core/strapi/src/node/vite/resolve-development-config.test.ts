@@ -46,6 +46,52 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     });
     expect((config.server?.hmr as { clientPort?: number }).clientPort).toBeUndefined();
 
+    // CJS-only deps imported by @strapi/admin must stay pre-bundled in dev (#26944, #26964, #27014).
+    expect(config.optimizeDeps?.include).toEqual(
+      expect.arrayContaining(['invariant', 'lodash', 'prismjs'])
+    );
+
+    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014).
+    const alias = config.resolve?.alias as Record<string, string> | undefined;
+    expect(alias?.invariant).toEqual(expect.any(String));
+    expect(alias?.prismjs).toEqual(expect.any(String));
+    expect(alias?.lodash).toEqual(expect.any(String));
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('pre-bundles prismjs language plugins for all apps (#26964)', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      bundler: 'vite' as const,
+      options: {
+        open: false,
+      },
+      plugins: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
+
+    const config = await resolveDevelopmentConfig(ctx);
+    const include = config.optimizeDeps?.include ?? [];
+
+    expect(include).toEqual(expect.arrayContaining(['prismjs', 'prismjs/components/*.js']));
+
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
     });

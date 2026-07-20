@@ -13,13 +13,16 @@ import {
 } from '@strapi/design-system';
 import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+
+import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
+import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -52,10 +55,31 @@ const StyledTd = styled(RawTd)`
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledTr = styled(RawTr)`
+const StyledTr = styled.tr<{
+  $isDragging?: boolean;
+  $isMovePending?: boolean;
+  $isValidDropTarget?: boolean;
+  $isInvalidDropTarget?: boolean;
+}>`
   height: 48px;
   background: ${({ theme }) => theme.colors.neutral0};
-  cursor: pointer;
+  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
+  }};
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      background: ${theme.colors.primary100};
+      outline: 1px dashed ${theme.colors.primary600};
+      outline-offset: -1px;
+    `}
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -71,11 +95,6 @@ const StyledTr = styled(RawTr)`
       border-bottom: 0;
     }
   }
-`;
-
-const StyledBodyTd = styled(RawTd)`
-  padding: ${({ theme }) => theme.spaces[4]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 interface AssetPreviewCellProps {
@@ -110,6 +129,8 @@ interface AssetRowProps {
 const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -120,8 +141,14 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
 
   return (
     <StyledTr
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      $isDragging={isDragging}
+      $isMovePending={isMovePending}
       tabIndex={0}
       role="row"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => onAssetItemClick(asset.id)}
       onKeyDown={handleKeyDown}
     >
@@ -167,6 +194,7 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
               defaultMessage: 'More actions',
             })}
             variant="ghost"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <More />
           </IconButton>
@@ -177,8 +205,6 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
 };
 
 const FolderTr = styled(StyledTr)`
-  cursor: pointer;
-
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
   }
@@ -192,6 +218,13 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const {
+    draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
+    droppable: { setNodeRef: setDropRef },
+    showValidDropHighlight,
+    showInvalidDropCursor,
+  } = useFolderDraggableDroppable(folder);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -202,8 +235,19 @@ const FolderRow = ({ folder }: FolderRowProps) => {
 
   return (
     <FolderTr
+      ref={(node) => {
+        setDragRef(node);
+        setDropRef(node);
+      }}
+      {...attributes}
+      {...listeners}
+      $isDragging={isDragging}
+      $isMovePending={isMovePending}
+      $isValidDropTarget={showValidDropHighlight}
+      $isInvalidDropTarget={showInvalidDropCursor}
       tabIndex={0}
       role="row"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => navigateToFolder(folder)}
       onKeyDown={handleKeyDown}
     >
@@ -280,6 +324,12 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
 
   const totalRows = folders.length + assets.length;
 
+  // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
+  // empty table renders nothing at all, not headers over an empty body.
+  if (totalRows === 0) {
+    return null;
+  }
+
   return (
     <StyledTable colCount={visibleHeaders.length} rowCount={totalRows + 1}>
       <StyledThead>
@@ -312,27 +362,12 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {totalRows === 0 ? (
-          <RawTr>
-            <StyledBodyTd colSpan={visibleHeaders.length}>
-              <Typography textColor="neutral600">
-                {formatMessage({
-                  id: 'app.components.EmptyStateLayout.content-document',
-                  defaultMessage: 'No content found',
-                })}
-              </Typography>
-            </StyledBodyTd>
-          </RawTr>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <FolderRow key={`folder-${folder.id}`} folder={folder} />
-            ))}
-            {assets.map((asset) => (
-              <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
-            ))}
-          </>
-        )}
+        {folders.map((folder) => (
+          <FolderRow key={`folder-${folder.id}`} folder={folder} />
+        ))}
+        {assets.map((asset) => (
+          <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
+        ))}
       </RawTbody>
     </StyledTable>
   );

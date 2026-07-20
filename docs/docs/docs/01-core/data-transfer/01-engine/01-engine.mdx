@@ -8,6 +8,10 @@ tags:
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
+:::caution
+**Destructive operation**: Importing or transferring data **into a Strapi instance** (via the [local](../02-providers/04-local-strapi/02-destination.md) or [remote](../02-providers/05-remote-strapi/03-destination.md) Strapi destination providers) uses the **restore** strategy by default. After bootstrap, init, and the integrity check pass, the engine runs `beforeTransfer()` on the destination, which clears existing destination records and media matching the transfer scope before new data is written. Exporting to a file does not modify a Strapi instance.
+:::
+
 ## Architecture Overview
 
 ```mermaid
@@ -126,6 +130,12 @@ sequenceDiagram
         end
     end
 
+    rect rgb(240, 230, 230)
+        Note over Client,DP: Before Transfer (Restore)
+        TE->>DP: beforeTransfer
+        Note right of DP: Clear destination data<br/>matching transfer scope
+    end
+
     rect rgb(245, 235, 250)
         Note over Client,DP: 3️⃣ Data Transfer Phase
 
@@ -165,6 +175,14 @@ sequenceDiagram
     end
 ```
 
+### Restore strategy and data loss
+
+When the destination is a Strapi instance and `strategy` is `restore` (the only supported conflict strategy today), the local destination provider prepares the instance during `beforeTransfer()` — **after** version and schema integrity checks pass and **before** any transfer stages run.
+
+In that step the provider may back up the local `uploads` folder, delete existing media files, and call `restore.deleteRecords()` to remove destination entities, internal models, and configuration records scoped by the `restore` options (see [Local Strapi destination restore options](../02-providers/04-local-strapi/02-destination.md)). The CLI builds those options from `--only` and `--exclude`; by default `admin::` content types are not cleared.
+
+This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
+
 A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
@@ -179,7 +197,75 @@ Once the integrity check has passed, the transfer begins by opening streams from
 4. links - the relations between entities
 5. configuration - the Strapi project configuration data
 
+### Media library vs upload binaries
+
+Strapi stores media in two parts that transfer on different stages:
+
+- **entities** stage — media library database records (`plugin::upload.file`, `plugin::upload.folder`) are transferred as part of `content`, along with other entities
+- **assets** stage — the binary files on disk under `public/uploads`
+
+The CLI `--exclude files` (or `--only` without `files`) skips only the **assets** stage. Media library records are still transferred unless you exclude them programmatically.
+
+To exclude upload content types from the entities stage, use entity and link transform filters:
+
+```typescript
+const UPLOAD_TYPES = ['plugin::upload.file', 'plugin::upload.folder'];
+
+const options = {
+  transforms: {
+    entities: [
+      {
+        filter(entity) {
+          return !UPLOAD_TYPES.includes(entity.type);
+        },
+      },
+    ],
+    links: [
+      {
+        filter(link) {
+          return !UPLOAD_TYPES.includes(link.left.type) && !UPLOAD_TYPES.includes(link.right.type);
+        },
+      },
+    ],
+  },
+};
+```
+
+When skipping the assets stage, sync upload binaries separately — for example with `rsync -avz public/uploads/ user@host:/path/to/strapi/public/uploads/`.
+
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+
+### Excluding content types from the CLI
+
+Export, import, and transfer accept `--exclude-content-types` and `--only-content-types` with comma-separated content type UIDs (for example `plugin::upload.file,plugin::upload.folder`). These filters apply to the **entities** and **links** stages:
+
+- Excluded types are omitted from the transfer stream and related links touching those types are skipped automatically.
+- On import/transfer restore, excluded types are not deleted on the destination before data is inserted.
+- `--only-content-types` limits transferred entities and links to the listed UIDs and scopes pre-transfer deletion to those types only.
+
+To skip upload binaries as well, combine with `--exclude files`, use `--exclude media-library`, or rely on automatic files-stage skipping when upload content types are out of scope. Programmatic transfers can use the same rules via entity and link transform filters.
+
+#### Excluding the media library (issue #25008)
+
+To omit **all** media — upload binaries and media library database records — use `--exclude media-library`. That preset expands to `--exclude files` plus both upload content types (`plugin::upload.file`, `plugin::upload.folder`).
+
+When upload content types are not in transfer scope (via `--exclude-content-types`, `--only-content-types`, or the `media-library` preset), the **files** stage is skipped automatically so export and import stay consistent.
+
+`--exclude files` alone only skips the **assets** stage; media library DB records still transfer unless you also exclude their content types (or use `media-library`).
+
+```bash
+# Export without media (matches the intent behind #25008)
+yarn strapi export --no-encrypt --exclude media-library
+
+# Import the same archive with matching filters
+yarn strapi import -f export_YYYYMMDDHHMMSS.tar --force --exclude media-library
+
+# Equivalent explicit form
+yarn strapi export --no-encrypt --exclude files \
+  --exclude-content-types plugin::upload.file,plugin::upload.folder
+```
+
+npm users: `npm run strapi export -- --no-encrypt --exclude media-library`
 
 ## Setting up the transfer engine
 

@@ -21,8 +21,8 @@ export default class MysqlDialect extends Dialect {
     this.databaseInspector = new MysqlDatabaseInspector(db);
   }
 
-  configure() {
-    const connection = this.db.config.connection.connection as Knex.MySqlConnectionConfig;
+  configure(conn?: Knex.MySqlConnectionConfig) {
+    const connection = conn || (this.db.config.connection.connection as Knex.MySqlConnectionConfig);
 
     connection.supportBigNumbers = true;
     // Only allow bigNumberStrings option set to be true if no connection option passed
