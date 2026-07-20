@@ -1538,7 +1538,7 @@ function previewScript(config) {
         if (blockEls.length > 0) {
           let candidate = blockEls[0].parentElement;
           while (candidate && candidate !== document.body) {
-            if (blockEls.every((el) => candidate.contains(el))) {
+            if (blockEls.every((el) => candidate?.contains(el))) {
               ancestor = candidate;
               break;
             }

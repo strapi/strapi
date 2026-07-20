@@ -231,7 +231,7 @@ describe('previewScript — blocks editing session', () => {
       type: INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END,
       payload: { fieldPath: 'body' },
     });
-    expect(container).toHaveStyle({ visibility: '' });
+    expect(container).not.toHaveStyle({ visibility: 'hidden' });
   });
 
   test('double-clicking the field works after the host re-renders the blocks content', () => {
