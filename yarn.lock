@@ -9050,7 +9050,7 @@ __metadata:
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
@@ -9219,7 +9219,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -9371,7 +9371,7 @@ __metadata:
     semver: "npm:7.7.4"
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.50.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     undici: "npm:6.27.0"
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
@@ -9417,7 +9417,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     tar: "npm:7.5.20"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
     ws: "npm:8.21.1"
@@ -9702,7 +9702,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.50.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
@@ -9733,7 +9733,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
   peerDependencies:
@@ -9835,7 +9835,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.50.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10143,7 +10143,7 @@ __metadata:
     semver: "npm:7.7.4"
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.50.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     vite: "npm:5.4.21"
     webpack: "npm:5.106.2"
     webpack-bundle-analyzer: "npm:5.3.0"
@@ -10190,7 +10190,7 @@ __metadata:
     typedoc: "npm:0.28.19"
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     undici: "npm:6.27.0"
     zod: "npm:3.25.76"
   languageName: unknown
@@ -10212,7 +10212,7 @@ __metadata:
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
     tsconfig: "npm:5.50.2"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -15310,7 +15310,7 @@ __metadata:
     "@notionhq/client": "npm:^2.2.15"
     "@types/node": "npm:20.19.41"
     tsup: "npm:^8.0.0"
-    typescript: "npm:^5.4.0"
+    typescript: "npm:6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -15346,7 +15346,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:^5"
+    typescript: "npm:6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -16771,7 +16771,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:^5"
+    typescript: "npm:6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -25436,6 +25436,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi-smoke-test@workspace:examples/openapi-smoke-test":
+  version: 0.0.0-use.local
+  resolution: "openapi-smoke-test@workspace:examples/openapi-smoke-test"
+  dependencies:
+    "@strapi/plugin-users-permissions": "workspace:*"
+    "@strapi/strapi": "workspace:*"
+    "@types/node": "npm:20.19.41"
+    better-sqlite3: "npm:12.8.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-router-dom: "npm:6.30.3"
+    styled-components: "npm:6.4.1"
+    typescript: "npm:^5"
+  languageName: unknown
+  linkType: soft
+
 "openapi-types@npm:12.1.3":
   version: 12.1.3
   resolution: "openapi-types@npm:12.1.3"
@@ -29484,7 +29500,7 @@ __metadata:
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.20"
     tsx: "npm:4.22.4"
-    typescript: "npm:5.9.3"
+    typescript: "npm:6.0.2"
     vitest: "catalog:"
     yalc: "npm:1.0.0-pre.53"
     yargs: "npm:17.7.2"
@@ -31040,7 +31056,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.9.3, typescript@npm:^5, typescript@npm:^5.4.0":
+"typescript@npm:6.0.2":
+  version: 6.0.2
+  resolution: "typescript@npm:6.0.2"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/4b860b0bf87cc0fee0f66d8ef2640b5a8a8a8c74d1129adb82e389e5f97124383823c47946bef8a73ede371461143a3aa8544399d2133c7b2e4f07e81860af7f
+  languageName: node
+  linkType: hard
+
+"typescript@npm:^5":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -31060,7 +31086,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.0#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>":
+  version: 6.0.2
+  resolution: "typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>::version=6.0.2&hash=5786d5"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/49f0b84fc6ca55653e77752b8a61beabc09ee3dae5d965c31596225aa6ef213c5727b1d2e895b900416dc603854ba0872ac4a812c2a4ed6793a601f9c675de02
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
