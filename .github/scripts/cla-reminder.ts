@@ -155,6 +155,11 @@ async function getLastAuthorActivity(
     per_page: 100,
   });
   for (const c of commits) {
+    // Only the PR author's own commits count. Maintainer merge-ups and
+    // allow-edits pushes carry a different GitHub author and must not reset
+    // the reminder timer. Match the linked GitHub account (c.author.login);
+    // commits from an unlinked email have no `author` and are skipped.
+    if (c.author?.login !== author) continue;
     const date = c.commit?.author?.date ?? c.commit?.committer?.date;
     if (date) last = Math.max(last, new Date(date).getTime());
   }

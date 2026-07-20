@@ -80,13 +80,17 @@ jobs:
             });
 
             // Feed the existing community PR lifecycle (waiting on author → stale → close).
+            // Add a companion `ci: waiting on author` provenance label alongside
+            // the shared one, so the green-CI path (ci-passed-coderabbit.yml) can
+            // tell a CI-driven label apart from a maintainer's review-driven one
+            // and only clear the shared label when CI owns it.
             try {
               await github.rest.issues.addLabels({
                 owner,
                 repo,
                 issue_number: pr.number,
-                labels: ['waiting on author'],
+                labels: ['waiting on author', 'ci: waiting on author'],
               });
             } catch (err) {
-              core.warning(`Could not add 'waiting on author' label: ${err.message}`);
+              core.warning(`Could not add 'waiting on author' labels: ${err.message}`);
             }

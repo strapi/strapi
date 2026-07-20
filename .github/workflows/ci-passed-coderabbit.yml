@@ -46,40 +46,39 @@ jobs:
               return;
             }
 
-            // Fetch the PR's comments once — reused below for both the
-            // provenance check and the CodeRabbit idempotency marker.
-            const { data: comments } = await github.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number: pr.number,
-              per_page: 100,
-            });
-
             // Clear 'waiting on author' — but ONLY when CI provably owns it.
             // That label is also the manual review-feedback lifecycle trigger
             // (a maintainer adds it after a review), so a green Tests run must
             // not strip a review-driven label. The failure path (ci-triage.yml)
-            // posts a `<!-- ci-triage:failure:<sha> -->` marker comment in the
-            // same step that adds the label, so the presence of that marker is
-            // proof CI added it. Without the marker we leave the label alone.
+            // adds a companion `ci: waiting on author` provenance label in the
+            // same step, so its presence proves CI owns the shared label. When
+            // present, remove both; drop the shared label first so a failed
+            // removal leaves the provenance behind and a later run retries.
             // Runs before the draft/base/checks gates to mirror when it was added.
-            const ciAddedWaitingOnAuthor = comments.some((c) =>
-              (c.body || '').includes('<!-- ci-triage:failure:')
-            );
-            if (ciAddedWaitingOnAuthor) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner,
-                  repo,
-                  issue_number: pr.number,
-                  name: 'waiting on author',
-                });
-                core.info(`Removed CI-added 'waiting on author' from PR #${pr.number} — Tests are green.`);
-              } catch (err) {
-                // 404 when the label isn't present — expected once cleared.
-                if (err.status !== 404) {
-                  core.warning(`Could not remove 'waiting on author' label: ${err.message}`);
+            const ciOwnsWaitingOnAuthor = pr.labels.some((l) => l.name === 'ci: waiting on author');
+            if (ciOwnsWaitingOnAuthor) {
+              const removeLabel = async (name) => {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: pr.number,
+                    name,
+                  });
+                } catch (err) {
+                  // 404 when the label isn't present — expected once cleared.
+                  if (err.status !== 404) {
+                    core.warning(`Could not remove '${name}' label from PR #${pr.number}: ${err.message}`);
+                    throw err;
+                  }
                 }
+              };
+              try {
+                await removeLabel('waiting on author');
+                await removeLabel('ci: waiting on author');
+                core.info(`Removed CI-added 'waiting on author' from PR #${pr.number} — Tests are green.`);
+              } catch {
+                // Provenance label left in place — a later green run retries.
               }
             }
 
@@ -104,16 +103,17 @@ jobs:
 
             // Confirm ALL check runs on the head SHA are green. The "Tests"
             // workflow passing doesn't guarantee other required checks passed.
-            const { data: checks } = await github.rest.checks.listForRef({
+            // Paginate — this repo reports 140+ check runs, well over one page.
+            const checkRuns = await github.paginate(github.rest.checks.listForRef, {
               owner,
               repo,
               ref: headSha,
               per_page: 100,
             });
-            const unfinished = checks.check_runs.filter(
+            const unfinished = checkRuns.filter(
               (c) => c.status !== 'completed'
             );
-            const failed = checks.check_runs.filter(
+            const failed = checkRuns.filter(
               (c) =>
                 c.status === 'completed' &&
                 !['success', 'neutral', 'skipped'].includes(c.conclusion)
@@ -133,8 +133,14 @@ jobs:
             }
 
             // Idempotency: don't re-ping if we already requested a review for the
-            // current head SHA. Reuses the comments fetched above.
+            // current head SHA.
             const marker = `<!-- coderabbit-requested:${headSha} -->`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
             if (comments.some((c) => (c.body || '').includes(marker))) {
               core.info(`Already requested CodeRabbit review for ${headSha} — skipping.`);
               return;
