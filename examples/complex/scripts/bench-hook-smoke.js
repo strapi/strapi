@@ -2,19 +2,23 @@
 /* eslint-disable no-console */
 
 /**
- * Smoke: prove bench-hook patches createMigrationRunner when the built CJS
- * providers load it via `require('./runner.js')` (unresolved relative request).
+ * Regression smoke for bench-hook.js.
  *
- * Prerequisites:
- *   yarn nx build @strapi/database
+ * Proves the preload patches `createMigrationRunner` when loaded the way built
+ * CJS providers do — `require('./runner.js')` — not only when the unresolved
+ * request already ends with `/migrations/runner`.
  *
  * Usage (from examples/complex):
+ *   yarn test:bench-hook
+ *
+ * Or:
  *   STRAPI_BENCH_HOOK_OUTPUT=/tmp/bench-hook-smoke.json \
  *     node --require ./scripts/bench-hook.js ./scripts/bench-hook-smoke.js
  */
 
 const fs = require('fs');
 const Module = require('module');
+const os = require('os');
 const path = require('path');
 
 const OUTPUT_PATH = process.env.STRAPI_BENCH_HOOK_OUTPUT;
@@ -23,20 +27,30 @@ if (!OUTPUT_PATH) {
   process.exit(1);
 }
 
-const runnerPath = path.resolve(
-  __dirname,
-  '../../../packages/core/database/dist/migrations/runner.js'
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-bench-hook-'));
+const migrationsDir = path.join(tmpRoot, 'migrations');
+fs.mkdirSync(migrationsDir, { recursive: true });
+
+// Mimic packages/core/database/dist/migrations/runner.js
+fs.writeFileSync(
+  path.join(migrationsDir, 'runner.js'),
+  `'use strict';
+function createMigrationRunner(opts) {
+  return {
+    async up() {
+      opts.logger.info({ event: 'migrating', name: '001-smoke.js' });
+      opts.logger.info({ event: 'migrated', name: '001-smoke.js', durationSeconds: 0 });
+    },
+    async down() {},
+    async pending() {
+      return [];
+    },
+  };
+}
+module.exports = { createMigrationRunner };
+`
 );
 
-if (!fs.existsSync(runnerPath)) {
-  console.error(
-    `[bench-hook-smoke] missing built runner at ${runnerPath}\n` +
-      'Build first: yarn nx build @strapi/database'
-  );
-  process.exit(1);
-}
-
-const migrationsDir = path.dirname(runnerPath);
 const parent = new Module(path.join(migrationsDir, 'users.js'), module);
 parent.filename = path.join(migrationsDir, 'users.js');
 parent.paths = Module._nodeModulePaths(migrationsDir);
@@ -57,37 +71,31 @@ if (!runnerMod.createMigrationRunner.__strapiBenchHookPatched) {
 }
 
 async function main() {
-  const runner = runnerMod.createMigrationRunner({
-    storage: {
-      executed: async () => [],
-      logMigration: async () => undefined,
-      unlogMigration: async () => undefined,
-    },
-    logger: {
-      info() {
-        // no-op — hook wraps this
+  try {
+    const runner = runnerMod.createMigrationRunner({
+      logger: {
+        info() {
+          // no-op — hook wraps this
+        },
       },
-    },
-    getMigrations: async () => [
-      {
-        name: '001-smoke.js',
-        up: async () => undefined,
-        down: async () => undefined,
-      },
-    ],
-  });
+    });
 
-  await runner.up();
+    await runner.up();
 
-  const payload = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
-  const recorded = payload.migrations?.find((m) => m.name === '001-smoke.js');
+    const payload = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
+    const recorded = payload.migrations?.find((m) => m.name === '001-smoke.js');
 
-  if (!recorded) {
-    console.error('[bench-hook-smoke] expected 001-smoke.js timing entry, got:', payload);
-    process.exit(1);
+    if (!recorded) {
+      console.error('[bench-hook-smoke] expected 001-smoke.js timing entry, got:', payload);
+      process.exit(1);
+    }
+
+    console.log(
+      '[bench-hook-smoke] ok — patched relative require("./runner.js") and recorded migration timing'
+    );
+  } finally {
+    fs.rmSync(tmpRoot, { recursive: true, force: true });
   }
-
-  console.log('[bench-hook-smoke] ok — patched relative require and recorded migration timing');
 }
 
 main().catch((err) => {

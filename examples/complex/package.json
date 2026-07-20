@@ -39,6 +39,7 @@
     "setup:v4": "node scripts/setup-v4-project.js",
     "seed:v5": "node scripts/seed-v5.js",
     "test:migration": "node scripts/validate-migration.js",
+    "test:bench-hook": "node scripts/run-bench-hook-smoke.js",
     "bench:seed": "node scripts/bench.js seed",
     "bench:run": "node scripts/bench.js run",
     "bench:compare": "node scripts/bench-compare.js",

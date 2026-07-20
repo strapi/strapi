@@ -82,7 +82,7 @@ describe('createMigrationRunner', () => {
       );
     });
 
-    it('stops on first failure and does not log the failed migration', async () => {
+    it('wraps up failures with migration name, direction, and cause', async () => {
       const cause = new Error('boom');
       const failingMigrations: RunnableMigration[] = [
         {
