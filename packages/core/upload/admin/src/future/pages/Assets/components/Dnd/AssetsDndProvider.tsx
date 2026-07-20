@@ -25,9 +25,12 @@ import { useIntl } from 'react-intl';
 import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../../services/folders';
 import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
+import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
 import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
+import { getFolderLabel } from '../../../../utils/getFolderLabel';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetSelectionOptional } from '../../hooks/useAssetSelection';
+import { useFolderNavigation } from '../../hooks/useFolderNavigation';
 
 import { buildDragSet } from './buildDragSet';
 import { computeValidDropTargets } from './computeValidDropTargets';
@@ -101,7 +104,12 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const selection = useAssetSelectionOptional();
+  const { currentFolderId } = useFolderNavigation();
   const { data: folderStructure = [] } = useGetFolderStructureQuery();
+  const rootLabel = formatMessage({
+    id: getTranslationKey('plugin.name'),
+    defaultMessage: 'Media Library',
+  });
   const [bulkMove, { isLoading: isMovePending }] = useBulkMoveMutation();
   const [dragItems, setDragItems] = useState<DragItemData[]>([]);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
@@ -188,13 +196,18 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       }
 
       const payload = buildBulkMovePayload(items);
-      const successMessage = formatMessage({
-        id: getTranslationKey('modal.move.success-label'),
-        defaultMessage: 'Elements have been moved successfully.',
+      // Source is always the current folder — dragged items are, by definition,
+      // visible in the current view. Destination is the drop target. Both use
+      // leaf names so the DnD toast reads identically to the dialog's.
+      const successMessage = formatMoveSuccessMessage({
+        formatMessage,
+        count: items.length,
+        source: getFolderLabel(folderStructure, currentFolderId, rootLabel),
+        destination: getFolderLabel(folderStructure, targetFolderId, rootLabel),
       });
       const errorFallback = formatMessage({
-        id: getTranslationKey('modal.move.error-label'),
-        defaultMessage: 'An error occurred while moving the elements.',
+        id: getTranslationKey('list.bulk-actions.move.error'),
+        defaultMessage: 'An error occurred while moving the items.',
       });
 
       try {
@@ -233,9 +246,11 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       announceToLiveRegion,
       bulkMove,
       clearDragState,
+      currentFolderId,
       folderStructure,
       formatMessage,
       isMovePending,
+      rootLabel,
       selection,
       toggleNotification,
     ]
@@ -323,4 +338,6 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   );
 };
 
-// TODO: keyboard move path.
+// Keyboard-accessible moves are handled by `BulkMoveDialog` (reachable from the
+// bulk-actions bar): pointer drag is a mouse-only enhancement, the dialog is the
+// a11y path. No `KeyboardSensor` by design.

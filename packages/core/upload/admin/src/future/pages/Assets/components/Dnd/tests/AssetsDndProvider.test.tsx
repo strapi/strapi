@@ -207,6 +207,43 @@ describe('AssetsDndProvider', () => {
     });
   });
 
+  describe('Success messaging', () => {
+    it('announces the rich move message with source and destination leaf names', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      // currentFolderId defaults to root → "Media Library"; destination folder 2
+      // resolves to its leaf name "2023".
+      await waitFor(() => {
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: '1 element has been moved from Media Library to 2023',
+        });
+      });
+    });
+
+    it('falls back to the shared move error message when the server sends no message', async () => {
+      mockBulkMoveUnwrap.mockRejectedValueOnce({});
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      await waitFor(() => {
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while moving the items.',
+        });
+      });
+    });
+  });
+
   describe('Selection-aware multi-drag', () => {
     it('moves the full selection when dragging a selected item', async () => {
       const { user } = setup(<SeedSelection keys={[assetKey(10), assetKey(20), folderKey(3)]} />);
