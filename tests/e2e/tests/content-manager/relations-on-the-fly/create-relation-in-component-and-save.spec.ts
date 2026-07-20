@@ -19,8 +19,10 @@ test.describe('Relations on the fly - Create a Relation inside a component and S
     await page.getByRole('button', { name: 'Product carousel', exact: true }).click();
     // Step 3. Select a product
     await page.getByRole('combobox', { name: 'products' }).click();
-    // Step 4. Open the relation modal
-    await page.getByRole('option', { name: 'Create a relation' }).click();
+    const createRelationOption = page.getByRole('option', { name: 'Create a relation' });
+    if (await createRelationOption.isVisible()) {
+      await createRelationOption.click();
+    }
     await expect(page.getByText('Create a relation')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
 

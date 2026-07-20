@@ -1,7 +1,6 @@
 // eslint-disable-next-line import/extensions
 import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Core, Modules } from '@strapi/types';
-import { z } from '@strapi/utils';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
   type McpCapabilityRegistry,
@@ -11,35 +10,43 @@ import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandler
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import type { McpAdminTokenAbility } from './authentication';
 
-export function makeMcpToolDefinition<
-  Name extends string,
-  Title extends string,
-  Description extends string,
-  OutputSchema extends z.ZodObject<z.ZodRawShape>,
-  InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
-  Access extends Modules.MCP.McpCapabilityAccess = Modules.MCP.McpCapabilityAccess,
->(
-  tool: {
-    name: Name;
-    title: Title;
-    description: Description;
-    resolveInputSchema?: (context: Modules.MCP.McpHandlerContext) => InputSchema;
-    resolveOutputSchema: (context: Modules.MCP.McpHandlerContext) => OutputSchema;
-    createHandler: (
-      strapi: Core.Strapi,
-      context: Modules.MCP.McpHandlerContext
-    ) => Modules.MCP.McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
-  } & Access
-): Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description> & Access {
-  return tool as Modules.MCP.McpToolDefinition<
-    Name,
-    InputSchema,
-    OutputSchema,
-    Title,
-    Description
-  > &
-    Access;
-}
+/**
+ * Defines a Strapi MCP tool with full type inference, ready to pass to
+ * `strapi.ai.mcp.registerTool()`. Exposed publicly as `ai.mcp.defineTool`.
+ *
+ * The returned value is the definition unchanged — this builder only exists to
+ * infer the `name`, input/output schemas and handler types, and to narrow the
+ * access variant (`devModeOnly` vs `auth`) so the result is directly assignable
+ * to `registerTool`.
+ *
+ * @param tool - The tool definition. Provide either `devModeOnly: true` (dev-only,
+ * no auth) or an `auth` policy set — never both.
+ * @returns The same definition, with its access variant narrowed.
+ *
+ * @example
+ * ```ts
+ * import { ai } from '@strapi/strapi';
+ * import { z } from '@strapi/utils';
+ *
+ * const greet = ai.mcp.defineTool({
+ *   name: 'greet',
+ *   title: 'Greet',
+ *   description: 'Greets a user by name',
+ *   devModeOnly: true,
+ *   resolveInputSchema: () => z.object({ name: z.string() }),
+ *   resolveOutputSchema: () => z.object({ message: z.string() }),
+ *   createHandler: (strapi) => async ({ args }) => {
+ *     const message = `Hello, ${args.name}!`;
+ *     return { content: [{ type: 'text', text: message }], structuredContent: { message } };
+ *   },
+ * });
+ *
+ * // later, in register() or bootstrap():
+ * strapi.ai.mcp.registerTool(greet);
+ * ```
+ */
+export const makeMcpToolDefinition = ((definition: Modules.MCP.McpToolDefinition) =>
+  definition) as unknown as Modules.MCP.McpToolBuilder;
 
 export class McpToolRegistry
   extends McpCapabilityRegistryBase<'tool', Modules.MCP.McpToolDefinition, RegisteredTool>

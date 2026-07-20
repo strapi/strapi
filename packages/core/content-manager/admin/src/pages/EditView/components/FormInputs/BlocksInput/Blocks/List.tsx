@@ -332,8 +332,12 @@ const handleTabOnList = (editor: Editor) => {
  * Common handler for the shift+tab key on ordered and unordered lists (un-indentation)
  */
 
-const hasChildren = (node: any): node is { children: unknown[] } => {
+const hasChildren = (node: unknown): node is { children: unknown[] } => {
   return typeof node === 'object' && node !== null && 'children' in node;
+};
+
+const isNestedListNode = (node: unknown): node is { type: 'list'; children: unknown[] } => {
+  return hasChildren(node) && 'type' in node && node.type === 'list';
 };
 
 const handleShiftTabOnList = (editor: Editor) => {
@@ -349,11 +353,7 @@ const handleShiftTabOnList = (editor: Editor) => {
 
   const [currentList] = Editor.parent(editor, currentListItemPath);
 
-  if (
-    !Editor.isEditor(currentList) &&
-    hasChildren(currentList) &&
-    (currentList as any).type === 'list'
-  ) {
+  if (!Editor.isEditor(currentList) && isNestedListNode(currentList)) {
     const parentListPath = Path.parent(currentListItemPath);
 
     const [parentList] = Editor.parent(editor, parentListPath);
@@ -371,7 +371,7 @@ const handleShiftTabOnList = (editor: Editor) => {
     }
 
     // Case 2: The parent of the current list is another list.
-    if (hasChildren(parentList) && (parentList as any).type === 'list') {
+    if (isNestedListNode(parentList)) {
       Transforms.liftNodes(editor, {
         at: currentListItemPath,
         match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
@@ -380,11 +380,7 @@ const handleShiftTabOnList = (editor: Editor) => {
       try {
         const [remainingList, remainingListPath] = Editor.node(editor, parentListPath);
 
-        if (
-          hasChildren(remainingList) &&
-          (remainingList as any).type === 'list' &&
-          remainingList.children.length === 0
-        ) {
+        if (isNestedListNode(remainingList) && remainingList.children.length === 0) {
           Transforms.removeNodes(editor, { at: remainingListPath });
         }
       } catch (error) {
