@@ -133,56 +133,85 @@ const collectRuntimeDependencyNames = (pkg: PackageJson): string[] =>
   pkg.dependencies ? Object.keys(pkg.dependencies) : [];
 
 /**
- * Walk direct and transitive dependency names from app/plugin roots.
+ * Max BFS depth from expansion seeds when walking non-`@strapi/*` packages.
+ * Depth 0 = seed; depth 2 covers plugin → UI-kit wrapper → pre-built kit.
+ */
+const MAX_TRANSITIVE_DEPTH = 2;
+
+/**
+ * Resolve declared candidates and optionally BFS from expansion seeds.
  *
- * Official `@strapi/*` packages are visited as candidates but not expanded — walking into
- * `@strapi/strapi` / admin / design-system fans out the whole install graph (perf) and falsely
- * matches design-system transitive UI libs (`motion`, `react-dnd`, …) for optimizeDeps.exclude.
+ * Official `@strapi/*` packages are never expanded. Expansion is also skipped for names that
+ * are only static candidates (e.g. server deps listed on official plugins) unless they appear
+ * in `expansionSeeds` (non-`@strapi/*` app deps and community/local plugins).
  *
  * @internal exported for tests
  */
 export const collectCandidateDependencyNames = async (
   cwd: string,
-  rootNames: Iterable<string>
+  candidateNames: Iterable<string>,
+  expansionSeeds: Iterable<string> = candidateNames
 ): Promise<Set<string>> => {
-  const packages = await collectCandidatePackages(cwd, rootNames);
+  const packages = await collectCandidatePackages(cwd, candidateNames, expansionSeeds);
 
   return new Set(packages.keys());
 };
 
 const collectCandidatePackages = async (
   cwd: string,
-  rootNames: Iterable<string>
+  candidateNames: Iterable<string>,
+  expansionSeeds: Iterable<string> = candidateNames
 ): Promise<Map<string, PackageJson>> => {
   const packages = new Map<string, PackageJson>();
-  const queue = [...rootNames];
-  const visited = new Set<string>();
+  const seedSet = new Set(expansionSeeds);
 
-  while (queue.length > 0) {
-    const name = queue.shift()!;
-
-    if (visited.has(name)) {
+  for (const name of candidateNames) {
+    if (packages.has(name)) {
       continue;
     }
-
-    visited.add(name);
 
     const pkg = await getModule(name, cwd);
 
-    if (!pkg) {
+    if (pkg) {
+      packages.set(name, pkg);
+    }
+  }
+
+  const queue: Array<{ name: string; depth: number }> = [...seedSet].map((name) => ({
+    name,
+    depth: 0,
+  }));
+  const expansionVisited = new Set<string>();
+
+  while (queue.length > 0) {
+    const { name, depth } = queue.shift()!;
+
+    if (expansionVisited.has(name)) {
       continue;
     }
 
-    packages.set(name, pkg);
+    expansionVisited.add(name);
 
-    // Keep @strapi/* as candidates (exclude loop skips them) but do not walk their graphs.
-    if (isOfficialStrapiPackage(name)) {
+    let pkg = packages.get(name);
+
+    if (!pkg) {
+      const resolved = await getModule(name, cwd);
+
+      if (!resolved) {
+        continue;
+      }
+
+      pkg = resolved;
+      packages.set(name, pkg);
+    }
+
+    if (isOfficialStrapiPackage(name) || depth >= MAX_TRANSITIVE_DEPTH) {
       continue;
     }
 
     for (const dep of collectRuntimeDependencyNames(pkg)) {
-      if (!visited.has(dep)) {
-        queue.push(dep);
+      if (!expansionVisited.has(dep)) {
+        queue.push({ name: dep, depth: depth + 1 });
       }
     }
   }
@@ -218,8 +247,9 @@ const loadAppPackageJson = async (cwd: string): Promise<PackageJson | null> => {
  * Strapi's React/design-system pre-bundling. Skip dep optimization so they resolve through
  * the admin resolve aliases instead of being re-bundled by Vite.
  *
- * Scans app and plugin dependency trees (#26944), including transitive deps of non-`@strapi/*`
- * packages. Official `@strapi/*` graphs are not expanded (avoids admin/design-system fan-out).
+ * Scans app and plugin dependency trees (#26944). Direct deps of the app and every plugin are
+ * candidates. Transitive discovery is seeded only from non-`@strapi/*` app deps and
+ * community/local plugins (depth-capped), so official plugin server graphs are not walked.
  * Official `@strapi/*` packages and pinned singletons are never auto-excluded — `@strapi/strapi`
  * matches the heuristic but must stay on the optimizeDeps.include path (#26944, #27014).
  *
@@ -229,12 +259,17 @@ export const collectAdminOptimizeDepsExclude = async (
   cwd: string,
   plugins: PluginMeta[]
 ): Promise<string[]> => {
-  const rootNames = new Set<string>();
+  const candidateNames = new Set<string>();
+  const expansionSeeds = new Set<string>();
   const appPkg = await loadAppPackageJson(cwd);
 
   if (appPkg) {
     for (const name of collectRootDependencyNames(appPkg)) {
-      rootNames.add(name);
+      candidateNames.add(name);
+
+      if (!isOfficialStrapiPackage(name)) {
+        expansionSeeds.add(name);
+      }
     }
   }
 
@@ -243,12 +278,30 @@ export const collectAdminOptimizeDepsExclude = async (
 
     if (pluginPkg) {
       for (const name of collectRootDependencyNames(pluginPkg)) {
-        rootNames.add(name);
+        candidateNames.add(name);
+      }
+    }
+
+    // Community / local plugins: walk their runtime graphs for nested UI kits.
+    // Official `@strapi/*` plugins contribute direct deps as candidates only (no expansion).
+    if (plugin.type === 'local') {
+      const localName = pluginPkg?.name;
+
+      if (typeof localName === 'string' && localName && !isOfficialStrapiPackage(localName)) {
+        candidateNames.add(localName);
+        expansionSeeds.add(localName);
+      }
+    } else {
+      const moduleName = getPluginPackageName(plugin.modulePath);
+
+      if (!isOfficialStrapiPackage(moduleName)) {
+        candidateNames.add(moduleName);
+        expansionSeeds.add(moduleName);
       }
     }
   }
 
-  const candidatePackages = await collectCandidatePackages(cwd, rootNames);
+  const candidatePackages = await collectCandidatePackages(cwd, candidateNames, expansionSeeds);
   const exclude: string[] = [];
 
   for (const [name, pkg] of candidatePackages) {
