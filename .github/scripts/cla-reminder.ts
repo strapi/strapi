@@ -26,7 +26,34 @@ interface IssueEvent {
 
 const REMINDED_LABEL = 'cla: reminded';
 const STALE_LABEL = 'stale';
+// CLA-specific provenance for the shared `stale` label. Added alongside `stale`
+// whenever THIS script marks a PR stale, so that on signing we can tell a
+// CLA-driven stale apart from a review-driven one (community-pr-lifecycle also
+// uses the shared `stale` label). Both stale-adders guard on `!stale`, so only
+// one flow ever owns a given `stale` label — making this marker reliable.
+const CLA_STALE_LABEL = 'cla: stale';
 const DAY_MS = 86_400_000;
+
+/**
+ * Removes a label, tolerating the "not present" case (404) but surfacing any
+ * other failure so the caller can leave provenance intact and retry next run.
+ */
+async function removeLabel(
+  github: Octokit,
+  owner: string,
+  repo: string,
+  issueNumber: number,
+  name: string
+): Promise<void> {
+  try {
+    await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNumber, name });
+  } catch (err) {
+    // 404 → label already absent (concurrent removal / never applied). Any
+    // other error is real: rethrow so the run doesn't drop provenance labels.
+    if ((err as { status?: number }).status === 404) return;
+    throw err;
+  }
+}
 
 /**
  * Returns the timestamp (ms) of the most recent time `labelName` was added to
@@ -150,8 +177,13 @@ async function getLastAuthorActivity(
 /**
  * Runs on a daily schedule. For open PRs whose CLA is not signed:
  *   - author inactive ≥ CLA_REMINDER_DAYS  → post a reminder, add "cla: reminded"
- *   - reminded ≥ CLA_STALE_DAYS ago        → add "stale"
- * If the CLA gets signed, the "cla: reminded" marker is cleaned up.
+ *   - reminded ≥ CLA_STALE_DAYS ago        → add "stale" + "cla: stale"
+ * If the CLA gets signed, the "cla: reminded" marker is cleaned up, along with
+ * the shared "stale" label — but only when this script's own "cla: stale"
+ * provenance marker is present, so a review-driven "stale" (owned by the
+ * community PR lifecycle) is never cleared by mistake. Otherwise the community
+ * PR lifecycle would still auto-close the PR on the stale timestamp despite the
+ * signed CLA.
  */
 export async function processClaReminders({ github, context, core }: ScriptArgs): Promise<void> {
   const reminderDays = parseInt(process.env.CLA_REMINDER_DAYS ?? '7', 10);
@@ -184,23 +216,40 @@ export async function processClaReminders({ github, context, core }: ScriptArgs)
       continue;
     }
 
-    // ── CLA signed → clean up the reminder marker if present ────────────────
+    // ── CLA signed → clean up this script's own labels ─────────────────────
     if (signed === true) {
-      if (labelNames.includes(REMINDED_LABEL)) {
-        core.info(`PR #${pr.number}: CLA signed — removing "${REMINDED_LABEL}"`);
+      const hasReminded = labelNames.includes(REMINDED_LABEL);
+      const hasClaStale = labelNames.includes(CLA_STALE_LABEL);
+
+      // Enter cleanup while EITHER CLA-owned label is present — not just
+      // "cla: reminded". A previous run may have removed one label and failed
+      // on the other; keying on both means the survivor still triggers a retry.
+      if (hasReminded || hasClaStale) {
+        core.info(`PR #${pr.number}: CLA signed — cleaning up CLA labels`);
         if (!isDryRun) {
           try {
-            await github.rest.issues.removeLabel({
-              owner,
-              repo,
-              issue_number: pr.number,
-              name: REMINDED_LABEL,
-            });
-          } catch {
-            // Label may have been removed concurrently — not fatal
+            // Order matters. Drop the shared "stale" BEFORE its "cla: stale"
+            // provenance: if the shared removal fails, `removeLabel` rethrows,
+            // "cla: stale" stays, and the next run re-enters and retries. Only
+            // touch the shared label when we own it (cla: stale present), so a
+            // review-driven "stale" is never cleared.
+            if (hasClaStale) {
+              await removeLabel(github, owner, repo, pr.number, STALE_LABEL);
+              await removeLabel(github, owner, repo, pr.number, CLA_STALE_LABEL);
+            }
+            if (hasReminded) {
+              await removeLabel(github, owner, repo, pr.number, REMINDED_LABEL);
+            }
+            cleaned++;
+          } catch (err) {
+            core.warning(
+              `PR #${pr.number}: CLA label cleanup failed (${(err as Error).message}) — ` +
+                `provenance labels left in place, will retry next run`
+            );
           }
+        } else {
+          cleaned++;
         }
-        cleaned++;
       }
       continue;
     }
@@ -220,11 +269,14 @@ export async function processClaReminders({ github, context, core }: ScriptArgs)
 
       if (daysSinceReminder >= staleDays) {
         if (!isDryRun) {
+          // Add the shared `stale` (so community-pr-lifecycle closes it) plus
+          // `cla: stale` provenance (so signing can safely clear only this
+          // script's stale, not a review-driven one).
           await github.rest.issues.addLabels({
             owner,
             repo,
             issue_number: pr.number,
-            labels: [STALE_LABEL],
+            labels: [STALE_LABEL, CLA_STALE_LABEL],
           });
           await github.rest.issues.createComment({
             owner,
