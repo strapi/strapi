@@ -30,4 +30,16 @@ describe('discoverMigrationFiles', () => {
   it('returns an empty array when the directory does not exist', () => {
     expect(discoverMigrationFiles(path.join(tempDir, 'missing'))).toEqual([]);
   });
+
+  it('returns an empty array for an empty directory', () => {
+    expect(discoverMigrationFiles(tempDir)).toEqual([]);
+  });
+
+  it('does not recurse into nested directories', async () => {
+    await fse.writeFile(path.join(tempDir, '001-real.js'), 'module.exports = {}');
+    await fse.ensureDir(path.join(tempDir, 'nested'));
+    await fse.writeFile(path.join(tempDir, 'nested', 'ignored.js'), 'module.exports = {}');
+
+    expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
+  });
 });
