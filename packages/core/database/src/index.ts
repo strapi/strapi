@@ -8,6 +8,7 @@ import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
 import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
@@ -17,6 +18,7 @@ import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
+export { isDatabaseClientKind } from './connection';
 
 interface Settings {
   forceMigration?: boolean;
@@ -163,6 +165,13 @@ class Database {
     return !!transactionCtx.get();
   }
 
+  /**
+   * Run work inside a DB transaction. On a fulfilled callback, the transaction
+   * is committed; on rejection, it is rolled back. The callback receives Knex
+   * `commit` and `rollback` helpers: if you call `rollback` and return without
+   * throwing, the implementation avoids attempting a second `commit` on an
+   * already-finalised transactor.
+   */
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;
   async transaction<TCallback extends Callback>(
@@ -264,4 +273,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration, Event };

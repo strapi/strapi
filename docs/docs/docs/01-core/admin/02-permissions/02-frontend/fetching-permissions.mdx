@@ -17,7 +17,7 @@ At the very root of the entire admin panel we handle 4 routes:
 - Collecting information from a first time user
 - The authenticated application (where you use the CMS)
 
-Permissions, along with other vital application information is fetched in in the `AuthenticatedApp` component, located
+Permissions, along with other vital application information is fetched in the `AuthenticatedApp` component, located
 in the `packages/core/admin/admin/src/AuthenticatedApp` folder. The cache key (used with `react-query`'s `useQueries` hook)
 for the particular call is `admin-users-permission`.
 

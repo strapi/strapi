@@ -1,7 +1,8 @@
 /**
  * Migration overview
  * ===================
- * 1. Create bare draft rows for every published entry, cloning only scalar fields (no relations/components yet).
+ * 1. Create bare draft rows for every published entry, cloning scalar fields and join-column
+ *    foreign keys (no components, dynamic zones, or join-table relations yet).
  *    We do this with a single INSERT … SELECT per content type to avoid touching the document service for every single v4 entry.
  *
  * 2. Rewire all relations so the newly created drafts behave exactly like calling `documentService.discardDraft()`
@@ -146,8 +147,48 @@ const hasDraftAndPublish = async (trx: Knex, meta: any) => {
 };
 
 /**
- * Copy all the published entries to draft entries, without it's components, dynamic zones or relations.
- * This ensures all necessary draft's exist before copying it's relations.
+ * Join-column relations that are persisted on the row (e.g. createdBy), excluding virtual
+ * relations such as i18n `localizations` which reuse `document_id` and are not DB-owned.
+ */
+const isPersistedJoinColumnRelation = (attribute: any) =>
+  attribute?.type === 'relation' &&
+  !attribute.unstable_virtual &&
+  attribute.joinColumn &&
+  !attribute.joinTable;
+
+/**
+ * Column names copied when cloning a published row into a draft (stage 1).
+ * Scalars plus persisted join-column FKs; deduped so virtual relations cannot repeat columns.
+ */
+const getPublishedToDraftCloneColumns = (meta: { attributes: Record<string, unknown> }) => {
+  const seen = new Set<string>();
+  const columns: string[] = [];
+
+  const addColumn = (columnName: string | undefined) => {
+    if (!columnName || columnName === 'id' || seen.has(columnName)) {
+      return;
+    }
+    seen.add(columnName);
+    columns.push(columnName);
+  };
+
+  for (const attribute of Object.values(meta.attributes) as any[]) {
+    if (contentTypes.isScalarAttribute(attribute)) {
+      addColumn(attribute.columnName);
+      continue;
+    }
+
+    if (isPersistedJoinColumnRelation(attribute)) {
+      addColumn(attribute.joinColumn.name);
+    }
+  }
+
+  return columns;
+};
+
+/**
+ * Copy published entries to draft rows, cloning scalar fields and join-column foreign keys.
+ * Components, dynamic zones, and join-table relations are handled in later stages.
  */
 async function copyPublishedEntriesToDraft({
   db,
@@ -158,21 +199,9 @@ async function copyPublishedEntriesToDraft({
   trx: Knex;
   uid: string;
 }) {
-  // Extract all scalar attributes to use in the insert query
   const meta = db.metadata.get(uid);
 
-  // Get scalar attributes that will be copied over the new draft
-  const scalarAttributes = Object.values(meta.attributes).reduce((acc, attribute: any) => {
-    if (['id'].includes(attribute.columnName)) {
-      return acc;
-    }
-
-    if (contentTypes.isScalarAttribute(attribute)) {
-      acc.push(attribute.columnName);
-    }
-
-    return acc;
-  }, [] as string[]);
+  const columnsToCopy = getPublishedToDraftCloneColumns(meta);
 
   /**
    * Query to copy the published entries into draft entries.
@@ -184,16 +213,16 @@ async function copyPublishedEntriesToDraft({
   await trx
     // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
     .into(
-      trx.raw(`?? (${scalarAttributes.map(() => `??`).join(', ')})`, [
+      trx.raw(`?? (${columnsToCopy.map(() => `??`).join(', ')})`, [
         meta.tableName,
-        ...scalarAttributes,
+        ...columnsToCopy,
       ])
     )
     .insert((subQb: typeof trx) => {
       // SELECT columnName1, columnName2, columnName3, ...
       subQb
         .select(
-          ...scalarAttributes.map((att: string) => {
+          ...columnsToCopy.map((att: string) => {
             // NOTE: these literals reference Strapi's built-in system columns. They never get shortened by
             // the identifier migration (5.0.0-01-convert-identifiers-long-than-max-length) so we can safely
             // compare/use them directly here.
@@ -646,6 +675,84 @@ const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: strin
 };
 
 /**
+ * v4 join rows often only persisted order on one side of a bidirectional join table.
+ * When cloning relations for draft rows, derive missing order values from the other side
+ * so populate does not fall back to primary-key order.
+ */
+const assignMissingOrderColumnFromFallback = (
+  relations: Array<Record<string, any>>,
+  {
+    orderColumn,
+    fallbackOrderColumn,
+    groupByColumn,
+    tieBreakerColumn,
+  }: {
+    orderColumn: string;
+    fallbackOrderColumn: string;
+    groupByColumn: string;
+    tieBreakerColumn?: string;
+  }
+) => {
+  if (!orderColumn || !fallbackOrderColumn || relations.length === 0) {
+    return relations;
+  }
+
+  const byGroup = new Map<string | number, Array<Record<string, any>>>();
+
+  for (const relation of relations) {
+    const groupId = relation[groupByColumn];
+    const key = groupId ?? 'null';
+    const group = byGroup.get(key);
+
+    if (group) {
+      group.push(relation);
+    } else {
+      byGroup.set(key, [relation]);
+    }
+  }
+
+  for (const group of byGroup.values()) {
+    if (!group.some((relation) => relation[orderColumn] == null)) {
+      continue;
+    }
+
+    const sorted = [...group].sort((left, right) => {
+      const leftOrder = left[fallbackOrderColumn];
+      const rightOrder = right[fallbackOrderColumn];
+
+      if (leftOrder != null && rightOrder != null) {
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+      } else if (leftOrder != null) {
+        return -1;
+      } else if (rightOrder != null) {
+        return 1;
+      }
+
+      if (tieBreakerColumn) {
+        const leftTie = normalizeId(left[tieBreakerColumn]) ?? left[tieBreakerColumn];
+        const rightTie = normalizeId(right[tieBreakerColumn]) ?? right[tieBreakerColumn];
+
+        if (leftTie != null && rightTie != null && leftTie !== rightTie) {
+          return leftTie < rightTie ? -1 : 1;
+        }
+      }
+
+      return 0;
+    });
+
+    sorted.forEach((relation, index) => {
+      if (relation[orderColumn] == null) {
+        relation[orderColumn] = index + 1;
+      }
+    });
+  }
+
+  return relations;
+};
+
+/**
  * Builds a stable key for join-table relations to detect duplicates.
  * Key format: sourceId::targetId::field::componentType
  */
@@ -669,23 +776,26 @@ async function getExistingRelationKeys({
   joinTable,
   sourceColumnName,
   targetColumnName,
-  sourceIds,
+  filterIds,
+  filterColumnName,
 }: {
   trx: Knex;
   joinTable: any;
   sourceColumnName: string;
   targetColumnName: string;
-  sourceIds: number[];
+  filterIds: number[];
+  filterColumnName?: string;
 }): Promise<Set<string>> {
   const existingKeys = new Set<string>();
+  const columnName = filterColumnName ?? sourceColumnName;
 
-  if (sourceIds.length === 0) {
+  if (filterIds.length === 0) {
     return existingKeys;
   }
 
-  const idChunks = chunkArray(sourceIds, getBatchSize(trx, 1000));
+  const idChunks = chunkArray(filterIds, getBatchSize(trx, 1000));
   for (const chunk of idChunks) {
-    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(sourceColumnName, chunk);
+    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(columnName, chunk);
 
     applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
 
@@ -1724,7 +1834,7 @@ async function cloneComponentInstance({
   }
 
   for (const attribute of Object.values(componentMeta.attributes) as any) {
-    if (attribute.type !== 'relation') {
+    if (!isPersistedJoinColumnRelation(attribute)) {
       continue;
     }
 
@@ -2077,7 +2187,7 @@ async function copyRelationsForContentType({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       const relationsToInsert = newRelations.filter((relation) => {
@@ -2178,7 +2288,8 @@ async function copyRelationsFromOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftTargetIds,
+        filterIds: draftTargetIds,
+        filterColumnName: targetColumnName,
       });
 
       const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
@@ -2218,6 +2329,13 @@ async function copyRelationsFromOtherContentTypes({
         if (newRelations.length === 0) {
           continue;
         }
+
+        assignMissingOrderColumnFromFallback(newRelations, {
+          orderColumn: joinTable.inverseOrderColumnName,
+          fallbackOrderColumn: joinTable.orderColumnName,
+          groupByColumn: targetColumnName,
+          tieBreakerColumn: sourceColumnName,
+        });
 
         await insertRelationsWithDuplicateHandling({
           trx,
@@ -2378,7 +2496,7 @@ async function copyRelationsToOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       // Filter out relations that already exist
@@ -2389,6 +2507,13 @@ async function copyRelationsToOtherContentTypes({
       });
 
       if (relationsToInsert.length > 0) {
+        assignMissingOrderColumnFromFallback(relationsToInsert as Array<Record<string, any>>, {
+          orderColumn: joinTable.orderColumnName,
+          fallbackOrderColumn: joinTable.inverseOrderColumnName,
+          groupByColumn: sourceColumnName,
+          tieBreakerColumn: targetColumnName,
+        });
+
         await insertRelationsWithDuplicateHandling({
           trx,
           tableName: joinTable.name,
@@ -2434,16 +2559,10 @@ async function updateJoinColumnRelations({
 
   // Find all JoinColumn relations (oneToOne, manyToOne without joinTable)
   for (const attribute of Object.values(meta.attributes) as any) {
-    if (attribute.type !== 'relation') {
+    if (!isPersistedJoinColumnRelation(attribute)) {
       continue;
     }
 
-    // Skip relations with joinTable (handled by copyRelationsToOtherContentTypes)
-    if (attribute.joinTable) {
-      continue;
-    }
-
-    // Only handle oneToOne and manyToOne relations that use joinColumn
     const joinColumn = attribute.joinColumn;
     if (!joinColumn) {
       continue;

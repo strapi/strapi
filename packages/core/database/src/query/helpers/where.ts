@@ -224,7 +224,12 @@ type Operator =
   | '$jsonSupersetOf';
 
 // TODO: add type casting per operator at some point
-const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, value: any) => {
+const applyOperator = (
+  qb: Knex.QueryBuilder,
+  column: any,
+  operator: Operator,
+  value: any
+): Knex.QueryBuilder | undefined => {
   if (Array.isArray(value) && !isOperatorOfType('array', operator)) {
     return qb.where((subQB) => {
       value.forEach((subValue) =>
@@ -411,7 +416,7 @@ type Where =
     }
   | Array<Where>;
 
-const applyWhere = (qb: Knex.QueryBuilder, where: Where) => {
+const applyWhere = (qb: Knex.QueryBuilder, where: Where): Knex.QueryBuilder | undefined => {
   if (!isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }

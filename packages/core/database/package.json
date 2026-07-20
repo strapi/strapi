@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.46.1",
+  "version": "5.50.2",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -36,15 +36,18 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T tsc --noEmit && run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.46.1",
-    "ajv": "8.18.0",
+    "@strapi/utils": "5.50.2",
+    "ajv": "8.20.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "11.3.4",
@@ -55,11 +58,16 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.46.1",
-    "tsconfig": "5.46.1"
+    "@types/jest": "29.5.2",
+    "@types/node": "20.19.41",
+    "eslint-config-custom": "5.50.2",
+    "jest": "29.6.0",
+    "tsconfig": "5.50.2",
+    "vitest": "catalog:",
+    "vitest-config": "5.50.2"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

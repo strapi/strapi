@@ -172,7 +172,7 @@ type Step = {
   Title: (props: StepProps) => React.ReactNode;
   Content: (
     props: StepProps & {
-      values?: Record<string, React.ReactNode | ((chunks: React.ReactNode) => React.ReactNode)>;
+      values?: Record<string, React.ReactNode | ((_chunks: React.ReactNode) => React.ReactNode)>;
     }
   ) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string } & FlexProps) => React.ReactNode;
