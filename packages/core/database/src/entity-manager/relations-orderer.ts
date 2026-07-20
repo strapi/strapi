@@ -176,11 +176,14 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
   orderColumn: keyof TRelation,
   strict?: boolean
 ) => {
-  const computedRelations: OrderedLink[] = castArray(initArr ?? []).map((r) => ({
-    init: true,
-    id: r[idColumn] as ID,
-    order: Number(r[orderColumn]) || 1,
-  }));
+  const computedRelations: OrderedLink[] = _.sortBy(
+    castArray(initArr ?? []).map((r) => ({
+      init: true,
+      id: r[idColumn] as ID,
+      order: r[orderColumn] !== null && r[orderColumn] !== undefined ? Number(r[orderColumn]) : 1,
+    })),
+    'order'
+  );
 
   const maxOrder = maxBy('order', computedRelations)?.order || 0;
 
@@ -200,24 +203,37 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     let idx;
 
     if (r.position?.before) {
-      const { idx: relationIndex, relation } = findRelation(r.position.before);
+      const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
-        r.order = relation.order - 0.5;
+        const prevRelation = beforeIdx > 0 ? computedRelations[beforeIdx - 1] : null;
+        r.order =
+          prevRelation && prevRelation.order < relation.order
+            ? (prevRelation.order + relation.order) / 2
+            : relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = relationIndex;
+      idx = beforeIdx;
     } else if (r.position?.after) {
-      const { idx: relationIndex, relation } = findRelation(r.position.after);
+      const { idx: afterIdx, relation } = findRelation(r.position.after);
       if (relation.init) {
-        r.order = relation.order + 0.5;
+        const nextRelation =
+          afterIdx < computedRelations.length - 1 ? computedRelations[afterIdx + 1] : null;
+        r.order =
+          nextRelation && nextRelation.order > relation.order
+            ? (relation.order + nextRelation.order) / 2
+            : relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
-
-      idx = relationIndex + 1;
+      idx = afterIdx + 1;
     } else if (r.position?.start) {
-      r.order = 0.5;
+      if (computedRelations.length > 0) {
+        const firstRelation = computedRelations[0];
+        r.order = firstRelation.init ? firstRelation.order - 0.5 : firstRelation.order;
+      } else {
+        r.order = 0.5;
+      }
       idx = 0;
     } else {
       r.order = maxOrder + 0.5;
@@ -260,18 +276,22 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
      * Get a map between the relation id and its order
      */
     getOrderMap() {
-      return _(computedRelations)
-        .groupBy('order')
-        .reduce(
-          (acc, relations) => {
-            if (relations[0]?.init) return acc;
-            relations.forEach((relation, idx) => {
-              acc[relation.id] = Math.floor(relation.order) + (idx + 1) / (relations.length + 1);
-            });
-            return acc;
-          },
-          {} as Record<ID, number>
-        );
+      const map: Record<ID, number> = {};
+      const chunks = _(computedRelations).groupBy('order').value();
+      const sortedKeys = Object.keys(chunks).sort((a, b) => parseFloat(a) - parseFloat(b));
+
+      for (const orderStr of sortedKeys) {
+        const relations = chunks[orderStr];
+        let offset = 1;
+        relations.forEach((relation) => {
+          if (!relation.init) {
+            map[relation.id] = parseFloat(orderStr) + (offset / (relations.length + 1)) * 0.49;
+            offset += 1;
+          }
+        });
+      }
+
+      return map;
     },
   };
 };

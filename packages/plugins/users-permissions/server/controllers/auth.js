@@ -418,24 +418,14 @@ module.exports = ({ strapi }) => ({
     return ctx.send({ data: {} });
   },
   async connect(ctx, next) {
-    const grant = require('grant').koa();
-
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
-    const apiPrefix = strapi.config.get('api.rest.prefix');
-    const grantConfig = {
-      defaults: {
-        prefix: `${apiPrefix}/connect`,
-      },
-      ...providers,
-    };
-
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];
 
-    if (!_.get(grantConfig[provider], 'enabled')) {
+    if (!_.get(providers, [provider, 'enabled'])) {
       throw new ApplicationError('This provider is disabled');
     }
 
@@ -445,32 +435,35 @@ module.exports = ({ strapi }) => ({
       );
     }
 
-    // Ability to pass OAuth callback dynamically
     const queryCustomCallback = _.get(ctx, 'query.callback');
     const dynamicSessionCallback = _.get(ctx, 'session.grant.dynamic.callback');
-
     const customCallback = queryCustomCallback ?? dynamicSessionCallback;
 
-    // The custom callback is validated to make sure it's not redirecting to an unwanted actor.
     if (customCallback !== undefined) {
       try {
-        // We're extracting the callback validator from the plugin config since it can be user-customized
         const { validate: validateCallback } = strapi
           .plugin('users-permissions')
           .config('callback');
 
-        await validateCallback(customCallback, grantConfig[provider]);
+        await validateCallback(customCallback, providers[provider]);
 
-        grantConfig[provider].callback = customCallback;
+        // Persist across the provider redirect round-trip (request state alone is lost).
+        ctx.session = ctx.session || {};
+        ctx.session.grant = ctx.session.grant || {};
+        ctx.session.grant.dynamic = {
+          ...(ctx.session.grant.dynamic || {}),
+          callback: customCallback,
+        };
+        ctx.state.oauthConnect = { callback: customCallback };
       } catch (e) {
         throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
       }
     }
 
-    // Build a valid redirect URI for the current provider
-    grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
+    const { createOAuthConnectMiddleware } = require('../utils/oauth-connect');
+    const oauthConnect = createOAuthConnectMiddleware();
 
-    return grant(grantConfig)(ctx, next);
+    return oauthConnect(ctx, next);
   },
 
   async forgotPassword(ctx) {
