@@ -556,7 +556,12 @@ function previewScript(config) {
    * renders (e.g. the title rendered twice) also collapse to one highlight,
    * which matches how the focused state already behaves.
    *
-   * @typedef {{ highlight: HTMLElement; elements: Set<HTMLElement>; }} HighlightGroup
+   * `container` is the LCA ancestor of all stega-encoded elements in a blocks
+   * field — attached when an inline editing session starts. It covers blocks
+   * that have no stega encoding (code blocks, newly added blocks) and acts as
+   * a fallback when stega elements are detached after a host re-render.
+   *
+   * @typedef {{ highlight: HTMLElement; elements: Set<HTMLElement>; container: HTMLElement | null; }} HighlightGroup
    */
 
   /**
@@ -594,6 +599,20 @@ function previewScript(config) {
         if (r.right > maxRight) maxRight = r.right;
         if (r.bottom > maxBottom) maxBottom = r.bottom;
       });
+      // Expand with the container rect so the highlight covers the full blocks
+      // field — including non-stega-encoded blocks (code blocks, newly added
+      // blocks from an inline session) and acts as a fallback when all stega
+      // elements have been replaced by a host re-render.
+      if (group.container) {
+        const r = group.container.getBoundingClientRect();
+        if (r.width > 0 || r.height > 0) {
+          any = true;
+          if (r.left < minLeft) minLeft = r.left;
+          if (r.top < minTop) minTop = r.top;
+          if (r.right > maxRight) maxRight = r.right;
+          if (r.bottom > maxBottom) maxBottom = r.bottom;
+        }
+      }
       if (!any) return null;
       return {
         left: minLeft,
@@ -651,7 +670,7 @@ function previewScript(config) {
       const highlight = document.createElement('div');
       highlight.className = 'strapi-highlight';
       /** @type {HighlightGroup} */
-      const group = { highlight, elements: new Set() };
+      const group = { highlight, elements: new Set(), container: null };
 
       /**
        * @param {MouseEvent} event
@@ -964,6 +983,19 @@ function previewScript(config) {
       createHighlightForElement,
       removeHighlightForElement,
       findGroupForPath,
+      /**
+       * Attach a container element to all highlight groups for a blocks field.
+       * Called when an inline editing session starts with the LCA ancestor of
+       * all stega-encoded elements so the highlight always covers the full
+       * field area, even after the host re-renders with non-stega content.
+       * @param {string} fieldPath
+       * @param {HTMLElement} el
+       */
+      attachContainerToGroup: (fieldPath, el) => {
+        findGroupForPath(fieldPath).forEach((group) => {
+          group.container = el;
+        });
+      },
       /** @param {string | null} field */
       setFocusedField: (field) => {
         focusedField = field;
@@ -1143,6 +1175,8 @@ function previewScript(config) {
     let blocksEditScrollHandler = null;
     /** @type {ResizeObserver | null} */
     let blocksEditResizeObserver = null;
+    /** @type {{ el: HTMLElement; prevVisibility: string } | null} */
+    let blocksEditHiddenAncestor = null;
 
     /**
      * @param {HTMLElement} el
@@ -1305,14 +1339,12 @@ function previewScript(config) {
 
         // Blocks fields ship as an array of nodes. Live updates are delegated
         // to the host frontend — we re-dispatch as a CustomEvent so integrators
-        // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
+        // (e.g. BlocksRenderer in the Launchpad) can re-render without DOM patching.
         if (isBlocksValue(value)) {
           // Always forward — even when this field is being edited inline.
-          // The parent container has visibility:hidden which inherits to all children
-          // including newly-rendered un-stega'd elements, so there is no risk of
-          // duplicate visible text. Forwarding during editing lets the hidden
-          // container reflow to the correct height as content grows, preventing the
-          // overlay from covering content below the field.
+          // The hidden ancestor hides the host-rendered content; the framework
+          // re-renders freely underneath it. When the session ends the ancestor's
+          // visibility is restored and the updated content is immediately visible.
           forwardBlocksFieldChange(field, value);
           return;
         }
@@ -1479,14 +1511,58 @@ function previewScript(config) {
 
       if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START) {
         const { fieldPath } = event.data.payload;
-        // Inject CSS to hide host-rendered blocks content (hides existing + future elements)
-        const styleId = `strapi-blocks-hide-${fieldPath}`;
-        document.getElementById(styleId)?.remove();
-        const style = document.createElement('style');
-        style.id = styleId;
-        // The CSS selector targets all elements whose data-strapi-source contains fieldPath=<path>
-        style.textContent = `[${SOURCE_ATTRIBUTE}*="fieldPath=${fieldPath}"] { visibility: hidden !important; }`;
-        document.head.appendChild(style);
+
+        const fieldEls = /** @type {HTMLElement[]} */ (Array.from(getElementsByPath(fieldPath)));
+
+        // Normalize each stega element up to its nearest block-level ancestor
+        // (p, h2, li, etc.) before computing the lowest common ancestor. Without
+        // this, the LCA can stop at an inline wrapper (e.g. <strong> inside <p>)
+        // and only hide one paragraph instead of the whole field container.
+        // Using getComputedStyle rather than a tag-name allowlist so custom
+        // elements and framework wrappers are handled correctly.
+        const blockEls = fieldEls.map((el) => {
+          /** @type {HTMLElement} */
+          let node = el;
+          while (node.parentElement && node.parentElement !== document.body) {
+            const display = window.getComputedStyle(node).display;
+            if (!display.startsWith('inline') && display !== 'contents') break;
+            node = node.parentElement;
+          }
+          return node;
+        });
+
+        // Find the lowest common ancestor of those block-level elements —
+        // their common parent is the container div that holds all blocks.
+        /** @type {HTMLElement | null} */
+        let ancestor = null;
+        if (blockEls.length > 0) {
+          let candidate = blockEls[0].parentElement;
+          while (candidate && candidate !== document.body) {
+            if (blockEls.every((el) => candidate.contains(el))) {
+              ancestor = candidate;
+              break;
+            }
+            candidate = candidate.parentElement;
+          }
+        }
+
+        // Hide the field container so the host-rendered content doesn't show through
+        // the admin overlay. CSS visibility:hidden is inherited by all descendants
+        // (including blocks added during the session), works regardless of page
+        // background color, and is safe across frameworks — no major framework touches
+        // inline styles on elements it renders without an explicit style binding.
+        // Saving prevVisibility means we don't clobber any existing inline visibility
+        // the host app may have set.
+        const positionSource = ancestor ?? fieldEls[0] ?? null;
+        if (ancestor) {
+          const prevVisibility = ancestor.style.visibility;
+          ancestor.style.visibility = 'hidden';
+          blocksEditHiddenAncestor = { el: ancestor, prevVisibility };
+          // Persist the ancestor on the highlight group so computeGroupRect
+          // can use it to cover non-stega blocks and survive host re-renders.
+          highlightManager.attachContainerToGroup(fieldPath, ancestor);
+        }
+
         // Disable pointer events on the highlight so it can't be double-clicked during editing
         const matchingGroups = highlightManager.findGroupForPath(fieldPath);
         matchingGroups.forEach((group) => {
@@ -1499,7 +1575,6 @@ function previewScript(config) {
         document.addEventListener('click', blocksEditClickOutsideHandler);
 
         // Measure the preview's computed typography once so the admin overlay can match it
-        const fieldEls = /** @type {HTMLElement[]} */ (Array.from(getElementsByPath(fieldPath)));
         const sampleEl = fieldEls[0];
         /** @type {{ lineHeight?: string; fontSize?: string; paragraphGap?: string }} */
         const typographySync = {};
@@ -1513,47 +1588,30 @@ function previewScript(config) {
           }
         }
 
-        // Send position + typography to the admin on scroll
+        // Send position + typography to the admin; prefer the ancestor rect so the overlay
+        // covers the full field area (including non-encoded blocks like code).
         blocksEditScrollHandler = () => {
-          const elements = getElementsByPath(fieldPath);
-          let minLeft = Infinity;
-          let minTop = Infinity;
-          let maxRight = -Infinity;
-          let maxBottom = -Infinity;
-          let any = false;
-          elements.forEach((el) => {
-            const r = el.getBoundingClientRect();
-            if (r.width === 0 && r.height === 0) return;
-            any = true;
-            if (r.left < minLeft) minLeft = r.left;
-            if (r.top < minTop) minTop = r.top;
-            if (r.right > maxRight) maxRight = r.right;
-            if (r.bottom > maxBottom) maxBottom = r.bottom;
-          });
-          if (!any) return;
+          if (!positionSource) return;
+          const r = positionSource.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return;
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC, {
-            top: minTop,
-            left: minLeft,
-            right: maxRight,
-            bottom: maxBottom,
-            width: maxRight - minLeft,
-            height: maxBottom - minTop,
+            top: r.top,
+            left: r.left,
+            right: r.right,
+            bottom: r.bottom,
+            width: r.width,
+            height: r.height,
             typography: typographySync,
           });
         };
         window.addEventListener('scroll', blocksEditScrollHandler);
         // Fire once immediately to send initial position + typography to the admin
         blocksEditScrollHandler();
-        // Also sync when the preview content reflows as the user types new blocks
-        const containerEl =
-          fieldEls.find(
-            (el) =>
-              new URLSearchParams(el.getAttribute(SOURCE_ATTRIBUTE) ?? '').get('type') === 'blocks'
-          ) ?? fieldEls[0];
-        if (containerEl) {
+        // Sync position when the preview content reflows as the user types new blocks
+        if (positionSource) {
           const resizeObs = new ResizeObserver(blocksEditScrollHandler);
           blocksEditResizeObserver = resizeObs;
-          resizeObs.observe(containerEl);
+          resizeObs.observe(positionSource);
         }
         return;
       }
@@ -1572,8 +1630,11 @@ function previewScript(config) {
           blocksEditResizeObserver.disconnect();
           blocksEditResizeObserver = null;
         }
-        // Remove the CSS rule to restore host content visibility
-        document.getElementById(`strapi-blocks-hide-${fieldPath}`)?.remove();
+        // Restore visibility to reveal the host content (now updated by the host app)
+        if (blocksEditHiddenAncestor) {
+          blocksEditHiddenAncestor.el.style.visibility = blocksEditHiddenAncestor.prevVisibility;
+          blocksEditHiddenAncestor = null;
+        }
         // Restore pointer events on the highlight
         const matchingGroups = highlightManager.findGroupForPath(fieldPath);
         matchingGroups.forEach((group) => {
@@ -1606,6 +1667,10 @@ function previewScript(config) {
         if (blocksEditResizeObserver) {
           blocksEditResizeObserver.disconnect();
           blocksEditResizeObserver = null;
+        }
+        if (blocksEditHiddenAncestor) {
+          blocksEditHiddenAncestor.el.style.visibility = blocksEditHiddenAncestor.prevVisibility;
+          blocksEditHiddenAncestor = null;
         }
       },
     };
@@ -1647,9 +1712,6 @@ function previewScript(config) {
       if (existingStyles) {
         existingStyles.remove();
       }
-
-      // Remove any active blocks edit style tags
-      document.querySelectorAll('[id^="strapi-blocks-hide-"]').forEach((el) => el.remove());
 
       overlay.remove();
     };

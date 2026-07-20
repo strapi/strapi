@@ -112,6 +112,21 @@ const LivePreviewBlocksEditor = ({
   const [position, setPosition] = React.useState(blocksEditSession.position);
   const [typography, setTypography] = React.useState<FieldTypography>({});
 
+  // Keep the overlay height in sync with the editor's own content as the user types new blocks.
+  // The iframe's ResizeObserver only fires when the host app re-renders the hidden ancestor;
+  // this one runs on the admin side and never needs iframe cooperation.
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry.contentRect.height;
+      if (height > 0) {
+        setPosition((prev) => ({ ...prev, height }));
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   // Close when the user clicks anywhere in the iframe (notified via postMessage from previewScript)
   // Also update position when the iframe scrolls
   React.useEffect(() => {
@@ -174,14 +189,17 @@ const LivePreviewBlocksEditor = ({
   if (!iframeRect || isOutOfView) return null;
 
   return (
-    // Clipping wrapper covers exactly the visible iframe area; the editor moves freely inside it
+    // Clipping wrapper anchors to the iframe's top-left corner and grows downward as the
+    // editor gains content; overflow:hidden prevents the editor from bleeding above the
+    // Strapi header or outside the iframe's left/right bounds.
     <div
+      data-testid="blocks-editor-clipping-wrapper"
       style={{
         position: 'fixed',
         top: iframeRect.top,
         left: iframeRect.left,
         width: iframeRect.width,
-        height: iframeRect.height,
+        height: Math.max(iframeRect.height, position.top + position.height),
         overflow: 'hidden',
         pointerEvents: 'none',
         zIndex: 5,
@@ -196,7 +214,7 @@ const LivePreviewBlocksEditor = ({
             top: position.top,
             left: position.left,
             width: position.width,
-            height: position.height,
+            minHeight: position.height,
             overflow: 'visible',
             pointerEvents: 'auto',
             '--preview-image-max-height': 'none',

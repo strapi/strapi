@@ -188,6 +188,35 @@ describe('LivePreviewBlocksSurface', () => {
     expect(container).toHaveStyle({ left: '20px' });
   });
 
+  test('clipping wrapper height is at least the iframe height initially', () => {
+    // iframe mock: height = 600; session position: top=50, height=100 → max(600, 150) = 600
+    setupContext({ blocksEditSession: makeSession() });
+    render(<LivePreviewBlocksSurface documentResponse={mockDocumentResponse} />);
+
+    const wrapper = screen.getByTestId('blocks-editor-clipping-wrapper');
+    expect(wrapper).toHaveStyle({ height: '600px' });
+  });
+
+  test('clipping wrapper grows when editor content exceeds iframe height', () => {
+    setupContext({ blocksEditSession: makeSession() });
+    render(<LivePreviewBlocksSurface documentResponse={mockDocumentResponse} />);
+
+    // Simulate the field growing tall — top=50, height=700 → max(600, 750) = 750
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: {
+            type: INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC,
+            payload: { top: 50, left: 0, width: 600, height: 700, bottom: 750, right: 600 },
+          },
+        })
+      );
+    });
+
+    const wrapper = screen.getByTestId('blocks-editor-clipping-wrapper');
+    expect(wrapper).toHaveStyle({ height: '750px' });
+  });
+
   test('sends STRAPI_BLOCKS_EDIT_START when the editor mounts', () => {
     setupContext({ blocksEditSession: makeSession() });
     render(<LivePreviewBlocksSurface documentResponse={mockDocumentResponse} />);

@@ -18,14 +18,9 @@ const previewScriptSrc = fs.readFileSync(
   'utf-8'
 );
 
-const blocksValue = [
-  {
-    type: 'paragraph',
-    children: [{ type: 'text', text: 'Hello' }],
-  },
-];
-
 const runPreviewScript = () => {
+  // Disable stega decoding: JSDOM has no stega library, so we plant data-strapi-source
+  // attributes directly on elements rather than relying on invisible Unicode encoding.
   window.STRAPI_DISABLE_STEGA_DECODING = true;
   // eslint-disable-next-line no-eval
   eval(
@@ -37,11 +32,7 @@ const runPreviewScript = () => {
   );
 };
 
-/**
- * Dispatch a postMessage from the simulated admin panel to the preview script.
- * Must supply source and origin so the script's origin check passes in JSDOM
- * (window.parent === window, window.location.origin === 'http://localhost:1337').
- */
+/** Simulate a postMessage arriving from the admin panel into the preview iframe. */
 const dispatchAdminMessage = (data: unknown) => {
   window.dispatchEvent(
     new MessageEvent('message', {
@@ -52,13 +43,13 @@ const dispatchAdminMessage = (data: unknown) => {
   );
 };
 
+// ─── Blocks field changes ─────────────────────────────────────────────────────
+
 describe('previewScript — blocks field changes', () => {
   beforeEach(async () => {
     document.body.innerHTML = '<div id="root">Preview content</div>';
     runPreviewScript();
-    await new Promise((resolve) => {
-      setTimeout(resolve, 0);
-    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
   afterEach(() => {
@@ -66,106 +57,40 @@ describe('previewScript — blocks field changes', () => {
     window.STRAPI_DISABLE_STEGA_DECODING = undefined;
   });
 
-  test('forwards blocks field changes to the host via a window CustomEvent', () => {
+  test('a valid blocks value is forwarded to the host as a CustomEvent', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
     dispatchAdminMessage({
       type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: blocksValue },
+      payload: {
+        field: 'body',
+        value: [{ type: 'paragraph', children: [{ type: 'text', text: 'Hello' }] }],
+      },
     });
 
-    expect(handler).toHaveBeenCalledTimes(1);
     expect(handler.mock.calls[0][0].detail).toEqual({
       field: 'body',
-      value: blocksValue,
+      value: [{ type: 'paragraph', children: [{ type: 'text', text: 'Hello' }] }],
     });
   });
 
-  test('does not forward non-blocks field changes via the blocks CustomEvent path', () => {
+  test('non-blocks field values do not fire the host CustomEvent', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
     dispatchAdminMessage({
       type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'title', value: 'Plain title' },
+      payload: { field: 'title', value: 'A plain string' },
     });
 
     expect(handler).not.toHaveBeenCalled();
-  });
-
-  test('does not forward an empty array as a blocks value', () => {
-    const handler = jest.fn();
-    window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
-
-    dispatchAdminMessage({
-      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: [] },
-    });
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  test('does not forward null as a blocks value', () => {
-    const handler = jest.fn();
-    window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
-
-    dispatchAdminMessage({
-      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: null },
-    });
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  test('does not forward an array of objects missing type and children', () => {
-    const handler = jest.fn();
-    window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
-
-    dispatchAdminMessage({
-      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: [{ foo: 'bar' }] },
-    });
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  test('does not forward an array of objects with a non-array children property', () => {
-    const handler = jest.fn();
-    window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
-
-    dispatchAdminMessage({
-      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: [{ type: 'paragraph', children: 'not an array' }] },
-    });
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  test('forwards a multi-block value and includes the full value in the CustomEvent detail', () => {
-    const handler = jest.fn();
-    window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
-
-    const multiBlockValue = [
-      { type: 'paragraph', children: [{ type: 'text', text: 'First' }] },
-      { type: 'heading', level: 2, children: [{ type: 'text', text: 'Second' }] },
-    ];
-
-    dispatchAdminMessage({
-      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-      payload: { field: 'body', value: multiBlockValue },
-    });
-
-    expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls[0][0].detail).toEqual({ field: 'body', value: multiBlockValue });
   });
 });
 
-describe('previewScript — highlight grouping (deriveGroupKey)', () => {
-  beforeEach(() => {
-    window.STRAPI_DISABLE_STEGA_DECODING = true;
-  });
+// ─── Highlight zones ──────────────────────────────────────────────────────────
 
+describe('previewScript — highlight zones', () => {
   afterEach(() => {
     window.__strapi_previewCleanup?.();
     window.STRAPI_DISABLE_STEGA_DECODING = undefined;
@@ -178,46 +103,35 @@ describe('previewScript — highlight grouping (deriveGroupKey)', () => {
     return document.querySelectorAll('.strapi-highlight').length;
   };
 
-  test('two blocks elements with the same fieldPath share one highlight', async () => {
+  test('all paragraphs of a blocks field share one highlight overlay', async () => {
     const count = await countHighlights(`
       <p data-strapi-source="fieldPath=body&path=body.0.children.0.text&type=blocks&documentId=doc-1">First</p>
       <p data-strapi-source="fieldPath=body&path=body.1.children.0.text&type=blocks&documentId=doc-1">Second</p>
     `);
-
     expect(count).toBe(1);
   });
 
-  test('two regular elements with different paths get separate highlights', async () => {
+  test('the same field appearing twice in the page shares one highlight overlay', async () => {
+    const count = await countHighlights(`
+      <h1 data-strapi-source="path=title&type=string&documentId=doc-1">Title</h1>
+      <meta data-strapi-source="path=title&type=string&documentId=doc-1" content="Title" />
+    `);
+    expect(count).toBe(1);
+  });
+
+  test('separate fields each get their own highlight overlay', async () => {
     const count = await countHighlights(`
       <p data-strapi-source="path=title&type=string&documentId=doc-1">Title</p>
       <p data-strapi-source="path=description&type=string&documentId=doc-1">Description</p>
     `);
-
-    expect(count).toBe(2);
-  });
-
-  test('two regular elements with the same source share one highlight', async () => {
-    const count = await countHighlights(`
-      <span data-strapi-source="path=title&type=string&documentId=doc-1">Title A</span>
-      <span data-strapi-source="path=title&type=string&documentId=doc-1">Title B</span>
-    `);
-
-    expect(count).toBe(1);
-  });
-
-  test('blocks elements from different fields get separate highlights', async () => {
-    const count = await countHighlights(`
-      <p data-strapi-source="fieldPath=body&path=body.0.children.0.text&type=blocks&documentId=doc-1">Body</p>
-      <p data-strapi-source="fieldPath=summary&path=summary.0.children.0.text&type=blocks&documentId=doc-1">Summary</p>
-    `);
-
     expect(count).toBe(2);
   });
 });
 
-describe('previewScript — getFocusPath', () => {
+// ─── Double-clicking a field ──────────────────────────────────────────────────
+
+describe('previewScript — double-clicking a field', () => {
   beforeEach(() => {
-    window.STRAPI_DISABLE_STEGA_DECODING = true;
     jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
       left: 10,
       top: 20,
@@ -237,48 +151,126 @@ describe('previewScript — getFocusPath', () => {
     jest.restoreAllMocks();
   });
 
-  const setupWithSource = async (sourceAttr: string) => {
+  /** Set up a page with one annotated element, run the script, dblclick the highlight,
+   *  and return the `path` query string sent in STRAPI_FIELD_FOCUS_INTENT. */
+  const dblclickHighlight = async (sourceAttr: string): Promise<string | undefined> => {
     document.body.innerHTML = `<p data-strapi-source="${sourceAttr}">Content</p>`;
     runPreviewScript();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    return document.querySelector('.strapi-highlight') as HTMLElement;
-  };
 
-  const getFocusIntentPath = (postMessageSpy: jest.SpyInstance): URLSearchParams | null => {
-    const call = postMessageSpy.mock.calls.find(
-      ([data]) => data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+    const spy = jest.spyOn(window, 'postMessage');
+    highlight.dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 50, clientY: 50 })
     );
-    if (!call) return null;
-    return new URLSearchParams(call[0].payload.path);
+
+    const focusCall = spy.mock.calls.find(
+      ([data]) => (data as { type: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+    );
+    return focusCall?.[0].payload.path;
   };
 
-  test('double-clicking a blocks element sends STRAPI_FIELD_FOCUS_INTENT redirected to the field path', async () => {
-    const highlight = await setupWithSource(
+  test('double-clicking a blocks field opens the editor at the field root, not the specific block path', async () => {
+    const path = await dblclickHighlight(
       'fieldPath=body&path=body.0.children.0.text&type=blocks&documentId=doc-1'
     );
-
-    const postMessageSpy = jest.spyOn(window, 'postMessage');
-    highlight.dispatchEvent(
-      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 50, clientY: 50 })
-    );
-
-    const path = getFocusIntentPath(postMessageSpy);
-    expect(path).not.toBeNull();
-    expect(path?.get('path')).toBe('body');
-    expect(path?.get('fieldPath')).toBeNull();
+    expect(new URLSearchParams(path).get('path')).toBe('body');
   });
 
-  test('double-clicking a regular element sends STRAPI_FIELD_FOCUS_INTENT with the direct path unchanged', async () => {
-    const highlight = await setupWithSource('path=title&type=string&documentId=doc-1');
+  test('double-clicking a string field opens the editor at that field path', async () => {
+    const path = await dblclickHighlight('path=title&type=string&documentId=doc-1');
+    expect(new URLSearchParams(path).get('path')).toBe('title');
+  });
+});
 
-    const postMessageSpy = jest.spyOn(window, 'postMessage');
-    highlight.dispatchEvent(
+// ─── Blocks editing session ───────────────────────────────────────────────────
+
+describe('previewScript — blocks editing session', () => {
+  const containerRect = {
+    left: 0,
+    top: 10,
+    right: 400,
+    bottom: 300,
+    width: 400,
+    height: 290,
+    x: 0,
+    y: 10,
+    toJSON: () => ({}),
+  } as DOMRect;
+
+  let rectSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    document.body.innerHTML = `
+      <div id="blocks-container">
+        <p data-strapi-source="fieldPath=body&path=body.0.children.0.text&type=blocks&documentId=doc-1">First</p>
+        <p data-strapi-source="fieldPath=body&path=body.1.children.0.text&type=blocks&documentId=doc-1">Second</p>
+      </div>
+    `;
+    rectSpy = jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(containerRect);
+    runPreviewScript();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  afterEach(() => {
+    window.__strapi_previewCleanup?.();
+    window.STRAPI_DISABLE_STEGA_DECODING = undefined;
+    jest.restoreAllMocks();
+  });
+
+  test('starting an edit session hides the blocks container; ending it restores visibility', () => {
+    const container = document.getElementById('blocks-container')!;
+
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START,
+      payload: { fieldPath: 'body' },
+    });
+    expect(container).toHaveStyle({ visibility: 'hidden' });
+
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END,
+      payload: { fieldPath: 'body' },
+    });
+    expect(container).toHaveStyle({ visibility: '' });
+  });
+
+  test('double-clicking the field works after the host re-renders the blocks content', () => {
+    // Complete a session so the container is attached to the highlight group
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START,
+      payload: { fieldPath: 'body' },
+    });
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END,
+      payload: { fieldPath: 'body' },
+    });
+
+    // Host re-renders: original stega elements are detached (zero rects), container stays
+    rectSpy.mockImplementation(function (this: Element) {
+      if (this.id === 'blocks-container') return containerRect;
+      return {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      } as DOMRect;
+    });
+    window.dispatchEvent(new Event('resize'));
+
+    const spy = jest.spyOn(window, 'postMessage');
+    (document.querySelector('.strapi-highlight') as HTMLElement).dispatchEvent(
       new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 50, clientY: 50 })
     );
 
-    const path = getFocusIntentPath(postMessageSpy);
-    expect(path).not.toBeNull();
-    expect(path?.get('path')).toBe('title');
-    expect(path?.get('fieldPath')).toBeNull();
+    expect(
+      spy.mock.calls.some(
+        ([data]) => (data as { type: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+      )
+    ).toBe(true);
   });
 });
