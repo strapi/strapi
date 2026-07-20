@@ -200,7 +200,8 @@ const collectNestedCloneRelationAdjustments = async (
         return;
       }
 
-      if (relationIsUnchanged && isMorphToOneAttribute(attribute) && hasPopulatedRelation(value)) {
+      // Always defer morphToOne: populate can be null even when morph columns are set.
+      if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
         unset(relationPath, data);
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
@@ -301,11 +302,8 @@ export const prepareCloneData = async (
       continue;
     }
 
-    if (
-      relationIsUnchanged &&
-      isMorphToOneAttribute(attribute) &&
-      hasPopulatedRelation(originalData[attributeName])
-    ) {
+    // Always defer morphToOne: populate can be null even when morph columns are set.
+    if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
       delete data[attributeName];
       deferredCopies.push({
         schemaUid: contentType.uid as UID.Schema,
@@ -429,24 +427,34 @@ const copyFkColumnRelation = async (
   sourceEntryId: number,
   targetEntryId: number
 ) => {
-  const attribute = strapi.db.metadata.get(uid).attributes[attributeName];
+  const meta = strapi.db.metadata.get(uid);
+  const attribute = meta.attributes[attributeName];
 
   if (attribute?.type !== 'relation' || !('joinColumn' in attribute) || !attribute.joinColumn) {
     return;
   }
 
   const joinColumnName = attribute.joinColumn.name;
+  const trx = transactionCtx.get();
   const sourceRow = await strapi.db
-    .query(uid)
-    .findOne({ where: { id: sourceEntryId }, select: [joinColumnName] });
+    .connection(meta.tableName)
+    .where({ id: sourceEntryId })
+    .select([joinColumnName])
+    .modify((qb) => {
+      if (trx) {
+        qb.transacting(trx);
+      }
+    })
+    .first();
 
   if (!sourceRow) {
     return;
   }
 
+  // processData only accepts attribute names, not raw join-column names
   await strapi.db.query(uid).update({
     where: { id: targetEntryId },
-    data: { [joinColumnName]: sourceRow[joinColumnName] },
+    data: { [attributeName]: sourceRow[joinColumnName] ?? null },
   });
 };
 
@@ -457,7 +465,8 @@ const copyMorphToOneRelation = async (
   sourceEntryId: number,
   targetEntryId: number
 ) => {
-  const attribute = strapi.db.metadata.get(uid).attributes[attributeName];
+  const meta = strapi.db.metadata.get(uid);
+  const attribute = meta.attributes[attributeName];
 
   if (
     attribute?.type !== 'relation' ||
@@ -467,21 +476,34 @@ const copyMorphToOneRelation = async (
     return;
   }
 
-  const { idColumn, typeColumn } = attribute.morphColumn;
-  const sourceRow = await strapi.db.query(uid).findOne({
-    where: { id: sourceEntryId },
-    select: [idColumn.name, typeColumn.name],
-  });
+  const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
+  const trx = transactionCtx.get();
+  const sourceRow = await strapi.db
+    .connection(meta.tableName)
+    .where({ id: sourceEntryId })
+    .select([idColumn.name, typeColumn.name])
+    .modify((qb) => {
+      if (trx) {
+        qb.transacting(trx);
+      }
+    })
+    .first();
 
   if (!sourceRow) {
     return;
   }
 
+  const morphId = sourceRow[idColumn.name];
+  const morphType = sourceRow[typeColumn.name];
+
+  // processData only accepts the morph attribute ({ id, __type }), not raw column names
   await strapi.db.query(uid).update({
     where: { id: targetEntryId },
     data: {
-      [idColumn.name]: sourceRow[idColumn.name],
-      [typeColumn.name]: sourceRow[typeColumn.name],
+      [attributeName]:
+        morphId != null && morphType != null
+          ? { id: morphId, [typeField]: morphType }
+          : null,
     },
   });
 };
@@ -574,9 +596,10 @@ export const applyPostCloneRelationUpdates = async (
       rootAttribute.joinColumn &&
       !update.dataPath.includes('.')
     ) {
+      // processData only accepts attribute names, not raw join-column names
       await strapi.db.query(rootUid).update({
         where: { id: clonedEntryId },
-        data: { [rootAttribute.joinColumn.name]: null },
+        data: { [attributeName]: null },
       });
       continue;
     }
@@ -596,13 +619,10 @@ export const applyPostCloneRelationUpdates = async (
       rootAttribute.morphColumn &&
       !update.dataPath.includes('.')
     ) {
-      const { idColumn, typeColumn } = rootAttribute.morphColumn;
+      // processData only accepts the morph attribute, not raw column names
       await strapi.db.query(rootUid).update({
         where: { id: clonedEntryId },
-        data: {
-          [idColumn.name]: null,
-          [typeColumn.name]: null,
-        },
+        data: { [attributeName]: null },
       });
       continue;
     }
