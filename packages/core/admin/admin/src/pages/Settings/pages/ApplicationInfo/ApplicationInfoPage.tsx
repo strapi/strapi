@@ -61,6 +61,15 @@ const ApplicationInfoPage = () => {
       enabled: isAiEnabled,
     }
   );
+  const LicenseInfo = useEnterprise(
+    () => null,
+    async () =>
+      (
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo'
+        )
+      ).LicenseInfoEE
+  );
 
   const {
     allowedActions: { canRead, canUpdate },
@@ -109,6 +118,10 @@ const ApplicationInfoPage = () => {
   }
 
   if (!AIUsageData) {
+    return null;
+  }
+
+  if (!LicenseInfo) {
     return null;
   }
 
@@ -228,6 +241,7 @@ const ApplicationInfoPage = () => {
                   <AIUsageData />
                 </Grid.Root>
               </Flex>
+              <LicenseInfo />
               {canRead && (
                 <Box
                   hasRadius

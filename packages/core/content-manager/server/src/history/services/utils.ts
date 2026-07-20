@@ -7,7 +7,7 @@ import type { CreateHistoryVersion } from '../../../../shared/contracts/history-
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 type RelationResponse = {
   results: RelationResult[];

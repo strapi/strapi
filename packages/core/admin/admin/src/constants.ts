@@ -98,6 +98,10 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    'debug-dump': {
+      main: [{ action: 'admin::debug-dump.read', subject: null }],
+      read: [{ action: 'admin::debug-dump.read', subject: null }],
+    },
     plugins: {
       main: [{ action: 'admin::marketplace.read', subject: null }],
       read: [{ action: 'admin::marketplace.read', subject: null }],
@@ -150,15 +154,11 @@ export interface SettingsMenuLink
 export type SettingsMenu = {
   admin: SettingsMenuLink[];
   global: SettingsMenuLink[];
+  applicationInfo: SettingsMenuLink[];
 };
 
 export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
-    {
-      intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
-      to: '/settings/application-infos',
-      id: '000-application-infos',
-    },
     {
       intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
       to: '/settings/webhooks',
@@ -235,5 +235,18 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           },
         ]
       : []),
+  ],
+
+  applicationInfo: [
+    {
+      intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
+      to: '/settings/application-infos',
+      id: '000-application-infos',
+    },
+    {
+      intlLabel: { id: 'Settings.debug-dump.title', defaultMessage: 'Debug & support' },
+      to: '/settings/debug-dump',
+      id: 'debug-dump',
+    },
   ],
 });

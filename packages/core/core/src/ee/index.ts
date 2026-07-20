@@ -9,6 +9,7 @@ import {
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
 } from './license';
+import { createEntitlementsRegistry } from './entitlements';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -130,6 +131,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`
         );
+        result.error = error.message; // record why we fell back so usingCachedLicense is derivable
         return storedInfo.license;
       }
 
@@ -271,6 +273,8 @@ const list = () => {
 
 const get = (featureName: string) => list().find((feature) => feature.name === featureName);
 
+const entitlements = createEntitlementsRegistry();
+
 export default Object.freeze({
   init,
   checkLicense,
@@ -286,6 +290,10 @@ export default Object.freeze({
 
   get type() {
     return ee.licenseInfo.type;
+  },
+
+  get expireAt() {
+    return ee.licenseInfo.expireAt;
   },
 
   get isTrial() {
@@ -304,5 +312,10 @@ export default Object.freeze({
     list,
     get,
     isEnabled: (featureName: string) => get(featureName) !== undefined,
+  }),
+
+  entitlements: Object.freeze({
+    register: entitlements.register,
+    list: entitlements.list,
   }),
 });

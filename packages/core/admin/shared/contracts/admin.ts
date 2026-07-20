@@ -210,11 +210,23 @@ export declare namespace GetLicenseLimitInformation {
       )[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
-      permittedSeats: number;
+      permittedSeats: number | null;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
-      type: string;
+      type: string | null;
       isTrial: boolean;
+      seats: number | null;
+      subscriptionId: string | null;
+      expireAt: string | null;
+      licenseMode: 'online' | 'offline';
+      lastRegistrySyncAt: number | null;
+      nextRegistrySyncAt: number | null;
+      usingCachedLicense: boolean;
+      registrySyncError: string | null;
+      entitlements: Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
     };
     error?: errors.ApplicationError;
   }
@@ -231,6 +243,58 @@ export declare namespace GetGuidedTourMeta {
       isFirstSuperAdminUser: boolean;
       schemas: Record<UID.ContentType, Struct.ContentTypeSchema>;
     };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * /debug-dump - assemble a redacted diagnostic payload for Strapi Support
+ */
+export interface DebugDumpPayload {
+  dumpVersion: 1;
+  generatedAt: string;
+  strapi: {
+    version: string | null;
+    edition: 'EE' | 'CE';
+    projectType: string;
+    environment: string;
+    autoReload: boolean;
+  };
+  license?: {
+    type: string | null | undefined;
+    isTrial: boolean;
+    expireAt: string | null;
+    seats: number | null;
+    subscriptionId: string | null;
+    features: unknown[];
+    entitlements: unknown[];
+  };
+  system: {
+    nodeVersion: string;
+    os: { type: string; platform: string; arch: string; release: string };
+    isHostedOnStrapiCloud: boolean;
+  };
+  database: { client: string; schema?: string; displayName?: string };
+  plugins: string[];
+  providers: { upload: { name: unknown; isPrivate: boolean }; email: { name: unknown } };
+  contentModel: {
+    counts: { contentTypes: number; components: number };
+    contentTypes: unknown[];
+    components: unknown[];
+  };
+  customizations: unknown;
+  config: Record<string, unknown>;
+  packageJson: Record<string, unknown>;
+  env: Record<string, string | undefined>;
+}
+
+export declare namespace DebugDump {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: DebugDumpPayload;
     error?: errors.ApplicationError;
   }
 }

@@ -1,5 +1,6 @@
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
+import type { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
 
 export default {
@@ -55,19 +56,65 @@ export default {
       licenseLimitStatus = 'AT_LIMIT';
     }
 
-    const data = {
+    const eeInformation = await strapi.db
+      .query('strapi::core-store')
+      .findOne({ where: { key: 'ee_information' } })
+      .then((row: { value: string } | null) =>
+        row
+          ? (JSON.parse(row.value) as {
+              license?: string | null;
+              error?: string;
+              lastCheckAt?: number;
+            })
+          : null
+      )
+      .catch(() => null);
+
+    const licenseMode: 'online' | 'offline' =
+      strapi.ee.type === 'gold' && process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true'
+        ? 'offline'
+        : 'online';
+
+    // Registry re-check cron cadence ('0 0 */12 * * *', shifted to the startup time -> every 12h).
+    const REGISTRY_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
+    const lastRegistrySyncAt: number | null = eeInformation?.lastCheckAt ?? null;
+    let nextRegistrySyncAt: number | null = null;
+    if (licenseMode === 'online' && typeof lastRegistrySyncAt === 'number') {
+      // Step forward from the last check-in in 12h increments until we land in the
+      // future, so a stale last check-in never reports a "next check-in" in the past.
+      const now = Date.now();
+      let next = lastRegistrySyncAt + REGISTRY_CHECK_INTERVAL_MS;
+      while (next <= now) {
+        next += REGISTRY_CHECK_INTERVAL_MS;
+      }
+      nextRegistrySyncAt = next;
+    }
+
+    const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
-      permittedSeats,
+      permittedSeats: permittedSeats ?? null,
+      seats: strapi.ee.seats ?? null,
+      subscriptionId: strapi.ee.subscriptionId ?? null,
+      expireAt: strapi.ee.expireAt ?? null,
+      licenseMode,
+      lastRegistrySyncAt,
+      nextRegistrySyncAt,
+      usingCachedLicense: Boolean(eeInformation?.error && eeInformation?.license),
+      registrySyncError: eeInformation?.error ?? null,
       shouldNotify,
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type,
+      type: strapi.ee.type ?? null,
       isTrial: strapi.ee.isTrial,
-      features: strapi.ee.features.list() ?? [],
+      // `features.list()` is loosely typed at the source (`{ name: string; [k]: any }[]`);
+      // narrow it to the contract's named-feature union so consumers (e.g. useLicenseLimits) keep their types.
+      features: (strapi.ee.features.list() ??
+        []) as GetLicenseLimitInformation.Response['data']['features'],
+      entitlements: strapi.ee.entitlements.list(),
     };
 
-    return { data };
+    return { data } satisfies GetLicenseLimitInformation.Response;
   },
 };
