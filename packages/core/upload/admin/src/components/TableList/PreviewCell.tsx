@@ -66,7 +66,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
-  const { alternativeText, ext, formats, mime, name, url } = content;
+  const { alternativeText, ext, formats, isLocal, isUrlSigned, mime, name, url } = content;
 
   const fileExtension = getFileExtension(ext);
 
@@ -78,6 +78,10 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
       <Avatar.Item
         src={mediaURL}
         alt={alternativeText || undefined}
+        // Only signed remote URLs need crossOrigin (cache collision with the
+        // preview). Public/unsigned remote thumbnails must render without a
+        // bucket CORS rule. See #26581.
+        crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
         preview
         fallback={alternativeText}
       />

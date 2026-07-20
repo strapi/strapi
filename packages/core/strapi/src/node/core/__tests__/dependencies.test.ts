@@ -151,11 +151,11 @@ describe('admin peer dependency checks', () => {
       );
     });
 
-    it('uses npm with legacy peer deps when npm is the package manager', () => {
+    it('uses npm without legacy peer deps when npm is the package manager', () => {
       getPackageManagerMock.mockReturnValue('npm');
 
       expect(getInstallCommandHint([{ name: 'react', wantedVersion: '^18.0.0' }])).toBe(
-        'npm install --legacy-peer-deps --save react@^18.0.0'
+        'npm install --save react@^18.0.0'
       );
     });
   });
@@ -169,22 +169,23 @@ describe('admin peer dependency checks', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Please install them manually before re-running this command:',
         expect.any(String),
-        '  npm install --legacy-peer-deps --save react@^18.0.0'
+        '  npm install --save react@^18.0.0'
       );
     });
   });
 
   describe('installAdminPeerDeps', () => {
-    it('runs npm install with legacy peer deps', async () => {
+    it('runs npm install without legacy peer deps', async () => {
       const logger = createLogger();
 
       await installAdminPeerDeps([{ name: 'react', wantedVersion: '^18.0.0' }], { cwd, logger });
 
       expect(execaMock).toHaveBeenCalledWith(
         'npm',
-        ['install', '--legacy-peer-deps', '--save', 'react@^18.0.0'],
+        ['install', '--save', 'react@^18.0.0'],
         expect.objectContaining({ cwd })
       );
+      expect(execaMock.mock.calls[0][1]).not.toContain('--legacy-peer-deps');
     });
   });
 
@@ -277,9 +278,10 @@ describe('admin peer dependency checks', () => {
         );
         expect(execaMock).toHaveBeenCalledWith(
           'npm',
-          expect.arrayContaining(['install', '--legacy-peer-deps', '--save', 'react@^18.0.0']),
+          expect.arrayContaining(['install', '--save', 'react@^18.0.0']),
           expect.objectContaining({ cwd })
         );
+        expect(execaMock.mock.calls[0][1]).not.toContain('--legacy-peer-deps');
         expect(execaMock).toHaveBeenCalledWith(
           'node',
           ['/path/to/strapi', 'build'],
