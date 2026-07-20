@@ -1,5 +1,5 @@
 import { dirname, join } from 'node:path';
-import * as tsUtils from '@strapi/typescript-utils';
+import { isUsingTypeScriptSync } from '@strapi/typescript-utils';
 import type { NodePlopAPI } from 'plop';
 
 type GetGeneratorLanguageOptions = {
@@ -22,10 +22,10 @@ const getGeneratorLanguage = (
     const resolvedFilePath = filePath.replace('{{ plugin }}', plugin);
     const pluginServerDir = join(plop.getDestBasePath(), resolvedFilePath, '..');
 
-    return tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
+    return isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
   }
 
-  return tsUtils.isUsingTypeScriptSync(dirname(plop.getDestBasePath())) ? 'ts' : 'js';
+  return isUsingTypeScriptSync(dirname(plop.getDestBasePath())) ? 'ts' : 'js';
 };
 
 export default getGeneratorLanguage;
