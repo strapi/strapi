@@ -99,103 +99,103 @@ export const ContentTypeBuilderNav = () => {
     <SubNav.Main aria-label={pluginName}>
       <SubNav.Header label={pluginName} />
       <Divider background="neutral150" />
-      <SubNav.Content>
-        <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
-          <tours.contentTypeBuilder.Save>
-            <Flex gap={2}>
-              <Button
-                flex={1}
-                onClick={(e) => {
-                  e.preventDefault();
-                  saveSchema();
-                }}
-                type="submit"
-                disabled={!isModified || !isInDevelopmentMode}
-                fullWidth
+      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+        <tours.contentTypeBuilder.Save>
+          <Flex gap={2}>
+            <Button
+              flex={1}
+              onClick={(e) => {
+                e.preventDefault();
+                saveSchema();
+              }}
+              type="submit"
+              disabled={!isModified || !isInDevelopmentMode}
+              fullWidth
+              size="S"
+            >
+              {formatMessage({
+                id: 'global.save',
+                defaultMessage: 'Save',
+              })}
+            </Button>
+            <Menu.Root open={menuIsOpen} onOpenChange={setMenuIsOpen}>
+              <Menu.Trigger
                 size="S"
+                endIcon={null}
+                paddingTop="4px"
+                paddingLeft="7px"
+                paddingRight="7px"
+                variant="tertiary"
               >
-                {formatMessage({
-                  id: 'global.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
-              <Menu.Root open={menuIsOpen} onOpenChange={setMenuIsOpen}>
-                <Menu.Trigger
-                  size="S"
-                  endIcon={null}
-                  paddingTop="4px"
-                  paddingLeft="7px"
-                  paddingRight="7px"
-                  variant="tertiary"
+                <More fill="neutral500" aria-hidden focusable={false} />
+                <VisuallyHidden tag="span">
+                  {formatMessage({
+                    id: 'global.more.actions',
+                    defaultMessage: 'More actions',
+                  })}
+                </VisuallyHidden>
+              </Menu.Trigger>
+              <Menu.Content zIndex={1}>
+                <Menu.Item
+                  disabled={!history.canUndo || !isInDevelopmentMode}
+                  onSelect={undoHandler}
+                  startIcon={<ArrowCounterClockwise />}
                 >
-                  <More fill="neutral500" aria-hidden focusable={false} />
-                  <VisuallyHidden tag="span">
-                    {formatMessage({
-                      id: 'global.more.actions',
-                      defaultMessage: 'More actions',
-                    })}
-                  </VisuallyHidden>
-                </Menu.Trigger>
-                <Menu.Content zIndex={1}>
-                  <Menu.Item
-                    disabled={!history.canUndo || !isInDevelopmentMode}
-                    onSelect={undoHandler}
-                    startIcon={<ArrowCounterClockwise />}
-                  >
-                    {formatMessage({
-                      id: 'global.last-change.undo',
-                      defaultMessage: 'Undo last change',
-                    })}
-                  </Menu.Item>
-                  <Menu.Item
-                    disabled={!history.canRedo || !isInDevelopmentMode}
-                    onSelect={redoHandler}
-                    startIcon={<ArrowClockwise />}
-                  >
-                    {formatMessage({
-                      id: 'global.last-change.redo',
-                      defaultMessage: 'Redo last change',
-                    })}
-                  </Menu.Item>
-                  <Menu.Separator />
-                  <DiscardAllMenuItem
-                    disabled={!history.canDiscardAll || !isInDevelopmentMode}
-                    onSelect={discardHandler}
-                  >
-                    <Flex gap={2}>
-                      <Cross />
-                      <Typography>
-                        {formatMessage({
-                          id: 'global.last-changes.discard',
-                          defaultMessage: 'Discard last changes',
-                        })}
-                      </Typography>
-                    </Flex>
-                  </DiscardAllMenuItem>
-                </Menu.Content>
-              </Menu.Root>
-            </Flex>
-          </tours.contentTypeBuilder.Save>
+                  {formatMessage({
+                    id: 'global.last-change.undo',
+                    defaultMessage: 'Undo last change',
+                  })}
+                </Menu.Item>
+                <Menu.Item
+                  disabled={!history.canRedo || !isInDevelopmentMode}
+                  onSelect={redoHandler}
+                  startIcon={<ArrowClockwise />}
+                >
+                  {formatMessage({
+                    id: 'global.last-change.redo',
+                    defaultMessage: 'Redo last change',
+                  })}
+                </Menu.Item>
+                <Menu.Separator />
+                <DiscardAllMenuItem
+                  disabled={!history.canDiscardAll || !isInDevelopmentMode}
+                  onSelect={discardHandler}
+                >
+                  <Flex gap={2}>
+                    <Cross />
+                    <Typography>
+                      {formatMessage({
+                        id: 'global.last-changes.discard',
+                        defaultMessage: 'Discard last changes',
+                      })}
+                    </Typography>
+                  </Flex>
+                </DiscardAllMenuItem>
+              </Menu.Content>
+            </Menu.Root>
+          </Flex>
+        </tours.contentTypeBuilder.Save>
 
-          <Searchbar
-            value={search.value}
-            onChange={(e) => search.onChange(e.target.value)}
-            onClear={() => search.onChange('')}
-            placeholder={formatMessage({
-              id: getTrad('search.placeholder'),
-              defaultMessage: 'Search',
-            })}
-            size="S"
-            // eslint-disable-next-line react/no-children-prop
-            children={undefined}
-            name={'search_contentType'}
-            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-            aria-label={formatMessage({
-              id: getTrad('search.placeholder'),
-              defaultMessage: 'Search',
-            })}
-          />
-        </Flex>
+        <Searchbar
+          value={search.value}
+          onChange={(e) => search.onChange(e.target.value)}
+          onClear={() => search.onChange('')}
+          placeholder={formatMessage({
+            id: getTrad('search.placeholder'),
+            defaultMessage: 'Search',
+          })}
+          size="S"
+          // eslint-disable-next-line react/no-children-prop
+          children={undefined}
+          name={'search_contentType'}
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          aria-label={formatMessage({
+            id: getTrad('search.placeholder'),
+            defaultMessage: 'Search',
+          })}
+        />
+      </Flex>
+      <SubNav.Content>
         <SubNav.Sections>
           {menu.map((section) => (
             <Fragment key={section.name}>

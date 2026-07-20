@@ -42,6 +42,21 @@ describe('create-strapi-app', () => {
       expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'tsconfig.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'config', 'database.ts'))).toBe(true);
+
+      const apiConfig = fs.readFileSync(path.join(projectDir, 'config', 'api.ts'), 'utf8');
+      expect(apiConfig).toContain('strictParams: true');
+
+      const serverConfig = fs.readFileSync(path.join(projectDir, 'config', 'server.ts'), 'utf8');
+      expect(serverConfig).toContain('populateRelations: env.bool(');
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.ts'), 'utf8');
+      expect(pluginsConfig).toContain("jwtManagement: 'refresh'");
+      expect(pluginsConfig).toContain('httpOnly: true');
+      expect(pluginsConfig).toContain('allowedTypes:');
+      expect(pluginsConfig).toContain('application/x-executable');
+
+      const envFile = fs.readFileSync(path.join(projectDir, '.env'), 'utf8');
+      expect(envFile).toMatch(/^JWT_SECRET=.+/m);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -108,7 +123,7 @@ describe('create-strapi-app', () => {
     }
   });
 
-  it('does not write a Yarn config for npm projects', async () => {
+  it('does not write a Yarn config or .npmrc for npm projects', async () => {
     const projectDir = mkProjectDir();
     try {
       await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
@@ -116,6 +131,16 @@ describe('create-strapi-app', () => {
         .end();
 
       expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+      // npm install must use default peer resolution so the lockfile works with
+      // plain `npm ci` (#27019) — do not force legacy-peer-deps via .npmrc
+      expect(fs.existsSync(path.join(projectDir, '.npmrc'))).toBe(false);
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      // Align with @strapi/* peer ranges so strict npm peer resolution succeeds
+      expect(pkg.dependencies['react-router-dom']).toBe('^6.30.3');
+      expect(pkg.dependencies.react).toBe('^18.0.0');
+      expect(pkg.dependencies['react-dom']).toBe('^18.0.0');
+      expect(pkg.dependencies['styled-components']).toBe('^6.0.0');
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }

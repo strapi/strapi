@@ -15,6 +15,7 @@ export interface AuthSessions {
 }
 
 export interface AuthCookie {
+  name?: string;
   secure?: boolean;
   domain?: string;
   path?: string;
@@ -64,6 +65,11 @@ export interface ForgotPassword {
   emailTemplate?: string;
   from?: string;
   replyTo?: string;
+  /**
+   * Lifetime of the reset-password token. Accepts a number of seconds or a
+   * shorthand string such as `'15m'` / `'1h'`. Defaults to `'1h'`.
+   */
+  expiresIn?: string | number;
 }
 
 export interface RateLimit {

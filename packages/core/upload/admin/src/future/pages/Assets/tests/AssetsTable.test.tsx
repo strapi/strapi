@@ -15,6 +15,26 @@ jest.mock('../hooks/useFolderNavigation', () => ({
   }),
 }));
 
+jest.mock('../components/Dnd/useAssetDnd', () => ({
+  useFileDraggable: () => ({
+    attributes: {},
+    listeners: {},
+    setNodeRef: jest.fn(),
+    isDragging: false,
+  }),
+  useFolderDraggableDroppable: () => ({
+    draggable: {
+      attributes: {},
+      listeners: {},
+      setNodeRef: jest.fn(),
+      isDragging: false,
+    },
+    droppable: { setNodeRef: jest.fn() },
+    showValidDropHighlight: false,
+    showInvalidDropCursor: false,
+  }),
+}));
+
 const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.png'): File => ({
   id,
   name,
@@ -189,9 +209,9 @@ describe('AssetsTable', () => {
       expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
     });
 
-    it('shows empty state when no folders and no assets', () => {
+    it('renders nothing when no folders and no assets (empty state is owned by the page)', () => {
       setup({ folders: [], assets: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
+      expect(screen.queryByRole('grid')).not.toBeInTheDocument();
     });
 
     it('renders only folder rows when there are no assets', () => {
@@ -199,7 +219,6 @@ describe('AssetsTable', () => {
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
-      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
     });
   });
 });

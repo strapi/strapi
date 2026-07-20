@@ -15,7 +15,7 @@ const MockEditable = ({ onKeyDown }: { onKeyDown: React.KeyboardEventHandler }) 
 
 jest.mock('slate-react', () => ({
   ...jest.requireActual('slate-react'),
-  Editable: (props: any) => <MockEditable {...props} />,
+  Editable: (props: React.ComponentProps<typeof MockEditable>) => <MockEditable {...props} />,
 }));
 
 // `useStrapiApp` is mocked so the blocks store is always available synchronously on the
@@ -38,7 +38,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 // Test Helper
-const renderBlocksInput = (initialValues: any) => {
+const renderBlocksInput = (initialValues: Record<string, unknown>) => {
   return render(
     <BlocksInput
       label="blocks type"

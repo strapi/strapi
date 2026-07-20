@@ -158,18 +158,23 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
+  }
+}
+
+class InvalidPopulateError extends ValidationError {
+  constructor() {
+    super('Invalid populate parameter. Expected a string, an array of strings, a populate object');
   }
 }
 
@@ -232,7 +237,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isString(trimmed)) {
-      throw new Error('Invalid sort query');
+      throw new ValidationError('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
@@ -240,7 +245,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const field = rawField.trim();
 
     if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+      throw new ValidationError('Field cannot be empty');
     }
 
     validateOrder(order.trim());
@@ -270,7 +275,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           transformedSort[field] = trimmedOrder;
         }
       } else {
-        throw Error(`Invalid sort type expected object or string got ${typeof order}`);
+        throw new ValidationError(
+          `Invalid sort type expected object or string got ${typeof order}`
+        );
       }
     }
 
@@ -363,14 +370,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       );
     }
   };
-
-  class InvalidPopulateError extends Error {
-    constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
-    }
-  }
 
   // NOTE: we could support foo.* or foo.bar.* etc later on
   const convertPopulateQueryParams = (
@@ -469,7 +468,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
-        if ('populate' in subPopulate && subPopulate.populate !== '*') {
+        if (
+          'populate' in subPopulate &&
+          !isNil(subPopulate.populate) &&
+          subPopulate.populate !== '*'
+        ) {
           throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
@@ -481,7 +484,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         const newSubPopulate = {};
 
         // case: { populate: '*' }
-        if ('populate' in subPopulate) {
+        if ('populate' in subPopulate && subPopulate.populate === '*') {
           Object.assign(newSubPopulate, { populate: true });
         }
 
@@ -767,15 +770,26 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
-      params;
+    const {
+      _q: searchQuery,
+      sort,
+      filters,
+      fields,
+      populate,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+      ...rest
+    } = params;
 
     if (!isNil(status)) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(_q)) {
-      query._q = _q;
+    if (!isNil(searchQuery)) {
+      query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);

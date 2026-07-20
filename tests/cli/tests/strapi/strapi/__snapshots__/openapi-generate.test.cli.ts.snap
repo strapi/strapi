@@ -742,6 +742,136 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
         "type": "object",
       },
+      "ApiRelationLabRelationLabDocument": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "id": "ApiRelationLabRelationLabDocument",
+        "properties": {
+          "createdAt": {
+            "description": "A datetime field",
+            "type": "string",
+          },
+          "documentId": {
+            "description": "The document ID, represented by a UUID",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+            "type": "string",
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "number",
+              },
+            ],
+          },
+          "manyToMany": {
+            "description": "A relational field",
+            "items": {
+              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+            },
+            "type": "array",
+          },
+          "manyToManyBi": {
+            "description": "A relational field",
+            "items": {
+              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+            },
+            "type": "array",
+          },
+          "manyToOne": {
+            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+            "description": "A relational field",
+          },
+          "oneToMany": {
+            "description": "A relational field",
+            "items": {
+              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+            },
+            "type": "array",
+          },
+          "oneToOne": {
+            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+            "description": "A relational field",
+          },
+          "publishedAt": {
+            "default": "<generated-at-runtime>",
+            "description": "A datetime field",
+            "type": "string",
+          },
+          "title": {
+            "description": "A string field",
+            "type": "string",
+          },
+          "updatedAt": {
+            "description": "A datetime field",
+            "type": "string",
+          },
+        },
+        "required": [
+          "documentId",
+          "id",
+          "title",
+          "publishedAt",
+        ],
+        "type": "object",
+      },
+      "ApiRelationTargetRelationTargetDocument": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "id": "ApiRelationTargetRelationTargetDocument",
+        "properties": {
+          "createdAt": {
+            "description": "A datetime field",
+            "type": "string",
+          },
+          "documentId": {
+            "description": "The document ID, represented by a UUID",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+            "type": "string",
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "number",
+              },
+            ],
+          },
+          "name": {
+            "description": "A string field",
+            "type": "string",
+          },
+          "publishedAt": {
+            "default": "<generated-at-runtime>",
+            "description": "A datetime field",
+            "type": "string",
+          },
+          "relationLabs": {
+            "description": "A relational field",
+            "items": {
+              "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+            },
+            "type": "array",
+          },
+          "updatedAt": {
+            "description": "A datetime field",
+            "type": "string",
+          },
+        },
+        "required": [
+          "documentId",
+          "id",
+          "name",
+          "publishedAt",
+        ],
+        "type": "object",
+      },
       "ApiShopShopDocument": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "additionalProperties": false,
@@ -1564,6 +1694,14 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         "type": "object",
       },
     },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token for authentication",
+        "scheme": "bearer",
+        "type": "http",
+      },
+    },
   },
   "info": {
     "description": "API documentation for test-app-0 v0.1.0",
@@ -1601,6 +1739,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -1622,6 +1761,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -1636,73 +1776,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -2411,6 +2537,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -2432,6 +2559,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -2698,6 +2826,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -2719,6 +2848,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -4549,6 +4679,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -4567,6 +4698,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -4581,73 +4713,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -5252,6 +5370,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -5270,6 +5389,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -5498,6 +5618,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -5516,6 +5637,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -6040,6 +6162,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -6059,6 +6182,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -6073,73 +6197,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -6673,6 +6783,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -6692,6 +6803,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -6882,6 +6994,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -6901,6 +7014,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -7373,6 +7487,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -7412,6 +7527,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -7426,73 +7542,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -8629,6 +8731,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -8668,6 +8771,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -9033,6 +9137,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -9072,6 +9177,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -10069,6 +10175,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -10088,6 +10195,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -10102,73 +10210,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -10838,6 +10932,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -10857,6 +10952,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -11102,6 +11198,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -11121,6 +11218,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -13540,6 +13638,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -13561,6 +13660,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -13575,73 +13675,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -14243,6 +14329,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -14264,6 +14351,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -14472,6 +14560,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -14493,6 +14582,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -15375,6 +15465,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -15395,6 +15486,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -15990,6 +16082,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -16014,6 +16107,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -16028,73 +16122,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -16972,6 +17052,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -16996,6 +17077,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -17314,6 +17396,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -17338,6 +17421,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -18086,6 +18170,3120 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/relation-labs": {
+      "get": {
+        "operationId": "relation-lab/get/relation_labs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "_q",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[withCount]",
+            "required": false,
+            "schema": {
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "enum": [
+                    "title",
+                    "createdAt",
+                    "updatedAt",
+                    "publishedAt",
+                  ],
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "title",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {
+                    "enum": [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "propertyNames": {
+                    "enum": [
+                      "title",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                {
+                  "items": {
+                    "additionalProperties": {
+                      "enum": [
+                        "asc",
+                        "desc",
+                      ],
+                      "type": "string",
+                    },
+                    "propertyNames": {
+                      "enum": [
+                        "title",
+                        "createdAt",
+                        "updatedAt",
+                        "publishedAt",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Sort the result",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "manyToOne",
+                    "oneToOne",
+                    "oneToMany",
+                    "manyToMany",
+                    "manyToManyBi",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "manyToOne",
+                      "oneToOne",
+                      "oneToMany",
+                      "manyToMany",
+                      "manyToManyBi",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "createdAt": {
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                          "documentId": {
+                            "description": "The document ID, represented by a UUID",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                            "type": "string",
+                          },
+                          "id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "number",
+                              },
+                            ],
+                          },
+                          "manyToMany": {
+                            "description": "A relational field",
+                            "items": {
+                              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                            },
+                            "type": "array",
+                          },
+                          "manyToManyBi": {
+                            "description": "A relational field",
+                            "items": {
+                              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                            },
+                            "type": "array",
+                          },
+                          "manyToOne": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                            "description": "A relational field",
+                          },
+                          "oneToMany": {
+                            "description": "A relational field",
+                            "items": {
+                              "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                            },
+                            "type": "array",
+                          },
+                          "oneToOne": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                            "description": "A relational field",
+                          },
+                          "publishedAt": {
+                            "default": "<generated-at-runtime>",
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                          "title": {
+                            "description": "A string field",
+                            "type": "string",
+                          },
+                          "updatedAt": {
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "documentId",
+                          "id",
+                          "title",
+                          "publishedAt",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-lab",
+        ],
+      },
+      "post": {
+        "operationId": "relation-lab/post/relation_labs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "manyToOne",
+                    "oneToOne",
+                    "oneToMany",
+                    "manyToMany",
+                    "manyToManyBi",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "manyToOne",
+                      "oneToOne",
+                      "oneToMany",
+                      "manyToMany",
+                      "manyToManyBi",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "manyToMany": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "manyToManyBi": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "manyToOne": {
+                        "description": "A relational field",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                        "type": "string",
+                      },
+                      "oneToMany": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "oneToOne": {
+                        "description": "A relational field",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                        "type": "string",
+                      },
+                      "publishedAt": {
+                        "default": "<generated-at-runtime>",
+                        "description": "A datetime field",
+                        "type": "string",
+                      },
+                      "title": {
+                        "description": "A string field",
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "title",
+                      "publishedAt",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "data",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "manyToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToManyBi": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "oneToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "oneToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "title": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "title",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-lab",
+        ],
+      },
+    },
+    "/relation-labs/{id}": {
+      "delete": {
+        "operationId": "relation-lab/delete/relation_labs_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "manyToOne",
+                    "oneToOne",
+                    "oneToMany",
+                    "manyToMany",
+                    "manyToManyBi",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "manyToOne",
+                      "oneToOne",
+                      "oneToMany",
+                      "manyToMany",
+                      "manyToManyBi",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "manyToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToManyBi": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "oneToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "oneToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "title": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "title",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-lab",
+        ],
+      },
+      "get": {
+        "operationId": "relation-lab/get/relation_labs_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "manyToOne",
+                    "oneToOne",
+                    "oneToMany",
+                    "manyToMany",
+                    "manyToManyBi",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "manyToOne",
+                      "oneToOne",
+                      "oneToMany",
+                      "manyToMany",
+                      "manyToManyBi",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "enum": [
+                    "title",
+                    "createdAt",
+                    "updatedAt",
+                    "publishedAt",
+                  ],
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "title",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {
+                    "enum": [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "propertyNames": {
+                    "enum": [
+                      "title",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                {
+                  "items": {
+                    "additionalProperties": {
+                      "enum": [
+                        "asc",
+                        "desc",
+                      ],
+                      "type": "string",
+                    },
+                    "propertyNames": {
+                      "enum": [
+                        "title",
+                        "createdAt",
+                        "updatedAt",
+                        "publishedAt",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Sort the result",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "manyToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToManyBi": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "oneToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "oneToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "title": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "title",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-lab",
+        ],
+      },
+      "put": {
+        "operationId": "relation-lab/put/relation_labs_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "title",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "manyToOne",
+                    "oneToOne",
+                    "oneToMany",
+                    "manyToMany",
+                    "manyToManyBi",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "manyToOne",
+                      "oneToOne",
+                      "oneToMany",
+                      "manyToMany",
+                      "manyToManyBi",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "manyToMany": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "manyToManyBi": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "manyToOne": {
+                        "description": "A relational field",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                        "type": "string",
+                      },
+                      "oneToMany": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "oneToOne": {
+                        "description": "A relational field",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                        "type": "string",
+                      },
+                      "publishedAt": {
+                        "default": "<generated-at-runtime>",
+                        "description": "A datetime field",
+                        "type": "string",
+                      },
+                      "title": {
+                        "description": "A string field",
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "data",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "manyToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToManyBi": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "manyToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "oneToMany": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          },
+                          "type": "array",
+                        },
+                        "oneToOne": {
+                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
+                          "description": "A relational field",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "title": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "title",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-lab",
+        ],
+      },
+    },
+    "/relation-targets": {
+      "get": {
+        "operationId": "relation-target/get/relation_targets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "_q",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[withCount]",
+            "required": false,
+            "schema": {
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "enum": [
+                    "name",
+                    "createdAt",
+                    "updatedAt",
+                    "publishedAt",
+                  ],
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "name",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {
+                    "enum": [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "propertyNames": {
+                    "enum": [
+                      "name",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                {
+                  "items": {
+                    "additionalProperties": {
+                      "enum": [
+                        "asc",
+                        "desc",
+                      ],
+                      "type": "string",
+                    },
+                    "propertyNames": {
+                      "enum": [
+                        "name",
+                        "createdAt",
+                        "updatedAt",
+                        "publishedAt",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Sort the result",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "relationLabs",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "relationLabs",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "createdAt": {
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                          "documentId": {
+                            "description": "The document ID, represented by a UUID",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                            "type": "string",
+                          },
+                          "id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "number",
+                              },
+                            ],
+                          },
+                          "name": {
+                            "description": "A string field",
+                            "type": "string",
+                          },
+                          "publishedAt": {
+                            "default": "<generated-at-runtime>",
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                          "relationLabs": {
+                            "description": "A relational field",
+                            "items": {
+                              "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+                            },
+                            "type": "array",
+                          },
+                          "updatedAt": {
+                            "description": "A datetime field",
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "documentId",
+                          "id",
+                          "name",
+                          "publishedAt",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-target",
+        ],
+      },
+      "post": {
+        "operationId": "relation-target/post/relation_targets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "relationLabs",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "relationLabs",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "description": "A string field",
+                        "type": "string",
+                      },
+                      "publishedAt": {
+                        "default": "<generated-at-runtime>",
+                        "description": "A datetime field",
+                        "type": "string",
+                      },
+                      "relationLabs": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "publishedAt",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "data",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "name": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "relationLabs": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+                          },
+                          "type": "array",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "name",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-target",
+        ],
+      },
+    },
+    "/relation-targets/{id}": {
+      "delete": {
+        "operationId": "relation-target/delete/relation_targets_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "relationLabs",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "relationLabs",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "name": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "relationLabs": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+                          },
+                          "type": "array",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "name",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-target",
+        ],
+      },
+      "get": {
+        "operationId": "relation-target/get/relation_targets_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "relationLabs",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "relationLabs",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Filters to apply to the query",
+              "propertyNames": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "style": "deepObject",
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "enum": [
+                    "name",
+                    "createdAt",
+                    "updatedAt",
+                    "publishedAt",
+                  ],
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "name",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {
+                    "enum": [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "propertyNames": {
+                    "enum": [
+                      "name",
+                      "createdAt",
+                      "updatedAt",
+                      "publishedAt",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                {
+                  "items": {
+                    "additionalProperties": {
+                      "enum": [
+                        "asc",
+                        "desc",
+                      ],
+                      "type": "string",
+                    },
+                    "propertyNames": {
+                      "enum": [
+                        "name",
+                        "createdAt",
+                        "updatedAt",
+                        "publishedAt",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Sort the result",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "name": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "relationLabs": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+                          },
+                          "type": "array",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "name",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-target",
+        ],
+      },
+      "put": {
+        "operationId": "relation-target/put/relation_targets_by_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The document ID, represented by a UUID",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The fields to return, this doesn't include populatable fields like relations, components, files, or dynamic zones",
+              "items": {
+                "enum": [
+                  "name",
+                  "createdAt",
+                  "updatedAt",
+                  "publishedAt",
+                ],
+                "type": "string",
+              },
+              "readOnly": true,
+              "type": "array",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "description": "Populate all the first level relations, components, files, and dynamic zones for the entry",
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a single relation, component, file, or dynamic zone",
+                  "enum": [
+                    "relationLabs",
+                  ],
+                  "readOnly": true,
+                  "type": "string",
+                },
+                {
+                  "description": "Populate a selection of multiple relations, components, files, or dynamic zones",
+                  "items": {
+                    "enum": [
+                      "relationLabs",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Fetch documents based on their status. Default to "published" if not specified.",
+              "enum": [
+                "draft",
+                "published",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "publicationFilter",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)",
+              "enum": [
+                "never-published",
+                "has-published-version",
+                "modified",
+                "unmodified",
+                "never-published-document",
+                "has-published-version-document",
+                "published-without-draft",
+                "published-with-draft",
+              ],
+              "type": "string",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "hasPublishedVersion",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "boolean",
+                },
+                {
+                  "enum": [
+                    "true",
+                    "false",
+                  ],
+                  "type": "string",
+                },
+              ],
+              "description": "[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "description": "A string field",
+                        "type": "string",
+                      },
+                      "publishedAt": {
+                        "default": "<generated-at-runtime>",
+                        "description": "A datetime field",
+                        "type": "string",
+                      },
+                      "relationLabs": {
+                        "description": "A relational field",
+                        "items": {
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "data",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "createdAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "documentId": {
+                          "description": "The document ID, represented by a UUID",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                          "type": "string",
+                        },
+                        "id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "number",
+                            },
+                          ],
+                        },
+                        "name": {
+                          "description": "A string field",
+                          "type": "string",
+                        },
+                        "publishedAt": {
+                          "default": "<generated-at-runtime>",
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                        "relationLabs": {
+                          "description": "A relational field",
+                          "items": {
+                            "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
+                          },
+                          "type": "array",
+                        },
+                        "updatedAt": {
+                          "description": "A datetime field",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "documentId",
+                        "id",
+                        "name",
+                        "publishedAt",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "relation-target",
+        ],
+      },
+    },
     "/shop": {
       "delete": {
         "operationId": "shop/delete/shop",
@@ -18391,6 +21589,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -18410,6 +21609,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -19098,6 +22298,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -19117,6 +22318,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -19637,6 +22839,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -19655,6 +22858,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -20132,6 +23336,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -20150,6 +23355,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -20433,6 +23639,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -20453,6 +23660,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -20467,73 +23675,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -21178,6 +24372,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -21198,6 +24393,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -21444,6 +24640,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -21464,6 +24661,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -22034,6 +25232,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -22057,6 +25256,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -22071,73 +25271,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -22884,6 +26070,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -22907,6 +26094,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -23185,6 +26373,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -23208,6 +26397,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -24105,6 +27295,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -24125,6 +27316,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -24949,77 +28141,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -25032,6 +28211,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -25306,77 +28486,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -25389,6 +28556,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -26142,77 +29310,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -26225,6 +29380,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -27170,6 +30326,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         "operationId": "users-permissions/get/users_count",
         "parameters": [
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -27182,6 +30339,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -27948,6 +31106,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
       },
     },
   },
+  "security": [
+    {
+      "bearerAuth": [],
+    },
+  ],
+  "servers": [
+    {
+      "description": "Default server",
+      "url": "",
+    },
+  ],
   "x-powered-by": "strapi",
   "x-strapi-version": "<current-strapi-version>",
 }

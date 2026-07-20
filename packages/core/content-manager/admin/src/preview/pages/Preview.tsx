@@ -152,7 +152,7 @@ const PreviewPage = () => {
     collectionType: string;
   }>();
   const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
+    plugins?: { i18n?: { locale?: string } };
     status?: string;
   }>();
 
@@ -203,6 +203,8 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
+    // Preserve the existing dependency behavior: previewHighlightColors is derived from theme.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId, toggleNotification, theme, formatMessage]);
 
   if (!collectionType) {
@@ -224,7 +226,7 @@ const PreviewPage = () => {
     },
     query: {
       documentId,
-      locale: params.locale,
+      locale: params.locale as GetPreviewUrl.Request['query']['locale'],
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
