@@ -328,6 +328,54 @@ describe('collectAdminOptimizeDepsExclude', () => {
       'strapi-design-extended',
     ]);
   });
+
+  it('does not exclude design-system transitive UI libs reachable only via @strapi/strapi', async () => {
+    const motionLike = preBuiltReactPeerPackage('motion');
+
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          '@strapi/strapi': '5.50.2',
+        },
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@strapi/strapi') {
+        return {
+          dependencies: {
+            '@strapi/admin': '5.50.2',
+          },
+        };
+      }
+
+      if (name === '@strapi/admin') {
+        return {
+          dependencies: {
+            '@strapi/design-system': '2.2.0',
+            motion: '^12.0.0',
+          },
+        };
+      }
+
+      if (name === '@strapi/design-system') {
+        return {
+          dependencies: {
+            motion: '^12.0.0',
+            'react-dnd': '^16.0.0',
+          },
+        };
+      }
+
+      if (name === 'motion' || name === 'react-dnd') {
+        return motionLike;
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+  });
 });
 
 describe('collectCandidateDependencyNames', () => {
@@ -357,5 +405,63 @@ describe('collectCandidateDependencyNames', () => {
     await expect(collectCandidateDependencyNames('/app', ['root'])).resolves.toEqual(
       new Set(['root', 'mid', 'leaf'])
     );
+  });
+
+  it('does not expand official @strapi packages into the install graph', async () => {
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@strapi/strapi') {
+        return {
+          dependencies: {
+            '@strapi/admin': '5.50.2',
+            knex: '3.0.0',
+          },
+        };
+      }
+
+      if (name === '@strapi/admin' || name === 'knex') {
+        return { name };
+      }
+
+      return null;
+    });
+
+    await expect(collectCandidateDependencyNames('/app', ['@strapi/strapi'])).resolves.toEqual(
+      new Set(['@strapi/strapi'])
+    );
+    expect(getModuleMock).toHaveBeenCalledWith('@strapi/strapi', '/app');
+    expect(getModuleMock).not.toHaveBeenCalledWith('@strapi/admin', '/app');
+    expect(getModuleMock).not.toHaveBeenCalledWith('knex', '/app');
+  });
+
+  it('follows runtime dependencies only when expanding transitive packages', async () => {
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === 'plugin-ui-kit') {
+        return {
+          dependencies: {
+            'strapi-design-extended': '^0.0.13',
+          },
+          devDependencies: {
+            '@strapi/strapi': '5.50.2',
+            jest: '29.0.0',
+          },
+        };
+      }
+
+      if (name === 'strapi-design-extended') {
+        return { name: 'strapi-design-extended' };
+      }
+
+      if (name === '@strapi/strapi' || name === 'jest') {
+        return { name };
+      }
+
+      return null;
+    });
+
+    await expect(collectCandidateDependencyNames('/app', ['plugin-ui-kit'])).resolves.toEqual(
+      new Set(['plugin-ui-kit', 'strapi-design-extended'])
+    );
+    expect(getModuleMock).not.toHaveBeenCalledWith('@strapi/strapi', '/app');
+    expect(getModuleMock).not.toHaveBeenCalledWith('jest', '/app');
   });
 });

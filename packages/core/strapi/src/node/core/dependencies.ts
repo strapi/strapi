@@ -271,8 +271,15 @@ const getModule = async (name: string, cwd: string): Promise<PackageJson | null>
 
   if (entryPath) {
     const result = await readPkgUp({ cwd: path.dirname(entryPath) });
+    const packageJson = result?.packageJson;
 
-    return result?.packageJson ?? null;
+    // Reject walk-ups / alias installs where the manifest name does not match the request
+    // (e.g. `"foo": "npm:bar@1"` must not be treated as package `foo`).
+    if (!packageJson || (packageJson.name && packageJson.name !== name)) {
+      return null;
+    }
+
+    return packageJson;
   }
 
   return null;

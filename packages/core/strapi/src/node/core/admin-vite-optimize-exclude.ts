@@ -113,7 +113,8 @@ export const getPluginPackageName = (modulePath: string): string => {
   return modulePath.split('/')[0] ?? modulePath;
 };
 
-const collectDependencyNames = (pkg: PackageJson): string[] => {
+/** App / plugin package.json roots: include both runtime and declared-dev deps. */
+const collectRootDependencyNames = (pkg: PackageJson): string[] => {
   const names = new Set<string>();
 
   for (const section of [pkg.dependencies, pkg.devDependencies] as const) {
@@ -127,8 +128,16 @@ const collectDependencyNames = (pkg: PackageJson): string[] => {
   return [...names];
 };
 
+/** Transitive expansion: runtime dependencies only (devDeps are not installed for consumers). */
+const collectRuntimeDependencyNames = (pkg: PackageJson): string[] =>
+  pkg.dependencies ? Object.keys(pkg.dependencies) : [];
+
 /**
  * Walk direct and transitive dependency names from app/plugin roots.
+ *
+ * Official `@strapi/*` packages are visited as candidates but not expanded — walking into
+ * `@strapi/strapi` / admin / design-system fans out the whole install graph (perf) and falsely
+ * matches design-system transitive UI libs (`motion`, `react-dnd`, …) for optimizeDeps.exclude.
  *
  * @internal exported for tests
  */
@@ -160,13 +169,20 @@ const collectCandidatePackages = async (
 
     const pkg = await getModule(name, cwd);
 
-    if (pkg) {
-      packages.set(name, pkg);
+    if (!pkg) {
+      continue;
+    }
 
-      for (const dep of collectDependencyNames(pkg)) {
-        if (!visited.has(dep)) {
-          queue.push(dep);
-        }
+    packages.set(name, pkg);
+
+    // Keep @strapi/* as candidates (exclude loop skips them) but do not walk their graphs.
+    if (isOfficialStrapiPackage(name)) {
+      continue;
+    }
+
+    for (const dep of collectRuntimeDependencyNames(pkg)) {
+      if (!visited.has(dep)) {
+        queue.push(dep);
       }
     }
   }
@@ -202,9 +218,10 @@ const loadAppPackageJson = async (cwd: string): Promise<PackageJson | null> => {
  * Strapi's React/design-system pre-bundling. Skip dep optimization so they resolve through
  * the admin resolve aliases instead of being re-bundled by Vite.
  *
- * Scans app and plugin dependency trees (#26944). Official @strapi/* packages and pinned
- * singletons are never auto-excluded — @strapi/strapi matches the heuristic but must stay on
- * the optimizeDeps.include path (#26944, #27014).
+ * Scans app and plugin dependency trees (#26944), including transitive deps of non-`@strapi/*`
+ * packages. Official `@strapi/*` graphs are not expanded (avoids admin/design-system fan-out).
+ * Official `@strapi/*` packages and pinned singletons are never auto-excluded — `@strapi/strapi`
+ * matches the heuristic but must stay on the optimizeDeps.include path (#26944, #27014).
  *
  * @internal
  */
@@ -216,7 +233,7 @@ export const collectAdminOptimizeDepsExclude = async (
   const appPkg = await loadAppPackageJson(cwd);
 
   if (appPkg) {
-    for (const name of collectDependencyNames(appPkg)) {
+    for (const name of collectRootDependencyNames(appPkg)) {
       rootNames.add(name);
     }
   }
@@ -225,7 +242,7 @@ export const collectAdminOptimizeDepsExclude = async (
     const pluginPkg = await getPluginPackageJson(plugin, cwd);
 
     if (pluginPkg) {
-      for (const name of collectDependencyNames(pluginPkg)) {
+      for (const name of collectRootDependencyNames(pluginPkg)) {
         rootNames.add(name);
       }
     }
