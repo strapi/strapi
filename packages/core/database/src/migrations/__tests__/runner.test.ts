@@ -83,6 +83,7 @@ describe('createMigrationRunner', () => {
     });
 
     it('stops on first failure and does not log the failed migration', async () => {
+      const cause = new Error('boom');
       const failingMigrations: RunnableMigration[] = [
         {
           name: '001-first.js',
@@ -91,7 +92,7 @@ describe('createMigrationRunner', () => {
         },
         {
           name: '002-second.js',
-          up: jest.fn().mockRejectedValue(new Error('boom')),
+          up: jest.fn().mockRejectedValue(cause),
           down: jest.fn(),
         },
         {
@@ -103,7 +104,10 @@ describe('createMigrationRunner', () => {
 
       const { runner, storage } = createMocks(failingMigrations);
 
-      await expect(runner.up()).rejects.toThrow('boom');
+      await expect(runner.up()).rejects.toMatchObject({
+        message: 'Migration 002-second.js (up) failed: Original error: boom',
+        cause,
+      });
 
       expect(failingMigrations[0].up).toHaveBeenCalledTimes(1);
       expect(failingMigrations[1].up).toHaveBeenCalledTimes(1);
@@ -155,6 +159,25 @@ describe('createMigrationRunner', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({ event: 'reverted', name: '002-second.js' })
       );
+    });
+
+    it('wraps down failures with migration name, direction, and cause', async () => {
+      const cause = new Error('revert failed');
+      const failingMigrations: RunnableMigration[] = [
+        {
+          name: '001-first.js',
+          up: jest.fn(),
+          down: jest.fn().mockRejectedValue(cause),
+        },
+      ];
+
+      const { runner, storage } = createMocks(failingMigrations, ['001-first.js']);
+
+      await expect(runner.down()).rejects.toMatchObject({
+        message: 'Migration 001-first.js (down) failed: Original error: revert failed',
+        cause,
+      });
+      expect(storage.unlogMigration).not.toHaveBeenCalled();
     });
 
     it('does nothing when no migrations have been executed', async () => {

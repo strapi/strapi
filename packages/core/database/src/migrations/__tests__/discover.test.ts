@@ -42,4 +42,20 @@ describe('discoverMigrationFiles', () => {
 
     expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
   });
+
+  it('ignores dot-prefixed migration filenames (fast-glob dot: false parity)', async () => {
+    await fse.writeFile(path.join(tempDir, '001-real.js'), 'module.exports = {}');
+    await fse.writeFile(path.join(tempDir, '.hidden.js'), 'module.exports = {}');
+    await fse.writeFile(path.join(tempDir, '.hidden.sql'), 'SELECT 1;');
+
+    expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
+  });
+
+  it('ignores directories whose names end in .js or .sql (fast-glob onlyFiles parity)', async () => {
+    await fse.writeFile(path.join(tempDir, '001-real.js'), 'module.exports = {}');
+    await fse.ensureDir(path.join(tempDir, 'not-a-file.js'));
+    await fse.ensureDir(path.join(tempDir, 'not-a-file.sql'));
+
+    expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
+  });
 });

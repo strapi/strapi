@@ -106,14 +106,27 @@ const originalLoad = Module._load;
 Module._load = function patchedLoad(request, parent, ...rest) {
   const mod = originalLoad.call(this, request, parent, ...rest);
 
-  if (
-    typeof request === 'string' &&
-    request.endsWith(`${path.sep}migrations${path.sep}runner`) &&
-    mod &&
-    mod.createMigrationRunner
-  ) {
+  if (typeof request !== 'string' || !mod || !mod.createMigrationRunner) {
+    return mod;
+  }
+
+  let resolved;
+  try {
+    // Built CJS providers load via `require('./runner.js')`; match the resolved
+    // absolute path, not the unresolved request string.
+    resolved = Module._resolveFilename(request, parent);
+  } catch {
+    return mod;
+  }
+
+  const normalized = path.normalize(resolved);
+  const isMigrationRunner =
+    normalized.endsWith(`${path.sep}migrations${path.sep}runner.js`) ||
+    normalized.endsWith(`${path.sep}migrations${path.sep}runner`);
+
+  if (isMigrationRunner) {
     mod.createMigrationRunner = instrumentMigrationRunner(mod.createMigrationRunner);
-    debug('patched createMigrationRunner');
+    debug(`patched createMigrationRunner (${request} -> ${resolved})`);
   }
 
   return mod;

@@ -30,6 +30,15 @@ const logEvent = (
   logger.info({ event, name, ...extra });
 };
 
+const wrapMigrationError = (name: string, direction: 'up' | 'down', cause: unknown): Error => {
+  const causeMessage =
+    cause instanceof Error
+      ? `Original error: ${cause.message}`
+      : `Non-error value thrown. See cause for full value: ${String(cause)}`;
+
+  return new Error(`Migration ${name} (${direction}) failed: ${causeMessage}`, { cause });
+};
+
 export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
   const getPendingMigrations = async (): Promise<RunnableMigration[]> => {
     const [migrations, executedNames] = await Promise.all([
@@ -65,7 +74,12 @@ export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
 
         logEvent(opts.logger, 'migrating', migration.name);
 
-        await migration.up();
+        try {
+          await migration.up();
+        } catch (error) {
+          throw wrapMigrationError(migration.name, 'up', error);
+        }
+
         await opts.storage.logMigration({ name: migration.name });
 
         const durationSeconds = (Date.now() - start) / 1000;
@@ -84,7 +98,12 @@ export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
 
         logEvent(opts.logger, 'reverting', migration.name);
 
-        await migration.down();
+        try {
+          await migration.down();
+        } catch (error) {
+          throw wrapMigrationError(migration.name, 'down', error);
+        }
+
         await opts.storage.unlogMigration({ name: migration.name });
 
         const durationSeconds = Number.parseFloat(((Date.now() - start) / 1000).toFixed(3));
