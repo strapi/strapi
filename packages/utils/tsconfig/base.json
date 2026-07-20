@@ -15,7 +15,6 @@
     "noEmit": true,
     "types": [],
     "noUncheckedSideEffectImports": true,
-    "erasableSyntaxOnly": true,
-    "types": ["node"]
+    "erasableSyntaxOnly": true
   }
 }

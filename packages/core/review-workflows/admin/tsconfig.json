@@ -1,7 +1,6 @@
 {
   "extends": "tsconfig/client.json",
   "compilerOptions": {
-    "rootDir": "../",
     "paths": {
       "@tests/*": ["./tests/*"]
     },
