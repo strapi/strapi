@@ -1,5 +1,5 @@
 import { dirname, join } from 'node:path';
-import tsUtils from '@strapi/typescript-utils';
+import * as tsUtils from '@strapi/typescript-utils';
 import type { NodePlopAPI } from 'plop';
 
 type GetGeneratorLanguageOptions = {

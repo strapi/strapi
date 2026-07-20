@@ -1,5 +1,5 @@
 import path from 'node:path';
-import tsUtils from '@strapi/typescript-utils';
+import * as tsUtils from '@strapi/typescript-utils';
 
 import getGeneratorLanguage from '../get-generator-language';
 
