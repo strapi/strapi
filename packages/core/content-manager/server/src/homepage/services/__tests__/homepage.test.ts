@@ -341,6 +341,97 @@ describe('homepage service', () => {
       expect(wire[0].publishedAt).not.toEqual({});
     });
 
+    it('converts Date timestamps to ISO strings and keeps them after populate spread', async () => {
+      (strapiContentTypes.hasDraftAndPublish as jest.Mock).mockImplementation(() => true);
+
+      const updatedAt = new Date('2026-07-10T16:24:13.962Z');
+      const publishedAt = new Date('2026-07-10T16:24:14.099Z');
+
+      const contentTypes = {
+        'api::article.article': {
+          uid: 'api::article.article',
+          info: { displayName: 'Article' },
+          kind: 'collectionType',
+          options: { draftAndPublish: true },
+          attributes: {},
+        },
+      };
+
+      const findArticleDocuments = jest.fn(async () => [
+        {
+          documentId: 'article-1',
+          title: 'Article 1',
+          updatedAt,
+          publishedAt,
+        },
+      ]);
+      const findConfigurations = jest.fn(async () => [
+        {
+          value: JSON.stringify({
+            uid: 'api::article.article',
+            settings: { mainField: 'title' },
+          }),
+        },
+      ]);
+
+      const strapi = {
+        admin: {
+          services: {
+            permission: {
+              findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
+            },
+          },
+        },
+        contentTypes,
+        requestContext: {
+          get: jest.fn(() => ({
+            state: {
+              user: { id: 1 },
+              userAbility: {},
+            },
+          })),
+        },
+        db: {
+          query: jest.fn(() => ({
+            findMany: findConfigurations,
+          })),
+        },
+        plugin: jest.fn(() => ({
+          service: jest.fn(() => ({
+            create: jest.fn(() => ({
+              cannot: {
+                read: jest.fn(() => false),
+              },
+              sanitizedQuery: {
+                read: jest.fn(async (query: unknown) => query),
+              },
+            })),
+          })),
+        })),
+        contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
+        documents: jest.fn(() => ({
+          findMany: findArticleDocuments,
+        })),
+      };
+
+      const service = createHomepageService({ strapi } as any);
+
+      const result = await service.queryLastDocuments(
+        { sort: 'publishedAt:desc', populate: ['updatedAt', 'publishedAt'] },
+        true
+      );
+      const wire = JSON.parse(JSON.stringify(result));
+
+      expect(typeof result[0].updatedAt).toBe('string');
+      expect(typeof result[0].publishedAt).toBe('string');
+      expect(result[0].updatedAt).toBe(updatedAt.toISOString());
+      expect(result[0].publishedAt).toBe(publishedAt.toISOString());
+      expect(wire[0].updatedAt).toBe(updatedAt.toISOString());
+      expect(wire[0].publishedAt).toBe(publishedAt.toISOString());
+      expect(wire[0].updatedAt).not.toEqual({});
+      expect(wire[0].publishedAt).not.toEqual({});
+    });
+
     it('excludes non-displayed content types from recent documents', async () => {
       const contentTypes = {
         'api::article.article': {

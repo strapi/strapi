@@ -175,7 +175,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         kind: meta.contentType.kind,
         ...additionalFields,
         // Keep dates last so populate cannot overwrite with non-JSON-safe values
-        updatedAt: toIsoDateString(document.updatedAt) as string,
+        updatedAt: toIsoDateString(document.updatedAt) ?? String(document.updatedAt),
         publishedAt:
           meta.hasDraftAndPublish && document.publishedAt
             ? toIsoDateString(document.publishedAt)
