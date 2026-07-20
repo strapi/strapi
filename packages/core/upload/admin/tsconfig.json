@@ -3,20 +3,9 @@
   "compilerOptions": {
     "rootDir": "../",
     "paths": {
-      "@tests/*": [
-        "./tests/*"
-      ]
+      "@tests/*": ["./tests/*"]
     },
-    "types": [
-      "@testing-library/jest-dom",
-      "jest"
-    ]
+    "types": ["@testing-library/jest-dom", "jest"]
   },
-  "include": [
-    "../package.json",
-    "./src",
-    "../shared",
-    "./tests",
-    "./custom.d.ts"
-  ]
+  "include": ["../package.json", "./src", "../shared", "./tests", "./custom.d.ts"]
 }
