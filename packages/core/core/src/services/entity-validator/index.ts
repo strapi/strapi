@@ -318,12 +318,25 @@ const isDisconnectOnly = (value: unknown): boolean => {
  * resulting state can't be known without a DB read and they fall through to a pass
  * (publish re-validates the populated draft for D&P types; documented limitation for
  * non-D&P, tied to the null→[] follow-up).
+ *
+ * On creation there are no existing rows, so a disconnect-only payload attaches nothing
+ * and always leaves the field empty — for both to-one and to-many — so it is rejected
+ * regardless of `isToOne`.
  */
 const relationRequiredFails = (
   createOrUpdate: CreateOrUpdate,
   value: unknown,
   isToOne: boolean
 ): boolean => {
+  if (createOrUpdate === 'creation') {
+    // No existing rows on create, so a disconnect attaches nothing and the field stays
+    // empty for both to-one and to-many — reject it before the generic value check, which
+    // would otherwise treat the bare `{ disconnect: [...] }` object as a present value.
+    if (isDisconnectOnly(value)) {
+      return true;
+    }
+  }
+
   if (createOrUpdate === 'update') {
     // Absent key on update = keep the existing value.
     if (value === undefined) {
