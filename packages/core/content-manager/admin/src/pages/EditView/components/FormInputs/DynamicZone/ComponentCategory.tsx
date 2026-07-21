@@ -54,6 +54,7 @@ const ComponentPreviewImage = ({ src, alt, onError }: ComponentPreviewImageProps
           tag="img"
           src={src}
           alt={alt}
+          loading="lazy"
           width="100%"
           height="5.2rem"
           hasRadius

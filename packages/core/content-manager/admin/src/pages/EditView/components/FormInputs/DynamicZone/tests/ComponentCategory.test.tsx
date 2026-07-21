@@ -73,6 +73,7 @@ describe('ComponentCategory', () => {
     const thumbnail = getByAltText('myComponent');
     expect(thumbnail).toBeInTheDocument();
     expect(thumbnail).toHaveAttribute('src', '/_component-screenshots/test.png');
+    expect(thumbnail).toHaveAttribute('loading', 'lazy');
   });
 
   it('should render a preview thumbnail when an uploaded preview descriptor is provided', async () => {
