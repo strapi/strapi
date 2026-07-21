@@ -104,7 +104,7 @@ const init = (licenseDir: string, logger?: Logger) => {
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
-  const { get, commit, rollback } = (await strapi.db?.transaction()) as any;
+  const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
   try {
@@ -190,7 +190,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     await commit();
-  } catch (error) {
+  } catch {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
   }

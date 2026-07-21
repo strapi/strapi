@@ -24,7 +24,7 @@ export default {
           },
         },
       };
-    } catch (err) {
+    } catch {
       return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },

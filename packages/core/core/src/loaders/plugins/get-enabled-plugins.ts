@@ -71,7 +71,7 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
     } else {
       try {
         pathToPlugin = dirname(require.resolve(declaration.resolve));
-      } catch (e) {
+      } catch {
         pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
         if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {

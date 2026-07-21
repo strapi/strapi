@@ -182,7 +182,7 @@ export default function createComponentBuilder() {
           description: infos.description,
         })
         .set('options', {
-          ...(infos.options ?? {}),
+          ...infos.options,
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
@@ -332,7 +332,7 @@ export default function createComponentBuilder() {
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set('options', {
-          ...(infos.options ?? {}),
+          ...infos.options,
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)

@@ -21,7 +21,7 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return {
         ...DEFAULT_SETTINGS,
-        ...(settings || {}),
+        ...settings,
       };
     },
   };

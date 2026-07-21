@@ -268,7 +268,7 @@ export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: an
     try {
       await builder.writeFiles();
       await apiHandler.clear(uid);
-    } catch (error) {
+    } catch {
       await apiHandler.rollback(uid);
     }
   }

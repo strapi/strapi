@@ -114,7 +114,7 @@ class LocalFileSourceProvider implements ISourceProvider {
       // Read the metadata to ensure the file can be parsed
       await this.#loadMetadata();
       // TODO: we might also need to read the schema.jsonl files & implements a custom stream-check
-    } catch (e) {
+    } catch {
       if (this.options?.encryption?.enabled) {
         throw new ProviderInitializationError(
           `Key is incorrect or the file '${filePath}' is not a valid Strapi data file.`
@@ -220,7 +220,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               let metadata;
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-              } catch (error) {
+              } catch {
                 throw new Error(`Failed to read metadata for ${file}`);
               }
               const asset: IAsset = {
@@ -248,7 +248,7 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     try {
       streams.push(fs.createReadStream(file.path));
-    } catch (e) {
+    } catch {
       throw new Error(`Could not read backup file path provided at "${this.options.file.path}"`);
     }
 

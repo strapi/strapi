@@ -77,7 +77,7 @@ const authenticate = async (ctx) => {
       credentials: null,
       ability,
     };
-  } catch (err) {
+  } catch {
     return { authenticated: false };
   }
 };

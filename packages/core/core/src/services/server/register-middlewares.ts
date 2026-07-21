@@ -74,7 +74,7 @@ const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
 const validateMiddlewareConfig = async (config: MiddlewareConfig) => {
   try {
     await middlewareConfigSchema.validate(config, { strict: true, abortEarly: false });
-  } catch (error) {
+  } catch {
     throw new Error(
       'Invalid middleware configuration. Expected Array<string|{name?: string, resolve?: string, config: any}.'
     );

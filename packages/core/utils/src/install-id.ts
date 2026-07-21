@@ -8,7 +8,7 @@ export const generateInstallId = (projectId: string, installId: string) => {
     return projectId
       ? crypto.createHash('sha256').update(`${machineId}-${projectId}`).digest('hex')
       : crypto.randomUUID();
-  } catch (error) {
+  } catch {
     return crypto.randomUUID();
   }
 };

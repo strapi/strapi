@@ -170,7 +170,7 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
         const response = await fetchAI(fullUrl, {
           method: 'POST',
           headers: isJson
-            ? { 'Content-Type': 'application/json', ...(options.headers || {}) }
+            ? { 'Content-Type': 'application/json', ...options.headers }
             : options.headers,
           body: options.formData
             ? options.formData

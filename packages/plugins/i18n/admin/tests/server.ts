@@ -39,52 +39,50 @@ const LOCALES = [
 ] satisfies GetLocales.Response;
 
 export const server = setupServer(
-  ...[
-    /**
-     *
-     * locales
-     *
-     */
-    http.get('/i18n/locales', () => {
-      return HttpResponse.json(LOCALES);
-    }),
-    http.post<Record<string, never>, Pick<Locale, 'code' | 'name' | 'isDefault'>>(
-      '/i18n/locales',
-      async ({ request }) => {
-        const body = await request.json();
+  /**
+   *
+   * locales
+   *
+   */
+  http.get('/i18n/locales', () => {
+    return HttpResponse.json(LOCALES);
+  }),
+  http.post<Record<string, never>, Pick<Locale, 'code' | 'name' | 'isDefault'>>(
+    '/i18n/locales',
+    async ({ request }) => {
+      const body = await request.json();
 
-        const newLocale = {
-          id: LOCALES.length + 1,
-          createdAt: '',
-          updatedAt: '',
-          ...body,
-        } satisfies CreateLocale.Response;
+      const newLocale = {
+        id: LOCALES.length + 1,
+        createdAt: '',
+        updatedAt: '',
+        ...body,
+      } satisfies CreateLocale.Response;
 
-        return HttpResponse.json(newLocale);
-      }
-    ),
-    http.put('/i18n/locales/:id', () => {
+      return HttpResponse.json(newLocale);
+    }
+  ),
+  http.put('/i18n/locales/:id', () => {
+    return new HttpResponse();
+  }),
+  http.delete<{ id: string }>('/i18n/locales/:id', ({ params }) => {
+    if (params.id === '1') {
       return new HttpResponse();
-    }),
-    http.delete<{ id: string }>('/i18n/locales/:id', ({ params }) => {
-      if (params.id === '1') {
-        return new HttpResponse();
-      }
+    }
 
-      return new HttpResponse(null, { status: 404 });
-    }),
-    /**
-     *
-     * iso-locales
-     *
-     */
-    http.get('/i18n/iso-locales', () => {
-      return HttpResponse.json([
-        { code: 'af', name: 'Afrikaans (af)' },
-        { code: 'af-NA', name: 'Afrikaans (Namibia) (af-NA)' },
-        { code: 'af-ZA', name: 'Afrikaans (South Africa) (af-ZA)' },
-        { code: 'agq', name: 'Aghem (agq)' },
-      ]);
-    }),
-  ]
+    return new HttpResponse(null, { status: 404 });
+  }),
+  /**
+   *
+   * iso-locales
+   *
+   */
+  http.get('/i18n/iso-locales', () => {
+    return HttpResponse.json([
+      { code: 'af', name: 'Afrikaans (af)' },
+      { code: 'af-NA', name: 'Afrikaans (Namibia) (af-NA)' },
+      { code: 'af-ZA', name: 'Afrikaans (South Africa) (af-ZA)' },
+      { code: 'agq', name: 'Aghem (agq)' },
+    ]);
+  })
 );

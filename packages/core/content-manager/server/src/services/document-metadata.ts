@@ -316,7 +316,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           }
         }
       }
-    } catch (error) {
+    } catch {
       // i18n plugin might not be enabled or might error, ignore silently
     }
 

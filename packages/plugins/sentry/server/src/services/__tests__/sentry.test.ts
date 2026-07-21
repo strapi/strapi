@@ -1,4 +1,4 @@
-import Sentry, { type NodeOptions } from '@sentry/node';
+import * as Sentry from '@sentry/node';
 
 import sentryServiceLoader from '../sentry';
 import defaultConfig from '../../config';
@@ -8,7 +8,7 @@ const VALID_DSN = 'a_valid_dsn';
 
 jest.mock('@sentry/node', () => {
   return {
-    init(options: NodeOptions = {}) {
+    init(options: Sentry.NodeOptions = {}) {
       if (options.dsn !== VALID_DSN) {
         throw Error('invalid dsn');
       }

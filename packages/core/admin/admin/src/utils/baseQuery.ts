@@ -84,15 +84,13 @@ const simpleQuery: BaseQueryFn<
         }
       }
 
-      if (
-        typeof err.response?.data === 'object' &&
-        err.response?.data !== null &&
-        'error' in err.response?.data
-      ) {
+      const responseData = err.response?.data;
+
+      if (typeof responseData === 'object' && responseData !== null && 'error' in responseData) {
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response?.data.error as BaseQueryError };
+        return { data: undefined, error: responseData.error as BaseQueryError };
       } else {
         return {
           data: undefined,

@@ -183,11 +183,13 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           provider: file.provider,
         } as InputFile;
       });
+      const createEmptyMetadataResults = (): Array<{ altText: string; caption: string } | null> =>
+        Array.from({ length: files.length }, () => null);
 
       // If no image files, return sparse array with all nulls to avoid calling the AI server
       // This maintains the same array length as input files for proper index alignment
       if (imageFiles.length === 0) {
-        return new Array(files.length).fill(null);
+        return createEmptyMetadataResults();
       }
 
       const formData = await buildFormDataFromFiles(
@@ -243,7 +245,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       return imageFiles.reduce((sparseResults, { originalIndex }, resultIndex) => {
         sparseResults[originalIndex] = results[resultIndex];
         return sparseResults;
-      }, new Array(files.length).fill(null));
+      }, createEmptyMetadataResults());
     },
   };
 };

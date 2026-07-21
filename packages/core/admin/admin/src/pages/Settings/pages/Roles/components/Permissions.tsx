@@ -643,7 +643,7 @@ const reducer = (state: State, action: Action) =>
        */
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
         const { keys, value, userPermissions } = action;
-        const pathToValue = [...keys.split('..')];
+        const pathToValue = keys.split('..');
         let nextModifiedDataState = cloneDeep(state.modifiedData);
         const oldValues = get(nextModifiedDataState, pathToValue, {});
 

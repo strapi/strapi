@@ -33,7 +33,7 @@ export function generateDotEnv(scope: Scope) {
   const compile = _.template(envTmpl);
 
   return compile({
-    appKeys: new Array(4).fill(null).map(generateASecret).join(','),
+    appKeys: Array.from({ length: 4 }, () => generateASecret()).join(','),
     apiTokenSalt: generateASecret(),
     transferTokenSalt: generateASecret(),
     adminJwtToken: generateASecret(),

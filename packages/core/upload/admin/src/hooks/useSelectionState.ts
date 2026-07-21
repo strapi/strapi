@@ -56,15 +56,15 @@ export const useSelectionState = <TValues extends object>(
   };
 
   const deselectMultiple = (nextSelections: TValues[]) => {
-    setSelections((currSelections) => [
+    setSelections((currSelections) =>
       // filter out items in currSelections that are in nextSelections
-      ...currSelections.filter(
+      currSelections.filter(
         (currentSelection) =>
           nextSelections.findIndex((nextSelection) =>
             keys.every((key) => currentSelection[key] === nextSelection[key])
           ) === -1
-      ),
-    ]);
+      )
+    );
   };
 
   return [

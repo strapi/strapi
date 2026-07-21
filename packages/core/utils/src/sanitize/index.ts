@@ -156,7 +156,7 @@ const createAPISanitizers = (opts: APIOptions) => {
       throw new Error('Missing schema in sanitizeOutput');
     }
     if (isArray(data)) {
-      const res = new Array(data.length);
+      const res: unknown[] = Array.from({ length: data.length });
       for (let i = 0; i < data.length; i += 1) {
         res[i] = await sanitizeOutput(data[i], schema, { auth });
       }

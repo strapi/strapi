@@ -123,7 +123,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
             message: formatAPIError(res.error),
           });
         }
-      } catch (err) {
+      } catch {
         toggleNotification({
           type: 'danger',
           message: formatMessage({
@@ -147,10 +147,10 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
       },
       {
         // Don't check availability if the value is empty or wasn't changed
-        skip: !Boolean(
+        skip: !(
           (hasChanged || isCloning) &&
-            trimmedDebouncedValue !== '' &&
-            validationRegExp.test(trimmedDebouncedValue)
+          trimmedDebouncedValue !== '' &&
+          validationRegExp.test(trimmedDebouncedValue)
         ),
       }
     );

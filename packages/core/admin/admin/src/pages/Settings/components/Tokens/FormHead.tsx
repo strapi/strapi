@@ -50,7 +50,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       if (onRegenerate) {
         onRegenerate(res.data.accessKey);
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

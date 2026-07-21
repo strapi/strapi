@@ -1,0 +1,28 @@
+{
+  "name": "oxlint-config",
+  "version": "5.50.2",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./oxlint.config.ts",
+      "default": "./oxlint.config.ts"
+    },
+    "./base": "./base.ts",
+    "./back": "./back.ts",
+    "./front": "./front.ts",
+    "./tests": "./tests.ts"
+  },
+  "devDependencies": {
+    "oxlint": "1.72.0",
+    "tsconfig": "5.50.2"
+  },
+  "scripts": {
+    "test:ts": "run -T tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  }
+}

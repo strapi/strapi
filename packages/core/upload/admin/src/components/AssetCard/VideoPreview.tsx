@@ -31,7 +31,7 @@ export const VideoPreview = ({
       canvas.getContext('2d')?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
       video.replaceWith(canvas);
-      onLoadDuration && onLoadDuration(video.duration);
+      onLoadDuration?.(video.duration);
     }
   };
 

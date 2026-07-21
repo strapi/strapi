@@ -257,7 +257,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
 
         try {
           insertRelation(relation);
-        } catch (err) {
+        } catch {
           throw new Error(
             `There was a problem connecting relation with id ${
               relation.id

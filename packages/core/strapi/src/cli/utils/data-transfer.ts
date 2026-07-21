@@ -137,7 +137,7 @@ const abortTransfer = async ({
   try {
     await engine.abortTransfer();
     await strapi.destroy();
-  } catch (e) {
+  } catch {
     // ignore because there's not much else we can do
     return false;
   }

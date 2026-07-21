@@ -181,7 +181,7 @@ async function createApp(scope: Scope) {
         fse.writeFile(join(rootPath, 'license.txt'), data.license);
         logger.log('Your 30 days trial will be applied automatically to your project. Enjoy!');
       }
-    } catch (error) {
+    } catch {
       logger.error('Error while trying to create your trial. Please try again later.');
     }
   }
@@ -246,7 +246,7 @@ async function createApp(scope: Scope) {
           cwd: rootPath,
         });
         logger.success('Sample data added to your database');
-      } catch (error) {
+      } catch {
         logger.error('Failed to seed your database. Skipping');
       }
     }

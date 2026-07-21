@@ -31,7 +31,7 @@ export const urlSchema = yup.object().shape({
           new URL(val);
 
           return false;
-        } catch (err) {
+        } catch {
           // invalid url
           return true;
         }

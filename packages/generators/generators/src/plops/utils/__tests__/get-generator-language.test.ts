@@ -1,34 +1,30 @@
 import path from 'node:path';
-import tsUtils from '@strapi/typescript-utils';
+import { isUsingTypeScriptSync } from '@strapi/typescript-utils';
 
 import getGeneratorLanguage from '../get-generator-language';
+
+jest.mock('@strapi/typescript-utils', () => ({
+  isUsingTypeScriptSync: jest.fn(),
+}));
 
 describe('getGeneratorLanguage', () => {
   const appRoot = '/app';
   const appPlop = {
     getDestBasePath: () => path.join(appRoot, 'src'),
   };
-  let isUsingTypeScriptSyncSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    isUsingTypeScriptSyncSpy = jest.spyOn(tsUtils, 'isUsingTypeScriptSync');
-  });
-
-  afterEach(() => {
-    isUsingTypeScriptSyncSpy.mockRestore();
-  });
+  const isUsingTypeScriptSyncMock = jest.mocked(isUsingTypeScriptSync);
 
   test('non-plugin generation checks the generate dir', () => {
-    isUsingTypeScriptSyncSpy.mockReturnValue(true);
+    isUsingTypeScriptSyncMock.mockReturnValue(true);
 
     const language = getGeneratorLanguage({ filePath: 'api/{{ id }}' }, appPlop);
 
     expect(language).toBe('ts');
-    expect(isUsingTypeScriptSyncSpy).toHaveBeenCalledWith(appRoot);
+    expect(isUsingTypeScriptSyncMock).toHaveBeenCalledWith(appRoot);
   });
 
   test('in-app plugin generation checks the plugin server directory', () => {
-    isUsingTypeScriptSyncSpy.mockReturnValue(true);
+    isUsingTypeScriptSyncMock.mockReturnValue(true);
 
     const language = getGeneratorLanguage(
       { plugin: 'my-plugin', filePath: 'plugins/{{ plugin }}/server/src' },
@@ -36,7 +32,7 @@ describe('getGeneratorLanguage', () => {
     );
 
     expect(language).toBe('ts');
-    expect(isUsingTypeScriptSyncSpy).toHaveBeenCalledWith(
+    expect(isUsingTypeScriptSyncMock).toHaveBeenCalledWith(
       path.join(appRoot, 'src', 'plugins', 'my-plugin', 'server')
     );
   });
@@ -46,16 +42,16 @@ describe('getGeneratorLanguage', () => {
       getDestBasePath: () => path.join('/plugin', 'server', 'src'),
     };
 
-    isUsingTypeScriptSyncSpy.mockReturnValue(true);
+    isUsingTypeScriptSyncMock.mockReturnValue(true);
 
     const language = getGeneratorLanguage({ plugin: 'my-plugin', filePath: '.' }, standalonePlop);
 
     expect(language).toBe('ts');
-    expect(isUsingTypeScriptSyncSpy).toHaveBeenCalledWith(path.join('/plugin', 'server'));
+    expect(isUsingTypeScriptSyncMock).toHaveBeenCalledWith(path.join('/plugin', 'server'));
   });
 
   test('returns js when no tsconfig is found', () => {
-    isUsingTypeScriptSyncSpy.mockReturnValue(false);
+    isUsingTypeScriptSyncMock.mockReturnValue(false);
 
     const language = getGeneratorLanguage({ filePath: 'api/{{ id }}' }, appPlop);
 

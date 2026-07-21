@@ -102,7 +102,7 @@ describe('useRemoveAsset', () => {
       await waitFor(async () => {
         await removeAsset(ASSET_FIXTURE.id);
       });
-    } catch (err) {
+    } catch {
       // ...
     }
 
@@ -149,7 +149,7 @@ describe('useRemoveAsset', () => {
       await waitFor(async () => {
         await removeAsset(ASSET_FIXTURE.id);
       });
-    } catch (err) {
+    } catch {
       // ...
     }
 
