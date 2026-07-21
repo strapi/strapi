@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -18,32 +20,51 @@ import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
 
+const USERS_PAGE_SIZE = 10;
+
 const ListPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
   const {
-    allowedActions: { canRead: canReadAuditLogs, canReadUsers },
+    allowedActions: { canRead: canReadAuditLogs },
     isLoading: isLoadingRBAC,
-  } = useRBAC({
-    ...permissions?.auditLogs,
-    readUsers: permissions?.users.read || [],
-  });
+  } = useRBAC(permissions?.auditLogs?.read || []);
 
   const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
+  const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
     auditLogs,
     users,
+    usersPagination,
+    isLoadingUsers,
     isLoading: isLoadingData,
     hasError,
   } = useAuditLogsData({
     canReadAuditLogs,
-    canReadUsers,
+    usersPageSize,
   });
+
+  const { page = 1, pageCount = 1 } = usersPagination ?? {};
+  const hasMoreUsers = page < pageCount;
+
+  const handleLoadMoreUsers = () => {
+    if (hasMoreUsers) {
+      setUsersPageSize((prevPageSize) => prevPageSize + USERS_PAGE_SIZE);
+    }
+  };
 
   const formatTimeStamp = useFormatTimeStamp();
 
-  const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
+  const displayedFilters = getDisplayedFilters({
+    formatMessage,
+    users,
+    usersFilter: {
+      loading: isLoadingUsers,
+      hasMoreItems: hasMoreUsers,
+      onLoadMore: handleLoadMoreUsers,
+    },
+  });
 
   const headers: Table.Header<AuditLog, object>[] = [
     {
