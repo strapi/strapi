@@ -187,7 +187,6 @@ test.describe('Home as super admin', () => {
       } catch {
         await page.getByRole('button', { name: /^finish$/i }).click();
       }
-      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
@@ -245,15 +244,23 @@ test.describe('Home as super admin', () => {
       await page.getByRole('option', { name: 'Full access' }).click();
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Go back to the home page and wait for refreshed statistics
+      // Go back to the home page and wait for refreshed statistics.
+      // Entries comes from /count-documents (not key-statistics); both queries must settle.
+      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
       const keyStatisticsReady = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
           response.url().includes('/homepage/key-statistics') &&
           response.ok()
       );
-      await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-      await keyStatisticsReady;
+      const countDocumentsReady = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/homepage/count-documents') &&
+          response.ok()
+      );
+      await page.getByRole('link', { name: /^home$/i }).click();
+      await Promise.all([keyStatisticsReady, countDocumentsReady]);
 
       // The numbers should be updated
       await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
