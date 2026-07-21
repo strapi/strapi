@@ -63,7 +63,7 @@ describe('Passport', () => {
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
-      // @ts-expect-error
+      // @ts-expect-error passport strategy handler accepts runtime callback args
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(new Error('Bad credentials'));
@@ -86,7 +86,7 @@ describe('Passport', () => {
       const strategy = createLocalStrategy(strapi);
       const done = jest.fn();
 
-      // @ts-expect-error
+      // @ts-expect-error passport strategy handler accepts runtime callback args
       await strategy.handler('foo', 'bar', done);
 
       expect(done).toHaveBeenCalledWith(...args);

@@ -115,7 +115,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
-    (state) => state.values.layout ?? []
+    (state) => (state.values as ConfigurationFormData).layout ?? []
   );
 
   const onChange = useForm('Fields', (state) => state.onChange);

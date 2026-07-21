@@ -1,5 +1,3 @@
-import { ReactNode } from 'react';
-
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { http, HttpResponse } from 'msw';

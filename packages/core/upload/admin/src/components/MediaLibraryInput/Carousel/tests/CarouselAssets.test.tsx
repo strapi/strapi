@@ -63,6 +63,39 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
   });
 
+  it('should load a signed remote thumbnail with crossOrigin="anonymous" (#26581)', () => {
+    const { getByRole } = setup({
+      assets: [{ ...ASSET_FIXTURES[0], isUrlSigned: true }],
+    });
+
+    // The same signed URL is also loaded by the preview dialog with
+    // crossOrigin="anonymous"; the thumbnail must match so the browser does not
+    // cache a no-CORS response and reuse it for the cross-origin preview load.
+    expect(getByRole('img', { name: 'alternative text' })).toHaveAttribute(
+      'crossorigin',
+      'anonymous'
+    );
+  });
+
+  it('should not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+    // Public/unsigned remote thumbnails are cache-busted, so they never collide
+    // with the preview and must render as a plain <img> without requiring a
+    // bucket CORS rule.
+    const { getByRole } = setup({
+      assets: [{ ...ASSET_FIXTURES[0], isUrlSigned: false }],
+    });
+
+    expect(getByRole('img', { name: 'alternative text' })).not.toHaveAttribute('crossorigin');
+  });
+
+  it('should not set crossOrigin for local assets', () => {
+    const { getByRole } = setup({
+      assets: [{ ...ASSET_FIXTURES[0], isLocal: true, isUrlSigned: true }],
+    });
+
+    expect(getByRole('img', { name: 'alternative text' })).not.toHaveAttribute('crossorigin');
+  });
+
   it('should render actions buttons', () => {
     const { getByRole } = setup();
 
@@ -110,5 +143,18 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     const { queryByRole } = setup({ disabled: true });
 
     expect(queryByRole('button', { name: 'edit' })).not.toBeInTheDocument();
+  });
+
+  it('should not open edit view on double click when disabled', async () => {
+    const onDoubleClickAssetSpy = jest.fn();
+    const { getByRole, queryByText, user } = setup({
+      disabled: true,
+      onDoubleClickAsset: onDoubleClickAssetSpy,
+    });
+
+    await user.dblClick(getByRole('img', { name: 'alternative text' }));
+
+    expect(queryByText('Details')).not.toBeInTheDocument();
+    expect(onDoubleClickAssetSpy).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.48.0",
+  "version": "5.50.2",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -30,17 +30,29 @@
   "main": "./dist/index.js",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./*": "./*"
+  },
   "files": [
     "dist/"
   ],
   "scripts": {
-    "build": "run -T run-s clean build:types",
-    "build:types": "run -T tsc -p tsconfig.build.json",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
@@ -48,10 +60,10 @@
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "@strapi/database": "5.48.0",
-    "@strapi/logger": "5.48.0",
-    "@strapi/permissions": "5.48.0",
-    "@strapi/utils": "5.48.0",
+    "@strapi/database": "5.50.2",
+    "@strapi/logger": "5.50.2",
+    "@strapi/permissions": "5.50.2",
+    "@strapi/utils": "5.50.2",
     "commander": "8.3.0",
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
@@ -60,20 +72,20 @@
     "typedoc": "0.28.19",
     "typedoc-github-wiki-theme": "2.1.0",
     "typedoc-plugin-markdown": "4.11.0",
-    "zod": "3.25.67"
+    "zod": "3.25.76"
   },
   "devDependencies": {
-    "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.2",
     "@types/koa__router": "12.0.0",
+    "@types/node": "20.19.41",
     "@types/node-schedule": "2.1.7",
-    "eslint-config-custom": "5.48.0",
+    "eslint-config-custom": "5.50.2",
     "lodash": "4.18.1",
-    "tsconfig": "5.48.0",
-    "typescript": "5.4.5",
-    "undici": "6.25.0"
+    "tsconfig": "5.50.2",
+    "typescript": "5.9.3",
+    "undici": "6.27.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

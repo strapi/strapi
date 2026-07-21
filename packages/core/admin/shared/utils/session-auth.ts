@@ -1,7 +1,19 @@
 import crypto from 'crypto';
+import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';
+import { buildSessionMetadata } from '@strapi/utils';
+
+import { resolveAuthCookieName } from './auth-cookie-name';
+
+const ADMIN_ORIGIN = 'admin';
+const SESSION_CONTENT_TYPE = 'admin::session';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
+
+export const getAccessCookieName = (): string => {
+  const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
+  return resolveAuthCookieName(configured);
+};
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
 export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
@@ -105,4 +117,43 @@ export const extractDeviceParams = (
   const rememberMe = Boolean(body.rememberMe);
 
   return { deviceId, rememberMe };
+};
+
+export const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    userAgent: ctx.request.headers['user-agent'],
+  });
+
+/**
+ * Resolves the device id to use when revoking sessions on logout.
+ * SSO assigns deviceId server-side, so the client-provided value may not match
+ * the active session row. Prefer the deviceId stored on the session backing
+ * the current access token when available.
+ *
+ * Callers should pass `ctx.state.session.id` from the admin auth strategy and
+ * the already-parsed body `deviceId` — the logout route requires authentication,
+ * so sessionId is expected to be present.
+ */
+export const resolveLogoutDeviceId = async (
+  userId: string,
+  sessionId: string | undefined,
+  clientDeviceId: string | undefined
+): Promise<string | undefined> => {
+  if (!sessionId) {
+    strapi.log.debug('resolveLogoutDeviceId: no sessionId; falling back to client deviceId');
+    return clientDeviceId;
+  }
+
+  const session = await strapi.db.query(SESSION_CONTENT_TYPE).findOne({
+    where: { sessionId },
+  });
+
+  if (session?.userId !== userId || session?.origin !== ADMIN_ORIGIN) {
+    strapi.log.debug(
+      'resolveLogoutDeviceId: access-token session missing or not owned; falling back to client deviceId'
+    );
+    return clientDeviceId;
+  }
+
+  return typeof session.deviceId === 'string' ? session.deviceId : clientDeviceId;
 };

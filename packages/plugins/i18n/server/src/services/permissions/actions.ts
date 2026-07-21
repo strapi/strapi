@@ -99,6 +99,128 @@ const addAllLocalesToPermissions = async (permissions: any) => {
   );
 };
 
+/**
+ * `properties.locales === null` means access to all locales (see engine handler) — do not patch.
+ */
+const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
+  if (!('locales' in properties)) {
+    return true;
+  }
+
+  const { locales } = properties;
+
+  if (locales === null) {
+    return false;
+  }
+
+  return Array.isArray(locales) && locales.length === 0;
+};
+
+const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[]> => {
+  const { isLocalizedContentType } = getService('content-types');
+  const { actionProvider } = strapi.service('admin::permission');
+  const defaultLocale = await getService('locales').getDefaultLocale();
+
+  return Promise.all(
+    permissions.map(async (permission) => {
+      const { subject, action, properties = {} } = permission;
+
+      if (!subject) {
+        return permission;
+      }
+
+      const model = strapi.getModel(subject);
+
+      if (!model || !isLocalizedContentType(model)) {
+        return permission;
+      }
+
+      const appliesToLocales = await actionProvider.appliesToProperty('locales', action, subject);
+
+      if (!appliesToLocales) {
+        return permission;
+      }
+
+      // null means access to all locales — same semantics as the permission engine handler
+      if (properties.locales === null) {
+        return permission;
+      }
+
+      if (needsLocalesPatch(properties) && defaultLocale) {
+        return { ...permission, properties: { ...properties, locales: [defaultLocale] } };
+      }
+
+      return permission;
+    })
+  );
+};
+
+/**
+ * Repairs role permissions on content types that just had i18n enabled in this sync.
+ * Only patches permissions where `properties.locales` is missing or `[]`; leaves `null` alone.
+ * Safe to run at `afterSync` time because it does not depend on the actionProvider.
+ */
+const repairPermissionsForNewlyLocalizedTypes = async ({
+  oldContentTypes,
+  contentTypes,
+}: {
+  oldContentTypes: Record<string, any> | null | undefined;
+  contentTypes: Record<string, any>;
+}) => {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  const { isLocalizedContentType } = getService('content-types');
+
+  const newlyLocalizedUids = Object.keys(contentTypes).filter(
+    (uid) =>
+      oldContentTypes[uid] &&
+      !isLocalizedContentType(oldContentTypes[uid]) &&
+      isLocalizedContentType(contentTypes[uid])
+  );
+
+  if (newlyLocalizedUids.length === 0) {
+    return;
+  }
+
+  try {
+    const defaultLocaleCode = await getService('locales').getDefaultLocale();
+    if (!defaultLocaleCode) {
+      return;
+    }
+
+    const permissionService = strapi.service('admin::permission');
+    const allPermissions = await permissionService.findMany({
+      where: { subject: { $in: newlyLocalizedUids } },
+    });
+
+    const results = await Promise.allSettled(
+      allPermissions
+        .filter((permission: any) => needsLocalesPatch(permission.properties))
+        .map((permission: any) =>
+          strapi.db.query('admin::permission').update({
+            where: { id: permission.id },
+            data: {
+              properties: { ...permission.properties, locales: [defaultLocaleCode] },
+            },
+          })
+        )
+    );
+
+    results
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .forEach((r) =>
+        strapi.log.error(
+          'Failed to patch i18n permission during newly-localized type repair.',
+          r.reason
+        )
+      );
+  } catch (error) {
+    strapi.log.error('Failed to repair i18n permissions for newly localized content types.', error);
+  }
+};
+
 const syncSuperAdminPermissionsWithLocales = async () => {
   const roleService = strapi.service('admin::role');
   const permissionService = strapi.service('admin::permission');
@@ -134,6 +256,7 @@ const registerI18nActionsHooks = () => {
 
   actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
   hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
+  hooks.willValidateUpdatePermissions.register(normalizeRolePermissionsLocales);
 };
 
 const updateActionsProperties = () => {
@@ -152,4 +275,6 @@ export default {
   registerI18nActionsHooks,
   updateActionsProperties,
   syncSuperAdminPermissionsWithLocales,
+  repairPermissionsForNewlyLocalizedTypes,
+  normalizeRolePermissionsLocales,
 };
