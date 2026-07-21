@@ -38,16 +38,28 @@ const { getSessionManager, buildCookieOptionsWithExpiry } = jest.requireMock(
 describe('redirectWithAuth', () => {
   const user = { id: 42, email: 'admin@example.com' };
   const sanitizeUser = jest.fn((u: unknown) => ({ ...(u as object), sanitized: true }));
+  const generateRefreshToken = jest.fn(async () => ({
+    token: 'refresh-token',
+    absoluteExpiresAt: '2099-01-01T00:00:00.000Z',
+  }));
+  const generateAccessToken = jest.fn(async () => ({ token: 'access-token' }));
 
-  const createCtx = () => {
+  const createCtx = (overrides: Record<string, unknown> = {}) => {
     const cookiesSet = jest.fn();
     const redirect = jest.fn();
     return {
       params: { provider: 'google' },
       state: { user },
+      request: {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      },
       cookies: { set: cookiesSet },
       redirect,
       cookiesSet,
+      ...overrides,
     };
   };
 
@@ -75,12 +87,24 @@ describe('redirectWithAuth', () => {
     } as any;
 
     getSessionManager.mockReturnValue(() => ({
-      generateRefreshToken: jest.fn(async () => ({
-        token: 'refresh-token',
-        absoluteExpiresAt: '2099-01-01T00:00:00.000Z',
-      })),
-      generateAccessToken: jest.fn(async () => ({ token: 'access-token' })),
+      generateRefreshToken,
+      generateAccessToken,
     }));
+  });
+
+  test('stores session metadata from the SSO callback request', async () => {
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(generateRefreshToken).toHaveBeenCalledWith('42', 'device-id', {
+      type: 'refresh',
+      metadata: expect.objectContaining({
+        deviceName: 'Chrome on macOS',
+        loginAt: expect.any(String),
+      }),
+    });
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/success');
   });
 
   test('sets the access cookie path to /admin by default', async () => {
