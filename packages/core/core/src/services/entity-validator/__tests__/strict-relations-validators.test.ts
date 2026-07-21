@@ -290,6 +290,21 @@ describe('Entity validator - strictRelations', () => {
       ).rejects.toMatchObject({ name: 'ValidationError' });
     });
 
+    // Creation counterpart of disconnect-only: a bare `{ disconnect: [id] }` attaches
+    // nothing, so required creation must reject it (same for to-many; no existing rows).
+    test('strict + non-draft + to-one { disconnect: [id] } on CREATION → throws', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityCreation(
+          requiredRelationModel,
+          { author: { disconnect: [1] } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
     // Behaviour 1 (non-empty side): a connect that actually attaches an entry passes,
     // proving the no-op carve-out only applies to the empty case.
     test('strict + non-draft + { connect: [id] } → passes', async () => {
