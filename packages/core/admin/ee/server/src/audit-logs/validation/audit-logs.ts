@@ -11,8 +11,20 @@ const validateFindManySchema = yup
   })
   .required();
 
+const validateFindManyUsersSchema = yup
+  .object()
+  .shape({
+    page: yup.number().integer().min(1),
+    pageSize: yup.number().integer().min(1).max(100),
+  })
+  .required();
+
 export const validateFindMany = validateYupSchema(validateFindManySchema, { strict: false });
+export const validateFindManyUsers = validateYupSchema(validateFindManyUsersSchema, {
+  strict: false,
+});
 
 export default {
   validateFindMany,
+  validateFindManyUsers,
 };
