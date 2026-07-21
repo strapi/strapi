@@ -4,50 +4,94 @@ on:
   issues:
     types: [labeled]
 
-permissions:
-  issues: write
-  pull-requests: write
-  actions: read
-  checks: read
-  contents: read
-  statuses: read
+permissions: {}
 
 jobs:
-  issue-labeled:
+  invalid-template-label:
+    name: Re-validate invalid template label
+    if: "github.event.label.name == 'flag: invalid template'"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
-      # Unable to Reproduce Tasks
-      - name: 'Comment: unable to reproduce'
-        if: "${{ github.event.label.name == 'status: can not reproduce' }}"
-        uses: actions-cool/issues-helper@v3
+      - name: Checkout base branch
+        uses: actions/checkout@v4
         with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
+          persist-credentials: false
 
-            Hello @${{ github.event.issue.user.login }},
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
-            Thank you for reporting this bug, however we are unable to reproduce the issue you described given the information we have on hand. Can you please create a fresh project that you are able to reproduce the issue in, provide clear steps to reproduce this issue, and either upload this fresh project to a new GitHub repo or compress it into a `.zip` and upload it on this issue?
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
+
+      - name: Handle invalid template label
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/issue-template-label-action.ts
+
+  issue-labeled:
+    name: Handle issue label automation
+    if: "github.event.label.name != 'flag: invalid template'"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      actions: read
+      checks: read
+      statuses: read
+    steps:
+      - name: Handle issue label automation
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.issue.number;
+            const login = context.payload.issue.user.login;
+            const label = context.payload.label.name;
+
+            const comment = async (body) => {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            };
+
+            const close = async (state_reason) => {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number,
+                state: 'closed',
+                state_reason,
+              });
+            };
+
+            const lock = async (lock_reason) => {
+              await github.rest.issues.lock({ owner, repo, issue_number, lock_reason });
+            };
+
+            const handlers = {
+              'status: can not reproduce': async () => {
+                await comment(
+                  `> This is a templated message
+
+            Hello @${login},
+
+            Thank you for reporting this bug, however we are unable to reproduce the issue you described given the information we have on hand. Can you please create a fresh project that you are able to reproduce the issue in, provide clear steps to reproduce this issue, and either upload this fresh project to a new GitHub repo or compress it into a \`.zip\` and upload it on this issue?
 
             We would greatly appreciate your assistance with this, by working in a fresh project it will cut out any possible variables that might be unrelated.
-            Please note that issues labeled with `status: can not reproduce` will be closed in 14 days if there is no activity.
+            Please note that issues labeled with \`status: can not reproduce\` will be closed in 14 days if there is no activity.
 
-            Thank you!
+            Thank you!`
+                );
+              },
 
-      # v3 Legacy Issues
-      - name: 'Comment: unsupported v3 issues'
-        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
+              'flag: v3-unsupported': async () => {
+                await comment(
+                  `> This is a templated message
 
-            Hello @${{ github.event.issue.user.login }},
+            Hello @${login},
 
             Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting bug reports for Strapi v3.
             The recommended action we suggest for v3 users is to utilize the various migration resources to upgrade your package from Strapi v3 to Strapi v4:
@@ -59,28 +103,16 @@ jobs:
             Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
             For now this issue is marked as closed.
 
-            Thank You
-      - name: 'Close: unsupported v3 issues'
-        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
+            Thank You`
+                );
+                await close('not_planned');
+              },
 
-      # v4 Legacy Issues
-      - name: 'Comment: unsupported v4 issues'
-        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
+              'flag: v4-unsupported': async () => {
+                await comment(
+                  `> This is a templated message
 
-            Hello @${{ github.event.issue.user.login }},
+            Hello @${login},
 
             Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting low/medium severity bug reports for Strapi v4.
             We have confirmed that this issue is a low/medium severity bug and is not reproducable in Strapi 5. We advise upgrading to Strapi 5 to resolve this issue.
@@ -96,28 +128,16 @@ jobs:
             Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
             For now this issue is marked as closed.
 
-            Thank You
-      - name: 'Close: unsupported v4 issues'
-        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
+            Thank You`
+                );
+                await close('not_planned');
+              },
 
-      # Feature request redirections
-      - name: 'Comment: redirect feature request to canny'
-        if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
+              'issue: feature request': async () => {
+                await comment(
+                  `> This is a templated message
 
-            Hello @${{ github.event.issue.user.login }},
+            Hello @${login},
 
             First thank you for reporting this feature need.
             To manage feature requests and the Strapi roadmap, we are using Canny.
@@ -128,56 +148,16 @@ jobs:
 
             In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
 
-            Thank you for your insight and have a good day.
-      - name: 'Close: redirect feature request to canny'
-        if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'completed'
+            Thank you for your insight and have a good day.`
+                );
+                await close('completed');
+              },
 
-      # Invalid bug report template actions
-      - name: 'Comment: invalid bug report template'
-        if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
+              'flag: question': async () => {
+                await comment(
+                  `> This is a templated message
 
-            Hello @${{ github.event.issue.user.login }},
-
-            We ask that you please follow the issue template.
-            A proper issue submission let's us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
-
-            Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
-
-            Thank you.
-      - name: 'Close: invalid bug report template'
-        if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
-
-      # Redirect questions to GitHub Discussions
-      - name: 'Comment: redirect question to discussions'
-        if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            > This is a templated message
-
-            Hello @${{ github.event.issue.user.login }},
+            Hello @${login},
 
             Thank you for your interest in Strapi! However, this issue appears to be a question rather than a bug report. GitHub Issues are reserved for reproducible bug reports.
 
@@ -185,20 +165,19 @@ jobs:
 
             You can also check out our [Discord](https://discord.strapi.io) for real-time help.
 
-            Thank you!
-      - name: 'Close: redirect question to discussions'
-        if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
-      - name: 'Lock: redirect question to discussions'
-        if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'lock-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          lock-reason: 'off-topic'
+            Thank you!`
+                );
+                await close('not_planned');
+                await lock('off_topic');
+              },
+            };
+
+            const handler = handlers[label];
+
+            if (!handler) {
+              core.info(`No automation configured for label "${label}"`);
+              return;
+            }
+
+            core.info(`Running automation for label "${label}" on issue #${issue_number}`);
+            await handler();

@@ -8,20 +8,45 @@ import { getDisplayName } from '../../../../utils/users';
 
 interface AssigneeFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
 
-const AssigneeFilter = ({ name }: Filters.ValueInputProps) => {
-  const [page, setPage] = React.useState(1);
-  const { formatMessage } = useIntl();
-  const { data, isLoading } = useAdminUsers({
-    page,
-  });
-  const users = data?.users || [];
+const PAGE_SIZE = 10;
 
-  const field = useField(name);
+const AssigneeFilter = ({ name }: Filters.ValueInputProps) => {
+  const [pageSize, setPageSize] = React.useState(PAGE_SIZE);
+  const [hasOpened, setHasOpened] = React.useState(false);
+  const { formatMessage } = useIntl();
+  const field = useField<string>(name);
+  const shouldFetch = hasOpened || (field.value !== undefined && field.value !== '');
+  const { data, isLoading } = useAdminUsers({ pageSize }, { skip: !shouldFetch });
 
   const handleChange = (value?: string) => {
-    setPage(1);
+    setPageSize(PAGE_SIZE);
     field.onChange(name, value);
   };
+
+  const handleOpenChange = (isOpen?: boolean) => {
+    if (isOpen && !hasOpened) {
+      setHasOpened(true);
+    }
+  };
+
+  const { pageCount = 1, page = 1 } = data?.pagination ?? {};
+  const hasMoreItems = page < pageCount;
+
+  const handleLoadMore = () => {
+    if (!hasMoreItems) {
+      return;
+    }
+    setPageSize((prev) => prev + PAGE_SIZE);
+  };
+
+  const options = React.useMemo(
+    () =>
+      (data?.users ?? []).map((user) => ({
+        id: user.id,
+        label: getDisplayName(user),
+      })),
+    [data?.users]
+  );
 
   return (
     <Combobox
@@ -31,16 +56,16 @@ const AssigneeFilter = ({ name }: Filters.ValueInputProps) => {
         defaultMessage: 'Search and select an user to filter',
       })}
       onChange={handleChange}
+      onOpenChange={handleOpenChange}
       loading={isLoading}
-      onLoadMore={() => setPage((prev) => prev + 1)}
+      onLoadMore={handleLoadMore}
+      hasMoreItems={hasMoreItems}
     >
-      {users.map((user) => {
-        return (
-          <ComboboxOption key={user.id} value={user.id.toString()}>
-            {getDisplayName(user)}
-          </ComboboxOption>
-        );
-      })}
+      {options.map((option) => (
+        <ComboboxOption key={option.id} value={option.id.toString()}>
+          {option.label}
+        </ComboboxOption>
+      ))}
     </Combobox>
   );
 };

@@ -83,6 +83,30 @@ describe('Transform relational data', () => {
       });
     });
 
+    it('Connect relation operation to the published product version', async () => {
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: {
+            connect: {
+              documentId: 'product-1',
+              locale: 'en',
+              status: 'published',
+            },
+          },
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        products: {
+          connect: [{ id: 'product-1-en-published' }],
+        },
+      });
+    });
+
     it('Connect to both draft and publish by default', async () => {
       // Should connect to the default locale if not provided in the relation
       const { data } = await transformParamsDocumentId(SHOP_UID, {
@@ -111,6 +135,71 @@ describe('Transform relational data', () => {
           ],
         },
         product: { set: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }] },
+      });
+    });
+
+    it('xToOne with multiple documentIds in set keeps only the last documentId expanded', async () => {
+      // Caller sent two entries for a single-entry field: keep the last
+      // one and still link both its draft and published rows.
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          product: {
+            set: [
+              { documentId: 'product-1', locale: 'en' },
+              { documentId: 'product-2', locale: 'en' },
+            ],
+          },
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        product: {
+          set: [{ id: 'product-2-en-draft' }],
+        },
+      });
+    });
+
+    it('xToOne with an array shorthand of documentIds keeps only the last documentId expanded', async () => {
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          product: [
+            { documentId: 'product-1', locale: 'en' },
+            { documentId: 'product-2', locale: 'en' },
+          ],
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        product: {
+          set: [{ id: 'product-2-en-draft' }],
+        },
+      });
+    });
+
+    it('xToOne with a single documentId still expands to both draft and published ids', async () => {
+      // Both rows must be produced or the Edit View loses the link on save.
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          product: { documentId: 'product-1', locale: 'en' },
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        product: {
+          set: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }],
+        },
       });
     });
 

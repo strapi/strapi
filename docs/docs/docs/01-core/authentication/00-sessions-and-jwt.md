@@ -54,7 +54,10 @@ Endpoints (admin server):
 - `POST /admin/register` and `POST /admin/register-admin`
 - `POST /admin/reset-password`
 - `POST /admin/access-token` — rotates the refresh cookie and returns `{ data: { token } }`
-- `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device
+- `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device family
+- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, signed-in time, last used)
+- `DELETE /admin/users/me/sessions/:sessionId` — revokes a single session owned by the current user
+- `DELETE /admin/users/me/sessions` — revokes all sessions; query `?keepCurrent=true` preserves the session backing the current request ("log out of other devices")
 
 Optional request fields on login/register:
 
@@ -77,16 +80,17 @@ Configuration:
 **Deprecated:**
 
 - `admin.auth.options.*` — Use `admin.auth.sessions.options.*` instead
-- Cookie options (applied to `strapi_admin_refresh`):
-  - `admin.auth.cookie.domain` (or `admin.auth.domain`)
-  - `admin.auth.cookie.path` (default `/admin`)
-  - `admin.auth.cookie.sameSite` (default `lax`)
+- Cookie options:
+  - `admin.auth.cookie.name` (default `jwtToken`) — name of the non-httpOnly access-token cookie used for session logins (when `rememberMe` is false) and EE SSO handoff. Rename to avoid collisions with another app on a shared parent domain that sets a `jwtToken` cookie. Requires an admin rebuild after change (value is inlined into the admin bundle at build time).
+  - `admin.auth.cookie.domain` (or `admin.auth.domain`) — applied to `strapi_admin_refresh`
+  - `admin.auth.cookie.path` (default `/admin`) — applied to `strapi_admin_refresh`
+  - `admin.auth.cookie.sameSite` (default `lax`) — applied to `strapi_admin_refresh`
 
 Key files:
 
 - Bootstrap/config: `packages/core/admin/server/src/bootstrap.ts`
-- Routes: `packages/core/admin/server/src/routes/authentication.ts`
-- Controller: `packages/core/admin/server/src/controllers/authentication.ts`
+- Routes: `packages/core/admin/server/src/routes/authentication.ts`, `packages/core/admin/server/src/routes/users.ts`
+- Controllers: `packages/core/admin/server/src/controllers/authentication.ts`, `packages/core/admin/server/src/controllers/authenticated-session.ts`
 - Strategy (Bearer access token validation): `packages/core/admin/server/src/strategies/admin.ts`
 
 ## Content API (users-permissions)
@@ -101,7 +105,11 @@ When `jwtManagement` is `refresh`:
 - Login/Register/Provider callback responses include `{ jwt, refreshToken }`.
 - New endpoints:
   - `POST /api/auth/refresh` — body `{ refreshToken }`, returns `{ jwt }` and rotates the refresh token
-  - `POST /api/auth/logout` — revokes sessions for the authenticated user; optional `{ deviceId }` in body to revoke only one device
+  - `POST /api/auth/logout` — logs out the session backing the current request by default; optional body fields:
+    - `{ scope: 'all' }` — revokes every session for the user (previous default behavior before session management)
+    - `{ deviceId }` — revokes all sessions for a specific device family
+  - `GET /api/auth/sessions` — lists the authenticated user's active sessions
+  - `DELETE /api/auth/sessions/:sessionId` — revokes a single session owned by the authenticated user
 
 Configuration keys:
 
@@ -134,3 +142,4 @@ This behavior ensures that compromised refresh tokens cannot be used after a pas
 - Access tokens are always used in the `Authorization` header as `Bearer <token>`.
 - Admin refresh tokens are stored in an httpOnly cookie and are not exposed to JavaScript.
 - Device-bound sessions allow targeted logout by `deviceId`.
+- Session list responses expose `lastActiveAt` as the timestamp of the last refresh-token rotation for that session (not per-request activity tracking).

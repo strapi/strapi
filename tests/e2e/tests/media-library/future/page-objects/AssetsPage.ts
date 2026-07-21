@@ -127,8 +127,24 @@ export class AssetsPage {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
-      .getByRole('status');
+      .getByRole('status')
+      .first();
     await notification.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Wait for the bulk-move success toast after drag-and-drop.
+   * Scoped to the Notifications region so it does not match the a11y live region.
+   */
+  async waitForMoveSuccess() {
+    await this.getMoveSuccessNotification().waitFor({ state: 'visible' });
+  }
+
+  getMoveSuccessNotification() {
+    return this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .filter({ hasText: 'Elements have been moved successfully' });
   }
 
   async getSuccessMessage() {
@@ -172,11 +188,20 @@ export class AssetsPage {
   }
 
   /**
+   * The grid container. Scoped via test id so card/folder locators don't
+   * collide with the sidebar FolderTree, which also renders folder names as
+   * list items inside the `main` landmark.
+   */
+  get assetsGrid() {
+    return this.page.getByTestId('assets-grid');
+  }
+
+  /**
    * Get an asset card in grid view by (partial) filename.
    * Asset cards use role="listitem" in the list.
    */
   getAssetCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -226,6 +251,116 @@ export class AssetsPage {
   }
 
   /**
+   * Get an editable text input inside the asset details drawer by its visible
+   * label (File name, Caption, Alternative text).
+   */
+  getAssetDetailsDrawerTextField(label: string) {
+    return this.assetDetailsDrawer.getByRole('textbox', { name: label });
+  }
+
+  /**
+   * Get the Location SingleSelect combobox inside the asset details drawer.
+   */
+  getAssetDetailsDrawerLocationSelect() {
+    return this.assetDetailsDrawer.getByRole('combobox', { name: /location/i });
+  }
+
+  /**
+   * Replace the value of an editable text field in the drawer.
+   */
+  async fillAssetDetailsDrawerText(label: string, value: string) {
+    const field = this.getAssetDetailsDrawerTextField(label);
+    await field.fill(value);
+  }
+
+  /**
+   * Open the Location select and choose the option with the given name
+   * (e.g. "Media Library" for the root).
+   */
+  async selectAssetDetailsDrawerLocation(name: string | RegExp) {
+    await this.getAssetDetailsDrawerLocationSelect().click();
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  /**
+   * Click the Save button inside the asset details drawer.
+   */
+  async clickAssetDetailsDrawerSave() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Save' }).click();
+  }
+
+  /**
+   * Click the trash icon in the drawer footer and confirm the dialog.
+   * Returns once the confirm dialog has been dismissed.
+   */
+  async deleteAssetFromDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Delete this/i }).click();
+
+    // Confirm dialog renders in a Radix portal at body root — query off `page`,
+    // not the drawer locator.
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Delete this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: 'Confirm' }).click();
+  }
+
+  /**
+   * Click the replace icon in the drawer footer, confirm the dialog, and set
+   * the file picked by the native file chooser. Returns once the upload
+   * request has been initiated (the chooser was satisfied).
+   *
+   * Use `getDrawerToast(...)` to assert the in-drawer success toast.
+   */
+  async replaceAssetFromDrawer(filePath: string) {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Replace this/i }).click();
+
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Replace this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+
+    // Continue triggers `fileInputRef.current?.click()` which opens the native
+    // chooser. Wait for the chooser event BEFORE clicking so we don't miss it.
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    await confirmDialog.getByRole('button', { name: 'Continue' }).click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(filePath);
+  }
+
+  /**
+   * Get the in-drawer alert toast (above the preview). Matches the substring
+   * shown in the success/error message.
+   */
+  getDrawerToast(message: string | RegExp) {
+    return this.assetDetailsDrawer.getByText(message);
+  }
+
+  /**
+   * Open the fullscreen crop & focus editor from the preview. Returns once the
+   * editor footer (Apply) is visible. The editor renders in a Portal at body
+   * root, so query off `page`, not the drawer.
+   */
+  async openCropEditor() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Crop' }).click();
+    await expect(this.page.getByRole('button', { name: 'Apply' })).toBeVisible();
+  }
+
+  /**
+   * Click Apply in the crop editor (replace the original).
+   */
+  async applyCrop() {
+    await this.page.getByRole('button', { name: 'Apply' }).click();
+  }
+
+  /**
+   * Click "Save as copy" in the crop editor (new asset in the same folder).
+   */
+  async saveCropAsCopy() {
+    await this.page.getByRole('button', { name: 'Save as copy' }).click();
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
@@ -246,7 +381,7 @@ export class AssetsPage {
    * Get a folder card in grid view
    */
   getFolderCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -275,10 +410,65 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
-  async uploadFilesFromUrl(urls: string | string[]) {
-    await this.openImportFromUrlDialog();
-    const urlsArray = Array.isArray(urls) ? urls : [urls];
-    await this.urlTextarea.fill(urlsArray.join('\n'));
-    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  /**
+   * Drag a file or folder onto a folder target using pointer events (dnd-kit).
+   * Moves the pointer more than 8px before dropping to satisfy activation distance.
+   */
+  async dragItemToFolder(
+    itemName: string,
+    folderName: string,
+    view: 'grid' | 'table' = 'grid',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or target folder "${folderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Drag a folder row/card onto itself (invalid shallow drop).
+   */
+  async dragFolderToSelf(folderName: string, view: 'grid' | 'table' = 'table') {
+    const folder = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const box = await folder.boundingBox();
+    if (!box) {
+      throw new Error(`Could not resolve folder "${folderName}"`);
+    }
+
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.up();
   }
 }

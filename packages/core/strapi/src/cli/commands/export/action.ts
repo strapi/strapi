@@ -14,7 +14,6 @@ import {
 import {
   getDefaultExportName,
   buildTransferTable,
-  isIgnoredContentType,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -22,6 +21,10 @@ import {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
+  buildTransferTransforms,
+  normalizeTransferFilterOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 import { normalizeExportDirFormatOpts } from './validate-dir-format';
@@ -30,9 +33,6 @@ const {
   providers: { createLocalFileDestinationProvider },
 } = fileDataTransfer;
 
-const {
-  providers: { createLocalDirectoryDestinationProvider },
-} = directoryDataTransfer;
 const {
   providers: { createLocalStrapiSourceProvider },
 } = strapiDataTransfer;
@@ -49,6 +49,9 @@ interface CmdOptions {
   compress?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
   maxSizeJsonl?: number;
 }
@@ -67,8 +70,10 @@ export default async (opts: CmdOptions) => {
   }
 
   normalizeExportDirFormatOpts(opts);
+  normalizeTransferFilterOptions(opts);
 
   const strapi = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapi);
 
   const source = createSourceProvider(strapi);
   const destination = createDestinationProvider(opts);
@@ -79,22 +84,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
-          },
-        },
-      ],
-      entities: [
-        {
-          filter(entity) {
-            return !isIgnoredContentType(entity.type);
-          },
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   });
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('export', opts.verbose));
@@ -117,6 +107,13 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
+    });
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });
@@ -184,6 +181,7 @@ const createDestinationProvider = (opts: CmdOptions) => {
     : undefined;
 
   if (format === 'dir') {
+    const { createLocalDirectoryDestinationProvider } = directoryDataTransfer.providers;
     const dirPath = path.isAbsolute(filepath) ? filepath : path.resolve(process.cwd(), filepath);
     return createLocalDirectoryDestinationProvider({
       directory: { path: dirPath },

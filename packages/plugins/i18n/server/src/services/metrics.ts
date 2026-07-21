@@ -10,15 +10,19 @@ const sendDidInitializeEvent = async () => {
     0
   )(strapi.contentTypes as any);
 
-  await strapi.telemetry.send('didInitializeI18n', { groupProperties: { numberOfContentTypes } });
+  strapi.telemetry
+    .send('didInitializeI18n', { groupProperties: { numberOfContentTypes } })
+    .catch(() => {});
 };
 
 const sendDidUpdateI18nLocalesEvent = async () => {
   const numberOfLocales = await getService('locales').count();
 
-  await strapi.telemetry.send('didUpdateI18nLocales', {
-    groupProperties: { numberOfLocales },
-  });
+  strapi.telemetry
+    .send('didUpdateI18nLocales', {
+      groupProperties: { numberOfLocales },
+    })
+    .catch(() => {});
 };
 
 const metrics = () => ({

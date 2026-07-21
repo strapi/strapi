@@ -56,6 +56,10 @@ Content API configuration, for example the 'rest.maxLimit' option to set the max
 
 Feature flags for enabling and configuring future features that would be breaking changes and cannot be enabled by default, or experimental features that are not ready for public stable release.
 
+#### typescript
+
+Controls TypeScript tooling during development (for example `autogenerate` to emit types for JavaScript projects).
+
 #### plugins
 
 Contains plugin configurations, with each root-level value the id of a plugin, for example, 'users-permissions'
@@ -91,7 +95,7 @@ NOTE: This is the only configuration that is currently an array rather than an o
 
 ### Typings
 
-Most of the base configurations have been typed, although they are not currently publicly available. They can be found in: `packages/core/types/src/types/core/config`
+Most of the base configurations have been typed, although they are not currently publicly available. They can be found in: `packages/core/types/src/core/config`
 
 Any time a new configuration option is added to Strapi, it must also be added to the types for the appropriate config file (and once the env var loading feature is available, a parser for it such as string, integer, stringArray, etc must be defined)
 

@@ -58,6 +58,12 @@ export default {
       private: true,
       searchable: false,
     },
+    resetPasswordTokenExpiresAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     registrationToken: {
       type: 'string',
       configurable: false,
@@ -79,6 +85,14 @@ export default {
       target: 'admin::role',
       // FIXME: Allow setting this
       collectionName: 'strapi_users_roles',
+    },
+    apiTokens: {
+      configurable: false,
+      private: true,
+      type: 'relation',
+      relation: 'oneToMany',
+      mappedBy: 'adminUserOwner',
+      target: 'admin::api-token',
     },
     blocked: {
       type: 'boolean',

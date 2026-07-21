@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 import { getFetchClient } from './utils/getFetchClient';
+import { getProjectType } from './utils/getProjectType';
 import { createAbsoluteUrl } from './utils/urls';
 
 import type { Modules } from '@strapi/types';
@@ -41,7 +42,8 @@ const renderAdmin = async (
         return features?.future?.[name] === true;
       },
     },
-    // @ts-expect-error – there's pollution from the global scope of Node.
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision. Cannot use @ts-expect-error because of build:code and build:types context collision.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
@@ -56,8 +58,10 @@ const renderAdmin = async (
     flags: {
       nps: false,
       promoteEE: true,
+      docLinks: true,
     },
-    // @ts-expect-error – there's pollution from the global scope of Node.
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
     ai: {
       enabled: true,
     },
@@ -68,6 +72,11 @@ const renderAdmin = async (
   interface ProjectType extends Pick<Window['strapi'], 'flags'> {
     isEE: boolean;
     isTrial: boolean;
+    /**
+     * The licensed plan price id, sent by the license registry (EE only).
+     * Used to distinguish the Growth plan from other Enterprise plans.
+     */
+    planPriceId?: string;
     features: {
       name: string;
     }[];
@@ -79,7 +88,7 @@ const renderAdmin = async (
   try {
     const {
       data: {
-        data: { isEE, isTrial, features, flags, ai },
+        data: { isEE, isTrial, features, flags, ai, planPriceId },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
@@ -88,10 +97,12 @@ const renderAdmin = async (
     window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,
-      isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
+      isEnabled: (featureName: string | undefined) =>
+        features.some((feature) => feature.name === featureName),
     };
-    window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
-    // @ts-expect-error – there's pollution from the global scope of Node.
+    window.strapi.projectType = getProjectType({ isEE, planPriceId });
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
     window.strapi.ai = ai;
   } catch (err) {
     /**
