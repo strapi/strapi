@@ -159,16 +159,29 @@ function useResetKey(
 
     // If the 2 refs are not equal, it means the value was updated from outside
     if (valueUpdatesCount.current !== slateUpdatesCount.current) {
+      // Bring the 2 refs back in sync
+      slateUpdatesCount.current = valueUpdatesCount.current;
+
+      // The update may just be an echo of the editor's own content coming back through the form
+      // (e.g. the debounced sync, or a re-render while document queries settle). Remounting in
+      // that case is pointless and destructive: it wipes pending input and the DOM under the
+      // user's caret. Only force a remount when the content is actually different.
+      const externalState = value?.length ? normalizeBlocksState(editor, value) : null;
+      const editorState = normalizeBlocksState(editor, editor.children);
+      if (JSON.stringify(externalState) === JSON.stringify(editorState)) {
+        return;
+      }
+
+      // The remount reuses the same editor instance, so a selection pointing into the old
+      // content would survive it and crash slate-react's toDOMPoint when the new content is
+      // shorter. Drop the selection before swapping the children.
       if (editor.selection) {
         Transforms.deselect(editor);
       }
 
-      // So we change the key to force a rerender of the Slate editor,
+      // Change the key to force a rerender of the Slate editor,
       // which will pick up the new value through its initialValue prop
       setKey((previousKey) => previousKey + 1);
-
-      // Then bring the 2 refs back in sync
-      slateUpdatesCount.current = valueUpdatesCount.current;
     }
   }, [editor, value]);
 
@@ -256,7 +269,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
       clearTimeout(debounceTimeout.current);
       debounceTimeout.current = null;
-      incrementSlateUpdatesCount();
+      // Counter was already bumped when the AST changed; only push form state here.
       // Ensure Strapi Form state updates before the next event (e.g. Save click) reads values.
       flushSync(() => {
         onChange(
@@ -264,7 +277,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           normalizeBlocksState(editor, editor.children) as Schema.Attribute.BlocksValue
         );
       });
-    }, [editor, incrementSlateUpdatesCount, name, onChange]);
+    }, [editor, name, onChange]);
 
     const handleSlateChange = React.useCallback(
       (state: Descendant[]) => {
@@ -276,15 +289,20 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * state in sync with it in order to make sure that things like the "modified" state
            * isn't broken. Updating the whole state on every change is very expensive however,
            * so we debounce calls to onChange to mitigate input lag.
+           *
+           * Bump the reset-key counter immediately (not inside the debounce). Otherwise any
+           * value-prop identity change during the 300ms window — e.g. clicking the blocks
+           * toolbar — looks like an external update with stale empty form state and remounts
+           * the editor, wiping the pending input (blocks e2e flake).
            */
+          incrementSlateUpdatesCount();
+
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
           // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
-            incrementSlateUpdatesCount();
-
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
             debounceTimeout.current = null;
