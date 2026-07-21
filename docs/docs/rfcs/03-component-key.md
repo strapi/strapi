@@ -92,7 +92,7 @@ Primary touchpoints:
 
 - [ ] Create component → response includes `componentKey`
 - [ ] Publish → draft and published rows share the same `componentKey`, different `id`
-- [ ] Load published → update with `{ componentKey, …fields }` updates the draft instance
+- [ ] Load published → update with `\{ componentKey, …fields \}` updates the draft instance
 - [ ] Omit-id array replace still works
 - [ ] Invalid / foreign `componentKey` → 400
 - [ ] Nested components + dynamic zones covered
