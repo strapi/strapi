@@ -175,7 +175,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         kind: meta.contentType.kind,
         ...additionalFields,
         // Keep dates last so populate cannot overwrite with non-JSON-safe values
-        updatedAt: toIsoDateString(document.updatedAt) ?? String(document.updatedAt),
+        updatedAt: toIsoDateString(document.updatedAt) ?? '',
         publishedAt:
           meta.hasDraftAndPublish && document.publishedAt
             ? toIsoDateString(document.publishedAt)
@@ -273,19 +273,25 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         .flat()
         .sort((a, b) => {
           // ISO-8601 strings compare lexicographically in chronological order
+          const compareIso = (left: string, right: string, direction: 1 | -1) => {
+            if (left < right) return -1 * direction;
+            if (left > right) return 1 * direction;
+            return 0;
+          };
+
           switch (additionalQueryParams?.sort) {
             case 'publishedAt:desc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return b.publishedAt.localeCompare(a.publishedAt);
+              return compareIso(a.publishedAt, b.publishedAt, -1);
             case 'publishedAt:asc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return a.publishedAt.localeCompare(b.publishedAt);
+              return compareIso(a.publishedAt, b.publishedAt, 1);
             case 'updatedAt:desc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return b.updatedAt.localeCompare(a.updatedAt);
+              return compareIso(a.updatedAt, b.updatedAt, -1);
             case 'updatedAt:asc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return a.updatedAt.localeCompare(b.updatedAt);
+              return compareIso(a.updatedAt, b.updatedAt, 1);
             default:
               return 0;
           }
