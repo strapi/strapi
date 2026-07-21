@@ -10013,7 +10013,6 @@ __metadata:
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.2"
     fs-extra: "npm:11.3.4"
-    memfs: "npm:4.6.0"
     tsconfig: "npm:5.50.2"
     vitest: "catalog:"
     vitest-config: "npm:5.50.2"
