@@ -24,10 +24,6 @@ import {
   IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
-import mapValues from 'lodash/fp/mapValues';
-import get from 'lodash/get';
-import merge from 'lodash/merge';
-import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -45,6 +41,7 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { getIn, isObject, setIn } from '../../../utils/objects';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
 import {
@@ -154,42 +151,58 @@ const connectRelationToParent = (
   data: Create.Response['data'] | Publish.Response['data'],
   fieldToConnectUID?: string
 ) => {
+  const relationToConnect = {
+    id: data.documentId,
+    documentId: data.documentId,
+    locale: data.locale,
+  };
   /*
    * Check if the fieldToConnect is already present in the parentDataToUpdate.
    * This happens in particular when in the parentDocument you have created
    * a new component without saving.
    */
-  const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
-  const fieldToConnectPath = isFieldPresent
-    ? fieldToConnect
-    : // Compute the path to the parent object
-      fieldToConnect.split('.').slice(0, -1).join('.');
+  const fieldValue = getIn<{ connect?: Array<typeof relationToConnect> }>(
+    parentDataToUpdate,
+    fieldToConnect
+  );
+  const isFieldPresent = Boolean(fieldValue);
+  const fieldPath = fieldToConnect.split('.');
+  const fieldName = fieldPath.pop()!;
+  const existingConnect: Array<typeof relationToConnect> = Array.isArray(fieldValue?.connect)
+    ? fieldValue.connect
+    : [];
+  const connect = existingConnect.some(
+    (relation) =>
+      relation.documentId === relationToConnect.documentId &&
+      relation.locale === relationToConnect.locale
+  )
+    ? existingConnect
+    : [...existingConnect, relationToConnect];
   const fieldToConnectValue = isFieldPresent
     ? {
-        connect: [
-          {
-            id: data.documentId,
-            documentId: data.documentId,
-            locale: data.locale,
-          },
-        ],
+        ...fieldValue,
+        connect,
       }
     : {
-        [fieldToConnect.split('.').pop()!]: {
-          connect: [
-            {
-              id: data.documentId,
-              documentId: data.documentId,
-              locale: data.locale,
-            },
-          ],
+        [fieldName]: {
+          connect,
           disconnect: [],
         },
         // In case the object was not present you need to pass the componentUID of the parent document
         __component: fieldToConnectUID,
       };
-  const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
-  return merge(parentDataToUpdate, objectToConnect);
+  if (isFieldPresent && parentDataToUpdate) {
+    return setIn(parentDataToUpdate, fieldToConnect, fieldToConnectValue);
+  }
+
+  const parentPath = fieldPath.join('.');
+  const currentParentValue = getIn(parentDataToUpdate, parentPath);
+  const parentValue = {
+    ...(isObject(currentParentValue) ? currentParentValue : {}),
+    ...fieldToConnectValue,
+  };
+
+  return setIn(parentDataToUpdate ?? {}, parentPath, parentValue);
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
@@ -638,13 +651,34 @@ const transformData = (data: unknown): unknown => {
       return data.apiData;
     }
 
-    return mapValues((value) => transformData(value))(data as Record<string, unknown>);
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, transformData(value)])
+    );
   }
 
   return data;
 };
 
 const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
+
+const prepareParentDataForRelationUpdate = (
+  parentFormValues: AnyData | undefined,
+  fallbackParentFormValues: AnyData | undefined,
+  options: Parameters<typeof handleInvisibleAttributes>[1]
+) => {
+  const parentDataToUpdate = parentFormValues ?? fallbackParentFormValues;
+
+  if (!parentDataToUpdate) {
+    return parentDataToUpdate;
+  }
+
+  const { data } = handleInvisibleAttributes(transformDocumentData(parentDataToUpdate), {
+    ...options,
+    initialValues: fallbackParentFormValues,
+  });
+
+  return data;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
@@ -719,6 +753,11 @@ const PublishAction: DocumentActionComponent = ({
   const fieldToConnectUID = useRelationModal(
     'PublishAction',
     (state) => state.state.fieldToConnectUID,
+    false
+  );
+  const parentFormValues = useRelationModal(
+    'PublishAction',
+    (state) => state.state.parentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -927,10 +966,18 @@ const PublishAction: DocumentActionComponent = ({
             (parentDocumentMetaToUpdate.documentId ||
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
           ) {
-            const parentDataToUpdate =
+            const fallbackParentFormValues =
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                 ? getInitialFormValues()
                 : parentDocumentData.getInitialFormValues();
+            const parentDataToUpdate = prepareParentDataForRelationUpdate(
+              parentFormValues,
+              fallbackParentFormValues,
+              {
+                schema: parentDocumentData.schema,
+                components: parentDocumentData.components,
+              }
+            );
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
             const dataToUpdate = connectRelationToParent(
@@ -1219,6 +1266,11 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnectUID,
     false
   );
+  const parentFormValues = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.parentFormValues,
+    false
+  );
   const documentHistory = useRelationModal(
     'UpdateAction',
     (state) => state.state.documentHistory,
@@ -1371,10 +1423,18 @@ const UpdateAction: DocumentActionComponent = ({
               (parentDocumentMetaToUpdate.documentId ||
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
             ) {
-              const parentDataToUpdate =
+              const fallbackParentFormValues =
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
+              const parentDataToUpdate = prepareParentDataForRelationUpdate(
+                parentFormValues,
+                fallbackParentFormValues,
+                {
+                  schema: parentDocumentData.schema,
+                  components: parentDocumentData.components,
+                }
+              );
 
               const dataToUpdate = connectRelationToParent(
                 parentDataToUpdate,
