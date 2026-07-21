@@ -22,7 +22,7 @@ export type IsEnabled<
     : false
   : false;
 
-type Factory<T> = T | ((params: { strapi: Strapi }) => T)
+type Factory<T> = T | ((params: { strapi: Strapi }) => T);
 
 export type LoadedPlugin = {
   config: {
