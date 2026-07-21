@@ -4,8 +4,7 @@
  * Prism from `window` / bail safely (PR #25660). Keep `prismjs` in Vite `optimizeDeps.include`;
  * do not include `prismjs/components/*.js` (that language glob causes the blank-admin crash).
  *
- * This file mocks `prismjs` like Vite’s prebundle and clears `window.Prism`; **`develop` without
- * the fix throws**; **fix branch passes**. Ship with the `Code.tsx` change.
+ * This file mocks `prismjs` like Vite’s prebundle and clears `window.Prism`.
  *
  * @see https://github.com/strapi/strapi/issues/25070
  */
