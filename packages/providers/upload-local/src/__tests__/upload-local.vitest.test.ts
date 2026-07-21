@@ -1,9 +1,11 @@
 /* eslint-disable import/first */
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { fs } from 'memfs';
 
-jest.mock('fs', () => fs);
-
-import fse from 'fs-extra';
+vi.mock('fs', () => ({
+  ...fs,
+  default: fs,
+}));
 
 import localProvider from '../index';
 
@@ -13,7 +15,8 @@ describe('Local provider', () => {
       dirs: { static: { public: '' } },
     } as any;
 
-    fse.ensureDirSync('uploads');
+    // Create via memfs — fs-extra may bind the real fs before the mock applies under Vitest
+    fs.mkdirSync('uploads', { recursive: true });
   });
 
   afterAll(() => {

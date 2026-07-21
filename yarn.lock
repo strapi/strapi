@@ -10010,13 +10010,13 @@ __metadata:
     "@strapi/types": "npm:5.50.2"
     "@strapi/utils": "npm:5.50.2"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.2"
     fs-extra: "npm:11.3.4"
-    jest: "npm:29.6.0"
     memfs: "npm:4.6.0"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
