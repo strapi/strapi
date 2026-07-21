@@ -57,13 +57,13 @@ describe('Content type validator', () => {
         expect(err).toMatchObject({
           name: 'ValidationError',
           message:
-            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
+            'Attribute keys cannot be one of id, document_id, component_key, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
           details: {
             errors: [
               {
                 path: ['contentType', 'attributes', 'entryId'],
                 message:
-                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
+                  'Attribute keys cannot be one of id, document_id, component_key, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
                 name: 'ValidationError',
               },
             ],
@@ -93,13 +93,13 @@ describe('Content type validator', () => {
         expect(err).toMatchObject({
           name: 'ValidationError',
           message:
-            'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
+            'Attribute keys cannot be one of id, document_id, component_key, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
           details: {
             errors: [
               {
                 path: ['contentType', 'attributes', 'ENTRY_ID'],
                 message:
-                  'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
+                  'Attribute keys cannot be one of id, document_id, component_key, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
                 name: 'ValidationError',
               },
             ],
