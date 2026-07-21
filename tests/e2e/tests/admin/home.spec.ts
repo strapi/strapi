@@ -245,22 +245,19 @@ test.describe('Home as super admin', () => {
       await page.getByRole('button', { name: /save/i }).click();
 
       // Go back to the home page and wait for refreshed statistics.
-      // Entries comes from /count-documents (not key-statistics); both queries must settle.
       // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
+      // keep that RTK query warm, so Home remount often serves cache and no GET is issued
+      // (waitForResponse then times out). Entries still come from count-documents — assert
+      // via expect() polling once the widget is ready.
       const keyStatisticsReady = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
           response.url().includes('/homepage/key-statistics') &&
           response.ok()
       );
-      const countDocumentsReady = page.waitForResponse(
-        (response) =>
-          response.request().method() === 'GET' &&
-          response.url().includes('/homepage/count-documents') &&
-          response.ok()
-      );
       await page.getByRole('link', { name: /^home$/i }).click();
-      await Promise.all([keyStatisticsReady, countDocumentsReady]);
+      await keyStatisticsReady;
 
       // The numbers should be updated
       await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
