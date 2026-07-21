@@ -600,7 +600,8 @@ describe('ai-localizations service', () => {
     afterEach(() => {
       jest.restoreAllMocks();
       delete (global as any).fetch;
-      delete (global as any).strapi;
+      // global.strapi is a non-configurable accessor from unit.setup — cannot delete;
+      // each test reassigns its mock.
     });
 
     it('forwards maxLength/minLength to the AI so translations can respect the limit', async () => {
