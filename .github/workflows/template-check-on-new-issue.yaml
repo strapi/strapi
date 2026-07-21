@@ -2,7 +2,7 @@ name: Check Required Checkboxes
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   contents: read
@@ -12,140 +12,19 @@ jobs:
   check-checkboxes:
     runs-on: ubuntu-latest
     steps:
-      - name: Check issue uses template
-        uses: actions/github-script@v7
+      - name: Checkout base branch
+        uses: actions/checkout@v4
         with:
-          script: |
-            const issueBody = context.payload.issue.body || '';
-            const issueNumber = context.payload.issue.number;
+          persist-credentials: false
 
-            // Define the required checkboxes
-            const requiredCheckboxes = [
-              {
-                id: 'duplicateCheck',
-                text: 'I have checked the existing issues for duplicates.',
-                patterns: [
-                  /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates\./i,
-                  /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates/i,
-                  /- \[x\]\s*I have checked.*\[issues\].*duplicates/i,
-                  /\[x\].*I have checked.*\[issues\].*duplicates/i,
-                  /- \[x\]\s*I have checked the existing issues for duplicates\./i,
-                  /- \[x\]\s*I have checked the existing issues for duplicates/i,
-                  /- \[x\]\s*I have checked.*duplicates/i,
-                  /\[x\].*I have checked.*duplicates/i
-                ]
-              },
-              {
-                id: 'codeOfConduct',
-                text: 'I agree to follow this project\'s Code of Conduct.',
-                patterns: [
-                  /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)\./i,
-                  /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)/i,
-                  /- \[x\]\s*I agree.*\[Code of Conduct\].*\./i,
-                  /\[x\].*I agree.*\[Code of Conduct\].*\./i,
-                  /- \[x\]\s*I agree to follow this project's Code of Conduct\./i,
-                  /- \[x\]\s*I agree to follow this project's Code of Conduct/i,
-                  /- \[x\]\s*I agree.*Code of Conduct/i,
-                  /\[x\].*I agree.*Code of Conduct/i,
-                  /- \[x\]\s*I agree to follow.*Code of Conduct/i
-                ]
-              }
-            ];
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
-            // Define required version fields
-            const requiredVersionFields = [
-              {
-                id: 'nodeVersion',
-                label: 'Node Version',
-                pattern: /### Node Version[\s\S]*?(?=\n### |\n?$)/i
-              },
-              {
-                id: 'pmVersion',
-                label: 'Package Manager Version',
-                pattern: /### Package Manager Version[\s\S]*?(?=\n### |\n?$)/i
-              },
-              {
-                id: 'strapiVersion',
-                label: 'Strapi Version',
-                pattern: /### Strapi Version[\s\S]*?(?=\n### |\n?$)/i
-              }
-            ];
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
 
-            const missingItems = [];
-
-            // Check each required checkbox
-            for (const checkbox of requiredCheckboxes) {
-              let found = false;
-              
-              // Check if any of the patterns match
-              for (const pattern of checkbox.patterns) {
-                if (pattern.test(issueBody)) {
-                  found = true;
-                  break;
-                }
-              }
-              
-              if (!found) {
-                missingItems.push(checkbox.text);
-              }
-            }
-
-            // Check each required version field
-            for (const field of requiredVersionFields) {
-              const match = issueBody.match(field.pattern);
-              if (!match) {
-                missingItems.push(field.label);
-                continue;
-              }
-              
-              // Extract the content between the header and next section
-              let content = match[0];
-              // Remove the header line
-              content = content.replace(/^### .*?\n/i, '');
-              // Remove the next section header if present
-              content = content.replace(/\n### .*$/i, '');
-              
-              // Clean up the content
-              content = content.trim();
-              
-              // Check if content is empty or just placeholder text
-              if (!content || 
-                  content === 'No response' || 
-                  content === 'N/A' ||
-                  content === 'None' ||
-                  content.length < 3) {
-                missingItems.push(field.label);
-              }
-            }
-
-            // If required items are missing, add the label and comment
-            if (missingItems.length > 0) {
-              console.log('Missing required items:', missingItems);
-              
-              // Add the "flag: invalid template" label
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                labels: ['flag: invalid template']
-              });
-              
-              // Add a comment explaining what's missing
-              const comment = '> This is a templated message\n\n' +
-                'Hello @' + context.payload.issue.user.login + ',\n\n' +
-                'We ask that you please follow the issue template.\n' +
-                'A proper issue submission lets us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](.github/ISSUE_TEMPLATE/BUG_REPORT.yml).\n\n' +
-                'Please create a new issue and completely fill out the issue template, you can open a new issue [here](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/issues/new).\n\n' +
-                'Thank you.';
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                body: comment
-              });
-              
-              console.log('Added "flag: invalid template" label, and comment on issue #' + issueNumber);
-                          } else {
-              console.log('Added "flag: invalid template" label and comment on issue #' + issueNumber);
-            }
+      - name: Check issue uses template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/issue-template-check-action.ts

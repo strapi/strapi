@@ -147,9 +147,9 @@ describe('AssetsGrid', () => {
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
 
-    it('renders empty state when no assets and no folders', () => {
+    it('renders nothing when no assets and no folders (empty state is owned by the page)', () => {
       setup({ assets: [], folders: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
+      expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
     });
   });
 
@@ -187,6 +187,36 @@ describe('AssetsGrid', () => {
         asset.formats = null;
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).toBeInTheDocument();
+      });
+
+      it('loads signed remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
+      });
+
+      it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+        // Public/unsigned remote thumbnails are cache-busted, so they must
+        // render without requiring a bucket CORS rule.
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: false,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
+      });
+
+      it('does not set crossOrigin for local assets', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isLocal: true,
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
       });
     });
 
@@ -295,17 +325,11 @@ describe('AssetsGrid', () => {
       expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
     });
 
-    it('shows empty state when there are no folders and no assets', () => {
-      setup({ folders: [], assets: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
-    });
-
     it('renders only folder items when there are no assets', () => {
       const folders = [createMockFolder(1, 'Photos')];
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
-      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
     });
   });
 });

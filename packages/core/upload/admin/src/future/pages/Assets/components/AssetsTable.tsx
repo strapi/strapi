@@ -97,11 +97,6 @@ const StyledTr = styled.tr<{
   }
 `;
 
-const StyledBodyTd = styled(RawTd)`
-  padding: ${({ theme }) => theme.spaces[4]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
 interface AssetPreviewCellProps {
   asset: File;
 }
@@ -329,6 +324,12 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
 
   const totalRows = folders.length + assets.length;
 
+  // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
+  // empty table renders nothing at all, not headers over an empty body.
+  if (totalRows === 0) {
+    return null;
+  }
+
   return (
     <StyledTable colCount={visibleHeaders.length} rowCount={totalRows + 1}>
       <StyledThead>
@@ -361,27 +362,12 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {totalRows === 0 ? (
-          <RawTr>
-            <StyledBodyTd colSpan={visibleHeaders.length}>
-              <Typography textColor="neutral600">
-                {formatMessage({
-                  id: 'app.components.EmptyStateLayout.content-document',
-                  defaultMessage: 'No content found',
-                })}
-              </Typography>
-            </StyledBodyTd>
-          </RawTr>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <FolderRow key={`folder-${folder.id}`} folder={folder} />
-            ))}
-            {assets.map((asset) => (
-              <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
-            ))}
-          </>
-        )}
+        {folders.map((folder) => (
+          <FolderRow key={`folder-${folder.id}`} folder={folder} />
+        ))}
+        {assets.map((asset) => (
+          <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
+        ))}
       </RawTbody>
     </StyledTable>
   );
