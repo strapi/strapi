@@ -1,4 +1,4 @@
-import { eq, remove, cloneDeep } from 'lodash/fp';
+import { eq, remove } from 'lodash/fp';
 
 export type Handler = (...args: any[]) => any;
 
@@ -99,7 +99,9 @@ const createAsyncParallelHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
   async call(context: unknown) {
-    const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
+    const promises = this.getHandlers().map((handler) =>
+      handler(globalThis.structuredClone(context))
+    );
 
     return Promise.all(promises);
   },

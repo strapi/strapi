@@ -6,17 +6,7 @@
  */
 
 import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import { get, isArray, isEmpty, isInteger, isNil, isObject, isString, toNumber } from 'lodash/fp';
 import {
   constants,
   hasDraftAndPublish,
@@ -670,7 +660,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     // Don't mutate the original object
-    const filtersCopy = cloneDeep(filters);
+    const filtersCopy = globalThis.structuredClone(filters);
 
     return convertAndSanitizeFilters(filtersCopy, schema);
   };

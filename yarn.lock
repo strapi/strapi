@@ -15584,17 +15584,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js-pure@npm:3.36.0":
+  version: 3.36.0
+  resolution: "core-js-pure@npm:3.36.0"
+  checksum: 10c0/1c5ecb37451bcebaa449e36285d27c4c79d5ff24b8bfd44491ce661cfc12b5c56471c847d306d21a56894338d00abea4993a6f8e07c71d4e887d1f71e410d22e
+  languageName: node
+  linkType: hard
+
 "core-js-pure@npm:^3.23.3":
   version: 3.38.1
   resolution: "core-js-pure@npm:3.38.1"
   checksum: 10c0/466adbc0468b8c2a95b9bc49829492dece2cc6584d757c5b38555a26ed3d71f8364ac1ea3128a0a949e004e0e60206cc535ed84320982c3efb9a40c1785ddcc6
-  languageName: node
-  linkType: hard
-
-"core-js@npm:3.36.0":
-  version: 3.36.0
-  resolution: "core-js@npm:3.36.0"
-  checksum: 10c0/62dcb41ba79ead581e4c5b2740ae18bfe6ee230e853893736d16edb01b580574d8645ff6c5513d1c75d59620f8451aee45c119d3c4f5ebc66cff5f003a816864
   languageName: node
   linkType: hard
 
@@ -29455,7 +29455,7 @@ __metadata:
     chokidar: "npm:3.6.0"
     coffee: "npm:5.5.1"
     commander: "npm:8.3.0"
-    core-js: "npm:3.36.0"
+    core-js-pure: "npm:3.36.0"
     create-strapi-app: "workspace:*"
     cross-env: "npm:7.0.3"
     dotenv: "npm:16.6.1"

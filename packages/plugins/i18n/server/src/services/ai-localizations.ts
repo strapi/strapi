@@ -361,7 +361,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             });
 
             // Start with AI-translated content
-            let mergedData = structuredClone(content);
+            let mergedData = globalThis.structuredClone(content);
 
             // Merge unsupported fields from existing derived doc (if exists) or source doc
             // This preserves media, booleans, enumerations, and relations at all levels

@@ -200,7 +200,7 @@ const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyD
     delete acc[key];
 
     return acc;
-  }, structuredClone(data));
+  }, globalThis.structuredClone(data));
 
   return revisedData;
 };
