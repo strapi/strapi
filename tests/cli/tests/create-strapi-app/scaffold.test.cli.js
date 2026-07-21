@@ -136,6 +136,8 @@ describe('create-strapi-app', () => {
       expect(fs.existsSync(path.join(projectDir, '.npmrc'))).toBe(false);
 
       const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      // Templates import @strapi/database directly; must be a direct dep for pnpm (#26949)
+      expect(pkg.dependencies['@strapi/database']).toBe(pkg.dependencies['@strapi/strapi']);
       // Align with @strapi/* peer ranges so strict npm peer resolution succeeds
       expect(pkg.dependencies['react-router-dom']).toBe('^6.30.3');
       expect(pkg.dependencies.react).toBe('^18.0.0');
