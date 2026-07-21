@@ -46,10 +46,8 @@ const config = {
     ],
     'no-restricted-globals': [
       'error',
-      {
-        name: 'strapi',
-        message: 'Use window.strapi instead.',
-      },
+      { name: 'strapi', message: 'Use window.strapi instead.' },
+      { name: 'structuredClone', message: 'Use globalThis.structuredClone instead.' },
     ],
     'react/display-name': 'off',
   },

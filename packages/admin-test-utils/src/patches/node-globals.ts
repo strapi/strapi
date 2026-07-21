@@ -69,7 +69,7 @@ const NODE_GLOBALS = Object.freeze({
   fetch,
   AbortController,
   AbortSignal,
-  structuredClone,
+  structuredClone: globalThis.structuredClone,
   BroadcastChannel,
 } as const);
 

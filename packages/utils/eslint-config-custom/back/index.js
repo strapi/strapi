@@ -43,6 +43,10 @@ const config = {
         props: false,
       },
     ],
+    'no-restricted-globals': [
+      'error',
+      { name: 'structuredClone', message: 'Use globalThis.structuredClone instead.' },
+    ],
   },
 };
 
