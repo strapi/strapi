@@ -35,6 +35,7 @@ interface ComponentCategoryProps {
 interface ComponentPreviewImageProps {
   src: string;
   alt: string;
+  onError?: React.ReactEventHandler<HTMLImageElement>;
 }
 
 /**
@@ -43,7 +44,7 @@ interface ComponentPreviewImageProps {
  * Uses a controlled Popover anchored to the thumbnail — the content is portaled, so it escapes
  * the accordion's overflow clipping.
  */
-const ComponentPreviewImage = ({ src, alt }: ComponentPreviewImageProps) => {
+const ComponentPreviewImage = ({ src, alt, onError }: ComponentPreviewImageProps) => {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -59,6 +60,7 @@ const ComponentPreviewImage = ({ src, alt }: ComponentPreviewImageProps) => {
           style={{ objectFit: 'cover' }}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
+          onError={onError}
         />
       </Popover.Anchor>
       <Popover.Content
@@ -83,6 +85,32 @@ const ComponentPreviewImage = ({ src, alt }: ComponentPreviewImageProps) => {
         </Box>
       </Popover.Content>
     </Popover.Root>
+  );
+};
+
+interface ComponentTileVisualProps {
+  previewUrl?: string;
+  icon?: string;
+  displayName: string;
+}
+
+/**
+ * Holds per-tile load-error state: when the preview image fails to load (missing file,
+ * unreachable CDN…), the tile falls back to the component icon instead of a broken image.
+ */
+const ComponentTileVisual = ({ previewUrl, icon, displayName }: ComponentTileVisualProps) => {
+  const [hasLoadError, setHasLoadError] = React.useState(false);
+
+  if (!previewUrl || hasLoadError) {
+    return <ComponentIcon color="currentColor" background="primary200" icon={icon} />;
+  }
+
+  return (
+    <ComponentPreviewImage
+      src={previewUrl}
+      alt={displayName}
+      onError={() => setHasLoadError(true)}
+    />
   );
 };
 
@@ -128,11 +156,11 @@ const ComponentCategory = ({
                   paddingLeft={2}
                   paddingRight={2}
                 >
-                  {previewUrl ? (
-                    <ComponentPreviewImage src={previewUrl} alt={displayName} />
-                  ) : (
-                    <ComponentIcon color="currentColor" background="primary200" icon={icon} />
-                  )}
+                  <ComponentTileVisual
+                    previewUrl={previewUrl}
+                    icon={icon}
+                    displayName={displayName}
+                  />
 
                   <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
                     <Typography variant="pi" fontWeight="bold" ellipsis width="100%">

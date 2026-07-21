@@ -1,5 +1,5 @@
 import { Accordion } from '@strapi/design-system';
-import { render as renderRTL, waitFor } from '@tests/utils';
+import { fireEvent, render as renderRTL, waitFor } from '@tests/utils';
 
 import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory';
 
@@ -95,6 +95,25 @@ describe('ComponentCategory', () => {
 
     const thumbnail = getByAltText('myComponent');
     expect(thumbnail).toHaveAttribute('src', '/uploads/hero_preview_abc123.png');
+  });
+
+  it('should fall back to the component icon when the preview image fails to load', async () => {
+    const { user, getByRole, getByAltText, queryByAltText } = render({
+      components: [
+        {
+          uid: 'test.test',
+          displayName: 'myComponent',
+          icon: 'test',
+          preview: '/_component-screenshots/broken.png',
+        },
+      ],
+    });
+
+    await user.click(getByRole('button', { name: /testing/i }));
+
+    fireEvent.error(getByAltText('myComponent'));
+
+    expect(queryByAltText('myComponent')).not.toBeInTheDocument();
   });
 
   it('should fall back to the component icon (no image) when no preview is provided', async () => {
