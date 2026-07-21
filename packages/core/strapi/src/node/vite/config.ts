@@ -76,10 +76,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'invariant',
         // UMD; without pre-bundling plugin chunks get empty namespace → "Prism is not defined" (#26964).
         'prismjs',
-        // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
-        // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
-        // projects blank-crash the admin (#25070, #26964).
-        'prismjs/components/*.js',
+        // Do NOT add `prismjs/components/*.js` to include. #26978 prebundled every language for
+        // all apps; combined with #27014's optimizeDeps contract, Vite evaluates those chunks in
+        // reverse import order so parents (e.g. basic before vbnet) load too late →
+        // `Cannot set properties of undefined (setting 'comment')` and a blank admin in develop.
+        // Keep `prismjs` only; let language components load as normal ESM side-effect imports.
         // CodeMirror must be a single instance across design-system, lang-json and uiw or the
         // JSON custom field crashes on instanceof checks. Pre-bundle for every build — dev and
         // production — not only monorepo examples. Use the resolvable subset so include stays in
