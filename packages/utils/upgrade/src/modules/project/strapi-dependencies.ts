@@ -96,7 +96,16 @@ export const pinStrapiDependencies = (
     ...asDependencyRecord(packageJSON.devDependencies),
   };
 
-  for (const { name, section } of unpinned) {
+  const pinMajor = semver.major(pinVersion);
+
+  for (const { name, section, declaredVersion } of unpinned) {
+    // Skip packages whose major version differs from the pin target.
+    // E.g. @strapi/design-system (^2.x) should not be pinned to v5.x.
+    const rangeMin = semver.minVersion(declaredVersion);
+    if (rangeMin && semver.major(rangeMin.version) !== pinMajor) {
+      continue;
+    }
+
     if (section === 'dependencies') {
       dependencies[name] = pinVersion;
     } else {
