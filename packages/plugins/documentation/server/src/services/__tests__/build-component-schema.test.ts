@@ -1,47 +1,52 @@
 import buildComponentSchema from '../helpers/build-component-schema';
 
-const strapi = {
-  plugins: {
-    'users-permissions': {
-      contentTypes: {
-        role: {
-          attributes: {
-            test: {
-              type: 'string',
+// Factory returns a fresh mock per test — the mock exposes methods (functions),
+// so it can't be structuredClone'd, and a factory avoids shared mutable state
+// between tests without needing a deep clone at all.
+const createStrapiMock = () => {
+  return {
+    plugins: {
+      'users-permissions': {
+        contentTypes: {
+          role: {
+            attributes: {
+              test: {
+                type: 'string',
+              },
             },
           },
         },
-      },
-      routes: {
-        'content-api': {
-          routes: [],
-        },
-      },
-    },
-  },
-  apis: {
-    restaurant: {
-      contentTypes: {
-        restaurant: {
-          attributes: {
-            test: {
-              type: 'string',
-            },
+        routes: {
+          'content-api': {
+            routes: [],
           },
         },
       },
-      routes: {
-        restaurant: { routes: [] },
+    },
+    apis: {
+      restaurant: {
+        contentTypes: {
+          restaurant: {
+            attributes: {
+              test: {
+                type: 'string',
+              },
+            },
+          },
+        },
+        routes: {
+          restaurant: { routes: [] },
+        },
       },
     },
-  },
-  contentType: () => ({ info: {}, attributes: { test: { type: 'string' } } }),
-} as any;
+    contentType: () => ({ info: {}, attributes: { test: { type: 'string' } } }),
+  } as any;
+};
 
 describe('Documentation plugin | Build component schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
-    global.strapi = globalThis.structuredClone(strapi);
+    global.strapi = createStrapiMock();
   });
 
   afterAll(() => {
