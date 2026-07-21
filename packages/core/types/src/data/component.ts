@@ -13,7 +13,19 @@ import type * as UID from '../uid';
 export type Component<
   TComponentUID extends UID.Component = UID.Component,
   TComponentKeys extends AttributeNames<TComponentUID> = AttributeNames<TComponentUID>,
-> = Intersect<[{ id: ID }, Pick<AttributeValues<TComponentUID>, TComponentKeys>]>;
+> = Intersect<
+  [
+    {
+      id: ID;
+      /**
+       * Durable identity for this component instance across draft/publish clones.
+       * Prefer this over `id` for Content API round-trips when Draft & Publish is enabled.
+       */
+      componentKey?: string;
+    },
+    Pick<AttributeValues<TComponentUID>, TComponentKeys>,
+  ]
+>;
 
 /**
  * @internal

@@ -288,9 +288,16 @@ export const transformContentTypesToModels = (
         ? { documentId: { type: 'string', default: createDocumentId } }
         : {};
 
+    // Durable identity for component instances across draft/publish clones.
+    // Copied on publish/clone (same value on both status rows); numeric `id` stays row-local.
+    const componentKeyAttribute: Record<string, Schema.Attribute.AnyAttribute> =
+      contentType.modelType === 'component'
+        ? { componentKey: { type: 'string', default: createDocumentId } }
+        : {};
+
     // TODO: this needs to be combined with getReservedNames, we should not be maintaining two lists
-    // Prevent user from creating a documentId attribute
-    const reservedAttributeNames = ['document_id', identifiers.ID_COLUMN];
+    // Prevent user from creating a documentId / componentKey attribute
+    const reservedAttributeNames = ['document_id', 'component_key', identifiers.ID_COLUMN];
     Object.keys(contentType.attributes || {}).forEach((attributeName) => {
       const snakeCasedAttributeName = _.snakeCase(attributeName);
       if (reservedAttributeNames.includes(snakeCasedAttributeName)) {
@@ -314,6 +321,7 @@ export const transformContentTypesToModels = (
           type: 'increments',
         },
         ...documentIdAttribute,
+        ...componentKeyAttribute,
         ...transformAttributes(contentType, identifiers),
       },
       indexes: contentType.indexes as Model['indexes'],
