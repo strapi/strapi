@@ -65,6 +65,41 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       };
     },
 
+    async findManyUsers(query: { page?: number | string; pageSize?: number | string }) {
+      const { page = 1, pageSize = 10 } = query;
+
+      const userAttribute = strapi.db.metadata.get('admin::audit-log').attributes.user;
+
+      if (
+        userAttribute?.type !== 'relation' ||
+        !('joinTable' in userAttribute) ||
+        !userAttribute.joinTable ||
+        !('inverseJoinColumn' in userAttribute.joinTable)
+      ) {
+        throw new Error('The audit log user relation is expected to use a join table');
+      }
+
+      const { joinTable } = userAttribute;
+
+      const authorIds = await strapi.db
+        .connection(joinTable.name)
+        .distinct(joinTable.inverseJoinColumn.name)
+        .pluck(joinTable.inverseJoinColumn.name);
+
+      const { results, pagination } = await strapi.db.query('admin::user').findPage({
+        select: ['id', 'email', 'username', 'firstname', 'lastname'],
+        where: { id: { $in: authorIds } },
+        orderBy: { id: 'asc' },
+        page: Number(page),
+        pageSize: Number(pageSize),
+      });
+
+      return {
+        results: results.map(getSanitizedUser),
+        pagination,
+      };
+    },
+
     async findOne(id: unknown) {
       const result: any = await strapi.db.query('admin::audit-log').findOne({
         where: { id },

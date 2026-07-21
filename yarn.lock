@@ -2846,19 +2846,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/state@npm:6.7.1, @codemirror/state@npm:^6.6.0":
+"@codemirror/state@npm:6.7.1, @codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.2.0, @codemirror/state@npm:^6.6.0":
   version: 6.7.1
   resolution: "@codemirror/state@npm:6.7.1"
   dependencies:
     "@marijn/find-cluster-break": "npm:^1.0.0"
   checksum: 10c0/2490b87759d1f4f27f4573a084414bf30bf9ed5dccaa75485334a2d132c039f2255e3bca564fb07c6760a16bf86cc29532475d9fb75cfdb0771b330fe71be4e7
-  languageName: node
-  linkType: hard
-
-"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.1, @codemirror/state@npm:^6.1.4, @codemirror/state@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@codemirror/state@npm:6.2.0"
-  checksum: 10c0/9e1569b3b01a80e634a97816adc82ba938d36d0a0626c82d7ff74faecfd9e1b94b29de58564e0d40b702ac833de34e96448f4ee5c148b68f33c8d7e1c23a3b1b
   languageName: node
   linkType: hard
 
@@ -2874,7 +2867,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:6.43.0":
+"@codemirror/view@npm:6.43.0, @codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.6.0":
   version: 6.43.0
   resolution: "@codemirror/view@npm:6.43.0"
   dependencies:
@@ -2883,17 +2876,6 @@ __metadata:
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
   checksum: 10c0/87d0db936c1148bd573994062d9109b284e1dc023af1db3490c6f27043cd840f91b63b56adfd6763a71c6ac17b9cd98adda92d41cae6d209efe5bc5133c689a3
-  languageName: node
-  linkType: hard
-
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.6.0":
-  version: 6.7.3
-  resolution: "@codemirror/view@npm:6.7.3"
-  dependencies:
-    "@codemirror/state": "npm:^6.1.4"
-    style-mod: "npm:^4.0.0"
-    w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/eaf24f14699e6fb92c9d794acc2a04e18a7a8937d16c93bd3b7ebbe5450a4842a87c1da1f0ef0cc58f14d3933ab40fae0e953105c91140ccd1b1221fdcf330ab
   languageName: node
   linkType: hard
 
@@ -10074,13 +10056,13 @@ __metadata:
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
     "@strapi/utils": "npm:5.50.2"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.2"
     form-data: "npm:4.0.6"
-    jest: "npm:29.6.0"
     mailgun.js: "npm:10.2.1"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
@@ -14467,30 +14449,21 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^1.1.7":
-  version: 1.1.14
-  resolution: "brace-expansion@npm:1.1.14"
+  version: 1.1.16
+  resolution: "brace-expansion@npm:1.1.16"
   dependencies:
     balanced-match: "npm:^1.0.0"
     concat-map: "npm:0.0.1"
-  checksum: 10c0/b6fdac832bc4e36a753658c9ed052c2e1a2be221763b002df25d1efbf7d21724334e726a6cd5eadc72a4b19ec3efb632d629cc003bc9c62f7af7a7915ffa4385
+  checksum: 10c0/b2a915bbedbf4e45840d1fb9a4d391bbf26a79475bd134714d3cee34f1f0edb0ce982738028843be5fbaf8039429f71fa487df8c915b6065ced542c83e58fae6
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^2.0.1":
+"brace-expansion@npm:^2.0.1, brace-expansion@npm:^2.0.2":
   version: 2.1.0
   resolution: "brace-expansion@npm:2.1.0"
   dependencies:
     balanced-match: "npm:^1.0.0"
   checksum: 10c0/439cedf3e23d7993b37919f1d6fdc653ec21a42437ec3e7460bea9ca8b17edf7a24a633273c31d61aa4335877cf29a443f1871814131c87997a1e6223e1f1502
-  languageName: node
-  linkType: hard
-
-"brace-expansion@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "brace-expansion@npm:2.0.2"
-  dependencies:
-    balanced-match: "npm:^1.0.0"
-  checksum: 10c0/6d117a4c793488af86b83172deb6af143e94c17bc53b0b3cec259733923b4ca84679d506ac261f4ba3c7ed37c46018e2ff442f9ce453af8643ecd64f4a54e6cf
   languageName: node
   linkType: hard
 
