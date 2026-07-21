@@ -12,17 +12,18 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../services/folders';
+import {
+  useBulkMoveMutation,
+  useGetFolderQuery,
+  useGetFolderStructureQuery,
+} from '../../../services/folders';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
+import { canDropItemOnFolder } from '../../../utils/canDropItemOnFolder';
 import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
-import { formatMoveSuccessMessage } from '../../../utils/formatMoveSuccessMessage';
 import { getBulkMoveErrorMessage } from '../../../utils/getBulkMoveErrorMessage';
-import { getFolderLabel } from '../../../utils/getFolderLabel';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
-
-import { computeValidDropTargets } from './Dnd/computeValidDropTargets';
 
 const StyledModalContent = styled(Modal.Content)`
   max-width: 51.6rem;
@@ -46,6 +47,10 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
   const { data: folderStructure = [] } = useGetFolderStructureQuery(undefined, { skip: !open });
+  const { data: currentFolder } = useGetFolderQuery(
+    { id: currentFolderId! },
+    { skip: currentFolderId === null }
+  );
   const [bulkMove, { isLoading: isMoving }] = useBulkMoveMutation();
 
   // '' is the DOM-only sentinel for the Media Library root (null everywhere else).
@@ -62,30 +67,33 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
     defaultMessage: 'Media Library',
   });
 
-  // The dialog options are just another view of the drag highlight's valid-drop
-  // set: reconstruct the selection as a drag set and run it through the same
-  // canonical `canDropItemOnFolder` predicate (via `computeValidDropTargets`).
-  // This drops not only the selected folders/descendants but also destinations
-  // where the items already live (e.g. the current folder) so the dialog can't
-  // offer a no-op move.
-  const validDestinationIds = useMemo(
-    () =>
-      computeValidDropTargets(
-        buildDragSetFromSelection(selectedIds, selectedFolderIds, currentFolderId),
-        folderStructure
-      ),
-    [selectedIds, selectedFolderIds, currentFolderId, folderStructure]
+  // Reconstruct the selection as a drag set so the dialog validates destinations
+  // through the exact same canonical predicate as the DnD highlight.
+  const dragSet = useMemo(
+    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, currentFolderId),
+    [selectedIds, selectedFolderIds, currentFolderId]
   );
 
-  // Labels carry the full ancestry ("About / Images" vs "Tech / Images") so
+  // Options carry the full ancestry ("About / Images" vs "Tech / Images") so
   // same-named folders stay distinguishable, listed depth-first under their
-  // parent. Memoized: large libraries shouldn't re-walk the tree on every render.
+  // parent. Selected folders and their descendants are pruned during the same
+  // single walk — an item can't be moved into itself or below itself (the
+  // server would reject it). The current folder (where the items already live)
+  // is filtered out too via `canDropItemOnFolder`, so we never offer a no-op
+  // move. Memoized: large libraries shouldn't re-walk the tree on every render.
   const destinationOptions = useMemo(
     () =>
-      flattenFolderStructure(folderStructure).filter((option) =>
-        validDestinationIds.has(option.id)
+      flattenFolderStructure(folderStructure, selectedFolderIds).filter((option) =>
+        canDropItemOnFolder({ items: dragSet, targetFolderId: option.id, folderStructure })
       ),
-    [folderStructure, validDestinationIds]
+    [folderStructure, selectedFolderIds, dragSet]
+  );
+
+  // Hide the root option when the items already live at root — dropping there
+  // would be a no-op. Uses the same predicate as the DnD highlight.
+  const canMoveToRoot = useMemo(
+    () => canDropItemOnFolder({ items: dragSet, targetFolderId: null, folderStructure }),
+    [dragSet, folderStructure]
   );
 
   const count = selectedIds.size + selectedFolderIds.size;
@@ -121,14 +129,23 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
       return;
     }
 
+    const sourceName = currentFolderId === null ? rootLabel : (currentFolder?.name ?? rootLabel);
+    const destinationName =
+      destinationFolderId === null
+        ? rootLabel
+        : (destinationOptions.find((option) => option.id === destinationFolderId)?.label ??
+          rootLabel);
+
     toggleNotification({
       type: 'success',
-      message: formatMoveSuccessMessage({
-        formatMessage,
-        count,
-        source: getFolderLabel(folderStructure, currentFolderId, rootLabel),
-        destination: getFolderLabel(folderStructure, destinationFolderId, rootLabel),
-      }),
+      message: formatMessage(
+        {
+          id: getTranslationKey('list.bulk-actions.move.success'),
+          defaultMessage:
+            '{count, plural, =1 {# element has} other {# elements have}} been moved from {source} to {destination}',
+        },
+        { count, source: sourceName, destination: destinationName }
+      ),
     });
     clear();
     onClose();
@@ -167,9 +184,7 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
               onChange={(value) => setDestination(String(value))}
               disabled={isMoving}
             >
-              {validDestinationIds.has(null) && (
-                <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
-              )}
+              {canMoveToRoot && <SingleSelectOption value="">{rootLabel}</SingleSelectOption>}
               {destinationOptions.map((option) => (
                 <SingleSelectOption key={option.id} value={String(option.id)}>
                   {option.label}

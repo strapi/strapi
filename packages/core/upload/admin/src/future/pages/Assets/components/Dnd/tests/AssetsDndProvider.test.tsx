@@ -75,6 +75,12 @@ const ValidityProbe = ({ targetId }: { targetId: number | null }) => {
   return <div data-testid="valid-target">{String(isValidDropTarget(targetId))}</div>;
 };
 
+const RootValidityProbe = () => {
+  const { isValidDropTarget } = useAssetsDnd();
+
+  return <div data-testid="valid-root-target">{String(isValidDropTarget(null))}</div>;
+};
+
 const SelectionProbe = () => {
   const { selectedKeys } = useAssetSelection();
 
@@ -136,16 +142,18 @@ const fileDragStartEvent: DragStartEvent = {
   active: validDragEndEvent.active,
 };
 
-const setup = (ui?: React.ReactNode) =>
+const setup = (ui?: React.ReactNode, options?: Parameters<typeof render>[1]) =>
   render(
     <AssetSelectionProvider>
       <AssetsDndProvider>
         <MovePendingProbe />
         <ValidityProbe targetId={2} />
+        <RootValidityProbe />
         <SelectionProbe />
         {ui}
       </AssetsDndProvider>
-    </AssetSelectionProvider>
+    </AssetSelectionProvider>,
+    options
   );
 
 describe('AssetsDndProvider', () => {
@@ -396,7 +404,8 @@ describe('AssetsDndProvider', () => {
     });
 
     it('does not call bulkMove when dropping a file onto its current folder', async () => {
-      setup();
+      // The current folder is 2, so a drop onto folder 2 is a no-op.
+      setup(undefined, { initialEntries: [{ search: '?folder=2' }] });
 
       await act(async () => {
         triggerDragStart?.({
@@ -479,7 +488,8 @@ describe('AssetsDndProvider', () => {
     });
 
     it('calls bulkMove with null destination when dropping onto Home', async () => {
-      setup();
+      // The current folder is 5, so dropping onto Home (root) is a real move.
+      setup(undefined, { initialEntries: [{ search: '?folder=5' }] });
 
       await act(async () => {
         triggerDragStart?.(fileDragStartEvent);
@@ -507,6 +517,135 @@ describe('AssetsDndProvider', () => {
           destinationFolderId: null,
         });
       });
+    });
+
+    it('treats Home as a valid drop when dragging items out of a subfolder', async () => {
+      // currentFolderId = 2 (a subfolder). The dragged folder's own parentId is
+      // null (unpopulated by the folders query) but the drag set is stamped with
+      // the current folder, so Home (root) is a legitimate destination.
+      setup(undefined, { initialEntries: [{ search: '?folder=2' }] });
+
+      await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: null,
+              },
+            },
+            rect: { current: { initial: null, translated: null } },
+          },
+        });
+      });
+
+      // Home highlights as a valid target for the current drag set.
+      await waitFor(() => {
+        expect(screen.getByTestId('valid-root-target')).toHaveTextContent('true');
+      });
+
+      await act(async () => {
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: null,
+              },
+            },
+          },
+          over: {
+            id: 'folder-tree-target:home',
+            data: {
+              current: {
+                kind: 'folder-tree-target',
+                id: null,
+                name: 'Home',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: [],
+          folderIds: [3],
+          destinationFolderId: null,
+        });
+      });
+    });
+
+    it('rejects dropping a select-all set (with a folder active) back onto its current folder', async () => {
+      // Reproduces the reviewer's "tricky" case: select-all in folder 2, then
+      // grab a folder tile whose parentId is unpopulated (null). Without the
+      // current-folder stamp, the set would look like it lives at root and the
+      // no-op guard for folder 2 would never match.
+      const { user } = setup(<SeedSelection keys={[folderKey(3), assetKey(10)]} />, {
+        initialEntries: [{ search: '?folder=2' }],
+      });
+
+      await user.click(screen.getByTestId('seed-selection'));
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+
+      await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: null,
+              },
+            },
+            rect: { current: { initial: null, translated: null } },
+          },
+        });
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: null,
+              },
+            },
+          },
+          over: {
+            id: 'folder-target:2',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 2,
+                name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
     });
 
     it('does not call bulkMove when dropping a root item onto Home', async () => {

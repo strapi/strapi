@@ -160,11 +160,11 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
         return;
       }
 
-      const { items, fromSelection } = buildDragSet(data, selection?.selectedKeys);
+      const { items, fromSelection } = buildDragSet(data, selection?.selectedKeys, currentFolderId);
       dragSessionRef.current = { items, fromSelection };
       setDragItems(items);
     },
-    [clearDragState, selection?.selectedKeys]
+    [clearDragState, currentFolderId, selection?.selectedKeys]
   );
 
   const handleDragEnd = useCallback(
@@ -290,7 +290,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           return '';
         }
 
-        const { items } = buildDragSet(activeData, selection?.selectedKeys);
+        const { items } = buildDragSet(activeData, selection?.selectedKeys, currentFolderId);
 
         if (
           !canDropItemOnFolder({
@@ -313,7 +313,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           defaultMessage: 'Drag cancelled.',
         }),
     }),
-    [folderStructure, formatMessage, selection?.selectedKeys]
+    [currentFolderId, folderStructure, formatMessage, selection?.selectedKeys]
   );
 
   return (
