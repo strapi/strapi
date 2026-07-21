@@ -1,6 +1,5 @@
 import http from 'node:http';
 
-import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
@@ -57,15 +56,6 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     expect(alias?.invariant).toEqual(expect.any(String));
     expect(alias?.prismjs).toEqual(expect.any(String));
     expect(alias?.lodash).toEqual(expect.any(String));
-
-    // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
-    // field keeps a single instance (JSONInput instanceof checks)
-    expect(config.optimizeDeps?.include).toEqual(
-      expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
-    );
-    for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
-      expect(alias?.[mod]).toEqual(expect.any(String));
-    }
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());

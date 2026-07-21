@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import readPkgUp from 'read-pkg-up';
 
-import { ADMIN_VITE_ALIAS_MODULES, ADMIN_VITE_SINGLETON_MODULES } from './admin-vite-alias-modules';
+import { ADMIN_VITE_ALIAS_MODULES } from './admin-vite-alias-modules';
 import { getModule, type PackageJson } from './dependencies';
 import type { PluginMeta } from './plugins';
 
@@ -15,14 +15,8 @@ const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
  * The admin entry host (@strapi/strapi) must never land in optimizeDeps.exclude (#26944, #27014).
  * CJS-only deps imported by @strapi/admin (e.g. invariant, lodash) belong in optimizeDeps.include
  * (see vite/config.ts — #26964, #26944, #27014).
- * The CodeMirror singletons (e.g. @uiw/react-codemirror — ESM with a React peer) match the
- * exclude heuristic but must stay pre-bundled so the admin keeps a single instance
  */
-const PINNED_OPTIMIZE_MODULES = new Set<string>([
-  ...ADMIN_VITE_ALIAS_MODULES,
-  ...ADMIN_VITE_SINGLETON_MODULES,
-  '@strapi/strapi',
-]);
+const PINNED_OPTIMIZE_MODULES = new Set<string>([...ADMIN_VITE_ALIAS_MODULES, '@strapi/strapi']);
 
 const isOfficialStrapiPackage = (name: string): boolean => name.startsWith('@strapi/');
 

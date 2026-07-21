@@ -2,10 +2,7 @@ import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
-import {
-  buildAdminViteResolveAliases,
-  getResolvableSingletonModules,
-} from '../core/admin-vite-aliases';
+import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -80,11 +77,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
         // projects blank-crash the admin (#25070, #26964).
         'prismjs/components/*.js',
-        // CodeMirror must be a single instance across design-system, lang-json and uiw or the
-        // JSON custom field crashes on instanceof checks. Pre-bundle for every build — dev and
-        // production — not only monorepo examples. Use the resolvable subset so include stays in
-        // lockstep with resolve.alias (an unresolvable singleton must not be forced into pre-bundling).
-        ...getResolvableSingletonModules(),
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why

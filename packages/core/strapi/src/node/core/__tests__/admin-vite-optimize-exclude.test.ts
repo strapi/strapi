@@ -6,10 +6,7 @@ import {
   shipsPreBuiltDist,
   shouldExcludeFromOptimizeDeps,
 } from '../admin-vite-optimize-exclude';
-import {
-  ADMIN_VITE_ALIAS_MODULES,
-  ADMIN_VITE_SINGLETON_MODULES,
-} from '../admin-vite-alias-modules';
+import { ADMIN_VITE_ALIAS_MODULES } from '../admin-vite-alias-modules';
 import { getModule } from '../dependencies';
 import type { PluginMeta } from '../plugins';
 
@@ -24,11 +21,7 @@ jest.mock('read-pkg-up', () => ({
 
 const readPkgUp = jest.requireMock('read-pkg-up').default as jest.Mock;
 
-const PINNED_OPTIMIZE_MODULES = [
-  ...ADMIN_VITE_ALIAS_MODULES,
-  ...ADMIN_VITE_SINGLETON_MODULES,
-  '@strapi/strapi',
-] as const;
+const PINNED_OPTIMIZE_MODULES = [...ADMIN_VITE_ALIAS_MODULES, '@strapi/strapi'] as const;
 
 const preBuiltReactPeerPackage = (name: string) => ({
   name,
@@ -254,34 +247,6 @@ describe('collectAdminOptimizeDepsExclude', () => {
     });
 
     await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([]);
-  });
-
-  it('never auto-excludes CodeMirror singletons even though @uiw/react-codemirror matches the heuristic', async () => {
-    // @uiw/react-codemirror is ESM, ships dist and has a React peer — it matches
-    // shouldExcludeFromOptimizeDeps, so the singleton guard is what keeps it pre-bundled
-    expect(shouldExcludeFromOptimizeDeps(preBuiltReactPeerPackage('@uiw/react-codemirror'))).toBe(
-      true
-    );
-
-    readPkgUp.mockResolvedValue({
-      packageJson: {
-        dependencies: Object.fromEntries(
-          ADMIN_VITE_SINGLETON_MODULES.map((moduleName) => [moduleName, '1.0.0'])
-        ),
-      },
-    });
-
-    getModuleMock.mockImplementation(async (name: string) => {
-      if (
-        ADMIN_VITE_SINGLETON_MODULES.includes(name as (typeof ADMIN_VITE_SINGLETON_MODULES)[number])
-      ) {
-        return preBuiltReactPeerPackage(name);
-      }
-
-      return null;
-    });
-
-    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
   });
 
   it('does not exclude @strapi/strapi or alias modules for a typical consumer app', async () => {
