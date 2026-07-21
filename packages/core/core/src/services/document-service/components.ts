@@ -475,14 +475,16 @@ const createComponent = async <TUID extends UID.Component>(
     // Make sure we don't save the component with a pre-defined ID
     omit('id'),
     // Preserve componentKey on publish/clone; mint one on first create
-    (value: Input<TUID>) => ({
-      ...value,
-      componentKey:
-        typeof (value as { componentKey?: string }).componentKey === 'string' &&
-        (value as { componentKey?: string }).componentKey
-          ? (value as { componentKey: string }).componentKey
-          : createDocumentId(),
-    }),
+    (value: Input<TUID>) => {
+      const existingKey = (value as unknown as { componentKey?: string }).componentKey;
+      return {
+        ...value,
+        componentKey:
+          typeof existingKey === 'string' && existingKey.length > 0
+            ? existingKey
+            : createDocumentId(),
+      };
+    },
     assignComponentData(schema, componentData)
   );
 

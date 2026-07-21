@@ -283,15 +283,18 @@ export const transformContentTypesToModels = (
 
     // Add document id to content types
     // as it is not documented
+    // NOTE: this helper also receives component schemas at runtime (see Strapi bootstrap),
+    // even though LoadedContentTypeModel is typed as ContentTypeSchema only.
+    const modelType = (contentType as { modelType: string }).modelType;
     const documentIdAttribute: Record<string, Schema.Attribute.AnyAttribute> =
-      contentType.modelType === 'contentType'
+      modelType === 'contentType'
         ? { documentId: { type: 'string', default: createDocumentId } }
         : {};
 
     // Durable identity for component instances across draft/publish clones.
     // Copied on publish/clone (same value on both status rows); numeric `id` stays row-local.
     const componentKeyAttribute: Record<string, Schema.Attribute.AnyAttribute> =
-      contentType.modelType === 'component'
+      modelType === 'component'
         ? { componentKey: { type: 'string', default: createDocumentId } }
         : {};
 
@@ -334,7 +337,7 @@ export const transformContentTypesToModels = (
     // Keep the exact same name/columns schema sync already produced so existing databases
     // see no index diff on upgrade (a rename would orphan the old index, since the schema
     // builder's dropIndex is a silent no-op unless forceMigration is enabled).
-    if (contentType.modelType === 'contentType') {
+    if (modelType === 'contentType') {
       model.indexes = [
         ...(model.indexes || []),
         {
