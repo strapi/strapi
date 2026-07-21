@@ -18,7 +18,7 @@ const LanguageProvider = ({ children, messages }: LanguageProviderProps) => {
   const locale = useTypedSelector((state) => state.admin_app.language.locale);
   const appMessages = defaultsDeep(messages[locale], messages.en);
 
-  const hasWarnedRef = React.useRef(false);
+  const warnedKeysRef = React.useRef(new Set<string>());
 
   const shouldLogMissingTranslations =
     process.env.NODE_ENV !== 'production' &&
@@ -27,12 +27,12 @@ const LanguageProvider = ({ children, messages }: LanguageProviderProps) => {
   const handleIntlError = React.useCallback(
     (err: Parameters<NonNullable<React.ComponentProps<typeof IntlProvider>['onError']>>[0]) => {
       if (err.code === ReactIntlErrorCode.MISSING_TRANSLATION) {
-        if (shouldLogMissingTranslations && !hasWarnedRef.current) {
-          hasWarnedRef.current = true;
+        if (shouldLogMissingTranslations && !warnedKeysRef.current.has(err.message)) {
+          warnedKeysRef.current.add(err.message);
 
           console.warn(
-            '[react-intl] Missing translations detected. English fallback messages are being used. ' +
-              'Set STRAPI_ADMIN_LOG_MISSING_TRANSLATIONS=true to see this warning (dev only).'
+            `[react-intl] Missing translation detected. English fallback message is being used. ${err.message} ` +
+              'Set STRAPI_ADMIN_LOG_MISSING_TRANSLATIONS=true to see these warnings (dev only).'
           );
         }
 
