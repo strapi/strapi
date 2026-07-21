@@ -289,6 +289,7 @@ export const attributeTypes = {
       target: yup.string().required(errorsTrads.required.id),
       relation: yup.string().required(),
       type: yup.string().required(),
+      required: validators.required(),
       targetAttribute: yup.lazy(() => {
         const relationType = getRelationType(modifiedData.relation!, modifiedData.targetAttribute);
 
