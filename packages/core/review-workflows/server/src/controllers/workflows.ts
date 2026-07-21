@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { update, map, property } from 'lodash/fp';
+import { update, map } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';

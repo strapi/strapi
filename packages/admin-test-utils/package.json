@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "5.49.0",
+  "version": "5.50.2",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -73,8 +73,8 @@
     "watch:code": "run -T rollup -c -w",
     "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit"
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json"
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
@@ -85,15 +85,18 @@
   },
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
+    "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
-    "eslint-config-custom": "5.49.0",
+    "eslint-config-custom": "5.50.2",
     "jest-environment-jsdom": "29.6.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "styled-components": "6.4.1",
-    "tsconfig": "5.49.0"
+    "tsconfig": "5.50.2"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^6.0.0",
     "jest-environment-jsdom": "^29.0.0",
     "styled-components": "^6.0.0"
   },
