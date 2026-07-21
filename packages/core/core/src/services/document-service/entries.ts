@@ -1,5 +1,6 @@
 import type { UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
+import { createId as createDocumentId } from '@paralleldrive/cuid2';
 import { assoc, omit } from 'lodash/fp';
 
 import * as components from './components';
@@ -16,8 +17,33 @@ const createEntriesService = (
 ) => {
   const contentType = strapi.contentType(uid);
 
+  const removeNilDocumentId = (data: any) => {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    if (data.documentId !== null && data.documentId !== undefined) {
+      return data;
+    }
+
+    return omit('documentId', data);
+  };
+
+  const assignGeneratedDocumentId = (data: any) => {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    if (data.documentId !== null && data.documentId !== undefined) {
+      return data;
+    }
+
+    return assoc('documentId', createDocumentId(), data);
+  };
+
   async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: transformedData, ...restParams } = await transformParamsDocumentId(uid, params);
+    const data = removeNilDocumentId(transformedData);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
@@ -66,11 +92,17 @@ const createEntriesService = (
       }
     }
 
-    const validData = await entityValidator.validateEntityCreation(contentType, data, {
-      // Note: publishedAt value will always be set when DP is disabled
-      isDraft: !params?.data?.publishedAt,
-      locale: params?.locale,
-    });
+    const dataWithDocumentId = assignGeneratedDocumentId(data);
+
+    const validData = await entityValidator.validateEntityCreation(
+      contentType,
+      dataWithDocumentId,
+      {
+        // Note: publishedAt value will always be set when DP is disabled
+        isDraft: !params?.data?.publishedAt,
+        locale: params?.locale,
+      }
+    );
 
     // Component handling
     const componentData = await components.createComponents(uid, validData);
@@ -98,7 +130,8 @@ const createEntriesService = (
   }
 
   async function updateEntry(entryToUpdate: any, params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: transformedData, ...restParams } = await transformParamsDocumentId(uid, params);
+    const data = removeNilDocumentId(transformedData);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     const validData = await entityValidator.validateEntityUpdate(
