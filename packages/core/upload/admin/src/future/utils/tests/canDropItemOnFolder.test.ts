@@ -116,4 +116,46 @@ describe('canDropItemOnFolder', () => {
       })
     ).toBe(false);
   });
+
+  describe('root target (destinationFolderId null)', () => {
+    it('allows moving a nested file to root', () => {
+      expect(
+        canDropItemOnFolder({
+          items: [{ kind: 'file', id: 10, name: 'hero.png', folderId: 2 }],
+          targetFolderId: null,
+          folderStructure,
+        })
+      ).toBe(true);
+    });
+
+    it('allows moving a nested folder to root', () => {
+      expect(
+        canDropItemOnFolder({
+          items: [{ kind: 'folder', id: 2, name: '2023', parentId: 1 }],
+          targetFolderId: null,
+          folderStructure,
+        })
+      ).toBe(true);
+    });
+
+    it('blocks moving a file that is already at root', () => {
+      expect(
+        canDropItemOnFolder({
+          items: [{ kind: 'file', id: 10, name: 'hero.png', folderId: null }],
+          targetFolderId: null,
+          folderStructure,
+        })
+      ).toBe(false);
+    });
+
+    it('blocks moving a folder that is already at root', () => {
+      expect(
+        canDropItemOnFolder({
+          items: [{ kind: 'folder', id: 5, name: 'Sibling', parentId: null }],
+          targetFolderId: null,
+          folderStructure,
+        })
+      ).toBe(false);
+    });
+  });
 });

@@ -455,8 +455,6 @@ interface AssetsGridProps {
 }
 
 export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
-  const { formatMessage } = useIntl();
-
   const totalItems = folders.length + assets.length;
 
   // Render order: folders first, then assets — range selection follows it.
@@ -465,17 +463,10 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
     ...assets.map((asset) => assetKey(asset.id)),
   ];
 
+  // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
+  // empty grid renders nothing at all.
   if (totalItems === 0) {
-    return (
-      <Box padding={8}>
-        <Typography textColor="neutral600">
-          {formatMessage({
-            id: 'app.components.EmptyStateLayout.content-document',
-            defaultMessage: 'No content found',
-          })}
-        </Typography>
-      </Box>
-    );
+    return null;
   }
 
   return (

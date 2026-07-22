@@ -1,5 +1,6 @@
 import http from 'node:http';
 
+import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
@@ -45,6 +46,26 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
       server: mockHttpServer,
     });
     expect((config.server?.hmr as { clientPort?: number }).clientPort).toBeUndefined();
+
+    // CJS-only deps imported by @strapi/admin must stay pre-bundled in dev (#26944, #26964, #27014).
+    expect(config.optimizeDeps?.include).toEqual(
+      expect.arrayContaining(['invariant', 'lodash', 'prismjs'])
+    );
+
+    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014).
+    const alias = config.resolve?.alias as Record<string, string> | undefined;
+    expect(alias?.invariant).toEqual(expect.any(String));
+    expect(alias?.prismjs).toEqual(expect.any(String));
+    expect(alias?.lodash).toEqual(expect.any(String));
+
+    // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
+    // field keeps a single instance (JSONInput instanceof checks)
+    expect(config.optimizeDeps?.include).toEqual(
+      expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
+    );
+    for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
+      expect(alias?.[mod]).toEqual(expect.any(String));
+    }
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());

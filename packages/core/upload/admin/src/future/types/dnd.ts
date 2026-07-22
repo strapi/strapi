@@ -20,9 +20,13 @@ export interface FolderTargetData {
   name: string;
 }
 
+export interface FolderTreeTargetData {
+  kind: 'folder-tree-target';
+  id: number | null;
+  name: string;
+}
+
 export interface BulkMovePayload {
   fileIds: number[];
   folderIds: number[];
 }
-
-// TODO extend active data with selectedItems for multi-select drag overlay + payload.

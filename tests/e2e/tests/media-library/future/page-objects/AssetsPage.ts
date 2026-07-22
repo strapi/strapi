@@ -183,6 +183,13 @@ export class AssetsPage {
   }
 
   /**
+   * Toggle a folder's selection checkbox in table view (additive).
+   */
+  async selectFolder(name: string) {
+    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+  }
+
+  /**
    * The floating bulk action bar (visible only when at least one asset is selected).
    */
   getBulkActionsBar() {
@@ -515,6 +522,143 @@ export class AssetsPage {
     await this.page.mouse.down();
     await this.page.mouse.move(startX + 12, startY);
     await this.page.mouse.move(startX, startY);
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Sidebar folder tree navigation (left rail).
+   */
+  get folderTreeNav() {
+    return this.page.getByRole('navigation', { name: /media library folders/i });
+  }
+
+  getTreeFolderRow(name: string) {
+    return this.folderTreeNav.getByRole('button', { name, exact: true });
+  }
+
+  getHomeTreeRow() {
+    return this.folderTreeNav.getByRole('button', { name: 'Home' });
+  }
+
+  /**
+   * Drag a file or folder from the main view onto a sidebar folder row.
+   */
+  async dragItemToTreeFolder(
+    itemName: string,
+    treeFolderName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getTreeFolderRow(treeFolderName);
+
+    await this.dragBetweenLocators(item, target);
+  }
+
+  /**
+   * Drag a file or folder from the main view onto the sidebar Home row.
+   */
+  async dragItemToHome(
+    itemName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getHomeTreeRow();
+
+    await this.dragBetweenLocators(item, target);
+  }
+
+  /**
+   * Hover a dragged item over a collapsed sidebar folder long enough to spring-load it open.
+   * Leaves the pointer over `treeFolderName` with the mouse button held down.
+   */
+  async springLoadFolder(
+    itemName: string,
+    treeFolderName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file',
+    dwellMs = 650
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getTreeFolderRow(treeFolderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or tree folder "${treeFolderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.waitForTimeout(dwellMs);
+  }
+
+  /**
+   * Complete a drag started by `springLoadFolder` by dropping on a locator.
+   */
+  async dropDraggedItemOn(locator: Locator) {
+    const targetBox = await locator.boundingBox();
+
+    if (!targetBox) {
+      throw new Error('Could not resolve drop target');
+    }
+
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(endX, endY, { steps: 8 });
+    await this.page.mouse.up();
+  }
+
+  private async dragBetweenLocators(item: Locator, target: Locator) {
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error('Could not resolve drag source or drop target');
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
     await this.page.mouse.up();
   }
 }

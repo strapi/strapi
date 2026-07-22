@@ -79,4 +79,17 @@ describe('addFirstPublishedAtToDraft', () => {
     expect(result.media).toBe(mediaObj);
     expect(result.title).toBe('x');
   });
+
+  it('does not tag entry as modified when firstPublishedAt is set during first publish', async () => {
+    const serverUpdatedAt = new Date(Date.now() + 60_000);
+    const draft = { id: 1, firstPublishedAt: null, title: 'test' };
+    update.mockResolvedValue({ id: 1, updatedAt: serverUpdatedAt });
+
+    const result = await addFirstPublishedAtToDraft(draft, update, contentType);
+
+    expect(result).not.toBe(draft);
+    expect(result.firstPublishedAt).toBeInstanceOf(Date);
+    // serverUpdatedAt is 60s in the future so it's always >= firstPublishedAt, thus tagged as published, not modified
+    expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(result.firstPublishedAt.getTime());
+  });
 });

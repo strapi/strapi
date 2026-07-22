@@ -30,6 +30,7 @@ import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
+import { EmptyState } from './components/EmptyState';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { localStorageKeys, viewOptions } from './constants';
@@ -51,9 +52,10 @@ interface AssetsViewProps {
   view: number;
   folderId: number | null;
   onAssetItemClick: (assetId: number) => void;
+  onAddAssets: () => void;
 }
 
-const AssetsView = ({ view, folderId, onAssetItemClick }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const {
     assets,
@@ -104,16 +106,7 @@ const AssetsView = ({ view, folderId, onAssetItemClick }: AssetsViewProps) => {
   }
 
   if (folders.length === 0 && assets.length === 0) {
-    return (
-      <Box padding={8}>
-        <Typography textColor="neutral600">
-          {formatMessage({
-            id: 'app.components.EmptyStateLayout.content-document',
-            defaultMessage: 'No content found',
-          })}
-        </Typography>
-      </Box>
-    );
+    return <EmptyState onAddAssets={onAddAssets} />;
   }
   return (
     <>
@@ -313,8 +306,8 @@ export const AssetsPage = () => {
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
-        <AssetsDndProvider>
-          <AssetSelectionProvider>
+        <AssetSelectionProvider>
+          <AssetsDndProvider>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Box ref={uploadDropZoneRef}>
               <Layouts.Root
@@ -427,14 +420,15 @@ export const AssetsPage = () => {
                       view={view}
                       folderId={currentFolderId}
                       onAssetItemClick={openDetails}
+                      onAddAssets={handleFileSelect}
                     />
                   </DropZoneWithOverlay>
                 </Layouts.Content>
               </Layouts.Root>
             </Box>
             <BulkActionsBar />
-          </AssetSelectionProvider>
-        </AssetsDndProvider>
+          </AssetsDndProvider>
+        </AssetSelectionProvider>
       </UploadDropZoneProvider>
       <CreateFolderDialog
         open={isCreateFolderDialogOpen}
