@@ -1,12 +1,13 @@
+import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest';
 import { resolveMx } from 'dns/promises';
 
 import { resolveMxHosts, sendDirectSmtp } from '../src/direct-smtp';
 
-jest.mock('dns/promises', () => ({
-  resolveMx: jest.fn(),
+vi.mock('dns/promises', () => ({
+  resolveMx: vi.fn(),
 }));
 
-const mockedResolveMx = resolveMx as jest.MockedFunction<typeof resolveMx>;
+const mockedResolveMx = resolveMx as MockedFunction<typeof resolveMx>;
 
 describe('resolveMxHosts', () => {
   beforeEach(() => {
