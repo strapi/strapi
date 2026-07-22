@@ -10,6 +10,7 @@
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "allowJs": true, // Emit JS source files (e.g. JS-authored local plugins) into dist alongside compiled TS
     "noEmitOnError": true,
     "noImplicitThis": true,
     "outDir": "dist",
@@ -38,7 +39,10 @@
     "src/admin/",
     // Do not include test files
     "**/*.test.*",
-    // Do not include plugins in the server compilation
-    "src/plugins/**"
+    // Plugin admin code is compiled by Vite / src/admin/tsconfig.json, not the
+    // server tsc (it may contain JSX). Plugin SERVER code IS compiled so that
+    // local plugins are emitted to dist and load in production.
+    "src/plugins/**/admin/**",
+    "src/plugins/**/strapi-admin.*"
   ]
 }
