@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
+import { omit, assoc, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -28,6 +28,7 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -447,16 +448,42 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
+    const newDocumentId = createDocumentId();
+
     const clonedEntries = await async.map(
       entriesToClone,
-      async.pipe(
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
+      async (entryToClone: Record<string, unknown>) => {
+        const sourceEntryId = entryToClone.id as number;
+        const originalData = omit(['id', 'createdAt', 'updatedAt'], entryToClone) as Record<
+          string,
+          unknown
+        >;
+        const { data, relationsToCopy } = await prepareCloneData(
+          originalData,
+          queryParams.data,
+          contentType,
+          (modelUid) => strapi.getModel(modelUid as UID.Schema)
+        );
+        const dataWithDocumentId = assoc('documentId', newDocumentId, data);
+        const doc = await entries.create({
+          ...queryParams,
+          data: dataWithDocumentId,
+          status: 'draft',
+        });
+
+        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
+
+        if (relationsToCopy.length === 0) {
+          return doc;
+        }
+
+        const selectionQuery = transformParamsToQuery(
+          uid,
+          pickSelectionParams({ ...queryParams, status: 'draft' }) as any
+        );
+
+        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+      }
     );
 
     clonedEntries.forEach(emitEvent('entry.create'));
