@@ -72,7 +72,7 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     });
   });
 
-  it('pre-bundles prismjs language plugins for all apps (#26964)', async () => {
+  it('pre-bundles prismjs core but not language components (#26964 / blank-admin)', async () => {
     const mockHttpServer = http.createServer();
     const ctx = {
       cwd: process.cwd(),
@@ -100,7 +100,10 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     const config = await resolveDevelopmentConfig(ctx);
     const include = config.optimizeDeps?.include ?? [];
 
-    expect(include).toEqual(expect.arrayContaining(['prismjs', 'prismjs/components/*.js']));
+    // Core stays prebundled (#26964). Language glob must stay out — #26978+#27014 reverse-order
+    // prebundle blanks the admin with TypeError setting 'comment'.
+    expect(include).toEqual(expect.arrayContaining(['prismjs']));
+    expect(include).not.toContain('prismjs/components/*.js');
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
