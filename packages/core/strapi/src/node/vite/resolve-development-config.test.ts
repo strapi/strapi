@@ -1,7 +1,7 @@
 import http from 'node:http';
 
 import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
-import { resolveDevelopmentConfig } from './config';
+import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
 jest.mock('browserslist-to-esbuild', () => ({
@@ -9,7 +9,37 @@ jest.mock('browserslist-to-esbuild', () => ({
   default: jest.fn(() => ['chrome100']),
 }));
 
-describe('resolveDevelopmentConfig (Vite admin dev)', () => {
+describe('Vite admin configuration', () => {
+  it('does not copy public files into the admin build output', async () => {
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
+      bundler: 'vite' as const,
+      options: {
+        minify: true,
+        sourcemaps: false,
+      },
+      plugins: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
+
+    const config = await resolveProductionConfig(ctx);
+
+    expect(config.publicDir).toBe(false);
+  });
+
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
     const ctx = {
