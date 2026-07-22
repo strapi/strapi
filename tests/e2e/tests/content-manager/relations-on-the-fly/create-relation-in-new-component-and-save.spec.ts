@@ -17,6 +17,8 @@ test.describe('Relations on the fly - Create a Relation inside a new component a
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     const addComponentButton = page.getByRole('button', { name: 'Add a component to content' });
+    // Intentionally anchors to `with-admin`'s seeded carousel; update this with
+    // `tests/e2e/data/with-admin/entities/entities_00001.jsonl` if its title changes.
     const components = page
       .getByRole('list')
       .filter({ has: page.getByRole('button', { name: 'Product carousel - 23/24 kits' }) })
