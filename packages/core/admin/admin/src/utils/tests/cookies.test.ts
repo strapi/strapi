@@ -225,6 +225,16 @@ describe('Cookie Utilities', () => {
       );
     });
 
+    it('omits the Secure attribute when the page is served over plain http', () => {
+      // This suite runs at the preset's http://localhost:1337/admin URL; the
+      // https counterpart lives in cookiesSecure.test.ts (jsdom pins the
+      // page URL per environment, so the two halves need separate files).
+      withEnv({}, (writes, mod) => {
+        mod.setCookie('jwtToken', 'abc');
+        expect(writes.every((w) => !w.includes('Secure'))).toBe(true);
+      });
+    });
+
     it('omits the Domain attribute entirely when host-only', () => {
       withEnv(
         { STRAPI_ADMIN_AUTH_COOKIE_PATH: '/admin', STRAPI_ADMIN_AUTH_COOKIE_DOMAIN: undefined },

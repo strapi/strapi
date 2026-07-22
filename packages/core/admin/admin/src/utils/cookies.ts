@@ -72,7 +72,8 @@ export const getCookieValue = (name: string): string | null => {
  * Sets a cookie with the given name, value, and optional expiration time.
  * Uses `admin.auth.cookie.path` and `admin.auth.cookie.domain` (both inlined
  * at build time) so the access cookie stays scoped to the same path and domain
- * as the httpOnly refresh cookie and the EE SSO access cookie.
+ * as the httpOnly refresh cookie and the EE SSO access cookie. The cookie is
+ * marked `Secure` whenever the page is served over TLS.
  *
  * @param name - The name of the cookie.
  * @param value - The value of the cookie.
@@ -97,7 +98,15 @@ export const setCookie = (name: string, value: string, days?: number): void => {
   }
 
   const domainAttr = AUTH_COOKIE_DOMAIN ? `; Domain=${AUTH_COOKIE_DOMAIN}` : '';
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=${AUTH_COOKIE_PATH}${domainAttr}${expires}`;
+  // Mark the token Secure when the page itself is served over TLS — the
+  // browser's own criterion — so it is never attached to plain-http requests.
+  // Expiry writes stay flag-free on purpose: deletion targets the (name,
+  // domain, path) key regardless of Secure, and from an http origin a
+  // flag-free write can still clear non-Secure entries (no origin can carry
+  // the Secure flag over http, and Secure entries are untouchable from there
+  // either way).
+  const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=${AUTH_COOKIE_PATH}${domainAttr}${expires}${secureAttr}`;
 };
 
 /**
