@@ -440,11 +440,11 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "co",
-    "name": "Corsican (co)"
+    "name": "Corsican (co)",
   },
   {
     "code": "co-cos",
-    "name": "Corsican (Corsica) (co-cos)"
+    "name": "Corsican (Corsica) (co-cos)",
   },
   {
     "code": "cs",
