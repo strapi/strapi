@@ -37,8 +37,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
   const isProduction = process.env.NODE_ENV === 'production';
 
-  const domain: string | undefined =
-    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  const domain = getAccessCookieDomain();
   const path = getAccessCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =

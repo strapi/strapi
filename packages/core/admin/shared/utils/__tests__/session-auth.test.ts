@@ -2,6 +2,7 @@ import {
   getAccessCookieName,
   getAccessCookiePath,
   getAccessCookieDomain,
+  getRefreshCookieOptions,
   resolveLogoutDeviceId,
 } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
@@ -100,6 +101,34 @@ describe('getAccessCookieDomain', () => {
     }) as any;
 
     expect(getAccessCookieDomain()).toBe('cookie.strapi.test');
+  });
+});
+
+describe('getRefreshCookieOptions', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: jest.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('resolves the domain through the shared helper so it agrees with the access cookie', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test' : undefined
+    ) as any;
+
+    expect(getRefreshCookieOptions().domain).toBe('strapi.test');
+  });
+
+  test('falls back to a host-only cookie when the configured domain is invalid', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test:1337' : undefined
+    ) as any;
+
+    expect(getRefreshCookieOptions().domain).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
+    warnSpy.mockRestore();
   });
 });
 
