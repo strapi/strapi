@@ -153,22 +153,43 @@ const AuthProvider = ({
 
   const pendingLogoutRef = React.useRef<(() => void) | null>(null);
   const logoutGuardOpenRef = React.useRef(false);
+  const logoutGuardForcedRef = React.useRef(false);
   const [isSessionLogoutDialogOpen, setIsSessionLogoutDialogOpen] = React.useState(false);
+  const [isSessionLogoutForced, setIsSessionLogoutForced] = React.useState(false);
 
-  const runLogoutWithGuard = React.useCallback((logoutFn: () => void) => {
-    if (logoutGuardOpenRef.current) {
-      return;
-    }
+  /**
+   * Prompt before discarding unsaved edits, then run `logoutFn`.
+   *
+   * - Voluntary (explicit logout): Cancel leaves the user fully logged in.
+   * - Forced (idle / session-dead): the session is already unusable — Cancel
+   *   (or dismiss) still runs `logoutFn` so the client cannot keep a stale token.
+   *   While the dialog is open, a later forced request upgrades the pending action
+   *   (e.g. local idle → global session-dead).
+   */
+  const runLogoutWithGuard = React.useCallback(
+    (logoutFn: () => void, { forced = false }: { forced?: boolean } = {}) => {
+      if (logoutGuardOpenRef.current) {
+        pendingLogoutRef.current = logoutFn;
+        if (forced) {
+          logoutGuardForcedRef.current = true;
+          setIsSessionLogoutForced(true);
+        }
+        return;
+      }
 
-    if (!hasUnsavedChanges()) {
-      logoutFn();
-      return;
-    }
+      if (!hasUnsavedChanges()) {
+        logoutFn();
+        return;
+      }
 
-    logoutGuardOpenRef.current = true;
-    pendingLogoutRef.current = logoutFn;
-    setIsSessionLogoutDialogOpen(true);
-  }, []);
+      logoutGuardOpenRef.current = true;
+      logoutGuardForcedRef.current = forced;
+      pendingLogoutRef.current = logoutFn;
+      setIsSessionLogoutForced(forced);
+      setIsSessionLogoutDialogOpen(true);
+    },
+    []
+  );
 
   const performGlobalLogout = React.useCallback(() => {
     void (async () => {
@@ -192,7 +213,7 @@ const AuthProvider = ({
   }, [dispatch, navigate]);
 
   const clearStateAndLogout = React.useCallback(() => {
-    runLogoutWithGuard(performGlobalLogout);
+    runLogoutWithGuard(performGlobalLogout, { forced: true });
   }, [performGlobalLogout, runLogoutWithGuard]);
 
   /**
@@ -206,21 +227,31 @@ const AuthProvider = ({
    * goes through `clearStateAndLogout` and broadcasts to all tabs.
    */
   const clearLocalSessionAndRedirect = React.useCallback(() => {
-    runLogoutWithGuard(performLocalLogout);
+    runLogoutWithGuard(performLocalLogout, { forced: true });
   }, [performLocalLogout, runLogoutWithGuard]);
 
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;
+    logoutGuardForcedRef.current = false;
     setIsSessionLogoutDialogOpen(false);
+    setIsSessionLogoutForced(false);
     const logoutFn = pendingLogoutRef.current;
     pendingLogoutRef.current = null;
     logoutFn?.();
   }, []);
 
   const handleCancelSessionLogout = React.useCallback(() => {
+    const forced = logoutGuardForcedRef.current;
+    const logoutFn = pendingLogoutRef.current;
     logoutGuardOpenRef.current = false;
-    setIsSessionLogoutDialogOpen(false);
+    logoutGuardForcedRef.current = false;
     pendingLogoutRef.current = null;
+    setIsSessionLogoutDialogOpen(false);
+    setIsSessionLogoutForced(false);
+    // Forced paths: session is already dead — dismiss must still clear client state.
+    if (forced) {
+      logoutFn?.();
+    }
   }, []);
 
   const handleSessionLogoutDialogOpenChange = React.useCallback(
@@ -374,10 +405,22 @@ const AuthProvider = ({
     [dispatch, loginMutation]
   );
 
+  /**
+   * Explicit user logout. Confirm unsaved changes *before* `logoutMutation` so
+   * Cancel leaves the server session and client token intact.
+   */
   const logout = React.useCallback(async () => {
-    await logoutMutation({ deviceId: getOrCreateDeviceId() });
-    clearStateAndLogout();
-  }, [clearStateAndLogout, logoutMutation]);
+    runLogoutWithGuard(() => {
+      void (async () => {
+        try {
+          await logoutMutation({ deviceId: getOrCreateDeviceId() });
+        } catch {
+          // The session may already be invalid.
+        }
+        performGlobalLogout();
+      })();
+    });
+  }, [logoutMutation, performGlobalLogout, runLogoutWithGuard]);
 
   const refetchPermissions = React.useCallback(async () => {
     if (!isUninitialized) {
@@ -481,7 +524,12 @@ const AuthProvider = ({
         open={isSessionLogoutDialogOpen}
         onOpenChange={handleSessionLogoutDialogOpenChange}
       >
-        <ConfirmDialog onConfirm={handleConfirmSessionLogout} onCancel={handleCancelSessionLogout}>
+        <ConfirmDialog
+          onConfirm={handleConfirmSessionLogout}
+          onCancel={handleCancelSessionLogout}
+          // Forced session-dead: no Cancel that pretends the session is still valid.
+          startAction={isSessionLogoutForced ? <></> : undefined}
+        >
           {formatMessage({
             id: 'global.prompt.unsaved',
             defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
