@@ -146,7 +146,7 @@ interface DocumentActionsProps {
 }
 
 const connectRelationToParent = (
-  parentDataToUpdate: AnyData | undefined,
+  parentDataToUpdate: AnyData,
   fieldToConnect: string,
   data: Create.Response['data'] | Publish.Response['data'],
   fieldToConnectUID?: string
@@ -161,16 +161,23 @@ const connectRelationToParent = (
    * This happens in particular when in the parentDocument you have created
    * a new component without saving.
    */
-  const fieldValue = getIn<{ connect?: Array<typeof relationToConnect> }>(
-    parentDataToUpdate,
-    fieldToConnect
-  );
-  const isFieldPresent = Boolean(fieldValue);
+  const fieldValue = getIn<unknown>(parentDataToUpdate, fieldToConnect);
+  const relationFieldValue = isObject(fieldValue) ? fieldValue : undefined;
+  const isFieldPresent = relationFieldValue !== undefined;
   const fieldPath = fieldToConnect.split('.');
-  const fieldName = fieldPath.pop()!;
-  const existingConnect: Array<typeof relationToConnect> = Array.isArray(fieldValue?.connect)
-    ? fieldValue.connect
+  const fieldName = fieldPath.at(-1);
+
+  if (!fieldName) {
+    return parentDataToUpdate;
+  }
+
+  const parentPath = fieldPath.slice(0, -1).join('.');
+  const existingConnect: Array<typeof relationToConnect> = Array.isArray(
+    relationFieldValue?.connect
+  )
+    ? (relationFieldValue.connect as Array<typeof relationToConnect>)
     : [];
+  // A relation is identified by documentId and locale; numeric ids are not stable across locales.
   const connect = existingConnect.some(
     (relation) =>
       relation.documentId === relationToConnect.documentId &&
@@ -180,7 +187,7 @@ const connectRelationToParent = (
     : [...existingConnect, relationToConnect];
   const fieldToConnectValue = isFieldPresent
     ? {
-        ...fieldValue,
+        ...relationFieldValue,
         connect,
       }
     : {
@@ -195,14 +202,13 @@ const connectRelationToParent = (
     return setIn(parentDataToUpdate, fieldToConnect, fieldToConnectValue);
   }
 
-  const parentPath = fieldPath.join('.');
   const currentParentValue = getIn(parentDataToUpdate, parentPath);
   const parentValue = {
     ...(isObject(currentParentValue) ? currentParentValue : {}),
     ...fieldToConnectValue,
   };
 
-  return setIn(parentDataToUpdate ?? {}, parentPath, parentValue);
+  return setIn(parentDataToUpdate, parentPath, parentValue);
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
@@ -674,6 +680,7 @@ const prepareParentDataForRelationUpdate = (
 
   const { data } = handleInvisibleAttributes(transformDocumentData(parentDataToUpdate), {
     ...options,
+    // The live snapshot can omit saved invisible fields, so retain the parent's saved initial values.
     initialValues: fallbackParentFormValues,
   });
 
@@ -980,39 +987,41 @@ const PublishAction: DocumentActionComponent = ({
             );
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            const dataToUpdate = connectRelationToParent(
-              parentDataToUpdate,
-              fieldToConnect,
-              res.data,
-              fieldToConnectUID
-            );
+            if (parentDataToUpdate) {
+              const dataToUpdate = connectRelationToParent(
+                parentDataToUpdate,
+                fieldToConnect,
+                res.data,
+                fieldToConnectUID
+              );
 
-            try {
-              const updateRes = await updateDocumentMutation({
-                collectionType: metaDocumentToUpdate.collectionType,
-                model: metaDocumentToUpdate.model,
-                documentId:
-                  metaDocumentToUpdate.collectionType !== SINGLE_TYPES
-                    ? metaDocumentToUpdate.documentId
-                    : undefined,
-                params: metaDocumentToUpdate.params,
-                data: dataToUpdate,
-              });
+              try {
+                const updateRes = await updateDocumentMutation({
+                  collectionType: metaDocumentToUpdate.collectionType,
+                  model: metaDocumentToUpdate.model,
+                  documentId:
+                    metaDocumentToUpdate.collectionType !== SINGLE_TYPES
+                      ? metaDocumentToUpdate.documentId
+                      : undefined,
+                  params: metaDocumentToUpdate.params,
+                  data: dataToUpdate,
+                });
 
-              if ('error' in updateRes) {
-                toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                return;
+                if ('error' in updateRes) {
+                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
+                  return;
+                }
+              } catch (err) {
+                toggleNotification({
+                  type: 'danger',
+                  message: formatMessage({
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  }),
+                });
+
+                throw err;
               }
-            } catch (err) {
-              toggleNotification({
-                type: 'danger',
-                message: formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                }),
-              });
-
-              throw err;
             }
           }
 
@@ -1436,40 +1445,45 @@ const UpdateAction: DocumentActionComponent = ({
                 }
               );
 
-              const dataToUpdate = connectRelationToParent(
-                parentDataToUpdate,
-                fieldToConnect,
-                res.data,
-                fieldToConnectUID
-              );
+              if (parentDataToUpdate) {
+                const dataToUpdate = connectRelationToParent(
+                  parentDataToUpdate,
+                  fieldToConnect,
+                  res.data,
+                  fieldToConnectUID
+                );
 
-              try {
-                const updateRes = await updateDocumentMutation({
-                  collectionType: parentDocumentMetaToUpdate.collectionType,
-                  model: parentDocumentMetaToUpdate.model,
-                  documentId:
-                    parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
-                      ? parentDocumentMetaToUpdate.documentId
-                      : undefined,
-                  params: parentDocumentMetaToUpdate.params,
-                  data: {
-                    ...dataToUpdate,
-                  },
-                });
-                if ('error' in updateRes) {
-                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                  return;
+                try {
+                  const updateRes = await updateDocumentMutation({
+                    collectionType: parentDocumentMetaToUpdate.collectionType,
+                    model: parentDocumentMetaToUpdate.model,
+                    documentId:
+                      parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
+                        ? parentDocumentMetaToUpdate.documentId
+                        : undefined,
+                    params: parentDocumentMetaToUpdate.params,
+                    data: {
+                      ...dataToUpdate,
+                    },
+                  });
+                  if ('error' in updateRes) {
+                    toggleNotification({
+                      type: 'danger',
+                      message: formatAPIError(updateRes.error),
+                    });
+                    return;
+                  }
+                } catch (err) {
+                  toggleNotification({
+                    type: 'danger',
+                    message: formatMessage({
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    }),
+                  });
+
+                  throw err;
                 }
-              } catch (err) {
-                toggleNotification({
-                  type: 'danger',
-                  message: formatMessage({
-                    id: 'notification.error',
-                    defaultMessage: 'An error occurred',
-                  }),
-                });
-
-                throw err;
               }
             }
 
@@ -1767,6 +1781,8 @@ export {
   DocumentActions,
   DocumentActionsMenu,
   DocumentActionButton,
+  PublishAction,
+  UpdateAction,
   DEFAULT_ACTIONS,
   openPublishConfirmDialog,
 };

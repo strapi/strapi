@@ -700,9 +700,7 @@ const RelationModalWithContext = ({
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
   const getParentFormValuesWithCurrentRelation = () => {
-    const formValues = structuredClone(getParentFormValues());
-
-    return fieldValue ? setIn(formValues, name, fieldValue) : formValues;
+    return setIn(getParentFormValues(), name, fieldValue);
   };
 
   const handleLoadMore = () => {

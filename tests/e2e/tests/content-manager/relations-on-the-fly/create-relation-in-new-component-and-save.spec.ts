@@ -62,7 +62,11 @@ test.describe('Relations on the fly - Create a Relation inside a new component a
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     const parentUpdateRequest = await parentUpdate;
     const parentUpdateData = parentUpdateRequest.postDataJSON() as {
-      content: Array<{ __component: string; title?: string; products?: { connect?: unknown[] } }>;
+      content: Array<{
+        __component: string;
+        title?: string;
+        products?: { connect?: Array<{ documentId?: unknown }> };
+      }>;
     };
     expect(parentUpdateData.content).toHaveLength(componentCount + 1);
     expect(parentUpdateData.content).toEqual(
@@ -71,7 +75,9 @@ test.describe('Relations on the fly - Create a Relation inside a new component a
           __component: 'page-blocks.product-carousel',
           title: carouselTitle,
           products: expect.objectContaining({
-            connect: expect.arrayContaining([expect.anything()]),
+            connect: expect.arrayContaining([
+              expect.objectContaining({ documentId: expect.any(String) }),
+            ]),
           }),
         }),
       ])
