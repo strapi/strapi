@@ -20,13 +20,14 @@ type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
  * Creates a valid query params object for get requests
  * ie. plugins[i18n][locale]=en becomes locale=en
  */
-const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery<TQuery> => {
-  if (!query) return query;
+const buildValidParams = (query: object): TransformedQuery<Query> => {
+  const q = query as Query;
+  if (!q) return q;
 
   // Extract pluginOptions from the query, they shouldn't be part of the URL
   const { plugins: _, ...validQueryParams } = {
-    ...query,
-    ...Object.values(query?.plugins ?? {}).reduce<Record<string, unknown>>((acc, current) => {
+    ...q,
+    ...Object.values(q?.plugins ?? {}).reduce<Record<string, unknown>>((acc, current) => {
       if (typeof current === 'object' && current !== null) {
         return Object.assign(acc, current);
       }
