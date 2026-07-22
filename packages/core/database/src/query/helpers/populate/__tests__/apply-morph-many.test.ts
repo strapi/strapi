@@ -5,18 +5,13 @@ import applyPopulate from '../apply';
  *
  * Empty collections must serialize as `[]`, matching oneToMany/manyToMany —
  * not `null` (issue #24927 symptom 2).
+ *
+ * Covers both morphX target branches (`morphToMany` join table and `morphToOne`
+ * inverse), including the `_.isEmpty(referencedValues)` early return.
  */
 
 jest.mock('../../transform', () => ({
-  fromRow: jest.fn((_meta: unknown, row: unknown) => {
-    if (row == null) {
-      return null;
-    }
-    if (Array.isArray(row)) {
-      return row;
-    }
-    return row;
-  }),
+  fromRow: jest.fn((_meta: unknown, row: unknown) => (row == null ? null : row)),
 }));
 
 const SOURCE_UID = 'api::article.article';
@@ -51,7 +46,26 @@ const buildTargetMorphToMany = () => ({
   },
 });
 
-const buildCtx = (joinRows: Record<string, unknown>[]) => {
+const buildTargetMorphToOne = () => ({
+  type: 'relation' as const,
+  relation: 'morphToOne' as const,
+  morphColumn: {
+    idColumn: {
+      name: 'related_id',
+      referencedColumn: 'id',
+    },
+    typeColumn: {
+      name: 'related_type',
+    },
+  },
+});
+
+type TargetBuilder = typeof buildTargetMorphToMany | typeof buildTargetMorphToOne;
+
+const buildCtx = (
+  joinRows: Record<string, unknown>[],
+  buildTarget: TargetBuilder = buildTargetMorphToMany
+) => {
   const mockQb = {
     alias: 't',
     getAlias: jest.fn().mockReturnValue('lnk'),
@@ -76,7 +90,7 @@ const buildCtx = (joinRows: Record<string, unknown>[]) => {
           return {
             columnToAttribute: {},
             attributes: {
-              related: buildTargetMorphToMany(),
+              related: buildTarget(),
             },
           };
         }
@@ -99,36 +113,83 @@ const buildCtx = (joinRows: Record<string, unknown>[]) => {
 };
 
 describe('morphMany populate', () => {
-  it('returns [] when an entry has no related morph rows (empty multiple media)', async () => {
-    const { ctx } = buildCtx([]);
+  describe('morphToMany target (e.g. upload media)', () => {
+    it('returns [] when an entry has no related morph rows (empty multiple media)', async () => {
+      const { ctx } = buildCtx([]);
 
-    const results: Record<string, unknown>[] = [{ id: 1 }];
+      const results: Record<string, unknown>[] = [{ id: 1 }];
 
-    await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
 
-    expect(results[0][ATTRIBUTE_NAME]).toEqual([]);
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([]);
+    });
+
+    it('returns [] when all results have nil ids (empty referencedValues early return)', async () => {
+      const { ctx, mockQb } = buildCtx([]);
+
+      const results: Record<string, unknown>[] = [{}];
+
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([]);
+      expect(mockQb.execute).not.toHaveBeenCalled();
+    });
+
+    it('returns populated rows when morph links exist', async () => {
+      const fileRow = { id: 42, name: 'photo.jpg', related_id: 1, related_type: SOURCE_UID };
+      const { ctx } = buildCtx([fileRow]);
+
+      const results: Record<string, unknown>[] = [{ id: 1 }];
+
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([fileRow]);
+    });
+
+    it('returns [] for entries without matches in a mixed result set', async () => {
+      const fileRow = { id: 42, name: 'photo.jpg', related_id: 1, related_type: SOURCE_UID };
+      const { ctx } = buildCtx([fileRow]);
+
+      const results: Record<string, unknown>[] = [{ id: 1 }, { id: 2 }];
+
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([fileRow]);
+      expect(results[1][ATTRIBUTE_NAME]).toEqual([]);
+    });
   });
 
-  it('returns populated rows when morph links exist', async () => {
-    const fileRow = { id: 42, name: 'photo.jpg', related_id: 1, related_type: SOURCE_UID };
-    const { ctx } = buildCtx([fileRow]);
+  describe('morphToOne target', () => {
+    it('returns [] when an entry has no related morph rows', async () => {
+      const { ctx } = buildCtx([], buildTargetMorphToOne);
 
-    const results: Record<string, unknown>[] = [{ id: 1 }];
+      const results: Record<string, unknown>[] = [{ id: 1 }];
 
-    await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
 
-    expect(results[0][ATTRIBUTE_NAME]).toEqual([fileRow]);
-  });
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([]);
+    });
 
-  it('returns [] for entries without matches in a mixed result set', async () => {
-    const fileRow = { id: 42, name: 'photo.jpg', related_id: 1, related_type: SOURCE_UID };
-    const { ctx } = buildCtx([fileRow]);
+    it('returns [] when all results have nil ids (empty referencedValues early return)', async () => {
+      const { ctx, mockQb } = buildCtx([], buildTargetMorphToOne);
 
-    const results: Record<string, unknown>[] = [{ id: 1 }, { id: 2 }];
+      const results: Record<string, unknown>[] = [{}];
 
-    await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
 
-    expect(results[0][ATTRIBUTE_NAME]).toEqual([fileRow]);
-    expect(results[1][ATTRIBUTE_NAME]).toEqual([]);
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([]);
+      expect(mockQb.execute).not.toHaveBeenCalled();
+    });
+
+    it('returns populated rows when morph links exist', async () => {
+      const fileRow = { id: 42, name: 'photo.jpg', related_id: 1, related_type: SOURCE_UID };
+      const { ctx } = buildCtx([fileRow], buildTargetMorphToOne);
+
+      const results: Record<string, unknown>[] = [{ id: 1 }];
+
+      await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+
+      expect(results[0][ATTRIBUTE_NAME]).toEqual([fileRow]);
+    });
   });
 });
