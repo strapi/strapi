@@ -9937,13 +9937,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.50.2"
-    jest: "npm:29.6.0"
     nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
