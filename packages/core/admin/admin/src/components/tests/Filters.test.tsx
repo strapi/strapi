@@ -1,6 +1,6 @@
 import { fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
 
-import { Filters } from '../Filters';
+import { Filters, createDateTimeRangeFilter, parseDateTimeRangeFilter } from '../Filters';
 
 const DEFAULT_FILTERS = [
   {
@@ -170,5 +170,58 @@ describe('Filters', () => {
     });
     expect(screen.queryByText(/hello world/)).not.toBeInTheDocument();
     expect(screen.queryAllByText(/hello there/)).toHaveLength(1);
+  });
+});
+
+describe('datetime range filters', () => {
+  it('translates $eq into a half-open minute range on the UTC instant the picker produced', () => {
+    expect(createDateTimeRangeFilter('$eq', '2026-06-12T14:30:00.000Z')).toEqual({
+      $gte: encodeURIComponent('2026-06-12T14:30:00.000Z'),
+      $lt: encodeURIComponent('2026-06-12T14:31:00.000Z'),
+    });
+  });
+
+  it('floors seconds & milliseconds so any instant within the selected minute matches', () => {
+    expect(createDateTimeRangeFilter('$eq', '2026-06-12T14:30:38.123Z')).toEqual({
+      $gte: encodeURIComponent('2026-06-12T14:30:00.000Z'),
+      $lt: encodeURIComponent('2026-06-12T14:31:00.000Z'),
+    });
+  });
+
+  it('wraps the range in $not for $ne', () => {
+    expect(createDateTimeRangeFilter('$ne', '2026-06-12T14:30:00.000Z')).toEqual({
+      $not: {
+        $gte: encodeURIComponent('2026-06-12T14:30:00.000Z'),
+        $lt: encodeURIComponent('2026-06-12T14:31:00.000Z'),
+      },
+    });
+  });
+
+  it('round-trips a $eq range back to the authored operator & value for chip display', () => {
+    expect(
+      parseDateTimeRangeFilter({
+        $gte: '2026-06-12T14:30:00.000Z',
+        $lt: '2026-06-12T14:31:00.000Z',
+      })
+    ).toEqual({ operator: '$eq', value: '2026-06-12T14:30:00.000Z' });
+  });
+
+  it('round-trips a $ne range back to the authored operator & value for chip display', () => {
+    expect(
+      parseDateTimeRangeFilter({
+        $not: { $gte: '2026-06-12T14:30:00.000Z', $lt: '2026-06-12T14:31:00.000Z' },
+      })
+    ).toEqual({ operator: '$ne', value: '2026-06-12T14:30:00.000Z' });
+  });
+
+  it('ignores entries that are not minute-range shaped', () => {
+    expect(parseDateTimeRangeFilter({ $gt: '2026-06-12T14:30:00.000Z' })).toBeNull();
+    expect(parseDateTimeRangeFilter({ $gte: '2026-06-12T14:30:00.000Z' })).toBeNull();
+    expect(
+      parseDateTimeRangeFilter({
+        $gte: '2026-06-12T14:30:00.000Z',
+        $lte: '2026-06-12T14:31:00.000Z',
+      })
+    ).toBeNull();
   });
 });
