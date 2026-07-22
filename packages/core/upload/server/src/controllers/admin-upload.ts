@@ -171,11 +171,21 @@ export default {
       filesArray.length === data.fileInfo.length
     ) {
       // Reorder filesArray to match data.fileInfo order
-      const alignedFilesArray = data.fileInfo
-        .map((info) => {
-          return filesArray.find((file) => file.originalFilename === info.name);
-        })
-        .filter(Boolean) as any[];
+const alignedFilesArray = data.fileInfo.map((info, index) => {
+  const match = filesArray.find((file) => file.originalFilename === info.name);
+  if (!match) {
+    return filesArray[index];
+  }
+  return match;
+});
+
+if (alignedFilesArray.every(Boolean)) {
+  filesArray = alignedFilesArray as any[];
+} else {
+  strapi.log.warn(
+    'Could not align file order by name; using original order'
+  );
+}
 
       filesArray = alignedFilesArray;
     }
