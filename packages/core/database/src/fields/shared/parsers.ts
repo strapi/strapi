@@ -1,10 +1,22 @@
 import { padCharsEnd, isString, toString } from 'lodash/fp';
-import * as dateFns from 'date-fns';
+import type * as dateFnsType from 'date-fns';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
 
+// Lazy: defer date-fns until a date / time / timestamp value is parsed.
+// `@strapi/database` is required during boot via the field registry; date-fns
+// adds a chunk of transitive submodule loads that most boots never trigger.
+let lazyDateFns: typeof dateFnsType | undefined;
+const dateFns = (): typeof dateFnsType => {
+  if (!lazyDateFns) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyDateFns = require('date-fns');
+  }
+  return lazyDateFns as typeof dateFnsType;
+};
+
 const isDate = (value: unknown): value is Date => {
-  return dateFns.isDate(value);
+  return dateFns().isDate(value);
 };
 
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
@@ -17,13 +29,13 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
   }
 
   try {
-    const date = dateFns.parseISO(toString(value));
-    if (dateFns.isValid(date)) {
+    const date = dateFns().parseISO(toString(value));
+    if (dateFns().isValid(date)) {
       return date;
     }
 
-    const milliUnixDate = dateFns.parse(toString(value), 'T', new Date());
-    if (dateFns.isValid(milliUnixDate)) {
+    const milliUnixDate = dateFns().parse(toString(value), 'T', new Date());
+    if (dateFns().isValid(milliUnixDate)) {
       return milliUnixDate;
     }
 
@@ -35,7 +47,7 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
 
 export const parseDate = (value: unknown) => {
   if (isDate(value)) {
-    return dateFns.format(value, 'yyyy-MM-dd');
+    return dateFns().format(value, 'yyyy-MM-dd');
   }
 
   const found = isString(value) ? value.match(PARTIAL_DATE_REGEX) || [] : [];
@@ -53,8 +65,8 @@ export const parseDate = (value: unknown) => {
     throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
   }
 
-  const date = dateFns.parseISO(extractedValue);
-  if (!dateFns.isValid(date)) {
+  const date = dateFns().parseISO(extractedValue);
+  if (!dateFns().isValid(date)) {
     throw new InvalidDateError(`Invalid date`);
   }
 
@@ -63,7 +75,7 @@ export const parseDate = (value: unknown) => {
 
 export const parseTime = (value: unknown) => {
   if (isDate(value)) {
-    return dateFns.format(value, 'HH:mm:ss.SSS');
+    return dateFns().format(value, 'HH:mm:ss.SSS');
   }
 
   if (typeof value !== 'string') {
