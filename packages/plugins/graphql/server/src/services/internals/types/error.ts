@@ -2,7 +2,7 @@ import { objectType } from 'nexus';
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
 const { ValidationError } = errors;
 
@@ -10,7 +10,7 @@ const { ValidationError } = errors;
  * Build an Error object type
  * @return {Object<string, NexusObjectTypeDef>}
  */
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { ERROR_CODES, ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return objectType({

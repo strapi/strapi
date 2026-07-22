@@ -2,7 +2,7 @@ import { enumType } from 'nexus';
 import { set } from 'lodash/fp';
 import { strings } from '@strapi/utils';
 
-interface Definition {
+export interface Definition {
   enum: string[];
 }
 
