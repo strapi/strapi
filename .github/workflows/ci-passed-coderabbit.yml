@@ -46,42 +46,6 @@ jobs:
               return;
             }
 
-            // Clear 'waiting on author' — but ONLY when CI provably owns it.
-            // That label is also the manual review-feedback lifecycle trigger
-            // (a maintainer adds it after a review), so a green Tests run must
-            // not strip a review-driven label. The failure path (ci-triage.yml)
-            // adds a companion `ci: waiting on author` provenance label in the
-            // same step, so its presence proves CI owns the shared label. When
-            // present, remove both; drop the shared label first so a failed
-            // removal leaves the provenance behind and a later run retries.
-            // Runs before the draft/base/checks gates to mirror when it was added.
-            const ciOwnsWaitingOnAuthor = pr.labels.some((l) => l.name === 'ci: waiting on author');
-            if (ciOwnsWaitingOnAuthor) {
-              const removeLabel = async (name) => {
-                try {
-                  await github.rest.issues.removeLabel({
-                    owner,
-                    repo,
-                    issue_number: pr.number,
-                    name,
-                  });
-                } catch (err) {
-                  // 404 when the label isn't present — expected once cleared.
-                  if (err.status !== 404) {
-                    core.warning(`Could not remove '${name}' label from PR #${pr.number}: ${err.message}`);
-                    throw err;
-                  }
-                }
-              };
-              try {
-                await removeLabel('waiting on author');
-                await removeLabel('ci: waiting on author');
-                core.info(`Removed CI-added 'waiting on author' from PR #${pr.number} — Tests are green.`);
-              } catch {
-                // Provenance label left in place — a later green run retries.
-              }
-            }
-
             // Skip drafts (CodeRabbit also skips drafts, but avoid the noisy comment).
             if (pr.draft) {
               core.info(`PR #${pr.number} is a draft — skipping.`);
