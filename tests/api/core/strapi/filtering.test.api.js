@@ -91,11 +91,40 @@ const productFixtures = [
   },
 ];
 
+// Dedicated content type for LIKE-metacharacter escaping tests. Kept separate
+// from `product` so its fixtures don't affect the count-based product assertions.
+const tag = {
+  attributes: {
+    slug: {
+      type: 'string',
+    },
+  },
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
+  description: '',
+  collectionName: '',
+};
+
+const tagFixtures = [
+  { slug: 'a_c' },
+  { slug: 'abc' },
+  { slug: 'axc' },
+  { slug: '50%' },
+  { slug: '5000' },
+  { slug: '100% pure' },
+  { slug: '1000 pure' },
+  { slug: 'Cutting\\' },
+  { slug: 'Cutting-tool' },
+];
+
 describe('Filtering API', () => {
   beforeAll(async () => {
     await builder
       .addContentType(product)
+      .addContentType(tag)
       .addFixtures(product.singularName, productFixtures)
+      .addFixtures(tag.singularName, tagFixtures)
       .build();
 
     strapi = await createStrapiInstance();
@@ -556,6 +585,60 @@ describe('Filtering API', () => {
         });
 
         expect(res2.body.data).toEqual(res.body.data);
+      });
+    });
+
+    // Regression tests for GitHub issue #26468: LIKE metacharacters (%, _, \) in a
+    // user-supplied value must be matched literally, and no value may produce an
+    // unhandled 500 (a trailing backslash previously crashed on PostgreSQL).
+    describe('LIKE metacharacter escaping', () => {
+      const filterTags = (slugFilter) =>
+        rq({
+          method: 'GET',
+          url: '/tags',
+          qs: { filters: { slug: slugFilter }, pagination: { pageSize: 100 } },
+        });
+
+      test('$eqi treats _ as a literal, not a single-character wildcard', async () => {
+        const res = await filterTags({ $eqi: 'a_c' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$eqi treats % as a literal, not a wildcard', async () => {
+        const res = await filterTags({ $eqi: '50%' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$eqi stays case-insensitive equality', async () => {
+        const res = await filterTags({ $eqi: 'ABC' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$eqi with a trailing backslash does not 500', async () => {
+        const res = await filterTags({ $eqi: 'Cutting\\' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$containsi escapes % so it matches the literal substring', async () => {
+        const res = await filterTags({ $containsi: '100%' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$startsWith escapes % so it matches literally', async () => {
+        const res = await filterTags({ $startsWith: '50%' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
       });
     });
 
