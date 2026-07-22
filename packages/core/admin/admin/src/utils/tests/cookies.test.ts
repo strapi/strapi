@@ -180,6 +180,31 @@ describe('Cookie Utilities', () => {
       );
     });
 
+    it('expires the host-only copy at the configured path before a domain-scoped set', () => {
+      withEnv(
+        { STRAPI_ADMIN_AUTH_COOKIE_DOMAIN: 'strapi.test', STRAPI_ADMIN_AUTH_COOKIE_PATH: '/admin' },
+        (writes, mod) => {
+          mod.setCookie('jwtToken', 'abc');
+          const expiries = writes.filter((w) => w.includes('Expires=Thu, 01 Jan 1970'));
+          // Upgrade shadow: a pre-domain client wrote a host-only Path=/admin
+          // cookie; being older, it would sort before (and shadow) the
+          // domain-scoped token at the same path, so set must expire it.
+          expect(expiries.some((w) => w.includes('Path=/admin') && !w.includes('Domain='))).toBe(
+            true
+          );
+          // ...but never the exact key being written.
+          expect(
+            expiries.some((w) => w.includes('Path=/admin') && w.includes('Domain=strapi.test'))
+          ).toBe(false);
+          // Legacy root-path copies are still cleared in both flavours.
+          expect(expiries.some((w) => w.includes('Path=/;') && !w.includes('Domain='))).toBe(true);
+          expect(
+            expiries.some((w) => w.includes('Path=/;') && w.includes('Domain=strapi.test'))
+          ).toBe(true);
+        }
+      );
+    });
+
     it('deletes across both the configured Domain and host-only', () => {
       withEnv(
         { STRAPI_ADMIN_AUTH_COOKIE_DOMAIN: 'strapi.test', STRAPI_ADMIN_AUTH_COOKIE_PATH: '/admin' },

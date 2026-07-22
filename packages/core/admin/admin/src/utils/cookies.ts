@@ -32,6 +32,25 @@ const expireCookieAt = (name: string, path: string, domain?: string): void => {
 };
 
 /**
+ * Every `(path, domain)` key the access cookie may live under: the configured
+ * key plus the legacy-path and host-only variants written by older versions or
+ * previous configs. The browser cookie store keys entries by
+ * `(name, domain, path)`, so each combination is a distinct entry.
+ */
+const cookieKeyMatrix = (): Array<{ path: string; domain: string | undefined }> => {
+  const paths = new Set<string>([AUTH_COOKIE_PATH, ...LEGACY_AUTH_COOKIE_PATHS]);
+  const domains = new Set<string | undefined>([undefined, AUTH_COOKIE_DOMAIN]);
+
+  const matrix: Array<{ path: string; domain: string | undefined }> = [];
+  for (const path of paths) {
+    for (const domain of domains) {
+      matrix.push({ path, domain });
+    }
+  }
+  return matrix;
+};
+
+/**
  * Retrieves the value of a specified cookie.
  *
  * @param name - The name of the cookie to retrieve.
@@ -67,14 +86,13 @@ export const setCookie = (name: string, value: string, days?: number): void => {
     expires = `; Expires=${date.toUTCString()}`;
   }
 
-  // Drop legacy Path=/ copies (host-only and domain-scoped) so login does not
-  // leave a duplicate root cookie.
-  for (const legacyPath of LEGACY_AUTH_COOKIE_PATHS) {
-    if (legacyPath !== AUTH_COOKIE_PATH) {
-      expireCookieAt(name, legacyPath, undefined);
-      if (AUTH_COOKIE_DOMAIN) {
-        expireCookieAt(name, legacyPath, AUTH_COOKIE_DOMAIN);
-      }
+  // Expire every other key the cookie may live under (legacy Path=/, host-only
+  // copies written before a domain was configured). A stale same-name entry at
+  // an equal-length path sorts first in document.cookie by creation time
+  // (RFC 6265 §5.4), so leaving one behind would shadow the token written below.
+  for (const { path, domain } of cookieKeyMatrix()) {
+    if (path !== AUTH_COOKIE_PATH || domain !== AUTH_COOKIE_DOMAIN) {
+      expireCookieAt(name, path, domain);
     }
   }
 
@@ -94,15 +112,7 @@ export const setCookie = (name: string, value: string, days?: number): void => {
  * @param name - The name of the cookie to delete.
  */
 export const deleteCookie = (name: string): void => {
-  const paths = new Set<string>([AUTH_COOKIE_PATH, ...LEGACY_AUTH_COOKIE_PATHS]);
-  const domains: Array<string | undefined> = [undefined];
-  if (AUTH_COOKIE_DOMAIN) {
-    domains.push(AUTH_COOKIE_DOMAIN);
-  }
-
-  for (const path of paths) {
-    for (const domain of domains) {
-      expireCookieAt(name, path, domain);
-    }
+  for (const { path, domain } of cookieKeyMatrix()) {
+    expireCookieAt(name, path, domain);
   }
 };
