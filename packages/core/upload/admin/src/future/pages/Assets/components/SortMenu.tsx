@@ -1,6 +1,7 @@
 import { Menu } from '@strapi/design-system';
 import { Check, ChevronDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { getTranslationKey } from '../../../utils/translations';
 import {
@@ -44,6 +45,21 @@ const FOLDERS_LABELS: Record<FoldersPosition, MessageDescriptor> = {
   },
 };
 
+// Stretch to the toolbar row height so the trigger matches the view toggle
+// (the parent Flex uses alignItems="stretch").
+const SortTrigger = styled(Menu.Trigger)`
+  height: auto;
+`;
+
+// Full-width section band, like the design mock. The negative inline margin
+// cancels the Menu.Content padding so the background runs edge to edge.
+const GroupLabel = styled(Menu.Label)`
+  display: block;
+  background: ${({ theme }) => theme.colors.neutral100};
+  margin-inline: calc(-1 * ${({ theme }) => theme.spaces[1]});
+  padding-inline: ${({ theme }) => theme.spaces[3]};
+`;
+
 interface SortMenuProps {
   sort: ListSort;
 }
@@ -70,16 +86,16 @@ export const SortMenu = ({ sort }: SortMenuProps) => {
 
   return (
     <Menu.Root>
-      <Menu.Trigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
+      <SortTrigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
         {triggerLabel}
-      </Menu.Trigger>
+      </SortTrigger>
       {/* The DS default maxHeight (15rem) folds everything after the first
           group behind an invisible scroll — the three groups must be visible
           at once. 70vh keeps a scroll on very short viewports. */}
-      <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh">
-        <Menu.Label>
+      <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh" width="25rem">
+        <GroupLabel>
           {formatMessage({ id: getTranslationKey('list.sort.by'), defaultMessage: 'Sort by' })}
-        </Menu.Label>
+        </GroupLabel>
         {(Object.keys(SORT_BY_LABELS) as SortByKey[]).map((key) => (
           <Menu.Item
             key={key}
@@ -94,12 +110,12 @@ export const SortMenu = ({ sort }: SortMenuProps) => {
         ))}
 
         <Menu.Separator />
-        <Menu.Label>
+        <GroupLabel>
           {formatMessage({
             id: getTranslationKey('list.sort.direction'),
             defaultMessage: 'Sort direction',
           })}
-        </Menu.Label>
+        </GroupLabel>
         {(Object.keys(SORT_DIRECTION_LABELS) as SortDirectionKey[]).map((key) => (
           <Menu.Item
             key={key}
@@ -114,9 +130,9 @@ export const SortMenu = ({ sort }: SortMenuProps) => {
         ))}
 
         <Menu.Separator />
-        <Menu.Label>
+        <GroupLabel>
           {formatMessage({ id: getTranslationKey('list.sort.folders'), defaultMessage: 'Folders' })}
-        </Menu.Label>
+        </GroupLabel>
         {(Object.keys(FOLDERS_LABELS) as FoldersPosition[]).map((position) => (
           <Menu.Item
             key={position}

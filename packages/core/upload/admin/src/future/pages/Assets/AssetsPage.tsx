@@ -416,7 +416,7 @@ export const AssetsPage = () => {
                           TODO: Filters and search
                         </Flex>
 
-                        <Flex gap={4} alignItems="center">
+                        <Flex gap={4} alignItems="stretch">
                           <SortMenu sort={listSort} />
                           <StyledToggleGroup
                             type="single"
