@@ -56,7 +56,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "aig",
-    "name": "Antigua and Barbuda Creole English",
+    "name": "Antigua and Barbuda Creole English (aig)",
   },
   {
     "code": "ar",
@@ -200,7 +200,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "bah",
-    "name": "Bahamas Creole English",
+    "name": "Bahamas Creole English (bah)",
   },
   {
     "code": "bm",
@@ -280,19 +280,19 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "bs-Cyrl",
-    "name": "Bosnian (Cyrillic)",
+    "name": "Bosnian (Cyrillic) (bs-Cyrl)",
   },
   {
     "code": "bs-Cyrl-BA",
-    "name": "Bosnian (Cyrillic, Bosnia and Herzegovina)",
+    "name": "Bosnian (Cyrillic, Bosnia and Herzegovina) (bs-Cyrl-BA)",
   },
   {
     "code": "bs-Latn",
-    "name": "Bosnian (Latin)",
+    "name": "Bosnian (Latin) (bs-Latn)",
   },
   {
     "code": "bs-Latn-BA",
-    "name": "Bosnian (Latin, Bosnia and Herzegovina)",
+    "name": "Bosnian (Latin, Bosnia and Herzegovina) (bs-Latn-BA)",
   },
   {
     "code": "br",
@@ -360,7 +360,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "ny",
-    "name": "Chichewa",
+    "name": "Chichewa (ny)",
   },
   {
     "code": "cgg",
@@ -456,7 +456,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "dwr",
-    "name": "Dawro",
+    "name": "Dawro (dwr)",
   },
   {
     "code": "dua",
@@ -468,7 +468,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "dv",
-    "name": "Dhivehi (Maldives)",
+    "name": "Dhivehi (Maldives) (dv)",
   },
   {
     "code": "nl",
@@ -852,11 +852,11 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "svc",
-    "name": "Vincentian Creole English",
+    "name": "Vincentian Creole English (svc)",
   },
   {
     "code": "vic",
-    "name": "Virgin Islands Creole English",
+    "name": "Virgin Islands Creole English (vic)",
   },
   {
     "code": "en-SD",
@@ -1152,7 +1152,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "gmv",
-    "name": "Gamo",
+    "name": "Gamo (gmv)",
   },
   {
     "code": "lao",
@@ -1204,7 +1204,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "gof",
-    "name": "Gofa",
+    "name": "Gofa (gof)",
   },
   {
     "code": "el",
@@ -1256,7 +1256,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "ht",
-    "name": "Haitian",
+    "name": "Haitian (ht)",
   },
   {
     "code": "haw",
@@ -1308,11 +1308,11 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "smn",
-    "name": "Inari Sami",
+    "name": "Inari Sami (smn)",
   },
   {
     "code": "smn-FI",
-    "name": "Inari Sami (Finland)",
+    "name": "Inari Sami (Finland) (smn-FI)",
   },
   {
     "code": "id",
@@ -1508,7 +1508,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "lir",
-    "name": "Liberian English",
+    "name": "Liberian English (lir)",
   },
   {
     "code": "ln",
@@ -1672,7 +1672,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "mn-Cyrl",
-    "name": "Mongolian (Cyrillic)",
+    "name": "Mongolian (Cyrillic) (mn-Cyrl)",
   },
   {
     "code": "mfe",
@@ -1712,19 +1712,19 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "se",
-    "name": "Northern Sami",
+    "name": "Northern Sami (se)",
   },
   {
     "code": "se-FI",
-    "name": "Northern Sami (Finland)",
+    "name": "Northern Sami (Finland) (se-FI)",
   },
   {
     "code": "se-NO",
-    "name": "Northern Sami (Norway)",
+    "name": "Northern Sami (Norway) (se-NO)",
   },
   {
     "code": "se-SE",
-    "name": "Northern Sami (Sweden)",
+    "name": "Northern Sami (Sweden) (se-SE)",
   },
   {
     "code": "nd",
@@ -1749,6 +1749,14 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "nn-NO",
     "name": "Norwegian Nynorsk (Norway) (nn-NO)",
+  },
+  {
+    "code": "no",
+    "name": "Norwegian (no)",
+  },
+  {
+    "code": "no-NO",
+    "name": "Norwegian (Norway) (no-NO)",
   },
   {
     "code": "nus",
@@ -1972,7 +1980,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "gd-GB",
-    "name": "Scottish Gaelic (United Kingdom)",
+    "name": "Scottish Gaelic (United Kingdom) (gd-GB)",
   },
   {
     "code": "seh",
@@ -2348,7 +2356,7 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "tch",
-    "name": "Turks And Caicos Creole English",
+    "name": "Turks And Caicos Creole English (tch)",
   },
   {
     "code": "uk",
@@ -2372,11 +2380,11 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "ug",
-    "name": "Uyghur",
+    "name": "Uyghur (ug)",
   },
   {
     "code": "ug-CN",
-    "name": "Uyghur (China)",
+    "name": "Uyghur (China) (ug-CN)",
   },
   {
     "code": "uz",
