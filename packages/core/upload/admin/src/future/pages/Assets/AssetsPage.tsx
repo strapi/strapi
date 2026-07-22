@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect, type ChangeEvent } from 'react';
+import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -33,12 +33,15 @@ import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneCont
 import { EmptyState } from './components/EmptyState';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
+import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
 import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelection';
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { getListQueryKey } from './utils/listQueryKey';
+import { mergeMixedList } from './utils/mergeMixedList';
 
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
@@ -51,11 +54,22 @@ const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 interface AssetsViewProps {
   view: number;
   folderId: number | null;
+  assetsSort: string;
+  foldersSort: string;
+  foldersPosition: FoldersPosition;
   onAssetItemClick: (assetId: number) => void;
   onAddAssets: () => void;
 }
 
-const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsViewProps) => {
+const AssetsView = ({
+  view,
+  folderId,
+  assetsSort,
+  foldersSort,
+  foldersPosition,
+  onAssetItemClick,
+  onAddAssets,
+}: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const {
     assets,
@@ -64,13 +78,24 @@ const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsVie
     hasNextPage,
     fetchNextPage,
     error,
-  } = useInfiniteAssets({ folder: folderId });
+  } = useInfiniteAssets({ folder: folderId, sort: assetsSort });
   const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
     parentId: folderId,
+    sort: foldersSort,
   });
 
   const isGridView = view === viewOptions.GRID;
   const isLoading = isLoadingAssets || isLoadingFolders;
+
+  // "Folders: Mixed with files" — interleave the complete folder list into the
+  // loaded asset stream client-side, following the active sort.
+  const mixedItems = useMemo(
+    () =>
+      foldersPosition === 'mixed'
+        ? mergeMixedList({ folders, assets, sort: assetsSort, hasNextPage })
+        : null,
+    [foldersPosition, folders, assets, assetsSort, hasNextPage]
+  );
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
     useCallback(
@@ -111,9 +136,19 @@ const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsVie
   return (
     <>
       {isGridView ? (
-        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
+        <AssetsGrid
+          folders={folders}
+          assets={assets}
+          mixedItems={mixedItems}
+          onAssetItemClick={onAssetItemClick}
+        />
       ) : (
-        <AssetsTable assets={assets} folders={folders} onAssetItemClick={onAssetItemClick} />
+        <AssetsTable
+          assets={assets}
+          folders={folders}
+          mixedItems={mixedItems}
+          onAssetItemClick={onAssetItemClick}
+        />
       )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
@@ -295,11 +330,14 @@ export const AssetsPage = () => {
     }
   };
 
+  const listSort = useListSort();
+
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
     view,
     search: '', // TODO: wire when building header search
-    sort: null, // TODO: wire when building header sort
+    // Folder position changes the render order too — selection must reset.
+    sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
     filter: null, // TODO: wire when building header filters
   });
 
@@ -367,7 +405,7 @@ export const AssetsPage = () => {
                         </Flex>
 
                         <Flex gap={4} alignItems="center">
-                          <Box>TODO: Sort</Box>
+                          <SortMenu sort={listSort} />
                           <StyledToggleGroup
                             type="single"
                             value={isGridView ? 'grid' : 'table'}
@@ -419,6 +457,9 @@ export const AssetsPage = () => {
                     <AssetsView
                       view={view}
                       folderId={currentFolderId}
+                      assetsSort={listSort.assetsSort}
+                      foldersSort={listSort.foldersSort}
+                      foldersPosition={listSort.foldersPosition}
                       onAssetItemClick={openDetails}
                       onAddAssets={handleFileSelect}
                     />

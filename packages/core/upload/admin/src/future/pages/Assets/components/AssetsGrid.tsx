@@ -19,6 +19,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
@@ -451,22 +452,68 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  /**
+   * When set ("Folders: Mixed with files"), cards render in this interleaved
+   * order — folder cards flow inside the asset grid instead of the dedicated
+   * top band. Range selection follows the same order.
+   */
+  mixedItems?: MixedItem[] | null;
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
+export const AssetsGrid = ({
+  assets,
+  folders = [],
+  mixedItems = null,
+  onAssetItemClick,
+}: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
-  // Render order: folders first, then assets — range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  // Render order — folders first by default, or the interleaved mixed order.
+  // Range selection follows it.
+  const orderedItemKeys: ItemKey[] = mixedItems
+    ? mixedItems.map((item) =>
+        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
+      )
+    : [
+        ...folders.map((folder) => folderKey(folder.id)),
+        ...assets.map((asset) => assetKey(asset.id)),
+      ];
 
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.
   if (totalItems === 0) {
     return null;
+  }
+
+  if (mixedItems) {
+    return (
+      <Grid.Root gap={4} role="list" data-testid="assets-grid">
+        {mixedItems.map((item) =>
+          item.kind === 'folder' ? (
+            <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${item.folder.id}`}>
+              <FolderCard folder={item.folder} orderedItemKeys={orderedItemKeys} />
+            </Grid.Item>
+          ) : (
+            <Grid.Item
+              col={3}
+              m={4}
+              s={6}
+              xs={12}
+              key={item.asset.id}
+              direction="column"
+              alignItems="stretch"
+            >
+              <AssetCard
+                asset={item.asset}
+                orderedItemKeys={orderedItemKeys}
+                onAssetItemClick={onAssetItemClick}
+              />
+            </Grid.Item>
+          )
+        )}
+      </Grid.Root>
+    );
   }
 
   return (
