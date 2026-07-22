@@ -1,3 +1,5 @@
+/** @import { Core } from '@strapi/strapi' */
+
 const allowedMediaTypes = [
   'image/*',
   'video/*',
@@ -20,6 +22,9 @@ const deniedExecutableTypes = [
   'application/x-mach-binary',
 ];
 
+/**
+ * @returns {Core.Config.Plugin}
+ */
 module.exports = () => ({
   'users-permissions': {
     config: {

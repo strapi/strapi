@@ -1,7 +1,12 @@
 'use strict';
 
+/** @import { Core } from '@strapi/strapi' */
+
 const responseHandlers = require('./src/response-handlers');
 
+/**
+ * @type {Core.Config.Middlewares}
+ */
 module.exports = [
   'strapi::logger',
   'strapi::errors',

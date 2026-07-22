@@ -1,7 +1,13 @@
 'use strict';
 
+/** @import { Core } from '@strapi/strapi' */
+
 const cronTasks = require('./src/cron-tasks');
 
+/**
+ * @param {Core.Config.Shared.ConfigParams} param0
+ * @returns {Core.Config.Server}
+ */
 module.exports = ({ env }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),

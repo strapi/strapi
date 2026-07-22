@@ -1,3 +1,8 @@
+/** @import { Core } from '@strapi/strapi' */
+
+/**
+ * @type {Core.Config.Api}
+ */
 module.exports = {
   rest: {
     defaultLimit: 25,
