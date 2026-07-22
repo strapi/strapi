@@ -631,7 +631,8 @@ const attributePropertiesSchema = (meta: SchemaMeta) => {
   ]);
 
   if (meta.modelType === 'component') {
-    return base
+    return z
+      .union([...base.options, dynamicZoneSchema])
       .superRefine(enumRefinement)
       .superRefine(checkUserTarget)
       .superRefine(maxGreaterThanMin)
