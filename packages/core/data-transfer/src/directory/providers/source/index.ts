@@ -195,7 +195,10 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         let metadata: IAsset['metadata'];
         try {
           metadata = await this.#readAssetMetadata(name);
-        } catch {
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            throw error;
+          }
           this.#reportWarning(missingAssetMetadataSidecarMessage(name));
           metadata = buildFallbackAssetMetadataFromFilename(name, { size: stat.size });
         }

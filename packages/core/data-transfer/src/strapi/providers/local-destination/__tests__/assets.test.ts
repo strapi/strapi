@@ -170,7 +170,9 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     expect(uploadStream).toHaveBeenCalled();
 
     await new Promise<void>((resolve, reject) => {
-      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+      stream.on('error', reject);
+      stream.on('finish', resolve);
+      stream.end();
     });
   });
 });
