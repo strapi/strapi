@@ -1,6 +1,12 @@
-import { getAccessCookieName, getAccessCookiePath, resolveLogoutDeviceId } from '../session-auth';
+import {
+  getAccessCookieName,
+  getAccessCookiePath,
+  getAccessCookieDomain,
+  resolveLogoutDeviceId,
+} from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
 import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
+import { DEFAULT_AUTH_COOKIE_DOMAIN } from '../auth-cookie-domain';
 
 describe('getAccessCookieName', () => {
   beforeEach(() => {
@@ -54,6 +60,46 @@ describe('getAccessCookiePath', () => {
     ) as any;
 
     expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+});
+
+describe('getAccessCookieDomain', () => {
+  beforeEach(() => {
+    global.strapi = {
+      config: {
+        get: jest.fn(() => undefined),
+      },
+    } as any;
+  });
+
+  test('defaults to a host-only cookie', () => {
+    expect(getAccessCookieDomain()).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
+  });
+
+  test('uses the admin.auth.cookie.domain config', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.domain' ? 'strapi.test' : undefined
+    ) as any;
+
+    expect(getAccessCookieDomain()).toBe('strapi.test');
+  });
+
+  test('falls back to admin.auth.domain', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.domain' ? 'legacy.strapi.test' : undefined
+    ) as any;
+
+    expect(getAccessCookieDomain()).toBe('legacy.strapi.test');
+  });
+
+  test('prefers admin.auth.cookie.domain over admin.auth.domain', () => {
+    global.strapi.config.get = jest.fn((key: string) => {
+      if (key === 'admin.auth.cookie.domain') return 'cookie.strapi.test';
+      if (key === 'admin.auth.domain') return 'legacy.strapi.test';
+      return undefined;
+    }) as any;
+
+    expect(getAccessCookieDomain()).toBe('cookie.strapi.test');
   });
 });
 

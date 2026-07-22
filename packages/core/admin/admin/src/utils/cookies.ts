@@ -1,3 +1,4 @@
+import { resolveAuthCookieDomain } from '../../../shared/utils/auth-cookie-domain';
 import { resolveAuthCookieName } from '../../../shared/utils/auth-cookie-name';
 import { resolveAuthCookiePath } from '../../../shared/utils/auth-cookie-path';
 
@@ -13,11 +14,21 @@ export const AUTH_COOKIE_NAME = resolveAuthCookieName(process.env.STRAPI_ADMIN_A
  */
 export const AUTH_COOKIE_PATH = resolveAuthCookiePath(process.env.STRAPI_ADMIN_AUTH_COOKIE_PATH);
 
+/**
+ * Resolved once at module load: the build inlines `admin.auth.cookie.domain`
+ * into the bundle as `STRAPI_ADMIN_AUTH_COOKIE_DOMAIN`. `undefined` means the
+ * cookie is host-only.
+ */
+export const AUTH_COOKIE_DOMAIN = resolveAuthCookieDomain(
+  process.env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN
+);
+
 /** Paths previously used by the client for the access cookie; cleared on set/delete. */
 const LEGACY_AUTH_COOKIE_PATHS = ['/'] as const;
 
-const expireCookieAtPath = (name: string, path: string): void => {
-  document.cookie = `${name}=; Path=${path}; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+const expireCookieAt = (name: string, path: string, domain?: string): void => {
+  const domainAttr = domain ? `; Domain=${domain}` : '';
+  document.cookie = `${name}=; Path=${path}${domainAttr}; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 };
 
 /**
@@ -40,8 +51,9 @@ export const getCookieValue = (name: string): string | null => {
 
 /**
  * Sets a cookie with the given name, value, and optional expiration time.
- * Uses `admin.auth.cookie.path` (inlined at build time) so the access cookie
- * stays scoped to the same path as the httpOnly refresh cookie.
+ * Uses `admin.auth.cookie.path` and `admin.auth.cookie.domain` (both inlined
+ * at build time) so the access cookie stays scoped to the same path and domain
+ * as the httpOnly refresh cookie and the EE SSO access cookie.
  *
  * @param name - The name of the cookie.
  * @param value - The value of the cookie.
@@ -55,25 +67,42 @@ export const setCookie = (name: string, value: string, days?: number): void => {
     expires = `; Expires=${date.toUTCString()}`;
   }
 
-  // Drop legacy Path=/ copies so login does not leave a duplicate root cookie.
+  // Drop legacy Path=/ copies (host-only and domain-scoped) so login does not
+  // leave a duplicate root cookie.
   for (const legacyPath of LEGACY_AUTH_COOKIE_PATHS) {
     if (legacyPath !== AUTH_COOKIE_PATH) {
-      expireCookieAtPath(name, legacyPath);
+      expireCookieAt(name, legacyPath, undefined);
+      if (AUTH_COOKIE_DOMAIN) {
+        expireCookieAt(name, legacyPath, AUTH_COOKIE_DOMAIN);
+      }
     }
   }
 
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=${AUTH_COOKIE_PATH}${expires}`;
+  const domainAttr = AUTH_COOKIE_DOMAIN ? `; Domain=${AUTH_COOKIE_DOMAIN}` : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=${AUTH_COOKIE_PATH}${domainAttr}${expires}`;
 };
 
 /**
  * Deletes a cookie by setting its expiration date to a past date.
- * Clears both the configured path and legacy Path=/ so logout works after upgrades.
+ *
+ * Expires every combination of {configured path, legacy Path=/} and
+ * {configured domain, host-only}. A `Domain`-scoped cookie is a distinct entry
+ * from a host-only one in the browser cookie store, so both must be cleared or
+ * remote logout leaves the EE SSO cookie (written with `Domain` by the server)
+ * behind, rehydrating a dead session into an infinite login redirect.
  *
  * @param name - The name of the cookie to delete.
  */
 export const deleteCookie = (name: string): void => {
   const paths = new Set<string>([AUTH_COOKIE_PATH, ...LEGACY_AUTH_COOKIE_PATHS]);
+  const domains: Array<string | undefined> = [undefined];
+  if (AUTH_COOKIE_DOMAIN) {
+    domains.push(AUTH_COOKIE_DOMAIN);
+  }
+
   for (const path of paths) {
-    expireCookieAtPath(name, path);
+    for (const domain of domains) {
+      expireCookieAt(name, path, domain);
+    }
   }
 };

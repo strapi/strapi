@@ -5,6 +5,7 @@ import { buildSessionMetadata } from '@strapi/utils';
 
 import { resolveAuthCookieName } from './auth-cookie-name';
 import { resolveAuthCookiePath } from './auth-cookie-path';
+import { resolveAuthCookieDomain } from './auth-cookie-domain';
 
 const ADMIN_ORIGIN = 'admin';
 const SESSION_CONTENT_TYPE = 'admin::session';
@@ -19,6 +20,12 @@ export const getAccessCookieName = (): string => {
 export const getAccessCookiePath = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
   return resolveAuthCookiePath(configured);
+};
+
+export const getAccessCookieDomain = (): string | undefined => {
+  const configured: string | undefined =
+    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  return resolveAuthCookieDomain(configured);
 };
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;

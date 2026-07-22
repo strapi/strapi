@@ -20,7 +20,12 @@ jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
 }));
 
-const buildStrapiMock = (cookieName?: string, cookiePath?: string): Core.Strapi =>
+const buildStrapiMock = (
+  cookieName?: string,
+  cookiePath?: string,
+  cookieDomain?: string,
+  legacyAuthDomain?: string
+): Core.Strapi =>
   ({
     config: {
       get: jest.fn((key: string, def?: unknown) => {
@@ -38,6 +43,12 @@ const buildStrapiMock = (cookieName?: string, cookiePath?: string): Core.Strapi 
         }
         if (key === 'admin.auth.cookie.path') {
           return cookiePath;
+        }
+        if (key === 'admin.auth.cookie.domain') {
+          return cookieDomain;
+        }
+        if (key === 'admin.auth.domain') {
+          return legacyAuthDomain;
         }
         if (key === 'features') {
           return undefined;
@@ -140,5 +151,42 @@ describe('createBuildContext', () => {
     const ctx = await createBuildContext(buildArgs(strapi));
 
     expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/config/admin');
+  });
+
+  it('transports admin.auth.cookie.domain into STRAPI_ADMIN_AUTH_COOKIE_DOMAIN', async () => {
+    const strapi = buildStrapiMock(undefined, undefined, 'strapi.test');
+
+    const ctx = await createBuildContext(buildArgs(strapi));
+
+    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN).toBe('strapi.test');
+  });
+
+  it('falls back to admin.auth.domain for STRAPI_ADMIN_AUTH_COOKIE_DOMAIN', async () => {
+    const strapi = buildStrapiMock(undefined, undefined, undefined, 'legacy.strapi.test');
+
+    const ctx = await createBuildContext(buildArgs(strapi));
+
+    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN).toBe('legacy.strapi.test');
+  });
+
+  it('prefers admin.auth.cookie.domain over admin.auth.domain', async () => {
+    const strapi = buildStrapiMock(
+      undefined,
+      undefined,
+      'cookie.strapi.test',
+      'legacy.strapi.test'
+    );
+
+    const ctx = await createBuildContext(buildArgs(strapi));
+
+    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN).toBe('cookie.strapi.test');
+  });
+
+  it('sets an empty STRAPI_ADMIN_AUTH_COOKIE_DOMAIN when config is unset', async () => {
+    const strapi = buildStrapiMock(undefined, undefined, undefined, undefined);
+
+    const ctx = await createBuildContext(buildArgs(strapi));
+
+    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN).toBe('');
   });
 });
