@@ -193,31 +193,43 @@ const ClearSelectionOnChange = ({ listQueryKey }: ClearSelectionOnChangeProps) =
  * AssetsPage
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Mirrors the design-system Toggle look (grey track, white active segment
+ * card) — reproduced locally because the DS component is a labels-only
+ * boolean input (no icons) and paints its left segment in danger red. Here
+ * both segments use the primary blue when active.
+ */
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
+  padding: ${({ theme }) => theme.spaces[1]};
+  background: ${({ theme }) => theme.colors.neutral100};
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: ${({ theme }) => theme.borderRadius};
-  overflow: hidden;
 `;
 
 const StyledToggleItem = styled(ToggleGroup.Item)`
   display: flex;
+  flex: 1 1 50%;
   align-items: center;
+  justify-content: center;
   gap: ${({ theme }) => theme.spaces[2]};
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  border: none;
-  background: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
+  padding: 0.6rem ${({ theme }) => theme.spaces[3]};
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.neutral600};
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSizes[1]};
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.neutral700};
   }
 
   &[data-state='on'] {
-    background: ${({ theme }) => theme.colors.neutral150};
+    background: ${({ theme }) => theme.colors.neutral0};
+    border-color: ${({ theme }) => theme.colors.neutral200};
+    color: ${({ theme }) => theme.colors.primary600};
   }
 
   svg {
