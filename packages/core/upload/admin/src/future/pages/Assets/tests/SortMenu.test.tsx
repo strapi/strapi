@@ -71,6 +71,17 @@ describe('SortMenu', () => {
     expect(sort.setSortBy).toHaveBeenCalledWith(null);
   });
 
+  it('hides the Folders group in grid view (showFoldersGroup=false)', async () => {
+    const { user } = render(<SortMenu sort={makeSort()} showFoldersGroup={false} />);
+
+    await user.click(screen.getByRole('button', { name: /sort:/i }));
+
+    expect(screen.queryByText('Folders')).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Mixed with files' })).not.toBeInTheDocument();
+    // The other groups stay.
+    expect(screen.getByRole('menuitem', { name: 'A to Z' })).toBeInTheDocument();
+  });
+
   it('switches the folders position', async () => {
     const sort = makeSort();
     const { user } = render(<SortMenu sort={sort} />);

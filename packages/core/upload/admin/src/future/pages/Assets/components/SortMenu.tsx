@@ -54,23 +54,30 @@ const SortTrigger = styled(Menu.Trigger)`
 // Full-width section band, like the design mock. The negative inline margin
 // cancels the Menu.Content padding so the background runs edge to edge.
 const GroupLabel = styled(Menu.Label)`
+  width: 100%;
   display: block;
-  background: ${({ theme }) => theme.colors.neutral100};
-  margin-inline: calc(-1 * ${({ theme }) => theme.spaces[1]});
+  background: ${({ theme }) =>
+    theme.colorScheme === 'dark' ? theme.colors.neutral150 : theme.colors.neutral100};
   padding-inline: ${({ theme }) => theme.spaces[3]};
+  border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
 interface SortMenuProps {
   sort: ListSort;
+  /**
+   * The grid view forces folders on top (mixing folder cards with asset cards
+   * is not supported there), so it hides the Folders group entirely.
+   */
+  showFoldersGroup?: boolean;
 }
 
 /**
- * Toolbar "Sort" dropdown: three single-select groups (Sort by / Sort direction /
+ * Toolbar "Sort" dropdown: single-select groups (Sort by / Sort direction /
  * Folders). Picking an option keeps the menu open (`onSelect` preventDefault) so
  * several facets can be tuned in one visit; clicking a checked facet clears it
  * (the hook guarantees at least one sort rule stays active).
  */
-export const SortMenu = ({ sort }: SortMenuProps) => {
+export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
   const { formatMessage } = useIntl();
 
   const triggerLabel = formatMessage(
@@ -90,8 +97,8 @@ export const SortMenu = ({ sort }: SortMenuProps) => {
         {triggerLabel}
       </SortTrigger>
       {/* The DS default maxHeight (15rem) folds everything after the first
-          group behind an invisible scroll — the three groups must be visible
-          at once. 70vh keeps a scroll on very short viewports. */}
+          group behind an invisible scroll — all groups must be visible at
+          once. 70vh keeps a scroll on very short viewports. */}
       <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh" width="25rem">
         <GroupLabel>
           {formatMessage({ id: getTranslationKey('list.sort.by'), defaultMessage: 'Sort by' })}
@@ -129,22 +136,29 @@ export const SortMenu = ({ sort }: SortMenuProps) => {
           </Menu.Item>
         ))}
 
-        <Menu.Separator />
-        <GroupLabel>
-          {formatMessage({ id: getTranslationKey('list.sort.folders'), defaultMessage: 'Folders' })}
-        </GroupLabel>
-        {(Object.keys(FOLDERS_LABELS) as FoldersPosition[]).map((position) => (
-          <Menu.Item
-            key={position}
-            onSelect={(e: Event) => {
-              e.preventDefault();
-              sort.setFoldersPosition(position);
-            }}
-            endIcon={sort.foldersPosition === position ? checkmark : null}
-          >
-            {formatMessage(FOLDERS_LABELS[position])}
-          </Menu.Item>
-        ))}
+        {showFoldersGroup && (
+          <>
+            <Menu.Separator />
+            <GroupLabel>
+              {formatMessage({
+                id: getTranslationKey('list.sort.folders'),
+                defaultMessage: 'Folders',
+              })}
+            </GroupLabel>
+            {(Object.keys(FOLDERS_LABELS) as FoldersPosition[]).map((position) => (
+              <Menu.Item
+                key={position}
+                onSelect={(e: Event) => {
+                  e.preventDefault();
+                  sort.setFoldersPosition(position);
+                }}
+                endIcon={sort.foldersPosition === position ? checkmark : null}
+              >
+                {formatMessage(FOLDERS_LABELS[position])}
+              </Menu.Item>
+            ))}
+          </>
+        )}
       </Menu.Content>
     </Menu.Root>
   );

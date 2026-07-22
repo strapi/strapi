@@ -176,20 +176,21 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
-  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
-  // Click semantics: plain click selects one; cmd/ctrl toggles; shift selects a contiguous
-  // range (anchor → target), replacing the current selection.
+  // Plain click opens the asset details; pointer selection lives on the
+  // checkbox only. Modifier clicks keep the selection semantics: shift selects
+  // a range, cmd/ctrl toggles.
   const handleRowClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
       toggle(key);
     } else {
-      selectOnly(key);
+      onAssetItemClick(asset.id);
     }
   };
 
@@ -578,7 +579,11 @@ export const AssetsTable = ({
         )}
         {!mixedItems &&
           folders.map((folder) => (
-            <FolderRow key={`folder-${folder.id}`} folder={folder} orderedItemKeys={orderedItemKeys} />
+            <FolderRow
+              key={`folder-${folder.id}`}
+              folder={folder}
+              orderedItemKeys={orderedItemKeys}
+            />
           ))}
         {!mixedItems &&
           assets.map((asset) => (
