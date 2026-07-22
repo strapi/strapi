@@ -22,12 +22,16 @@ describe('Admin Sessions Management (Active Devices)', () => {
   });
 
   afterAll(async () => {
-    await strapi.db.query(SESSION_UID).deleteMany({});
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query(SESSION_UID).deleteMany({});
+      await strapi.destroy();
+    }
   });
 
   afterEach(async () => {
-    await strapi.db.query(SESSION_UID).deleteMany({});
+    if (strapi) {
+      await strapi.db.query(SESSION_UID).deleteMany({});
+    }
   });
 
   const getCookie = (res: any, name: string): string | undefined => {

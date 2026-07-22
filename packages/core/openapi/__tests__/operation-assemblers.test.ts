@@ -136,6 +136,97 @@ describe('OpenAPI operation assemblers – params added via addQueryParams / add
       assembler.assemble(context, contentAPIRoute({ handler: 'api::article.article.findMany' }));
       expect(context.output.data.parameters).toEqual([]);
     });
+
+    it('expands nested pagination object into bracket notation query params', () => {
+      const paginationSchema = z
+        .intersection(
+          z.object({
+            withCount: z.boolean().optional(),
+          }),
+          z.union([
+            z.object({
+              page: z.number().int().positive(),
+              pageSize: z.number().int().positive(),
+            }),
+            z.object({
+              start: z.number().int().min(0),
+              limit: z.number().int().positive(),
+            }),
+          ])
+        )
+        .optional();
+
+      const route = contentAPIRoute({
+        handler: 'api::article.article.findMany',
+        request: {
+          query: {
+            pagination: paginationSchema,
+          },
+        },
+      });
+
+      const assembler = new OperationParametersAssembler();
+      const context = createOperationContext();
+      assembler.assemble(context, route);
+
+      const parameters = context.output.data.parameters ?? [];
+      const names = parameters.map((p) => p.name);
+
+      expect(names).toContain('pagination[page]');
+      expect(names).toContain('pagination[pageSize]');
+      expect(names).toContain('pagination[start]');
+      expect(names).toContain('pagination[limit]');
+      expect(names).toContain('pagination[withCount]');
+      expect(names).not.toContain('pagination');
+    });
+
+    it('describes filters as a deepObject query param', () => {
+      const filtersSchema = z.record(z.string(), z.any()).optional();
+
+      const route = contentAPIRoute({
+        handler: 'api::article.article.findMany',
+        request: {
+          query: {
+            filters: filtersSchema,
+          },
+        },
+      });
+
+      const assembler = new OperationParametersAssembler();
+      const context = createOperationContext();
+      assembler.assemble(context, route);
+
+      const parameters = context.output.data.parameters ?? [];
+      const filtersParam = parameters.find(
+        (p): p is typeof p & { name: string } => p.name === 'filters' && p.in === 'query'
+      );
+
+      expect(filtersParam).toBeDefined();
+      expect(filtersParam?.style).toBe('deepObject');
+      expect(filtersParam?.explode).toBe(true);
+      expect(filtersParam?.schema).toMatchObject({ type: 'object' });
+      expect(parameters.some((p) => p.name.startsWith('filters['))).toBe(false);
+    });
+
+    it('keeps obscure query params when allOf merge yields no properties', () => {
+      const obscureSchema = z.intersection(z.object({}), z.object({})).optional();
+
+      const route = contentAPIRoute({
+        handler: 'api::article.article.findMany',
+        request: {
+          query: {
+            obscure: obscureSchema,
+          },
+        },
+      });
+
+      const assembler = new OperationParametersAssembler();
+      const context = createOperationContext();
+      assembler.assemble(context, route);
+
+      const parameters = context.output.data.parameters ?? [];
+      expect(parameters.some((p) => p.name === 'obscure' && p.in === 'query')).toBe(true);
+    });
   });
 
   describe('BodyAssembler', () => {

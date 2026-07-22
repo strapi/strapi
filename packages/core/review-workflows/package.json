@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.50.1",
+  "version": "5.50.2",
   "description": "Review workflows for your content",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -62,9 +62,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.2.1",
-    "@strapi/icons": "2.2.1",
-    "@strapi/utils": "5.50.1",
+    "@strapi/design-system": "2.2.3",
+    "@strapi/icons": "2.2.3",
+    "@strapi/utils": "5.50.2",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
     "koa": "2.16.4",
@@ -78,9 +78,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.50.1",
-    "@strapi/content-manager": "5.50.1",
-    "@strapi/types": "5.50.1",
+    "@strapi/admin": "5.50.2",
+    "@strapi/content-manager": "5.50.2",
+    "@strapi/types": "5.50.2",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
