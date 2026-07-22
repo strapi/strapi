@@ -313,8 +313,8 @@ export const AssetsPage = () => {
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
-        <AssetsDndProvider>
-          <AssetSelectionProvider>
+        <AssetSelectionProvider>
+          <AssetsDndProvider>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Box ref={uploadDropZoneRef}>
               <Layouts.Root
@@ -433,8 +433,8 @@ export const AssetsPage = () => {
               </Layouts.Root>
             </Box>
             <BulkActionsBar />
-          </AssetSelectionProvider>
-        </AssetsDndProvider>
+          </AssetsDndProvider>
+        </AssetSelectionProvider>
       </UploadDropZoneProvider>
       <CreateFolderDialog
         open={isCreateFolderDialogOpen}

@@ -17,6 +17,8 @@ import {
   useGetFolderQuery,
   useGetFolderStructureQuery,
 } from '../../../services/folders';
+import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
+import { canDropItemOnFolder } from '../../../utils/canDropItemOnFolder';
 import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
 import { getBulkMoveErrorMessage } from '../../../utils/getBulkMoveErrorMessage';
 import { getTranslationKey } from '../../../utils/translations';
@@ -65,15 +67,33 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
     defaultMessage: 'Media Library',
   });
 
+  // Reconstruct the selection as a drag set so the dialog validates destinations
+  // through the exact same canonical predicate as the DnD highlight.
+  const dragSet = useMemo(
+    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, currentFolderId),
+    [selectedIds, selectedFolderIds, currentFolderId]
+  );
+
   // Options carry the full ancestry ("About / Images" vs "Tech / Images") so
   // same-named folders stay distinguishable, listed depth-first under their
   // parent. Selected folders and their descendants are pruned during the same
   // single walk — an item can't be moved into itself or below itself (the
-  // server would reject it). Memoized: large libraries shouldn't re-walk the
-  // tree on every dialog render.
+  // server would reject it). The current folder (where the items already live)
+  // is filtered out too via `canDropItemOnFolder`, so we never offer a no-op
+  // move. Memoized: large libraries shouldn't re-walk the tree on every render.
   const destinationOptions = useMemo(
-    () => flattenFolderStructure(folderStructure, selectedFolderIds),
-    [folderStructure, selectedFolderIds]
+    () =>
+      flattenFolderStructure(folderStructure, selectedFolderIds).filter((option) =>
+        canDropItemOnFolder({ items: dragSet, targetFolderId: option.id, folderStructure })
+      ),
+    [folderStructure, selectedFolderIds, dragSet]
+  );
+
+  // Hide the root option when the items already live at root — dropping there
+  // would be a no-op. Uses the same predicate as the DnD highlight.
+  const canMoveToRoot = useMemo(
+    () => canDropItemOnFolder({ items: dragSet, targetFolderId: null, folderStructure }),
+    [dragSet, folderStructure]
   );
 
   const count = selectedIds.size + selectedFolderIds.size;
@@ -164,7 +184,7 @@ export const BulkMoveDialog = ({ open, onClose }: BulkMoveDialogProps) => {
               onChange={(value) => setDestination(String(value))}
               disabled={isMoving}
             >
-              <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
+              {canMoveToRoot && <SingleSelectOption value="">{rootLabel}</SingleSelectOption>}
               {destinationOptions.map((option) => (
                 <SingleSelectOption key={option.id} value={String(option.id)}>
                   {option.label}
