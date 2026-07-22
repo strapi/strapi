@@ -105,10 +105,16 @@ describe('getAccessCookieDomain', () => {
 });
 
 describe('getRefreshCookieOptions', () => {
+  const logWarn = jest.fn();
+
   beforeEach(() => {
+    logWarn.mockReset();
     global.strapi = {
       config: {
         get: jest.fn(() => undefined),
+      },
+      log: {
+        warn: logWarn,
       },
     } as any;
   });
@@ -121,14 +127,13 @@ describe('getRefreshCookieOptions', () => {
     expect(getRefreshCookieOptions().domain).toBe('strapi.test');
   });
 
-  test('falls back to a host-only cookie when the configured domain is invalid', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  test('falls back to a host-only cookie and warns via strapi.log when the configured domain is invalid', () => {
     global.strapi.config.get = jest.fn((key: string) =>
       key === 'admin.auth.cookie.domain' ? 'strapi.test:1337' : undefined
     ) as any;
 
     expect(getRefreshCookieOptions().domain).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
-    warnSpy.mockRestore();
+    expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('strapi.test:1337'));
   });
 });
 

@@ -24,7 +24,10 @@ const isValidCookiePath = (path: string): boolean => {
   return !/[\x00-\x1F\x7F;]/.test(path);
 };
 
-export const resolveAuthCookiePath = (configuredPath?: string): string => {
+export const resolveAuthCookiePath = (
+  configuredPath?: string,
+  warn: (message: string) => void = console.warn
+): string => {
   const cookiePath = (configuredPath || '').trim();
 
   if (!cookiePath) {
@@ -32,7 +35,7 @@ export const resolveAuthCookiePath = (configuredPath?: string): string => {
   }
 
   if (!isValidCookiePath(cookiePath)) {
-    console.warn(
+    warn(
       `Ignoring invalid admin auth cookie path "${cookiePath}" (must be an absolute path without ";"); using "${DEFAULT_AUTH_COOKIE_PATH}" instead.`
     );
     return DEFAULT_AUTH_COOKIE_PATH;

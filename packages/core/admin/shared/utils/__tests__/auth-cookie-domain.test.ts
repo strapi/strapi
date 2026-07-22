@@ -30,4 +30,13 @@ describe('resolveAuthCookieDomain', () => {
     expect(resolveAuthCookieDomain('strapi.test;HttpOnly')).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  it('routes the warning through the provided warn callback instead of console', () => {
+    const warn = jest.fn();
+
+    expect(resolveAuthCookieDomain('strapi.test:1337', warn)).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('strapi.test:1337'));
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
 });

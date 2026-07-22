@@ -12,20 +12,27 @@ const SESSION_CONTENT_TYPE = 'admin::session';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
+// The resolvers are browser-shared (also inlined into the admin bundle) so
+// they default to console.warn; on the server, route their warnings through
+// the Strapi logger instead.
+const warnViaStrapiLog = (message: string): void => {
+  strapi.log.warn(message);
+};
+
 export const getAccessCookieName = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
-  return resolveAuthCookieName(configured);
+  return resolveAuthCookieName(configured, warnViaStrapiLog);
 };
 
 export const getAccessCookiePath = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
-  return resolveAuthCookiePath(configured);
+  return resolveAuthCookiePath(configured, warnViaStrapiLog);
 };
 
 export const getAccessCookieDomain = (): string | undefined => {
   const configured: string | undefined =
     strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
-  return resolveAuthCookieDomain(configured);
+  return resolveAuthCookieDomain(configured, warnViaStrapiLog);
 };
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;

@@ -25,7 +25,10 @@ const isValidCookieDomain = (domain: string): boolean => {
   return !/[\x00-\x1F\x7F;,\s/:]/.test(domain);
 };
 
-export const resolveAuthCookieDomain = (configuredDomain?: string): string | undefined => {
+export const resolveAuthCookieDomain = (
+  configuredDomain?: string,
+  warn: (message: string) => void = console.warn
+): string | undefined => {
   const cookieDomain = (configuredDomain || '').trim();
 
   if (!cookieDomain) {
@@ -33,7 +36,7 @@ export const resolveAuthCookieDomain = (configuredDomain?: string): string | und
   }
 
   if (!isValidCookieDomain(cookieDomain)) {
-    console.warn(
+    warn(
       `Ignoring invalid admin auth cookie domain "${cookieDomain}" (must be a bare host name); using a host-only cookie instead.`
     );
     return DEFAULT_AUTH_COOKIE_DOMAIN;
