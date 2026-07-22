@@ -72,7 +72,8 @@ describe('SessionsPage', () => {
 
     await waitFor(() => expect(keepCurrent).toBe('true'));
     expect(getByRole('heading', { name: 'Active Devices' })).toBeInTheDocument();
-    expect(mockNavigate).not.toHaveBeenCalled();
+    // Keep-current revoke must not log the user out of this device.
+    expect(mockLogout).not.toHaveBeenCalled();
   });
 
   it('calls the revoke endpoint when ending a non-current session', async () => {
