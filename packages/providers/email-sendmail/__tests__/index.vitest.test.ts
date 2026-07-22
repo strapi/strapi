@@ -1,14 +1,15 @@
+import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import { generateKeyPairSync } from 'crypto';
 import { resolveMx } from 'dns/promises';
 
 import provider from '../src/index';
 import { MinimalSmtpServer } from './helpers/minimal-smtp-server';
 
-jest.mock('dns/promises', () => ({
-  resolveMx: jest.fn(),
+vi.mock('dns/promises', () => ({
+  resolveMx: vi.fn(),
 }));
 
-const mockedResolveMx = resolveMx as jest.MockedFunction<typeof resolveMx>;
+const mockedResolveMx = resolveMx as MockedFunction<typeof resolveMx>;
 
 describe('@strapi/provider-email-sendmail', () => {
   describe('init + send (integration against minimal SMTP)', () => {
@@ -53,7 +54,7 @@ describe('@strapi/provider-email-sendmail', () => {
     });
 
     it('merges silent: true by default and allows override', async () => {
-      const debug = jest.fn();
+      const debug = vi.fn();
       const instance = provider.init(
         {
           devPort: server.port,

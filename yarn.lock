@@ -8641,7 +8641,7 @@ __metadata:
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
-    use-context-selector: "npm:1.4.1"
+    use-context-selector: "npm:1.4.4"
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
@@ -8728,7 +8728,7 @@ __metadata:
     "@types/prismjs": "npm:1.26.5"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
-    dompurify: "npm:3.4.11"
+    dompurify: "npm:3.4.12"
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
@@ -9534,13 +9534,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.50.2"
-    jest: "npm:29.6.0"
     nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
@@ -9560,13 +9560,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.50.2"
-    jest: "npm:29.6.0"
     nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
@@ -9607,13 +9607,12 @@ __metadata:
     "@strapi/types": "npm:5.50.2"
     "@strapi/utils": "npm:5.50.2"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.2"
     fs-extra: "npm:11.3.4"
-    jest: "npm:29.6.0"
-    memfs: "npm:4.6.0"
     tsconfig: "npm:5.50.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.50.2"
   languageName: unknown
   linkType: soft
 
@@ -9898,7 +9897,7 @@ __metadata:
     "@types/koa-static": "npm:4.0.2"
     "@types/node": "npm:20.19.41"
     byte-size: "npm:8.1.1"
-    cropperjs: "npm:1.6.1"
+    cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
     file-type: "npm:21.3.4"
     formidable: "npm:3.5.4"
@@ -13668,8 +13667,8 @@ __metadata:
   linkType: hard
 
 "body-parser@npm:~1.20.3":
-  version: 1.20.4
-  resolution: "body-parser@npm:1.20.4"
+  version: 1.20.6
+  resolution: "body-parser@npm:1.20.6"
   dependencies:
     bytes: "npm:~3.1.2"
     content-type: "npm:~1.0.5"
@@ -13679,11 +13678,11 @@ __metadata:
     http-errors: "npm:~2.0.1"
     iconv-lite: "npm:~0.4.24"
     on-finished: "npm:~2.4.1"
-    qs: "npm:~6.14.0"
+    qs: "npm:~6.15.1"
     raw-body: "npm:~2.5.3"
     type-is: "npm:~1.6.18"
     unpipe: "npm:~1.0.0"
-  checksum: 10c0/569c1e896297d1fcd8f34026c8d0ab70b90d45343c15c5d8dff5de2bad08125fc1e2f8c2f3f4c1ac6c0caaad115218202594d37dcb8d89d9b5dcae1c2b736aa9
+  checksum: 10c0/ad477209f1e714c41fa892a7d2fe22e10b23262103cc25cc6492dd3e6f7869cd2d8b00928b543a1a14d3c3663432452a192efd00422fad6f3687b0e38f7e3b07
   languageName: node
   linkType: hard
 
@@ -13728,20 +13727,20 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^2.0.1, brace-expansion@npm:^2.0.2":
-  version: 2.1.2
-  resolution: "brace-expansion@npm:2.1.2"
+  version: 2.1.0
+  resolution: "brace-expansion@npm:2.1.0"
   dependencies:
     balanced-match: "npm:^1.0.0"
-  checksum: 10c0/5442ecab84045d21826268bc56c81a6ef4215327ee1f5ee153f67928e93f7a915d130ecec9966623143277fa3cce036ebb50020024bcc4d78853cdd6af9a19f8
+  checksum: 10c0/439cedf3e23d7993b37919f1d6fdc653ec21a42437ec3e7460bea9ca8b17edf7a24a633273c31d61aa4335877cf29a443f1871814131c87997a1e6223e1f1502
   languageName: node
   linkType: hard
 
 "brace-expansion@npm:^5.0.2, brace-expansion@npm:^5.0.5":
-  version: 5.0.7
-  resolution: "brace-expansion@npm:5.0.7"
+  version: 5.0.5
+  resolution: "brace-expansion@npm:5.0.5"
   dependencies:
     balanced-match: "npm:^4.0.2"
-  checksum: 10c0/4769109c3c082de178e449a371bcad50d51ab468f644bce2dd9188efe0cf0a080ed102105d7fc8577382cedc45bad7e6443a91bf3d8102264ee8cf927dbaf205
+  checksum: 10c0/4d238e14ed4f5cc9c07285550a41cef23121ca08ba99fa9eb5b55b580dcb6bf868b8210aa10526bdc9f8dc97f33ca2a7259039c4cc131a93042beddb424c48e3
   languageName: node
   linkType: hard
 
@@ -15087,10 +15086,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cropperjs@npm:1.6.1":
-  version: 1.6.1
-  resolution: "cropperjs@npm:1.6.1"
-  checksum: 10c0/53a2e3af688cb3307eb0cd9b39e8009c5bdbf1d2a78317f07c506f741e27df0fd35d3dd2f6a17509e59949866735eb25808f277988fb1658365541423e30b1a6
+"cropperjs@npm:1.6.2":
+  version: 1.6.2
+  resolution: "cropperjs@npm:1.6.2"
+  checksum: 10c0/5002e0cc3a491ceb8a104b2cb7a7c335a03e109fe590653f3aeefa27ca7115466edae62afc8ba21105bbaad4134583f5057ebbf5e8d843c7b2c1c1f0779630e9
   languageName: node
   linkType: hard
 
@@ -15860,15 +15859,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:3.4.11":
-  version: 3.4.11
-  resolution: "dompurify@npm:3.4.11"
+"dompurify@npm:3.4.12":
+  version: 3.4.12
+  resolution: "dompurify@npm:3.4.12"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10c0/31439481c7e8fc3805d40c376936fd66936620fb1b1a31a2ec097f6165412c37f2d868e082c9ceba62bb37661c1ea132a5db4d5213434317e30df68d4aca9cc9
+  checksum: 10c0/127a13817353d4e20e75a991a9022a04c3af12af7479f68e2b8bee6dbc7330a96edfb8f4ebff96f4f0f24cd43e8dbba46214131f510c3aa87a843bd8b610d0ab
   languageName: node
   linkType: hard
 
@@ -17610,9 +17609,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.2
-  resolution: "fast-uri@npm:3.1.2"
-  checksum: 10c0/5b35641895959f3f7ab7a7b1b5542bded159346f25ec9f256817b206d50b64eda5828e90d605a2e2fc645c90519a7259c2bab2c942ee728c88b88e5be21b090d
+  version: 3.1.4
+  resolution: "fast-uri@npm:3.1.4"
+  checksum: 10c0/f90948821ceb49980f64f89b8216ba498f5957f26035be813526a55b6145d26cbd63ef5618d5205a3292b31edc9c08589749350cd72bd86c7095eb434dceb757
   languageName: node
   linkType: hard
 
@@ -20909,13 +20908,13 @@ __metadata:
   linkType: hard
 
 "js-yaml@npm:^4.0.0, js-yaml@npm:^4.1.0":
-  version: 4.3.0
-  resolution: "js-yaml@npm:4.3.0"
+  version: 4.1.1
+  resolution: "js-yaml@npm:4.1.1"
   dependencies:
     argparse: "npm:^2.0.1"
   bin:
     js-yaml: bin/js-yaml.js
-  checksum: 10c0/058b30473d6915ca5b4feb11e2f7d4d97242f98d00a798ed48dd90b46b7c640398afe9128c5db22c5300f8c6528fe2a174b9a93f351a70ebc28c6203938d8bff
+  checksum: 10c0/561c7d7088c40a9bb53cc75becbfb1df6ae49b34b5e6e5a81744b14ae8667ec564ad2527709d1a6e7d5e5fa6d483aa0f373a50ad98d42fde368ec4a190d4fae7
   languageName: node
   linkType: hard
 
@@ -25483,7 +25482,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:6.15.3, qs@npm:^6.11.0, qs@npm:^6.14.0, qs@npm:^6.14.1, qs@npm:^6.5.2":
+"qs@npm:6.15.3, qs@npm:^6.11.0, qs@npm:^6.14.0, qs@npm:^6.14.1, qs@npm:^6.5.2, qs@npm:~6.15.1":
   version: 6.15.3
   resolution: "qs@npm:6.15.3"
   dependencies:
@@ -29389,9 +29388,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^7.19.0":
-  version: 7.28.0
-  resolution: "undici@npm:7.28.0"
-  checksum: 10c0/fe781983a26098795e99bb1f64906cbb7d0bcaa029a26baade007b53ea67f2631d189b8f9671a31f4c8d0cb3773b7559608628ba54452fef51fec90e7c78bb0d
+  version: 7.27.2
+  resolution: "undici@npm:7.27.2"
+  checksum: 10c0/714632147c80eb8eda8a52df51b481d346df5e035ccc1d87eb3bbcb8f92ec25d7cbbe81abdeae5db4e37a93e490c8d2fa2359ecdca4b2c5c6c513dcd2626ad47
   languageName: node
   linkType: hard
 
@@ -29730,9 +29729,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-context-selector@npm:1.4.1":
-  version: 1.4.1
-  resolution: "use-context-selector@npm:1.4.1"
+"use-context-selector@npm:1.4.4":
+  version: 1.4.4
+  resolution: "use-context-selector@npm:1.4.4"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: "*"
@@ -29743,7 +29742,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 10c0/9751181117fdb47049aec8f3a6ccc4f1286e8661c769dbed554d58e478538cb83dac180a62baedcb3f65c99c3ed41d5423a955c9b7c12133b0e4263c30255bff
+  checksum: 10c0/19d11287de220c79a1d26d3ad8e44e9b47389c569703711829e76229f215b72a86030c14c992dc378593a55fb48ec3d8a4558c1d6ac8b1554d47d275d33de3e9
   languageName: node
   linkType: hard
 
