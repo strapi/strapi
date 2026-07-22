@@ -334,7 +334,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             activeIndex !== -1 &&
             overIndex !== -1;
           const canCreateNewRowForItem =
-            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+            activeContainerIndex !== overContainerIndex &&
+            GRID_COLUMNS - spaceTaken < draggedItem.size;
           const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
           /**
@@ -371,8 +372,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               // Default: insert a new row after the row being hovered (between that row and the
               // next). For row 0, use index 0 instead so fields that are not full-width can still
               // be moved above the first row—there is no separate drop area above it in the UI.
-              const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
 
+              const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
               /**
                * When inserting *after* the hovered row, reuse the following row if it only
                * contains spacers. Skip when inserting at index 0 — draft[0] is the hovered row.
@@ -396,7 +397,13 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               }
 
               const newContainerPrototype = draft[overContainerIndex];
-              const newContainerId = `container-${draft.length}`;
+
+              // use draft.length without check may be cause key confilct and flicking.
+              let i = draft.length;
+              while (!!containersAsDictionary[`container-${i}`]) {
+                i++;
+              }
+              const newContainerId = `container-${i}`;
 
               draft.splice(insertIndex, 0, {
                 ...newContainerPrototype,
@@ -419,7 +426,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           targetChildren.splice(overIndex, 0, draggedItem);
         });
 
-        setContainers(update);
+        setContainers(update.filter((container) => container.children.length > 0));
       }}
       onDragEnd={(event) => {
         const { active, over } = event;
