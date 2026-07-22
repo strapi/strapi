@@ -5,6 +5,7 @@ import utils from './utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  buildSessionMetadataFromContext,
   getAccessCookieName,
   getSessionManager,
   generateDeviceId,
@@ -119,6 +120,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
       'admin'
     ).generateRefreshToken(userId, deviceId, {
       type: 'refresh',
+      metadata: buildSessionMetadataFromContext(ctx),
     });
 
     const cookieOptions = buildCookieOptionsWithExpiry('refresh', absoluteExpiresAt);
@@ -137,11 +139,14 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
 
     const domain: string | undefined = strapi.config.get('admin.auth.domain');
+    const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+
     ctx.cookies.set(getAccessCookieName(), accessToken, {
       httpOnly: false,
       secure: isSecure,
       overwrite: true,
       domain,
+      path,
     });
 
     const sanitizedUser = getService('user').sanitizeUser(user);

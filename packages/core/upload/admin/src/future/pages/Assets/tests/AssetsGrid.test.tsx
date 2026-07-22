@@ -157,9 +157,9 @@ describe('AssetsGrid', () => {
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
 
-    it('renders empty state when no assets and no folders', () => {
+    it('renders nothing when no assets and no folders (empty state is owned by the page)', () => {
       setup({ assets: [], folders: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
+      expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
     });
   });
 
@@ -335,17 +335,11 @@ describe('AssetsGrid', () => {
       expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
     });
 
-    it('shows empty state when there are no folders and no assets', () => {
-      setup({ folders: [], assets: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
-    });
-
     it('renders only folder items when there are no assets', () => {
       const folders = [createMockFolder(1, 'Photos')];
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
-      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
     });
   });
 

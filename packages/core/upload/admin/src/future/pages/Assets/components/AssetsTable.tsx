@@ -103,11 +103,6 @@ const StyledTr = styled.tr<{
   }
 `;
 
-const StyledBodyTd = styled(RawTd)`
-  padding: ${({ theme }) => theme.spaces[4]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
 // Leading checkbox column. Narrow + centred so the control sits flush against the
 // row's left edge.
 const CheckboxTd = styled(StyledTd)`
@@ -496,6 +491,12 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
     }
   };
 
+  // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
+  // empty table renders nothing at all, not headers over an empty body.
+  if (totalRows === 0) {
+    return null;
+  }
+
   return (
     <StyledTable colCount={colCount} rowCount={totalRows + 1}>
       <StyledThead>
@@ -543,36 +544,21 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {totalRows === 0 ? (
-          <RawTr>
-            <StyledBodyTd colSpan={colCount}>
-              <Typography textColor="neutral600">
-                {formatMessage({
-                  id: 'app.components.EmptyStateLayout.content-document',
-                  defaultMessage: 'No content found',
-                })}
-              </Typography>
-            </StyledBodyTd>
-          </RawTr>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <FolderRow
-                key={`folder-${folder.id}`}
-                folder={folder}
-                orderedItemKeys={orderedItemKeys}
-              />
-            ))}
-            {assets.map((asset) => (
-              <AssetRow
-                key={asset.id}
-                asset={asset}
-                orderedItemKeys={orderedItemKeys}
-                onAssetItemClick={onAssetItemClick}
-              />
-            ))}
-          </>
-        )}
+        {folders.map((folder) => (
+          <FolderRow
+            key={`folder-${folder.id}`}
+            folder={folder}
+            orderedItemKeys={orderedItemKeys}
+          />
+        ))}
+        {assets.map((asset) => (
+          <AssetRow
+            key={asset.id}
+            asset={asset}
+            orderedItemKeys={orderedItemKeys}
+            onAssetItemClick={onAssetItemClick}
+          />
+        ))}
       </RawTbody>
     </StyledTable>
   );

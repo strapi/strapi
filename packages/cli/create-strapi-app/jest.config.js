@@ -2,5 +2,5 @@
 
 module.exports = {
   preset: '../../../jest-preset.unit.js',
-  displayName: 'Nodemailer email provider',
+  displayName: 'Create Strapi App',
 };

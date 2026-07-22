@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.50.1",
+  "version": "5.50.2",
   "description": "A powerful UI to easily manage your data.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -70,16 +70,16 @@
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
-    "@radix-ui/react-toolbar": "1.0.4",
+    "@radix-ui/react-toolbar": "1.1.11",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.3",
     "@strapi/icons": "2.2.3",
-    "@strapi/types": "5.50.1",
-    "@strapi/utils": "5.50.1",
+    "@strapi/types": "5.50.2",
+    "@strapi/utils": "5.50.2",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
-    "dompurify": "3.4.11",
+    "dompurify": "3.4.12",
     "fractional-indexing": "3.2.0",
     "highlight.js": "^10.4.1",
     "immer": "9.0.21",
@@ -108,11 +108,11 @@
     "slate-history": "0.93.0",
     "slate-react": "0.98.4",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "3.25.76"
   },
   "devDependencies": {
-    "@strapi/admin": "5.50.1",
-    "@strapi/database": "5.50.1",
+    "@strapi/admin": "5.50.2",
+    "@strapi/database": "5.50.2",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
