@@ -217,6 +217,7 @@ describe('getFetchClient', () => {
         Promise.resolve({
           status: 404,
           ok: false,
+          text: () => Promise.resolve(''),
         })
       );
 
@@ -225,6 +226,54 @@ describe('getFetchClient', () => {
       await expect(fetchClient.get('/api/export', { responseType: 'blob' })).rejects.toMatchObject({
         name: 'FetchError',
         status: 404,
+      });
+    });
+
+    it('should surface a JSON server error envelope when responseType is non-json', async () => {
+      const errorBody = {
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Type is required',
+          details: {},
+        },
+      };
+
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 400,
+          ok: false,
+          text: () => Promise.resolve(JSON.stringify(errorBody)),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.get('/lms/reports/download', { responseType: 'text' })).rejects.toMatchObject({
+        name: 'FetchError',
+        status: 400,
+        message: 'Type is required',
+        response: { data: errorBody },
+      });
+    });
+
+    it('should surface a plain-text server error body when responseType is non-json and body is not JSON', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 502,
+          ok: false,
+          text: () => Promise.resolve('Bad Gateway'),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.get('/api/export', { responseType: 'blob' })).rejects.toMatchObject({
+        name: 'FetchError',
+        status: 502,
+        message: 'Server Error',
+        response: { data: { error: { name: 'ApplicationError', message: 'Bad Gateway', status: 502 } } },
       });
     });
 
