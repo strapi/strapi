@@ -4,13 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { SessionsPage } from '../SessionsPage';
 
 const mockLogout = jest.fn(() => Promise.resolve());
-const mockNavigate = jest.fn();
 const mockToggleNotification = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-}));
 
 jest.mock('../../features/Auth', () => ({
   ...jest.requireActual('../../features/Auth'),
@@ -130,8 +124,8 @@ describe('SessionsPage', () => {
     await user.click(confirm);
 
     await waitFor(() => expect(revokedId).toBe('session-current'));
+    // Auth.logout owns the login redirect (and may confirm unsaved changes first).
     expect(mockLogout).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith('/auth/login');
   });
 
   it('shows an error state when sessions cannot be loaded', async () => {
@@ -184,7 +178,7 @@ describe('SessionsPage', () => {
     await user.click(await findByRole('button', { name: /confirm/i }));
 
     await waitFor(() => expect(keepCurrent).toBeNull());
+    // Auth.logout owns the login redirect (and may confirm unsaved changes first).
     expect(mockLogout).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith('/auth/login');
   });
 });
