@@ -88,13 +88,14 @@ const AssetsView = ({
   const isLoading = isLoadingAssets || isLoadingFolders;
 
   // "Folders: Mixed with files" — interleave the complete folder list into the
-  // loaded asset stream client-side, following the active sort.
+  // loaded asset stream client-side, following the active sort. Table view
+  // only: the grid always keeps folders in their own band on top.
   const mixedItems = useMemo(
     () =>
-      foldersPosition === 'mixed'
+      foldersPosition === 'mixed' && !isGridView
         ? mergeMixedList({ folders, assets, sort: assetsSort, hasNextPage })
         : null,
-    [foldersPosition, folders, assets, assetsSort, hasNextPage]
+    [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
   );
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
@@ -136,12 +137,7 @@ const AssetsView = ({
   return (
     <>
       {isGridView ? (
-        <AssetsGrid
-          folders={folders}
-          assets={assets}
-          mixedItems={mixedItems}
-          onAssetItemClick={onAssetItemClick}
-        />
+        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
       ) : (
         <AssetsTable
           assets={assets}
@@ -221,6 +217,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSizes[1]};
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
+  white-space: nowrap;
 
   &:hover {
     color: ${({ theme }) => theme.colors.neutral700};
@@ -417,7 +414,7 @@ export const AssetsPage = () => {
                         </Flex>
 
                         <Flex gap={4} alignItems="stretch">
-                          <SortMenu sort={listSort} />
+                          <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
                           <StyledToggleGroup
                             type="single"
                             value={isGridView ? 'grid' : 'table'}

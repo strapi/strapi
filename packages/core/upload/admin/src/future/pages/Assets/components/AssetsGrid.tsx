@@ -19,7 +19,6 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
-import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
@@ -35,8 +34,8 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 // Top-left selection checkbox overlaid on the asset preview, always visible.
 const CheckboxOverlay = styled(Flex)`
   position: absolute;
-  top: ${({ theme }) => theme.spaces[2]};
-  left: ${({ theme }) => theme.spaces[2]};
+  top: ${({ theme }) => theme.spaces[3]};
+  left: ${({ theme }) => theme.spaces[3]};
   z-index: 1;
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 `;
@@ -177,6 +176,16 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
     }
   };
 
+  // Checkbox is the pointer path to selection; Shift extends the range.
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else {
+      toggle(key);
+    }
+  };
+
   return (
     <StyledFolderCard
       ref={setNodeRef}
@@ -192,6 +201,19 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       role="listitem"
       tabIndex={0}
     >
+      <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+        <Checkbox
+          checked={isSelected(key)}
+          onClick={handleCheckboxClick}
+          aria-label={formatMessage(
+            {
+              id: getTranslationKey('list.table.row.select'),
+              defaultMessage: 'Select {name}',
+            },
+            { name: folder.name }
+          )}
+        />
+      </Flex>
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
@@ -345,20 +367,21 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
-  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
-  // OS file-manager click semantics (same as the table view): shift selects a
-  // range, cmd/ctrl toggles, plain click selects only this card.
+  // Plain click opens the asset details; pointer selection lives on the
+  // checkbox only. Modifier clicks keep the selection semantics: shift selects
+  // a range, cmd/ctrl toggles.
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
       toggle(key);
     } else {
-      selectOnly(key);
+      onAssetItemClick(asset.id);
     }
   };
 
@@ -452,68 +475,23 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
-  /**
-   * When set ("Folders: Mixed with files"), cards render in this interleaved
-   * order — folder cards flow inside the asset grid instead of the dedicated
-   * top band. Range selection follows the same order.
-   */
-  mixedItems?: MixedItem[] | null;
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({
-  assets,
-  folders = [],
-  mixedItems = null,
-  onAssetItemClick,
-}: AssetsGridProps) => {
+export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
-  // Render order — folders first by default, or the interleaved mixed order.
-  // Range selection follows it.
-  const orderedItemKeys: ItemKey[] = mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
-    : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
-      ];
+  // Render order: folders always on top in the grid (mixing is table-only) —
+  // range selection follows it.
+  const orderedItemKeys: ItemKey[] = [
+    ...folders.map((folder) => folderKey(folder.id)),
+    ...assets.map((asset) => assetKey(asset.id)),
+  ];
 
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.
   if (totalItems === 0) {
     return null;
-  }
-
-  if (mixedItems) {
-    return (
-      <Grid.Root gap={4} role="list" data-testid="assets-grid">
-        {mixedItems.map((item) =>
-          item.kind === 'folder' ? (
-            <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${item.folder.id}`}>
-              <FolderCard folder={item.folder} orderedItemKeys={orderedItemKeys} />
-            </Grid.Item>
-          ) : (
-            <Grid.Item
-              col={3}
-              m={4}
-              s={6}
-              xs={12}
-              key={item.asset.id}
-              direction="column"
-              alignItems="stretch"
-            >
-              <AssetCard
-                asset={item.asset}
-                orderedItemKeys={orderedItemKeys}
-                onAssetItemClick={onAssetItemClick}
-              />
-            </Grid.Item>
-          )
-        )}
-      </Grid.Root>
-    );
   }
 
   return (

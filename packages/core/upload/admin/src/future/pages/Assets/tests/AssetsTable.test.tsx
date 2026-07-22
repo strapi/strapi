@@ -283,15 +283,15 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
-    it('selects an asset when its row body is clicked', async () => {
+    it('opens the asset details when its row body is clicked (no selection)', async () => {
       const { user } = setup();
 
       // rows[0] is the header; rows[1] is the first asset row (image1.png).
       const firstAssetRow = screen.getAllByRole('row')[1];
       await user.click(firstAssetRow);
 
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
-      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
     });
 
     it('opens details (and does not select) when the filename is clicked', async () => {
