@@ -246,6 +246,7 @@ const filterFieldsBasedOnAttributeType = (type: Schema.Attribute.Kind) => (field
     case 'component':
       return field.name === 'label' || field.name === 'editable';
     case 'dynamiczone':
+      return field.name !== 'placeholder' && field.name !== 'mainField';
     case 'json':
       return field.name !== 'placeholder' && field.name !== 'mainField' && field.name !== 'size';
     case 'relation':
