@@ -2,7 +2,7 @@
   "name": "complex",
   "version": "0.0.0",
   "private": true,
-  "description": "A Strapi application with complex schemas",
+  "description": "Migration test fixture: Strapi app with rich schemas, seeds, and validators for v4→v5 integration tests (see tests/migration/)",
   "scripts": {
     "build": "strapi build",
     "dev": "strapi develop",

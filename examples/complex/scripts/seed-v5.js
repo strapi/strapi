@@ -7,80 +7,14 @@ const { createStrapi, compileStrapi } = require('@strapi/strapi');
 
 let strapi;
 
-const BASE_COUNTS = {
-  basic: 5,
-  basicDp: { published: 3, drafts: 2 },
-  basicDpI18n: { published: 3, drafts: 2 },
-  relation: 5,
-  relationDp: { published: 5, drafts: 3 },
-  relationDpI18n: { published: 5, drafts: 3 },
-  mediaFiles: 10,
-};
+const { requireFixture } = require('./require-fixture');
+const spec = requireFixture('spec');
+const { getSeedCountsForProfile } = requireFixture('derive-expectations');
+const { parseMultiplier } = requireFixture('resolve-context');
 
-const LOCALES = ['en', 'fr'];
-
-function parseCliArgs(argv) {
-  const opts = { multiplier: 1 };
-
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-
-    if (arg === '--multiplier' && argv[i + 1] != null) {
-      opts.multiplier = Number(argv[i + 1]);
-      i += 1;
-      continue;
-    }
-
-    if (arg && arg.startsWith('--multiplier=')) {
-      opts.multiplier = Number(arg.split('=')[1]);
-      continue;
-    }
-
-    if (!Number.isNaN(Number(arg))) {
-      opts.multiplier = Number(arg);
-    }
-  }
-
-  const envMultiplier = process.env.SEED_MULTIPLIER;
-  if (!Number.isNaN(Number(envMultiplier))) {
-    opts.multiplier = Number(envMultiplier);
-  }
-
-  if (!Number.isFinite(opts.multiplier) || opts.multiplier <= 0) {
-    opts.multiplier = 1;
-  }
-
-  return opts;
-}
-
-function applyMultiplierToCounts(base, multiplier) {
-  const m = Number(multiplier) || 1;
-
-  return {
-    basic: base.basic * m,
-    basicDp: {
-      published: base.basicDp.published * m,
-      drafts: base.basicDp.drafts * m,
-    },
-    basicDpI18n: {
-      published: base.basicDpI18n.published * m,
-      drafts: base.basicDpI18n.drafts * m,
-    },
-    relation: base.relation * m,
-    relationDp: {
-      published: base.relationDp.published * m,
-      drafts: base.relationDp.drafts * m,
-    },
-    relationDpI18n: {
-      published: base.relationDpI18n.published * m,
-      drafts: base.relationDpI18n.drafts * m,
-    },
-    mediaFiles: base.mediaFiles * m,
-  };
-}
-
-const { multiplier } = parseCliArgs(process.argv.slice(2));
-const COUNTS = applyMultiplierToCounts(BASE_COUNTS, multiplier);
+const multiplier = parseMultiplier(process.argv.slice(2));
+const COUNTS = getSeedCountsForProfile(spec, { profile: 'v5', multiplier });
+const LOCALES = spec.locales;
 
 const random = {
   string: (len = 8) =>

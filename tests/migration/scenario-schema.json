@@ -1,0 +1,62 @@
+{
+  "$comment": "Loose documentation for migration scenario JSON (not a runtime schema validator).",
+  "type": "object",
+  "required": ["id", "baseline", "stages"],
+  "properties": {
+    "id": { "type": "string" },
+    "description": { "type": "string" },
+    "dataOrigin": { "type": "string", "description": "v4 | v5; defaults from baseline if omitted" },
+    "baseline": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "initialVersion"],
+          "properties": {
+            "type": { "const": "v4-scaffold" },
+            "initialVersion": {
+              "type": "string",
+              "description": "e.g. legacy (latest v4) or 4.26.2"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "initialVersion"],
+          "properties": {
+            "type": { "const": "v5-pinned" },
+            "initialVersion": { "type": "string", "description": "e.g. 5.7.0" }
+          }
+        }
+      ]
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["id", "type", "version"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "strapi-pinned" },
+              "version": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "validate"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "workspace" },
+              "validate": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

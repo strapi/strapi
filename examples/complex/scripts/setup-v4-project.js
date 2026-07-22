@@ -30,6 +30,9 @@ function findDockerComposeFile(v4ProjectDir) {
   return complexDockerCompose;
 }
 
+/** Strapi v4 app versions (npm semver or dist-tag `legacy`), set by migration tests via STRAPI_V4_VERSION */
+const STRAPI_V4_VERSION = process.env.STRAPI_V4_VERSION || 'legacy';
+
 const CONTENT_TYPES = [
   'basic',
   'basic-dp',
@@ -44,6 +47,7 @@ const CONTENT_TYPES = [
 ];
 
 console.log('Setting up Strapi v4 project at:', V4_PROJECT_DIR);
+console.log('Strapi v4 package version:', STRAPI_V4_VERSION);
 console.log('⚠️  Note: This will overwrite existing files in the v4 project.\n');
 
 // Ensure the v4 project directory exists
@@ -81,9 +85,11 @@ const packageJson = {
     'seed:sqlite': 'node scripts/seed-with-db.js sqlite',
   },
   dependencies: {
-    '@strapi/plugin-i18n': '4.26.0',
-    '@strapi/plugin-users-permissions': '4.26.0',
-    '@strapi/strapi': '4.26.0',
+    '@strapi/plugin-i18n': STRAPI_V4_VERSION,
+    '@strapi/plugin-users-permissions': STRAPI_V4_VERSION,
+    '@strapi/strapi': STRAPI_V4_VERSION,
+    // Pin to v9 — better-sqlite3 v12 requires newer Node than Strapi v4 supports (Node ≤20).
+    'better-sqlite3': '9.6.0',
     entities: '2.2.0',
     sqlite3: '5.1.7',
     mysql2: '3.20.0',
@@ -163,7 +169,7 @@ module.exports = ({ env }) => {
     };
   }
 
-  // mysql + mariadb — both use mysql2 driver.
+  // mysql + mariadb — v4 passes client straight to Knex (no mysql→mysql2 alias); mysql2 is in package.json.
   return {
     connection: {
       client: 'mysql2',
@@ -566,6 +572,10 @@ console.log('✅ Created database development scripts');
 const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.js');
 const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
 fs.copyFileSync(seedScriptSource, seedScriptDest);
+fs.copyFileSync(
+  path.join(SCRIPT_DIR, 'require-fixture.js'),
+  path.join(v4ScriptsDir, 'require-fixture.js')
+);
 try {
   fs.chmodSync(seedScriptDest, 0o755);
 } catch (error) {
