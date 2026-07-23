@@ -54,8 +54,32 @@ const multipleMediaCT = {
   },
 };
 
+// A plain oneToOne relation used to prove the media morph path behaves identically to a
+// real relation for the same delta/replace payload shapes (the central CMS-1428 claim).
+const relationTargetCT = {
+  displayName: 'delta-target',
+  singularName: 'delta-target',
+  pluralName: 'delta-targets',
+  draftAndPublish: false,
+  attributes: {
+    label: { type: 'string' },
+  },
+};
+
+const relationHolderCT = {
+  displayName: 'delta-holder',
+  singularName: 'delta-holder',
+  pluralName: 'delta-holders',
+  draftAndPublish: false,
+  attributes: {
+    pick: { type: 'relation', relation: 'oneToOne', target: 'api::delta-target.delta-target' },
+  },
+};
+
 const SINGLE_UID = 'api::delta-single.delta-single';
 const MULTIPLE_UID = 'api::delta-multiple.delta-multiple';
+const TARGET_UID = 'api::delta-target.delta-target';
+const HOLDER_UID = 'api::delta-holder.delta-holder';
 const FILE_UID = 'plugin::upload.file';
 
 const createEntry = (uid, body = {}, qs = {}) =>
@@ -112,8 +136,17 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
   let fileB;
   let fileC;
 
+  let targetA;
+  let targetB;
+  let targetC;
+
   beforeAll(async () => {
-    await builder.addContentType(singleMediaCT).addContentType(multipleMediaCT).build();
+    await builder
+      .addContentType(singleMediaCT)
+      .addContentType(multipleMediaCT)
+      .addContentType(relationTargetCT)
+      .addContentType(relationHolderCT)
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -122,6 +155,15 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
     fileA = a.body[0].id;
     fileB = b.body[0].id;
     fileC = c.body[0].id;
+
+    const [ta, tb, tc] = await Promise.all([
+      createEntry(TARGET_UID, { label: 'A' }),
+      createEntry(TARGET_UID, { label: 'B' }),
+      createEntry(TARGET_UID, { label: 'C' }),
+    ]);
+    targetA = ta.body.data.documentId;
+    targetB = tb.body.data.documentId;
+    targetC = tc.body.data.documentId;
   });
 
   afterAll(async () => {
@@ -326,6 +368,35 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       expect(await readCover(documentId)).toBe(null);
       expect(await countJoinRows(id, 'cover')).toBe(0);
     });
+
+    test('{ set: [B, C] } is last-wins → C attached, one row', async () => {
+      const { id, documentId } = await createWithCover();
+
+      const update = await updateEntry(
+        SINGLE_UID,
+        documentId,
+        { cover: { set: [fileB, fileC] } },
+        { populate: ['cover'] }
+      );
+      expect(update.statusCode).toBe(200);
+      expect((await readCover(documentId)).id).toBe(fileC);
+      // No phantom row for B — single media holds exactly one physical row.
+      expect(await countJoinRows(id, 'cover')).toBe(1);
+    });
+
+    test('array [B, C] is last-wins → C attached, one row', async () => {
+      const { id, documentId } = await createWithCover();
+
+      const update = await updateEntry(
+        SINGLE_UID,
+        documentId,
+        { cover: [fileB, fileC] },
+        { populate: ['cover'] }
+      );
+      expect(update.statusCode).toBe(200);
+      expect((await readCover(documentId)).id).toBe(fileC);
+      expect(await countJoinRows(id, 'cover')).toBe(1);
+    });
   });
 
   describe('Single media — field scoping', () => {
@@ -371,6 +442,17 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       const res = await createEntry(
         SINGLE_UID,
         { cover: { connect: [fileB, fileC] } },
+        { populate: ['cover'] }
+      );
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.cover.id).toBe(fileC);
+      expect(await countJoinRows(res.body.data.id, 'cover')).toBe(1);
+    });
+
+    test('create with { set: [B, C] } is last-wins → C attached, one row', async () => {
+      const res = await createEntry(
+        SINGLE_UID,
+        { cover: { set: [fileB, fileC] } },
         { populate: ['cover'] }
       );
       expect(res.statusCode).toBe(201);
@@ -461,20 +543,50 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
     });
   });
 
-  // Parity: the same payload shapes on a oneToOne relation behave identically to single media.
-  describe('oneToOne relation parity (sanity)', () => {
+  // Parity: the same payload shapes on a real oneToOne relation must behave identically to
+  // single media. This exercises an actual relation (`pick`) — it is the executable form of
+  // the central CMS-1428 claim that media now matches relation semantics. The CM write
+  // endpoints return a xToOne relation as a `{ count }` object, so the attached value is read
+  // back through the dedicated relations endpoint instead of the create/update response.
+  describe('oneToOne relation parity', () => {
+    // Returns the documentId of the single related entry, or null when the relation is empty.
+    const readPickId = async (documentId) => {
+      const res = await rq.get(`/content-manager/relations/${HOLDER_UID}/${documentId}/pick`);
+      expect(res.statusCode).toBe(200);
+      return res.body.results[0]?.documentId ?? null;
+    };
+
+    const createWithPick = async () => {
+      const res = await createEntry(HOLDER_UID, { pick: { connect: [{ documentId: targetA }] } });
+      expect(res.statusCode).toBe(201);
+      const { documentId } = res.body.data;
+      expect(await readPickId(documentId)).toBe(targetA);
+      return documentId;
+    };
+
     test('{ connect: [] } on a populated relation is a no-op (matches single media)', async () => {
-      // Covered structurally by the relation tests in strict-relations-publish.test.api.js;
-      // this asserts the media path now matches that relation behaviour for the empty delta.
-      const { documentId } = await createWithCover();
-      const update = await updateEntry(
-        SINGLE_UID,
-        documentId,
-        { cover: { connect: [] } },
-        { populate: ['cover'] }
-      );
+      const documentId = await createWithPick();
+      const update = await updateEntry(HOLDER_UID, documentId, { pick: { connect: [] } });
       expect(update.statusCode).toBe(200);
-      expect((await readCover(documentId))?.id).toBe(fileA);
+      expect(await readPickId(documentId)).toBe(targetA);
+    });
+
+    test('{ connect: [B] } on a populated relation attaches B (matches single media)', async () => {
+      const documentId = await createWithPick();
+      const update = await updateEntry(HOLDER_UID, documentId, {
+        pick: { connect: [{ documentId: targetB }] },
+      });
+      expect(update.statusCode).toBe(200);
+      expect(await readPickId(documentId)).toBe(targetB);
+    });
+
+    test('{ set: [B, C] } on a relation is last-wins → C attached (matches single media)', async () => {
+      const documentId = await createWithPick();
+      const update = await updateEntry(HOLDER_UID, documentId, {
+        pick: { set: [{ documentId: targetB }, { documentId: targetC }] },
+      });
+      expect(update.statusCode).toBe(200);
+      expect(await readPickId(documentId)).toBe(targetC);
     });
   });
 });
