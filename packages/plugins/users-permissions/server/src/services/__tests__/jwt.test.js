@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const jwtService = require('../jwt');
 const {
   createMockSessionManager,
-} = require('../../../../../../tests/helpers/create-session-manager-mock');
+} = require('../../../../../../../tests/helpers/create-session-manager-mock');
 
 describe('JWT Service', () => {
   let strapi;
