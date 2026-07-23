@@ -48,6 +48,17 @@ const mockStrapi = {
         self: { type: 'component', component: 'shared.circular' },
       },
     },
+    'shared.reqseo': {
+      attributes: {
+        title: { type: 'string', required: true },
+        author: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::author.author',
+          required: true,
+        },
+      },
+    },
   },
 } as unknown as Core.Strapi;
 
@@ -895,6 +906,15 @@ const makeModel = (attrs: TestAttrs): ContentManagerModelForMcp => ({
   attributes: attrs,
 });
 
+/** Helper: same as makeModel but with draft-and-publish enabled (create resolves to a draft). */
+const makeDpModel = (attrs: TestAttrs): ContentManagerModelForMcp => ({
+  uid: 'api::test.test',
+  kind: 'collectionType',
+  apiID: 'test',
+  options: { draftAndPublish: true },
+  attributes: attrs,
+});
+
 // ---------------------------------------------------------------------------
 // Phase 2 — Schema builders (extract to mcp/schemas/*; keep exports stable)
 // ---------------------------------------------------------------------------
@@ -937,7 +957,7 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ status: 'invalid' }).success).toBe(false);
   });
 
-  it('makes required attributes required in the schema', () => {
+  it('makes required scalar attributes required on non-D&P create (hard gate matches enforcement)', () => {
     const attrs = { title: { type: 'string', required: true } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
     expect(schema.safeParse({}).success).toBe(false);
@@ -947,6 +967,54 @@ describe('buildDataSchema', () => {
   it('makes non-required attributes optional', () => {
     const attrs = { title: { type: 'string', required: false } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    expect(schema.safeParse({}).success).toBe(true);
+    expect(schema.safeParse({ title: 'hello' }).success).toBe(true);
+  });
+
+  // ── CMS-1425: draft-write leniency for required fields ────────────────────
+
+  it('Layer A: D&P create relaxes required scalar + relation + multiple media to optional', () => {
+    const attrs = {
+      title: { type: 'string', required: true },
+      author: {
+        type: 'relation',
+        relation: 'manyToOne',
+        target: 'api::author.author',
+        required: true,
+      },
+      gallery: { type: 'media', multiple: true, required: true },
+    } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    // Draft create parity: an empty draft is accepted (admin/REST draft writes skip required).
+    expect(schema.safeParse({}).success).toBe(true);
+    // Values still accepted when provided.
+    expect(schema.safeParse({ title: 'hi', author: 'abc', gallery: [{ id: 1 }] }).success).toBe(
+      true
+    );
+  });
+
+  it('Layer A: non-D&P create keeps required scalar gate but relaxes required relation/media', () => {
+    const attrs = {
+      title: { type: 'string', required: true },
+      author: {
+        type: 'relation',
+        relation: 'manyToOne',
+        target: 'api::author.author',
+        required: true,
+      },
+      gallery: { type: 'media', multiple: true, required: true },
+    } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    // Required scalar still enforced (published write, entity validator gates it).
+    expect(schema.safeParse({}).success).toBe(false);
+    expect(schema.safeParse({ author: 'abc', gallery: [{ id: 1 }] }).success).toBe(false);
+    // Required relation/media are flag-dependent/lenient by default — never hard-gated.
+    expect(schema.safeParse({ title: 'hi' }).success).toBe(true);
+  });
+
+  it('partial mode relaxes required scalars even on a non-D&P model (update parity)', () => {
+    const attrs = { title: { type: 'string', required: true } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, { partial: true });
     expect(schema.safeParse({}).success).toBe(true);
     expect(schema.safeParse({ title: 'hello' }).success).toBe(true);
   });
@@ -1280,6 +1348,31 @@ describe('buildDataSchema', () => {
     );
   });
 
+  // ── CMS-1425: mode propagation into components ────────────────────────────
+
+  it('D&P create: required scalar inside a component is relaxed (mode propagates)', () => {
+    const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    // Passing the component but omitting its required scalar — accepted post-fix.
+    expect(schema.safeParse({ seo: {} }).success).toBe(true);
+    // Required nested relation is also relaxed (divergence coverage, not propagation proof).
+    expect(schema.safeParse({ seo: { title: 't' } }).success).toBe(true);
+  });
+
+  it('partial update: required scalar inside a component is relaxed (mode propagates)', () => {
+    const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, { partial: true });
+    expect(schema.safeParse({ seo: {} }).success).toBe(true);
+  });
+
+  it('non-D&P create: required scalar inside a component stays hard-gated (guard)', () => {
+    const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    // Component supplied but required scalar omitted → rejected.
+    expect(schema.safeParse({ seo: {} }).success).toBe(false);
+    expect(schema.safeParse({ seo: { title: 't' } }).success).toBe(true);
+  });
+
   it('circular component reference falls back to z.record() — no infinite loop', () => {
     const attrs = { circular: { type: 'component', component: 'shared.circular' } } as TestAttrs;
     // Should not throw and should produce a parseable schema
@@ -1314,7 +1407,7 @@ describe('buildDataSchema', () => {
     );
   });
 
-  it('per-ct create tool uses derived data schema', () => {
+  it('per-ct create tool uses derived data schema (non-D&P: required scalar gated)', () => {
     const model = baseModel({
       attributes: {
         title: { type: 'string', required: true },
@@ -1328,6 +1421,89 @@ describe('buildDataSchema', () => {
     expect(inputSchema.safeParse({ data: { title: 'Hi' } }).success).toBe(true);
     expect(inputSchema.safeParse({ data: {} }).success).toBe(false); // title required
     expect(inputSchema.safeParse({ data: { title: 'Hi', age: 'old' } }).success).toBe(false); // age must be int
+  });
+
+  // ── CMS-1425: Layer B — full tool input schema (create/update/write) ──────
+
+  it('Layer B: D&P create tool accepts empty data (draft leniency)', () => {
+    const model = baseModel({
+      options: { draftAndPublish: true },
+      attributes: {
+        title: { type: 'string', required: true },
+        author: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::author.author',
+          required: true,
+        },
+      } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const createTool = tools.find((t) => t.name === 'create_article')!;
+    const inputSchema = createTool.resolveInputSchema(mockContext);
+    expect(inputSchema.safeParse({ data: {} }).success).toBe(true);
+  });
+
+  it('Layer B: update tool accepts empty/partial data for D&P and non-D&P models', () => {
+    for (const dp of [true, false]) {
+      const model = baseModel({
+        options: { draftAndPublish: dp },
+        attributes: { title: { type: 'string', required: true } } as TestAttrs,
+      });
+      const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+      const updateTool = tools.find((t) => t.name === 'update_article')!;
+      const inputSchema = updateTool.resolveInputSchema(mockContext);
+      expect(inputSchema.safeParse({ documentId: 'abc', data: {} }).success).toBe(true);
+      expect(inputSchema.safeParse({ documentId: 'abc', data: { title: 'Hi' } }).success).toBe(
+        true
+      );
+    }
+  });
+
+  it('Layer B: single-type write tool accepts empty/partial data', () => {
+    const uid = 'api::global.global';
+    const model = baseModel({
+      kind: 'singleType',
+      uid,
+      apiID: 'global',
+      options: { draftAndPublish: true },
+      attributes: { title: { type: 'string', required: true } } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const writeTool = tools.find((t) => t.name === 'write_global')!;
+    const inputSchema = writeTool.resolveInputSchema(mockContext);
+    expect(inputSchema.safeParse({ data: {} }).success).toBe(true);
+  });
+
+  // ── CMS-1425: agent-visible contract via z.toJSONSchema ───────────────────
+
+  it('D&P create: relaxed fields drop out of the JSON Schema required array + hint present', () => {
+    const attrs = {
+      title: { type: 'string', required: true },
+      subtitle: { type: 'string', required: false },
+    } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    const jsonSchema = z.toJSONSchema(schema) as {
+      required?: string[];
+      properties?: Record<string, { description?: string }>;
+    };
+    // title is no longer advertised as required to the agent
+    expect(jsonSchema.required ?? []).not.toContain('title');
+    // required-hint text is emitted for the required attribute
+    expect(jsonSchema.properties?.title?.description).toContain('before publishing');
+  });
+
+  it('non-D&P create: required scalar still listed in JSON Schema required array (guard)', () => {
+    const attrs = { title: { type: 'string', required: true } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    const jsonSchema = z.toJSONSchema(schema) as { required?: string[] };
+    expect(jsonSchema.required ?? []).toContain('title');
+  });
+
+  it('D&P create: strict mode still rejects unknown keys after relaxation', () => {
+    const attrs = { title: { type: 'string', required: true } } as TestAttrs;
+    const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    expect(schema.safeParse({ unknownField: 'x' }).success).toBe(false);
   });
 
   it('excludes attributes not in permittedFields set', () => {
