@@ -42,8 +42,8 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -53,12 +53,11 @@
   "devDependencies": {
     "@strapi/types": "5.50.2",
     "@types/fs-extra": "11.0.4",
-    "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.50.2",
-    "jest": "29.6.0",
-    "memfs": "4.6.0",
-    "tsconfig": "5.50.2"
+    "tsconfig": "5.50.2",
+    "vitest": "catalog:",
+    "vitest-config": "5.50.2"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

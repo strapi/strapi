@@ -1,6 +1,6 @@
 import type { Struct } from '@strapi/types';
-import type { Configuration, Settings, Metadatas, Layouts } from './content-types';
 import { errors } from '@strapi/utils';
+import type { Configuration, Settings, Metadatas, Layouts } from './content-types';
 
 export interface Component extends Struct.ComponentSchema {
   isDisplayed: boolean;

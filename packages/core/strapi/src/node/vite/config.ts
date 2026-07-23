@@ -32,6 +32,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   return {
     root: ctx.cwd,
     base: ctx.basePath,
+    // Public files are served by the strapi::public middleware at runtime, so they do not need to
+    // be copied into the admin build output.
+    publicDir: false,
     build: {
       emptyOutDir: false, // Rely on CLI to do this
       outDir: ctx.distDir,

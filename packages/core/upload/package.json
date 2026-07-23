@@ -80,7 +80,7 @@
     "@strapi/provider-upload-local": "5.50.2",
     "@strapi/utils": "5.50.2",
     "byte-size": "8.1.1",
-    "cropperjs": "1.6.1",
+    "cropperjs": "1.6.2",
     "date-fns": "2.30.0",
     "file-type": "21.3.4",
     "formik": "2.4.9",

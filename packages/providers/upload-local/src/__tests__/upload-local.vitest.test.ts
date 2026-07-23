@@ -1,22 +1,28 @@
-/* eslint-disable import/first */
-import { fs } from 'memfs';
-
-jest.mock('fs', () => fs);
-
-import fse from 'fs-extra';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import localProvider from '../index';
 
 describe('Local provider', () => {
-  beforeAll(() => {
-    global.strapi = {
-      dirs: { static: { public: '' } },
-    } as any;
+  let publicDir: string;
+  let uploadsDir: string;
 
-    fse.ensureDirSync('uploads');
+  beforeAll(() => {
+    // Use a real temp dir: under Vitest, fs-extra.pathExistsSync is bound to the
+    // real fs (memfs mocks of `fs` alone do not cover it).
+    publicDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-upload-local-'));
+    uploadsDir = path.join(publicDir, 'uploads');
+    fs.mkdirSync(uploadsDir);
+
+    global.strapi = {
+      dirs: { static: { public: publicDir } },
+    } as any;
   });
 
   afterAll(() => {
+    fs.rmSync(publicDir, { recursive: true, force: true });
     global.strapi.dirs = undefined as any;
   });
 
@@ -74,7 +80,7 @@ describe('Local provider', () => {
       await providerInstance.replace(newFile, oldFile);
 
       expect(newFile.url).toEqual('/uploads/replace_hash.json');
-      expect(fs.readFileSync('uploads/replace_hash.json').toString()).toEqual('new');
+      expect(fs.readFileSync(path.join(uploadsDir, 'replace_hash.json')).toString()).toEqual('new');
     });
 
     test('Should delete the old file when hash changes', async () => {
@@ -93,7 +99,7 @@ describe('Local provider', () => {
         buffer: Buffer.from('old'),
       });
 
-      expect(fs.existsSync('uploads/old_hash_to_remove.json')).toBe(true);
+      expect(fs.existsSync(path.join(uploadsDir, 'old_hash_to_remove.json'))).toBe(true);
 
       const newFile = {
         name: 'new',
@@ -107,8 +113,8 @@ describe('Local provider', () => {
       await providerInstance.replace(newFile, oldFile);
 
       expect(newFile.url).toEqual('/uploads/new_hash.json');
-      expect(fs.existsSync('uploads/new_hash.json')).toBe(true);
-      expect(fs.existsSync('uploads/old_hash_to_remove.json')).toBe(false);
+      expect(fs.existsSync(path.join(uploadsDir, 'new_hash.json'))).toBe(true);
+      expect(fs.existsSync(path.join(uploadsDir, 'old_hash_to_remove.json'))).toBe(false);
     });
   });
 });
