@@ -57,12 +57,12 @@ const Layout = () => {
     supportedModelsToDisplay.length > 0 &&
     pathname !== '/content-manager/403'
   ) {
-    return <Navigate to="/403" />;
+    return <Navigate to="/content-manager/403" />;
   }
 
   // Redirect the user to the create content type page
-  if (supportedModelsToDisplay.length === 0 && pathname !== '/no-content-types') {
-    return <Navigate to="/no-content-types" />;
+  if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
+    return <Navigate to="/content-manager/no-content-types" />;
   }
 
   // On /content-manager base route
