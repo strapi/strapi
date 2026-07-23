@@ -62,7 +62,7 @@ export interface History {
 }
 
 export interface ForgotPassword {
-  emailTemplate?: string;
+  emailTemplate?: { subject: string; text: string; html?: string };
   from?: string;
   replyTo?: string;
   /**
