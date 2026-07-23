@@ -137,7 +137,8 @@ const buildCollectionTools = (
       uid,
       attributes
     );
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
+    // Updates are partial (REST/admin parity) — every attribute is optional.
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, { partial: true });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -367,7 +368,8 @@ const buildSingleTypeTools = (
       createFields === null || updateFields === null
         ? null
         : new Set([...createFields, ...updateFields]);
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
+    // Single-type write is an upsert; treat as partial for update parity (REST updates are partial).
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, { partial: true });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
