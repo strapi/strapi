@@ -13,7 +13,36 @@ type CustomFieldUID = Utils.String.Suffix<
   string
 >;
 
-type CustomFieldOptionInput =
+/**
+ * Augment with custom Content-Type Builder form input ids registered through
+ * `app.getPlugin('content-type-builder').apis.forms.components.add`.
+ *
+ * @example
+ * ```ts
+ * declare module '@strapi/admin/strapi-admin' {
+ *   export interface CustomFieldOptionInputRegistry {
+ *     'my-slider': true;
+ *   }
+ * }
+ * ```
+ */
+export interface CustomFieldOptionInputRegistry {}
+
+/**
+ * Augment with custom option field names (typically `options.*` paths).
+ *
+ * @example
+ * ```ts
+ * declare module '@strapi/admin/strapi-admin' {
+ *   export interface CustomFieldOptionNameRegistry {
+ *     'options.my-slider-label': true;
+ *   }
+ * }
+ * ```
+ */
+export interface CustomFieldOptionNameRegistry {}
+
+export type BuiltInCustomFieldOptionInput =
   | 'text'
   | 'checkbox'
   | 'checkbox-with-number-field'
@@ -27,7 +56,7 @@ type CustomFieldOptionInput =
   | 'select-number'
   | 'radio-group';
 
-type CustomFieldOptionName =
+export type BuiltInCustomFieldOptionName =
   | 'min'
   | 'minLength'
   | 'max'
@@ -39,7 +68,15 @@ type CustomFieldOptionName =
   | 'private'
   | 'default';
 
-interface CustomFieldOption {
+export type CustomFieldOptionInput =
+  | BuiltInCustomFieldOptionInput
+  | (keyof CustomFieldOptionInputRegistry & string);
+
+export type CustomFieldOptionName =
+  | BuiltInCustomFieldOptionName
+  | (keyof CustomFieldOptionNameRegistry & string);
+
+export interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
     values?: Record<string, PrimitiveType>;
   };
@@ -51,7 +88,7 @@ interface CustomFieldOption {
   defaultValue?: string | number | boolean | Date;
 }
 
-interface CustomFieldOptionSection {
+export interface CustomFieldOptionSection {
   sectionTitle:
     | (MessageDescriptor & {
         values?: Record<string, PrimitiveType>;
@@ -60,13 +97,13 @@ interface CustomFieldOptionSection {
   items: CustomFieldOption[];
 }
 
-interface CustomFieldOptions {
+export interface CustomFieldOptions {
   base?: (CustomFieldOptionSection | CustomFieldOption)[];
   advanced?: (CustomFieldOptionSection | CustomFieldOption)[];
   validator?: () => Record<string, AnySchema>;
 }
 
-interface CustomField {
+export interface CustomField {
   name: string;
   pluginId?: string;
   type: (typeof ALLOWED_TYPES)[number];
@@ -214,4 +251,4 @@ const optionsValidationReducer = (
   return acc;
 };
 
-export { type CustomField, CustomFields };
+export { CustomFields };
