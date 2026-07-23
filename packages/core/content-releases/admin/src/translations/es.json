@@ -34,6 +34,10 @@
   "pages.Releases.max-limit-reached.action": "Explorar planes",
   "pages.PurchaseRelease.subTitle": "Gestiona las actualizaciones y publicaciones de contenidos.",
   "pages.PurchaseRelease.not-available": "Los lanzamientos sólo están disponibles como parte de un plan de pago. Actualiza para crear y gestionar versiones.",
+  "pages.PurchaseRelease.description": "Group content and publish updates together",
+  "pages.PurchaseRelease.perks1": "Add many entries to releases",
+  "pages.PurchaseRelease.perks2": "Quickly identify entries containing errors",
+  "pages.PurchaseRelease.perks3": "Schedule their publication, or publish them manually",
   "header.actions.add-release": "Nuevo lanzamiento",
   "header.actions.refresh": "Referescar",
   "header.actions.publish": "Publicar",
@@ -84,9 +88,10 @@
   "pages.ReleaseDetails.groupBy.option.actions": "Acciones",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Programado para el {date} a las {time} ({offset})",
   "pages.ReleaseDetails.entry-validation.fields": "Campos",
-  "pages.Settings.releases.title": "Lanzamientos",
   "pages.Settings.releases.description": "Crear y gestionar actualizaciones de contenidos",
+  "pages.Settings.releases.preferences.title": "Preferences",
   "pages.Settings.releases.timezone.label": "Zona horaria por defecto",
+  "pages.Settings.releases.timezone.hint": "The timezone of every release can still be changed individually.",
   "pages.Settings.releases.setting.default-timezone-notification-success": "Zona horaria por defecto actualizada.",
   "pages.ReleaseDetails.entry-validation.fields.error": "{errors} errores en campos.",
   "pages.ReleaseDetails.entry-validation.fields.success": "Todos los campos están rellenados correctamente.",
@@ -94,5 +99,8 @@
   "pages.ReleaseDetails.entry-validation.review-stage.not-enabled": "Esta entrada no está asociada a ningún flujo de trabajo.",
   "pages.ReleaseDetails.entry-validation.review-stage.not-ready": "Esta entrada no está en la fase requerida para su publicación. ({stageName})",
   "pages.ReleaseDetails.entry-validation.review-stage.ready": "Esta entrada se encuentra en la fase requerida para su publicación. ({stageName})",
-  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "No se requiere ninguna fase para su publicación."
+  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "No se requiere ninguna fase para su publicación.",
+  "widget.upcoming-releases.link": "Open Releases",
+  "widget.upcoming-releases.title": "Upcoming releases",
+  "widget.upcoming-releases.no-data": "No releases"
 }

@@ -58,6 +58,7 @@
   "Providers.status": "Stav",
   "Roles.empty": "Zatím nemáte žádné role.",
   "Roles.empty.search": "Hledání neodpovídají žádné role.",
+  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Role smazána",
   "Settings.roles.edited": "Role upravena",
   "Settings.section-label": "Plugin Users & Permissions",

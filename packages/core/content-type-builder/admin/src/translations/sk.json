@@ -62,6 +62,7 @@
   "error.contentType.pluralName-equals-singularName": "Táto hodnota nemôže byť rovnaká ako jednotné API ID iného typu obsahu.",
   "error.contentType.pluralName-equals-collectionName": "Táto hodnota sa už používa iným typom obsahu.",
   "error.contentTypeName.reserved-name": "Tento názov je vyhradený a nemôže byť použitý (hrozí poškodenie iných funkcionalít systému)",
+  "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Duplicitné hodnoty nie sú povolené",
   "error.validation.enum-empty-string": "Prázdne reťazce nie sú povolené",
   "error.validation.enum-regex": "Aspoň jedna hodnota je neplatná. Hodnoty by mali obsahovať aspoň jeden abecedný znak pred prvým výskytom čísla.",

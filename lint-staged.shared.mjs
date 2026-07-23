@@ -18,13 +18,18 @@ import { ESLint } from 'eslint';
  * mirrors the CLI's own ignore resolution, so ESLint only runs on files it
  * actually lints; Prettier still formats everything.
  *
+ * Generated translation key types (`keys.generated.d.ts`) are also excluded from
+ * ESLint — they are machine-written and not part of package lint config.
+ *
  * @type {import('lint-staged').Configuration}
  */
 const config = {
   async '*.{js,ts,jsx,tsx}'(files) {
     const eslint = new ESLint();
     const ignored = await Promise.all(files.map((file) => eslint.isPathIgnored(file)));
-    const lintable = files.filter((_file, index) => !ignored[index]);
+    const lintable = files.filter(
+      (file, index) => !ignored[index] && !file.endsWith('keys.generated.d.ts')
+    );
 
     const quote = (list) => list.map((file) => `"${file}"`).join(' ');
 

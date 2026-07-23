@@ -58,6 +58,7 @@
   "Providers.status": "Status",
   "Roles.empty": "Zatiaľ nemáte žiadne roly.",
   "Roles.empty.search": "Žiadne roly nezodpovedajú vyhľadávaniu.",
+  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Rola bola odstránená",
   "Settings.roles.edited": "Rola bola upravená",
   "Settings.section-label": "Plugin Používatelia a oprávnenia",

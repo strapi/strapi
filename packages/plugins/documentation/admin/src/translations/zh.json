@@ -35,5 +35,8 @@
   "pages.SettingsPage.toggle.label": "受限存取",
   "plugin.description.long": "建立 OpenAPI 文件，並透過 SWAGGER UI 可視化您的 API。",
   "plugin.description.short": "建立 OpenAPI 文件，並透過 SWAGGER UI 可視化您的 API。",
-  "plugin.name": "文件資料"
+  "plugin.name": "文件資料",
+  "Input.error.contain.lowercase": "Password must contain at least one lowercase character",
+  "Input.error.contain.number": "Password must contain at least one number",
+  "Input.error.contain.uppercase": "Password must contain at least one uppercase character"
 }

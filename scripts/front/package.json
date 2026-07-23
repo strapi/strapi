@@ -3,7 +3,9 @@
   "version": "5.50.2",
   "private": true,
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:front": "jest --config jest.config.front.js",
+    "verify:translations": "tsx verify-translations/index.ts",
+    "verify:translations:test": "tsx --test verify-translations/__tests__/*.test.ts"
   },
   "devDependencies": {
     "@types/jest": "29.5.2",

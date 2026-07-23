@@ -17,6 +17,7 @@
   "EditPage.form.roles": "역할 상세정보",
   "Email.template.data.loaded": "이메일 템플릿을 불러왔습니다.",
   "Email.template.email_confirmation": "이메일 주소 확인",
+  "Email.template.reset_password": "비밀번호 재설정",
   "Email.template.form.edit.label": "템플릿 수정",
   "Email.template.table.action.label": "action",
   "Email.template.table.icon.label": "icon",
@@ -57,6 +58,7 @@
   "Providers.status": "상태",
   "Roles.empty": "아직 역할이 없습니다.",
   "Roles.empty.search": "검색과 일치하는 역할이 없습니다.",
+  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "사용자 & 권한 플러그인",
@@ -78,6 +80,5 @@
   "popUpWarning.button.cancel": "취소",
   "popUpWarning.button.confirm": "확인",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.warning.cancel": "수정 사항을 취소하시겠습니까?",
-  "Email.template.reset_password": "비밀번호 재설정"
+  "popUpWarning.warning.cancel": "수정 사항을 취소하시겠습니까?"
 }

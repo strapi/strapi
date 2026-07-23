@@ -82,5 +82,6 @@
   "plugin.schema.i18n.localized.description-content-type": "Umožňuje překládat záznam do různých jazyků",
   "plugin.schema.i18n.localized.description-field": "Pole může mít v každém jazyce jinou hodnotu",
   "plugin.schema.i18n.localized.label-content-type": "Internacionalizace",
-  "plugin.schema.i18n.localized.label-field": "Povolit lokalizaci pro toto pole"
+  "plugin.schema.i18n.localized.label-field": "Povolit lokalizaci pro toto pole",
+  "list-view.table.header.label": "Available in"
 }
