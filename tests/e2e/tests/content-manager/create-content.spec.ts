@@ -34,6 +34,33 @@ test.describe('Adding content', () => {
     );
   });
 
+  test('the back button returns to the list view after publishing a new entry', async ({
+    page,
+  }) => {
+    await createContent(
+      page,
+      'Match',
+      [
+        {
+          name: 'opponent*',
+          type: 'text',
+          value: 'testname',
+        },
+      ],
+      { save: false, publish: true, verify: false }
+    );
+
+    // Publishing a freshly created entry redirects to that entry's edit view,
+    // replacing the `create` route in the history.
+    await expect(page).not.toHaveURL(/\/create(\?|$)/);
+
+    // Going back should land on the list view, not a stale, pre-filled create form.
+    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+
+    await expect(page.getByRole('link', { name: 'Create new entry' })).toBeVisible();
+    await expect(page).not.toHaveURL(/\/create(\?|$)/);
+  });
+
   test('I want to set component order when creating content', async ({ page }) => {
     const fields = [
       {
