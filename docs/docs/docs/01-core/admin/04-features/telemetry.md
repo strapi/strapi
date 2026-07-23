@@ -211,14 +211,26 @@ Do not add per-render or high-frequency tracking without an explicit product nee
 
 ## `window.strapi` telemetry fields
 
-Set in `packages/core/admin/admin/src/render.ts`:
+Set in `packages/core/admin/admin/src/render.ts`. A local `browserStrapi` object is
+built first (with defaults), enriched from `/admin/project-type`, then assigned to
+`window.strapi` once at the end:
 
 ```typescript
-window.strapi.telemetryDisabled = process.env.STRAPI_TELEMETRY_DISABLED === 'true';
-window.strapi.projectType = 'Community' | 'Enterprise'; // updated after /admin/project-type
+const browserStrapi: Admin.BrowserStrapi = {
+  telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
+  projectType: 'Community',
+  // …other fields
+};
+
+// after fetching /admin/project-type
+browserStrapi.projectType = isEE ? 'Enterprise' : 'Community';
+
+// assigned exactly once, before the app renders
+window.strapi = browserStrapi;
 ```
 
-Typed in `packages/core/admin/admin/custom.d.ts`.
+Typed as `BrowserStrapi` in `packages/core/types/src/admin/browser-strapi.ts` (the
+`window.strapi` global is declared in `packages/core/types/src/globals-admin.ts`).
 
 ---
 
