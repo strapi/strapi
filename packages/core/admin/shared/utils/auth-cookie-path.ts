@@ -21,6 +21,7 @@ const isValidCookiePath = (path: string): boolean => {
   }
 
   // RFC 6265 path-av: any CHAR except CTLs or ";".
+  // eslint-disable-next-line no-control-regex -- CTL chars are exactly what RFC 6265 forbids
   return !/[\x00-\x1F\x7F;]/.test(path);
 };
 

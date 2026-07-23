@@ -22,6 +22,7 @@ export const DEFAULT_AUTH_COOKIE_DOMAIN = undefined;
 const isValidCookieDomain = (domain: string): boolean => {
   // RFC 6265 domain-av: a host name. No leading dot required, no scheme, no
   // path, no port, and none of the control/attribute-separator characters.
+  // eslint-disable-next-line no-control-regex -- CTL chars are exactly what RFC 6265 forbids
   return !/[\x00-\x1F\x7F;,\s/:]/.test(domain);
 };
 
