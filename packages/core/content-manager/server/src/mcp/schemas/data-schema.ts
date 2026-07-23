@@ -26,6 +26,8 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
  *   with an explanatory hint instead of being rejected outright.
  * - `partial` — update writes. REST/admin updates are partial and the entity validator
  *   does not treat omitted fields as missing, so every attribute becomes optional.
+ *   Required attributes still carry the explanatory hint so agents can tell required
+ *   fields apart from optional ones even when nothing is hard-gated.
  *
  * Both flags propagate recursively through components and the custom-field redispatch so
  * required scalars *inside* components follow the same rule as top-level ones.
@@ -37,7 +39,7 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
 export type InputSchemaMode = {
   /** D&P create: relax required scalars/components to optional-with-hint. */
   lenient?: boolean;
-  /** Update: relax every attribute to optional. */
+  /** Update: relax every attribute to optional (required ones keep the hint). */
   partial?: boolean;
 };
 
@@ -45,34 +47,45 @@ export type InputSchemaMode = {
 const REQUIRED_HINT = 'Marked required in the content-type schema — fill it in before publishing.';
 
 /**
+ * Appends the required hint to a schema's description without clobbering an existing one.
+ * Zod's `.describe()` replaces the description outright, so a required Blocks field would
+ * otherwise lose its own "structured rich text content" description. Compose instead.
+ */
+const withRequiredHint = (s: z.ZodTypeAny): z.ZodTypeAny => {
+  const existing = s.description;
+  return existing !== undefined && existing !== ''
+    ? s.describe(`${existing} ${REQUIRED_HINT}`)
+    : s.describe(REQUIRED_HINT);
+};
+
+/**
  * Applies the required constraint to a leaf attribute schema according to `mode`.
  *
- * - `partial` → always optional (no hint; every field is relaxed uniformly).
- * - required + `lenient` → optional, with the required hint appended.
- * - required otherwise → returned as-is (hard-gated).
+ * Required fields keep the explanatory hint even under `partial`, so agents can still
+ * tell required attributes apart from optional ones on updates (all fields are optional,
+ * but only the required ones carry the hint).
+ *
+ * - required + (`lenient` or `partial`) → optional, with the required hint appended.
+ * - required + neither → returned as-is (hard-gated).
  * - not required → optional.
  */
 const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode): z.ZodTypeAny => {
-  if (mode.partial === true) {
-    return s.optional();
-  }
   if (required === true) {
-    return mode.lenient === true ? s.describe(REQUIRED_HINT).optional() : s;
+    if (mode.lenient === true || mode.partial === true) {
+      return withRequiredHint(s).optional();
+    }
+    return s;
   }
   return s.optional();
 };
 
 /**
  * Applies the required constraint to relation/media schemas, which are never hard-gated.
- * Required entries get the hint (unless `partial`, which relaxes everything silently).
+ * Required entries always get the hint (relations/media are optional in every mode).
  */
-const applyRelationalRequired = (
-  s: z.ZodTypeAny,
-  required: boolean,
-  mode: InputSchemaMode
-): z.ZodTypeAny => {
-  if (mode.partial !== true && required === true) {
-    return s.describe(REQUIRED_HINT).optional();
+const applyRelationalRequired = (s: z.ZodTypeAny, required: boolean): z.ZodTypeAny => {
+  if (required === true) {
+    return withRequiredHint(s).optional();
   }
   return s.optional();
 };
@@ -247,7 +260,7 @@ export const attributeToInputSchema = (
       const mediaAttr = attr as unknown as { required?: boolean; multiple?: boolean };
       const s = mediaAttr.multiple === true ? z.array(z.any()) : z.any();
       // Media is never hard-gated — enforcement is flag-dependent and lenient by default.
-      return applyRelationalRequired(s, mediaAttr.required === true, mode);
+      return applyRelationalRequired(s, mediaAttr.required === true);
     }
     case 'relation': {
       const relAttr = attr as Schema.Attribute.Relation;
@@ -328,7 +341,7 @@ export const attributeToInputSchema = (
       }
 
       // Relations are never hard-gated — enforcement is flag-dependent and lenient by default.
-      return applyRelationalRequired(s, relAttr.required === true, mode);
+      return applyRelationalRequired(s, relAttr.required === true);
     }
     default: {
       const unknownAttr: unknown = attr;
@@ -369,7 +382,8 @@ export type BuildDataSchemaOptions = {
  * Unknown keys are rejected (strict mode) — invalid field names fail at the MCP boundary.
  *
  * Required-field handling mirrors admin/REST draft leniency (CMS-1425):
- * - Updates (`options.partial`) relax every attribute to optional.
+ * - Updates (`options.partial`) relax every attribute to optional; required attributes
+ *   still carry the required hint so the agent can distinguish them from optional ones.
  * - Create on a draft-and-publish model relaxes required scalars/components to
  *   optional-with-hint (MCP create always resolves to a draft, and draft writes skip
  *   required validation).

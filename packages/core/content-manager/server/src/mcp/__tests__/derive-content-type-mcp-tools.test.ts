@@ -1500,6 +1500,79 @@ describe('buildDataSchema', () => {
     expect(jsonSchema.required ?? []).toContain('title');
   });
 
+  it('partial update: required scalar is optional but keeps the required hint (D&P + non-D&P)', () => {
+    for (const make of [makeDpModel, makeModel]) {
+      const attrs = {
+        title: { type: 'string', required: true },
+        subtitle: { type: 'string', required: false },
+      } as TestAttrs;
+      const schema = buildDataSchema(mockStrapi, make(attrs), attrs, null, { partial: true });
+      const jsonSchema = z.toJSONSchema(schema) as {
+        required?: string[];
+        properties?: Record<string, { description?: string }>;
+      };
+      // Nothing is hard-gated on a partial update
+      expect(jsonSchema.required ?? []).toEqual([]);
+      // ...but the required field is still distinguishable via the hint
+      expect(jsonSchema.properties?.title?.description).toContain('before publishing');
+      // and the optional field carries no hint
+      expect(jsonSchema.properties?.subtitle?.description ?? '').not.toContain('before publishing');
+    }
+  });
+
+  it('update_* / write_* tools advertise required fields via the hint, not the required array', () => {
+    const collection = baseModel({
+      options: { draftAndPublish: true },
+      attributes: { title: { type: 'string', required: true } } as TestAttrs,
+    });
+    const single = baseModel({
+      kind: 'singleType',
+      uid: 'api::global.global',
+      apiID: 'global',
+      options: { draftAndPublish: true },
+      attributes: { title: { type: 'string', required: true } } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [collection, single]);
+
+    for (const name of ['update_article', 'write_global']) {
+      const tool = tools.find((t) => t.name === name)!;
+      const inputSchema = tool.resolveInputSchema(mockContext);
+      const jsonSchema = z.toJSONSchema(inputSchema) as {
+        properties?: {
+          data?: { required?: string[]; properties?: Record<string, { description?: string }> };
+        };
+      };
+      const data = jsonSchema.properties?.data;
+      expect(data?.required ?? []).not.toContain('title');
+      expect(data?.properties?.title?.description).toContain('before publishing');
+    }
+  });
+
+  it('required Blocks field composes its own description with the hint (no clobber)', () => {
+    const attrs = { body: { type: 'blocks', required: true } } as TestAttrs;
+    // D&P create relaxes the required Blocks field to optional-with-hint
+    const dpSchema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    const dpJson = z.toJSONSchema(dpSchema) as {
+      properties?: Record<string, { description?: string }>;
+    };
+    const dpDescription = dpJson.properties?.body?.description ?? '';
+    // Blocks' own description is preserved...
+    expect(dpDescription).toContain('structured rich text content');
+    // ...alongside the required hint
+    expect(dpDescription).toContain('before publishing');
+
+    // Same on a partial update
+    const partialSchema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      partial: true,
+    });
+    const partialJson = z.toJSONSchema(partialSchema) as {
+      properties?: Record<string, { description?: string }>;
+    };
+    const partialDescription = partialJson.properties?.body?.description ?? '';
+    expect(partialDescription).toContain('structured rich text content');
+    expect(partialDescription).toContain('before publishing');
+  });
+
   it('D&P create: strict mode still rejects unknown keys after relaxation', () => {
     const attrs = { title: { type: 'string', required: true } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
