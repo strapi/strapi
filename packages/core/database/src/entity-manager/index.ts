@@ -991,7 +991,16 @@ export const createEntityManager = (db: Database): EntityManager => {
               .execute();
 
             if (hasSet) {
-              const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
+              // Single media (morphOne) is last-wins for multi-item set/array shapes too,
+              // mirroring create and `normalizeXToOneRelationValue` for xToOne relations.
+              // Without the slice, `{ set: [B, C] }` would insert both rows and — because
+              // morphOne populate reads `order asc` + first — leave B observable with a
+              // hidden C row, the same phantom-row defect the connect path guards against.
+              const setData = isSingle
+                ? (cleanRelationData.set ?? []).slice(-1)
+                : (cleanRelationData.set ?? []);
+
+              const rows = setData.map((data, idx) => ({
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
