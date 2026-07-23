@@ -12,7 +12,7 @@ import type {
 } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
-import type { OmitRelationsWithoutTarget, RelationInputValue } from './relations';
+import type { MediaInputValue, OmitRelationsWithoutTarget, RelationInputValue } from './relations';
 
 export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
@@ -105,6 +105,18 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
         TAttribute extends Schema.Attribute.RelationWithTarget
           ? RelationInputValue<TAttribute['relation']>
+          : never,
+      ],
+      // Media
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+        TAttribute extends Schema.Attribute.Media<
+          // Unused as long as the media input value doesn't depend on the allowed kinds
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          infer _TKind,
+          infer TMultiple
+        >
+          ? MediaInputValue<TMultiple>
           : never,
       ],
       // DynamicZone

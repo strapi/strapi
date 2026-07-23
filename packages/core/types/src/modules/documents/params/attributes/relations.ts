@@ -1,7 +1,7 @@
 import type * as Schema from '../../../../schema';
 
 import type * as UID from '../../../../uid';
-import type { If } from '../../../../utils';
+import type { Constants, If } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
 
@@ -31,6 +31,17 @@ type XManyInput = ShortHand[] | LongHand[] | null | PartialUpdate | FullUpdate;
 
 export type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKind.Any> = If<
   Schema.Attribute.IsManyRelation<TRelationKind>,
+  XManyInput,
+  XOneInput
+>;
+
+/**
+ * Media attributes are persisted as a morph relation to `plugin::upload.file` and accept the
+ * same input formats (ids, objects, connect/set syntax) at write time - see the shared
+ * `relation`/`media` handling in the entity validator.
+ */
+export type MediaInputValue<TMultiple extends Constants.BooleanValue> = If<
+  TMultiple,
   XManyInput,
   XOneInput
 >;
