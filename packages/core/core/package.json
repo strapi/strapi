@@ -114,7 +114,7 @@
     "typescript": "5.9.3",
     "undici": "6.27.0",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@swc/core": "1.13.5",
