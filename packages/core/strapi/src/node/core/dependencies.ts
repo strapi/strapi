@@ -259,12 +259,30 @@ const reexecCurrentCommand = async (cwd: string) => {
 
 const getModule = async (name: string, cwd: string): Promise<PackageJson | null> => {
   const modulePackagePath = resolveFrom.silent(cwd, path.join(name, 'package.json'));
-  if (!modulePackagePath) {
-    return null;
-  }
-  const file = await fs.readFile(modulePackagePath, 'utf8').then((res) => JSON.parse(res));
 
-  return file;
+  if (modulePackagePath) {
+    const file = await fs.readFile(modulePackagePath, 'utf8').then((res) => JSON.parse(res));
+
+    return file;
+  }
+
+  // Restrictive `exports` maps may omit `./package.json`; resolve the package entry instead.
+  const entryPath = resolveFrom.silent(cwd, name);
+
+  if (entryPath) {
+    const result = await readPkgUp({ cwd: path.dirname(entryPath) });
+    const packageJson = result?.packageJson;
+
+    // Reject walk-ups / alias installs where the manifest name does not match the request
+    // (e.g. `"foo": "npm:bar@1"` must not be treated as package `foo`).
+    if (!packageJson || (packageJson.name && packageJson.name !== name)) {
+      return null;
+    }
+
+    return packageJson;
+  }
+
+  return null;
 };
 
 const getModuleVersion = async (name: string, cwd: string): Promise<string | null> => {

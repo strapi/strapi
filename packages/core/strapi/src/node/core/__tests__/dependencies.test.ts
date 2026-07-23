@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import {
   findUndeclaredAdminPeerDeps,
   getInstallCommandHint,
+  getModule,
   installAdminPeerDeps,
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,
@@ -197,6 +198,53 @@ describe('admin peer dependency checks', () => {
         ['/path/to/strapi', 'build'],
         expect.objectContaining({ cwd, stdio: 'inherit' })
       );
+    });
+  });
+
+  describe('getModule', () => {
+    it('falls back to package entry when exports omit ./package.json', async () => {
+      resolveFromSilentMock.mockImplementation((_, modulePath: string) => {
+        if (modulePath === 'restricted-ui-lib/package.json') {
+          return undefined;
+        }
+
+        if (modulePath === 'restricted-ui-lib') {
+          return '/tmp/strapi-app/node_modules/restricted-ui-lib/dist/index.js';
+        }
+
+        return undefined;
+      });
+
+      readPkgUpMock.mockResolvedValue({
+        path: '/tmp/strapi-app/node_modules/restricted-ui-lib/package.json',
+        packageJson: { name: 'restricted-ui-lib', version: '1.0.0' },
+      } as Awaited<ReturnType<typeof readPkgUp>>);
+
+      await expect(getModule('restricted-ui-lib', cwd)).resolves.toEqual({
+        name: 'restricted-ui-lib',
+        version: '1.0.0',
+      });
+    });
+
+    it('rejects readPkgUp fallback when package.json name does not match the request', async () => {
+      resolveFromSilentMock.mockImplementation((_, modulePath: string) => {
+        if (modulePath === 'aliased-ui-kit/package.json') {
+          return undefined;
+        }
+
+        if (modulePath === 'aliased-ui-kit') {
+          return '/tmp/strapi-app/node_modules/.pnpm/strapi-design-extended@0.0.13/node_modules/strapi-design-extended/dist/index.js';
+        }
+
+        return undefined;
+      });
+
+      readPkgUpMock.mockResolvedValue({
+        path: '/tmp/strapi-app/node_modules/strapi-design-extended/package.json',
+        packageJson: { name: 'strapi-design-extended', version: '0.0.13' },
+      } as Awaited<ReturnType<typeof readPkgUp>>);
+
+      await expect(getModule('aliased-ui-kit', cwd)).resolves.toBeNull();
     });
   });
 
