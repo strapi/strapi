@@ -37,12 +37,17 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
     searchColumns.push(...numberColumns);
   }
 
+  const aliasSearchColumn = (columnName: string) => {
+    // Qualify columns when the query uses joins (e.g. deleteMany/updateMany subqueries).
+    return qb.aliasColumn(columnName, qb.hasJoins() ? qb.alias : undefined);
+  };
+
   switch (db.dialect.client) {
     case 'postgres': {
       searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`??::text ILIKE ?`, [
-          qb.aliasColumn(columnName),
+          aliasSearchColumn(columnName),
           `%${escapeQuery(query, '*%\\')}%`,
         ]);
       });
@@ -53,7 +58,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
       searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ? ESCAPE '\\'`, [
-          qb.aliasColumn(columnName),
+          aliasSearchColumn(columnName),
           `%${escapeQuery(query, '*%\\')}%`,
         ]);
       });
@@ -63,7 +68,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
       searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ?`, [
-          qb.aliasColumn(columnName),
+          aliasSearchColumn(columnName),
           `%${escapeQuery(query, '*%\\')}%`,
         ]);
       });
