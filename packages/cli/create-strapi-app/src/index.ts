@@ -167,6 +167,7 @@ async function run(args: string[]): Promise<void> {
     devDependencies: {},
     dependencies: {
       '@strapi/strapi': version,
+      '@strapi/database': version,
       '@strapi/plugin-users-permissions': version,
       '@strapi/plugin-cloud': version,
       // third party

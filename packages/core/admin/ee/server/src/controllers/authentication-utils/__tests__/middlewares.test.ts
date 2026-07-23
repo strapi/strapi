@@ -149,6 +149,56 @@ describe('redirectWithAuth', () => {
     );
   });
 
+  test('respects admin.auth.cookie.domain for the access cookie', async () => {
+    (global.strapi.config.get as jest.Mock).mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'admin.auth.cookie.domain') return 'strapi.test';
+        if (key === 'admin.auth.cookie.secure') return false;
+        if (key === 'admin.auth.cookie.name') return undefined;
+        if (key === 'admin.auth.cookie.path') return undefined;
+        if (key === 'admin.auth.domain') return undefined;
+        return defaultValue;
+      }
+    );
+
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      DEFAULT_AUTH_COOKIE_NAME,
+      'access-token',
+      expect.objectContaining({
+        domain: 'strapi.test',
+      })
+    );
+  });
+
+  test('falls back to admin.auth.domain for the access cookie domain', async () => {
+    (global.strapi.config.get as jest.Mock).mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'admin.auth.domain') return 'legacy.strapi.test';
+        if (key === 'admin.auth.cookie.secure') return false;
+        if (key === 'admin.auth.cookie.name') return undefined;
+        if (key === 'admin.auth.cookie.path') return undefined;
+        if (key === 'admin.auth.cookie.domain') return undefined;
+        return defaultValue;
+      }
+    );
+
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      DEFAULT_AUTH_COOKIE_NAME,
+      'access-token',
+      expect.objectContaining({
+        domain: 'legacy.strapi.test',
+      })
+    );
+  });
+
   test('still sets the refresh cookie via buildCookieOptionsWithExpiry', async () => {
     const ctx = createCtx();
 
