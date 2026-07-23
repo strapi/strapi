@@ -174,6 +174,33 @@ describe('i18n - Content API', () => {
       });
     });
 
+    test('Can create an entry using the default locale', async () => {
+      const categoryName = 'default locale category';
+
+      const res = await rq({
+        method: 'POST',
+        url: '/categories',
+        body: {
+          data: {
+            name: categoryName,
+          },
+        },
+      });
+
+      const createdEntry = await strapi.db.query('api::category.category').findOne({
+        where: {
+          name: categoryName,
+          locale: 'en',
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(createdEntry).toMatchObject({
+        name: categoryName,
+        locale: 'en',
+      });
+    });
+
     test('Cannot create an entry in an unconfigured locale', async () => {
       const categoryName = 'unconfigured locale category';
 
@@ -261,6 +288,42 @@ describe('i18n - Content API', () => {
 
       expect(statusCode).toBe(200);
       expect(body.data).toMatchObject(transformToRESTResource(data.homepages[1]));
+    });
+
+    test('Cannot update an entry in an unconfigured locale', async () => {
+      const homepageBefore = await strapi.db.query('api::homepage.homepage').findOne({
+        where: {
+          locale: 'en',
+        },
+      });
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/homepage?locale=${UNCONFIGURED_LOCALE}`,
+        body: {
+          data: {
+            title: 'unconfigured locale homepage update',
+          },
+        },
+      });
+
+      const homepageAfter = await strapi.db.query('api::homepage.homepage').findOne({
+        where: {
+          locale: 'en',
+        },
+      });
+
+      const updatedEntries = await strapi.db.query('api::homepage.homepage').findMany({
+        where: {
+          title: 'unconfigured locale homepage update',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toContain(`Locale ${UNCONFIGURED_LOCALE} not found`);
+      expect(homepageAfter.title).toBe(homepageBefore.title);
+      expect(updatedEntries).toHaveLength(0);
     });
   });
 });
