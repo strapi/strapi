@@ -85,6 +85,7 @@ const categories = [
 ];
 
 const data = {};
+const UNCONFIGURED_LOCALE = 'en-GB';
 
 describe('i18n - Content API', () => {
   const builder = createTestBuilder();
@@ -144,6 +145,96 @@ describe('i18n - Content API', () => {
       expect(Array.isArray(body.data)).toBe(true);
       expect(body.data).toHaveLength(1);
       expect(body.data[0]).toMatchObject(transformToRESTResource(data.categories[1]));
+    });
+
+    test('Can create an entry in a configured locale', async () => {
+      const categoryName = 'configured locale category';
+
+      const res = await rq({
+        method: 'POST',
+        url: '/categories?locale=ko',
+        body: {
+          data: {
+            name: categoryName,
+          },
+        },
+      });
+
+      const createdEntry = await strapi.db.query('api::category.category').findOne({
+        where: {
+          name: categoryName,
+          locale: 'ko',
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(createdEntry).toMatchObject({
+        name: categoryName,
+        locale: 'ko',
+      });
+    });
+
+    test('Cannot create an entry in an unconfigured locale', async () => {
+      const categoryName = 'unconfigured locale category';
+
+      const res = await rq({
+        method: 'POST',
+        url: `/categories?locale=${UNCONFIGURED_LOCALE}`,
+        body: {
+          data: {
+            name: categoryName,
+          },
+        },
+      });
+
+      const createdEntries = await strapi.db.query('api::category.category').findMany({
+        where: {
+          name: categoryName,
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toContain(`Locale ${UNCONFIGURED_LOCALE} not found`);
+      expect(createdEntries).toHaveLength(0);
+    });
+
+    test('Cannot update an entry in an unconfigured locale', async () => {
+      const categoryBefore = await strapi.db.query('api::category.category').findOne({
+        where: {
+          documentId: data.categories[0].documentId,
+          locale: 'en',
+        },
+      });
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/categories/${data.categories[0].documentId}?locale=${UNCONFIGURED_LOCALE}`,
+        body: {
+          data: {
+            name: 'unconfigured locale update',
+          },
+        },
+      });
+
+      const categoryAfter = await strapi.db.query('api::category.category').findOne({
+        where: {
+          documentId: data.categories[0].documentId,
+          locale: 'en',
+        },
+      });
+
+      const updatedEntries = await strapi.db.query('api::category.category').findMany({
+        where: {
+          name: 'unconfigured locale update',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toContain(`Locale ${UNCONFIGURED_LOCALE} not found`);
+      expect(categoryAfter.name).toBe(categoryBefore.name);
+      expect(updatedEntries).toHaveLength(0);
     });
   });
 
