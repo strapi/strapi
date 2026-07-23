@@ -9,9 +9,24 @@ const PAGE_SIZE = 20;
 interface UseInfiniteAssetsOptions {
   folder?: number | null;
   sort?: string;
+  /** Extra `filters[$and]` entries for the files query. */
+  filters?: Record<string, unknown>[];
+  /**
+   * Stable fingerprint of `filters` — a change resets the accumulated pages
+   * (the array identity itself changes every render).
+   */
+  filtersKey?: string;
+  /** Structural switch: an `is [folder]`-only type badge means no file can match. */
+  enabled?: boolean;
 }
 
-const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {}) => {
+const useInfiniteAssets = ({
+  folder = null,
+  sort,
+  filters,
+  filtersKey = '',
+  enabled = true,
+}: UseInfiniteAssetsOptions = {}) => {
   const [page, setPage] = useState(1);
   const lastResultsRef = useRef<File[]>([]);
   const isMountRef = useRef(true);
@@ -21,12 +36,16 @@ const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {
     isLoading,
     isFetching,
     error,
-  } = useGetAssetsQuery({
-    folder,
-    page,
-    pageSize: PAGE_SIZE,
-    sort,
-  });
+  } = useGetAssetsQuery(
+    {
+      folder,
+      page,
+      pageSize: PAGE_SIZE,
+      sort,
+      filters,
+    },
+    { skip: !enabled }
+  );
 
   const pagination = data?.pagination;
 
@@ -67,7 +86,7 @@ const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {
     }
     setPage(1);
     lastResultsRef.current = [];
-  }, [folder, sort]);
+  }, [folder, sort, filtersKey]);
 
   const hasNextPage = pagination ? page < pagination.pageCount : false;
   const isFetchingMore = isFetching && page > 1;
@@ -75,6 +94,18 @@ const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {
   const fetchNextPage = useCallback(() => {
     setPage((prev) => prev + 1);
   }, []);
+
+  if (!enabled) {
+    return {
+      assets: [] as File[],
+      pagination: undefined,
+      isLoading: false,
+      isFetchingMore: false,
+      hasNextPage: false,
+      fetchNextPage,
+      error: undefined,
+    };
+  }
 
   return { assets, pagination, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error };
 };

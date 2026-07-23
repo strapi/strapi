@@ -1,4 +1,5 @@
 import { Button, Flex, Typography } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
@@ -38,6 +39,37 @@ export const EmptyState = ({ onAddAssets }: EmptyStateProps) => {
         {formatMessage({
           id: getTranslationKey('list.empty.add-assets'),
           defaultMessage: 'Add assets',
+        })}
+      </Button>
+    </Flex>
+  );
+};
+
+interface FilteredEmptyStateProps {
+  onClearFilters: () => void;
+}
+
+/**
+ * Empty state when active filters match nothing (including contradictory
+ * badges — allowed by design). Distinct from the no-content state: the library
+ * has items, the filters exclude them all.
+ */
+export const FilteredEmptyState = ({ onClearFilters }: FilteredEmptyStateProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" alignItems="center" gap={6} padding={11}>
+      <EmptyDocuments width="16rem" height="8.8rem" />
+      <Typography textColor="neutral600">
+        {formatMessage({
+          id: getTranslationKey('list.filters.empty'),
+          defaultMessage: 'No items matched current filters',
+        })}
+      </Typography>
+      <Button variant="secondary" startIcon={<Cross aria-hidden />} onClick={onClearFilters}>
+        {formatMessage({
+          id: getTranslationKey('list.filters.clear'),
+          defaultMessage: 'Clear filters',
         })}
       </Button>
     </Flex>

@@ -13,6 +13,8 @@ interface GetAssetsParams {
   pageSize?: number;
   folder?: number | null;
   sort?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the folder scope. */
+  filters?: Record<string, unknown>[];
 }
 
 interface GetAssetsResponse {
@@ -37,19 +39,16 @@ const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
       query: (params = {}) => {
-        const { folder, ...rest } = params as GetAssetsParams;
+        const { folder, filters = [], ...rest } = params as GetAssetsParams;
 
         const queryParams: Record<string, unknown> = { ...rest };
 
-        if (folder != null) {
-          queryParams['filters'] = {
-            $and: [{ folder: { id: folder } }],
-          };
-        } else {
-          queryParams['filters'] = {
-            $and: [{ folder: { id: { $null: true } } }],
-          };
-        }
+        const folderScope =
+          folder != null ? { folder: { id: folder } } : { folder: { id: { $null: true } } };
+
+        queryParams['filters'] = {
+          $and: [folderScope, ...filters],
+        };
 
         return {
           url: '/upload/files',

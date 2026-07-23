@@ -30,7 +30,9 @@ import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
-import { EmptyState } from './components/EmptyState';
+import { EmptyState, FilteredEmptyState } from './components/EmptyState';
+import { FilterBadges } from './components/FilterBadges';
+import { FilterMenu } from './components/FilterMenu';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { SortMenu } from './components/SortMenu';
@@ -39,7 +41,9 @@ import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelec
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+import { useListFilters } from './hooks/useListFilters';
 import { useListSort, type FoldersPosition } from './hooks/useListSort';
+import { buildAssetFilters, type BuiltFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
 import { mergeMixedList } from './utils/mergeMixedList';
 
@@ -57,6 +61,11 @@ interface AssetsViewProps {
   assetsSort: string;
   foldersSort: string;
   foldersPosition: FoldersPosition;
+  builtFilters: BuiltFilters;
+  /** Fingerprint of the active filters — resets infinite scroll on change. */
+  filtersKey: string;
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
   onAssetItemClick: (assetId: number) => void;
   onAddAssets: () => void;
 }
@@ -67,6 +76,10 @@ const AssetsView = ({
   assetsSort,
   foldersSort,
   foldersPosition,
+  builtFilters,
+  filtersKey,
+  hasActiveFilters,
+  onClearFilters,
   onAssetItemClick,
   onAddAssets,
 }: AssetsViewProps) => {
@@ -78,11 +91,26 @@ const AssetsView = ({
     hasNextPage,
     fetchNextPage,
     error,
-  } = useInfiniteAssets({ folder: folderId, sort: assetsSort });
-  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
-    parentId: folderId,
-    sort: foldersSort,
+  } = useInfiniteAssets({
+    folder: folderId,
+    sort: assetsSort,
+    filters: builtFilters.fileClauses,
+    filtersKey,
+    enabled: builtFilters.showFiles,
   });
+  const { data: fetchedFolders = [], isLoading: isLoadingFolders } = useGetFoldersQuery(
+    {
+      parentId: folderId,
+      sort: foldersSort,
+      filters: builtFilters.folderClauses,
+    },
+    { skip: !builtFilters.showFolders }
+  );
+  // A type badge can exclude folders structurally (e.g. "Type is Picture").
+  const folders = useMemo(
+    () => (builtFilters.showFolders ? fetchedFolders : []),
+    [builtFilters.showFolders, fetchedFolders]
+  );
 
   const isGridView = view === viewOptions.GRID;
   const isLoading = isLoadingAssets || isLoadingFolders;
@@ -132,7 +160,11 @@ const AssetsView = ({
   }
 
   if (folders.length === 0 && assets.length === 0) {
-    return <EmptyState onAddAssets={onAddAssets} />;
+    return hasActiveFilters ? (
+      <FilteredEmptyState onClearFilters={onClearFilters} />
+    ) : (
+      <EmptyState onAddAssets={onAddAssets} />
+    );
   }
   return (
     <>
@@ -340,6 +372,15 @@ export const AssetsPage = () => {
   };
 
   const listSort = useListSort();
+  const listFilters = useListFilters();
+
+  // Resolve relative presets against "now" only when the filters change —
+  // keeps the query args (and RTK cache keys) stable between renders.
+  const builtFilters = useMemo(
+    () => buildAssetFilters(listFilters.filters, new Date()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- serialized is the value identity of filters
+    [listFilters.serialized]
+  );
 
   // The view is deliberately absent: table and grid render the same list, so
   // toggling views keeps the selection.
@@ -348,7 +389,7 @@ export const AssetsPage = () => {
     search: '', // TODO: wire when building header search
     // Folder position changes the render order too — selection must reset.
     sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
-    filter: null, // TODO: wire when building header filters
+    filter: listFilters.serialized || null,
   });
 
   return (
@@ -409,54 +450,62 @@ export const AssetsPage = () => {
                       </SimpleMenu>
                     }
                     subtitle={
-                      <Flex justifyContent="space-between" alignItems="center" gap={4} width="100%">
-                        <Flex gap={4} alignItems="center">
-                          TODO: Filters and search
-                        </Flex>
+                      <>
+                        <Flex
+                          justifyContent="space-between"
+                          alignItems="center"
+                          gap={4}
+                          width="100%"
+                        >
+                          <Flex gap={4} alignItems="center">
+                            <FilterMenu listFilters={listFilters} />
+                          </Flex>
 
-                        <Flex gap={4} alignItems="stretch">
-                          <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-                          <StyledToggleGroup
-                            type="single"
-                            value={isGridView ? 'grid' : 'table'}
-                            onValueChange={(value) =>
-                              value &&
-                              setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                            }
-                            aria-label={formatMessage({
-                              id: getTranslationKey('view.switch.label'),
-                              defaultMessage: 'View options',
-                            })}
-                          >
-                            <StyledToggleItem
-                              value="table"
+                          <Flex gap={4} alignItems="center">
+                            <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
+                            <StyledToggleGroup
+                              type="single"
+                              value={isGridView ? 'grid' : 'table'}
+                              onValueChange={(value) =>
+                                value &&
+                                setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
+                              }
                               aria-label={formatMessage({
-                                id: getTranslationKey('view.table'),
-                                defaultMessage: 'Table view',
+                                id: getTranslationKey('view.switch.label'),
+                                defaultMessage: 'View options',
                               })}
                             >
-                              <List />
-                              {formatMessage({
-                                id: getTranslationKey('view.table'),
-                                defaultMessage: 'Table view',
-                              })}
-                            </StyledToggleItem>
-                            <StyledToggleItem
-                              value="grid"
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.grid'),
-                                defaultMessage: 'Grid view',
-                              })}
-                            >
-                              <GridIcon />
-                              {formatMessage({
-                                id: getTranslationKey('view.grid'),
-                                defaultMessage: 'Grid view',
-                              })}
-                            </StyledToggleItem>
-                          </StyledToggleGroup>
+                              <StyledToggleItem
+                                value="table"
+                                aria-label={formatMessage({
+                                  id: getTranslationKey('view.table'),
+                                  defaultMessage: 'Table view',
+                                })}
+                              >
+                                <List />
+                                {formatMessage({
+                                  id: getTranslationKey('view.table'),
+                                  defaultMessage: 'Table view',
+                                })}
+                              </StyledToggleItem>
+                              <StyledToggleItem
+                                value="grid"
+                                aria-label={formatMessage({
+                                  id: getTranslationKey('view.grid'),
+                                  defaultMessage: 'Grid view',
+                                })}
+                              >
+                                <GridIcon />
+                                {formatMessage({
+                                  id: getTranslationKey('view.grid'),
+                                  defaultMessage: 'Grid view',
+                                })}
+                              </StyledToggleItem>
+                            </StyledToggleGroup>
+                          </Flex>
                         </Flex>
-                      </Flex>
+                        <FilterBadges listFilters={listFilters} />
+                      </>
                     }
                   />
                 </HeaderWrapper>
@@ -470,6 +519,10 @@ export const AssetsPage = () => {
                       assetsSort={listSort.assetsSort}
                       foldersSort={listSort.foldersSort}
                       foldersPosition={listSort.foldersPosition}
+                      builtFilters={builtFilters}
+                      filtersKey={listFilters.serialized}
+                      hasActiveFilters={listFilters.filters.length > 0}
+                      onClearFilters={listFilters.clearFilters}
                       onAssetItemClick={openDetails}
                       onAddAssets={handleFileSelect}
                     />

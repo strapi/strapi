@@ -19,6 +19,8 @@ interface GetFoldersParams {
   parentId?: number | null;
   /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
   sort?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent scope. */
+  filters?: Record<string, unknown>[];
 }
 
 interface BulkMoveParams {
@@ -42,22 +44,19 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId, sort } = params as GetFoldersParams;
+        const { parentId, sort, filters = [] } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
         };
 
-        if (parentId != null) {
-          queryParams['filters'] = {
-            $and: [{ parent: { id: parentId } }],
-          };
-        } else {
-          queryParams['filters'] = {
-            $and: [{ parent: { id: { $null: true } } }],
-          };
-        }
+        const parentScope =
+          parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+
+        queryParams['filters'] = {
+          $and: [parentScope, ...filters],
+        };
 
         return {
           url: '/upload/folders',
