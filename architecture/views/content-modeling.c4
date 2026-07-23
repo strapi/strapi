@@ -1,0 +1,47 @@
+views {
+  view content_type_builder_server_code of strapi.server_runtime.content_type_builder_server {
+    title 'Content-Type Builder Server - Code Organization'
+    description '''
+      Code-level organization of the Content-Type Builder server package: routes, middlewares, controllers, services, and schema builder internals.
+    '''
+
+    include
+      ctb_server_routes,
+      ctb_server_middlewares,
+      ctb_server_controllers,
+      ctb_server_services,
+      ctb_schema_builder,
+      strapi.application_source,
+      strapi.application_source.content_type_schema_files,
+      ctb_server_routes -> ctb_server_middlewares,
+      ctb_server_routes -> ctb_server_controllers,
+      ctb_server_controllers -> ctb_server_services,
+      ctb_server_services -> ctb_schema_builder,
+      ctb_server_middlewares -> ctb_server_controllers,
+      ctb_schema_builder -> strapi.application_source.content_type_schema_files
+  }
+
+  dynamic view content_type_builder_schema_change_flow {
+    variant sequence
+    title 'Content-Type Builder - Schema Change Flow'
+    description '''
+      Sequence view for a schema editing session: the Admin UI captures a content model change, sends it to the Content-Type Builder server, validation and services build the schema update, and schema files become the source loaded by the runtime.
+    '''
+
+    developer -> strapi.admin_web_app.content_type_builder_ui 'open schema editor'
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_app_pages -> strapi.admin_web_app.content_type_builder_ui.ctb_ui_data_manager 'load editing session state'
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_app_pages -> strapi.admin_web_app.content_type_builder_ui.ctb_ui_schema_components 'render content type and field editors'
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_schema_components -> strapi.admin_web_app.content_type_builder_ui.ctb_ui_form_modals 'configure field or relation'
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_form_modals -> strapi.admin_web_app.content_type_builder_ui.ctb_ui_data_manager 'update pending schema state'
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_data_manager -> strapi.server_runtime.content_type_builder_server.ctb_server_routes 'submit schema change'
+    strapi.server_runtime.content_type_builder_server.ctb_server_routes -> strapi.server_runtime.content_type_builder_server.ctb_server_middlewares 'validate request context'
+    strapi.server_runtime.content_type_builder_server.ctb_server_routes -> strapi.server_runtime.content_type_builder_server.ctb_server_controllers 'dispatch Content-Type Builder request'
+    strapi.server_runtime.content_type_builder_server.ctb_server_controllers -> strapi.server_runtime.content_type_builder_server.ctb_server_services 'delegate schema operation'
+    strapi.server_runtime.content_type_builder_server.ctb_server_services -> strapi.server_runtime.content_type_builder_server.ctb_schema_builder 'build schema update'
+    strapi.server_runtime.content_type_builder_server.ctb_schema_builder -> strapi.application_source.content_type_schema_files 'write schema.json definitions'
+    strapi.server_runtime.schema_loader -> strapi.application_source.content_type_schema_files 'read schema files during load'
+    strapi.server_runtime.schema_loader -> strapi.server_runtime.schema_sync 'provide content type definitions'
+    strapi.server_runtime.schema_sync -> strapi.server_runtime.database_layer 'sync database metadata and tables'
+    developer <- strapi.admin_web_app.content_type_builder_ui 'schema change available after reload'
+  }
+}
