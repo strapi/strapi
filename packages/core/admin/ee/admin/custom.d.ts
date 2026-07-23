@@ -27,6 +27,7 @@ declare global {
         promoteEE?: boolean;
         nps?: boolean;
         docLinks?: boolean;
+        disableLocalLoginForSSO?: boolean;
       };
       projectType: 'Community' | 'Growth' | 'Enterprise';
       telemetryDisabled: boolean;

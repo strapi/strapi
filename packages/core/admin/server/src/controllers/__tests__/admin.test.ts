@@ -49,6 +49,55 @@ describe('Admin Controller', () => {
     });
   });
 
+  describe('getProjectType', () => {
+    test('Includes disableLocalLoginForSSO flag (default false) in the flags payload', async () => {
+      global.strapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue: unknown) => {
+            if (key === 'admin.flags') {
+              return { nps: true };
+            }
+            return defaultValue;
+          }),
+        },
+      } as any;
+
+      const result = await adminController.getProjectType();
+
+      expect(global.strapi.config.get).toHaveBeenCalledWith('admin.flags', {});
+      expect(global.strapi.config.get).toHaveBeenCalledWith(
+        'admin.auth.disableLocalLoginForSSO',
+        false
+      );
+      expect(result.data).toStrictEqual({
+        isEE: false,
+        features: [],
+        flags: { nps: true, disableLocalLoginForSSO: false },
+        ai: { enabled: false },
+      });
+    });
+
+    test('Reflects disableLocalLoginForSSO=true when configured', async () => {
+      global.strapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue: unknown) => {
+            if (key === 'admin.flags') {
+              return {};
+            }
+            if (key === 'admin.auth.disableLocalLoginForSSO') {
+              return true;
+            }
+            return defaultValue;
+          }),
+        },
+      } as any;
+
+      const result = await adminController.getProjectType();
+
+      expect(result.data.flags).toStrictEqual({ disableLocalLoginForSSO: true });
+    });
+  });
+
   describe('information', () => {
     beforeAll(() => {
       global.strapi = {
