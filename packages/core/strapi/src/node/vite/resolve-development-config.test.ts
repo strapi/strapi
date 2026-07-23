@@ -1,5 +1,6 @@
 import http from 'node:http';
 
+import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
@@ -56,6 +57,53 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     expect(alias?.invariant).toEqual(expect.any(String));
     expect(alias?.prismjs).toEqual(expect.any(String));
     expect(alias?.lodash).toEqual(expect.any(String));
+
+    // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
+    // field keeps a single instance (JSONInput instanceof checks)
+    expect(config.optimizeDeps?.include).toEqual(
+      expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
+    );
+    for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
+      expect(alias?.[mod]).toEqual(expect.any(String));
+    }
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('pre-bundles prismjs core but not language components (#26964 / blank-admin)', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      bundler: 'vite' as const,
+      options: {
+        open: false,
+      },
+      plugins: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
+
+    const config = await resolveDevelopmentConfig(ctx);
+    const include = config.optimizeDeps?.include ?? [];
+
+    // Core stays prebundled (#26964). Language glob must stay out — #26978+#27014 reverse-order
+    // prebundle blanks the admin with TypeError setting 'comment'.
+    expect(include).toEqual(expect.arrayContaining(['prismjs']));
+    expect(include).not.toContain('prismjs/components/*.js');
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
