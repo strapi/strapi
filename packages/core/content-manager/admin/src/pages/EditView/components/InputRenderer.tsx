@@ -192,6 +192,7 @@ const BaseInputRenderer = ({
           type={props.type}
           disabled={fieldIsDisabled}
           autoFocus={isInPreviewPopover}
+          livePreviewSync={isInPreviewPopover}
         />
       );
     case 'component':

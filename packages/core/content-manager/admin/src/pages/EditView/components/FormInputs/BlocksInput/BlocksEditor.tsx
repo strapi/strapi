@@ -216,10 +216,15 @@ interface BlocksEditorProps
     BlocksContentProps {
   disabled?: boolean;
   name: string;
+  /** When true, sync form state on every keystroke (Live Preview popover). */
+  livePreviewSync?: boolean;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
+  (
+    { disabled = false, name, onChange, value, error, livePreviewSync = false, ...contentProps },
+    forwardedRef
+  ) => {
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
@@ -296,12 +301,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * the editor, wiping the pending input (blocks e2e flake).
            */
           incrementSlateUpdatesCount();
+          if (livePreviewSync) {
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            return;
+          }
 
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
-          // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
@@ -309,7 +317,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           }, 300);
         }
       },
-      [editor, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, livePreviewSync, name, onChange]
     );
 
     // Clean up the timeout on unmount

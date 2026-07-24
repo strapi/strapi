@@ -83,40 +83,12 @@ function previewScript(config) {
   };
 
   /**
-   * @param {string} path
-   * @returns {HTMLElement[]}
-   */
-  const getElementsByExactPath = (path) => {
-    return /** @type {HTMLElement[]} */ (
-      Array.from(document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`)).filter((el) => {
-        if (!(el instanceof HTMLElement)) return false;
-        const attr = el.getAttribute(SOURCE_ATTRIBUTE) ?? '';
-        return new URLSearchParams(attr).get('path') === path;
-      })
-    );
-  };
-
-  /**
-   * @param {string} fieldPath
-   * @returns {HTMLElement[]}
-   */
-  const getElementsByFieldPath = (fieldPath) => {
-    return /** @type {HTMLElement[]} */ (
-      Array.from(document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`)).filter((el) => {
-        if (!(el instanceof HTMLElement)) return false;
-        const attr = el.getAttribute(SOURCE_ATTRIBUTE) ?? '';
-        return new URLSearchParams(attr).get('fieldPath') === fieldPath;
-      })
-    );
-  };
-
-  /**
    * Group key for the highlight manager. For most fields this is the raw
    * source attribute (so identical sources share one highlight, which is what
-   * gives multi-media galleries their single bounding box). For blocks
-   * fields, every text leaf has a unique `path` but the same `fieldPath`, so
-   * we drop `path` from the key — all leaves of a blocks field cluster into
-   * a single highlight whose rect spans the entire rendered field.
+   * gives multi-media galleries their single bounding box). For blocks fields,
+   * every encoded marker shares the same `path` and `fieldPath` (the blocks
+   * field path). We drop `path` from the key so all marked elements cluster
+   * into a single highlight whose rect spans the entire rendered field.
    * @param {string} sourceAttr
    * @returns {string}
    */
@@ -145,44 +117,21 @@ function previewScript(config) {
   };
 
   /**
-   * @param {unknown} blocks
-   * @param {string} rootPath
-   * @returns {Array<{ path: string; text: string }>}
+   * Blocks live updates are rendered by the host frontend (e.g. via BlocksRenderer).
+   * Re-dispatch the change on the iframe window so integrators can subscribe with
+   * `window.addEventListener('strapiFieldChange', …)` without the preview script
+   * attempting to patch the DOM. The admin panel also posts the same payload via
+   * `postMessage`, which hosts can listen for on `window` 'message' events.
+   * @param {string} field
+   * @param {unknown} value
    */
-  const collectBlocksLeaves = (blocks, rootPath) => {
-    /** @type {Array<{ path: string; text: string }>} */
-    const out = [];
-    /**
-     * @param {unknown} node
-     * @param {string} currentPath
-     */
-    const visit = (node, currentPath) => {
-      if (Array.isArray(node)) {
-        node.forEach((child, i) => visit(child, `${currentPath}.${i}`));
-        return;
-      }
-      if (!node || typeof node !== 'object') return;
-      const n = /** @type {Record<string, unknown>} */ (node);
-      if (typeof n.text === 'string') {
-        out.push({ path: `${currentPath}.text`, text: n.text });
-      }
-      if (Array.isArray(n.children)) {
-        n.children.forEach((child, i) => visit(child, `${currentPath}.children.${i}`));
-      }
-    };
-    visit(blocks, rootPath);
-    return out;
+  const forwardBlocksFieldChange = (field, value) => {
+    window.dispatchEvent(
+      new CustomEvent(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+        detail: { field, value },
+      })
+    );
   };
-
-  /**
-   * Tracks DOM elements we cloned to represent newly-added blocks before the
-   * host framework re-renders. On the next change event we either reuse them
-   * (typing inside a freshly-added block) or remove them (the block was
-   * deleted again before save). On teardown we remove all of them so React
-   * reconciliation doesn't crash after save.
-   * @type {Map<string, HTMLElement>}
-   */
-  const blocksClones = new Map();
 
   /**
    * @param {Element} element
@@ -391,9 +340,8 @@ function previewScript(config) {
 
   /**
    * Resolve the source attribute to use when opening the popover for a clicked
-   * element. Elements carrying a `fieldPath` (currently blocks text leaves)
-   * point at a deep leaf path; we redirect the popover to the parent field.
-   * Falls back to the media-specific normalization for everything else.
+   * element. Blocks markers carry a `fieldPath`; redirect the popover to that
+   * field. Falls back to the media-specific normalization for everything else.
    * @param {string} sourceAttr
    * @param {Element} element
    * @returns {string}
@@ -1342,98 +1290,11 @@ function previewScript(config) {
         const { field, value } = event.data.payload;
         if (!field) return;
 
-        // Blocks fields ship as an array of nodes. Each rendered text leaf
-        // carries `fieldPath=<field>` + a unique leaf `path`, so we walk the
-        // new value, update matching leaves in the DOM, and clone a previous
-        // sibling for newly-added blocks the host framework hasn't rendered
-        // yet. Leaves that disappear from the new value get hidden until the
-        // framework re-renders on save.
+        // Blocks fields ship as an array of nodes. Live updates are delegated
+        // to the host frontend — we re-dispatch as a CustomEvent so integrators
+        // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
         if (isBlocksValue(value)) {
-          const newLeaves = collectBlocksLeaves(value, field);
-          const newPaths = new Set(newLeaves.map((l) => l.path));
-
-          // Drop clones whose leaf path is no longer in the new value
-          for (const [path, el] of Array.from(blocksClones)) {
-            if (path !== field && !path.startsWith(`${field}.`)) continue;
-            if (newPaths.has(path)) continue;
-            el.remove();
-            blocksClones.delete(path);
-          }
-
-          newLeaves.forEach((leaf) => {
-            const matches = getElementsByExactPath(leaf.path);
-            const ourClone = blocksClones.get(leaf.path);
-
-            // Prefer framework-owned elements over our clone (e.g. once the
-            // framework re-renders after save and starts owning this leaf,
-            // drop our orphan clone).
-            const framework = matches.filter((el) => el !== ourClone);
-            if (framework.length > 0) {
-              if (ourClone) {
-                ourClone.remove();
-                blocksClones.delete(leaf.path);
-              }
-              framework.forEach((el) => {
-                if (!isMediaElement(el)) {
-                  el.innerText = leaf.text;
-                  el.style.display = '';
-                }
-              });
-              return;
-            }
-
-            if (ourClone) {
-              ourClone.innerText = leaf.text;
-              return;
-            }
-
-            // No element for this leaf yet — find a previous-sibling leaf and
-            // clone it. We decrement each numeric segment of the leaf path
-            // from deepest to shallowest until we find a match.
-            const segments = leaf.path.split('.');
-            for (let i = segments.length - 1; i >= 0; i--) {
-              if (!/^\d+$/.test(segments[i])) continue;
-              const currentIdx = parseInt(segments[i], 10);
-              if (currentIdx <= 0) continue;
-              const candidateSegs = [...segments];
-              candidateSegs[i] = String(currentIdx - 1);
-              const candidatePath = candidateSegs.join('.');
-              const prevEls = getElementsByExactPath(candidatePath);
-              if (prevEls.length === 0) continue;
-
-              prevEls.forEach((prev) => {
-                if (!prev.parentElement) return;
-                const clone = /** @type {HTMLElement} */ (prev.cloneNode(true));
-                const prevAttr = prev.getAttribute(SOURCE_ATTRIBUTE);
-                if (prevAttr) {
-                  const params = new URLSearchParams(prevAttr);
-                  params.set('path', leaf.path);
-                  clone.setAttribute(SOURCE_ATTRIBUTE, params.toString());
-                }
-                clone.innerText = leaf.text;
-                prev.parentElement.insertBefore(clone, prev.nextSibling);
-                blocksClones.set(leaf.path, clone);
-              });
-              break;
-            }
-          });
-
-          // Hide framework-owned leaves whose path no longer exists in the
-          // new value (block was removed but host framework hasn't re-rendered
-          // yet). We only hide — never remove — so React reconciliation isn't
-          // disturbed.
-          getElementsByFieldPath(field).forEach((el) => {
-            const attr = el.getAttribute(SOURCE_ATTRIBUTE) ?? '';
-            const path = new URLSearchParams(attr).get('path');
-            if (!path) return;
-            if (newPaths.has(path)) {
-              el.style.display = '';
-            } else if (!blocksClones.has(path)) {
-              el.style.display = 'none';
-            }
-          });
-
-          highlightManager.updateAllHighlights();
+          forwardBlocksFieldChange(field, value);
           return;
         }
 
@@ -1645,10 +1506,6 @@ function previewScript(config) {
       if (existingStyles) {
         existingStyles.remove();
       }
-
-      // Drop blocks clones we injected so React reconciliation isn't surprised
-      blocksClones.forEach((el) => el.remove());
-      blocksClones.clear();
 
       overlay.remove();
     };

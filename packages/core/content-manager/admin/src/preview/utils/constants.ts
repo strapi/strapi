@@ -1,6 +1,11 @@
 import { NotificationConfig } from '@strapi/admin/strapi-admin';
 import { MessageDescriptor } from 'react-intl';
 
+export const PREVIEW_HIGHLIGHT_COLORS = {
+  highlightHoverColor: '#7b79ff',
+  highlightActiveColor: '#4945ff',
+} as const;
+
 /**
  * These events are not part of the public API, changing them is not a breaking change.
  */
