@@ -3,6 +3,7 @@ import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
 
 const READ_ACTION = 'plugin::content-manager.explorer.read';
+const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 /**
  * Returns the main display field for a model (e.g. title, name).
@@ -44,6 +45,57 @@ const FIELDS_TO_IGNORE = new Set([
 ]);
 
 const STATUS_FIELDS = new Set(['id', 'documentId', 'locale', 'updatedAt', 'publishedAt']);
+
+const incrementInitialTempKey = (key?: string): string => {
+  if (!key) {
+    return `a${TEMP_KEY_DIGITS[0]}`;
+  }
+
+  const [head, ...digits] = key;
+  let carry = true;
+
+  for (let index = digits.length - 1; carry && index >= 0; index -= 1) {
+    const nextDigitIndex = TEMP_KEY_DIGITS.indexOf(digits[index]) + 1;
+
+    if (nextDigitIndex === 0) {
+      throw new Error(`Invalid temporary key digit: ${digits[index]}`);
+    }
+
+    if (nextDigitIndex === TEMP_KEY_DIGITS.length) {
+      digits[index] = TEMP_KEY_DIGITS[0];
+    } else {
+      digits[index] = TEMP_KEY_DIGITS[nextDigitIndex];
+      carry = false;
+    }
+  }
+
+  if (!carry) {
+    return `${head}${digits.join('')}`;
+  }
+
+  if (head === 'z') {
+    throw new Error('Cannot increment temporary keys any further');
+  }
+
+  const nextHead = String.fromCharCode(head.charCodeAt(0) + 1);
+  if (nextHead > 'a') {
+    digits.push(TEMP_KEY_DIGITS[0]);
+  } else {
+    digits.pop();
+  }
+
+  return `${nextHead}${digits.join('')}`;
+};
+
+const generateInitialTempKeys = (length: number): string[] => {
+  let previousKey: string | undefined;
+
+  return Array.from({ length }, () => {
+    const nextKey = incrementInitialTempKey(previousKey);
+    previousKey = nextKey;
+    return nextKey;
+  });
+};
 
 /**
  * Normalizes a value to an array: arrays pass through, single values become [value], null/undefined become [].
@@ -421,10 +473,11 @@ const processDocumentData = async (
         attributes: {},
       }) as Schema.Component;
       if (attribute.repeatable && isArray(value)) {
+        const tempKeys = generateInitialTempKeys(value.length);
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
             const processed = await processDocumentData(item, compSchema, components, preResolved);
-            return { ...processed, __temp_key__: index + 1 };
+            return { ...processed, __temp_key__: tempKeys[index] };
           })
         );
       } else if (value) {
@@ -442,13 +495,14 @@ const processDocumentData = async (
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
+      const tempKeys = generateInitialTempKeys(value.length);
       result[key] = await Promise.all(
         value.map(async (item: Record<string, unknown>, index: number) => {
           const compSchema = (components[item?.__component as string] || {
             attributes: {},
           }) as Schema.Component;
           const processed = await processDocumentData(item, compSchema, components, preResolved);
-          return { ...processed, __temp_key__: index + 1 };
+          return { ...processed, __temp_key__: tempKeys[index] };
         })
       );
       continue;
