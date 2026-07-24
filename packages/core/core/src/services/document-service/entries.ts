@@ -11,6 +11,28 @@ import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { clearTransformDataRequestCache, transformData } from './transform/data';
 
+/**
+ * Reads and validates the `api.documents.strictRelations` flag.
+ * false/undefined => legacy behaviour (relational required constraints not enforced),
+ * true => enforce required media and relations on non-draft writes.
+ * Mirrors the validation of `api.documents.strictParams` (see repository.ts).
+ */
+const isStrictRelationsEnabled = (): boolean => {
+  const rawStrictRelations: unknown = strapi.config.get('api.documents.strictRelations', undefined);
+
+  if (
+    rawStrictRelations !== undefined &&
+    rawStrictRelations !== false &&
+    rawStrictRelations !== true
+  ) {
+    throw new errors.ValidationError(
+      `Invalid config.api.documents.strictRelations value: "${rawStrictRelations}". Expected boolean (true or false).`
+    );
+  }
+
+  return rawStrictRelations === true;
+};
+
 const createEntriesService = (
   uid: UID.ContentType,
   entityValidator: Modules.EntityValidator.EntityValidator
@@ -101,6 +123,7 @@ const createEntriesService = (
         // Note: publishedAt value will always be set when DP is disabled
         isDraft: !params?.data?.publishedAt,
         locale: params?.locale,
+        strictRelations: isStrictRelationsEnabled(),
       }
     );
 
@@ -140,6 +163,7 @@ const createEntriesService = (
       {
         isDraft: !params?.data?.publishedAt, // Always update the draft version
         locale: params?.locale,
+        strictRelations: isStrictRelationsEnabled(),
       },
       entryToUpdate
     );

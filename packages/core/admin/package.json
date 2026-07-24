@@ -87,7 +87,7 @@
     "@casl/ability": "6.7.5",
     "@internationalized/date": "3.12.1",
     "@radix-ui/react-context": "1.0.1",
-    "@radix-ui/react-toolbar": "1.0.4",
+    "@radix-ui/react-toolbar": "1.1.11",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.3",
     "@strapi/icons": "2.2.3",
@@ -143,7 +143,7 @@
     "sift": "16.0.1",
     "sonner": "2.0.7",
     "typescript": "5.9.3",
-    "use-context-selector": "1.4.1",
+    "use-context-selector": "1.4.4",
     "yup": "0.32.9",
     "zod": "3.25.76"
   },

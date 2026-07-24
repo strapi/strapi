@@ -22,7 +22,8 @@ interface GetFoldersParams {
 interface BulkMoveParams {
   fileIds?: number[];
   folderIds?: number[];
-  destinationFolderId: number;
+  /** `null` moves the items to the root of the Media Library. */
+  destinationFolderId: number | null;
 }
 
 type DataEnvelope<T> = {

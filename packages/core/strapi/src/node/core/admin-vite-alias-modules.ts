@@ -1,3 +1,5 @@
+import { ADMIN_VITE_SINGLETON_MODULES } from './admin-vite-singleton-modules';
+
 /**
  * Modules given explicit Vite resolve aliases (and included in resolve.dedupe) for the admin bundle.
  * Single source of truth for resolution contract tests.
@@ -20,8 +22,16 @@ export const ADMIN_VITE_ALIAS_MODULES = [
 
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
 
-/** Same modules passed to Vite resolve.dedupe */
-export const ADMIN_VITE_DEDUPE_MODULES = ADMIN_VITE_ALIAS_MODULES;
+/**
+ * Modules passed to Vite resolve.dedupe (and aliased): the admin alias modules plus the
+ * CodeMirror singletons, so every copy collapses onto a single runtime instance.
+ */
+export const ADMIN_VITE_DEDUPE_MODULES = [
+  ...ADMIN_VITE_ALIAS_MODULES,
+  ...ADMIN_VITE_SINGLETON_MODULES,
+] as const;
+
+export { ADMIN_VITE_SINGLETON_MODULES };
 
 /**
  * Alias modules with exact versions declared in @strapi/admin dependencies (not peers).
