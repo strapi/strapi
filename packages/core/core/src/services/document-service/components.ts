@@ -7,6 +7,7 @@ import {
   getComponentJoinColumnEntityName,
   getComponentJoinColumnInverseName,
   getComponentTypeColumn,
+  createDocumentId,
 } from '../../utils/transform-content-types-to-models';
 
 // type aliases for readability
@@ -173,8 +174,22 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = data[attributeName as keyof TData] as ComponentValue;
-      await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
+      const rawComponentValue = data[attributeName as keyof TData] as ComponentValue;
+      const previousValue = (await strapi.db
+        .query(uid)
+        .load(entityToUpdate, attributeName)) as ComponentValue;
+
+      // Resolve durable componentKey → row id on this parent (draft or published) before
+      // delete/update so Content API clients can round-trip keys from either status.
+      const componentValue = resolveComponentIdentities(
+        attributeName,
+        previousValue,
+        rawComponentValue
+      );
+
+      await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue, {
+        previousValue,
+      });
 
       if (repeatable === true) {
         if (!Array.isArray(componentValue)) {
@@ -206,9 +221,20 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         };
       }
     } else if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName as keyof TData] as DynamicZoneValue;
+      const rawDynamiczoneValues = data[attributeName as keyof TData] as DynamicZoneValue;
+      const previousValue = (await strapi.db
+        .query(uid)
+        .load(entityToUpdate, attributeName)) as DynamicZoneValue;
 
-      await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues);
+      const dynamiczoneValues = resolveComponentIdentities(
+        attributeName,
+        previousValue,
+        rawDynamiczoneValues
+      ) as DynamicZoneValue;
+
+      await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues, {
+        previousValue,
+      });
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
@@ -232,6 +258,68 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
   return componentBody;
 };
 
+/**
+ * Map payload entries that carry `componentKey` (without a usable row `id`) onto the
+ * matching component row already linked to this parent entity.
+ *
+ * Fail closed: unknown keys throw the same relation error as invalid ids.
+ * Entries without id/key are creates. Existing `id` wins and is left unchanged.
+ */
+const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>(
+  attributeName: string,
+  previousValue: T | null | undefined,
+  componentValue: T
+): T => {
+  if (componentValue == null) {
+    return componentValue;
+  }
+
+  const previous = _.castArray(previousValue || []).filter(Boolean) as Array<{
+    id?: Modules.EntityService.Params.Attribute.ID;
+    componentKey?: string;
+    __component?: string;
+  }>;
+
+  const resolveOne = (value: any) => {
+    if (value == null || typeof value !== 'object') {
+      return value;
+    }
+
+    if (typeof value.id !== 'undefined') {
+      return value;
+    }
+
+    if (typeof value.componentKey === 'undefined' || value.componentKey === null) {
+      return value;
+    }
+
+    const match = previous.find((entry) => {
+      if (entry.componentKey !== value.componentKey) {
+        return false;
+      }
+      // Dynamic zones: keys are only unique within the same __component uid
+      if (value.__component && entry.__component && value.__component !== entry.__component) {
+        return false;
+      }
+      return true;
+    });
+
+    if (!match?.id) {
+      throw new errors.ApplicationError(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+    }
+
+    return { ...value, id: match.id };
+  };
+
+  if (Array.isArray(componentValue)) {
+    return componentValue.map(resolveOne) as T;
+  }
+
+  return resolveOne(componentValue) as T;
+};
+
 const pickStringifiedId = ({
   id,
 }: {
@@ -249,11 +337,12 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   componentUID: UID.Component,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  componentValue: ComponentValue
+  componentValue: ComponentValue,
+  options?: { previousValue?: ComponentValue }
 ) => {
-  const previousValue = (await strapi.db
-    .query(uid)
-    .load(entityToUpdate, attributeName)) as ComponentValue;
+  const previousValue =
+    options?.previousValue ??
+    ((await strapi.db.query(uid).load(entityToUpdate, attributeName)) as ComponentValue);
   const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
   const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
 
@@ -278,11 +367,12 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  dynamiczoneValues: DynamicZoneValue
+  dynamiczoneValues: DynamicZoneValue,
+  options?: { previousValue?: DynamicZoneValue }
 ) => {
-  const previousValue = (await strapi.db
-    .query(uid)
-    .load(entityToUpdate, attributeName)) as DynamicZoneValue;
+  const previousValue =
+    options?.previousValue ??
+    ((await strapi.db.query(uid).load(entityToUpdate, attributeName)) as DynamicZoneValue);
 
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter(has('id'))
@@ -384,6 +474,17 @@ const createComponent = async <TUID extends UID.Component>(
   const transform = pipe(
     // Make sure we don't save the component with a pre-defined ID
     omit('id'),
+    // Preserve componentKey on publish/clone; mint one on first create
+    (value: Input<TUID>) => {
+      const existingKey = (value as unknown as { componentKey?: string }).componentKey;
+      return {
+        ...value,
+        componentKey:
+          typeof existingKey === 'string' && existingKey.length > 0
+            ? existingKey
+            : createDocumentId(),
+      };
+    },
     assignComponentData(schema, componentData)
   );
 
@@ -400,11 +501,12 @@ const updateComponent = async <TUID extends UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
+  // componentKey is durable identity — do not allow clients to reassign it on update
   return strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
-    data: assignComponentData(schema, componentData, data),
+    data: assignComponentData(schema, componentData, omit('componentKey', data)),
   });
 };
 

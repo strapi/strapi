@@ -15,6 +15,7 @@ const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
 const DOC_ID_ATTRIBUTE = 'documentId';
+const COMPONENT_KEY_ATTRIBUTE = 'componentKey';
 
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt';
@@ -27,6 +28,7 @@ const UPDATED_AT_ATTRIBUTE = 'updatedAt';
 const constants = {
   ID_ATTRIBUTE,
   DOC_ID_ATTRIBUTE,
+  COMPONENT_KEY_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
   FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
@@ -38,7 +40,7 @@ const constants = {
 };
 
 /** ID-like fields accepted at root level and on relations/media/components (validate/sanitize traversal). */
-const ID_FIELDS: string[] = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
+const ID_FIELDS: string[] = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, COMPONENT_KEY_ATTRIBUTE];
 /** Keys accepted on morphTo relation payloads (e.g. __type). */
 const MORPH_TO_KEYS: string[] = ['__type'];
 /** Keys accepted on dynamic zone component payloads (e.g. __component). */
@@ -55,6 +57,7 @@ const RESERVED_ATTRIBUTE_NAMES: string[] = [
   // ID fields
   'id',
   'document_id',
+  'component_key',
 
   // Creator fields
   'created_at',
@@ -209,6 +212,7 @@ const getNonWritableAttributes = (model: Model) => {
   return _.uniq([
     ID_ATTRIBUTE,
     DOC_ID_ATTRIBUTE,
+    COMPONENT_KEY_ATTRIBUTE,
     ...getTimestamps(model),
     ...nonWritableAttributes,
   ]);
