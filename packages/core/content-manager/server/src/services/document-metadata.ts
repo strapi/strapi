@@ -394,15 +394,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     // Populate localization statuses
     if (document.localizations?.length) {
+      // Index versions by documentId + locale + published-state so the per-localization
+      // counterpart lookup below is O(1) instead of a `versions.find` scan — the map turns
+      // the whole loop from O(localizations × versions) into O(localizations + versions).
+      // Key on the published flag because each localization wants the version with the
+      // *opposite* publishedAt. First occurrence wins, mirroring `find`.
+      const versionByKey = new Map<string, (typeof versions)[number]>();
+      for (const v of versions) {
+        const key = `${v.documentId}:${v.locale}:${v.publishedAt === null ? 'draft' : 'published'}`;
+        if (!versionByKey.has(key)) {
+          versionByKey.set(key, v);
+        }
+      }
+
       document.localizations = document.localizations.map((d) => {
-        // Find the counterpart version (same documentId + locale, opposite publishedAt) from
-        // the already-fetched versions array, avoiding an extra DB query.
-        const counterpart = versions.find(
-          (v) =>
-            v.documentId === d.documentId &&
-            v.locale === d.locale &&
-            (d.publishedAt === null) !== (v.publishedAt === null)
-        );
+        // The counterpart is the same documentId + locale with the opposite published state.
+        const counterpartState = d.publishedAt === null ? 'published' : 'draft';
+        const counterpart = versionByKey.get(`${d.documentId}:${d.locale}:${counterpartState}`);
         return {
           ...d,
           status: this.getStatus(d, counterpart ? [counterpart] : []),
