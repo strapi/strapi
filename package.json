@@ -135,7 +135,6 @@
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
     "@swc-node/register": "1.11.1",
-    "@swc/cli": "0.7.10",
     "@swc/core": "1.13.5",
     "@swc/helpers": "0.5.17",
     "@swc/jest": "0.2.39",
