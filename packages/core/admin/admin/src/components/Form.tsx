@@ -15,6 +15,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
+import { useRegisterUnsavedChanges } from '../hooks/useRegisterUnsavedChanges';
 import { useWarnIfUnsavedChanges } from '../hooks/useWarnIfUnsavedChanges';
 import { getIn, setIn } from '../utils/objects';
 
@@ -854,17 +855,21 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
+  const registrationId = React.useId();
+  const hasUnsavedEdits = modified && !isSubmitting;
+
+  useRegisterUnsavedChanges(registrationId, hasUnsavedEdits);
 
   // this is trigering a native browser prompt on page unload
   // We aren't able to use our Dialog component in that scenario
   // so we fallback to the native browser one when the user is trying to close/refresh the tab/browser
   // This hook will be triggered on dev mode because of the live reloads but it's fine as it's only for that scenario
-  useWarnIfUnsavedChanges(modified && !isSubmitting);
+  useWarnIfUnsavedChanges(hasUnsavedEdits);
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     return (
       !isSubmitting &&
-      modified &&
+      hasUnsavedEdits &&
       (currentLocation.pathname !== nextLocation.pathname ||
         currentLocation.search !== nextLocation.search)
     );
