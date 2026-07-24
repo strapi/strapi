@@ -607,22 +607,33 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            if (isEmpty(cleanRelationData.set)) {
+            // At create there is nothing to delta against, so a connect is equivalent to a
+            // set — honour `set || connect` like regular joinTable relations do. Without this,
+            // create-with-connect (`{ connect: [file] }`) on media silently attaches nothing.
+            // `disconnect` at create is meaningless and is ignored (same as relations).
+            const attachData = !isEmpty(cleanRelationData.set)
+              ? cleanRelationData.set
+              : cleanRelationData.connect;
+
+            if (isEmpty(attachData)) {
               continue;
             }
 
-            const rows =
-              cleanRelationData.set?.map((data, idx) => {
-                return {
-                  [joinColumn.name]: data.id,
-                  [idColumn.name]: id,
-                  [typeColumn.name]: uid,
-                  ...(('on' in joinTable && joinTable.on) || {}),
-                  ...(data.__pivot || {}),
-                  order: idx + 1,
-                  field: attributeName,
-                };
-              }) ?? [];
+            // Single media (morphOne) is last-wins and holds at most one file.
+            const dataset =
+              attribute.relation === 'morphOne' ? (attachData ?? []).slice(-1) : (attachData ?? []);
+
+            const rows = dataset.map((data, idx) => {
+              return {
+                [joinColumn.name]: data.id,
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...(('on' in joinTable && joinTable.on) || {}),
+                ...(data.__pivot || {}),
+                order: idx + 1,
+                field: attributeName,
+              };
+            });
 
             await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
@@ -869,40 +880,73 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const hasSet = !isEmpty(cleanRelationData.set);
+            const isSingle = attribute.relation === 'morphOne';
             const hasConnect = !isEmpty(cleanRelationData.connect);
-            const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
+            const hasSet = !isEmpty(cleanRelationData.set);
 
-            // for connect/disconnect without a set, only modify those relations
-            if (!hasSet && (hasConnect || hasDisconnect)) {
-              // delete disconnects and connects (to prevent duplicates when we add them later)
-              const idsToDelete = [
-                ...(cleanRelationData.disconnect || []),
-                ...(cleanRelationData.connect || []),
-              ];
+            // A partial update is a connect/disconnect delta payload (no `set` key),
+            // which must modify only the listed relations — as opposed to a `set`/
+            // scalar/array/null payload, which replaces the whole field. Gate on the
+            // payload *shape* (like regular joinTable relations at `!has('set', …)`),
+            // not on content, so that an empty delta (`{ connect: [] }` /
+            // `{ disconnect: [] }`) is a no-op instead of wiping the field.
+            const isPartialUpdate = !has('set', cleanRelationData);
 
-              if (!isEmpty(idsToDelete)) {
-                const where = {
-                  $or: idsToDelete.map((item: any) => {
-                    return {
-                      [idColumn.name]: id,
-                      [typeColumn.name]: uid,
-                      [joinColumn.name]: item.id,
-                      ...(joinTable.on || {}),
-                      field: attributeName,
-                    };
-                  }),
-                };
-
+            if (isPartialUpdate) {
+              // For single media (morphOne) a connect is last-wins and the field holds
+              // at most one file, so a connect replaces whatever is attached: delete ALL
+              // existing rows for this field first (not just the connected ids). Upload
+              // files have no draft & publish, so we enforce exactly one physical row —
+              // do not copy the xToOne-relation looseness that tolerates two rows.
+              // For multiple media (morphMany) only the listed connect/disconnect ids are
+              // deleted (dedup before re-insert / removal).
+              if (isSingle && hasConnect) {
                 await this.createQueryBuilder(joinTable.name)
                   .delete()
-                  .where(where)
+                  .where({
+                    [idColumn.name]: id,
+                    [typeColumn.name]: uid,
+                    ...(joinTable.on || {}),
+                    field: attributeName,
+                  })
                   .transacting(trx)
                   .execute();
+              } else {
+                // delete disconnects and connects (to prevent duplicates when we add them later)
+                const idsToDelete = [
+                  ...(cleanRelationData.disconnect || []),
+                  ...(cleanRelationData.connect || []),
+                ];
+
+                if (!isEmpty(idsToDelete)) {
+                  const where = {
+                    $or: idsToDelete.map((item: any) => {
+                      return {
+                        [idColumn.name]: id,
+                        [typeColumn.name]: uid,
+                        [joinColumn.name]: item.id,
+                        ...(joinTable.on || {}),
+                        field: attributeName,
+                      };
+                    }),
+                  };
+
+                  await this.createQueryBuilder(joinTable.name)
+                    .delete()
+                    .where(where)
+                    .transacting(trx)
+                    .execute();
+                }
               }
 
               // connect relations
               if (hasConnect) {
+                // Single media is last-wins: keep only the final connected file so the
+                // field ends with exactly one row. Multiple media appends all connects.
+                const connects = isSingle
+                  ? (cleanRelationData.connect ?? []).slice(-1)
+                  : (cleanRelationData.connect ?? []);
+
                 // Query database to find the order of the last relation
                 const start = await this.createQueryBuilder(joinTable.name)
                   .where({
@@ -918,7 +962,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
                 const startOrder = (start as any)?.max || 0;
 
-                const rows = (cleanRelationData.connect ?? []).map((data, idx) => ({
+                const rows = connects.map((data, idx) => ({
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
@@ -947,7 +991,16 @@ export const createEntityManager = (db: Database): EntityManager => {
               .execute();
 
             if (hasSet) {
-              const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
+              // Single media (morphOne) is last-wins for multi-item set/array shapes too,
+              // mirroring create and `normalizeXToOneRelationValue` for xToOne relations.
+              // Without the slice, `{ set: [B, C] }` would insert both rows and — because
+              // morphOne populate reads `order asc` + first — leave B observable with a
+              // hidden C row, the same phantom-row defect the connect path guards against.
+              const setData = isSingle
+                ? (cleanRelationData.set ?? []).slice(-1)
+                : (cleanRelationData.set ?? []);
+
+              const rows = setData.map((data, idx) => ({
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
