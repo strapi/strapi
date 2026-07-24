@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect, type ChangeEvent } from 'react';
+import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -33,12 +33,15 @@ import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneCont
 import { EmptyState } from './components/EmptyState';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
+import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
 import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelection';
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { getListQueryKey } from './utils/listQueryKey';
+import { mergeMixedList } from './utils/mergeMixedList';
 
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
@@ -51,11 +54,22 @@ const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 interface AssetsViewProps {
   view: number;
   folderId: number | null;
+  assetsSort: string;
+  foldersSort: string;
+  foldersPosition: FoldersPosition;
   onAssetItemClick: (assetId: number) => void;
   onAddAssets: () => void;
 }
 
-const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsViewProps) => {
+const AssetsView = ({
+  view,
+  folderId,
+  assetsSort,
+  foldersSort,
+  foldersPosition,
+  onAssetItemClick,
+  onAddAssets,
+}: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const {
     assets,
@@ -64,13 +78,25 @@ const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsVie
     hasNextPage,
     fetchNextPage,
     error,
-  } = useInfiniteAssets({ folder: folderId });
+  } = useInfiniteAssets({ folder: folderId, sort: assetsSort });
   const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
     parentId: folderId,
+    sort: foldersSort,
   });
 
   const isGridView = view === viewOptions.GRID;
   const isLoading = isLoadingAssets || isLoadingFolders;
+
+  // "Folders: Mixed with files" — interleave the complete folder list into the
+  // loaded asset stream client-side, following the active sort. Table view
+  // only: the grid always keeps folders in their own band on top.
+  const mixedItems = useMemo(
+    () =>
+      foldersPosition === 'mixed' && !isGridView
+        ? mergeMixedList({ folders, assets, sort: assetsSort, hasNextPage })
+        : null,
+    [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
+  );
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
     useCallback(
@@ -113,7 +139,12 @@ const AssetsView = ({ view, folderId, onAssetItemClick, onAddAssets }: AssetsVie
       {isGridView ? (
         <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
       ) : (
-        <AssetsTable assets={assets} folders={folders} onAssetItemClick={onAssetItemClick} />
+        <AssetsTable
+          assets={assets}
+          folders={folders}
+          mixedItems={mixedItems}
+          onAssetItemClick={onAssetItemClick}
+        />
       )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
@@ -158,31 +189,44 @@ const ClearSelectionOnChange = ({ listQueryKey }: ClearSelectionOnChangeProps) =
  * AssetsPage
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Mirrors the design-system Toggle look (grey track, white active segment
+ * card) — reproduced locally because the DS component is a labels-only
+ * boolean input (no icons) and paints its left segment in danger red. Here
+ * both segments use the primary blue when active.
+ */
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
+  padding: ${({ theme }) => theme.spaces[1]};
+  background: ${({ theme }) => theme.colors.neutral100};
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: ${({ theme }) => theme.borderRadius};
-  overflow: hidden;
 `;
 
 const StyledToggleItem = styled(ToggleGroup.Item)`
   display: flex;
+  flex: 1 1 50%;
   align-items: center;
+  justify-content: center;
   gap: ${({ theme }) => theme.spaces[2]};
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  border: none;
-  background: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
+  padding: 0.6rem ${({ theme }) => theme.spaces[3]};
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.neutral600};
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSizes[1]};
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
+  white-space: nowrap;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.neutral700};
   }
 
   &[data-state='on'] {
-    background: ${({ theme }) => theme.colors.neutral150};
+    background: ${({ theme }) => theme.colors.neutral0};
+    border-color: ${({ theme }) => theme.colors.neutral200};
+    color: ${({ theme }) => theme.colors.primary600};
   }
 
   svg {
@@ -295,11 +339,14 @@ export const AssetsPage = () => {
     }
   };
 
+  const listSort = useListSort();
+
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
     view,
     search: '', // TODO: wire when building header search
-    sort: null, // TODO: wire when building header sort
+    // Folder position changes the render order too — selection must reset.
+    sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
     filter: null, // TODO: wire when building header filters
   });
 
@@ -366,8 +413,8 @@ export const AssetsPage = () => {
                           TODO: Filters and search
                         </Flex>
 
-                        <Flex gap={4} alignItems="center">
-                          <Box>TODO: Sort</Box>
+                        <Flex gap={4} alignItems="stretch">
+                          <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
                           <StyledToggleGroup
                             type="single"
                             value={isGridView ? 'grid' : 'table'}
@@ -419,6 +466,9 @@ export const AssetsPage = () => {
                     <AssetsView
                       view={view}
                       folderId={currentFolderId}
+                      assetsSort={listSort.assetsSort}
+                      foldersSort={listSort.foldersSort}
+                      foldersPosition={listSort.foldersPosition}
                       onAssetItemClick={openDetails}
                       onAddAssets={handleFileSelect}
                     />

@@ -232,6 +232,32 @@ export class AssetsPage {
     await this.gridViewButton.click();
   }
 
+  /**
+   * The toolbar "Sort: <active>" dropdown.
+   */
+  getSortMenuTrigger() {
+    return this.page.getByRole('button', { name: /^sort:/i });
+  }
+
+  /**
+   * Open the sort dropdown, pick one option, close the menu (it stays open on
+   * select so several facets can be tuned — Escape dismisses it).
+   */
+  async pickSortOption(optionName: string) {
+    await this.getSortMenuTrigger().click();
+    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Names of the rendered table rows (folders and assets), header excluded.
+   */
+  async getTableRowNames() {
+    const rows = this.page.getByRole('grid').getByRole('row');
+    const texts = await rows.allInnerTexts();
+    return texts.slice(1).map((text) => text.split('\n').find(Boolean) ?? '');
+  }
+
   async switchToTableView() {
     await this.tableViewButton.click();
   }

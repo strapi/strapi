@@ -344,41 +344,52 @@ describe('AssetsGrid', () => {
   });
 
   describe('Selection', () => {
-    it('selects a card on plain click and replaces the selection on the next click', async () => {
+    it('opens the asset details on plain card click (no selection)', async () => {
       const { user } = setup();
-      // Filename clicks open the drawer; card-body clicks select.
       const cards = screen.getAllByRole('listitem');
 
       await user.click(cards[0]);
-      expect(screen.getByText('1 item selected')).toBeInTheDocument();
 
-      await user.click(cards[1]);
-      // Plain click replaces — still a single selection.
-      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
     it('adds to the selection with Cmd/Ctrl+click', async () => {
       const { user } = setup();
       const cards = screen.getAllByRole('listitem');
 
-      await user.click(cards[0]);
       await user.keyboard('{Meta>}');
+      await user.click(cards[0]);
       await user.click(cards[1]);
       await user.keyboard('{/Meta}');
 
       expect(screen.getByText('2 items selected')).toBeInTheDocument();
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
     });
 
-    it('selects a contiguous range with Shift+click', async () => {
+    it('selects a contiguous range with Shift+click from a checkbox anchor', async () => {
       const { user } = setup();
       const cards = screen.getAllByRole('listitem');
 
-      await user.click(cards[0]);
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
       await user.keyboard('{Shift>}');
       await user.click(cards[2]);
       await user.keyboard('{/Shift}');
 
       expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    });
+
+    it('toggles folder selection via the folder card checkbox', async () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      const { user } = setup({ folders, assets: mockAssets });
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
     it('opens details (and does not select) when the filename is clicked', async () => {
