@@ -10,6 +10,14 @@ export { buildDataSchema, buildComponentInputSchema, attributeToInputSchema } fr
 export { buildSortSchema, getScalarAttributeKeys, SCALAR_ATTRIBUTE_TYPES } from './sort-schema';
 export { buildFiltersSchema, FILTER_OPERATORS, attributeTypeToFilterValue } from './filters-schema';
 export {
+  buildFieldsSchema,
+  buildPopulateSchema,
+  buildMaxDepthSchema,
+  getPopulatableAttributeKeys,
+  buildInlinePathMatcher,
+  POPULATABLE_ATTRIBUTE_TYPES,
+} from './query-schema';
+export {
   buildDocumentOutputSchema,
   buildListOutputSchema,
   buildDeleteOutputSchema,

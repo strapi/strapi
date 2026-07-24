@@ -8,7 +8,14 @@ import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
-import { ok, sanitizeFormatShape } from '../utils';
+import { buildInlinePathMatcher } from '../schemas/query-schema';
+import {
+  ok,
+  sanitizeFormatShape,
+  buildInlineOptions,
+  enforceResponseBudget,
+  getMaxResponseBytes,
+} from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -27,7 +34,12 @@ type McpFindManyParams = Parameters<Modules.Documents.ServiceInstance['findMany'
 // ---------------------------------------------------------------------------
 
 type SingleLocaleArgs = { locale?: string };
-type SingleGetArgs = SingleLocaleArgs & { status?: 'draft' | 'published' };
+type SingleGetArgs = SingleLocaleArgs & {
+  status?: 'draft' | 'published';
+  fields?: unknown;
+  populate?: unknown;
+  maxDepth?: number;
+};
 type SingleUnpublishArgs = SingleLocaleArgs & { discardDraft?: boolean };
 type SingleWriteArgs = { data: Record<string, unknown>; locale?: string };
 
@@ -140,7 +152,7 @@ export const createSingleGetHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({ args }: { args: SingleGetArgs }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
-    const { locale, status } = args;
+    const { locale, status, fields, populate: populateArg, maxDepth } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
@@ -153,17 +165,32 @@ export const createSingleGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read({ locale, status });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read({
+      locale,
+      status,
+      ...(fields !== undefined && { fields }),
+      ...(populateArg !== undefined && { populate: populateArg }),
+    });
     const { locale: resolvedLocale, status: resolvedStatus } = await getDocumentLocaleAndStatus(
       { locale, status },
       uid
     );
 
-    const populate = await getService('populate-builder')(typedUid)
-      .populateFromQuery(permissionQuery)
-      .populateDeep(Infinity)
+    // Explicit populate → honor exactly. Otherwise keep legacy infinite-depth auto-populate
+    // (overridable via `maxDepth`). Inlining is opt-in, off the sanitized populate.
+    const populateBuilder =
+      getService('populate-builder')(typedUid).populateFromQuery(permissionQuery);
+    if (populateArg === undefined) {
+      populateBuilder.populateDeep(maxDepth ?? Infinity);
+    }
+    const populate = await populateBuilder
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
+
+    const inlineMatcher = buildInlinePathMatcher(
+      (permissionQuery as { populate?: unknown }).populate ?? populateArg
+    );
+    const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const versionFindQuery: McpDocumentQuery = {
       ...permissionQuery,
@@ -204,9 +231,21 @@ export const createSingleGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const result = await sanitizeFormatShape(permissionChecker, typedUid, version);
+    const result = await sanitizeFormatShape(
+      permissionChecker,
+      typedUid,
+      version,
+      undefined,
+      inlineOptions
+    );
 
-    return ok(result as Record<string, unknown>);
+    const structuredContent = enforceResponseBudget(
+      result,
+      getMaxResponseBytes(strapi),
+      (notice) => ({ data: null, meta: result.meta, truncated: true, notice })
+    );
+
+    return ok(structuredContent);
   };
 
 /**
