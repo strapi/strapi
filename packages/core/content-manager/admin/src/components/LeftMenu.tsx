@@ -160,10 +160,9 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         <SubNav.Sections>
           {menu.map((section) => {
             return (
-              <SubNav.Section
+              <SubNav.SubSection
                 key={section.id}
-                label={section.title}
-                badgeLabel={section.links.length.toString()}
+                label={`${section.title} • ${section.links.length}`}
               >
                 {section.links.map((link) => {
                   return (
@@ -177,7 +176,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                     />
                   );
                 })}
-              </SubNav.Section>
+              </SubNav.SubSection>
             );
           })}
         </SubNav.Sections>
