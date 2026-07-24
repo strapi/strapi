@@ -43,20 +43,22 @@ const SORT_DIRECTION_BY_RULE = Object.fromEntries(
 interface ParsedSort {
   sortBy: SortByKey | null;
   direction: SortDirectionKey | null;
+  /** False when the state is the fallback default (no recognized rule in the URL). */
+  isExplicit: boolean;
 }
 
 /** Parses `?sort=` — the first recognized rule wins, unknown rules are dropped. */
 const parseSortParam = (raw: string | undefined): ParsedSort => {
   for (const rule of (raw ?? '').split(',')) {
     if (rule in SORT_BY_BY_RULE) {
-      return { sortBy: SORT_BY_BY_RULE[rule], direction: null };
+      return { sortBy: SORT_BY_BY_RULE[rule], direction: null, isExplicit: true };
     }
     if (rule in SORT_DIRECTION_BY_RULE) {
-      return { sortBy: null, direction: SORT_DIRECTION_BY_RULE[rule] };
+      return { sortBy: null, direction: SORT_DIRECTION_BY_RULE[rule], isExplicit: true };
     }
   }
 
-  return { sortBy: DEFAULT_SORT_BY, direction: null };
+  return { sortBy: DEFAULT_SORT_BY, direction: null, isExplicit: false };
 };
 
 const serializeSort = (sortBy: SortByKey | null, direction: SortDirectionKey | null): string => {
@@ -72,12 +74,16 @@ export interface ListSort {
   sortBy: SortByKey | null;
   direction: SortDirectionKey | null;
   foldersPosition: FoldersPosition;
-  /** Combined rules for the files query, e.g. `updatedAt:DESC,name:ASC`. */
+  /**
+   * The active rule for the files query, e.g. `updatedAt:DESC` — always a
+   * single rule since the sort groups are mutually exclusive.
+   */
   assetsSort: string;
   /**
-   * Rules applicable to the folders query — folders have no `size` column, so
-   * size rules are dropped; with nothing left, folders keep their default
-   * alphabetical order (matches the sidebar tree).
+   * Rule applicable to the folders query. In the default state (no sort in the
+   * URL) folders keep their alphabetical order so the band matches the sidebar
+   * tree; an explicit user sort applies, except size rules (folders have no
+   * `size` column), which fall back to alphabetical.
    */
   foldersSort: string;
   setSortBy: (key: SortByKey | null) => void;
@@ -88,7 +94,7 @@ export interface ListSort {
 export const useListSort = (): ListSort => {
   const [{ query }, setQuery] = useQueryParams<{ sort?: string; folders?: string }>();
 
-  const { sortBy, direction } = parseSortParam(query?.sort);
+  const { sortBy, direction, isExplicit } = parseSortParam(query?.sort);
   const foldersPosition: FoldersPosition = query?.folders === 'mixed' ? 'mixed' : 'top';
 
   const writeSort = (nextSortBy: SortByKey | null, nextDirection: SortDirectionKey | null) => {
@@ -124,7 +130,9 @@ export const useListSort = (): ListSort => {
     direction && !direction.startsWith('size') ? SORT_DIRECTION_RULES[direction] : null,
   ];
   const folderRules = folderRuleCandidates.filter((rule): rule is string => Boolean(rule));
-  const foldersSort = folderRules.length > 0 ? folderRules.join(',') : 'name:ASC';
+  // Default state keeps folders alphabetical (matches the sidebar tree) — only
+  // an explicit user sort reorders the folders band.
+  const foldersSort = isExplicit && folderRules.length > 0 ? folderRules.join(',') : 'name:ASC';
 
   return {
     sortBy,

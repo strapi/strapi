@@ -23,7 +23,14 @@ describe('useListSort', () => {
     expect(result.current.direction).toBeNull();
     expect(result.current.foldersPosition).toBe('top');
     expect(result.current.assetsSort).toBe('updatedAt:DESC');
-    // Folders default to the sidebar-tree alphabetical order via the date rule.
+    // Default state: folders stay alphabetical so the band matches the sidebar tree.
+    expect(result.current.foldersSort).toBe('name:ASC');
+  });
+
+  it('applies an explicit sort to the folders query', () => {
+    mockQuery = { sort: 'updatedAt:DESC' };
+    const { result } = renderHook(() => useListSort());
+
     expect(result.current.foldersSort).toBe('updatedAt:DESC');
   });
 

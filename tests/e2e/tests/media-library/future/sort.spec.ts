@@ -28,18 +28,18 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('Media Librar
     // Default state advertised on the trigger.
     await expect(assetsPage.getSortMenuTrigger()).toHaveText(/Most recent updates/);
 
-    // Alphabetical — picking a direction replaces the date sort (mutually exclusive).
+    // Alphabetical — picking a direction replaces the date sort (mutually
+    // exclusive). Poll: the re-sorted response can land a tick after the click.
     await assetsPage.pickSortOption('A to Z');
-
-    await expect(assetsPage.getAssetRow('test-image-1.jpg')).toBeVisible();
-    let names = await assetsPage.getTableRowNames();
-    expect(names.indexOf('test-image-1.jpg')).toBeLessThan(names.indexOf('test-image-2.jpg'));
+    await expect
+      .poll(() => assetsPage.getTableRowNames())
+      .toEqual(['test-image-1.jpg', 'test-image-2.jpg']);
 
     // Flip to Z to A — order inverts.
     await assetsPage.pickSortOption('Z to A');
-    await expect(assetsPage.getAssetRow('test-image-1.jpg')).toBeVisible();
-    names = await assetsPage.getTableRowNames();
-    expect(names.indexOf('test-image-2.jpg')).toBeLessThan(names.indexOf('test-image-1.jpg'));
+    await expect
+      .poll(() => assetsPage.getTableRowNames())
+      .toEqual(['test-image-2.jpg', 'test-image-1.jpg']);
   });
 
   test('mixes folders with files according to the sort rule', async ({ page }) => {
@@ -56,14 +56,15 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('Media Librar
     await assetsPage.pickSortOption('A to Z');
 
     // Folders on top (default): folder first regardless of name.
-    let names = await assetsPage.getTableRowNames();
-    expect(names[0]).toBe('test-image-15');
+    await expect
+      .poll(() => assetsPage.getTableRowNames().then((names) => names[0]))
+      .toBe('test-image-15');
 
     // Mixed: the folder slots between the two files alphabetically.
     await assetsPage.pickSortOption('Mixed with files');
-    await expect(assetsPage.getAssetRow('test-image-1.jpg')).toBeVisible();
-    names = await assetsPage.getTableRowNames();
-    expect(names).toEqual(['test-image-1.jpg', 'test-image-15', 'test-image-2.jpg']);
+    await expect
+      .poll(() => assetsPage.getTableRowNames())
+      .toEqual(['test-image-1.jpg', 'test-image-15', 'test-image-2.jpg']);
   });
 
   test('restores the sort from the URL after a reload', async ({ page }) => {

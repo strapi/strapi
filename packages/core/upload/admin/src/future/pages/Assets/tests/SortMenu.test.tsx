@@ -27,14 +27,16 @@ describe('SortMenu', () => {
     expect(screen.getByText('Sort direction')).toBeInTheDocument();
     expect(screen.getByText('Folders')).toBeInTheDocument();
 
+    // The active option of each group carries a visually-hidden "(active)"
+    // suffix for screen readers, hence the non-exact matching.
     for (const label of [
       'Oldest uploads',
-      'Most recent updates',
+      'Most recent updates (active)',
       'A to Z',
       'Z to A',
       'File size increasingly',
       'File size decreasingly',
-      'On top',
+      'On top (active)',
       'Mixed with files',
     ]) {
       expect(screen.getByRole('menuitem', { name: label })).toBeInTheDocument();
@@ -66,7 +68,7 @@ describe('SortMenu', () => {
     const { user } = render(<SortMenu sort={sort} />);
 
     await user.click(screen.getByRole('button', { name: /sort:/i }));
-    await user.click(screen.getByRole('menuitem', { name: 'Most recent updates' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Most recent updates (active)' }));
 
     expect(sort.setSortBy).toHaveBeenCalledWith(null);
   });

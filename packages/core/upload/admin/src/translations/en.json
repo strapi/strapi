@@ -172,6 +172,7 @@
   "list.sort.folders": "Folders",
   "list.sort.folders-on-top": "On top",
   "list.sort.folders-mixed": "Mixed with files",
+  "list.sort.active": "(active)",
 
   "list.assets.loading-more": "Loading more assets...",
   "list.assets.loading-asset": "Loading the preview for the media: {path}",

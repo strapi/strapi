@@ -13,7 +13,6 @@ import {
   createEmptySelection,
   getIdsOfKind,
   selectAll as selectAllState,
-  selectOnly as selectOnlyState,
   selectRange as selectRangeState,
   toggleSelection,
   type ItemKey,
@@ -42,8 +41,6 @@ export interface AssetSelection {
   isSelected: (key: ItemKey) => boolean;
   /** Additive toggle (Cmd/Ctrl+click, item checkbox). */
   toggle: (key: ItemKey) => void;
-  /** Plain click — replaces the selection with a single item. */
-  selectOnly: (key: ItemKey) => void;
   /** Shift+click — selects the contiguous range from the anchor to the target. */
   selectRange: (orderedKeys: ItemKey[], targetKey: ItemKey) => void;
   /** Header checkbox — selects every rendered item (folders and assets). */
@@ -67,11 +64,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
   );
 
   const toggle = useCallback((key: ItemKey) => setState((prev) => toggleSelection(prev, key)), []);
-
-  const selectOnly = useCallback(
-    (key: ItemKey) => setState((prev) => selectOnlyState(prev, key)),
-    []
-  );
 
   const selectRange = useCallback(
     (orderedKeys: ItemKey[], targetKey: ItemKey) =>
@@ -103,7 +95,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       anchorKey: state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,
@@ -115,7 +106,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,

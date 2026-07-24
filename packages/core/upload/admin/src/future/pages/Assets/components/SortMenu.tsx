@@ -1,4 +1,4 @@
-import { Menu } from '@strapi/design-system';
+import { Menu, VisuallyHidden } from '@strapi/design-system';
 import { Check, ChevronDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -51,8 +51,8 @@ const SortTrigger = styled(Menu.Trigger)`
   height: auto;
 `;
 
-// Full-width section band, like the design mock. The negative inline margin
-// cancels the Menu.Content padding so the background runs edge to edge.
+// Full-width section band, like the design mock (sits inside the Menu.Content
+// padding, so the band stops short of the panel edges).
 const GroupLabel = styled(Menu.Label)`
   width: 100%;
   display: block;
@@ -91,6 +91,16 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
 
   const checkmark = <Check aria-hidden width="1.6rem" height="1.6rem" fill="primary600" />;
 
+  // The checkmark icon is aria-hidden, so the active option carries a
+  // visually-hidden suffix for screen readers instead (menuitem does not
+  // allow aria-checked).
+  const activeMark = (
+    <VisuallyHidden>
+      {' '}
+      {formatMessage({ id: getTranslationKey('list.sort.active'), defaultMessage: '(active)' })}
+    </VisuallyHidden>
+  );
+
   return (
     <Menu.Root>
       <SortTrigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
@@ -113,6 +123,7 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             endIcon={sort.sortBy === key ? checkmark : null}
           >
             {formatMessage(SORT_BY_LABELS[key])}
+            {sort.sortBy === key && activeMark}
           </Menu.Item>
         ))}
 
@@ -133,6 +144,7 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             endIcon={sort.direction === key ? checkmark : null}
           >
             {formatMessage(SORT_DIRECTION_LABELS[key])}
+            {sort.direction === key && activeMark}
           </Menu.Item>
         ))}
 
@@ -155,6 +167,7 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
                 endIcon={sort.foldersPosition === position ? checkmark : null}
               >
                 {formatMessage(FOLDERS_LABELS[position])}
+                {sort.foldersPosition === position && activeMark}
               </Menu.Item>
             ))}
           </>
