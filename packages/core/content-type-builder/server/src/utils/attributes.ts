@@ -48,6 +48,7 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
       target: attribute.target,
       targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
       configurable: configurable === false ? false : undefined,
+      required: !!required,
       private: !!attribute.private,
       pluginOptions,
       // TODO: remove

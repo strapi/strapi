@@ -44,6 +44,7 @@ export type Relation = Base & {
   target: string;
   targetAttribute?: string | null;
   configurable?: boolean;
+  required?: boolean;
   private?: boolean;
   pluginOptions?: Record<string, unknown>;
 };

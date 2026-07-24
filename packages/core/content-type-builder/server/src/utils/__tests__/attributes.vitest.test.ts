@@ -60,6 +60,22 @@ describe('attributes utils', () => {
         targetAttribute: 'author',
         configurable: false,
         private: false,
+        required: false,
+      });
+    });
+
+    it('preserves required on relation attributes', () => {
+      expect(
+        formatAttribute({
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::author.author',
+          required: true,
+        })
+      ).toMatchObject({
+        type: 'relation',
+        target: 'api::author.author',
+        required: true,
       });
     });
 

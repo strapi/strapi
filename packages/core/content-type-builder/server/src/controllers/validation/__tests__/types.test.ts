@@ -440,4 +440,24 @@ describe('Type validators', () => {
       }
     );
   });
+
+  describe('relation type', () => {
+    test('Accepts required: true on a relation attribute', () => {
+      const attributes = {
+        author: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::author.author',
+          required: true,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.author, {
+        types: ['relation'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.author)).toBe(true);
+    });
+  });
 });
