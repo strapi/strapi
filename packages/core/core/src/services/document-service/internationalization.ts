@@ -16,6 +16,14 @@ const getDefaultLocale = async (): Promise<string> => {
   return strapi.plugin('i18n').service('locales').getDefaultLocale();
 };
 
+const assertLocaleExists = async (locale: string) => {
+  const foundLocale = await strapi.plugin('i18n').service('locales').findByCode(locale);
+
+  if (!foundLocale) {
+    throw new errors.ValidationError(`Locale ${locale} not found`);
+  }
+};
+
 const defaultLocale: AsyncTransform = async (contentType, params) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
     return params;
@@ -73,7 +81,7 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
 /**
  * Translate locale status parameter into the data that will be saved
  */
-const localeToData: Transform = (contentType, params) => {
+const localeToData: AsyncTransform = async (contentType, params) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
     return params;
   }
@@ -81,6 +89,7 @@ const localeToData: Transform = (contentType, params) => {
   if (params.locale) {
     const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
     if (isValidLocale) {
+      await assertLocaleExists(params.locale);
       return assoc(['data', 'locale'], params.locale, params);
     }
 
