@@ -21,10 +21,12 @@ const ENCODABLE_TYPES = [
   /**
    * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
    * - json: object
-   * - blocks: object, will require a custom implementation in a dedicated PR
    * - integer, float and decimal: number
    * - boolean: boolean (believe it or not)
    * - uid: can be stringified but would mess up URLs
+   *
+   * The blocks type is an array of nodes — handled in a dedicated branch below
+   * because it requires walking the tree to encode each text leaf.
    */
 ];
 
@@ -54,7 +56,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
     encodeField(
       text: string,
-      { kind, model, documentId, type, path, locale }: FieldContentSourceMap
+      { kind, model, documentId, type, path, locale, fieldPath }: FieldContentSourceMap
     ) {
       /**
        * Combine all metadata into into a one string so we only have to deal with one data-atribute
@@ -75,6 +77,9 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       if (locale) {
         strapiSource.set('locale', locale);
       }
+      if (fieldPath) {
+        strapiSource.set('fieldPath', fieldPath);
+      }
 
       const encoded = vercelStegaCombine(
         text,
@@ -87,6 +92,44 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       return encoded;
     },
 
+    encodeBlocks(
+      blocks: unknown,
+      metadata: Omit<FieldContentSourceMap, 'path' | 'type'> & { fieldPath: string }
+    ): unknown {
+      const visit = (node: unknown, currentPath: string): unknown => {
+        if (Array.isArray(node)) {
+          return node.map((child, index) => visit(child, `${currentPath}.${index}`));
+        }
+
+        if (!isObject(node)) {
+          return node;
+        }
+
+        return Object.entries(node).reduce<Record<string, unknown>>((acc, [key, value]) => {
+          if (key === 'text' && typeof value === 'string') {
+            acc[key] = this.encodeField(value, {
+              ...metadata,
+              path: `${currentPath}.text`,
+              type: 'blocks',
+            });
+            return acc;
+          }
+
+          if (key === 'children' && Array.isArray(value)) {
+            acc[key] = value.map((child, index) =>
+              visit(child, `${currentPath}.children.${index}`)
+            );
+            return acc;
+          }
+
+          acc[key] = value;
+          return acc;
+        }, {});
+      };
+
+      return visit(blocks, metadata.fieldPath);
+    },
+
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
       if (!isObject(data) || data === undefined) {
         return data;
@@ -95,6 +138,21 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       return traverseEntity(
         ({ key, value, attribute, schema, path, parent }, { set }) => {
           if (!attribute || EXCLUDED_FIELDS.includes(key)) {
+            return;
+          }
+
+          if (attribute.type === 'blocks' && Array.isArray(value)) {
+            const fieldPath = path.rawWithIndices!;
+            set(
+              key,
+              this.encodeBlocks(value, {
+                fieldPath,
+                kind: schema.kind,
+                model: schema.uid as UID.Schema,
+                locale: data.locale,
+                documentId: data.documentId,
+              }) as any
+            );
             return;
           }
 

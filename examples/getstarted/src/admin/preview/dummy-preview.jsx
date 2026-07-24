@@ -63,8 +63,19 @@ const isAudioMedia = (value) => {
   );
 };
 
+const isBlocksValue = (value) =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every(
+    (node) =>
+      node !== null &&
+      typeof node === 'object' &&
+      typeof node.type === 'string' &&
+      Array.isArray(node.children)
+  );
+
 const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
-  if (fieldName === 'blocks') {
+  if (fieldName === 'blocks' || isBlocksValue(value)) {
     return (
       <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
         {value ? <BlocksRenderer content={value} /> : 'null'}
