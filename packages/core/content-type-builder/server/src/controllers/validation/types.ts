@@ -11,6 +11,7 @@ import {
   isValidDefaultJSON,
   isValidName,
   isValidEnum,
+  isValidGraphQLEnumValue,
   isValidRegExpPattern,
   UID_REGEX,
 } from './common';
@@ -156,7 +157,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
       return {
         enum: yup
           .array()
-          .of(yup.string().test(isValidEnum).required())
+          .of(yup.string().test(isValidEnum).test(isValidGraphQLEnumValue).required())
           .min(1)
           .test(areEnumValuesUnique)
           .required(),

@@ -369,6 +369,93 @@ describe('Type validators', () => {
     });
   });
 
+  describe('enumeration type', () => {
+    test.each(['true', 'false', 'null'])(
+      'does not allow GraphQL reserved enum value %s',
+      (value) => {
+        const attributes = {
+          status: {
+            type: 'enumeration',
+            enum: [value],
+          },
+        } satisfies Struct.SchemaAttributes;
+
+        const validator = getTypeValidator(attributes.status, {
+          types: ['enumeration'],
+          attributes,
+        });
+
+        expect(validator.isValidSync(attributes.status)).toBe(false);
+      }
+    );
+
+    test('returns a clear validation error for GraphQL reserved enum values', () => {
+      const attributes = {
+        status: {
+          type: 'enumeration',
+          enum: ['true'],
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.status, {
+        types: ['enumeration'],
+        attributes,
+      });
+
+      expect(() => validator.validateSync(attributes.status)).toThrow(
+        'must not be one of the GraphQL reserved values: true, false, null'
+      );
+    });
+
+    test('allows enum values that are not GraphQL reserved literals', () => {
+      const attributes = {
+        status: {
+          type: 'enumeration',
+          enum: ['draft', 'published'],
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.status, {
+        types: ['enumeration'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.status)).toBe(true);
+    });
+
+    test('allows case variants of GraphQL reserved enum values', () => {
+      const attributes = {
+        status: {
+          type: 'enumeration',
+          enum: ['True', 'FALSE', 'Null'],
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.status, {
+        types: ['enumeration'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.status)).toBe(true);
+    });
+
+    test('does not allow enum arrays containing a GraphQL reserved value', () => {
+      const attributes = {
+        status: {
+          type: 'enumeration',
+          enum: ['draft', 'true'],
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.status, {
+        types: ['enumeration'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.status)).toBe(false);
+    });
+  });
+
   describe('media type', () => {
     test('Validates allowedTypes', () => {
       // @ts-expect-error - Silence the cast as Struct.SchemaAttributes since allowedTypes expects one of 'audios',
