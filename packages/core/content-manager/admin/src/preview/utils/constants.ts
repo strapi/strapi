@@ -10,6 +10,11 @@ export const INTERNAL_EVENTS = {
   STRAPI_FIELD_CHANGE: 'strapiFieldChange',
   STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+  STRAPI_BLOCKS_EDIT_START: 'strapiBlocksEditStart',
+  STRAPI_BLOCKS_EDIT_END: 'strapiBlocksEditEnd',
+  STRAPI_SCROLL: 'strapiScroll',
+  STRAPI_CLICK_OUTSIDE_BLOCKS: 'strapiClickOutsideBlocks',
+  STRAPI_FIELD_POSITION_SYNC: 'strapiFieldPositionSync',
 } as const;
 
 /**
@@ -59,3 +64,18 @@ export const PREVIEW_ERROR_MESSAGES = {
   string,
   { message: MessageDescriptor; type: NonNullable<NotificationConfig['type']> }
 >;
+
+/**
+ * Dimensions of the floating blocks toolbar, used by both the position hook and the toolbar component.
+ */
+export const TOOLBAR_HEIGHT = 46;
+export const TOOLBAR_WIDTH = 400;
+
+/**
+ * Default highlight colors used by the preview script when no theme is available.
+ * In production the admin overrides these with the actual theme colors (primary500/primary600).
+ */
+export const PREVIEW_HIGHLIGHT_COLORS = {
+  highlightHoverColor: '#4945ff',
+  highlightActiveColor: '#271fe0',
+} as const;

@@ -34,6 +34,7 @@ import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
+import { LivePreviewBlocksSurface } from '../components/LivePreviewBlocksSurface';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
@@ -70,9 +71,24 @@ const DEVICES = [
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface PreviewFieldRect {
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
 interface PopoverField extends FieldContentSourceMap {
-  position: DOMRect;
+  position: PreviewFieldRect;
   attribute: Schema.Attribute.AnyAttribute;
+}
+
+interface BlocksEditSession {
+  fieldPath: string;
+  position: PreviewFieldRect;
+  attribute: Schema.Attribute.Blocks;
 }
 
 interface PreviewContextValue {
@@ -87,6 +103,8 @@ interface PreviewContextValue {
   iframeRef: React.RefObject<HTMLIFrameElement>;
   popoverField: PopoverField | null;
   setPopoverField: (value: PopoverField | null) => void;
+  blocksEditSession: BlocksEditSession | null;
+  setBlocksEditSession: (session: BlocksEditSession | null) => void;
 }
 
 type PreviewHighlightColors = {
@@ -139,6 +157,7 @@ const PreviewPage = () => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const [blocksEditSession, setBlocksEditSession] = React.useState<BlocksEditSession | null>(null);
   const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
@@ -163,10 +182,13 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const previewHighlightColors: PreviewHighlightColors = {
-    highlightHoverColor: theme.colors.primary500,
-    highlightActiveColor: theme.colors.primary600,
-  };
+  const previewHighlightColors = React.useMemo(
+    (): PreviewHighlightColors => ({
+      highlightHoverColor: theme.colors.primary500,
+      highlightActiveColor: theme.colors.primary600,
+    }),
+    [theme]
+  );
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
@@ -203,9 +225,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-    // Preserve the existing dependency behavior: previewHighlightColors is derived from theme.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentId, toggleNotification, theme, formatMessage]);
+  }, [documentId, toggleNotification, previewHighlightColors, formatMessage]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -320,6 +340,8 @@ const PreviewPage = () => {
         iframeRef={iframeRef}
         popoverField={popoverField}
         setPopoverField={setPopoverField}
+        blocksEditSession={blocksEditSession}
+        setBlocksEditSession={setBlocksEditSession}
       >
         <FormContext
           method="PUT"
@@ -355,6 +377,7 @@ const PreviewPage = () => {
             <Blocker />
             <PreviewHeader />
             <InputPopover documentResponse={documentResponse} />
+            <LivePreviewBlocksSurface documentResponse={documentResponse} />
             <Flex flex={1} overflow="auto" alignItems="stretch">
               {hasAdvancedPreview && (
                 <Box

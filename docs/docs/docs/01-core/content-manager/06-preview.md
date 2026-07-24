@@ -54,10 +54,11 @@ The metadata uses URL search params format, because it makes it easy to encode a
 
 Stega can only encode strings. This means:
 
-- **Blocks fields don't support visual editing** — their content is a JSON object, not a string. Supporting them would require a custom implementation.
 - **Numbers and booleans aren't encoded** — we can't modify their type in the response.
 - **Fields inside components and dynamic zones work** — we encode individual string fields within them, not the parent object. The path includes indices (e.g., `components.2.title`) to identify the exact field.
 - **Media fields work partially** — the string properties inside media objects (like `url`, `name`, `alternativeText`) get encoded when traversed.
+
+Blocks fields are JSON, not strings, so they can't be stega-encoded in the normal sense. They use a different approach described below.
 
 ### Communication protocol
 
@@ -81,6 +82,14 @@ sequenceDiagram
     Iframe->>Admin: strapiFieldSingleClickHint
     Iframe->>Admin: strapiFieldFocusIntent (double-click)
 
+    Note over Admin,Iframe: Blocks inline editing (internal events)
+    Admin->>Iframe: strapiBlocksEditStart
+    Iframe->>Admin: strapiFieldPositionSync
+    Admin->>Iframe: strapiFieldChange (live value updates)
+    Admin->>Iframe: strapiScroll (wheel forwarding)
+    Iframe->>Admin: strapiClickOutsideBlocks
+    Admin->>Iframe: strapiBlocksEditEnd
+
     Note over Admin,Iframe: Content saved (public event)
     Admin->>Iframe: strapiUpdate
 ```
@@ -96,3 +105,85 @@ Users can configure the preview behavior from their frontend via `window` global
 - `window.STRAPI_DISABLE_STEGA_DECODING` - disable field detection entirely. When true, users need to write the `data-strapi-source` attribute manually for fields to be editable
 - `window.STRAPI_HIGHLIGHT_HOVER_COLOR` - customize hover highlight color
 - `window.STRAPI_HIGHLIGHT_ACTIVE_COLOR` - customize active highlight color
+
+## Blocks inline editing
+
+Blocks fields hold a JSON AST, so they can't use the stega string encoding that other field types use. Instead they get a dedicated inline editing flow that overlays a full `BlocksEditor` directly on top of the iframe's rendered content.
+
+### Stega encoding for blocks
+
+Even though a blocks field is JSON, we still need a way for the preview script to identify which DOM elements belong to a given blocks field, so it can draw a highlight and compute the field's bounding box. The server-side content-source-maps service (`packages/core/core/src/services/content-source-maps.ts`) handles this with a dedicated encoding pass over the blocks AST.
+
+Instead of encoding every text node, it encodes **one stega marker per visual block**:
+
+- For `paragraph`, `heading`, and `quote` nodes: the first `{ type: 'text' }` leaf in the subtree.
+- For `list` nodes: the first text leaf of each `list-item` (recursively for nested lists).
+- For `image` nodes: the `url` and `alternativeText` string fields inside the image object.
+- `code` blocks are skipped entirely (encoding their content would corrupt syntax).
+
+All markers within one blocks field share the same metadata — specifically, the `fieldPath` key set to the field's path (e.g. `content`) and `type: 'blocks'`. The individual `path` key still varies per leaf, but the preview script uses `fieldPath` as the group key so all marked elements cluster into a single highlight whose bounding box spans the entire rendered field.
+
+### Highlight grouping for blocks
+
+Standard fields group highlights by their full `data-strapi-source` attribute value. For blocks, every marker shares the same `fieldPath` but different `path` values (each leaf has its own position in the AST). The `deriveGroupKey` function in the preview script detects the `fieldPath` key and strips `path` from the group key, collapsing all marked elements into one highlight.
+
+### The edit session
+
+Double-clicking a blocks field highlight starts an edit session. The flow is:
+
+1. **Admin** receives `strapiFieldFocusIntent` with the field path and the highlight's current bounding rect.
+2. **Admin** sets `blocksEditSession` in `PreviewContext` — this mounts `LivePreviewBlocksSurface`.
+3. **Admin** posts `strapiBlocksEditStart` to the iframe.
+4. **Iframe** (preview script) responds:
+   - Finds the lowest common ancestor of all stega-decoded elements for the field (normalizing inline elements like `<strong>` up to their block-level parents first, so the LCA is the container div rather than an individual block), then sets `visibility: hidden` on it. This hides the host-rendered content so the overlay doesn't double-render without depending on background color. CSS `visibility: hidden` is inherited by all descendants — including blocks added during the session — and is reversed on session end by restoring the previous `visibility` value. No major frontend framework resets inline styles on elements without an explicit style binding, so this is safe across React, Vue, Svelte, Angular, and vanilla JS.
+   - Stores the LCA ancestor on the highlight group (`group.container`). `computeGroupRect` uses it as a fallback rect so the highlight continues to cover the full field area even after the host re-renders and detaches the original stega elements — this is what makes double-clicking work reliably after edits.
+   - Disables pointer events on the highlight so it can't be accidentally double-clicked during editing.
+   - Attaches a `click` listener to the document to detect clicks outside the editor (`strapiClickOutsideBlocks`).
+   - Reads computed typography (`lineHeight`, `fontSize`, paragraph `marginBottom`) from the first matching element and sends it immediately with `strapiFieldPositionSync`.
+   - Attaches a `scroll` listener and a `ResizeObserver` on the field container, both firing `strapiFieldPositionSync` on every change so the overlay tracks the field as the iframe scrolls or reflows.
+5. **Admin** (`LivePreviewBlocksSurface`) positions the `BlocksEditor` overlay using the received rect, translated from iframe-relative to viewport-relative coordinates. CSS custom properties (`--preview-line-height`, `--preview-font-size`, `--preview-block-gap`) are set on the overlay container so the editor's paragraph elements match the iframe's computed typography. The outer clipping wrapper grows to `Math.max(iframeRect.height, position.top + position.height)` so the editor is never clipped when content extends past the visible iframe area. A `ResizeObserver` on the editor container also tracks height growth as the user types new blocks, independent of the iframe.
+6. As the user types, `BlocksEditor` fires `onChange` synchronously on every keystroke (`livePreviewSync` mode). The admin posts `strapiFieldChange` to the iframe so the host app can re-render the hidden blocks container in sync — this keeps the iframe's DOM layout up to date, which feeds back into the `strapiFieldPositionSync` position reports.
+7. Wheel events on the overlay container are forwarded to the iframe as `strapiScroll`, so the iframe scrolls naturally even though the pointer is over the admin's overlay.
+8. The session ends when: the user clicks outside the editor in the admin, presses Escape, a `strapiClickOutsideBlocks` message arrives from the iframe, or the field scrolls entirely out of the iframe viewport.
+9. On end, the admin posts `strapiBlocksEditEnd` and then one final `strapiFieldChange` with the latest value, so the host app can re-render with the edited content without a save.
+10. **Iframe** restores `visibility` on the LCA ancestor (revealing the already-updated host content), removes event listeners, and re-enables pointer events on the highlight.
+
+### Admin-side components
+
+| File                                              | Role                                                                                                                               |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `preview/components/LivePreviewBlocksSurface.tsx` | Mounts the overlay when `blocksEditSession` is set; handles all postMessage coordination and session lifecycle                     |
+| `preview/components/PreviewBlocksToolbar.tsx`     | Renders `BlocksToolbar` in a `document.body` portal, positioned over the current text selection using `useFloatingToolbarPosition` |
+| `preview/hooks/useFloatingToolbarPosition.ts`     | Computes toolbar position from Slate's selection rect; flips above/below when near the iframe top edge                             |
+| `preview/utils/constants.ts`                      | Exports `TOOLBAR_HEIGHT` / `TOOLBAR_WIDTH` used by both the hook and the toolbar component                                         |
+
+`BlocksEditor` is rendered with two special props:
+
+- `isLivePreviewInline` — omits `EditorLayout` (the title bar / expand button shell) and renders the floating toolbar node passed via `floatingToolbar` instead.
+- `livePreviewSync` — calls `onChange` synchronously on every Slate change instead of debouncing. `flushPendingFormSync` safely no-ops in this mode because there is never a pending debounced update.
+
+### Toolbar positioning
+
+The floating toolbar follows the Slate text selection. `useFloatingToolbarPosition` reads `ReactEditor.toDOMRange(editor, selection).getBoundingClientRect()` and positions the toolbar above the selection. It flips below when there is not enough room above within the iframe's visible area — this is computed relative to the iframe top (`iframeRef.current.getBoundingClientRect().top`), not the viewport top, to account for the Strapi admin header above the iframe.
+
+On mobile (`useIsMobile`), the toolbar is centered horizontally (`left: 50%; transform: translateX(-50%)`) and capped at `calc(100vw - 16px)` width instead of following the cursor.
+
+### Live update integration for host apps
+
+When a blocks edit session is active, the admin fires `strapiFieldChange` messages on every keystroke. Host apps can listen for these on the `window` `message` event or as a native `CustomEvent` dispatched on `window` by the preview script under the same event name. This lets frameworks like Next.js or Nuxt re-render their `BlocksRenderer` in real time without waiting for a save.
+
+```js
+// Listen via postMessage (from a parent frame or service worker)
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'strapiFieldChange') {
+    const { field, value } = e.data.payload;
+    // update your local state
+  }
+});
+
+// Or via the CustomEvent dispatched by the preview script on the same window
+window.addEventListener('strapiFieldChange', (e) => {
+  const { field, value } = e.detail;
+  // update your local state
+});
+```

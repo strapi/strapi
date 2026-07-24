@@ -216,10 +216,29 @@ interface BlocksEditorProps
     BlocksContentProps {
   disabled?: boolean;
   name: string;
+  /** When true, sync form state on every keystroke (Live Preview popover). */
+  livePreviewSync?: boolean;
+  /** When true, renders the editor without the EditorLayout shell (used for Live Preview inline editing). */
+  isLivePreviewInline?: boolean;
+  /** Optional node rendered inside the Slate provider (used for floating toolbars that need Slate context). */
+  floatingToolbar?: React.ReactNode;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
+  (
+    {
+      disabled = false,
+      name,
+      onChange,
+      value,
+      error,
+      livePreviewSync = false,
+      isLivePreviewInline = false,
+      floatingToolbar,
+      ...contentProps
+    },
+    forwardedRef
+  ) => {
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
@@ -265,6 +284,10 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const flushPendingFormSync = React.useCallback(() => {
       if (!debounceTimeout.current) {
+        // In livePreviewSync mode onChange fires synchronously on every change, so there is
+        // never a pending debounced update. React commits batched state updates between
+        // browser events, meaning the form state is already up-to-date before any subsequent
+        // event (e.g. a Save click) reads it — no flushSync is needed here.
         return;
       }
       clearTimeout(debounceTimeout.current);
@@ -288,7 +311,8 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * Slate handles the state of the editor internally. We just need to keep Strapi's form
            * state in sync with it in order to make sure that things like the "modified" state
            * isn't broken. Updating the whole state on every change is very expensive however,
-           * so we debounce calls to onChange to mitigate input lag.
+           * so we debounce calls to onChange to mitigate input lag — except in the Live Preview
+           * popover, where each update must reach the preview iframe immediately.
            *
            * Bump the reset-key counter immediately (not inside the debounce). Otherwise any
            * value-prop identity change during the 300ms window — e.g. clicking the blocks
@@ -296,12 +320,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * the editor, wiping the pending input (blocks e2e flake).
            */
           incrementSlateUpdatesCount();
+          if (livePreviewSync) {
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            return;
+          }
 
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
-          // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
@@ -309,7 +336,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           }, 300);
         }
       },
-      [editor, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, livePreviewSync, name, onChange]
     );
 
     // Clean up the timeout on unmount
@@ -369,31 +396,39 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             isExpandedMode={isExpandedMode}
             flushPendingFormSync={flushPendingFormSync}
           >
-            <EditorLayout
-              error={error}
-              disabled={disabled}
-              onToggleExpand={handleToggleExpand}
-              ariaDescriptionId={ariaDescriptionId}
-            >
-              <BlocksToolbar />
-              <EditorDivider width="100%" />
-              <BlocksContent {...contentProps} />
-              {!isExpandedMode && !isMobile && (
-                <IconButton
-                  position="absolute"
-                  bottom="1.2rem"
-                  right="1.2rem"
-                  shadow="filterShadow"
-                  label={formatMessage({
-                    id: getTranslation('components.Blocks.expand'),
-                    defaultMessage: 'Expand',
-                  })}
-                  onClick={handleToggleExpand}
-                >
-                  <Expand />
-                </IconButton>
-              )}
-            </EditorLayout>
+            {isLivePreviewInline ? (
+              <>
+                {/* TODO: surface the error prop to the user in the inline overlay (EditorLayout is omitted here) */}
+                {floatingToolbar}
+                <BlocksContent {...contentProps} hideDragHandles />
+              </>
+            ) : (
+              <EditorLayout
+                error={error}
+                disabled={disabled}
+                onToggleExpand={handleToggleExpand}
+                ariaDescriptionId={ariaDescriptionId}
+              >
+                <BlocksToolbar />
+                <EditorDivider width="100%" />
+                <BlocksContent {...contentProps} />
+                {!isExpandedMode && !isMobile && (
+                  <IconButton
+                    position="absolute"
+                    bottom="1.2rem"
+                    right="1.2rem"
+                    shadow="filterShadow"
+                    label={formatMessage({
+                      id: getTranslation('components.Blocks.expand'),
+                      defaultMessage: 'Expand',
+                    })}
+                    onClick={handleToggleExpand}
+                  >
+                    <Expand />
+                  </IconButton>
+                )}
+              </EditorLayout>
+            )}
           </BlocksEditorProvider>
         </Slate>
       </>

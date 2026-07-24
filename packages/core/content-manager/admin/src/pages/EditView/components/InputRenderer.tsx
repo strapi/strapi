@@ -191,6 +191,8 @@ const BaseInputRenderer = ({
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}
+          autoFocus={isInPreviewPopover}
+          livePreviewSync={isInPreviewPopover}
         />
       );
     case 'component':

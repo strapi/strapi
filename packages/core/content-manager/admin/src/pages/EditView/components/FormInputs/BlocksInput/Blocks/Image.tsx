@@ -24,8 +24,10 @@ const ImageWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: boolean }>`
 
   & > img {
     height: auto;
-    // The max-height is decided with the design team, the 56px is the height of the toolbar
-    max-height: calc(512px - 56px);
+    // The max-height is decided with the design team, the 56px is the height of the toolbar.
+    // In inline live-preview mode, --preview-image-max-height is set to "none" on the overlay
+    // container so images render at their natural proportional size (matching the preview).
+    max-height: var(--preview-image-max-height, calc(512px - 56px));
     max-width: 100%;
     object-fit: contain;
   }
@@ -108,6 +110,7 @@ const ImageDialog = () => {
 
     // Save the path of the node that is being replaced by an image to insert the images there later
     // It's the closest full block node above the selection
+    // Use anchor Point not the full Range: Editor.above with a cross-block Range resolves [] (root) and finds no block.
     const nodeEntryBeingReplaced = Editor.above(editor, {
       match(node) {
         if (Editor.isEditor(node)) return false;
@@ -116,13 +119,14 @@ const ImageDialog = () => {
 
         return !isInlineNode;
       },
+      at: editor.selection?.anchor,
     });
 
     if (!nodeEntryBeingReplaced) return;
     const [, pathToInsert] = nodeEntryBeingReplaced;
 
     // Remove the previous node that is being replaced by an image
-    Transforms.removeNodes(editor);
+    Transforms.removeNodes(editor, { at: pathToInsert });
 
     // Convert images to nodes and insert them
     const nodesToInsert = images.map((image) => {
