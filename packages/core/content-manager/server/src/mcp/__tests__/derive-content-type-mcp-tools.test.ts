@@ -971,8 +971,6 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ title: 'hello' }).success).toBe(true);
   });
 
-  // ── CMS-1425: draft-write leniency for required fields ────────────────────
-
   it('Layer A: D&P create relaxes required scalar + relation + multiple media to optional', () => {
     const attrs = {
       title: { type: 'string', required: true },
@@ -1012,9 +1010,11 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ title: 'hi' }).success).toBe(true);
   });
 
-  it('partial mode relaxes required scalars even on a non-D&P model (update parity)', () => {
+  it('update mode relaxes required scalars even on a non-D&P model (update parity)', () => {
     const attrs = { title: { type: 'string', required: true } } as TestAttrs;
-    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, { partial: true });
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      operation: 'update',
+    });
     expect(schema.safeParse({}).success).toBe(true);
     expect(schema.safeParse({ title: 'hello' }).success).toBe(true);
   });
@@ -1059,6 +1059,45 @@ describe('buildDataSchema', () => {
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
     expect(schema.safeParse({ slug: 'ab' }).success).toBe(false); // too short
     expect(schema.safeParse({ slug: 'abc' }).success).toBe(true);
+  });
+
+  it('draft writes relax minLength / min but keep maxLength / max (admin draft parity)', () => {
+    // Admin + entity validators skip minimum checks on drafts but keep maximums (column limits).
+    const attrs = {
+      slug: { type: 'string', minLength: 3, maxLength: 5 },
+      score: { type: 'integer', min: 10, max: 20 },
+    } as TestAttrs;
+
+    // D&P create targets a draft → below-minimum accepted, above-maximum still rejected.
+    const dpCreate = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
+    expect(dpCreate.safeParse({ slug: 'ab', score: 1 }).success).toBe(true);
+    expect(dpCreate.safeParse({ slug: 'toolong' }).success).toBe(false);
+    expect(dpCreate.safeParse({ score: 99 }).success).toBe(false);
+
+    // D&P update also targets a draft → same leniency.
+    const dpUpdate = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs, null, {
+      operation: 'update',
+    });
+    expect(dpUpdate.safeParse({ slug: 'ab', score: 1 }).success).toBe(true);
+  });
+
+  it('non-D&P writes keep minLength / min (published — entity validator enforces it)', () => {
+    const attrs = {
+      slug: { type: 'string', minLength: 3 },
+      score: { type: 'integer', min: 10 },
+    } as TestAttrs;
+
+    // Published create keeps the lower bound.
+    const create = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    expect(create.safeParse({ slug: 'ab' }).success).toBe(false);
+    expect(create.safeParse({ score: 1 }).success).toBe(false);
+
+    // A non-D&P update is published too, so the lower bound stays.
+    const update = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      operation: 'update',
+    });
+    expect(update.safeParse({ slug: 'ab' }).success).toBe(false);
+    expect(update.safeParse({ score: 1 }).success).toBe(false);
   });
 
   // ── relation fixtures ─────────────────────────────────────────────────────
@@ -1348,8 +1387,6 @@ describe('buildDataSchema', () => {
     );
   });
 
-  // ── CMS-1425: mode propagation into components ────────────────────────────
-
   it('D&P create: required scalar inside a component is relaxed (mode propagates)', () => {
     const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);
@@ -1361,7 +1398,9 @@ describe('buildDataSchema', () => {
 
   it('partial update: required scalar inside a component is relaxed (mode propagates)', () => {
     const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
-    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, { partial: true });
+    const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      operation: 'update',
+    });
     expect(schema.safeParse({ seo: {} }).success).toBe(true);
   });
 
@@ -1423,8 +1462,6 @@ describe('buildDataSchema', () => {
     expect(inputSchema.safeParse({ data: { title: 'Hi', age: 'old' } }).success).toBe(false); // age must be int
   });
 
-  // ── CMS-1425: Layer B — full tool input schema (create/update/write) ──────
-
   it('Layer B: D&P create tool accepts empty data (draft leniency)', () => {
     const model = baseModel({
       options: { draftAndPublish: true },
@@ -1475,7 +1512,55 @@ describe('buildDataSchema', () => {
     expect(inputSchema.safeParse({ data: {} }).success).toBe(true);
   });
 
-  // ── CMS-1425: agent-visible contract via z.toJSONSchema ───────────────────
+  // The collection update handler creates a new locale (and the single-type write upserts)
+  // when no version exists. On a non-D&P model that create is published, so a required field
+  // is enforced late — by the entity validator, not at this Zod boundary. The input schema is
+  // resolved per-tool before the request, so it cannot tell an update from a locale-create /
+  // first-write; it stays partial and the server remains the source of truth for the create
+  // path. These tests pin that intentional late-validation contract.
+  it('Layer B: non-D&P update tool accepts empty data (locale-create validated late server-side)', () => {
+    const model = baseModel({
+      options: { draftAndPublish: false },
+      attributes: { title: { type: 'string', required: true } } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const updateTool = tools.find((t) => t.name === 'update_article')!;
+    const inputSchema = updateTool.resolveInputSchema(mockContext);
+    // Passes Zod; the published locale-create path enforces `title` in the entity validator.
+    expect(inputSchema.safeParse({ documentId: 'abc', data: {} }).success).toBe(true);
+    // Required field still advertised via the (lifecycle-neutral) hint, not the required array.
+    const jsonSchema = z.toJSONSchema(inputSchema) as {
+      properties?: {
+        data?: { required?: string[]; properties?: Record<string, { description?: string }> };
+      };
+    };
+    const data = jsonSchema.properties?.data;
+    expect(data?.required ?? []).not.toContain('title');
+    expect(data?.properties?.title?.description).toContain('when the entry is saved');
+  });
+
+  it('Layer B: non-D&P single-type write accepts empty data (first-write validated late server-side)', () => {
+    const model = baseModel({
+      kind: 'singleType',
+      uid: 'api::global.global',
+      apiID: 'global',
+      options: { draftAndPublish: false },
+      attributes: { title: { type: 'string', required: true } } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const writeTool = tools.find((t) => t.name === 'write_global')!;
+    const inputSchema = writeTool.resolveInputSchema(mockContext);
+    // Passes Zod; the published first-write (upsert create) enforces `title` server-side.
+    expect(inputSchema.safeParse({ data: {} }).success).toBe(true);
+    const jsonSchema = z.toJSONSchema(inputSchema) as {
+      properties?: {
+        data?: { required?: string[]; properties?: Record<string, { description?: string }> };
+      };
+    };
+    const data = jsonSchema.properties?.data;
+    expect(data?.required ?? []).not.toContain('title');
+    expect(data?.properties?.title?.description).toContain('when the entry is saved');
+  });
 
   it('D&P create: relaxed fields drop out of the JSON Schema required array + hint present', () => {
     const attrs = {
@@ -1501,22 +1586,30 @@ describe('buildDataSchema', () => {
   });
 
   it('partial update: required scalar is optional but keeps the required hint (D&P + non-D&P)', () => {
-    for (const make of [makeDpModel, makeModel]) {
+    // The hint wording is mode-aware: a D&P update targets a draft (publish step), a non-D&P
+    // update is published immediately (enforced on save).
+    const cases = [
+      { make: makeDpModel, hint: 'before publishing' },
+      { make: makeModel, hint: 'when the entry is saved' },
+    ] as const;
+    for (const { make, hint } of cases) {
       const attrs = {
         title: { type: 'string', required: true },
         subtitle: { type: 'string', required: false },
       } as TestAttrs;
-      const schema = buildDataSchema(mockStrapi, make(attrs), attrs, null, { partial: true });
+      const schema = buildDataSchema(mockStrapi, make(attrs), attrs, null, {
+        operation: 'update',
+      });
       const jsonSchema = z.toJSONSchema(schema) as {
         required?: string[];
         properties?: Record<string, { description?: string }>;
       };
       // Nothing is hard-gated on a partial update
       expect(jsonSchema.required ?? []).toEqual([]);
-      // ...but the required field is still distinguishable via the hint
-      expect(jsonSchema.properties?.title?.description).toContain('before publishing');
+      // ...but the required field is still distinguishable via the mode-aware hint
+      expect(jsonSchema.properties?.title?.description).toContain(hint);
       // and the optional field carries no hint
-      expect(jsonSchema.properties?.subtitle?.description ?? '').not.toContain('before publishing');
+      expect(jsonSchema.properties?.subtitle?.description ?? '').not.toContain('Marked required');
     }
   });
 
@@ -1561,16 +1654,16 @@ describe('buildDataSchema', () => {
     // ...alongside the required hint
     expect(dpDescription).toContain('before publishing');
 
-    // Same on a partial update
+    // Same on a partial update — here on a non-D&P model, so the hint uses neutral wording
     const partialSchema = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
-      partial: true,
+      operation: 'update',
     });
     const partialJson = z.toJSONSchema(partialSchema) as {
       properties?: Record<string, { description?: string }>;
     };
     const partialDescription = partialJson.properties?.body?.description ?? '';
     expect(partialDescription).toContain('structured rich text content');
-    expect(partialDescription).toContain('before publishing');
+    expect(partialDescription).toContain('when the entry is saved');
   });
 
   it('D&P create: strict mode still rejects unknown keys after relaxation', () => {

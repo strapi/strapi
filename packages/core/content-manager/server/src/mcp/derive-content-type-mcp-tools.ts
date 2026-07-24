@@ -137,8 +137,12 @@ const buildCollectionTools = (
       uid,
       attributes
     );
-    // Updates are partial (REST/admin parity) — every attribute is optional.
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, { partial: true });
+    // Updates are partial (REST/admin parity) — every attribute is optional. On a non-D&P
+    // model, the new-locale branch in the handler creates+publishes, so required fields are
+    // enforced late by the entity validator (see buildDataSchema's note).
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, {
+      operation: 'update',
+    });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -368,8 +372,12 @@ const buildSingleTypeTools = (
       createFields === null || updateFields === null
         ? null
         : new Set([...createFields, ...updateFields]);
-    // Single-type write is an upsert; treat as partial for update parity (REST updates are partial).
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, { partial: true });
+    // Single-type write is an upsert; treat as partial for update parity (REST updates are
+    // partial). On a non-D&P model the first write creates+publishes, so required fields are
+    // enforced late by the entity validator (see buildDataSchema's note).
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, {
+      operation: 'update',
+    });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,

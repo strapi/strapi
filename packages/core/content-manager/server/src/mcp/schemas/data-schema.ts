@@ -17,62 +17,89 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
   typeof (attr as Record<string, unknown>).customField === 'string';
 
 /**
- * Controls how the required constraint is projected onto the emitted Zod schema.
+ * Describes the write the emitted schema will validate. Two orthogonal facts fully
+ * determine how the required/min constraints are projected, so both are modelled
+ * explicitly rather than as a set of overlapping booleans:
  *
- * - `lenient` — create on a draft-and-publish model. MCP create always resolves to a
- *   draft, and draft writes skip required validation entirely (both server-side in the
- *   entity validator and admin-side), so hard-gating required fields here would make MCP
- *   stricter than the admin panel. When set, required scalars/components become optional
- *   with an explanatory hint instead of being rejected outright.
- * - `partial` — update writes. REST/admin updates are partial and the entity validator
- *   does not treat omitted fields as missing, so every attribute becomes optional.
- *   Required attributes still carry the explanatory hint so agents can tell required
- *   fields apart from optional ones even when nothing is hard-gated.
+ * - `operation` — `create` or `update`. Updates are partial (REST/admin parity): the
+ *   entity validator never treats an omitted field as missing, so every attribute becomes
+ *   optional regardless of the model.
+ * - `draftAndPublish` — whether the target model has draft & publish enabled. An MCP
+ *   create always resolves to a draft, and an MCP update edits the draft version, so on a
+ *   D&P model the write *targets a draft*. Draft writes skip required and `min`/`minLength`
+ *   validation (both server-side in the entity validator and admin-side), so hard-gating
+ *   them here would make MCP stricter than the admin panel.
  *
- * Both flags propagate recursively through components and the custom-field redispatch so
+ * Derived rules (see `applyRequired` / `applyMin`):
+ * - `targetsDraft`  = `draftAndPublish` — a draft is written on D&P models in either operation.
+ * - relax required  = `targetsDraft || operation === 'update'`.
+ * - relax min       = `targetsDraft` — only draft writes skip `min`/`minLength`.
+ * - hint wording     — publish-oriented on D&P models, lifecycle-neutral otherwise (see
+ *   `requiredHint`), because non-D&P writes have no publish step.
+ *
+ * The mode propagates recursively through components and the custom-field redispatch so
  * required scalars *inside* components follow the same rule as top-level ones.
  *
- * Relations and media are never hard-gated regardless of these flags — their enforcement
+ * Relations and media are never hard-gated regardless of the mode — their enforcement
  * is flag-dependent (`api.documents.strictRelations`) and lenient by default, so a hard
  * Zod gate would diverge from real behavior on the default config.
  */
 export type InputSchemaMode = {
-  /** D&P create: relax required scalars/components to optional-with-hint. */
-  lenient?: boolean;
-  /** Update: relax every attribute to optional (required ones keep the hint). */
-  partial?: boolean;
+  operation: 'create' | 'update';
+  draftAndPublish: boolean;
 };
 
-/** Neutral hint appended to required attributes when their hard gate is dropped. */
-const REQUIRED_HINT = 'Marked required in the content-type schema — fill it in before publishing.';
+/** Default mode for callers that don't specify one: a published (non-D&P) create — the strictest. */
+const DEFAULT_MODE: InputSchemaMode = { operation: 'create', draftAndPublish: false };
+
+/** A D&P model writes a draft in both create and update; non-D&P writes are published. */
+const targetsDraft = (mode: InputSchemaMode): boolean => mode.draftAndPublish === true;
+
+/** Required is relaxed when the write targets a draft, or when it is a partial update. */
+const relaxesRequired = (mode: InputSchemaMode): boolean =>
+  targetsDraft(mode) === true || mode.operation === 'update';
+
+/** `min`/`minLength` is relaxed only when the write targets a draft (drafts skip it). */
+const relaxesMin = (mode: InputSchemaMode): boolean => targetsDraft(mode) === true;
+
+/**
+ * Hint appended to required attributes when their hard gate is dropped. Wording is
+ * mode-aware: only D&P models have a publish step, so the "before publishing" phrasing
+ * would be misleading on a non-D&P write (which is enforced when the entry is saved).
+ */
+const requiredHint = (mode: InputSchemaMode): string =>
+  mode.draftAndPublish === true
+    ? 'Marked required in the content-type schema — fill it in before publishing.'
+    : 'Marked required in the content-type schema — the server enforces it when the entry is saved.';
 
 /**
  * Appends the required hint to a schema's description without clobbering an existing one.
  * Zod's `.describe()` replaces the description outright, so a required Blocks field would
  * otherwise lose its own "structured rich text content" description. Compose instead.
  */
-const withRequiredHint = (s: z.ZodTypeAny): z.ZodTypeAny => {
+const withRequiredHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny => {
+  const hint = requiredHint(mode);
   const existing = s.description;
   return existing !== undefined && existing !== ''
-    ? s.describe(`${existing} ${REQUIRED_HINT}`)
-    : s.describe(REQUIRED_HINT);
+    ? s.describe(`${existing} ${hint}`)
+    : s.describe(hint);
 };
 
 /**
  * Applies the required constraint to a leaf attribute schema according to `mode`.
  *
- * Required fields keep the explanatory hint even under `partial`, so agents can still
- * tell required attributes apart from optional ones on updates (all fields are optional,
- * but only the required ones carry the hint).
+ * Required fields keep the explanatory hint whenever the gate is dropped, so agents can
+ * still tell required attributes apart from optional ones on updates and drafts (all
+ * fields are optional, but only the required ones carry the hint).
  *
- * - required + (`lenient` or `partial`) → optional, with the required hint appended.
- * - required + neither → returned as-is (hard-gated).
+ * - required + gate dropped (draft target or update) → optional, with the required hint.
+ * - required + gate kept (non-D&P create) → returned as-is (hard-gated).
  * - not required → optional.
  */
 const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode): z.ZodTypeAny => {
   if (required === true) {
-    if (mode.lenient === true || mode.partial === true) {
-      return withRequiredHint(s).optional();
+    if (relaxesRequired(mode) === true) {
+      return withRequiredHint(s, mode).optional();
     }
     return s;
   }
@@ -80,12 +107,29 @@ const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode
 };
 
 /**
+ * Applies a `min`/`minLength` lower bound unless the write targets a draft. Admin
+ * validation (`admin/src/utils/validation.ts`) and the entity validator
+ * (`entity-validator/validators.ts`) both skip minimum checks on drafts, so gating them
+ * at Zod would make MCP stricter than the admin panel for draft writes. `max`/`maxLength`
+ * is always kept — it maps to a real column limit and applies to drafts too.
+ */
+const applyMin = <T extends z.ZodString | z.ZodNumber>(
+  s: T,
+  min: number,
+  mode: InputSchemaMode
+): T => (relaxesMin(mode) === true ? s : (s.min(min) as T));
+
+/**
  * Applies the required constraint to relation/media schemas, which are never hard-gated.
  * Required entries always get the hint (relations/media are optional in every mode).
  */
-const applyRelationalRequired = (s: z.ZodTypeAny, required: boolean): z.ZodTypeAny => {
+const applyRelationalRequired = (
+  s: z.ZodTypeAny,
+  required: boolean,
+  mode: InputSchemaMode
+): z.ZodTypeAny => {
   if (required === true) {
-    return withRequiredHint(s).optional();
+    return withRequiredHint(s, mode).optional();
   }
   return s.optional();
 };
@@ -105,7 +149,7 @@ export function buildComponentInputSchema(
   strapi: Core.Strapi,
   componentUid: string,
   visited: Set<string> = new Set(),
-  mode: InputSchemaMode = {}
+  mode: InputSchemaMode = DEFAULT_MODE
 ): z.ZodTypeAny {
   if (visited.has(componentUid) === true) {
     // Circular reference — fall back to permissive but non-empty JSON Schema
@@ -149,7 +193,7 @@ export const attributeToInputSchema = (
   strapi: Core.Strapi,
   attr: Schema.Attribute.AnyAttribute,
   visited: Set<string> = new Set(),
-  mode: InputSchemaMode = {}
+  mode: InputSchemaMode = DEFAULT_MODE
 ): z.ZodTypeAny => {
   switch (attr.type) {
     case 'string':
@@ -158,7 +202,7 @@ export const attributeToInputSchema = (
     case 'password': {
       const { required, minLength, maxLength } = attr as Schema.Attribute.String;
       let s: z.ZodString = z.string();
-      if (minLength !== undefined) s = s.min(minLength);
+      if (minLength !== undefined) s = applyMin(s, minLength, mode);
       if (maxLength !== undefined) s = s.max(maxLength);
       return applyRequired(s, required === true, mode);
     }
@@ -175,7 +219,7 @@ export const attributeToInputSchema = (
     case 'integer': {
       const { required, min, max } = attr as Schema.Attribute.Integer;
       let s = z.number().int();
-      if (min !== undefined) s = s.min(min);
+      if (min !== undefined) s = applyMin(s, min, mode);
       if (max !== undefined) s = s.max(max);
       return applyRequired(s, required === true, mode);
     }
@@ -188,7 +232,7 @@ export const attributeToInputSchema = (
     case 'float': {
       const { required, min, max } = attr as Schema.Attribute.Decimal;
       let s = z.number();
-      if (min !== undefined) s = s.min(min);
+      if (min !== undefined) s = applyMin(s, min, mode);
       if (max !== undefined) s = s.max(max);
       return applyRequired(s, required === true, mode);
     }
@@ -260,7 +304,7 @@ export const attributeToInputSchema = (
       const mediaAttr = attr as unknown as { required?: boolean; multiple?: boolean };
       const s = mediaAttr.multiple === true ? z.array(z.any()) : z.any();
       // Media is never hard-gated — enforcement is flag-dependent and lenient by default.
-      return applyRelationalRequired(s, mediaAttr.required === true);
+      return applyRelationalRequired(s, mediaAttr.required === true, mode);
     }
     case 'relation': {
       const relAttr = attr as Schema.Attribute.Relation;
@@ -341,7 +385,7 @@ export const attributeToInputSchema = (
       }
 
       // Relations are never hard-gated — enforcement is flag-dependent and lenient by default.
-      return applyRelationalRequired(s, relAttr.required === true);
+      return applyRelationalRequired(s, relAttr.required === true, mode);
     }
     default: {
       const unknownAttr: unknown = attr;
@@ -365,14 +409,15 @@ export const attributeToInputSchema = (
 };
 
 /**
- * Options controlling how `buildDataSchema` projects the required constraint.
+ * Options controlling how `buildDataSchema` projects the required/min constraints.
  */
 export type BuildDataSchemaOptions = {
   /**
-   * When true, the schema is built for an update (partial write): every attribute
-   * becomes optional. Overrides the D&P leniency derived from the model.
+   * The write the schema validates. Defaults to `create`. Updates are partial, so every
+   * attribute becomes optional regardless of the model. Whether the write targets a draft
+   * (and therefore relaxes required/min) is derived from the model's draft & publish flag.
    */
-  partial?: boolean;
+  operation?: 'create' | 'update';
 };
 
 /**
@@ -382,14 +427,24 @@ export type BuildDataSchemaOptions = {
  * Unknown keys are rejected (strict mode) — invalid field names fail at the MCP boundary.
  *
  * Required-field handling mirrors admin/REST draft leniency (CMS-1425):
- * - Updates (`options.partial`) relax every attribute to optional; required attributes
- *   still carry the required hint so the agent can distinguish them from optional ones.
- * - Create on a draft-and-publish model relaxes required scalars/components to
- *   optional-with-hint (MCP create always resolves to a draft, and draft writes skip
- *   required validation).
- * - Create on a non-D&P model keeps the hard gate on required scalars (writes are
- *   published and the entity validator enforces them).
+ * - Updates relax every attribute to optional; required attributes still carry the
+ *   required hint so the agent can distinguish them from optional ones.
+ * - Writes to a draft & publish model target a draft (MCP create resolves to a draft;
+ *   MCP update edits the draft version). Drafts skip required and `min`/`minLength`
+ *   validation, so those are relaxed to match the admin panel.
+ * - Create on a non-D&P model keeps the hard gate on required scalars and on `min` (writes
+ *   are published and the entity validator enforces them). A non-D&P update stays partial
+ *   (required relaxed) but keeps `min`, since the write is published.
  * - Relations and media are never hard-gated (flag-dependent, lenient by default).
+ *
+ * NOTE: `update_*` (collection) and `write_*` (single-type upsert) can reach a *create*
+ * on the server — a missing locale is created (`collection-handlers.ts`), and an upsert
+ * creates on first write (`single-type-handlers.ts`). On a non-D&P model that create is
+ * published, so required fields are enforced late, by the entity validator, rather than at
+ * this Zod boundary. This is intentional: the input schema is resolved per-tool before the
+ * request, so it cannot know whether a given call will update an existing version or create
+ * a new one. The partial schema keeps the common update path ergonomic; the server remains
+ * the source of truth for the create path.
  */
 export const buildDataSchema = (
   strapi: Core.Strapi,
@@ -398,11 +453,11 @@ export const buildDataSchema = (
   permittedFields?: Set<string> | null,
   options: BuildDataSchemaOptions = {}
 ): z.ZodTypeAny => {
-  const draftAndPublish = (schema as { options?: { draftAndPublish?: boolean } }).options
-    ?.draftAndPublish;
+  const draftAndPublish =
+    (schema as { options?: { draftAndPublish?: boolean } }).options?.draftAndPublish === true;
   const mode: InputSchemaMode = {
-    partial: options.partial === true,
-    lenient: draftAndPublish === true,
+    operation: options.operation ?? 'create',
+    draftAndPublish,
   };
 
   const shape: Record<string, z.ZodTypeAny> = {};
