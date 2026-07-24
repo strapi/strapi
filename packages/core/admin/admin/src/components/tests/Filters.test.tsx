@@ -1,6 +1,10 @@
 import { fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
+import { useLocation } from 'react-router-dom';
 
 import { Filters } from '../Filters';
+import { useField } from '../Form';
+
+import type { RenderOptions } from '@tests/utils';
 
 const DEFAULT_FILTERS = [
   {
@@ -23,17 +27,63 @@ const DEFAULT_FILTERS = [
     label: 'Created At',
     type: 'date',
   },
+  {
+    name: 'updatedAt',
+    label: 'Updated At',
+    type: 'datetime',
+  },
 ] satisfies Filters.Filter[];
 
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <input aria-label="location" data-testid="location" readOnly value={location.search} />;
+};
+
+const DateTimeTextInput = ({ 'aria-label': ariaLabel, name }: Filters.ValueInputProps) => {
+  const field = useField<string>(name);
+
+  return (
+    <input
+      aria-label={ariaLabel}
+      name={name}
+      onChange={(event) => field.onChange(name, event.target.value)}
+      value={field.value ?? ''}
+    />
+  );
+};
+
 describe('Filters', () => {
-  const render = (props?: Partial<Filters.Props>) =>
+  const render = ({ initialEntries, ...props }: Partial<Filters.Props> & RenderOptions = {}) =>
     renderRTL(
-      <Filters.Root options={DEFAULT_FILTERS} {...props}>
-        <Filters.Trigger />
-        <Filters.Popover />
-        <Filters.List />
-      </Filters.Root>
+      <>
+        <Filters.Root options={DEFAULT_FILTERS} {...props}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+        </Filters.Root>
+        <LocationDisplay />
+      </>,
+      { initialEntries }
     );
+
+  const renderWithTextDateTimeInput = (props: Partial<Filters.Props> & RenderOptions = {}) =>
+    render({
+      ...props,
+      options: DEFAULT_FILTERS.map((filter) =>
+        filter.name === 'updatedAt' ? { ...filter, input: DateTimeTextInput } : filter
+      ),
+    });
+
+  const getDayRange = (value: string) => {
+    const start = new Date(value);
+    start.setUTCHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    return { start: start.toISOString(), end: end.toISOString() };
+  };
 
   it('should open the popover when the trigger is clicked', async () => {
     const { user } = render();
@@ -52,6 +102,16 @@ describe('Filters', () => {
     const addFilterButton = await screen.findByRole('button', { name: 'Add filter' });
     expect(addFilterButton).toBeInTheDocument();
     expect(addFilterButton).toBeDisabled();
+  });
+
+  it('should not render the popover content when no filters are provided', async () => {
+    const { user } = render({ options: [] });
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+    expect(screen.queryByRole('combobox', { name: 'Select field' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Select filter' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add filter' })).not.toBeInTheDocument();
   });
 
   it("should add a filter to the list when the 'Add filter' button is clicked & close the popover", async () => {
@@ -82,6 +142,22 @@ describe('Filters', () => {
     fireEvent.click(removeButton);
 
     await waitFor(() => expect(screen.queryByText('Name $eq Jimbob')).not.toBeInTheDocument());
+  });
+
+  it('should remove parsed filter values that contain literal percent signs', async () => {
+    render({
+      initialEntries: [
+        {
+          pathname: '/',
+          search: `filters[$and][0][name][$eq]=${encodeURIComponent('100%')}&page=1`,
+        },
+      ],
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Name $eq 100%' }));
+
+    await waitFor(() => expect(screen.queryByText('Name $eq 100%')).not.toBeInTheDocument());
+    expect(screen.getByTestId('location')).toHaveValue('?page=1');
   });
 
   it('should display a list of the filter names when the combobox named Select field is pressed', async () => {
@@ -118,6 +194,114 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Draft' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Modified' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Published' })).toBeInTheDocument();
+  });
+
+  it('should convert exact datetime equality filters to a day range', async () => {
+    const { user } = renderWithTextDateTimeInput();
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
+    expect({ start, end }).toEqual({
+      start: '2026-06-13T00:00:00.000Z',
+      end: '2026-06-14T00:00:00.000Z',
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+
+    expect(await screen.findByRole('option', { name: 'is' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is not' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is null' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is greater than' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'is' }));
+    await user.type(screen.getByRole('textbox', { name: 'Updated At' }), selectedDate);
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await waitFor(() =>
+      expect((screen.getByTestId('location') as HTMLInputElement).value).toContain(
+        'filters[$and][0][updatedAt][$gte]'
+      )
+    );
+
+    const search = screen.getByTestId('location').getAttribute('value') ?? '';
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+
+    expect(searchParams.get('filters[$and][0][updatedAt][$gte]')).toEqual(start);
+    expect(searchParams.get('filters[$and][0][updatedAt][$lt]')).toEqual(end);
+    expect(searchParams.has('filters[$and][0][updatedAt][$eq]')).toBe(false);
+    expect(await screen.findByText(/Updated At \$eq/)).toBeInTheDocument();
+  });
+
+  it('should convert exact datetime non-equality filters to an outside-day range', async () => {
+    const { user } = renderWithTextDateTimeInput();
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+    await user.click(await screen.findByRole('option', { name: 'is not' }));
+    await user.type(screen.getByRole('textbox', { name: 'Updated At' }), selectedDate);
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await waitFor(() =>
+      expect((screen.getByTestId('location') as HTMLInputElement).value).toContain(
+        'filters[$and][0][$or][0][updatedAt][$lt]'
+      )
+    );
+
+    const search = screen.getByTestId('location').getAttribute('value') ?? '';
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+
+    expect(searchParams.get('filters[$and][0][$or][0][updatedAt][$lt]')).toEqual(start);
+    expect(searchParams.get('filters[$and][0][$or][1][updatedAt][$gte]')).toEqual(end);
+    expect(searchParams.has('filters[$and][0][updatedAt][$ne]')).toBe(false);
+    expect(await screen.findByText(/Updated At \$ne/)).toBeInTheDocument();
+  });
+
+  it('should reset the operator and value when changing fields', async () => {
+    const { user } = renderWithTextDateTimeInput();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+
+    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent(
+      /^is$/
+    );
+    expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Updated At')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Updated At'), '2026-06-13T10:15:00.000Z');
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await screen.findByText(/Updated At \$eq/);
+    expect(screen.queryByText(/Jimbob/)).not.toBeInTheDocument();
+  });
+
+  it('should remove a generated datetime range as one filter', async () => {
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
+    render({
+      initialEntries: [
+        {
+          pathname: '/',
+          search:
+            `filters[$and][0][updatedAt][$gte]=${encodeURIComponent(start)}&` +
+            `filters[$and][0][updatedAt][$lt]=${encodeURIComponent(end)}&` +
+            'page=1',
+        },
+      ],
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: /Updated At \$eq/ }));
+
+    await waitFor(() => expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument());
+    expect(screen.getByTestId('location')).toHaveValue('?page=1');
   });
 
   it('should replace existing filter when editing instead of adding a duplicate', async () => {
