@@ -629,18 +629,17 @@ export const addAttributes = async (
           page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
         );
       }
-    } else if (
-      options?.clickFinish !== false &&
-      // These attribute types finalize themselves, so there is no "Finish" to click on the CT field
-      // list afterwards:
-      //  - relation: addRelationAttribute already clicks Finish internally,
-      //  - component: creating a new component closes the modal once its first field is added,
-      //  - dynamic zone: adding its components closes the modal (no Finish on the CT field list).
-      !isDynamicZoneAttribute(attribute) &&
-      !isComponentAttribute(attribute) &&
-      !isRelationAttribute(attribute)
-    ) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+    } else if (options?.clickFinish !== false) {
+      // Some attribute flows finalize themselves and leave no "Finish" on the CT field list:
+      //  - relation: addRelationAttribute clicks Finish internally,
+      //  - new component: addComponentAttribute clicks Finish once its first field is added,
+      //  - dynamic zone: adding its components closes the modal.
+      // Others (e.g. an existing `useExisting` component) do NOT, so the outer Finish is still
+      // required. Rather than encode every case, click Finish only when it is actually present.
+      const finishButton = page.getByRole('button', { name: 'Finish' });
+      if (await finishButton.isVisible({ timeout: 1000 })) {
+        await clickAndWait(page, finishButton);
+      }
     }
   }
 };
