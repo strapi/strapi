@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/client.json",
+  "extends": "tsconfig/admin",
   "include": ["src", "./custom.d.ts"],
   "compilerOptions": {
     "types": ["@testing-library/jest-dom", "jest"]
