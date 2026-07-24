@@ -329,6 +329,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       resolveUploadFileId: (metadata) => fileEntitiesMapper?.[metadata.id],
       restoreMediaEntitiesContent: this.#isContentTypeIncluded('plugin::upload.file'),
       removeAssetsBackup: this.#removeAssetsBackup.bind(this),
+      onWarning: this.onWarning,
     });
   }
 

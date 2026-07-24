@@ -16,6 +16,10 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import {
+  buildFallbackAssetMetadataFromFilename,
+  missingAssetMetadataSidecarMessage,
+} from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
@@ -77,6 +81,17 @@ class LocalFileSourceProvider implements ISourceProvider {
         origin: 'file-source-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'file-source-provider',
+      },
+      kind: 'warning',
     });
   }
 
@@ -189,6 +204,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
+    const reportWarning = this.#reportWarning.bind(this);
     this.#reportInfo('creating assets read stream');
 
     let activeAsyncEntries = 0;
@@ -217,11 +233,12 @@ class LocalFileSourceProvider implements ISourceProvider {
               const { path: filePath, size = 0 } = entry;
               const normalizedPath = unknownPathToPosix(filePath);
               const file = path.basename(normalizedPath);
-              let metadata;
+              let metadata: IFile;
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-              } catch (error) {
-                throw new Error(`Failed to read metadata for ${file}`);
+              } catch {
+                reportWarning(missingAssetMetadataSidecarMessage(file));
+                metadata = buildFallbackAssetMetadataFromFilename(file, { size });
               }
               const asset: IAsset = {
                 metadata,
