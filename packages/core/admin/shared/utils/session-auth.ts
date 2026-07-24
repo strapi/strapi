@@ -4,15 +4,35 @@ import type { Modules } from '@strapi/types';
 import { buildSessionMetadata } from '@strapi/utils';
 
 import { resolveAuthCookieName } from './auth-cookie-name';
+import { resolveAuthCookiePath } from './auth-cookie-path';
+import { resolveAuthCookieDomain } from './auth-cookie-domain';
 
 const ADMIN_ORIGIN = 'admin';
 const SESSION_CONTENT_TYPE = 'admin::session';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
+// The resolvers are browser-shared (also inlined into the admin bundle) so
+// they default to console.warn; on the server, route their warnings through
+// the Strapi logger instead.
+const warnViaStrapiLog = (message: string): void => {
+  strapi.log.warn(message);
+};
+
 export const getAccessCookieName = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
-  return resolveAuthCookieName(configured);
+  return resolveAuthCookieName(configured, warnViaStrapiLog);
+};
+
+export const getAccessCookiePath = (): string => {
+  const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
+  return resolveAuthCookiePath(configured, warnViaStrapiLog);
+};
+
+export const getAccessCookieDomain = (): string | undefined => {
+  const configured: string | undefined =
+    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  return resolveAuthCookieDomain(configured, warnViaStrapiLog);
 };
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
@@ -24,9 +44,8 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
   const isProduction = process.env.NODE_ENV === 'production';
 
-  const domain: string | undefined =
-    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
-  const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+  const domain = getAccessCookieDomain();
+  const path = getAccessCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
