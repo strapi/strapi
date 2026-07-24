@@ -5,6 +5,7 @@ import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
 import {
   buildAdminViteResolveAliases,
   getResolvableSingletonModules,
+  getResolvableYupCjsModules,
 } from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
@@ -74,6 +75,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // CJS-only; required for @strapi/admin in dev (#26944, #26964, #27014).
         'lodash',
         'invariant',
+        // yup's ESM build named-imports `getter` from property-expr (CJS). Pre-bundle it for
+        // every app so it is never served raw — otherwise the admin blank-crashes with "does
+        // not provide an export named 'getter'" once a plugin trips the optimizeDeps auto-exclude
+        // (#27062). Resolvable subset only, kept in lockstep with resolve.alias (see #27014).
+        ...getResolvableYupCjsModules(),
         // UMD; without pre-bundling plugin chunks get empty namespace → "Prism is not defined" (#26964).
         'prismjs',
         // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.

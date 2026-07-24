@@ -72,6 +72,45 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
     });
   });
 
+  it('pre-bundles and aliases property-expr so yup ESM named imports never break (#27062)', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      bundler: 'vite' as const,
+      options: {
+        open: false,
+      },
+      plugins: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
+
+    const config = await resolveDevelopmentConfig(ctx);
+
+    // property-expr is CJS and yup/es/Reference.js does `import { getter } from 'property-expr'`.
+    // It must stay pre-bundled (and aliased for pnpm) or the admin blank-crashes (#27062).
+    expect(config.optimizeDeps?.include).toEqual(expect.arrayContaining(['property-expr']));
+
+    const alias = config.resolve?.alias as Record<string, string> | undefined;
+    expect(alias?.['property-expr']).toEqual(expect.any(String));
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
   it('pre-bundles prismjs language plugins for all apps (#26964)', async () => {
     const mockHttpServer = http.createServer();
     const ctx = {
