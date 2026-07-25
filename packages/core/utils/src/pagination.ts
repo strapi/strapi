@@ -103,7 +103,9 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   if (usePagePagination) {
     const { page, pageSize } = merge(defaultValues.page, {
       ...args,
-      pageSize: Math.max(1, args.pageSize ?? 0),
+      // Only clamp a caller-provided pageSize to a minimum of 1; when pageSize
+      // is absent, let the configured default flow through instead of forcing 1.
+      ...(isNil(args.pageSize) ? {} : { pageSize: Math.max(1, args.pageSize) }),
     });
 
     Object.assign(pagination, {

@@ -35,6 +35,16 @@ describe('Pagination util', () => {
         });
       });
 
+      test('Uses default pageSize when only page is provided', () => {
+        const pagination = { page: 2 };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: defaultLimit, // (page - 1) * defaultLimit
+          limit: defaultLimit,
+        });
+      });
+
       test('Uses maxLimit as pageSize', () => {
         const pagination = { pageSize: 999 };
         const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
