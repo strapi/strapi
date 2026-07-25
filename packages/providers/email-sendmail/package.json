@@ -50,12 +50,16 @@
     "nodemailer": "9.0.1"
   },
   "devDependencies": {
+    "@strapi/types": "5.51.0",
     "@types/node": "20.19.41",
     "@types/nodemailer": "7.0.11",
     "eslint-config-custom": "5.51.0",
     "tsconfig": "5.51.0",
     "vitest": "catalog:",
     "vitest-config": "5.51.0"
+  },
+  "peerDependencies": {
+    "@strapi/types": "^5.0.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

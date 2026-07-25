@@ -3,6 +3,7 @@ import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';
+import type { Providers } from '@strapi/types';
 import type { EmailConfig, SendOptions } from '../types';
 
 const { ApplicationError } = errors;
@@ -65,7 +66,7 @@ const emailController = {
 
   async getSettings(ctx: Koa.Context) {
     const config: EmailConfig = strapi.plugin('email').service('email').getProviderSettings();
-    const provider = strapi.plugin('email').provider;
+    const provider = strapi.plugin('email').provider as Providers.Email.Provider;
 
     // Check if provider supports verify method
     const supportsVerify = typeof provider?.verify === 'function';
@@ -89,7 +90,7 @@ const emailController = {
   },
 
   async verify(ctx: Koa.Context) {
-    const provider = strapi.plugin('email').provider;
+    const provider = strapi.plugin('email').provider as Providers.Email.Provider;
 
     if (!provider?.verify || typeof provider.verify !== 'function') {
       throw new ApplicationError('This email provider does not support connection verification');

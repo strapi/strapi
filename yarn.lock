@@ -9814,12 +9814,15 @@ __metadata:
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
     "@aws-sdk/client-ses": "npm:3.1023.0"
+    "@strapi/types": "npm:5.51.0"
     "@strapi/utils": "npm:5.51.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.51.0"
     tsconfig: "npm:5.51.0"
     vitest: "catalog:"
     vitest-config: "npm:5.51.0"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
   languageName: unknown
   linkType: soft
 
@@ -9827,6 +9830,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
+    "@strapi/types": "npm:5.51.0"
     "@strapi/utils": "npm:5.51.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.51.0"
@@ -9835,6 +9839,8 @@ __metadata:
     tsconfig: "npm:5.51.0"
     vitest: "catalog:"
     vitest-config: "npm:5.51.0"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
   languageName: unknown
   linkType: soft
 
@@ -9842,6 +9848,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@strapi/types": "npm:5.51.0"
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.51.0"
@@ -9849,6 +9856,8 @@ __metadata:
     tsconfig: "npm:5.51.0"
     vitest: "catalog:"
     vitest-config: "npm:5.51.0"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
   languageName: unknown
   linkType: soft
 
@@ -9857,10 +9866,13 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": "npm:8.1.3"
+    "@strapi/types": "npm:5.51.0"
     "@strapi/utils": "npm:5.51.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.51.0"
     tsconfig: "npm:5.51.0"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
   languageName: unknown
   linkType: soft
 
@@ -9868,6 +9880,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@strapi/types": "npm:5.51.0"
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.51.0"
@@ -9875,6 +9888,8 @@ __metadata:
     tsconfig: "npm:5.51.0"
     vitest: "catalog:"
     vitest-config: "npm:5.51.0"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
   languageName: unknown
   linkType: soft
 

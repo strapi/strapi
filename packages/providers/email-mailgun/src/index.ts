@@ -1,11 +1,7 @@
 import assert from 'node:assert';
 import formData from 'form-data';
 import Mailgun, { type MailgunClientOptions } from 'mailgun.js';
-
-interface Settings {
-  defaultFrom: string;
-  defaultReplyTo: string;
-}
+import type { Providers } from '@strapi/types';
 
 interface SendOptions {
   from?: string;
@@ -28,7 +24,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export default {
-  init(providerOptions: ProviderOptions, settings: Settings) {
+  init(providerOptions: ProviderOptions, settings: Providers.Email.Settings) {
     assert(providerOptions.key, 'Mailgun API key is required');
     assert(providerOptions.domain, 'Mailgun domain is required');
 
@@ -58,4 +54,4 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Email.Factory;

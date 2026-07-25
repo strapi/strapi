@@ -5,6 +5,7 @@ export type * as Data from './data';
 export type * as Internal from './internal';
 export type * as Modules from './modules';
 export type * as Plugin from './plugin';
+export type * as Providers from './providers';
 export type * as Public from './public';
 export type * as Schema from './schema';
 export type * as Utils from './utils';
