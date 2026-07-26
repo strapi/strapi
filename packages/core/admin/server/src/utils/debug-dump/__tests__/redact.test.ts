@@ -88,4 +88,82 @@ describe('debug-dump scrub', () => {
     expect(({} as any).polluted).toBeUndefined();
     expect(r).toEqual({ safe: 1 });
   });
+
+  it('masks credential-shaped keys outside known secret containers', () => {
+    expect(scrub({ accessKeyId: 'AKIAIOSFODNN7EXAMPLE' }).accessKeyId).toBe(REDACTED);
+    // nested SMTP auth.pass (Ben's case) — auth is not a secret container, pass is
+    expect(scrub({ auth: { pass: 'hunter2', user: 'admin' } })).toEqual({
+      auth: { pass: REDACTED, user: 'admin' },
+    });
+    expect(scrub({ smtp: { pwd: 'x' } })).toEqual({ smtp: { pwd: REDACTED } });
+    expect(scrub({ passwd: 'x' }).passwd).toBe(REDACTED);
+    expect(scrub({ mnemonic: 'word word word' }).mnemonic).toBe(REDACTED);
+    expect(scrub({ authorization: 'Bearer abc' }).authorization).toBe(REDACTED);
+    expect(scrub({ sentry: { dsn: 'https://k@o.ingest.sentry.io/1' } })).toEqual({
+      sentry: { dsn: REDACTED },
+    });
+  });
+
+  it('masks well-known provider secret values under innocuous keys', () => {
+    // Real-format Stripe (sk_live_) and GitLab (glpat-) sample tokens are omitted:
+    // GitHub push protection flags them even as fake fixtures. Their patterns are
+    // still applied by the scrubber; the shapes below exercise the same layer.
+    for (const value of [
+      'whsec_abcdef0123456789abcdef01', // Stripe webhook signing secret
+      'ghp_0123456789abcdefABCDEF0123456789abcd', // GitHub token
+      'github_pat_11ABCDEFG0123456789_abcdefghijklmnop', // GitHub fine-grained PAT
+      'xoxb-1234567890-abcdefFGHIJK', // Slack token
+      'AKIAIOSFODNN7EXAMPLE', // AWS access key id
+      'SG.abcdefABCDEF012345.xyzXYZ0123456789abcd', // SendGrid
+      'AIzaSyD-abc123_DEF456ghi789JKL', // Google API key
+      'shpat_abcdef0123456789abcdef0123', // Shopify
+    ]) {
+      expect(scrub({ someField: value })).toEqual({ someField: REDACTED });
+    }
+  });
+
+  it('does not over-redact legitimate non-secret config', () => {
+    const config = {
+      author: 'A Strapi developer',
+      username: 'admin',
+      host: 'db.internal',
+      port: 5432,
+      clientId: 'public-client-123',
+      name: 'my-project',
+      version: '5.50.2',
+      environment: 'production',
+      autoReload: true,
+      compass: 'north',
+      keyboard: 'qwerty',
+    };
+    expect(scrub(config)).toEqual(config);
+  });
+
+  it('masks secret-bearing URLs, PEM keys, and more shapes found by the stress-test', () => {
+    // credentials in a URL authority, including empty-user (Redis)
+    expect(scrub({ redisUrl: 'redis://:passw0rd@cache.internal:6379/0' }).redisUrl).toBe(REDACTED);
+    // PEM private key block (not caught by key name)
+    expect(
+      scrub({
+        ciDeployKey: '-----BEGIN OPENSSH PRIVATE KEY-----\nAAAA\n-----END OPENSSH PRIVATE KEY-----',
+      }).ciDeployKey
+    ).toBe(REDACTED);
+    // Slack incoming webhook + Sentry DSN (secret carried in host/path)
+    expect(scrub({ hook: 'https://hooks.slack.com/services/T00/B00/XXXXXXXXXXXX' }).hook).toBe(
+      REDACTED
+    );
+    expect(scrub({ tracing: 'https://abc123def456@o12345.ingest.sentry.io/42' }).tracing).toBe(
+      REDACTED
+    );
+    // Strapi EE license key + crypto seed phrase (by key name)
+    expect(scrub({ licenseKey: '38206b7c-a2bf-4b65-9cfb-c614d51ba28d' }).licenseKey).toBe(REDACTED);
+    expect(scrub({ seedPhrase: 'abandon abandon abandon' }).seedPhrase).toBe(REDACTED);
+    // flat camelCase password suffix, but not lowercase look-alikes
+    expect(scrub({ smtpAuthPass: 'hunter2' }).smtpAuthPass).toBe(REDACTED);
+    expect(scrub({ compass: 'north', bypass: 'on' })).toEqual({ compass: 'north', bypass: 'on' });
+    // publishable (public) Stripe key stays visible
+    expect(scrub({ publishableKey: 'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA' }).publishableKey).toBe(
+      'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA'
+    );
+  });
 });

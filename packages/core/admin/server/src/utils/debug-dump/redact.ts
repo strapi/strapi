@@ -1,8 +1,24 @@
 export const REDACTED = '[REDACTED]';
 
-// Layer 1: key names whose value must be masked wherever they appear.
+// Layer 1a: key names (substring match) whose value must be masked wherever they appear.
 const SECRET_KEY_PATTERN =
-  /(secret|password|passphrase|salt|token|api[_-]?key|private[_-]?key|encryption[_-]?key|credential|provider[_-]?options|connection[_-]?string)/i;
+  /(secret|password|passphrase|salt|token|api[_-]?key|access[_-]?key|license[_-]?key|private[_-]?key|encryption[_-]?key|credential|provider[_-]?options|connection[_-]?string|mnemonic|seed[_-]?phrase|authorization|bearer)/i;
+
+// Layer 1b: short, ambiguous key names matched EXACTLY (case-insensitive), so they
+// do not over-match as substrings (e.g. `pass` must not redact `compass`/`bypass`,
+// and this still catches a nested SMTP `auth.pass`).
+const SECRET_KEY_EXACT = new Set(['pass', 'pwd', 'passwd', 'dsn']);
+// camelCase password suffixes (capitalized), e.g. `smtpAuthPass`, `dbPwd` — the
+// capital letter distinguishes them from lowercase look-alikes (`compass`, `bypass`).
+const SECRET_KEY_SUFFIX = /[a-z](Pass|Pwd|Passwd)$/;
+// separator-delimited short secret names, e.g. `auth.pass`, `db_pwd`, `x-pass`.
+const SECRET_KEY_DELIMITED = /(^|[._-])(pass|pwd|passwd|dsn)([._-]|$)/i;
+
+const isSecretKey = (key: string): boolean =>
+  SECRET_KEY_PATTERN.test(key) ||
+  SECRET_KEY_EXACT.has(key.toLowerCase()) ||
+  SECRET_KEY_SUFFIX.test(key) ||
+  SECRET_KEY_DELIMITED.test(key);
 
 // Layer 3: string values that look like secrets regardless of their key.
 // Real JWTs are base64url-encoded and the header segment always begins with
@@ -11,10 +27,46 @@ const SECRET_KEY_PATTERN =
 // (e.g. "5.50.1", "18.3.1").
 const JWT_PATTERN = /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
 const LONG_TOKEN_PATTERN = /^[A-Fa-f0-9]{32,}$|^[A-Za-z0-9+/]{40,}={0,2}$/;
-const URL_WITH_CREDENTIALS = /^[a-z][a-z0-9+.-]*:\/\/[^/@\s]+:[^/@\s]+@/i;
+// Credentials embedded in a URL authority: `user:pass@` or `:pass@` (empty user,
+// as in `redis://:password@host`).
+const URL_WITH_CREDENTIALS = /^[a-z][a-z0-9+.-]*:\/\/[^/@\s]*:[^/@\s]+@/i;
+// PEM private key blocks (certificates are public, so only PRIVATE KEY is masked).
+const PEM_PRIVATE_KEY_PATTERN = /-----BEGIN(?: [A-Z0-9]+)* PRIVATE KEY-----/;
+// URLs whose secret is carried in the host/path rather than a `user:pass@` authority:
+// chat webhooks and error-tracking DSNs.
+const SECRET_URL_PATTERN =
+  /^https:\/\/hooks\.slack\.com\/services\/|^https:\/\/(?:discord|discordapp)\.com\/api\/webhooks\/|:\/\/[^/@\s]+@[^/\s]*\bsentry\.io\b/i;
+
+// Well-known provider secret token formats, matched against the whole value. The
+// prefixes are specific enough to have negligible false-positive risk, so they
+// mask a value even under an innocuous key (e.g. `key: 'sk_live_...'`).
+// `pk_` (publishable) keys are intentionally excluded — they are public by design.
+const PROVIDER_SECRET_PATTERN = new RegExp(
+  [
+    '^(sk|rk)_(live|test)_[A-Za-z0-9]{8,}$', // Stripe secret / restricted
+    '^whsec_[A-Za-z0-9]{16,}$', // Stripe webhook signing secret
+    '^(gh[posru]_|github_pat_)[A-Za-z0-9_]{20,}$', // GitHub tokens / fine-grained PAT
+    '^xox[baprs]-[A-Za-z0-9-]{10,}$', // Slack tokens
+    '^(AKIA|ASIA)[A-Z0-9]{16}$', // AWS access key id
+    '^SG\\.[A-Za-z0-9_-]{16,}\\.[A-Za-z0-9_-]{16,}$', // SendGrid
+    '^AIza[A-Za-z0-9_-]{20,}$', // Google API key
+    '^ya29\\.[A-Za-z0-9_-]{20,}$', // Google OAuth access token
+    '^glpat-[A-Za-z0-9_-]{16,}$', // GitLab personal access token
+    '^(shpat|shpss|shpca|shppa)_[A-Za-z0-9]{20,}$', // Shopify
+    '^dop_v1_[a-f0-9]{40,}$', // DigitalOcean
+    '^re_[A-Za-z0-9_]{16,}$', // Resend
+    '^nfp_[A-Za-z0-9]{20,}$', // Netlify
+    '^EAAA[A-Za-z0-9_-]{20,}$', // Square
+  ].join('|')
+);
 
 const looksSecret = (value: string): boolean =>
-  JWT_PATTERN.test(value) || LONG_TOKEN_PATTERN.test(value) || URL_WITH_CREDENTIALS.test(value);
+  JWT_PATTERN.test(value) ||
+  LONG_TOKEN_PATTERN.test(value) ||
+  URL_WITH_CREDENTIALS.test(value) ||
+  PROVIDER_SECRET_PATTERN.test(value) ||
+  PEM_PRIVATE_KEY_PATTERN.test(value) ||
+  SECRET_URL_PATTERN.test(value);
 
 export interface ScrubOptions {
   appRoot?: string;
@@ -76,7 +128,7 @@ const walk = (value: unknown, appRoot?: string, homeDir?: string): unknown => {
       // any inner value whose own key/value doesn't independently match a
       // masking pattern (e.g. `providerOptions.auth.pass`), so there is nothing
       // safe to preserve underneath a secret-named container.
-      out[key] = SECRET_KEY_PATTERN.test(key) ? REDACTED : walk(val, appRoot, homeDir);
+      out[key] = isSecretKey(key) ? REDACTED : walk(val, appRoot, homeDir);
     }
     return out;
   }
