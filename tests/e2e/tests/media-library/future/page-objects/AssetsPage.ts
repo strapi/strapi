@@ -176,17 +176,25 @@ export class AssetsPage {
   }
 
   /**
+   * An item's selection checkbox. Assets and folders share the same label, and
+   * so do rows and cards, so this works in both views.
+   */
+  getSelectionCheckbox(name: string) {
+    return this.page.getByRole('checkbox', { name: `Select ${name}` });
+  }
+
+  /**
    * Toggle an asset's selection checkbox in table view (additive).
    */
   async selectAsset(name: string) {
-    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+    await this.getSelectionCheckbox(name).click();
   }
 
   /**
    * Toggle a folder's selection checkbox in table view (additive).
    */
   async selectFolder(name: string) {
-    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+    await this.getSelectionCheckbox(name).click();
   }
 
   /**
@@ -245,7 +253,7 @@ export class AssetsPage {
    */
   async pickSortOption(optionName: string) {
     await this.getSortMenuTrigger().click();
-    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    await this.page.getByRole('menuitemradio', { name: optionName, exact: true }).click();
     await this.page.keyboard.press('Escape');
   }
 
