@@ -228,6 +228,105 @@ describe('traverse-entity', () => {
 
       expect(result.field).toBe('modified');
     });
+
+    test('should not leave a removed key on the result, even as undefined', async () => {
+      const schema = createBaseSchema({
+        keep: { type: 'string' },
+        secret: { type: 'string' },
+      });
+      const entity = { keep: 'keep', secret: 'secret' };
+
+      mockVisitor.mockImplementation((options, utils) => {
+        if (options.key === 'secret') {
+          utils.remove(options.key);
+        }
+      });
+
+      const result = await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      // Removals are staged rather than deleted, so assert the key is genuinely gone and
+      // not merely blanked — `toEqual` alone would pass for `{ secret: undefined }`.
+      expect(Object.keys(result)).toEqual(['keep']);
+      expect('secret' in result).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(result, 'secret')).toBe(false);
+      expect(JSON.stringify(result)).toBe('{"keep":"keep"}');
+    });
+
+    test('should restore a key that is set after being removed', async () => {
+      const schema = createBaseSchema({
+        field: { type: 'string' },
+      });
+      const entity = { field: 'original' };
+
+      mockVisitor.mockImplementation((options, utils) => {
+        if (options.key === 'field') {
+          utils.remove(options.key);
+          utils.set(options.key, 'restored');
+        }
+      });
+
+      const result = await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      expect(result).toEqual({ field: 'restored' });
+    });
+
+    test('should keep a key the visitor sets that was not on the entity', async () => {
+      const schema = createBaseSchema({
+        field: { type: 'string' },
+        added: { type: 'string' },
+      });
+      const entity = { field: 'value' };
+
+      mockVisitor.mockImplementation((options, utils) => {
+        if (options.key === 'field') {
+          utils.set('added', 'injected');
+        }
+      });
+
+      const result = await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      expect(result).toEqual({ field: 'value', added: 'injected' });
+    });
+
+    test('should show a removed key as undefined to a later visitor call', async () => {
+      const schema = createBaseSchema({
+        first: { type: 'string' },
+        second: { type: 'string' },
+      });
+      const entity = { first: 'first', second: 'second' };
+
+      let observed: unknown = 'not read';
+      mockVisitor.mockImplementation((options, utils) => {
+        if (options.key === 'first') {
+          utils.remove(options.key);
+        }
+        if (options.key === 'second') {
+          observed = (options.data as Record<string, unknown>).first;
+        }
+      });
+
+      await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      expect(observed).toBeUndefined();
+    });
+
+    test('should not mutate the source entity when removing', async () => {
+      const schema = createBaseSchema({
+        keep: { type: 'string' },
+        secret: { type: 'string' },
+      });
+      const entity = { keep: 'keep', secret: 'secret' };
+
+      mockVisitor.mockImplementation((options, utils) => {
+        if (options.key === 'secret') {
+          utils.remove(options.key);
+        }
+      });
+
+      await traverseEntity(mockVisitor, { schema, getModel: mockGetModel }, entity);
+
+      expect(entity).toEqual({ keep: 'keep', secret: 'secret' });
+    });
   });
 
   describe('Relational attributes', () => {

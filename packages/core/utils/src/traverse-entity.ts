@@ -1,4 +1,4 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+import { clone, curry } from 'lodash/fp';
 
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
@@ -18,6 +18,21 @@ const parallelWithOrderedErrors = async <T>(promises: Promise<T>[]): Promise<T[]
   }
 
   return results.map((r) => (r as PromiseFulfilledResult<T>).value);
+};
+
+/**
+ * Native stand-ins for the lodash/fp predicates this module used to call.
+ *
+ * They run once per key (and several times per node) so the wrapper overhead was
+ * measurable. Semantics are deliberately identical: `isNil` is a loose null check,
+ * `isObject` matches lodash in treating functions as objects and `null` as not one.
+ */
+const isNil = (value: unknown): boolean => value == null;
+const isArray = Array.isArray;
+const isObject = (value: unknown): boolean => {
+  if (value == null) return false;
+  const type = typeof value;
+  return type === 'object' || type === 'function';
 };
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
@@ -155,8 +170,16 @@ const traverseEntity = async (
 
   // Don't mutate the original entity object
   // only clone at 1st level as the next level will get clone when traversed
-  const copy = clone(entity);
-  const visitorUtils = createVisitorUtils({ data: copy });
+  const copy = shallowCopy(entity);
+
+  // Removals are recorded rather than applied with `delete`. Deleting a property moves
+  // the object into dictionary mode, which then costs on every subsequent read — and
+  // sanitization reads every remaining key immediately afterwards to recurse, before the
+  // object is returned and serialized. Instead the key is blanked (so a visitor reading
+  // it still sees `undefined`, as it did when deleted) and dropped when the result is
+  // assembled below.
+  const removedKeys = new Set<string>();
+  const visitorUtils = createVisitorUtils({ data: copy, removedKeys });
 
   const keys = Object.keys(copy);
   for (let i = 0; i < keys.length; i += 1) {
@@ -164,14 +187,22 @@ const traverseEntity = async (
     // Retrieve the attribute definition associated to the key from the schema
     const attribute = schema.attributes[key] as AnyAttribute | undefined;
 
-    const newPath = { ...path };
-
-    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
-    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
-
-    if (!isNil(attribute)) {
-      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    // `attribute` is only appended to the attribute path when the key maps to one;
+    // otherwise the parent's value carries through unchanged.
+    let attributePath = path.attribute;
+    if (attribute != null) {
+      attributePath = path.attribute == null ? key : `${path.attribute}.${key}`;
     }
+
+    // Built as a single literal rather than a spread followed by assignments. The spread
+    // produced an object whose hidden class then transitioned on each write; a literal
+    // with all three fields is one allocation in a shape V8 can keep monomorphic across
+    // every key of every entity.
+    const newPath: Path = {
+      raw: path.raw == null ? key : `${path.raw}.${key}`,
+      attribute: attributePath,
+      rawWithIndices: path.rawWithIndices == null ? key : `${path.rawWithIndices}.${key}`,
+    };
 
     // Visit the current attribute
     const visitorOptions: VisitorOptions = {
@@ -291,15 +322,70 @@ const traverseEntity = async (
     }
   }
 
-  return copy;
+  // Nothing was removed, so the working copy is already the result.
+  if (removedKeys.size === 0) {
+    return copy;
+  }
+
+  return omitKeys(copy, removedKeys);
 };
 
-const createVisitorUtils = ({ data }: { data: Data }) => ({
+/**
+ * Shallow copy preserving the shape lodash's `clone` produced.
+ *
+ * Arrays and plain objects are copied natively. Anything else — Date, RegExp, a class
+ * instance — falls back to lodash so exotic values keep their prototype and internal
+ * slots, which a spread would silently discard.
+ */
+const shallowCopy = (entity: Data): Data => {
+  if (isArray(entity)) {
+    return entity.slice() as unknown as Data;
+  }
+
+  if (Object.getPrototypeOf(entity) === Object.prototype) {
+    return { ...entity };
+  }
+
+  return clone(entity);
+};
+
+/** Rebuild without the removed keys, producing a fresh object in fast-properties mode. */
+const omitKeys = (source: Data, removedKeys: Set<string>): Data => {
+  if (isArray(source)) {
+    // Removing an array index used to `delete` it, leaving a hole and keeping `length`
+    // unchanged. Filtering instead would renumber the remaining elements, so the delete
+    // is kept here. The built-in visitors never remove an index — an index has no
+    // matching attribute, so every visitor returns early — which makes this a cold path
+    // not worth optimizing at the cost of changing its semantics.
+    for (const key of removedKeys) {
+      delete (source as unknown as Record<string, unknown>)[key];
+    }
+    return source;
+  }
+
+  const result: Data = {};
+  const keys = Object.keys(source);
+
+  for (let i = 0; i < keys.length; i += 1) {
+    const key = keys[i];
+    if (!removedKeys.has(key)) {
+      result[key] = source[key];
+    }
+  }
+
+  return result;
+};
+
+const createVisitorUtils = ({ data, removedKeys }: { data: Data; removedKeys: Set<string> }) => ({
   remove(key: string) {
-    delete data[key];
+    removedKeys.add(key);
+    // Blanked rather than deleted so a visitor that reads the key afterwards observes
+    // `undefined`, exactly as it did when this was a `delete`.
+    data[key] = undefined;
   },
 
   set(key: string, value: Data) {
+    removedKeys.delete(key);
     data[key] = value;
   },
 });
