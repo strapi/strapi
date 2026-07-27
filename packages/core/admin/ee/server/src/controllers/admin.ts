@@ -1,5 +1,6 @@
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
+
 import type { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
 

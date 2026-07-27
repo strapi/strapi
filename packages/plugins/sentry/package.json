@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "5.50.2",
+  "version": "5.51.0",
   "description": "Send Strapi error events to Sentry",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -64,7 +64,7 @@
     "@strapi/icons": "2.2.3"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.50.2",
+    "@strapi/strapi": "5.51.0",
     "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
     "jest": "29.6.0",
