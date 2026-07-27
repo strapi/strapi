@@ -20,6 +20,7 @@ import {
 } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
+import { SubNavFolder } from './SubNavFolder';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
@@ -385,5 +386,6 @@ export const SubNav = {
   Sections,
   Section,
   SubSection,
+  Folder: SubNavFolder,
   PageWrapper,
 };
