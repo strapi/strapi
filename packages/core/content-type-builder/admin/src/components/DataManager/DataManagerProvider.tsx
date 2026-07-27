@@ -34,7 +34,7 @@ import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfo
 
 import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
-import type { Internal } from '@strapi/types';
+import type { Internal, Modules } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
@@ -44,6 +44,7 @@ type SchemaResponse = {
   data: {
     components: Components;
     contentTypes: ContentTypes;
+    contentStructure?: Modules.ContentStructure.ContentStructureFile | null;
   };
 };
 
