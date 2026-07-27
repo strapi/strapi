@@ -5,7 +5,7 @@ import type { DragItemData } from '../types/dnd';
 
 export interface CanDropItemOnFolderParams {
   items: DragItemData[];
-  targetFolderId: number;
+  targetFolderId: number | null;
   folderStructure: FolderNode[];
 }
 
@@ -57,6 +57,9 @@ export const isFolderDescendantOf = (
   return collectDescendantIds(ancestorNode).has(candidateId);
 };
 
+const isItemAtRoot = (item: DragItemData): boolean =>
+  item.kind === 'file' ? item.folderId == null : item.parentId == null;
+
 export const canDropItemOnFolder = ({
   items,
   targetFolderId,
@@ -64,6 +67,10 @@ export const canDropItemOnFolder = ({
 }: CanDropItemOnFolderParams): boolean => {
   if (items.length === 0) {
     return false;
+  }
+
+  if (targetFolderId === null) {
+    return items.some((item) => !isItemAtRoot(item));
   }
 
   const draggedFolderIds = new Set(
