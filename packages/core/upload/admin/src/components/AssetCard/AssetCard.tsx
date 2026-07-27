@@ -65,6 +65,12 @@ export const AssetCard = ({
         width={asset.width!}
         updatedAt={asset.updatedAt}
         isUrlSigned={asset?.isUrlSigned || false}
+        // Only signed remote URLs need crossOrigin: they are loaded without a
+        // cache-buster, so thumbnail and preview share a cache entry and must
+        // both opt into CORS to avoid a cache collision. Public/unsigned remote
+        // URLs are cache-busted, so they must not require a bucket CORS rule to
+        // render. See #26581.
+        crossOrigin={!local && asset?.isUrlSigned ? 'anonymous' : undefined}
         {...commonAssetCardProps}
       />
     );

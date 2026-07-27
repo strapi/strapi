@@ -6,7 +6,6 @@ import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@str
 import {
   buildTransferTable,
   createStrapiInstance,
-  isIgnoredContentType,
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
@@ -16,6 +15,10 @@ import {
   getDiffHandler,
   getAssetsBackupHandler,
   parseRestoreFromOptions,
+  buildTransferTransforms,
+  normalizeTransferFilterOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import {
   exitWith,
@@ -52,6 +55,9 @@ interface CmdOptions {
   verbose?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
   force?: boolean;
   checksums?: boolean;
@@ -75,7 +81,10 @@ export default async (opts: CmdOptions) => {
     exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
   }
 
+  normalizeTransferFilterOptions(opts);
+
   const strapi = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapi);
   const checksumsEnabled = opts.checksums !== false;
   let source;
   let destination;
@@ -153,22 +162,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
-          },
-        },
-      ],
-      entities: [
-        {
-          filter(entity) {
-            return !isIgnoredContentType(entity.type);
-          },
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   });
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('transfer', opts.verbose));
@@ -272,6 +266,13 @@ export default async (opts: CmdOptions) => {
   progress.on('transfer::start', async () => {
     transferPrepStartedAt = Date.now();
     prepStepDetail = null;
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
+    });
     startingSpinner = ora(formatPrepSpinnerLine()).start();
     startingElapsedInterval = setInterval(() => {
       if (startingSpinner && transferPrepStartedAt != null) {

@@ -187,7 +187,6 @@ test.describe('Home as super admin', () => {
       } catch {
         await page.getByRole('button', { name: /^finish$/i }).click();
       }
-      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
@@ -245,14 +244,19 @@ test.describe('Home as super admin', () => {
       await page.getByRole('option', { name: 'Full access' }).click();
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Go back to the home page and wait for refreshed statistics
+      // Go back to the home page and wait for refreshed statistics.
+      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
+      // keep that RTK query warm, so Home remount often serves cache and no GET is issued
+      // (waitForResponse then times out). Entries still come from count-documents — assert
+      // via expect() polling once the widget is ready.
       const keyStatisticsReady = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
           response.url().includes('/homepage/key-statistics') &&
           response.ok()
       );
-      await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+      await page.getByRole('link', { name: /^home$/i }).click();
       await keyStatisticsReady;
 
       // The numbers should be updated

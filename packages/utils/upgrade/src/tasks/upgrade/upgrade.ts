@@ -39,6 +39,9 @@ export const upgrade = async (options: UpgradeOptions) => {
   // Load all available versions from the NPM registry
   await npmPackage.refresh();
 
+  // Pin ranged @strapi/* dependencies before resolving upgrade targets
+  await prompts.pinVersions(project, options);
+
   // Initialize the upgrade instance
   // Throws during initialization if the provided target is incompatible with the current version
   const upgrader = upgraderFactory(project, options.target, npmPackage)

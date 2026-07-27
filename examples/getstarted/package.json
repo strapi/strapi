@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@strapi/blocks-react-renderer": "1.0.2",
-    "@strapi/icons": "2.2.1",
+    "@strapi/icons": "2.2.3",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",
@@ -42,5 +42,8 @@
   },
   "strapi": {
     "uuid": "getstarted"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.41"
   }
 }

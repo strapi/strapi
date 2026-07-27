@@ -71,11 +71,12 @@ const recreateStrapiInstance = async ({ jwtManagement = 'refresh', enableRoutes 
       s.config.set('plugin::users-permissions.jwtManagement', jwtManagement);
       s.config.set('plugin::users-permissions.sessions.httpOnly', false);
       s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
-      for (const { route, role } of enableRoutes) {
-        await enableAuthRoute(s, route, role);
-      }
     },
   });
+
+  for (const { route, role } of enableRoutes) {
+    await enableAuthRoute(strapi, route, role);
+  }
 };
 
 describe('UP Content API - Active Sessions', () => {

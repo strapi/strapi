@@ -1,3 +1,4 @@
+import { DndContext } from '@dnd-kit/core';
 import { fireEvent, render, screen } from '@tests/utils';
 
 import { FolderTree } from '../FolderTree';
@@ -32,7 +33,11 @@ const renderTree = (overrides: Partial<React.ComponentProps<typeof FolderTree>> 
     onSelectFolder: jest.fn(),
   };
 
-  return render(<FolderTree {...defaultProps} {...overrides} />);
+  return render(
+    <DndContext>
+      <FolderTree {...defaultProps} {...overrides} />
+    </DndContext>
+  );
 };
 
 describe('FolderTree', () => {

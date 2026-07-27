@@ -22,8 +22,19 @@ interface GetFoldersParams {
 interface BulkMoveParams {
   fileIds?: number[];
   folderIds?: number[];
-  destinationFolderId: number;
+  /** `null` moves the items to the root of the Media Library. */
+  destinationFolderId: number | null;
 }
+
+type DataEnvelope<T> = {
+  data: T;
+};
+
+const isDataEnvelope = <T>(response: T | DataEnvelope<T>): response is DataEnvelope<T> =>
+  typeof response === 'object' && response !== null && 'data' in response;
+
+const unwrapData = <T>(response: T | DataEnvelope<T>): T =>
+  isDataEnvelope(response) ? response.data : response;
 
 const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -53,8 +64,7 @@ const foldersApi = uploadApi.injectEndpoints({
         };
       },
       transformResponse: (response: GetFolders.Response['data']) =>
-        // TODO dont want this cast
-        (response as any).data,
+        unwrapData<GetFolders.Response['data']>(response),
       providesTags: (results) => {
         if (results) {
           return [
@@ -109,7 +119,7 @@ const foldersApi = uploadApi.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: GetFolders.Response['data']) =>
-        ((response as any)?.data ?? response ?? []) as Folder[],
+        unwrapData<GetFolders.Response['data']>(response ?? []),
       providesTags: (results) => {
         if (results) {
           return [

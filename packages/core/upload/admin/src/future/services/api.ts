@@ -396,6 +396,39 @@ const uploadApi = adminApi
       }),
 
       /**
+       * Upload a single, already-prepared file WITHOUT opening the global
+       * upload-progress dialog. For flows that create one asset programmatically
+       * (e.g. crop → "Save as copy"), where the bulk-upload progress UI is
+       * inappropriate. Same endpoint as `uploadFiles`, minus the progress/retry
+       * machinery.
+       */
+      uploadFileSilently: builder.mutation<UploadedFile, UploadEntry>({
+        queryFn: async ({ file, fileInfo }, { getState }) => {
+          const token = (getState() as RootState).admin_app?.token;
+          const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+
+          const formData = new FormData();
+          formData.append('files', file);
+          formData.append('fileInfo', JSON.stringify(fileInfo));
+
+          try {
+            const uploaded = await uploadFileViaXHR(
+              url,
+              token,
+              formData,
+              new AbortController().signal,
+              () => {}
+            );
+            return { data: uploaded };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : 'Upload failed';
+            return { error: { name: 'UnknownError', message } };
+          }
+        },
+        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+      }),
+
+      /**
        * Retry uploading cancelled files.
        * Maps cancelled rows back to their original entries and re-runs only those
        * through the same sequential loop with a fresh AbortController.
@@ -534,6 +567,10 @@ const uploadApi = adminApi
     }),
   });
 
-export const { useUploadFilesMutation, useRetryCancelledFilesMutation, useUploadFromUrlsMutation } =
-  uploadApi;
+export const {
+  useUploadFilesMutation,
+  useUploadFileSilentlyMutation,
+  useRetryCancelledFilesMutation,
+  useUploadFromUrlsMutation,
+} = uploadApi;
 export { uploadApi };

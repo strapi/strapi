@@ -1,6 +1,6 @@
 import type { Schema, UID } from '@strapi/types';
 
-import { mergeUnsupportedFields } from '../ai-localizations';
+import { createAILocalizationsService, mergeUnsupportedFields } from '../ai-localizations';
 
 describe('ai-localizations service', () => {
   describe('mergeUnsupportedFields', () => {
@@ -516,6 +516,186 @@ describe('ai-localizations service', () => {
         expect(result.blocks[1].metaTitle).toBe('Translated Meta');
         expect(result.blocks[1].ogImage).toEqual({ id: 2, url: '/og.jpg' });
       });
+    });
+  });
+
+  describe('generateDocumentLocalizations - issue #26579 (maxLength constraints)', () => {
+    const MODEL = 'api::article.article' as UID.ContentType;
+
+    const buildSchema = (): Schema.Schema =>
+      ({
+        modelType: 'contentType',
+        uid: MODEL,
+        modelName: 'article',
+        globalId: 'Article',
+        info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+        options: { draftAndPublish: true },
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: { i18n: { localized: true } },
+          },
+          description: {
+            type: 'text',
+            maxLength: 80,
+            minLength: 10,
+            pluginOptions: { i18n: { localized: true } },
+          },
+        },
+      }) as unknown as Schema.Schema;
+
+    const buildMockStrapi = (schema: Schema.Schema) => {
+      const jobsService = { upsertJobForDocument: jest.fn().mockResolvedValue(undefined) };
+      const settingsService = {
+        getSettings: jest.fn().mockResolvedValue({ aiLocalizations: true }),
+      };
+      const contentTypesService = { isLocalizedContentType: jest.fn().mockReturnValue(true) };
+      const localesService = {
+        getDefaultLocale: jest.fn().mockResolvedValue('en'),
+        find: jest.fn().mockResolvedValue([{ code: 'en' }, { code: 'pt-BR' }, { code: 'fr' }]),
+      };
+
+      const documentsApi = {
+        findOne: jest.fn().mockResolvedValue({
+          documentId: 'doc1',
+          title: 'Some title',
+          description: 'Some description',
+        }),
+        update: jest.fn().mockResolvedValue({}),
+      };
+
+      const mockStrapi = {
+        getModel: jest.fn(() => schema),
+        documents: jest.fn(() => documentsApi),
+        plugins: {
+          i18n: {
+            services: {
+              'ai-localization-jobs': jobsService,
+              settings: settingsService,
+              'content-types': contentTypesService,
+              locales: localesService,
+            },
+          },
+          'content-manager': {
+            services: {
+              'populate-builder': () => ({
+                populateDeep: () => ({ build: async () => ({}) }),
+              }),
+            },
+          },
+        },
+        ai: {
+          admin: {
+            isEnabled: jest.fn(() => true),
+            getAiToken: jest.fn().mockResolvedValue({ token: 'test-token' }),
+          },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
+      };
+
+      return { mockStrapi, jobsService, documentsApi };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      delete (global as any).fetch;
+      // global.strapi is a non-configurable accessor from unit.setup — cannot delete;
+      // each test reassigns its mock.
+    });
+
+    it('forwards maxLength/minLength to the AI so translations can respect the limit', async () => {
+      const schema = buildSchema();
+      const { mockStrapi } = buildMockStrapi(schema);
+
+      (global as any).strapi = mockStrapi;
+
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          localizations: [
+            { locale: 'pt-BR', content: { title: 'Título', description: 'Descrição' } },
+            { locale: 'fr', content: { title: 'Titre', description: 'Description' } },
+          ],
+        }),
+      });
+      (global as any).fetch = fetchMock;
+
+      const service = createAILocalizationsService({ strapi: mockStrapi as any });
+
+      await service.generateDocumentLocalizations({
+        model: MODEL,
+        document: {
+          documentId: 'doc1',
+          locale: 'en',
+          title: 'With Teltec Data support',
+          description:
+            'With Teltec Data support, this Brazilian publisher cut costs and improved a lot.',
+        } as any,
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+
+      expect(requestBody.contentTypeSchema.description).toMatchObject({
+        type: 'text',
+        maxLength: 80,
+        minLength: 10,
+      });
+    });
+
+    it('persists valid locales even if another locale fails validation, and reports which locale failed', async () => {
+      const schema = buildSchema();
+      const { mockStrapi, jobsService, documentsApi } = buildMockStrapi(schema);
+      (global as any).strapi = mockStrapi;
+
+      documentsApi.update.mockImplementation(async ({ locale }: { locale: string }) => {
+        if (locale === 'fr') {
+          throw new Error('description must be at most 80 characters');
+        }
+        return {};
+      });
+
+      (global as any).fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          localizations: [
+            { locale: 'pt-BR', content: { title: 'Título', description: 'curto' } },
+            {
+              locale: 'fr',
+              content: {
+                title: 'Titre',
+                description: 'a'.repeat(103), // exceeds maxLength 80
+              },
+            },
+          ],
+        }),
+      });
+
+      const errorSpy = mockStrapi.log.error;
+      const service = createAILocalizationsService({ strapi: mockStrapi as any });
+
+      await service.generateDocumentLocalizations({
+        model: MODEL,
+        document: {
+          documentId: 'doc1',
+          locale: 'en',
+          title: 'A title',
+          description: 'A source description that expands when translated.',
+        } as any,
+      });
+
+      const updatedLocales = documentsApi.update.mock.calls.map((c: any[]) => c[0].locale);
+      expect(updatedLocales).toContain('pt-BR');
+
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/"fr".*80 characters/));
+
+      const lastJobStatus = jobsService.upsertJobForDocument.mock.calls.at(-1)?.[0]?.status;
+      expect(lastJobStatus).toBe('failed');
     });
   });
 });

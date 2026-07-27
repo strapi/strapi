@@ -1,10 +1,10 @@
 /**
- * Regression: #25070 — admin can blank-crash when `prismjs` is bundled so `import *` has no
+ * Regression: #25070 / #26964 — admin can blank-crash when `prismjs` is bundled so `import *` has no
  * top-level `.languages` and language plugins expect `Prism` global — `decorateCode` must resolve
- * Prism from `window` / bail safely (PR #25660).
+ * Prism from `window` / bail safely (PR #25660). Keep `prismjs` in Vite `optimizeDeps.include`;
+ * do not include `prismjs/components/*.js` (that language glob causes the blank-admin crash).
  *
- * This file mocks `prismjs` like Vite’s prebundle and clears `window.Prism`; **`develop` without
- * the fix throws**; **fix branch passes**. Ship with the `Code.tsx` change.
+ * This file mocks `prismjs` like Vite’s prebundle and clears `window.Prism`.
  *
  * @see https://github.com/strapi/strapi/issues/25070
  */
