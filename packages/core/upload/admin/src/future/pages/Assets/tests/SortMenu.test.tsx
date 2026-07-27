@@ -23,8 +23,7 @@ describe('SortMenu', () => {
     const trigger = screen.getByRole('button', { name: 'Sort: Most recent updates' });
     await user.click(trigger);
 
-    expect(screen.getByText('Sort by')).toBeInTheDocument();
-    expect(screen.getByText('Sort direction')).toBeInTheDocument();
+    expect(screen.getByText('Sort')).toBeInTheDocument();
     expect(screen.getByText('Folders')).toBeInTheDocument();
 
     // The active option of each group carries a visually-hidden "(active)"
@@ -34,8 +33,8 @@ describe('SortMenu', () => {
       'Most recent updates (active)',
       'A to Z',
       'Z to A',
-      'File size increasingly',
-      'File size decreasingly',
+      'File size ascending',
+      'File size descending',
       'On top (active)',
       'Mixed with files',
     ]) {

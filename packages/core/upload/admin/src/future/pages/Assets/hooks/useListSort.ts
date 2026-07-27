@@ -8,7 +8,7 @@ import { useQueryParams } from '@strapi/admin/strapi-admin';
  *   recent updates).
  * - `?folders=mixed` — folders interleaved with files. Omitted → folders on top.
  *
- * The "Sort by" and "Sort direction" groups are mutually exclusive: exactly one
+ * The date rules and the direction rules are mutually exclusive: exactly one
  * rule is active at a time (one checkmark total, like the design mock). Picking
  * an option in one group clears the other; clearing the active option falls
  * back to the default — an unsorted list is not a state the UI offers.

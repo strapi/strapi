@@ -29,11 +29,11 @@ const SORT_DIRECTION_LABELS: Record<SortDirectionKey, MessageDescriptor> = {
   nameDesc: { id: getTranslationKey('list.sort.name-desc'), defaultMessage: 'Z to A' },
   sizeAsc: {
     id: getTranslationKey('list.sort.size-asc'),
-    defaultMessage: 'File size increasingly',
+    defaultMessage: 'File size ascending',
   },
   sizeDesc: {
     id: getTranslationKey('list.sort.size-desc'),
-    defaultMessage: 'File size decreasingly',
+    defaultMessage: 'File size descending',
   },
 };
 
@@ -72,10 +72,10 @@ interface SortMenuProps {
 }
 
 /**
- * Toolbar "Sort" dropdown: single-select groups (Sort by / Sort direction /
- * Folders). Picking an option keeps the menu open (`onSelect` preventDefault) so
- * several facets can be tuned in one visit; clicking a checked facet clears it
- * (the hook guarantees at least one sort rule stays active).
+ * Toolbar "Sort" dropdown: single-select sections (Sort / Folders). Picking an
+ * option keeps the menu open (`onSelect` preventDefault) so several facets can
+ * be tuned in one visit; clicking a checked facet clears it (the hook
+ * guarantees at least one sort rule stays active).
  */
 export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
   const { formatMessage } = useIntl();
@@ -110,8 +110,10 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
           group behind an invisible scroll — all groups must be visible at
           once. 70vh keeps a scroll on very short viewports. */}
       <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh" width="25rem">
+        {/* One single-select "Sort" section: the two rule families were always
+            mutually exclusive (one checkmark total), so they share a group. */}
         <GroupLabel>
-          {formatMessage({ id: getTranslationKey('list.sort.by'), defaultMessage: 'Sort by' })}
+          {formatMessage({ id: getTranslationKey('list.sort.section'), defaultMessage: 'Sort' })}
         </GroupLabel>
         {(Object.keys(SORT_BY_LABELS) as SortByKey[]).map((key) => (
           <Menu.Item
@@ -126,14 +128,6 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             {sort.sortBy === key && activeMark}
           </Menu.Item>
         ))}
-
-        <Menu.Separator />
-        <GroupLabel>
-          {formatMessage({
-            id: getTranslationKey('list.sort.direction'),
-            defaultMessage: 'Sort direction',
-          })}
-        </GroupLabel>
         {(Object.keys(SORT_DIRECTION_LABELS) as SortDirectionKey[]).map((key) => (
           <Menu.Item
             key={key}
