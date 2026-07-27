@@ -5,6 +5,7 @@ import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
 
 import { useDataManager } from '../../DataManager/useDataManager';
+import { createEmptyContentStructure } from '../../DataManager/utils/contentStructure';
 import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
 import { mockData } from './mockData';
@@ -79,6 +80,14 @@ const mockDataManager = ({
   isModified: false,
   isSaving: false,
   applyChange() {},
+  contentStructure: createEmptyContentStructure(),
+  createFolder() {},
+  renameFolder() {},
+  moveFolder() {},
+  deleteFolderOnly() {},
+  deleteFolderAndSubtree() {},
+  assignContentTypeToFolder() {},
+  reorderFolderChildren() {},
   ...overrides,
   history: {
     canUndo: true,
