@@ -3,6 +3,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Checkbox,
   Flex,
   Grid,
   IconButton,
@@ -16,7 +17,9 @@ import { ASSET_TYPES } from '../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
+import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
@@ -28,13 +31,30 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
-const StyledCard = styled(Card)<{ $isDragging?: boolean; $isMovePending?: boolean }>`
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+// Top-left selection checkbox overlaid on the asset preview, always visible.
+const CheckboxOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[2]};
+  left: ${({ theme }) => theme.spaces[2]};
+  z-index: 1;
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+`;
+
+const StyledCard = styled(Card)<{
+  $isDragging?: boolean;
+  $isMovePending?: boolean;
+  $isSelected?: boolean;
+}>`
+  border: 1px solid
+    ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
   cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  background: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary100 : undefined)};
+  /* Shift+click range selection must not highlight card text. */
+  user-select: none;
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -59,14 +79,18 @@ const StyledFolderCard = styled(Flex)<{
   $isMovePending?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
+  $isSelected?: boolean;
 }>`
   width: 100%;
+  user-select: none;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]}; // 8px
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border: 1px solid
+    ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ theme }) => theme.colors.neutral0};
+  background: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
   cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
     if ($isMovePending) {
       return 'wait';
@@ -107,12 +131,14 @@ const FolderName = styled(Typography)`
 
 interface FolderCardProps {
   folder: Folder;
+  orderedItemKeys: ItemKey[];
 }
 
-const FolderCard = ({ folder }: FolderCardProps) => {
+const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const { isSelected, toggle, selectRange } = useAssetSelection();
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -120,15 +146,33 @@ const FolderCard = ({ folder }: FolderCardProps) => {
     showInvalidDropCursor,
   } = useFolderDraggableDroppable(folder);
 
+  const key = folderKey(folder.id);
+
   const setNodeRef = (node: HTMLElement | null) => {
     setDragRef(node);
     setDropRef(node);
   };
 
+  // Folders share the selection mechanism with assets (toggle, range,
+  // select-all). Only the plain-click semantic differs: it navigates into the
+  // folder instead of selecting it.
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else if (e.metaKey || e.ctrlKey) {
+      toggle(key);
+    } else {
+      navigateToFolder(folder);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggle(key);
     }
   };
 
@@ -141,7 +185,8 @@ const FolderCard = ({ folder }: FolderCardProps) => {
       $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
-      onClick={() => navigateToFolder(folder)}
+      $isSelected={isSelected(key)}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="listitem"
       tabIndex={0}
@@ -247,6 +292,7 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const StyledCardHeader = styled(CardHeader)`
+  position: relative;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
@@ -265,21 +311,80 @@ const FileName = styled(Typography)`
   min-width: 0;
 `;
 
+// The asset filename is its own interactive element: clicking it opens the
+// details drawer instead of selecting the card (mirrors the table view).
+const NameButton = styled.button`
+  display: inline-flex;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+`;
+
 interface AssetCardProps {
   asset: File;
+  orderedItemKeys: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
+const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
 
+  const key = assetKey(asset.id);
+  const selected = isSelected(key);
+
+  // OS file-manager click semantics (same as the table view): shift selects a
+  // range, cmd/ctrl toggles, plain click selects only this card.
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else if (e.metaKey || e.ctrlKey) {
+      toggle(key);
+    } else {
+      selectOnly(key);
+    }
+  };
+
+  // Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggle(key);
+    }
+  };
+
+  const handleNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAssetItemClick(asset.id);
+  };
+
+  // Same semantics as the table's row checkbox: Shift extends the range,
+  // otherwise a plain additive toggle. Never bubbles into the card click.
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else {
+      toggle(key);
     }
   };
 
@@ -290,13 +395,27 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isSelected={selected}
       tabIndex={0}
       role="listitem"
       onDragStart={(e) => e.preventDefault()}
-      onClick={() => onAssetItemClick(asset.id)}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
+        <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <Checkbox
+            checked={selected}
+            onClick={handleCheckboxClick}
+            aria-label={formatMessage(
+              {
+                id: getTranslationKey('list.table.row.select'),
+                defaultMessage: 'Select {name}',
+              },
+              { name: asset.name }
+            )}
+          />
+        </CheckboxOverlay>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>
@@ -304,9 +423,11 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
           <FileTypeIcon>
             <TypeIcon width={20} height={20} />
           </FileTypeIcon>
-          <FileName textColor="primary800" ellipsis>
-            {asset.name}
-          </FileName>
+          <NameButton type="button" onClick={handleNameClick}>
+            <FileName textColor="primary800" ellipsis>
+              {asset.name}
+            </FileName>
+          </NameButton>
           <IconButton
             label={formatMessage({
               id: getTranslationKey('control-card.more-actions'),
@@ -336,6 +457,12 @@ interface AssetsGridProps {
 export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
+  // Render order: folders first, then assets — range selection follows it.
+  const orderedItemKeys: ItemKey[] = [
+    ...folders.map((folder) => folderKey(folder.id)),
+    ...assets.map((asset) => assetKey(asset.id)),
+  ];
+
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.
   if (totalItems === 0) {
@@ -349,7 +476,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
           <Grid.Root gap={4}>
             {folders.map((folder) => (
               <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${folder.id}`}>
-                <FolderCard folder={folder} />
+                <FolderCard folder={folder} orderedItemKeys={orderedItemKeys} />
               </Grid.Item>
             ))}
           </Grid.Root>
@@ -365,7 +492,11 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
           direction="column"
           alignItems="stretch"
         >
-          <AssetCard asset={asset} onAssetItemClick={onAssetItemClick} />
+          <AssetCard
+            asset={asset}
+            orderedItemKeys={orderedItemKeys}
+            onAssetItemClick={onAssetItemClick}
+          />
         </Grid.Item>
       ))}
     </Grid.Root>
