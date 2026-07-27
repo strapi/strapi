@@ -937,7 +937,7 @@ const RelationsList = ({
                 ? { start: true }
                 : relationInFront
                   ? {
-                      before: relationInFront.documentId,
+                      before: relationInFront.documentId ?? relationInFront.apiData?.documentId,
                       locale: relationInFront.locale,
                       status:
                         'publishedAt' in relationInFront && relationInFront.publishedAt
