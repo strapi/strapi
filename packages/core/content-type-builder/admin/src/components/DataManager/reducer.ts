@@ -6,6 +6,7 @@ import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import { createUndoRedoSlice } from './undoRedo';
+import { createEmptyContentStructure, sectionKeyForKind } from './utils/contentStructure';
 
 import type {
   Components,
@@ -15,6 +16,12 @@ import type {
   Status,
   AnyAttribute,
 } from '../../types';
+import type {
+  ContentStructure,
+  ContentStructureGroup,
+  GroupStatus,
+  SectionKey,
+} from './utils/contentStructure';
 import type { Internal, Schema, Struct, UID } from '@strapi/types';
 
 export interface DataManagerStateType {
@@ -22,6 +29,8 @@ export interface DataManagerStateType {
   initialComponents: Components;
   contentTypes: ContentTypes;
   initialContentTypes: ContentTypes;
+  contentStructure: ContentStructure;
+  initialContentStructure: ContentStructure;
   reservedNames: {
     models: string[];
     attributes: string[];
@@ -35,6 +44,8 @@ const initialState: DataManagerStateType = {
   contentTypes: {},
   initialComponents: {},
   initialContentTypes: {},
+  contentStructure: createEmptyContentStructure(),
+  initialContentStructure: createEmptyContentStructure(),
   reservedNames: {
     models: [],
     attributes: [],
@@ -64,6 +75,46 @@ type InitPayload = {
   components: Record<string, Component>;
   contentTypes: Record<string, ContentType>;
   reservedNames: DataManagerStateType['reservedNames'];
+  contentStructure?: ContentStructure;
+};
+
+type CreateFolderPayload = {
+  parentId: string | null;
+  section: SectionKey;
+  name: string;
+  id: string;
+};
+
+type RenameFolderPayload = {
+  section: SectionKey;
+  name: string;
+  id: string;
+};
+
+type MoveFolderPayload = {
+  newParentId: string | null;
+  section: SectionKey;
+  index?: number;
+  id: string;
+};
+
+type DeleteFolderPayload = {
+  section: SectionKey;
+  id: string;
+};
+
+type AssignContentTypeToFolderPayload = {
+  targetGroupId: string | null;
+  uid: UID.ContentType;
+  section: SectionKey;
+  index?: number;
+};
+
+type ReorderFolderChildrenPayload = {
+  section: SectionKey;
+  groupId: string;
+  from: number;
+  to: number;
 };
 
 type AddAttributePayload = {
@@ -204,6 +255,14 @@ const getNewStatus = (oldStatus: Status | undefined, newStatus: Status) => {
   return newStatus;
 };
 
+const getNewGroupStatus = (oldStatus: GroupStatus, newStatus: GroupStatus): GroupStatus => {
+  if (oldStatus === 'NEW') {
+    return oldStatus;
+  }
+
+  return newStatus;
+};
+
 const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
   attribute.status = getNewStatus(attribute.status, status);
 };
@@ -273,19 +332,75 @@ const updateType = (type: ContentType | Component, data: Record<string, any>) =>
   setStatus(type, 'CHANGED');
 };
 
+const findGroup = (groups: ContentStructureGroup[], id: string) => {
+  return groups.find((group) => group.id === id);
+};
+
+const setGroupStatus = (group: ContentStructureGroup, status: GroupStatus): void => {
+  group.status = getNewGroupStatus(group.status, status);
+};
+
+/**
+ * Remove a content type reference from every group of a section, mark the group as changed if a reference was removed.
+ * @returns true if a reference was removed, false otherwise.
+ */
+const removeContentTypeChild = (groups: ContentStructureGroup[], uid: string): boolean => {
+  let removed = false;
+
+  for (const group of groups) {
+    const groupIndex = group.children.findIndex((child) => {
+      return child.type === 'contentType' && child.uid === uid;
+    });
+
+    if (groupIndex !== -1) {
+      group.children.splice(groupIndex, 1);
+      setGroupStatus(group, 'CHANGED');
+      removed = true;
+    }
+  }
+
+  return removed;
+};
+
+/**
+ * Determines whether `potentialDescendantId` is nested somewhere inside `ancestorId`'s subtree
+ */
+const isDescendantGroup = (
+  groups: ContentStructureGroup[],
+  ancestorId: string,
+  potentialDescendantId: string
+): boolean => {
+  let current = findGroup(groups, potentialDescendantId);
+
+  while (current && current.parent !== null) {
+    if (current.parent === ancestorId) {
+      return true;
+    }
+
+    current = findGroup(groups, current.parent);
+  }
+
+  return false;
+};
+
 const slice = createUndoRedoSlice(
   {
     name: 'data-manager',
     initialState,
     reducers: {
       init: (state, action: PayloadAction<InitPayload>) => {
-        const { components, contentTypes, reservedNames } = action.payload;
+        const { components, contentTypes, reservedNames, contentStructure } = action.payload;
 
         state.components = components;
         state.initialComponents = components;
         state.initialContentTypes = contentTypes;
         state.contentTypes = contentTypes;
         state.reservedNames = reservedNames;
+
+        const structure = contentStructure ?? createEmptyContentStructure();
+        state.initialContentStructure = structure;
+        state.contentStructure = structure;
+
         state.isLoading = false;
       },
       createComponentSchema: (state, action: PayloadAction<CreateComponentSchemaPayload>) => {
@@ -636,6 +751,8 @@ const slice = createUndoRedoSlice(
           return;
         }
 
+        const previousKind = type.kind;
+
         updateType(type, {
           info: {
             displayName,
@@ -646,6 +763,11 @@ const slice = createUndoRedoSlice(
           },
           pluginOptions,
         });
+
+        if (kind && kind !== previousKind) {
+          const oldSection = state.contentStructure.sections[sectionKeyForKind(previousKind)];
+          removeContentTypeChild(oldSection.groups, uid);
+        }
       },
       deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
         const uid = action.payload;
@@ -722,6 +844,223 @@ const slice = createUndoRedoSlice(
             }
           });
         });
+      },
+
+      createFolder: (state, action: PayloadAction<CreateFolderPayload>) => {
+        const { section, id, name, parentId } = action.payload;
+        const { groups } = state.contentStructure.sections[section];
+
+        groups.push({ id, name, parent: parentId, children: [], status: 'NEW' });
+
+        if (parentId) {
+          const parent = findGroup(groups, parentId);
+
+          if (parent) {
+            parent.children.push({ type: 'group', id });
+            setGroupStatus(parent, 'CHANGED');
+          }
+        }
+      },
+      renameFolder: (state, action: PayloadAction<RenameFolderPayload>) => {
+        const { section, id, name } = action.payload;
+
+        const group = findGroup(state.contentStructure.sections[section].groups, id);
+        if (!group) {
+          return;
+        }
+
+        group.name = name;
+        setGroupStatus(group, 'CHANGED');
+      },
+      moveFolder: (state, action: PayloadAction<MoveFolderPayload>) => {
+        const { section, id, newParentId, index } = action.payload;
+        const { groups } = state.contentStructure.sections[section];
+
+        const group = findGroup(groups, id);
+        if (!group) {
+          return;
+        }
+
+        // Reject no-ops and cyclic moves
+        if (newParentId === id || (newParentId && isDescendantGroup(groups, id, newParentId))) {
+          return;
+        }
+
+        if (group.parent) {
+          const oldParent = findGroup(groups, group.parent);
+
+          if (oldParent) {
+            // Remove from the old parent's list of children.
+            const idx = oldParent.children.findIndex((child) => {
+              return child.type === 'group' && child.id === id;
+            });
+
+            if (idx !== -1) {
+              oldParent.children.splice(idx, 1);
+            }
+
+            setGroupStatus(oldParent, 'CHANGED');
+          }
+        }
+
+        group.parent = newParentId;
+        setGroupStatus(group, 'CHANGED');
+
+        if (newParentId) {
+          const newParent = findGroup(groups, newParentId);
+
+          if (newParent) {
+            const entry = { type: 'group' as const, id };
+
+            if (typeof index === 'number' && index >= 0 && index <= newParent.children.length) {
+              newParent.children.splice(index, 0, entry);
+            } else {
+              newParent.children.push(entry);
+            }
+
+            setGroupStatus(newParent, 'CHANGED');
+          }
+        }
+      },
+      deleteFolderOnly: (state, action: PayloadAction<DeleteFolderPayload>) => {
+        const { section, id: groupToDeleteId } = action.payload;
+        const { groups } = state.contentStructure.sections[section];
+
+        const groupToDelete = findGroup(groups, groupToDeleteId);
+        if (!groupToDelete) {
+          return;
+        }
+
+        const groupToDeleteParentId = groupToDelete.parent;
+
+        // It is necessary to clone the children because we must subsequently mutate the original group.children array when we splice it out of its parent.
+        const children = groupToDelete.children.map((child) => ({ ...child }));
+
+        // Children of a deleted folder inherit the deleted folder's parent.
+        children.forEach((child) => {
+          if (child.type === 'group') {
+            const childGroup = findGroup(groups, child.id);
+
+            if (childGroup) {
+              childGroup.parent = groupToDeleteParentId;
+            }
+          }
+        });
+
+        if (groupToDeleteParentId) {
+          const groupToDeleteParent = findGroup(groups, groupToDeleteParentId);
+
+          if (groupToDeleteParent) {
+            // Splice the deleted folder's children of the deleted folder into their new parent at the position of the deleted folder.
+            const groupToDeleteIndex = groupToDeleteParent.children.findIndex((child) => {
+              return child.type === 'group' && child.id === groupToDeleteId;
+            });
+
+            if (groupToDeleteIndex !== -1) {
+              groupToDeleteParent.children.splice(groupToDeleteIndex, 1, ...children);
+            } else {
+              groupToDeleteParent.children.push(...children);
+            }
+
+            setGroupStatus(groupToDeleteParent, 'CHANGED');
+          }
+        }
+
+        // Finally, remove the deleted folder from its section's list of groups.
+        const groupIndex = groups.findIndex((candidate) => {
+          return candidate.id === groupToDeleteId;
+        });
+
+        if (groupIndex !== -1) {
+          groups.splice(groupIndex, 1);
+        }
+      },
+      deleteFolderAndSubtree: (state, action: PayloadAction<DeleteFolderPayload>) => {
+        const { section, id: groupToDeleteId } = action.payload;
+        const { groups } = state.contentStructure.sections[section];
+
+        const groupToDelete = findGroup(groups, groupToDeleteId);
+        if (!groupToDelete) {
+          return;
+        }
+
+        const toRemove = new Set<string>();
+        const collect = (currentGroupId: string) => {
+          toRemove.add(currentGroupId);
+
+          const currentGroup = findGroup(groups, currentGroupId);
+
+          for (const child of currentGroup?.children ?? []) {
+            if (child.type !== 'group') continue;
+            collect(child.id);
+          }
+        };
+
+        collect(groupToDeleteId);
+
+        if (groupToDelete.parent) {
+          const groupToDeleteParent = findGroup(groups, groupToDelete.parent);
+
+          if (groupToDeleteParent) {
+            const groupToDeleteIndex = groupToDeleteParent.children.findIndex((child) => {
+              return child.type === 'group' && child.id === groupToDeleteId;
+            });
+
+            if (groupToDeleteIndex !== -1) {
+              groupToDeleteParent.children.splice(groupToDeleteIndex, 1);
+            }
+
+            setGroupStatus(groupToDeleteParent, 'CHANGED');
+          }
+        }
+
+        // Removes the group entry and all its descendants from the contentStructure.
+        state.contentStructure.sections[section].groups = groups.filter((candidate) => {
+          return !toRemove.has(candidate.id);
+        });
+      },
+      assignContentTypeToFolder: (
+        state,
+        action: PayloadAction<AssignContentTypeToFolderPayload>
+      ) => {
+        const { section, uid, targetGroupId, index } = action.payload;
+        const { groups } = state.contentStructure.sections[section];
+
+        removeContentTypeChild(groups, uid);
+
+        if (targetGroupId) {
+          const targetGroup = findGroup(groups, targetGroupId);
+
+          if (targetGroup) {
+            const entry = { type: 'contentType' as const, uid };
+
+            if (typeof index === 'number' && index >= 0 && index <= targetGroup.children.length) {
+              targetGroup.children.splice(index, 0, entry);
+            } else {
+              targetGroup.children.push(entry);
+            }
+
+            setGroupStatus(targetGroup, 'CHANGED');
+          }
+        }
+      },
+      reorderFolderChildren: (state, action: PayloadAction<ReorderFolderChildrenPayload>) => {
+        const { section, groupId, from, to } = action.payload;
+
+        const group = findGroup(state.contentStructure.sections[section].groups, groupId);
+        if (!group) {
+          return;
+        }
+
+        const child = group.children[from];
+        if (!child) {
+          return;
+        }
+
+        group.children.splice(from, 1);
+        group.children.splice(to, 0, child);
+
+        setGroupStatus(group, 'CHANGED');
       },
 
       applyChange(
@@ -814,11 +1153,13 @@ const slice = createUndoRedoSlice(
       return {
         components: state.components,
         contentTypes: state.contentTypes,
+        contentStructure: state.contentStructure,
       };
     },
     discard: (state) => {
       state.components = state.initialComponents;
       state.contentTypes = state.initialContentTypes;
+      state.contentStructure = state.initialContentStructure;
     },
   }
 );

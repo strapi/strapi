@@ -4,6 +4,13 @@ import sortBy from 'lodash/sortBy';
 
 import { pluginId } from '../../../pluginId';
 
+import {
+  createEmptyContentStructure,
+  hasContentStructureChanged,
+  toServerFile,
+} from './contentStructure';
+
+import type { ContentStructure } from './contentStructure';
 import type {
   Component,
   Components,
@@ -47,9 +54,13 @@ type TrackingEventProperties = {
 const stateToRequestData = ({
   components,
   contentTypes,
+  contentStructure = createEmptyContentStructure(),
+  initialContentStructure = createEmptyContentStructure(),
 }: {
   components: Components;
   contentTypes: ContentTypes;
+  contentStructure?: ContentStructure;
+  initialContentStructure?: ContentStructure;
 }) => {
   const trackingEventProperties: TrackingEventProperties = {
     newContentTypes: 0,
@@ -97,10 +108,19 @@ const stateToRequestData = ({
       return requestFormattedContentType;
     });
 
+  // Folder changes occur in the same operation as schema changes.
+  // Attach the draft structure only when a change has occurred, as the server-side
+  // ZOD schema for this payload specifies that the contentStructure property is optional.
+  const structureChanged = hasContentStructureChanged(contentStructure, initialContentStructure);
+  const contentStructureRequestPayload = structureChanged
+    ? { contentStructure: toServerFile(contentStructure) }
+    : undefined;
+
   return {
     requestData: {
       components: formattedComponents,
       contentTypes: formattedContentTypes,
+      ...contentStructureRequestPayload,
     },
     trackingEventProperties,
   };

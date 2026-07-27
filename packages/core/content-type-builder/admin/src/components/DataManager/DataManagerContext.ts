@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
+import type { ContentStructure, SectionKey } from './utils/contentStructure';
 import type { Component, ContentType } from '../../types';
 import type { Internal, Struct } from '@strapi/types';
 
@@ -72,6 +73,29 @@ export interface DataManagerContextValue {
   }) => void;
   deleteComponent(uid: Internal.UID.Component): void;
   deleteContentType(uid: Internal.UID.ContentType): void;
+  contentStructure: ContentStructure;
+  createFolder: (opts: { section: SectionKey; name: string; parentId: string | null }) => void;
+  renameFolder: (opts: { section: SectionKey; id: string; name: string }) => void;
+  moveFolder: (opts: {
+    section: SectionKey;
+    id: string;
+    newParentId: string | null;
+    index?: number;
+  }) => void;
+  deleteFolderOnly: (opts: { section: SectionKey; id: string }) => void;
+  deleteFolderAndSubtree: (opts: { section: SectionKey; id: string }) => void;
+  assignContentTypeToFolder: (opts: {
+    section: SectionKey;
+    uid: Internal.UID.ContentType;
+    targetGroupId: string | null;
+    index?: number;
+  }) => void;
+  reorderFolderChildren: (opts: {
+    section: SectionKey;
+    groupId: string;
+    from: number;
+    to: number;
+  }) => void;
   removeComponentFromDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
