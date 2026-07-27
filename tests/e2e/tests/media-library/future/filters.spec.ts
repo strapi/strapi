@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { describeOnCondition } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { describeOnCondition } from '../../../../utils/shared';
 
 import { AssetsPage } from './page-objects/AssetsPage';
 
-const FIXTURE_IMAGE_1 = path.join(__dirname, '../../data/uploads/test-image-1.jpg');
+const FIXTURE_IMAGE_1 = path.join(__dirname, '../../../data/uploads/test-image-1.jpg');
 
 describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
   'Media Library - Filters',
