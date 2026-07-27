@@ -118,19 +118,20 @@ const LicenseInfoEE = () => {
   };
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={6}>
-      <Flex
-        direction="column"
-        alignItems="stretch"
-        gap={4}
-        hasRadius
-        background="neutral0"
-        shadow="tableShadow"
-        paddingTop={6}
-        paddingBottom={6}
-        paddingRight={7}
-        paddingLeft={7}
-      >
+    // License and entitlements live in a single card, each keeping its own heading.
+    <Flex
+      direction="column"
+      alignItems="stretch"
+      gap={6}
+      hasRadius
+      background="neutral0"
+      shadow="tableShadow"
+      paddingTop={6}
+      paddingBottom={6}
+      paddingRight={7}
+      paddingLeft={7}
+    >
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Typography variant="delta" tag="h3">
           {formatMessage({ id: 'Settings.license.title', defaultMessage: 'License' })}
         </Typography>
@@ -216,18 +217,7 @@ const LicenseInfoEE = () => {
         )}
       </Flex>
 
-      <Flex
-        direction="column"
-        alignItems="stretch"
-        gap={4}
-        hasRadius
-        background="neutral0"
-        shadow="tableShadow"
-        paddingTop={6}
-        paddingBottom={6}
-        paddingRight={7}
-        paddingLeft={7}
-      >
+      <Flex direction="column" alignItems="stretch" gap={4}>
         <Typography variant="delta" tag="h3">
           {formatMessage({
             id: 'Settings.license.entitlements',
