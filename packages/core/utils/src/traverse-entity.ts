@@ -27,7 +27,9 @@ const parallelWithOrderedErrors = async <T>(promises: Promise<T>[]): Promise<T[]
  * measurable. Semantics are deliberately identical: `isNil` is a loose null check,
  * `isObject` matches lodash in treating functions as objects and `null` as not one.
  */
-const isNil = (value: unknown): boolean => value == null;
+// Declared as a type predicate, matching lodash's signature: the traversal relies on
+// `isNil(attribute)` narrowing `attribute` for the branches that follow it.
+const isNil = (value: unknown): value is null | undefined => value == null;
 const isArray = Array.isArray;
 const isObject = (value: unknown): boolean => {
   if (value == null) return false;
