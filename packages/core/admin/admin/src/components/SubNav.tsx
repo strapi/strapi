@@ -20,7 +20,7 @@ import {
 } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
-import { SubNavFolder } from './SubNavFolder';
+import { BASE_INDENT, INDENT_STEP, SubNavFolder } from './SubNavFolder';
 
 const MainSubNav = styled(DSSubNav)<{ $isFullPage?: boolean }>`
   width: 100%;
@@ -56,7 +56,7 @@ const Main = ({
   </MainSubNav>
 );
 
-const StyledLink = styled(NavLink)`
+const StyledLink = styled(NavLink)<{ $depth?: number }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -64,6 +64,10 @@ const StyledLink = styled(NavLink)`
   height: 32px;
 
   color: ${({ theme }) => theme.colors.neutral800};
+
+  & > div {
+    padding-left: ${({ $depth = 0 }) => `${BASE_INDENT + $depth * INDENT_STEP}px`};
+  }
 
   &.active > div {
     ${({ theme }) => {
@@ -97,19 +101,20 @@ const StyledLink = styled(NavLink)`
 `;
 
 const Link = (
-  props: Omit<React.ComponentProps<typeof StyledLink>, 'label'> & {
+  props: Omit<React.ComponentProps<typeof StyledLink>, 'label' | '$depth'> & {
     label: React.ReactNode;
     endAction?: React.ReactNode;
     handleClick?: () => void;
+    /** Nesting depth; indents the link so its text aligns under the parent folder's label. */
+    depth?: number;
   }
 ) => {
-  const { label, endAction, handleClick, ...rest } = props;
+  const { label, endAction, handleClick, depth, ...rest } = props;
 
   return (
-    <StyledLink {...rest} onClick={handleClick}>
+    <StyledLink {...rest} $depth={depth} onClick={handleClick}>
       <Box
         width={'100%'}
-        paddingLeft={3}
         paddingRight={3}
         paddingTop={{ initial: 1, large: 0 }}
         paddingBottom={{ initial: 1, large: 0 }}

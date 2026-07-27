@@ -5,6 +5,7 @@ import {
   Box,
   Flex,
   Searchbar,
+  Typography,
   useCollator,
   useFilter,
   Divider,
@@ -15,7 +16,44 @@ import { useLocation } from 'react-router-dom';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { useTypedSelector } from '../modules/hooks';
+import {
+  countTreeLinks,
+  deriveVisibleTree,
+  flattenTreeLinks,
+  type VisibleTreeNode,
+} from '../utils/contentStructure';
 import { getTranslation } from '../utils/translations';
+
+import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+import type { Modules } from '@strapi/types';
+
+type LinkTreeNode = VisibleTreeNode<ContentManagerLink>;
+
+type BuildContentStructureSectionParams = {
+  compareLinks: (a: ContentManagerLink, b: ContentManagerLink) => number;
+  groups: Modules.ContentStructure.ResolvedGroupNode[];
+  id: 'collectionTypes' | 'singleTypes';
+  links: ContentManagerLink[];
+  title: string;
+};
+
+const buildContentStructureSection = ({
+  compareLinks,
+  groups,
+  links,
+  title,
+  id,
+}: BuildContentStructureSectionParams): { id: string; title: string; tree: LinkTreeNode[] } => {
+  try {
+    return { id, title, tree: deriveVisibleTree(groups, links, compareLinks) };
+  } catch {
+    const tree: LinkTreeNode[] = [...links].sort(compareLinks).map((link) => {
+      return { type: 'link', link };
+    });
+
+    return { id, title, tree };
+  }
+};
 
 const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
@@ -32,6 +70,10 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
 
   const singleTypeLinks = useTypedSelector((state) => state['content-manager'].app.singleTypeLinks);
 
+  const contentStructure = useTypedSelector(
+    (state) => state['content-manager'].app.contentStructure
+  );
+
   const { contains } = useFilter(locale, {
     sensitivity: 'base',
   });
@@ -40,50 +82,50 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     sensitivity: 'base',
   });
 
-  const menu = React.useMemo(
-    () =>
-      [
-        {
-          id: 'collectionTypes',
-          title: formatMessage({
-            id: getTranslation('components.LeftMenu.collection-types'),
-            defaultMessage: 'Collection Types',
-          }),
-          searchable: true,
-          links: collectionTypeLinks,
-        },
-        {
-          id: 'singleTypes',
-          title: formatMessage({
-            id: getTranslation('components.LeftMenu.single-types'),
-            defaultMessage: 'Single Types',
-          }),
-          searchable: true,
-          links: singleTypeLinks,
-        },
-      ].map((section) => ({
-        ...section,
-        links: section.links
-          /**
-           * Filter by the search value
-           */
-          .filter((link) => contains(link.title, search.trim()))
-          /**
-           * Sort correctly using the language
-           */
-          .sort((a, b) => formatter.compare(a.title, b.title))
-          /**
-           * Apply the formated strings to the links from react-intl
-           */
-          .map((link) => {
-            return {
-              ...link,
-              title: formatMessage({ id: link.title, defaultMessage: link.title }),
-            };
-          }),
-      })),
-    [collectionTypeLinks, search, singleTypeLinks, contains, formatMessage, formatter]
+  const compareLinks = React.useCallback(
+    (a: ContentManagerLink, b: ContentManagerLink) => {
+      return formatter.compare(a.title, b.title);
+    },
+    [formatter]
   );
+
+  const collectionTypesLabel = formatMessage({
+    id: getTranslation('components.LeftMenu.collection-types'),
+    defaultMessage: 'Collection Types',
+  });
+
+  const singleTypesLabel = formatMessage({
+    id: getTranslation('components.LeftMenu.single-types'),
+    defaultMessage: 'Single Types',
+  });
+
+  const sections = React.useMemo(() => {
+    return [
+      buildContentStructureSection({
+        id: 'collectionTypes',
+        groups: contentStructure?.collectionTypes ?? [],
+        title: collectionTypesLabel,
+        links: collectionTypeLinks,
+        compareLinks,
+      }),
+      buildContentStructureSection({
+        id: 'singleTypes',
+        groups: contentStructure?.singleTypes ?? [],
+        title: singleTypesLabel,
+        links: singleTypeLinks,
+        compareLinks,
+      }),
+    ];
+  }, [
+    collectionTypesLabel,
+    collectionTypeLinks,
+    singleTypesLabel,
+    contentStructure,
+    singleTypeLinks,
+    compareLinks,
+  ]);
+
+  const trimmedSearch = search.trim();
 
   const handleClear = () => {
     setSearch('');
@@ -97,6 +139,33 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     id: getTranslation('header.name'),
     defaultMessage: 'Content Manager',
   });
+
+  const formatLinkTitle = (link: ContentManagerLink) =>
+    formatMessage({ id: link.title, defaultMessage: link.title });
+
+  const linkTo = (link: ContentManagerLink) => ({
+    pathname: link.to,
+    search: i18nLocale ? `?plugins[i18n][locale]=${i18nLocale}` : '',
+  });
+
+  const renderMenuItem = (node: LinkTreeNode, depth: number): React.ReactNode => {
+    if (node.type === 'link') {
+      return (
+        <SubNav.Link
+          label={formatLinkTitle(node.link)}
+          to={linkTo(node.link)}
+          key={node.link.uid}
+          depth={depth}
+        />
+      );
+    }
+
+    return (
+      <SubNav.Folder key={node.id} label={node.name} depth={depth} defaultOpen>
+        {node.children.map((child) => renderMenuItem(child, depth + 1))}
+      </SubNav.Folder>
+    );
+  };
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -158,25 +227,35 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       </Box>
       <SubNav.Content>
         <SubNav.Sections>
-          {menu.map((section) => {
+          {sections.map((section) => {
+            const matches = trimmedSearch
+              ? flattenTreeLinks(section.tree)
+                  .filter(({ link }) => contains(formatLinkTitle(link), trimmedSearch))
+                  .sort((a, b) => compareLinks(a.link, b.link))
+              : null;
+
+            const count = matches ? matches.length : countTreeLinks(section.tree);
+
+            const sectionItems = matches
+              ? matches.map(({ link, path }) => (
+                  <SubNav.Link
+                    label={formatLinkTitle(link)}
+                    to={linkTo(link)}
+                    key={link.uid}
+                    endAction={
+                      path.length > 0 ? (
+                        <Typography variant="pi" textColor="neutral500">
+                          {path.join(' / ')}
+                        </Typography>
+                      ) : undefined
+                    }
+                  />
+                ))
+              : section.tree.map((node) => renderMenuItem(node, 0));
+
             return (
-              <SubNav.Section
-                key={section.id}
-                label={section.title}
-                badgeLabel={section.links.length.toString()}
-              >
-                {section.links.map((link) => {
-                  return (
-                    <SubNav.Link
-                      key={link.uid}
-                      to={{
-                        pathname: link.to,
-                        search: i18nLocale ? `?plugins[i18n][locale]=${i18nLocale}` : '',
-                      }}
-                      label={link.title}
-                    />
-                  );
-                })}
+              <SubNav.Section key={section.id} label={section.title} badgeLabel={count.toString()}>
+                {sectionItems}
               </SubNav.Section>
             );
           })}
