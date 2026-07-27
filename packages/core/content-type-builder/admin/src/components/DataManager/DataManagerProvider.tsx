@@ -27,6 +27,7 @@ import { DataManagerContext, type DataManagerContextValue } from './DataManagerC
 import { actions, initialState, type State } from './reducer';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
+import { fromServerFile, generateGroupId } from './utils/contentStructure';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
@@ -82,6 +83,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     reservedNames,
     initialComponents,
     initialContentTypes,
+    contentStructure,
+    initialContentStructure,
     isLoading,
   } = state.current;
 
@@ -101,8 +104,19 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const previousLocationRef = React.useRef<string | null>(null);
 
   const isModified = React.useMemo(() => {
-    return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
-  }, [components, contentTypes, initialComponents, initialContentTypes]);
+    return !(
+      isEqual(components, initialComponents) &&
+      isEqual(contentTypes, initialContentTypes) &&
+      isEqual(contentStructure, initialContentStructure)
+    );
+  }, [
+    components,
+    contentTypes,
+    initialComponents,
+    initialContentTypes,
+    contentStructure,
+    initialContentStructure,
+  ]);
 
   const fetchClient = useFetchClient();
 
@@ -117,7 +131,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes } = schemaResponse.data.data;
+      const { components, contentTypes, contentStructure } = schemaResponse.data.data;
 
       dispatch(
         actions.init({
@@ -130,6 +144,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
             status: 'UNCHANGED',
           })) as ContentTypes,
           reservedNames: reservedNamesResponse.data,
+          contentStructure: fromServerFile(contentStructure),
         })
       );
 
@@ -218,6 +233,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
+      contentStructure: state.current.contentStructure,
+      initialContentStructure: state.current.initialContentStructure,
     });
 
     // Track that the save button was clicked (includes session ID via useCTBTracking)
@@ -307,6 +324,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     contentTypes,
     initialComponents,
     initialContentTypes,
+    contentStructure,
     isSaving,
     isModified,
     isInDevelopmentMode,
@@ -401,6 +419,28 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
         dispatch(actions.deleteContentType(uid));
       }
+    },
+
+    createFolder({ section, name, parentId }) {
+      dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
+    },
+    renameFolder(payload) {
+      dispatch(actions.renameFolder(payload));
+    },
+    moveFolder(payload) {
+      dispatch(actions.moveFolder(payload));
+    },
+    deleteFolderOnly(payload) {
+      dispatch(actions.deleteFolderOnly(payload));
+    },
+    deleteFolderAndSubtree(payload) {
+      dispatch(actions.deleteFolderAndSubtree(payload));
+    },
+    assignContentTypeToFolder(payload) {
+      dispatch(actions.assignContentTypeToFolder(payload));
+    },
+    reorderFolderChildren(payload) {
+      dispatch(actions.reorderFolderChildren(payload));
     },
 
     updateComponentSchema({ data, componentUID }) {
