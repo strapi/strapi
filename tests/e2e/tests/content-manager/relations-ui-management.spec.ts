@@ -1,9 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { login } from '../../../utils/login';
-import {
-  resetDatabaseAndImportDataFromPath,
-  resyncSuperAdminPermissionsAfterImport,
-} from '../../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
   clickAndWait,
   findAndClose,
@@ -75,10 +72,7 @@ test.describe('Relations UI - manage relations to existing entries', { tag: ['@e
   test.describe.configure({ timeout: 300000 });
 
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin', (contentTypes) => contentTypes, {
-      coreStore: false,
-    });
-    await resyncSuperAdminPermissionsAfterImport();
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
