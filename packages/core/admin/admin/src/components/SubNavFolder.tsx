@@ -4,8 +4,8 @@ import { Box, Flex, Tooltip, Typography } from '@strapi/design-system';
 import { ChevronDown } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-const BASE_INDENT = 12; // (INDENT_STEP - 12px) to account for the space occupied by the chevron
-const INDENT_STEP = 24;
+export const BASE_INDENT = 12;
+export const INDENT_STEP = 24;
 
 const ANIMATION_DURATION = '0.3s';
 
