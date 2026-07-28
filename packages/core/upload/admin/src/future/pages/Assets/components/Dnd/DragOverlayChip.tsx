@@ -7,6 +7,13 @@ import { getTranslationKey } from '../../../../utils/translations';
 
 import type { DragItemData } from '../../../../types/dnd';
 
+// Folder & File (@strapi/icons) share viewBox 0 0 32 32 but File's glyph is
+// narrower/lighter. Rendering File a few px larger inside a fixed square box makes
+// the two previews read at the same visual size without shifting the chip layout.
+const FOLDER_ICON_SIZE = 20;
+const FILE_ICON_SIZE = 24;
+const ICON_BOX = 24;
+
 const Chip = styled(Flex)`
   position: relative;
   align-items: center;
@@ -31,6 +38,14 @@ const CompositeChip = styled(Chip)`
 const CountGroup = styled(Flex)`
   align-items: center;
   gap: ${({ theme }) => theme.spaces[1]};
+`;
+
+const IconBox = styled(Flex)`
+  flex-shrink: 0;
+  width: ${ICON_BOX}px;
+  height: ${ICON_BOX}px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const TotalBadge = styled(Flex)`
@@ -59,11 +74,15 @@ export const DragOverlayChip = ({ items }: DragOverlayChipProps) => {
 
   if (items.length === 1) {
     const item = items[0];
-    const Icon = item.kind === 'folder' ? FolderIcon : FileIcon;
+    const isFolder = item.kind === 'folder';
+    const Icon = isFolder ? FolderIcon : FileIcon;
+    const size = isFolder ? FOLDER_ICON_SIZE : FILE_ICON_SIZE;
 
     return (
       <Chip>
-        <Icon width={20} height={20} />
+        <IconBox>
+          <Icon width={size} height={size} />
+        </IconBox>
         <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
           {item.name}
         </Typography>
@@ -79,7 +98,9 @@ export const DragOverlayChip = ({ items }: DragOverlayChipProps) => {
     <CompositeChip gap={3}>
       {folderCount > 0 ? (
         <CountGroup>
-          <FolderIcon width={20} height={20} />
+          <IconBox>
+            <FolderIcon width={FOLDER_ICON_SIZE} height={FOLDER_ICON_SIZE} />
+          </IconBox>
           <Typography textColor="neutral800" fontWeight="semiBold">
             {formatMessage(
               {
@@ -93,7 +114,9 @@ export const DragOverlayChip = ({ items }: DragOverlayChipProps) => {
       ) : null}
       {fileCount > 0 ? (
         <CountGroup>
-          <FileIcon width={20} height={20} />
+          <IconBox>
+            <FileIcon width={FILE_ICON_SIZE} height={FILE_ICON_SIZE} />
+          </IconBox>
           <Typography textColor="neutral800" fontWeight="semiBold">
             {formatMessage(
               {

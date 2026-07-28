@@ -165,7 +165,7 @@ const AssetsView = ({
  * ClearSelectionOnChange
  *
  * Selection is list-scoped: it resets when the user is looking at a different list.
- * The list fingerprint is getListQueryKey() — folder, view, search, sort, filter.
+ * The list fingerprint is getListQueryKey() — folder, search, sort, filter.
  *
  * Hybrid rule: infinite scroll does not change the key (selection persists).
  * Search/sort/filter changes do (selection clears) — same mental model as folder nav.
@@ -341,9 +341,10 @@ export const AssetsPage = () => {
 
   const listSort = useListSort();
 
+  // The view is deliberately absent: table and grid render the same list, so
+  // toggling views keeps the selection.
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
-    view,
     search: '', // TODO: wire when building header search
     // Folder position changes the render order too — selection must reset.
     sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
