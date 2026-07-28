@@ -139,6 +139,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     }, []);
   };
 
+  /**
+   * Homepage widgets expect JSON-safe ISO strings. Returning `Date` objects can
+   * serialize as `{}` after spread/clone (see https://github.com/strapi/strapi/issues/27013).
+   */
+  const toIsoDateString = (value: unknown): string | null => {
+    if (value == null || value === '') {
+      return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(String(value));
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  };
+
   const formatDocuments = (
     documents: Modules.Documents.AnyDocument[],
     meta: ContentTypeMeta,
@@ -156,14 +169,17 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
-        publishedAt:
-          meta.hasDraftAndPublish && document.publishedAt ? new Date(document.publishedAt) : null,
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
         ...additionalFields,
+        // Keep dates last so populate cannot overwrite with non-JSON-safe values
+        updatedAt: toIsoDateString(document.updatedAt) ?? '',
+        publishedAt:
+          meta.hasDraftAndPublish && document.publishedAt
+            ? toIsoDateString(document.publishedAt)
+            : null,
       };
     });
   };
@@ -256,19 +272,26 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return recentDocuments
         .flat()
         .sort((a, b) => {
+          // ISO-8601 strings compare lexicographically in chronological order
+          const compareIso = (left: string, right: string, direction: 1 | -1) => {
+            if (left < right) return -1 * direction;
+            if (left > right) return 1 * direction;
+            return 0;
+          };
+
           switch (additionalQueryParams?.sort) {
             case 'publishedAt:desc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return b.publishedAt.valueOf() - a.publishedAt.valueOf();
+              return compareIso(a.publishedAt, b.publishedAt, -1);
             case 'publishedAt:asc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return a.publishedAt.valueOf() - b.publishedAt.valueOf();
+              return compareIso(a.publishedAt, b.publishedAt, 1);
             case 'updatedAt:desc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return b.updatedAt.valueOf() - a.updatedAt.valueOf();
+              return compareIso(a.updatedAt, b.updatedAt, -1);
             case 'updatedAt:asc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return a.updatedAt.valueOf() - b.updatedAt.valueOf();
+              return compareIso(a.updatedAt, b.updatedAt, 1);
             default:
               return 0;
           }

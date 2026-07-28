@@ -1,8 +1,9 @@
+import { describe, it, expect, vi } from 'vitest';
 import { createLogger } from '../src/logger';
 
 describe('createLogger', () => {
   it('uses custom logger even when silent is true (legacy guileen/node-sendmail)', () => {
-    const debug = jest.fn();
+    const debug = vi.fn();
     const logger = createLogger({
       silent: true,
       logger: { debug },
@@ -14,7 +15,7 @@ describe('createLogger', () => {
   it('noops missing methods on a partial custom logger', () => {
     const logger = createLogger({
       silent: false,
-      logger: { error: jest.fn() },
+      logger: { error: vi.fn() },
     });
     expect(() => logger.debug('x')).not.toThrow();
   });

@@ -1,31 +1,32 @@
+import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest';
 import { resolveMx } from 'dns/promises';
 import { hostname as osHostname } from 'os';
 import nodemailer from 'nodemailer';
 
 import { sendDirectSmtp } from '../src/direct-smtp';
 
-jest.mock('dns/promises', () => ({
-  resolveMx: jest.fn(),
+vi.mock('dns/promises', () => ({
+  resolveMx: vi.fn(),
 }));
 
-jest.mock('os', () => ({
-  hostname: jest.fn(() => 'test-host.fallback'),
+vi.mock('os', () => ({
+  hostname: vi.fn(() => 'test-host.fallback'),
 }));
 
-jest.mock('nodemailer');
+vi.mock('nodemailer');
 
-const mockedResolveMx = resolveMx as jest.MockedFunction<typeof resolveMx>;
-const mockedOsHostname = osHostname as jest.MockedFunction<typeof osHostname>;
-const mockedCreateTransport = nodemailer.createTransport as jest.MockedFunction<
+const mockedResolveMx = resolveMx as MockedFunction<typeof resolveMx>;
+const mockedOsHostname = osHostname as MockedFunction<typeof osHostname>;
+const mockedCreateTransport = nodemailer.createTransport as MockedFunction<
   typeof nodemailer.createTransport
 >;
 
 describe('sendDirectSmtp MX fallback and transport options', () => {
-  const sendMail = jest.fn();
-  const close = jest.fn();
+  const sendMail = vi.fn();
+  const close = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedOsHostname.mockReturnValue('test-host.fallback');
     sendMail.mockResolvedValue({ messageId: '<id@test>' });
     close.mockImplementation(() => {});
@@ -134,7 +135,7 @@ describe('sendDirectSmtp MX fallback and transport options', () => {
         transport && typeof transport === 'object' && 'host' in transport
           ? String((transport as { host?: unknown }).host ?? '')
           : '';
-      const perHostSend = jest.fn();
+      const perHostSend = vi.fn();
       if (host === 'mx.bad.example') {
         perHostSend.mockRejectedValue(new Error('ECONNREFUSED'));
       } else {

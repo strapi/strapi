@@ -1,15 +1,16 @@
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import nodemailer from 'nodemailer';
 
 import provider from '../index';
 
-jest.mock('nodemailer');
+vi.mock('nodemailer');
 
-const mockSendMail = jest.fn();
-const mockVerify = jest.fn();
-const mockIsIdle = jest.fn();
-const mockClose = jest.fn();
+const mockSendMail = vi.fn();
+const mockVerify = vi.fn();
+const mockIsIdle = vi.fn();
+const mockClose = vi.fn();
 
-(nodemailer.createTransport as jest.Mock).mockReturnValue({
+(nodemailer.createTransport as Mock).mockReturnValue({
   sendMail: mockSendMail,
   verify: mockVerify,
   isIdle: mockIsIdle,
@@ -18,7 +19,7 @@ const mockClose = jest.fn();
 
 describe('@strapi/provider-email-nodemailer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('init', () => {
@@ -500,7 +501,7 @@ describe('@strapi/provider-email-nodemailer', () => {
     });
 
     it('returns true when transporter does not support isIdle', () => {
-      (nodemailer.createTransport as jest.Mock).mockReturnValueOnce({
+      (nodemailer.createTransport as Mock).mockReturnValueOnce({
         sendMail: mockSendMail,
         verify: mockVerify,
         close: mockClose,
