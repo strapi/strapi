@@ -1,10 +1,6 @@
+import type { Providers } from '@strapi/types';
 import nodemailer from 'nodemailer';
 import type { Transporter, SendMailOptions, SentMessageInfo } from 'nodemailer';
-
-interface Settings {
-  defaultFrom: string;
-  defaultReplyTo: string;
-}
 
 interface SendOptions {
   // --- Core addressing ---
@@ -118,23 +114,8 @@ interface SendOptions {
 
 type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 
-interface ProviderCapabilities {
-  transport?: {
-    host?: string;
-    port?: number;
-    secure?: boolean;
-    pool?: boolean;
-    maxConnections?: number;
-  };
-  auth?: {
-    type?: string;
-    user?: string;
-  };
-  features?: string[];
-}
-
-function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities {
-  const capabilities: ProviderCapabilities = {};
+function getCapabilitiesFromOptions(opts: ProviderOptions): Providers.Email.Capabilities {
+  const capabilities: Providers.Email.Capabilities = {};
   const features: string[] = [];
 
   if (opts && typeof opts === 'object') {
@@ -178,7 +159,7 @@ function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities
 }
 
 export default {
-  init(providerOptions: ProviderOptions, settings: Settings) {
+  init(providerOptions: ProviderOptions, settings: Providers.Email.Settings) {
     const transporter: Transporter = nodemailer.createTransport(providerOptions);
 
     return {
@@ -307,9 +288,9 @@ export default {
         transporter.close();
       },
 
-      getCapabilities(): ProviderCapabilities {
+      getCapabilities(): Providers.Email.Capabilities {
         return getCapabilitiesFromOptions(providerOptions);
       },
     };
   },
-};
+} satisfies Providers.Email.Factory;

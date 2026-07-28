@@ -1,5 +1,6 @@
 import type { SendMailOptions } from 'nodemailer';
 
+import type { Providers } from '@strapi/types';
 import { sendDirectSmtp } from './direct-smtp';
 import type { ProviderSendmailOptions, Settings } from './types';
 
@@ -42,6 +43,6 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Email.Factory;
 
 export type { ProviderSendmailOptions, Settings } from './types';

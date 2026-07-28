@@ -1,11 +1,9 @@
-import type { Plugin } from '@strapi/types';
+import type { Plugin, Providers } from '@strapi/types';
 
 export interface EmailConfig extends Record<string, unknown> {
   provider: string;
   providerOptions?: object;
-  settings?: {
-    defaultFrom?: string;
-  };
+  settings?: Providers.Email.Settings;
 }
 
 type LoadedPluginConfig = Plugin.LoadedPlugin['config'];

@@ -50,9 +50,13 @@
     "@strapi/utils": "5.51.0"
   },
   "devDependencies": {
+    "@strapi/types": "5.51.0",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.51.0",
     "tsconfig": "5.51.0"
+  },
+  "peerDependencies": {
+    "@strapi/types": "^5.0.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
