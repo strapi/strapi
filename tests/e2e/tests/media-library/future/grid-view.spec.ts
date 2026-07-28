@@ -42,6 +42,29 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
         // Should still be in table view
         expect(await assetsPage.isGridViewActive()).toBe(false);
       });
+
+      test('should keep the selection when switching views', async ({ page }) => {
+        const assetsPage = new AssetsPage(page);
+        await assetsPage.goto();
+
+        const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+        await assetsPage.uploadFilesWithFilePicker(testImagePath);
+        await assetsPage.waitForUploadSuccess();
+
+        await assetsPage.switchToTableView();
+        await assetsPage.selectAsset('test-image.jpg');
+        await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+
+        // Both views render the same list, so the view is deliberately kept out
+        // of the fingerprint that clears the selection (see getListQueryKey).
+        await assetsPage.switchToGridView();
+        await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+        await expect(assetsPage.getSelectionCheckbox('test-image.jpg')).toBeChecked();
+
+        await assetsPage.switchToTableView();
+        await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+        await expect(assetsPage.getSelectionCheckbox('test-image.jpg')).toBeChecked();
+      });
     });
 
     test.describe('Grid Display', () => {
