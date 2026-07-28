@@ -1,0 +1,12 @@
+{
+  "name": "@strapi/mcp-schema-harness",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Blind-agent harness for evaluating MCP component update schemas",
+  "scripts": {
+    "test": "tsx --test validate.test.ts",
+    "schemas": "tsx gen-schemas.ts",
+    "prepare-bundle": "tsx prepare.ts --wrap",
+    "score": "tsx score.ts"
+  }
+}
