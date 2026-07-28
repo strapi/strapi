@@ -11,7 +11,14 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@strapi/icons';
+import {
+  ChevronDown,
+  Files,
+  Folder as FolderIcon,
+  GridFour as GridIcon,
+  Link,
+  List,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -24,6 +31,7 @@ import {
   useAssetDetailsParam,
 } from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsGrid } from './components/AssetsGrid';
+import { AssetsSearchInput } from './components/AssetsSearchInput';
 import { AssetsTable } from './components/AssetsTable';
 import { BulkActionsBar } from './components/BulkActionsBar';
 import { CreateFolderDialog } from './components/CreateFolderDialog';
@@ -35,6 +43,7 @@ import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
+import { useAssetSearch } from './hooks/useAssetSearch';
 import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelection';
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
@@ -43,9 +52,15 @@ import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { getListQueryKey } from './utils/listQueryKey';
 import { mergeMixedList } from './utils/mergeMixedList';
 
-import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+import type { File, UploadFileInfo } from '../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../shared/contracts/folders';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
+
+const ITEM_COUNT_MESSAGE = {
+  id: getTranslationKey('header.content.item-count'),
+  defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+};
 
 /* -------------------------------------------------------------------------------------------------
  * AssetsView
@@ -53,36 +68,40 @@ const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
 interface AssetsViewProps {
   view: number;
-  folderId: number | null;
+  folders: Folder[];
+  isLoadingFolders: boolean;
+  assets: File[];
+  isLoadingAssets: boolean;
+  isFetchingMore: boolean;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  error: unknown;
+  searchQuery: string;
   assetsSort: string;
-  foldersSort: string;
   foldersPosition: FoldersPosition;
   onAssetItemClick: (assetId: number) => void;
   onAddAssets: () => void;
+  onClearSearch: () => void;
 }
 
 const AssetsView = ({
   view,
-  folderId,
+  folders,
+  isLoadingFolders,
+  assets,
+  isLoadingAssets,
+  isFetchingMore,
+  hasNextPage,
+  fetchNextPage,
+  error,
+  searchQuery,
   assetsSort,
-  foldersSort,
   foldersPosition,
   onAssetItemClick,
   onAddAssets,
+  onClearSearch,
 }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const {
-    assets,
-    isLoading: isLoadingAssets,
-    isFetchingMore,
-    hasNextPage,
-    fetchNextPage,
-    error,
-  } = useInfiniteAssets({ folder: folderId, sort: assetsSort });
-  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
-    parentId: folderId,
-    sort: foldersSort,
-  });
 
   const isGridView = view === viewOptions.GRID;
   const isLoading = isLoadingAssets || isLoadingFolders;
@@ -132,7 +151,13 @@ const AssetsView = ({
   }
 
   if (folders.length === 0 && assets.length === 0) {
-    return <EmptyState onAddAssets={onAddAssets} />;
+    return (
+      <EmptyState
+        onAddAssets={onAddAssets}
+        searchQuery={searchQuery}
+        onClearSearch={onClearSearch}
+      />
+    );
   }
   return (
     <>
@@ -167,7 +192,8 @@ const AssetsView = ({
  * Selection is list-scoped: it resets when the user is looking at a different list.
  * The list fingerprint is getListQueryKey() — folder, search, sort, filter.
  *
- * Hybrid rule: infinite scroll does not change the key (selection persists).
+ * Hybrid rule: infinite scroll does not change the key (selection persists), and
+ * neither does the table/grid toggle — both views render the same list.
  * Search/sort/filter changes do (selection clears) — same mental model as folder nav.
  * -----------------------------------------------------------------------------------------------*/
 
@@ -263,16 +289,53 @@ export const AssetsPage = () => {
     }
   }, [currentFolderError, navigateToRoot]);
   const { title, itemCount } = useFolderInfo(currentFolderId);
-  const itemCountLabel = formatMessage(
+
+  const { searchQuery, isSearching, clearSearch } = useAssetSearch();
+  const listSort = useListSort();
+
+  const {
+    assets,
+    pagination,
+    isLoading: isLoadingAssets,
+    isFetchingMore,
+    hasNextPage,
+    fetchNextPage,
+    error: assetsError,
+  } = useInfiniteAssets({
+    // The real folder is passed even while searching: the service drops the folder
+    // filter when `search` is set, so results are still global.
+    folder: currentFolderId,
+    search: searchQuery || undefined,
+    sort: listSort.assetsSort,
+  });
+
+  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
+    parentId: currentFolderId,
+    search: searchQuery || undefined,
+    sort: listSort.foldersSort,
+  });
+
+  const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
+
+  const searchResultsTitle = formatMessage(
     {
-      id: getTranslationKey('header.content.item-count'),
-      defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+      id: getTranslationKey('header.search-results'),
+      defaultMessage: 'Search results for "{query}"',
     },
-    { count: itemCount }
+    { query: searchQuery }
   );
-  const pageHeaderTitle = title
-    ? `${title} (${itemCountLabel})`
-    : formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
+  const searchResultsCountLabel = formatMessage(ITEM_COUNT_MESSAGE, {
+    count: pagination?.total ?? 0,
+  });
+
+  let pageHeaderTitle: string;
+  if (isSearching) {
+    pageHeaderTitle = `${searchResultsTitle} (${searchResultsCountLabel})`;
+  } else if (title) {
+    pageHeaderTitle = `${title} (${itemCountLabel})`;
+  } else {
+    pageHeaderTitle = formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
+  }
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
@@ -339,13 +402,11 @@ export const AssetsPage = () => {
     }
   };
 
-  const listSort = useListSort();
-
   // The view is deliberately absent: table and grid render the same list, so
   // toggling views keeps the selection.
   const listQueryKey = getListQueryKey({
     folderId: currentFolderId,
-    search: '', // TODO: wire when building header search
+    search: searchQuery,
     // Folder position changes the render order too — selection must reset.
     sort: `${listSort.assetsSort};folders=${listSort.foldersPosition}`,
     filter: null, // TODO: wire when building header filters
@@ -364,6 +425,7 @@ export const AssetsPage = () => {
                 sideNav={
                   <FolderTree
                     currentFolderId={currentFolderId}
+                    showActiveFolder={!isSearching}
                     onSelectFolder={navigateToFolderId}
                   />
                 }
@@ -387,7 +449,7 @@ export const AssetsPage = () => {
                       >
                         <MenuItem
                           onSelect={() => setIsCreateFolderDialogOpen(true)}
-                          startIcon={<Folder />}
+                          startIcon={<FolderIcon />}
                         >
                           {formatMessage({
                             id: getTranslationKey('folder.create.title'),
@@ -411,7 +473,8 @@ export const AssetsPage = () => {
                     subtitle={
                       <Flex justifyContent="space-between" alignItems="center" gap={4} width="100%">
                         <Flex gap={4} alignItems="center">
-                          TODO: Filters and search
+                          {/* TODO: Filters */}
+                          <AssetsSearchInput />
                         </Flex>
 
                         <Flex gap={4} alignItems="stretch">
@@ -466,12 +529,20 @@ export const AssetsPage = () => {
                     <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
                     <AssetsView
                       view={view}
-                      folderId={currentFolderId}
+                      folders={folders}
+                      isLoadingFolders={isLoadingFolders}
+                      assets={assets}
+                      isLoadingAssets={isLoadingAssets}
+                      isFetchingMore={isFetchingMore}
+                      hasNextPage={hasNextPage}
+                      fetchNextPage={fetchNextPage}
+                      error={assetsError}
+                      searchQuery={searchQuery}
                       assetsSort={listSort.assetsSort}
-                      foldersSort={listSort.foldersSort}
                       foldersPosition={listSort.foldersPosition}
                       onAssetItemClick={openDetails}
                       onAddAssets={handleFileSelect}
+                      onClearSearch={clearSearch}
                     />
                   </DropZoneWithOverlay>
                 </Layouts.Content>

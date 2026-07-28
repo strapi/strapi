@@ -135,6 +135,8 @@
   "header.content.assets-empty": "No assets",
   "header.content.assets": "{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}",
   "header.content.item-count": "{count, plural, =1 {# item} other {# items}}",
+  "header.search.placeholder": "Search",
+  "header.search-results": "Search results for \"{query}\"",
   "import-files": "File upload",
   "import-from-url": "File upload from URL",
   "input.button.label": "Browse files",
@@ -172,7 +174,9 @@
   "list.sort.folders-on-top": "On top",
   "list.sort.folders-mixed": "Mixed with files",
   "list.sort.active": "(active)",
-
+  "list.search.empty.title": "No results found",
+  "list.search.empty.description": "No assets or folders match \"{query}\". Try a different search.",
+  "list.search.empty.clear": "Clear search",
   "list.assets.loading-more": "Loading more assets...",
   "list.assets.loading-asset": "Loading the preview for the media: {path}",
   "list.assets.not-supported-content": "No preview available",
@@ -316,6 +320,9 @@
   "sidebar.tree.expand": "Expand {name}",
   "sidebar.tree.collapse": "Collapse {name}",
   "sidebar.tree.empty": "No folders yet",
+  "sidebar.tree.no-results": "No folders match \"{query}\"",
   "sidebar.tree.loading": "Loading folders...",
-  "sidebar.tree.error": "Could not load folders."
+  "sidebar.tree.error": "Could not load folders.",
+  "sidebar.search.label": "Search folders",
+  "sidebar.search.placeholder": "Search folders"
 }

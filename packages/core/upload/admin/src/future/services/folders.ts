@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -19,6 +21,7 @@ interface GetFoldersParams {
   parentId?: number | null;
   /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
   sort?: string;
+  search?: string;
 }
 
 interface BulkMoveParams {
@@ -42,14 +45,20 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId, sort } = params as GetFoldersParams;
+        const { parentId, sort, search } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
         };
 
-        if (parentId != null) {
+        if (search) {
+          // Search is global: the parent filter is dropped so matching folders
+          // anywhere in the library surface. Server default paging applies —
+          // deliberately not the legacy `pageSize: -1`, which would make this an
+          // unbounded query.
+          queryParams['_q'] = encodeSearchQuery(search);
+        } else if (parentId != null) {
           queryParams['filters'] = {
             $and: [{ parent: { id: parentId } }],
           };
