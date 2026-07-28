@@ -86,6 +86,55 @@ const withRequiredHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny 
 };
 
 /**
+ * Hint appended to required relation/media attributes. Deliberately distinct from
+ * `requiredHint`: enforcement for relations and media depends on
+ * `api.documents.strictRelations`, which is disabled by default, so promising that the
+ * server enforces the field on save would be false for most configurations. The wording
+ * states the schema fact and stays neutral about when (or whether) it is enforced.
+ */
+const relationalRequiredHint = (mode: InputSchemaMode): string =>
+  mode.draftAndPublish === true
+    ? 'Marked required in the content-type schema — populate it before publishing.'
+    : 'Marked required in the content-type schema — populate it to keep the entry complete.';
+
+/** Appends the relation/media required hint, composing with any existing description. */
+const withRelationalRequiredHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny => {
+  const hint = relationalRequiredHint(mode);
+  const existing = s.description;
+  return existing !== undefined && existing !== ''
+    ? s.describe(`${existing} ${hint}`)
+    : s.describe(hint);
+};
+
+/**
+ * Hint appended to repeatable-component and dynamic-zone arrays on update. The Document
+ * Service replaces these lists wholesale (`document-service/components.ts` deletes any
+ * existing row not present in the incoming array), and the schema cannot enforce
+ * "include every item you keep" — it depends on document state, and a shorter array is
+ * also the legitimate way to delete items. The description must carry the semantics.
+ *
+ * Repeatable components accept `{ "id": N }` to keep a row as-is (see
+ * `buildComponentInputSchema`), so the wording points at that rather than asking for the
+ * full contents. Dynamic zones share this hint but have no such id branch — their items are
+ * always recreated — which is why the phrasing keeps "or its full contents" as the fallback.
+ */
+const WHOLESALE_REPLACE_HINT =
+  'Replaces the entire list: include every item you want to keep — either its "id" to ' +
+  'leave it untouched, or its full contents — because any existing item not included is ' +
+  'permanently deleted. Omit this field entirely to leave the list unchanged.';
+
+/** Appends the wholesale-replace hint on update, composing with any existing description. */
+const withWholesaleReplaceHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny => {
+  if (mode.operation !== 'update') {
+    return s;
+  }
+  const existing = s.description;
+  return existing !== undefined && existing !== ''
+    ? s.describe(`${existing} ${WHOLESALE_REPLACE_HINT}`)
+    : s.describe(WHOLESALE_REPLACE_HINT);
+};
+
+/**
  * Applies the required constraint to a leaf attribute schema according to `mode`.
  *
  * Required fields keep the explanatory hint whenever the gate is dropped, so agents can
@@ -112,6 +161,10 @@ const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode
  * (`entity-validator/validators.ts`) both skip minimum checks on drafts, so gating them
  * at Zod would make MCP stricter than the admin panel for draft writes. `max`/`maxLength`
  * is always kept — it maps to a real column limit and applies to drafts too.
+ *
+ * The same draft projection is applied inline to repeatable-component and dynamic-zone
+ * array minima (see the `component` / `dynamiczone` cases), which are aggregate counts
+ * rather than scalar bounds and so cannot share this helper's signature.
  */
 const applyMin = <T extends z.ZodString | z.ZodNumber>(
   s: T,
@@ -121,7 +174,8 @@ const applyMin = <T extends z.ZodString | z.ZodNumber>(
 
 /**
  * Applies the required constraint to relation/media schemas, which are never hard-gated.
- * Required entries always get the hint (relations/media are optional in every mode).
+ * Required entries always get the hint (relations/media are optional in every mode), using
+ * the configuration-neutral relational wording rather than the scalar guarantee.
  */
 const applyRelationalRequired = (
   s: z.ZodTypeAny,
@@ -129,7 +183,7 @@ const applyRelationalRequired = (
   mode: InputSchemaMode
 ): z.ZodTypeAny => {
   if (required === true) {
-    return withRequiredHint(s, mode).optional();
+    return withRelationalRequiredHint(s, mode).optional();
   }
   return s.optional();
 };
@@ -139,6 +193,14 @@ const applyRelationalRequired = (
  * Declared as a regular function so it is hoisted above `attributeToInputSchema`
  * — the two functions are mutually recursive (component attrs recurse into
  * attributeToInputSchema; attributeToInputSchema calls this for 'component' cases).
+ *
+ * On create this is a single object. On update it is a union of a patch branch (requires
+ * `id`, contents optional) and a create branch (no `id`, required fields enforced), matching
+ * how `updateOrCreateComponent` dispatches server-side. Without the split, a partial update
+ * made every nested field optional, so an id-less `{ seo: {} }` passed Zod and then replaced
+ * a valid row with one missing its required fields — the entity validator does not catch it
+ * because recursive update semantics downgrade `required` to `notNull`, which an absent key
+ * satisfies.
  *
  * @param strapi - Strapi instance (components registry available post-load).
  * @param componentUid - e.g. "common.seo".
@@ -165,18 +227,52 @@ export function buildComponentInputSchema(
 
   visited.add(componentUid);
 
-  const shape: Record<string, z.ZodTypeAny> = {};
-  for (const [key, attr] of Object.entries(component.attributes)) {
-    if (key === 'id') {
-      // eslint-disable-next-line no-continue
-      continue;
+  /** Builds the attribute shape under a given mode (`id` is added by the caller). */
+  const shapeFor = (contentsMode: InputSchemaMode): Record<string, z.ZodTypeAny> => {
+    const shape: Record<string, z.ZodTypeAny> = {};
+    for (const [key, attr] of Object.entries(component.attributes)) {
+      if (key === 'id') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+      shape[key] = attributeToInputSchema(strapi, attr, visited, contentsMode);
     }
-    shape[key] = attributeToInputSchema(strapi, attr, visited, mode);
+    return shape;
+  };
+
+  // On create there is no existing row to patch — a single create-semantics object.
+  if (mode.operation !== 'update') {
+    const schema = z.object(shapeFor(mode)).strict();
+    visited.delete(componentUid);
+    return schema;
   }
+
+  // On update the server branches on `id` (`document-service/components.ts`
+  // `updateOrCreateComponent`): with an `id` it runs a real partial UPDATE on that row;
+  // without one it CREATEs a fresh row (and strips any `id`), replacing the old one. Mirror
+  // both branches so an id-less object — a genuine create — is validated with create
+  // semantics instead of inheriting the update's blanket optionality.
+  const patchBranch = z
+    .object({
+      // Coerced rather than `union([number, string])`: component ids are numeric but JSON
+      // clients often send them as strings, and coercion keeps the advertised JSON Schema a
+      // plain `number` instead of a nested anyOf the agent has to reason about.
+      id: z.coerce.number().describe('ID of the existing component row to update in place.'),
+      ...shapeFor(mode),
+    })
+    .strict();
+
+  const createBranch = z.object(shapeFor({ ...mode, operation: 'create' })).strict();
 
   visited.delete(componentUid);
 
-  return z.object(shape).strict();
+  return z
+    .union([patchBranch, createBranch])
+    .describe(
+      'Include "id" to update an existing component in place — other fields are optional ' +
+        'and anything omitted keeps its current value. Omit "id" to replace it: the ' +
+        'replacement is created from scratch, so it must satisfy the required fields.'
+    );
 }
 
 /**
@@ -285,19 +381,29 @@ export const attributeToInputSchema = (
 
       let s: z.ZodTypeAny =
         componentAttr.repeatable === true ? z.array(componentSchema) : componentSchema;
-      if (componentAttr.repeatable === true && componentAttr.min !== undefined) {
+      if (
+        componentAttr.repeatable === true &&
+        componentAttr.min !== undefined &&
+        relaxesMin(mode) !== true
+      ) {
         s = (s as z.ZodArray<z.ZodTypeAny>).min(componentAttr.min);
       }
       if (componentAttr.repeatable === true && componentAttr.max !== undefined) {
         s = (s as z.ZodArray<z.ZodTypeAny>).max(componentAttr.max);
       }
+      if (componentAttr.repeatable === true) {
+        s = withWholesaleReplaceHint(s, mode);
+      }
       return applyRequired(s, componentAttr.required === true, mode);
     }
     case 'dynamiczone': {
       const dzAttr = attr as unknown as { required?: boolean; min?: number; max?: number };
-      let s = z.array(z.any());
-      if (dzAttr.min !== undefined) s = (s as z.ZodArray<z.ZodAny>).min(dzAttr.min);
+      let s: z.ZodTypeAny = z.array(z.any());
+      if (dzAttr.min !== undefined && relaxesMin(mode) !== true) {
+        s = (s as z.ZodArray<z.ZodAny>).min(dzAttr.min);
+      }
       if (dzAttr.max !== undefined) s = (s as z.ZodArray<z.ZodAny>).max(dzAttr.max);
+      s = withWholesaleReplaceHint(s, mode);
       return applyRequired(s, dzAttr.required === true, mode);
     }
     case 'media': {
@@ -426,16 +532,23 @@ export type BuildDataSchemaOptions = {
  * (id, documentId, timestamps, createdBy, updatedBy, localizations, locale, etc.).
  * Unknown keys are rejected (strict mode) — invalid field names fail at the MCP boundary.
  *
- * Required-field handling mirrors admin/REST draft leniency (CMS-1425):
+ * Required-field handling mirrors admin/REST draft leniency:
  * - Updates relax every attribute to optional; required attributes still carry the
  *   required hint so the agent can distinguish them from optional ones.
  * - Writes to a draft & publish model target a draft (MCP create resolves to a draft;
- *   MCP update edits the draft version). Drafts skip required and `min`/`minLength`
- *   validation, so those are relaxed to match the admin panel.
+ *   MCP update edits the draft version). Drafts skip required and minimum validation, so
+ *   those are relaxed to match the admin panel. This covers scalar `min`/`minLength` as
+ *   well as the aggregate `min` on repeatable components and dynamic zones — admin and
+ *   entity validation skip all of them for drafts.
  * - Create on a non-D&P model keeps the hard gate on required scalars and on `min` (writes
  *   are published and the entity validator enforces them). A non-D&P update stays partial
  *   (required relaxed) but keeps `min`, since the write is published.
- * - Relations and media are never hard-gated (flag-dependent, lenient by default).
+ * - Relations and media are never hard-gated (flag-dependent, lenient by default), and
+ *   carry configuration-neutral required wording since enforcement hinges on
+ *   `api.documents.strictRelations`.
+ * - Component values on update are a union: an `id`-bearing patch (contents optional, the
+ *   server UPDATEs that row) or an id-less replacement (validated as a create, since the
+ *   server CREATEs a fresh row). See `buildComponentInputSchema`.
  *
  * NOTE: `update_*` (collection) and `write_*` (single-type upsert) can reach a *create*
  * on the server — a missing locale is created (`collection-handlers.ts`), and an upsert
