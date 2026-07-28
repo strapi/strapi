@@ -7,7 +7,10 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
-import { useBulkDeleteItemsMutation } from '../../../services/assets';
+import {
+  useBulkDeleteItemsMutation,
+  useGenerateAiMetadataMutation,
+} from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
@@ -15,8 +18,6 @@ import { BulkMoveDialog } from './BulkMoveDialog';
 
 /**
  * Floating bulk action bar for the future Media Library.
- *
- * TODO: create-metadata control is a styled stub (toast on click)
  */
 const Bar = styled(Flex)`
   position: fixed;
@@ -53,19 +54,70 @@ export const BulkActionsBar = () => {
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
+  const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
+  const isBusy = isDeleting || isGeneratingMetadata;
 
-  const showStubNotification = (translationKey: string, defaultMessage: string) => {
-    toggleNotification({
-      type: 'info',
-      message: formatMessage({
-        id: getTranslationKey(translationKey),
-        defaultMessage,
-      }),
-    });
+  /**
+   * Metadata generation only applies to files — folders in the selection are
+   * ignored rather than blocking the action.
+   */
+  const handleCreateMetadata = async () => {
+    // Guard re-entry while pending.
+    if (isGeneratingMetadata) {
+      return;
+    }
+
+    const fileIds = Array.from(selectedIds);
+    const res = await generateAiMetadata({ fileIds });
+
+    if ('error' in res) {
+      // Keep the selection intact so the user can retry.
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('list.bulk-actions.create-metadata.error'),
+          defaultMessage: 'An error occurred while generating metadata.',
+        }),
+      });
+      return;
+    }
+
+    const successCount = res.data.filter(({ status }) => status === 'success').length;
+    const skippedCount = res.data.filter(({ status }) => status === 'skipped').length;
+    const errorCount = res.data.filter(({ status }) => status === 'error').length;
+
+    if (skippedCount === 0 && errorCount === 0) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage(
+          {
+            id: getTranslationKey('list.bulk-actions.create-metadata.success'),
+            defaultMessage:
+              '{count, plural, =1 {Metadata generated for # asset} other {Metadata generated for # assets}}',
+          },
+          { count: successCount }
+        ),
+      });
+    } else {
+      // Partial outcome: report every bucket so the user knows what was left out.
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage(
+          {
+            id: getTranslationKey('list.bulk-actions.create-metadata.partial'),
+            defaultMessage:
+              '{successCount} generated, {skippedCount} skipped (not an image), {errorCount} failed',
+          },
+          { successCount, skippedCount, errorCount }
+        ),
+      });
+    }
+
+    clear();
   };
 
   const handleConfirmDelete = async (e: MouseEvent) => {
@@ -140,13 +192,9 @@ export const BulkActionsBar = () => {
           <Button
             size="S"
             startIcon={<Sparkle />}
-            disabled={isDeleting}
-            onClick={() =>
-              showStubNotification(
-                'list.bulk-actions.create-metadata-not-available',
-                "Generate metadata isn't available yet"
-              )
-            }
+            disabled={isBusy || selectedIds.size === 0}
+            loading={isGeneratingMetadata}
+            onClick={handleCreateMetadata}
           >
             {formatMessage({
               id: getTranslationKey('list.bulk-actions.create-metadata'),
@@ -157,7 +205,7 @@ export const BulkActionsBar = () => {
 
         <IconButton
           variant="tertiary"
-          disabled={isDeleting}
+          disabled={isBusy}
           label={formatMessage({
             id: getTranslationKey('list.bulk-actions.move'),
             defaultMessage: 'Move',
@@ -181,7 +229,7 @@ export const BulkActionsBar = () => {
           <Dialog.Trigger>
             <IconButton
               variant="danger-light"
-              disabled={isDeleting}
+              disabled={isBusy}
               label={formatMessage({
                 id: getTranslationKey('list.bulk-actions.delete'),
                 defaultMessage: 'Delete',
@@ -256,7 +304,7 @@ export const BulkActionsBar = () => {
           defaultMessage: 'Clear selection',
         })}
         onClick={clear}
-        disabled={isDeleting}
+        disabled={isBusy}
       >
         <Cross />
       </IconButton>

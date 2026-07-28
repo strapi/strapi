@@ -400,7 +400,7 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
     });
 
-    it('renders stub action buttons when assets are selected', async () => {
+    it('renders the bulk action buttons when assets are selected', async () => {
       const { user } = setup();
 
       await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
@@ -411,16 +411,99 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('button', { name: 'Clear selection' })).toBeInTheDocument();
     });
 
-    it('shows an info toast when Create metadata is clicked', async () => {
+    it('generates metadata for the selected assets, toasts, and clears the selection', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({
+              data: [
+                { id: 1, status: 'success' },
+                { id: 2, status: 'success' },
+              ],
+            });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: 'Metadata generated for 2 assets',
+        })
+      );
+      expect(requestBody).toEqual({ fileIds: [1, 2] });
+      // Selection cleared → bar gone.
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('summarises a partial metadata result in a warning toast', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json({
+              data: [
+                { id: 1, status: 'success' },
+                { id: 2, status: 'skipped' },
+                { id: 3, status: 'error', error: 'AI server unavailable' },
+              ],
+            }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image3.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'warning',
+          message: '1 generated, 1 skipped (not an image), 1 failed',
+        })
+      );
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the selection and shows an error toast when metadata generation fails', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json(
+              { error: { message: 'AI Metadata service is not enabled' } },
+              { status: 400 }
+            ),
+          { once: true }
+        )
+      );
+
       const { user } = setup();
 
       await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Create metadata' }));
 
-      expect(mockToggleNotification).toHaveBeenCalledWith({
-        type: 'info',
-        message: "Generate metadata isn't available yet",
-      });
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while generating metadata.',
+        })
+      );
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
     });
 
     it('opens the move dialog when Move is clicked and cancels without moving', async () => {

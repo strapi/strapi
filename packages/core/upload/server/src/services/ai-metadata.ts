@@ -5,6 +5,10 @@ import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { buildFormDataFromFiles } from '../utils/images';
 
+import type { UnstableGenerateAIMetadata } from '../../../shared/contracts/files';
+
+export type AIMetadataFileResult = UnstableGenerateAIMetadata.FileResult;
+
 /**
  * Supported image types for AI metadata generation
  * @see https://ai.google.dev/gemini-api/docs/image-understanding
@@ -16,6 +20,22 @@ const SUPPORTED_IMAGE_TYPES = [
   'image/heic',
   'image/heif',
 ] as const;
+
+/**
+ * Number of images sent to the AI server per request when generating metadata
+ * for an explicit selection. Matches the URL cap of the bulk URL upload flow.
+ */
+const AI_METADATA_CHUNK_SIZE = 20;
+
+const chunk = <T>(items: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+
+  return chunks;
+};
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
@@ -156,6 +176,87 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           completedAt: new Date(),
         });
       }
+    },
+
+    /**
+     * Generate AI metadata for an explicit selection of files, synchronously.
+     *
+     * Unlike `processExistingFiles`, this does not create a job and does not
+     * filter on missing metadata — the selection is what the user asked for.
+     * Existing alt text / captions are still preserved by
+     * `updateFilesWithAIMetadata`, so a file that already has both is reported
+     * as `success` without being modified.
+     *
+     * Images are processed in sequential chunks so one failing chunk only
+     * affects its own files; every other chunk still runs.
+     *
+     * @experimental
+     */
+    async generateForFiles(
+      fileIds: number[],
+      user: { id: string | number }
+    ): Promise<AIMetadataFileResult[]> {
+      const uniqueIds = [...new Set(fileIds)];
+
+      const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
+        where: { id: { $in: uniqueIds } },
+      });
+
+      const filesById = new Map(files.map((file) => [file.id, file]));
+
+      // Keyed by input id so the response order matches the request order.
+      const resultsById = new Map<number, AIMetadataFileResult>();
+      const images: File[] = [];
+
+      uniqueIds.forEach((id) => {
+        const file = filesById.get(id);
+
+        if (!file) {
+          resultsById.set(id, { id, status: 'error', error: 'File not found' });
+          return;
+        }
+
+        // Mirrors the filter `processFiles` applies internally, so classification
+        // and processing always agree on what counts as an image.
+        if (!file.mime?.startsWith('image/')) {
+          resultsById.set(id, { id, status: 'skipped' });
+          return;
+        }
+
+        images.push(file);
+      });
+
+      for (const imageChunk of chunk(images, AI_METADATA_CHUNK_SIZE)) {
+        try {
+          const metadataResults = await this.processFiles(imageChunk);
+          await this.updateFilesWithAIMetadata(imageChunk, metadataResults, user);
+
+          imageChunk.forEach((file, index) => {
+            resultsById.set(file.id, {
+              id: file.id,
+              status: metadataResults[index] ? 'success' : 'error',
+              ...(metadataResults[index]
+                ? {}
+                : { error: 'AI metadata generation returned no result' }),
+            });
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'AI metadata generation failed';
+
+          strapi.log.error('AI metadata generation failed for a chunk of files', {
+            fileIds: imageChunk.map((file) => file.id),
+            message,
+          });
+
+          imageChunk.forEach((file) => {
+            resultsById.set(file.id, { id: file.id, status: 'error', error: message });
+          });
+        }
+      }
+
+      return fileIds.map(
+        (id) => resultsById.get(id) ?? { id, status: 'error', error: 'File not processed' }
+      );
     },
 
     /**

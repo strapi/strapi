@@ -8,6 +8,7 @@ import type {
   Pagination,
   UploadFileInfo,
   AssetWithPopulatedCreatedBy,
+  UnstableGenerateAIMetadata,
 } from '../../../../shared/contracts/files';
 
 interface GetAssetsParams {
@@ -170,6 +171,28 @@ const assetsApi = uploadApi.injectEndpoints({
         { type: 'Folder' as const, id: 'STRUCTURE' },
       ],
     }),
+    /**
+     * Generate AI metadata (alt text + caption) for the selected assets.
+     * Synchronous: resolves once every file has been processed and reports the
+     * outcome per file, so non-images and individual failures don't fail the
+     * whole batch. Existing alt text and captions are never overwritten.
+     */
+    generateAiMetadata: builder.mutation<
+      UnstableGenerateAIMetadata.Response['data'],
+      { fileIds: number[] }
+    >({
+      query: ({ fileIds }) => ({
+        url: '/upload/unstable/generate-ai-metadata',
+        method: 'POST',
+        data: { fileIds },
+      }),
+      transformResponse: (response: { data: UnstableGenerateAIMetadata.Response['data'] }) =>
+        response.data,
+      invalidatesTags: (_result, _error, { fileIds }) => [
+        ...fileIds.map((id) => ({ type: 'Asset' as const, id })),
+        { type: 'Asset' as const, id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -180,4 +203,5 @@ export const {
   useReplaceAssetMutation,
   useDeleteAssetMutation,
   useBulkDeleteItemsMutation,
+  useGenerateAiMetadataMutation,
 } = assetsApi;
