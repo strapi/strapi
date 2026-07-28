@@ -78,12 +78,16 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   const processEvent = (name: string, ...args: any) => {
     const requestState = strapi.requestContext.get()?.state;
 
-    // Ignore events with auth strategies different from admin
+    // Only audit admin-authenticated actions, plus MCP actions flagged via auditSource.
     const isUsingAdminAuth = requestState?.route.info.type === 'admin';
+    const auditSource = requestState?.auditSource;
+    const isMcpAdminAction = auditSource === 'mcp';
     const user = requestState?.user;
-    if (!isUsingAdminAuth || !user) {
+    if ((!isUsingAdminAuth && !isMcpAdminAction) || !user) {
       return null;
     }
+
+    const origin = auditSource ?? 'admin';
 
     const getPayload = eventMap[name];
 
@@ -102,7 +106,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     return {
       action: name,
       date: new Date().toISOString(),
-      payload: getPayload(...args) || {},
+      payload: { ...(getPayload(...args) || {}), origin },
       userId: user.id,
     };
   };

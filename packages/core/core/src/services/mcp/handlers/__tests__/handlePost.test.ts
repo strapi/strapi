@@ -61,7 +61,7 @@ describe('handlePost', () => {
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body }, respond: true }) as any;
+    ({ req, res, request: { body }, respond: true, state: {} }) as any;
 
   const makeRes = () => {
     const writeHeadSpy = jest.fn();
