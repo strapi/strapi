@@ -78,6 +78,30 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       expect(parent?.status).toBe('CHANGED');
       expect(findGroup(next, 'grp_child')?.parent).toBe('grp_parent');
     });
+
+    it('allows a create at exactly the maximum depth', () => {
+      const next = reducer(
+        stateWith([grp('grp_a', 'A', null, [groupChild('grp_b')]), grp('grp_b', 'B', 'grp_a')]),
+        actions.createFolder({ section, id: 'grp_c', name: 'C', parentId: 'grp_b' })
+      );
+
+      expect(findGroup(next, 'grp_c')?.parent).toBe('grp_b');
+    });
+
+    it('refuses a create that would exceed the maximum depth, produces no changes in tree', () => {
+      const before = stateWith([
+        grp('grp_a', 'A', null, [groupChild('grp_b')]),
+        grp('grp_b', 'B', 'grp_a', [groupChild('grp_c')]),
+        grp('grp_c', 'C', 'grp_b'),
+      ]);
+      const next = reducer(
+        before,
+        actions.createFolder({ section, id: 'grp_d', name: 'D', parentId: 'grp_c' })
+      );
+
+      expect(findGroup(next, 'grp_d')).toBeUndefined();
+      expect(groupsOf(next)).toEqual(groupsOf(before));
+    });
   });
 
   describe('renameFolder', () => {
@@ -183,6 +207,52 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         groupChild('grp_c'),
         ctChild('api::y.y'),
       ]);
+    });
+
+    it('allows a move that lands exactly at the maximum depth', () => {
+      const next = reducer(
+        stateWith([
+          grp('grp_a', 'A', null, [groupChild('grp_b')]),
+          grp('grp_b', 'B', 'grp_a'),
+          grp('grp_x', 'X', null),
+        ]),
+        actions.moveFolder({ section, id: 'grp_x', newParentId: 'grp_b' })
+      );
+
+      expect(findGroup(next, 'grp_x')?.parent).toBe('grp_b');
+      expect(findGroup(next, 'grp_b')?.children).toEqual([groupChild('grp_x')]);
+    });
+
+    it('refuses a move that would nest the folder past the maximum depth', () => {
+      const before = stateWith([
+        grp('grp_a', 'A', null, [groupChild('grp_b')]),
+        grp('grp_b', 'B', 'grp_a', [groupChild('grp_c')]),
+        grp('grp_c', 'C', 'grp_b'),
+        grp('grp_x', 'X', null),
+      ]);
+
+      const next = reducer(
+        before,
+        actions.moveFolder({ section, id: 'grp_x', newParentId: 'grp_c' })
+      );
+
+      expect(groupsOf(next)).toEqual(groupsOf(before));
+    });
+
+    it('refuses a move whose subtree would exceed the maximum depth', () => {
+      const before = stateWith([
+        grp('grp_a', 'A', null, [groupChild('grp_b')]),
+        grp('grp_b', 'B', 'grp_a'),
+        grp('grp_x', 'X', null, [groupChild('grp_y')]),
+        grp('grp_y', 'Y', 'grp_x'),
+      ]);
+
+      const next = reducer(
+        before,
+        actions.moveFolder({ section, id: 'grp_x', newParentId: 'grp_b' })
+      );
+
+      expect(groupsOf(next)).toEqual(groupsOf(before));
     });
   });
 

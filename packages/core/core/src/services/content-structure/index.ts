@@ -5,7 +5,8 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { isGroupExpressionValid } from './utils/isGroupExpressionValid';
 
 export const CONTENT_STRUCTURE_FILE_NAME = 'groups.json';
-const MAX_DEPTH = 3;
+
+export const MAX_FOLDER_DEPTH = 3;
 
 export interface ContentStructureService {
   /**
@@ -153,8 +154,8 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
         depth += 1;
       }
 
-      if (depth > MAX_DEPTH) {
-        reparentToRoot(group, `it exceeds the maximum nesting depth of ${MAX_DEPTH}`);
+      if (depth > MAX_FOLDER_DEPTH) {
+        reparentToRoot(group, `it exceeds the maximum nesting depth of ${MAX_FOLDER_DEPTH}`);
       }
     }
 

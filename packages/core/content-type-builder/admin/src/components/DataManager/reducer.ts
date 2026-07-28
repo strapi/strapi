@@ -6,7 +6,11 @@ import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import { createUndoRedoSlice } from './undoRedo';
-import { createEmptyContentStructure, sectionKeyForKind } from './utils/contentStructure';
+import {
+  createEmptyContentStructure,
+  MAX_FOLDER_DEPTH,
+  sectionKeyForKind,
+} from './utils/contentStructure';
 
 import type {
   Components,
@@ -387,6 +391,38 @@ const isDescendantGroup = (
   }
 
   return false;
+};
+
+const getGroupDepth = (groups: ContentStructureGroup[], id: string): number => {
+  let depth = 1;
+  let current = findGroup(groups, id);
+
+  while (current && current.parent !== null) {
+    current = findGroup(groups, current.parent);
+    depth += 1;
+  }
+
+  return depth;
+};
+
+/**
+ * Number of folder levels below a group e.g. a group with no sub-folders has height 0.
+ */
+const getSubtreeHeight = (groups: ContentStructureGroup[], id: string): number => {
+  const group = findGroup(groups, id);
+
+  if (!group) {
+    return 0;
+  }
+
+  let height = 0;
+
+  for (const child of group.children) {
+    if (child.type !== 'group') continue;
+    height = Math.max(height, 1 + getSubtreeHeight(groups, child.id));
+  }
+
+  return height;
 };
 
 const slice = createUndoRedoSlice(
@@ -858,6 +894,11 @@ const slice = createUndoRedoSlice(
         const { section, id, name, parentId } = action.payload;
         const { groups } = state.contentStructure.sections[section];
 
+        // Refuse creation of a folder that would exceed the maximum allowed depth.
+        if (parentId && getGroupDepth(groups, parentId) + 1 > MAX_FOLDER_DEPTH) {
+          return;
+        }
+
         groups.push({ id, name, parent: parentId, children: [], status: 'NEW' });
 
         if (parentId) {
@@ -891,6 +932,12 @@ const slice = createUndoRedoSlice(
 
         // Reject no-ops and cyclic moves
         if (newParentId === id || (newParentId && isDescendantGroup(groups, id, newParentId))) {
+          return;
+        }
+
+        // Refuse moves that would exceed the maximum allowed depth.
+        const newTopDepth = newParentId ? getGroupDepth(groups, newParentId) + 1 : 1;
+        if (newTopDepth + getSubtreeHeight(groups, id) > MAX_FOLDER_DEPTH) {
           return;
         }
 
