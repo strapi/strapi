@@ -185,30 +185,22 @@ const connectRelationToParent = (
   )
     ? existingConnect
     : [...existingConnect, relationToConnect];
-  const fieldToConnectValue = isFieldPresent
+  const relationValue = isFieldPresent
     ? {
         ...relationFieldValue,
         connect,
       }
     : {
-        [fieldName]: {
-          connect,
-          disconnect: [],
-        },
-        // In case the object was not present you need to pass the componentUID of the parent document
-        __component: fieldToConnectUID,
+        connect,
+        disconnect: [],
       };
-  if (isFieldPresent && parentDataToUpdate) {
-    return setIn(parentDataToUpdate, fieldToConnect, fieldToConnectValue);
+  const dataWithRelation = setIn(parentDataToUpdate, fieldToConnect, relationValue);
+
+  if (!isFieldPresent && fieldToConnectUID && parentPath) {
+    return setIn(dataWithRelation, `${parentPath}.__component`, fieldToConnectUID);
   }
 
-  const currentParentValue = getIn(parentDataToUpdate, parentPath);
-  const parentValue = {
-    ...(isObject(currentParentValue) ? currentParentValue : {}),
-    ...fieldToConnectValue,
-  };
-
-  return setIn(parentDataToUpdate, parentPath, parentValue);
+  return dataWithRelation;
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {

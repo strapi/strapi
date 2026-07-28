@@ -7,6 +7,27 @@ const mockPublish = jest.fn();
 const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
+let parentInitialFormValues: Record<string, unknown> | undefined;
+let relationModalState = {
+  isModalOpen: true,
+  fieldToConnect: 'relation',
+  fieldToConnectUID: undefined as string | undefined,
+  parentFormValues: undefined as Record<string, unknown> | undefined,
+  documentHistory: [
+    {
+      documentId: 'parent',
+      model: 'api::parent.parent',
+      collectionType: 'collection-types',
+      params: {},
+    },
+    {
+      documentId: undefined,
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      params: {},
+    },
+  ],
+};
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -32,9 +53,13 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
 jest.mock('../../../../hooks/useDocument', () => ({
   useDoc: () => ({
     schema: { options: { draftAndPublish: true } },
-    getInitialFormValues: () => undefined,
+    getInitialFormValues: () => parentInitialFormValues,
   }),
-  useDocument: () => ({ getInitialFormValues: () => undefined, schema: undefined, components: {} }),
+  useDocument: () => ({
+    getInitialFormValues: () => parentInitialFormValues,
+    schema: undefined,
+    components: {},
+  }),
 }));
 jest.mock('../../../../hooks/useDocumentContext', () => ({
   useDocumentContext: () => ({
@@ -67,24 +92,7 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
         params: {},
       },
       state: {
-        isModalOpen: true,
-        fieldToConnect: 'relation',
-        fieldToConnectUID: undefined,
-        parentFormValues: undefined,
-        documentHistory: [
-          {
-            documentId: 'parent',
-            model: 'api::parent.parent',
-            collectionType: 'collection-types',
-            params: {},
-          },
-          {
-            documentId: undefined,
-            model: 'api::child.child',
-            collectionType: 'collection-types',
-            params: {},
-          },
-        ],
+        ...relationModalState,
       },
     }),
 }));
@@ -117,8 +125,30 @@ const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: 
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    parentInitialFormValues = undefined;
+    relationModalState = {
+      isModalOpen: true,
+      fieldToConnect: 'relation',
+      fieldToConnectUID: undefined,
+      parentFormValues: undefined,
+      documentHistory: [
+        {
+          documentId: 'parent',
+          model: 'api::parent.parent',
+          collectionType: 'collection-types',
+          params: {},
+        },
+        {
+          documentId: undefined,
+          model: 'api::child.child',
+          collectionType: 'collection-types',
+          params: {},
+        },
+      ],
+    };
     mockCreate.mockResolvedValue({ data: { documentId: 'created', locale: 'en' } });
     mockPublish.mockResolvedValue({ data: { documentId: 'published', locale: 'en' } });
+    mockUpdateParent.mockResolvedValue({ data: {} });
     mockCountDraftRelations.mockResolvedValue({
       data: { unpublishedRelations: 0, draftM2mLinks: 0 },
       error: undefined,
@@ -151,6 +181,50 @@ describe('relation parent updates', () => {
       )
     );
     expect(mockUpdateParent).not.toHaveBeenCalled();
+  });
+
+  it('connects a missing top-level relation without creating an empty field when no component UID exists', async () => {
+    relationModalState.parentFormValues = {};
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      relation: {
+        connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+        disconnect: [],
+      },
+    });
+    expect(data).not.toHaveProperty('');
+    expect(data).not.toHaveProperty('undefined');
+    expect(data).not.toHaveProperty('__component');
+  });
+
+  it('preserves existing component metadata when connecting a missing relation without a UID', async () => {
+    relationModalState = {
+      ...relationModalState,
+      fieldToConnect: 'component.relation',
+      parentFormValues: { component: { __component: 'shared.component' } },
+    };
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      component: {
+        __component: 'shared.component',
+        relation: {
+          connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+          disconnect: [],
+        },
+      },
+    });
   });
 });
 
