@@ -24,6 +24,7 @@ export type ContentStructureSection = {
 };
 
 export const CONTENT_STRUCTURE_VERSION = 1;
+export const MAX_FOLDER_DEPTH = 3;
 
 /**
  * Admin-side model of the content-structure (folder groups).

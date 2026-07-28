@@ -52,7 +52,7 @@ const contentStructureFileObjectSchema = z.object({
 type ContentStructureFileObject = z.infer<typeof contentStructureFileObjectSchema>;
 type ContentStructureGroupInput = z.infer<typeof contentStructureGroupSchema>;
 
-const MAX_GROUP_DEPTH = 3;
+const MAX_FOLDER_DEPTH = 3;
 
 /**
  * File-wide group-id uniqueness across singleTypes and collectionTypes
@@ -145,9 +145,9 @@ const validateSectionGraph = (
       depth += 1;
     }
 
-    if (!broken && depth > MAX_GROUP_DEPTH) {
+    if (!broken && depth > MAX_FOLDER_DEPTH) {
       report(
-        `Group "${group.id}" exceeds the maximum nesting depth of ${MAX_GROUP_DEPTH} in section "${sectionKey}"`
+        `Group "${group.id}" exceeds the maximum nesting depth of ${MAX_FOLDER_DEPTH} in section "${sectionKey}"`
       );
     }
   }
