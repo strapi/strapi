@@ -18,42 +18,13 @@ import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { useTypedSelector } from '../modules/hooks';
 import {
   countTreeLinks,
-  deriveVisibleTree,
+  buildContentStructureSection,
   flattenTreeLinks,
-  type VisibleTreeNode,
+  type LinkTreeNode,
 } from '../utils/contentStructure';
 import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
-import type { Modules } from '@strapi/types';
-
-type LinkTreeNode = VisibleTreeNode<ContentManagerLink>;
-
-type BuildContentStructureSectionParams = {
-  compareLinks: (a: ContentManagerLink, b: ContentManagerLink) => number;
-  groups: Modules.ContentStructure.ResolvedGroupNode[];
-  id: 'collectionTypes' | 'singleTypes';
-  links: ContentManagerLink[];
-  title: string;
-};
-
-const buildContentStructureSection = ({
-  compareLinks,
-  groups,
-  links,
-  title,
-  id,
-}: BuildContentStructureSectionParams): { id: string; title: string; tree: LinkTreeNode[] } => {
-  try {
-    return { id, title, tree: deriveVisibleTree(groups, links, compareLinks) };
-  } catch {
-    const tree: LinkTreeNode[] = [...links].sort(compareLinks).map((link) => {
-      return { type: 'link', link };
-    });
-
-    return { id, title, tree };
-  }
-};
 
 const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
@@ -100,22 +71,23 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   });
 
   const sections = React.useMemo(() => {
-    return [
-      buildContentStructureSection({
-        id: 'collectionTypes',
-        groups: contentStructure?.collectionTypes ?? [],
-        title: collectionTypesLabel,
-        links: collectionTypeLinks,
-        compareLinks,
-      }),
-      buildContentStructureSection({
-        id: 'singleTypes',
-        groups: contentStructure?.singleTypes ?? [],
-        title: singleTypesLabel,
-        links: singleTypeLinks,
-        compareLinks,
-      }),
-    ];
+    const collectionTypesSection = buildContentStructureSection({
+      id: 'collectionTypes',
+      groups: contentStructure?.collectionTypes ?? [],
+      title: collectionTypesLabel,
+      links: collectionTypeLinks,
+      compareLinks,
+    });
+
+    const singleTypesSection = buildContentStructureSection({
+      id: 'singleTypes',
+      groups: contentStructure?.singleTypes ?? [],
+      title: singleTypesLabel,
+      links: singleTypeLinks,
+      compareLinks,
+    });
+
+    return [collectionTypesSection, singleTypesSection];
   }, [
     collectionTypesLabel,
     collectionTypeLinks,
