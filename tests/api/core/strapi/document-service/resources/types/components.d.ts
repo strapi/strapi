@@ -7,7 +7,8 @@ export interface ArticleComp extends Schema.Component {
     description: '';
   };
   attributes: {
-    text: Attribute.String;
+    text: Attribute.String & Attribute.Required;
+    note: Attribute.String;
   };
 }
 
