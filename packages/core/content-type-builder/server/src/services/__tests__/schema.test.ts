@@ -30,6 +30,11 @@ const contentTypeServiceMock = {
   generateAPI: jest.fn().mockResolvedValue(undefined),
 };
 
+const contentStructureServiceMock = {
+  persistFromUpdate: jest.fn().mockResolvedValue(false),
+  validateContentTypeUidReferences: jest.fn(),
+};
+
 const getServiceMock = jest.fn().mockImplementation((service) => {
   if (service === 'content-types') {
     return contentTypeServiceMock;
@@ -37,6 +42,10 @@ const getServiceMock = jest.fn().mockImplementation((service) => {
 
   if (service === 'api-handler') {
     return apiHandlerServiceMock;
+  }
+
+  if (service === 'content-structure') {
+    return contentStructureServiceMock;
   }
 
   return {};
