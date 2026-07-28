@@ -13,7 +13,6 @@ import {
   createEmptySelection,
   getIdsOfKind,
   selectAll as selectAllState,
-  selectOnly as selectOnlyState,
   selectRange as selectRangeState,
   toggleSelection,
   type ItemKey,
@@ -22,7 +21,8 @@ import {
 
 /**
  * Ephemeral, view-state-only multi-select for the future Media Library. Selection
- * is page-scoped and reset on folder navigation / view switch.
+ * is page-scoped and reset on folder navigation or sort/filter changes (the
+ * table/grid toggle keeps it — same list, different presentation).
  *
  * The actual computation lives in `../utils/selection.ts` (pure + unit-tested);
  * this hook is a thin React wrapper. Assets and folders share one mechanism —
@@ -42,13 +42,11 @@ export interface AssetSelection {
   isSelected: (key: ItemKey) => boolean;
   /** Additive toggle (Cmd/Ctrl+click, item checkbox). */
   toggle: (key: ItemKey) => void;
-  /** Plain click — replaces the selection with a single item. */
-  selectOnly: (key: ItemKey) => void;
   /** Shift+click — selects the contiguous range from the anchor to the target. */
   selectRange: (orderedKeys: ItemKey[], targetKey: ItemKey) => void;
   /** Header checkbox — selects every rendered item (folders and assets). */
   selectAll: (orderedKeys: ItemKey[]) => void;
-  /** Close button / folder navigation / view switch. */
+  /** Close button / folder navigation / list-identity changes. */
   clear: () => void;
 }
 
@@ -67,11 +65,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
   );
 
   const toggle = useCallback((key: ItemKey) => setState((prev) => toggleSelection(prev, key)), []);
-
-  const selectOnly = useCallback(
-    (key: ItemKey) => setState((prev) => selectOnlyState(prev, key)),
-    []
-  );
 
   const selectRange = useCallback(
     (orderedKeys: ItemKey[], targetKey: ItemKey) =>
@@ -103,7 +96,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       anchorKey: state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,
@@ -115,7 +107,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,
