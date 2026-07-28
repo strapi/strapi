@@ -7,7 +7,8 @@ import { styled } from 'styled-components';
 export const BASE_INDENT = 12;
 export const INDENT_STEP = 24;
 
-const ANIMATION_DURATION = '0.3s';
+const ANIMATION_DURATION = '0.5s';
+const COLLAPSE_EASING = 'cubic-bezier(0, 1, 0, 1)';
 
 interface SubNavFolderProps {
   label: string;
@@ -71,7 +72,7 @@ const Collapsible = styled.div<{ $open: boolean }>`
   grid-template-rows: ${({ $open }) => ($open ? '1fr' : '0fr')};
   display: grid;
 
-  transition: grid-template-rows ${ANIMATION_DURATION} ease;
+  transition: grid-template-rows ${ANIMATION_DURATION} ${COLLAPSE_EASING};
 `;
 
 const CollapsibleInner = styled.div`
