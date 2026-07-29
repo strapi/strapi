@@ -68,6 +68,7 @@ export interface Config {
   sharp?: {
     cache?: boolean;
     concurrency?: number;
+    limitInputPixels?: number | boolean;
   };
   concurrentUploadSize?: number;
   security?: {
