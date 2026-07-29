@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, Loader, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -8,8 +8,11 @@ import {
   ChevronDown,
   Cross,
   CrossCircle,
+  Information,
   MinusCircle,
+  Sparkle,
   Upload,
+  WarningCircle,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -21,18 +24,28 @@ import {
   toggleMinimize,
   cancelUpload,
   selectAggregateProgress,
+  selectMetadataProgress,
 } from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
 
-import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
+import type { FileMetadataStatus, FileProgress, FileProgressStatus } from '../store/uploadProgress';
+import type { MessageDescriptor } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
  * DialogHeader
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
+const HeaderStatusMessage = ({
+  title,
+  subtitle,
+  metadataSubtitle,
+}: {
+  title: string;
+  subtitle?: string;
+  metadataSubtitle?: string;
+}) => {
   return (
     <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
       <Drawer.Title>
@@ -43,6 +56,11 @@ const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: st
           {subtitle}
         </Typography>
       </Drawer.Description>
+      {metadataSubtitle && (
+        <Typography variant="pi" textColor="neutral600">
+          {metadataSubtitle}
+        </Typography>
+      )}
     </Flex>
   );
 };
@@ -67,6 +85,11 @@ type HeaderStatusProps = {
   totalFiles: number;
   successfulCount: number;
   errorCount: number;
+  /**
+   * Count-based metadata progress, or `null` when no row entered the metadata phase.
+   * Shown as an extra subtitle while generation is still in flight.
+   */
+  metadataProgress: number | null;
 };
 
 const HeaderStatus = ({
@@ -75,8 +98,22 @@ const HeaderStatus = ({
   totalFiles,
   successfulCount,
   errorCount,
+  metadataProgress,
 }: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
+
+  // Completion is upload-driven, so the terminal header can appear while metadata is
+  // still generating — the subtitle keeps ticking underneath until it settles.
+  const metadataSubtitle =
+    metadataProgress !== null && metadataProgress < 100
+      ? formatMessage(
+          {
+            id: getTranslationKey('upload.progress.generatingMetadata.withCount'),
+            defaultMessage: 'Generating metadata with AI ({percentage}%)',
+          },
+          { percentage: metadataProgress }
+        )
+      : undefined;
 
   if (status === 'error') {
     return (
@@ -127,6 +164,7 @@ const HeaderStatus = ({
             defaultMessage: 'Upload successful!',
           })}
           subtitle={subtitle}
+          metadataSubtitle={metadataSubtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -171,6 +209,7 @@ const HeaderStatus = ({
               percentage: progressPercentage,
             }
           )}
+          metadataSubtitle={metadataSubtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -205,6 +244,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
     (state) => state.uploadProgress
   );
   const progress = useTypedSelector(selectAggregateProgress);
+  const metadataProgress = useTypedSelector(selectMetadataProgress);
   const dispatch = useTypedDispatch();
   const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
@@ -258,13 +298,14 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
         totalFiles={totalFiles}
         successfulCount={successfulCount}
         errorCount={errorCount}
+        metadataProgress={metadataProgress}
       />
       <Flex gap={1}>
         {!isAllUploaded && (
           <TextButton onClick={handleCancel} fontWeight="bold">
             {formatMessage({
               id: getTranslationKey('upload.progress.cancel'),
-              defaultMessage: 'Cancel',
+              defaultMessage: 'Cancel all',
             })}
           </TextButton>
         )}
@@ -355,6 +396,56 @@ const FileRow = ({
   );
 };
 
+/**
+ * Icon + subline for a successfully uploaded row, keyed by its metadata phase.
+ * `'none'` covers rows that never entered the phase — AI metadata disabled — and
+ * renders exactly as before this feature existed. Non-images do enter the phase and
+ * land on `skipped`.
+ *
+ * Note the `skipped` visuals are a placeholder pending the updated design mock: a
+ * neutral `Information` icon, deliberately distinct from generated/failed/cancelled.
+ */
+const COMPLETED_ROW_PRESENTATION: Record<
+  FileMetadataStatus | 'none',
+  { icon: React.ReactNode; message: MessageDescriptor }
+> = {
+  none: {
+    icon: <CheckCircle fill="success500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.uploaded'),
+      defaultMessage: 'Uploaded',
+    },
+  },
+  generating: {
+    icon: <Sparkle fill="primary600" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.generatingMetadata'),
+      defaultMessage: 'Uploaded • Generating metadata…',
+    },
+  },
+  generated: {
+    icon: <CheckCircle fill="success500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataGenerated'),
+      defaultMessage: 'Uploaded • Metadata generated',
+    },
+  },
+  skipped: {
+    icon: <Information fill="neutral500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataSkipped'),
+      defaultMessage: 'Upload complete • Metadata generation skipped',
+    },
+  },
+  failed: {
+    icon: <WarningCircle fill="warning500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataFailed'),
+      defaultMessage: 'Upload complete • Metadata generation failed',
+    },
+  },
+};
+
 const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const { formatMessage } = useIntl();
   const isError = file.status === 'error';
@@ -401,14 +492,18 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   }
 
   if (isCompleted) {
+    // The upload succeeded; the metadata phase (if any) drives both the icon and the
+    // subline from here on — a metadata failure shows a warning, not an upload error.
+    const { icon, message } = COMPLETED_ROW_PRESENTATION[file.metadataStatus ?? 'none'];
+
     return (
-      <FileRow icon={<CheckCircle fill="success500" />} fileName={file.name}>
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: getTranslationKey('upload.progress.file.uploaded'),
-            defaultMessage: 'Uploaded',
-          })}
-        </Typography>
+      <FileRow icon={icon} fileName={file.name}>
+        <Flex gap={2}>
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage(message)}
+          </Typography>
+          {file.metadataStatus === 'generating' && <Loader small />}
+        </Flex>
       </FileRow>
     );
   }

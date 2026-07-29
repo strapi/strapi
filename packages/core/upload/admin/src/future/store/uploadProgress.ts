@@ -9,6 +9,16 @@ export interface FileUploadError {
 
 export type FileProgressStatus = 'pending' | 'uploading' | 'complete' | 'error' | 'cancelled';
 
+/**
+ * AI metadata generation phase for a single row, tracked independently from the
+ * upload status: a metadata failure never turns a successful upload into an error.
+ * `undefined` means the row has no metadata phase at all, i.e. AI metadata is
+ * disabled — non-images do get a phase and come back `skipped` from the server.
+ */
+export type FileMetadataStatus = 'generating' | 'generated' | 'skipped' | 'failed';
+
+export type FileMetadataResultStatus = Exclude<FileMetadataStatus, 'generating'>;
+
 export interface FileProgress {
   name: string;
   index: number;
@@ -17,6 +27,7 @@ export interface FileProgress {
   uploadedBytes: number;
   file?: File;
   error?: string;
+  metadataStatus?: FileMetadataStatus;
 }
 
 export interface UploadProgressState {
@@ -102,6 +113,43 @@ const uploadProgressSlice = createSlice({
       }
       state.errors = [...state.errors, { name, message }];
     },
+    /**
+     * Metadata generation started for a row.
+     *
+     * Metadata requests are fired-and-forgotten, so their callbacks can land after
+     * a new batch has replaced `files` and reused the same row indices. Every
+     * metadata payload therefore carries the `uploadId` it was fired for, and stale
+     * ones are dropped instead of writing onto another batch's row.
+     */
+    setFileMetadataGenerating(state, action: PayloadAction<{ index: number; uploadId: number }>) {
+      const { index, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
+      if (state.files[index]) {
+        state.files[index].metadataStatus = 'generating';
+      }
+    },
+    /**
+     * Terminal metadata outcome for a row. Never touches `status`/`error`/`errors`:
+     * the upload itself already succeeded regardless of how generation went.
+     */
+    setFileMetadataResult(
+      state,
+      action: PayloadAction<{
+        index: number;
+        uploadId: number;
+        status: FileMetadataResultStatus;
+      }>
+    ) {
+      const { index, uploadId, status } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
+      if (state.files[index]) {
+        state.files[index].metadataStatus = status;
+      }
+    },
     addUploadErrors(state, action: PayloadAction<FileUploadError[]>) {
       state.errors = [...state.errors, ...action.payload];
     },
@@ -146,6 +194,8 @@ const uploadProgressSlice = createSlice({
             ...file,
             status: 'pending' as FileProgressStatus,
             uploadedBytes: 0,
+            // A retried row goes through the metadata phase again from scratch.
+            metadataStatus: undefined,
           };
         }
         return file;
@@ -179,12 +229,34 @@ export const selectAggregateProgress = createSelector(
   }
 );
 
+/**
+ * Count-based metadata progress across the rows that actually entered the metadata
+ * phase: `settled / total`, where settled means any terminal metadata status.
+ *
+ * Count-based rather than byte-weighted because the generation endpoint answers in
+ * one go — there is no intermediate progress to weight. Returns `null` when no row
+ * has a metadata phase, so the header can hide the subtitle entirely.
+ */
+export const selectMetadataProgress = createSelector(
+  (state: RootState) => state.uploadProgress.files,
+  (files): number | null => {
+    const withMetadata = files.filter((f) => f.metadataStatus !== undefined);
+
+    if (withMetadata.length === 0) return null;
+
+    const settled = withMetadata.filter((f) => f.metadataStatus !== 'generating').length;
+    return Math.round((settled / withMetadata.length) * 100);
+  }
+);
+
 export const {
   openUploadProgress,
   setFileUploading,
   setFileProgress,
   setFileComplete,
   setFileError,
+  setFileMetadataGenerating,
+  setFileMetadataResult,
   addUploadErrors,
   closeUploadProgress,
   toggleMinimize,

@@ -5,10 +5,13 @@ import {
   setFileProgress,
   setFileComplete,
   setFileError,
+  setFileMetadataGenerating,
+  setFileMetadataResult,
   cancelUpload,
   setUploadFailed,
   retryCancelledFiles,
   selectAggregateProgress,
+  selectMetadataProgress,
   type FileProgress,
   type FileProgressStatus,
   type UploadProgressState,
@@ -38,6 +41,9 @@ const makeState = (files: FileProgress[]): UploadProgressState => ({
 
 const aggregate = (state: UploadProgressState) =>
   selectAggregateProgress({ uploadProgress: state });
+
+const metadataProgress = (state: UploadProgressState) =>
+  selectMetadataProgress({ uploadProgress: state });
 
 describe('uploadProgress slice', () => {
   describe('openUploadProgress', () => {
@@ -148,6 +154,19 @@ describe('uploadProgress slice', () => {
       expect(next.files.map((f) => f.status)).toEqual(['complete', 'pending', 'error']);
       expect(next.files[1].uploadedBytes).toBe(0);
     });
+
+    it('clears metadataStatus on retried rows so they re-enter the metadata phase', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'cancelled', 100, 60), metadataStatus: 'failed' as const },
+      ]);
+
+      const next = uploadProgressReducer(state, retryCancelledFiles());
+
+      // The completed row keeps its outcome; only the retried row is reset.
+      expect(next.files[0].metadataStatus).toBe('generated');
+      expect(next.files[1].metadataStatus).toBeUndefined();
+    });
   });
 
   describe('setFileUploading', () => {
@@ -189,6 +208,146 @@ describe('uploadProgress slice', () => {
 
     it('returns 0 for an empty batch', () => {
       expect(aggregate(makeState([]))).toBe(0);
+    });
+  });
+
+  describe('metadata reducers', () => {
+    it('marks a row as generating', () => {
+      const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+      const next = uploadProgressReducer(
+        state,
+        setFileMetadataGenerating({ index: 0, uploadId: 1 })
+      );
+
+      expect(next.files[0].metadataStatus).toBe('generating');
+    });
+
+    it.each(['generated', 'skipped', 'failed'] as const)('records the %s outcome', (status) => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generating' as const },
+      ]);
+
+      const next = uploadProgressReducer(
+        state,
+        setFileMetadataResult({ index: 0, uploadId: 1, status })
+      );
+
+      expect(next.files[0].metadataStatus).toBe(status);
+    });
+
+    it('leaves the upload status and batch errors untouched when generation fails', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generating' as const },
+      ]);
+
+      const next = uploadProgressReducer(
+        state,
+        setFileMetadataResult({ index: 0, uploadId: 1, status: 'failed' })
+      );
+
+      // The upload itself succeeded — a metadata failure must never demote it.
+      expect(next.files[0].status).toBe('complete');
+      expect(next.files[0].error).toBeUndefined();
+      expect(next.errors).toEqual([]);
+    });
+
+    it('ignores a dispatch for an index that does not exist', () => {
+      const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+      const next = uploadProgressReducer(
+        state,
+        setFileMetadataResult({ index: 5, uploadId: 1, status: 'generated' })
+      );
+
+      expect(next.files).toHaveLength(1);
+      expect(next.files[0].metadataStatus).toBeUndefined();
+    });
+
+    describe('stale-batch guard', () => {
+      it('drops a generating dispatch carrying a previous uploadId', () => {
+        // uploadId 1 = current batch; the callback belongs to the batch before it.
+        const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+        const next = uploadProgressReducer(
+          state,
+          setFileMetadataGenerating({ index: 0, uploadId: 0 })
+        );
+
+        expect(next.files[0].metadataStatus).toBeUndefined();
+      });
+
+      it('drops a result dispatch carrying a previous uploadId', () => {
+        const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+        const next = uploadProgressReducer(
+          state,
+          setFileMetadataResult({ index: 0, uploadId: 0, status: 'failed' })
+        );
+
+        expect(next.files[0].metadataStatus).toBeUndefined();
+      });
+
+      it('does not overwrite the new batch row when a late callback reuses its index', () => {
+        // A new batch opened (uploadId bumps to 2) and reused index 0 while the old
+        // batch's metadata request was still in flight.
+        const opened = uploadProgressReducer(
+          makeState([makeFile(0, 'complete', 100, 100)]),
+          openUploadProgress({ totalFiles: 1, fileNames: ['new.png'], fileSizes: [10] })
+        );
+        expect(opened.uploadId).toBe(2);
+
+        const next = uploadProgressReducer(
+          opened,
+          setFileMetadataResult({ index: 0, uploadId: 1, status: 'generated' })
+        );
+
+        expect(next.files[0].name).toBe('new.png');
+        expect(next.files[0].metadataStatus).toBeUndefined();
+        expect(next.files[0].status).toBe('pending');
+      });
+    });
+  });
+
+  describe('selectMetadataProgress', () => {
+    it('returns null when no row entered the metadata phase', () => {
+      const state = makeState([
+        makeFile(0, 'complete', 100, 100),
+        makeFile(1, 'complete', 100, 100),
+      ]);
+
+      expect(metadataProgress(state)).toBeNull();
+    });
+
+    it('counts settled rows over the rows with a metadata phase only', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'failed' as const },
+        { ...makeFile(2, 'complete', 100, 100), metadataStatus: 'generating' as const },
+        // Non-image row: excluded from both numerator and denominator.
+        makeFile(3, 'complete', 100, 100),
+      ]);
+
+      // 2 of 3 rows settled → 67%
+      expect(metadataProgress(state)).toBe(67);
+    });
+
+    it('counts skipped rows as settled', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'skipped' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'generating' as const },
+      ]);
+
+      expect(metadataProgress(state)).toBe(50);
+    });
+
+    it('returns 100 once every metadata row is terminal', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'skipped' as const },
+      ]);
+
+      expect(metadataProgress(state)).toBe(100);
     });
   });
 });

@@ -86,7 +86,7 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText(/Uploading 4 items \(50%\)/)).toBeInTheDocument();
     });
 
-    it('shows Cancel button during upload', () => {
+    it('shows Cancel all button during upload', () => {
       setup(
         createMockState({
           files: [
@@ -95,10 +95,10 @@ describe('UploadProgressDialog', () => {
           ],
         })
       );
-      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancel all' })).toBeInTheDocument();
     });
 
-    it('calls abortUpload and dispatch cancelUpload when Cancel is clicked', () => {
+    it('calls abortUpload and dispatch cancelUpload when Cancel all is clicked', () => {
       setup(
         createMockState({
           uploadId: 5,
@@ -106,7 +106,7 @@ describe('UploadProgressDialog', () => {
         })
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel all' }));
 
       expect(abortUpload).toHaveBeenCalledWith(5);
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'uploadProgress/cancelUpload' });
@@ -258,6 +258,110 @@ describe('UploadProgressDialog', () => {
         expect(screen.getByText('completed-file.png')).toBeInTheDocument();
       });
       expect(screen.getByText('Uploaded')).toBeInTheDocument();
+    });
+  });
+
+  describe('FileRowRenderer - metadata phase', () => {
+    const completedWithMetadata = (metadataStatus: FileProgress['metadataStatus']) =>
+      createMockState({
+        totalFiles: 1,
+        files: [{ ...createMockFile(0, 'photo.png', 'complete'), metadataStatus }],
+      });
+
+    it('shows the generating subline with a spinner while metadata is in flight', () => {
+      setup(completedWithMetadata('generating'));
+
+      expect(screen.getByText('Uploaded • Generating metadata…')).toBeInTheDocument();
+      // The DS Loader announces itself as a live status region.
+      expect(screen.getByRole('status')).toBeInTheDocument();
+    });
+
+    it('shows the generated subline once metadata succeeds', () => {
+      setup(completedWithMetadata('generated'));
+
+      expect(screen.getByText('Uploaded • Metadata generated')).toBeInTheDocument();
+    });
+
+    it('shows the skipped subline when the server skipped the file', () => {
+      setup(completedWithMetadata('skipped'));
+
+      expect(screen.getByText('Upload complete • Metadata generation skipped')).toBeInTheDocument();
+    });
+
+    it('shows the failed subline when metadata generation fails', () => {
+      setup(completedWithMetadata('failed'));
+
+      expect(screen.getByText('Upload complete • Metadata generation failed')).toBeInTheDocument();
+    });
+
+    it('falls back to the plain uploaded subline for rows with no metadata phase', () => {
+      setup(completedWithMetadata(undefined));
+
+      expect(screen.getByText('Uploaded')).toBeInTheDocument();
+    });
+
+    it('still reports the upload as successful when metadata failed', () => {
+      setup(completedWithMetadata('failed'));
+
+      // Metadata is a per-row annotation — it must not affect header completion.
+      expect(screen.getByText('Upload successful!')).toBeInTheDocument();
+      expect(screen.getByText(/uploaded successfully/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+
+    it('still reports the upload as successful when metadata was skipped', () => {
+      setup(completedWithMetadata('skipped'));
+
+      expect(screen.getByText('Upload successful!')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+
+    it('does not block closing while metadata generation is still in flight', () => {
+      setup(completedWithMetadata('generating'));
+
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+  });
+
+  describe('HeaderStatus - metadata subtitle', () => {
+    it('shows count-based metadata progress while generation is in flight', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generating' },
+          ],
+        })
+      );
+
+      // 1 of 2 metadata rows settled → 50%
+      expect(screen.getByText('Generating metadata with AI (50%)')).toBeInTheDocument();
+    });
+
+    it('hides the subtitle once every metadata row is terminal', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'failed' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+    });
+
+    it('hides the subtitle when no row entered the metadata phase (AI disabled)', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [createMockFile(0, 'photo.png', 'complete')],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
     });
   });
 
