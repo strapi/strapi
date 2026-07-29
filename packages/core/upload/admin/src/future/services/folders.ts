@@ -54,9 +54,9 @@ const foldersApi = uploadApi.injectEndpoints({
 
         if (search) {
           // Search is global: the parent filter is dropped so matching folders
-          // anywhere in the library surface. Server default paging applies —
-          // deliberately not the legacy `pageSize: -1`, which would make this an
-          // unbounded query.
+          // anywhere in the library surface. The endpoint is unpaginated — it
+          // returns every match — so callers can treat the array length as the
+          // true total. Bounding it is a separate decision.
           queryParams['_q'] = encodeSearchQuery(search);
         } else if (parentId != null) {
           queryParams['filters'] = {

@@ -62,6 +62,34 @@ const ITEM_COUNT_MESSAGE = {
   defaultMessage: '{count, plural, =1 {# item} other {# items}}',
 };
 
+const SEARCH_RESULTS_COUNT_MESSAGES = {
+  both: {
+    id: getTranslationKey('header.search-results.count'),
+    defaultMessage:
+      '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
+  },
+  folders: {
+    id: getTranslationKey('header.search-results.count.folders'),
+    defaultMessage: '{numberFolders, plural, one {1 folder} other {# folders}}',
+  },
+  assets: {
+    id: getTranslationKey('header.search-results.count.assets'),
+    defaultMessage: '{numberAssets, plural, =0 {0 assets} one {1 asset} other {# assets}}',
+  },
+};
+
+const getSearchResultsCountMessage = (numberFolders: number, numberAssets: number) => {
+  if (numberFolders === 0) {
+    return SEARCH_RESULTS_COUNT_MESSAGES.assets;
+  }
+
+  if (numberAssets === 0) {
+    return SEARCH_RESULTS_COUNT_MESSAGES.folders;
+  }
+
+  return SEARCH_RESULTS_COUNT_MESSAGES.both;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * AssetsView
  * -----------------------------------------------------------------------------------------------*/
@@ -324,9 +352,13 @@ export const AssetsPage = () => {
     },
     { query: searchQuery }
   );
-  const searchResultsCountLabel = formatMessage(ITEM_COUNT_MESSAGE, {
-    count: pagination?.total ?? 0,
-  });
+  const numberFolders = folders.length;
+  const numberAssets = pagination?.total ?? 0;
+
+  const searchResultsCountLabel = formatMessage(
+    getSearchResultsCountMessage(numberFolders, numberAssets),
+    { numberFolders, numberAssets }
+  );
 
   let pageHeaderTitle: string;
   if (isSearching) {

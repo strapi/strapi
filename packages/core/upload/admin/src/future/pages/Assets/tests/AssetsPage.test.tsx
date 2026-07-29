@@ -38,6 +38,17 @@ const createAsset = (id: number, name: string): File => ({
   updatedAt: '2024-01-01T00:00:00.000Z',
 });
 
+const createFolder = (id: number, name: string) => ({
+  id,
+  name,
+  pathId: id,
+  path: `/${id}`,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: '2024-01-01T00:00:00.000Z',
+  children: { count: 0 },
+  files: { count: 0 },
+});
+
 /** Surfaces the router search string so tests can assert on `?_q=`. */
 const LocationProbe = () => {
   const { search } = useLocation();
@@ -54,6 +65,9 @@ const respondWithAssets = (results: File[]) =>
       })
     )
   );
+
+const respondWithFolders = (data: ReturnType<typeof createFolder>[]) =>
+  server.use(http.get('*/upload/folders', () => HttpResponse.json({ data })));
 
 const renderPage = (search = '') =>
   render(
@@ -77,12 +91,67 @@ describe('AssetsPage search', () => {
     expect(await findHeading()).toHaveTextContent('Home (1 item)');
   });
 
-  it('shows the search results title and the matching assets total', async () => {
+  it('shows the search results title and the matching folder and asset totals', async () => {
     respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'other.png')]);
 
     renderPage('?_q=img');
 
-    expect(await findHeading()).toHaveTextContent('Search results for "img" (2 items)');
+    expect(await findHeading()).toHaveTextContent('Search results for "img" (1 folder - 2 assets)');
+  });
+
+  it('drops the assets half of the count when only folders match', async () => {
+    respondWithAssets([]);
+    respondWithFolders([createFolder(1, 'reports'), createFolder(2, 'report-archive')]);
+
+    renderPage('?_q=report');
+
+    const heading = await findHeading();
+
+    expect(heading).toHaveTextContent('Search results for "report" (2 folders)');
+    expect(heading).not.toHaveTextContent('0 assets');
+  });
+
+  it('drops the folders half of the count when only assets match', async () => {
+    respondWithAssets([createAsset(1, 'a.png'), createAsset(2, 'b.png'), createAsset(3, 'c.png')]);
+    respondWithFolders([]);
+
+    renderPage('?_q=png');
+
+    const heading = await findHeading();
+
+    expect(heading).toHaveTextContent('Search results for "png" (3 assets)');
+    expect(heading).not.toHaveTextContent('0 folders');
+  });
+
+  it('counts both halves when folders and assets match', async () => {
+    respondWithAssets([createAsset(1, 'report.png')]);
+    respondWithFolders([createFolder(1, 'reports'), createFolder(2, 'report-archive')]);
+
+    renderPage('?_q=report');
+
+    expect(await findHeading()).toHaveTextContent(
+      'Search results for "report" (2 folders - 1 asset)'
+    );
+  });
+
+  it('uses the singular form on both halves', async () => {
+    respondWithAssets([createAsset(1, 'report.png')]);
+    respondWithFolders([createFolder(1, 'reports')]);
+
+    renderPage('?_q=report');
+
+    expect(await findHeading()).toHaveTextContent(
+      'Search results for "report" (1 folder - 1 asset)'
+    );
+  });
+
+  it('leaves the folder heading count assets-only when not searching', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    respondWithFolders([createFolder(1, 'reports'), createFolder(2, 'report-archive')]);
+
+    renderPage();
+
+    expect(await findHeading()).toHaveTextContent('Home (1 item)');
   });
 
   it('decodes the query before showing it in the title', async () => {
@@ -153,12 +222,12 @@ describe('AssetsPage search', () => {
         'Search results for "img"'
       );
     });
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(2 items)');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1 folder - 2 assets)');
 
     releaseSearch();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1 item)');
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1 folder - 1 asset)');
     });
   });
 
