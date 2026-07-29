@@ -19,6 +19,7 @@ import {
   type TypeFilter,
   type TypeValue,
 } from '../hooks/useListFilters';
+import { parseCalendarDate } from '../utils/buildAssetFilters';
 
 import { DateRangeCalendar } from './DateRangeCalendar';
 import { DATE_FIELD_LABELS, FILTER_PANEL_WIDTH, PRESET_LABELS, TYPE_LABELS } from './FilterMenu';
@@ -248,10 +249,17 @@ const DateValuePopover = ({
   const { formatMessage, formatDate } = useIntl();
   const [open, setOpen] = useState(false);
 
+  // Parse as LOCAL calendar dates before formatting: react-intl would coerce
+  // the raw `YYYY-MM-DD` strings via `new Date(value)` = UTC midnight, showing
+  // the previous day in every timezone west of UTC while the query (also
+  // local, see buildAssetFilters) filters the day the user actually picked.
   const label =
     filter.mode === 'preset'
       ? formatMessage(PRESET_LABELS[filter.preset])
-      : `${formatDate(filter.from, { day: '2-digit', month: 'short' })} - ${formatDate(filter.to, {
+      : `${formatDate(parseCalendarDate(filter.from), {
+          day: '2-digit',
+          month: 'short',
+        })} - ${formatDate(parseCalendarDate(filter.to), {
           day: '2-digit',
           month: 'short',
           year: 'numeric',

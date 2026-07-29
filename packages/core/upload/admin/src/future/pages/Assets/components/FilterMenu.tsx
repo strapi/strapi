@@ -97,7 +97,7 @@ interface FilterMenuProps {
 export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   const { formatMessage } = useIntl();
   const [isOpen, setIsOpen] = useState(false);
-  const { filters, addFilter, updateFilter } = listFilters;
+  const { filters, addFilter, updateFilter, removeFilter } = listFilters;
 
   // The Type submenu edits the LAST type badge in place while the menu stays
   // open (checking values accumulates into one badge, per design).
@@ -118,7 +118,14 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
       : [...checkedValues, value];
 
     if (lastTypeFilter && lastTypeFilter.kind === 'type') {
-      updateFilter(lastTypeIndex, { ...lastTypeFilter, values: nextValues });
+      if (nextValues.length === 0) {
+        // Unchecking the final value removes the badge outright — a type
+        // filter with no values is not a state (it would serialize to a
+        // malformed `type:is:` the parser drops anyway).
+        removeFilter(lastTypeIndex);
+      } else {
+        updateFilter(lastTypeIndex, { ...lastTypeFilter, values: nextValues });
+      }
     } else if (nextValues.length > 0) {
       addFilter({ kind: 'type', condition: 'is', values: nextValues });
     }
@@ -192,6 +199,10 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
                   {formatMessage(PRESET_LABELS[preset])}
                 </Menu.Item>
               ))}
+              {/* Design constraint: only Creation date offers a range from the
+                  UI. The URL codec and the badges support ranges on both date
+                  fields (`updated:rangeis:…` works when hand-crafted) so this
+                  stays a one-line change if design extends it later. */}
               {field === 'createdAt' && (
                 <Menu.SubRoot>
                   <FieldSubTrigger>

@@ -1,5 +1,5 @@
 import { type ListFilter } from '../../hooks/useListFilters';
-import { buildAssetFilters } from '../buildAssetFilters';
+import { buildAssetFilters, parseCalendarDate } from '../buildAssetFilters';
 
 // Fixed "now": 2026-06-15 12:00 local time.
 const NOW = new Date(2026, 5, 15, 12, 0, 0);
@@ -70,6 +70,60 @@ describe('buildAssetFilters', () => {
             $lte: new Date(2026, 5, 14, 23, 59, 59, 999).toISOString(),
           },
         },
+      ]);
+    });
+
+    it('clamps month arithmetic at month ends instead of overflowing', () => {
+      // Mar 31 − 1 month: naive setters give Feb 31 → Mar 3. Expected: Feb 28.
+      const endOfMarch = new Date(2026, 2, 31, 12, 0, 0);
+      const filters: ListFilter[] = [
+        {
+          kind: 'date',
+          field: 'createdAt',
+          mode: 'preset',
+          condition: 'withinLast',
+          preset: '1month',
+        },
+      ];
+
+      expect(buildAssetFilters(filters, endOfMarch).fileClauses).toEqual([
+        { createdAt: { $gte: iso(2026, 2, 28, 12, 0, 0) } },
+      ]);
+    });
+
+    it('clamps leap-day year arithmetic', () => {
+      // Feb 29 2024 − 1 year → Feb 28 2023 (not Mar 1).
+      const leapDay = new Date(2024, 1, 29, 12, 0, 0);
+      const filters: ListFilter[] = [
+        {
+          kind: 'date',
+          field: 'createdAt',
+          mode: 'preset',
+          condition: 'withinLast',
+          preset: '1year',
+        },
+      ];
+
+      expect(buildAssetFilters(filters, leapDay).fileClauses).toEqual([
+        { createdAt: { $gte: iso(2023, 2, 28, 12, 0, 0) } },
+      ]);
+    });
+
+    it('clamps multi-month presets landing on short months', () => {
+      // May 31 − 3 months → Feb 28 (not Mar 3).
+      const endOfMay = new Date(2026, 4, 31, 12, 0, 0);
+      const filters: ListFilter[] = [
+        {
+          kind: 'date',
+          field: 'createdAt',
+          mode: 'preset',
+          condition: 'withinLast',
+          preset: '3months',
+        },
+      ];
+
+      expect(buildAssetFilters(filters, endOfMay).fileClauses).toEqual([
+        { createdAt: { $gte: iso(2026, 2, 28, 12, 0, 0) } },
       ]);
     });
 
@@ -243,5 +297,18 @@ describe('buildAssetFilters', () => {
     // Date clause still reaches folders even though the type badge hides them.
     expect(built.folderClauses).toHaveLength(1);
     expect(built.showFolders).toBe(false);
+  });
+
+  describe('parseCalendarDate', () => {
+    it('parses YYYY-MM-DD as a LOCAL calendar date, never UTC midnight', () => {
+      // `new Date('2024-01-01')` is UTC midnight — Dec 31 in every timezone
+      // west of UTC. The local components must match the input in ALL zones.
+      const date = parseCalendarDate('2024-01-01');
+
+      expect(date.getFullYear()).toBe(2024);
+      expect(date.getMonth()).toBe(0);
+      expect(date.getDate()).toBe(1);
+      expect(date.getHours()).toBe(0);
+    });
   });
 });

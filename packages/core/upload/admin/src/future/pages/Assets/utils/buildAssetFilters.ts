@@ -49,8 +49,18 @@ const subtractPreset = (now: Date, preset: DatePreset): Date => {
   const { days = 0, months = 0, years = 0 } = PRESET_DELTAS[preset];
   const result = new Date(now.getTime());
 
-  result.setFullYear(result.getFullYear() - years);
-  result.setMonth(result.getMonth() - months);
+  if (years || months) {
+    // JS date setters overflow at month ends (Mar 31 − 1 month → Feb 31 → Mar 3),
+    // so move to the 1st first and clamp the day to the target month's length.
+    const dayOfMonth = result.getDate();
+    result.setDate(1);
+    result.setFullYear(result.getFullYear() - years);
+    result.setMonth(result.getMonth() - months);
+
+    const daysInTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+    result.setDate(Math.min(dayOfMonth, daysInTargetMonth));
+  }
+
   result.setDate(result.getDate() - days);
 
   return result;
@@ -68,8 +78,13 @@ const endOfDay = (date: Date): Date => {
   return result;
 };
 
-/** Parses `YYYY-MM-DD` as a local calendar date (not UTC midnight). */
-const parseCalendarDate = (value: string): Date => {
+/**
+ * Parses `YYYY-MM-DD` as a local calendar date — NOT `new Date(value)`, which
+ * treats date-only strings as UTC midnight and shifts the day in every
+ * timezone west of UTC. Shared by the query builder, the badge labels and the
+ * range calendar so all three agree on which day a range endpoint means.
+ */
+export const parseCalendarDate = (value: string): Date => {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(year, month - 1, day);
 };

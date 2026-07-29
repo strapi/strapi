@@ -79,6 +79,21 @@ describe('FilterMenu', () => {
     });
   });
 
+  it('removes the type badge when the last value is unchecked', async () => {
+    const existing: ListFilter = { kind: 'type', condition: 'is', values: ['picture'] };
+    const listFilters = makeListFilters([existing]);
+    const { user } = render(<FilterMenu listFilters={listFilters} />);
+
+    await user.click(screen.getByRole('button', { name: /Filter/ }));
+    await user.click(screen.getByText('Type'));
+    await user.click(await screen.findByRole('menuitem', { name: 'Picture' }));
+
+    // A type filter with no values is not a state — the badge goes away
+    // instead of writing a malformed `type:is:` to the URL.
+    expect(listFilters.removeFilter).toHaveBeenCalledWith(0);
+    expect(listFilters.updateFilter).not.toHaveBeenCalled();
+  });
+
   it('adds a withinLast preset badge from the Creation date submenu', async () => {
     const listFilters = makeListFilters();
     const { user } = render(<FilterMenu listFilters={listFilters} />);

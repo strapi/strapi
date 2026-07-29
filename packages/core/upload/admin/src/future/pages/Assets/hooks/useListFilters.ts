@@ -202,11 +202,15 @@ export const useListFilters = (): ListFilters => {
 
   const filters = parseFiltersParam(query?.filters);
 
+  // `replace: true` on every write: filters are edited in rapid micro-steps
+  // (each checkbox of the keep-open Type submenu, each badge segment edit), so
+  // pushing would turn one logical change into a stack of Back entries. The
+  // URL stays shareable and refresh-safe either way.
   const writeFilters = (next: ListFilter[]) => {
     if (next.length === 0) {
-      setQuery({ filters: '' }, 'remove');
+      setQuery({ filters: '' }, 'remove', true);
     } else {
-      setQuery({ filters: serializeFilters(next) });
+      setQuery({ filters: serializeFilters(next) }, 'push', true);
     }
   };
 
