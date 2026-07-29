@@ -615,6 +615,35 @@ function previewScript(config) {
     };
 
     /**
+     * Find the DOM element that wraps the entire rendered output of a blocks
+     * field — the direct parent of all top-level block elements (`<p>`, `<h1>`,
+     * etc.). Used to derive a tight, always-current bounding rect for the
+     * highlight, including empty blocks and container padding that stega spans
+     * cannot cover.
+     *
+     * Strategy: walk up from the first stega span until we find an element
+     * whose direct children include at least one block-level element. This
+     * mirrors the fallback in findBlockIndex and handles all DOM shapes
+     * correctly — including lists where NCA would land on <li> (not the
+     * container) and single-span groups where there is no useful NCA.
+     *
+     * @param {HighlightGroup} group
+     * @returns {HTMLElement | null}
+     */
+    const findBlocksContainer = (group) => {
+      const firstEl = group.elements.values().next().value;
+      if (!firstEl) return null;
+      let el = firstEl.parentElement;
+      while (el && el !== document.body && el !== document.documentElement) {
+        if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    /**
      * Find the 0-based index of the Slate block that was clicked in a blocks
      * field. We cannot use `group.elements.indexOf(anchor)` because
      * `group.elements` has one entry per stega text-span, not one per block —
@@ -657,6 +686,30 @@ function previewScript(config) {
      * @param {HighlightGroup} group
      */
     const computeGroupRect = (group) => {
+      if (group.elements.size === 0) return null;
+
+      // For blocks fields (identified by fieldPath in the source attribute),
+      // derive the highlight from the field container's bounding rect so that
+      // empty blocks and container padding are always included — a fixed pixel
+      // buffer on the span union is too brittle when content grows or shrinks.
+      const firstEl = group.elements.values().next().value;
+      const firstSourceAttr = firstEl?.getAttribute(SOURCE_ATTRIBUTE);
+      const isBlocksField =
+        !!firstSourceAttr && new URLSearchParams(firstSourceAttr).has('fieldPath');
+
+      if (isBlocksField) {
+        const container = findBlocksContainer(group);
+        if (container) {
+          const r = container.getBoundingClientRect();
+          if (r.width > 0 || r.height > 0) {
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+          }
+        }
+      }
+
+      // Non-blocks fields (and blocks fallback): union of all non-zero span rects.
+      // For blocks fields add a buffer so that empty trailing blocks are still
+      // clickable even when they produce no stega spans.
       let minLeft = Infinity;
       let minTop = Infinity;
       let maxRight = -Infinity;
@@ -673,29 +726,11 @@ function previewScript(config) {
       });
       if (!any) return null;
 
-      // For blocks fields, extend the highlight below the last rendered element
-      // to cover empty trailing paragraphs (those have zero-size stega rects and
-      // are skipped above). We deliberately do NOT use findNearestCommonAncestor
-      // here — it can climb to a full-page-width layout container and make the
-      // highlight span the whole viewport.
-      const firstEl = group.elements.values().next().value;
-      if (firstEl) {
-        const firstSourceAttr = firstEl.getAttribute(SOURCE_ATTRIBUTE);
-        if (firstSourceAttr && new URLSearchParams(firstSourceAttr).has('fieldPath')) {
-          return {
-            left: minLeft,
-            top: minTop,
-            width: maxRight - minLeft,
-            height: maxBottom - minTop + 80,
-          };
-        }
-      }
-
       return {
         left: minLeft,
         top: minTop,
         width: maxRight - minLeft,
-        height: maxBottom - minTop,
+        height: maxBottom - minTop + (isBlocksField ? 80 : 0),
       };
     };
 
@@ -1091,6 +1126,28 @@ function previewScript(config) {
       }
     });
 
+    /**
+     * Reconcile tracked elements with the current DOM. Removes any elements
+     * that are no longer mounted, registers any new ones, and redraws all
+     * highlights. Called after the editor popover closes to correct staleness
+     * from live-preview updates that changed the field's rendered height.
+     */
+    const rescan = () => {
+      // Prune elements that were removed from the DOM while the popover was open
+      for (const element of [...elementToGroupKey.keys()]) {
+        if (!document.contains(element)) {
+          removeHighlightForElement(element);
+        }
+      }
+      // Register any elements that appeared during editing
+      document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`).forEach((element) => {
+        if (element instanceof HTMLElement) {
+          createHighlightForElement(element); // no-op for already-tracked elements
+        }
+      });
+      updateAllHighlights();
+    };
+
     return {
       get elements() {
         return Array.from(elementToGroupKey.keys());
@@ -1099,6 +1156,7 @@ function previewScript(config) {
         return Array.from(groups.values());
       },
       updateAllHighlights,
+      rescan,
       eventListeners,
       focusedHighlights,
       createHighlightForElement,
@@ -1583,6 +1641,15 @@ function previewScript(config) {
           }
           group.highlight.classList.add('strapi-highlight-focused');
           highlightManager.focusedHighlights.push(group.highlight);
+        });
+        return;
+      }
+
+      // The editor popover just closed; rescan groups after the next frame so
+      // any in-flight React renders in the iframe have committed first.
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS) {
+        requestAnimationFrame(() => {
+          highlightManager.rescan();
         });
         return;
       }
