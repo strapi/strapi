@@ -73,6 +73,7 @@ const DEVICES = [
 interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
   attribute: Schema.Attribute.AnyAttribute;
+  blockIndex: number | null;
 }
 
 interface PreviewContextValue {

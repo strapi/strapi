@@ -18,20 +18,25 @@ import {
  * Context utils
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * No need for actual data in the context. It's just to let children check if they're rendered
- * inside of a preview InputPopover without relying on prop drilling.
- */
-interface InputPopoverContextValue {}
+interface InputPopoverContextValue {
+  blockIndex: number | null;
+}
 
 const [InputPopoverProvider, useInputPopoverContext] =
   createContext<InputPopoverContextValue>('InputPopover');
 
 function useHasInputPopoverParent() {
   const context = useInputPopoverContext('useHasInputPopoverParent', () => true, false);
-
-  // useContext will return undefined if the called is not wrapped in the provider
   return context !== undefined;
+}
+
+function usePreviewPopoverBlockIndex() {
+  const blockIndex = useInputPopoverContext(
+    'usePreviewPopoverBlockIndex',
+    (ctx) => ctx.blockIndex,
+    false
+  );
+  return blockIndex ?? null;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -92,9 +97,23 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           });
 
           // We're able to handle the field, set it in context so the popover can pick it up
-          setPopoverField({ ...fieldMetaData, position: event.data.payload.position, attribute });
+          setPopoverField({
+            ...fieldMetaData,
+            position: event.data.payload.position,
+            attribute,
+            blockIndex:
+              typeof event.data.payload.blockIndex === 'number'
+                ? event.data.payload.blockIndex
+                : null,
+          });
         } catch (error) {
           if (error instanceof PreviewFieldError) {
+            // Relation fields can't be inline-edited. Silently ignore rather than showing
+            // a notification — the user may have double-clicked a relation element by
+            // accident, and showing an error is confusing when no action is needed.
+            if (error.messageKey === 'RELATIONS_NOT_HANDLED') {
+              return;
+            }
             const { type, message } = PREVIEW_ERROR_MESSAGES[error.messageKey];
             toggleNotification({ type, message: formatMessage(message) });
           } else if (error instanceof Error) {
@@ -112,6 +131,10 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           }),
         });
       }
+
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_IFRAME_CLICK) {
+        setPopoverField(null);
+      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -128,21 +151,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
 
   return (
     <>
-      {/**
-       * Overlay an empty div on top of the iframe while the popover is open so it can
-       * intercept clicks. Without it, we wouldn't be able to close the popover by clicking outside,
-       * because the click would be detected by the iframe window, not by the admin.
-       **/}
-      <Box
-        position={'fixed'}
-        top={iframeRect.top + 'px'}
-        left={iframeRect.left + 'px'}
-        width={iframeRect.width + 'px'}
-        height={iframeRect.height + 'px'}
-        zIndex={4}
-        onClick={() => iframeRef.current?.focus()}
-      />
-      <InputPopoverProvider>
+      <InputPopoverProvider blockIndex={popoverField.blockIndex}>
         <Popover.Root open={true} onOpenChange={(open) => !open && setPopoverField(null)}>
           <Popover.Trigger>
             <Box
@@ -154,7 +163,14 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
               transform={`translate(${iframeRect.left + popoverField.position.left}px, ${iframeRect.top + popoverField.position.top}px)`}
             />
           </Popover.Trigger>
-          <Popover.Content sideOffset={4} style={{ zIndex: 5 }}>
+          <Popover.Content
+            sideOffset={4}
+            style={{
+              zIndex: 5,
+              maxHeight: 'var(--radix-popover-content-available-height)',
+              overflow: 'hidden',
+            }}
+          >
             <Box padding={4} width="400px">
               {/* @ts-expect-error the types of `attribute` clash for some reason */}
               <InputRenderer
@@ -174,4 +190,4 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   );
 };
 
-export { InputPopover, useHasInputPopoverParent };
+export { InputPopover, useHasInputPopoverParent, usePreviewPopoverBlockIndex };

@@ -41,8 +41,8 @@ export function previewScript(_config: unknown): void {
 
   window.addEventListener('message', handler);
 
-  (window as Record<string, unknown>).__strapi_previewCleanup = () => {
+  (window as unknown as Record<string, unknown>).__strapi_previewCleanup = () => {
     window.removeEventListener('message', handler);
-    delete (window as Record<string, unknown>).__strapi_previewCleanup;
+    delete (window as unknown as Record<string, unknown>).__strapi_previewCleanup;
   };
 }

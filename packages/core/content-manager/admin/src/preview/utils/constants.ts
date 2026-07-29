@@ -15,6 +15,7 @@ export const INTERNAL_EVENTS = {
   STRAPI_FIELD_CHANGE: 'strapiFieldChange',
   STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+  STRAPI_IFRAME_CLICK: 'strapiIframeClick',
 } as const;
 
 /**
