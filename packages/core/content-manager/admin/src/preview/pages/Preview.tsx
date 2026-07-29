@@ -140,6 +140,26 @@ const PreviewPage = () => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const prevPopoverFieldRef = React.useRef<PopoverField | null>(null);
+
+  // When the popover closes, ask the iframe to rescan its stega element groups.
+  // Live-preview sync updates the iframe DOM while editing, which can change the
+  // rendered height of the field; groups need to reflect the current DOM so that
+  // hover highlights and double-click detection work on the updated content.
+  React.useEffect(() => {
+    const prev = prevPopoverFieldRef.current;
+    prevPopoverFieldRef.current = popoverField;
+
+    if (prev !== null && popoverField === null) {
+      const iframe = iframeRef.current;
+      if (!iframe?.src) return;
+      iframe.contentWindow?.postMessage(
+        { type: INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS },
+        new URL(iframe.src).origin
+      );
+    }
+  }, [popoverField, iframeRef]);
+
   const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
