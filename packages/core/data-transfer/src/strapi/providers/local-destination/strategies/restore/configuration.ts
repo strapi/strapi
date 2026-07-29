@@ -1,10 +1,11 @@
 import { Writable } from 'stream';
 import { omit } from 'lodash/fp';
 import chalk from 'chalk';
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
+import { restoreContentStructure } from '../../../../utils/content-structure';
 
 const omitInvalidCreationAttributes = omit(['id']);
 
@@ -35,6 +36,13 @@ export const restoreConfigs = async (strapi: Core.Strapi, config: IConfiguration
 
   if (config.type === 'webhook') {
     return restoreWebhooks(strapi, config.value as { value: unknown });
+  }
+
+  if (config.type === 'content-structure') {
+    return restoreContentStructure(
+      strapi,
+      config.value as Modules.ContentStructure.ContentStructureFile
+    );
   }
 };
 
