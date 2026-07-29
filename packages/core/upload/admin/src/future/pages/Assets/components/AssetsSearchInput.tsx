@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
-import { useDebounce, useIsMobile } from '@strapi/admin/strapi-admin';
+import { useDebounce, useIsMobile, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Box, Searchbar, SearchForm } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -26,6 +26,12 @@ export const AssetsSearchInput = () => {
   // worth reacting to.
   const lastCommittedRef = useRef(searchQuery);
 
+  // Read directly rather than through `useFolderNavigation`, which strips
+  // malformed `?folder=` values as a side effect.
+  const [{ query }] = useQueryParams<{ folder?: string }>();
+  const folderParam = query?.folder ?? '';
+  const lastFolderRef = useRef(folderParam);
+
   // Commit settled input to the URL.
   useEffect(() => {
     if (debouncedValue === lastCommittedRef.current) {
@@ -46,6 +52,19 @@ export const AssetsSearchInput = () => {
     lastCommittedRef.current = searchQuery;
     setValue(searchQuery);
   }, [searchQuery]);
+
+  // A folder navigation clears `_q`, but a term typed and never committed lives
+  // only in the debounce — without this it lands afterwards and reactivates the
+  // global search. `_q` alone can't see it: it was never non-empty.
+  useEffect(() => {
+    if (folderParam === lastFolderRef.current) {
+      return;
+    }
+
+    lastFolderRef.current = folderParam;
+    lastCommittedRef.current = searchQuery;
+    setValue(searchQuery);
+  }, [folderParam, searchQuery]);
 
   const searchForm = (
     <SearchForm onSubmit={(event: FormEvent<HTMLFormElement>) => event.preventDefault()}>

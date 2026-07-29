@@ -131,6 +131,36 @@ describe('AssetsSearchInput', () => {
     expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
+  it('drops an uncommitted term when a folder navigation clears the search', async () => {
+    const { user, rerender } = renderInput();
+
+    await user.type(screen.getByRole('searchbox'), 'kit');
+
+    mockUseQueryParams.mockReturnValue([{ query: { folder: '3' } }, mockSetQuery]);
+    rerender(<AssetsSearchInput />);
+
+    act(() => {
+      jest.advanceTimersByTime(DEBOUNCE_MS);
+    });
+
+    expect(mockSetQuery).not.toHaveBeenCalled();
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+  });
+
+  it('still commits typing while a folder is open', async () => {
+    mockUseQueryParams.mockReturnValue([{ query: { folder: '3' } }, mockSetQuery]);
+
+    const { user } = renderInput();
+
+    await user.type(screen.getByRole('searchbox'), 'kit');
+
+    act(() => {
+      jest.advanceTimersByTime(DEBOUNCE_MS);
+    });
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: 'kit' }, 'push', true);
+  });
+
   it('does not submit the form when Enter is pressed', async () => {
     const { user } = renderInput();
 
