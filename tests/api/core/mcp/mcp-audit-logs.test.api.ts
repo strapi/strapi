@@ -1,9 +1,9 @@
 import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createAgent } from 'api-tests/agent';
 import { createAuthRequest } from 'api-tests/request';
 import type { Core, UID } from '@strapi/types';
+import { createMcpClient, type AdminPermission, type AdminToken } from './utils/mcp-client';
 
 /**
  * Empirical test: are actions performed through the MCP server recorded in audit-logs?
@@ -18,7 +18,6 @@ import type { Core, UID } from '@strapi/types';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-const MCP_PROTOCOL_VERSION = '2025-06-18';
 const MODEL_UID = 'api::mcp-audit-doc.mcp-audit-doc';
 const SLUG = 'mcp-audit-doc';
 
@@ -39,32 +38,12 @@ const ct = {
   },
 };
 
-type AdminPermission = {
-  action: string;
-  subject: string | null;
-  conditions: string[];
-  properties: Record<string, unknown>;
-};
-
-type AdminToken = { id: number; name: string; accessKey: string };
-
-type JsonRpcResponse = {
-  jsonrpc?: '2.0';
-  id?: number | string | null;
-  result?: {
-    structuredContent?: Record<string, unknown>;
-    content?: Array<{ type: string; text?: string }>;
-    isError?: boolean;
-  };
-  error?: { code: number; message: string };
-};
-
 describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
   const builder = createTestBuilder();
   let strapi: Core.Strapi;
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
+  let mcp: ReturnType<typeof createMcpClient>;
   let tokenCount = 0;
-  let rpcId = 0;
 
   const deleteAllAdminTokens = async () => {
     await strapi.db.query('admin::api-token').deleteMany({ where: { kind: 'admin' } });
@@ -86,8 +65,6 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     return logs.filter((log: { payload?: { uid?: string } }) => log.payload?.uid === MODEL_UID);
   };
 
-  const findEntryCreateLogs = async () => findLogsForModel('entry.create');
-
   beforeAll(async () => {
     await builder.addContentType(ct).build();
 
@@ -101,6 +78,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
 
     rq = await createAuthRequest({ strapi });
+    mcp = createMcpClient(strapi, 'strapi-mcp-audit-test');
     await deleteAllAdminTokens();
   });
 
@@ -118,67 +96,6 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     await deleteAllAuditLogs();
   });
 
-  // ---------------------------------------------------------------------------
-  // Helpers (adapted from mcp-content-manager-rbac.test.api.ts)
-  // ---------------------------------------------------------------------------
-
-  const parseMcpResponse = (res: { body?: unknown; text?: string }): JsonRpcResponse => {
-    if (res.body !== undefined && Object.keys(res.body as Record<string, unknown>).length > 0) {
-      return res.body as JsonRpcResponse;
-    }
-
-    if (typeof res.text === 'string' && res.text.length > 0) {
-      const dataLines = res.text
-        .split('\n')
-        .filter((line) => line.startsWith('data: '))
-        .map((line) => line.slice('data: '.length).trim())
-        .filter((line) => line.length > 0 && line !== '[DONE]');
-
-      if (dataLines.length > 0) {
-        return JSON.parse(dataLines[dataLines.length - 1]);
-      }
-
-      return JSON.parse(res.text);
-    }
-
-    return {};
-  };
-
-  const mcpPost = async (accessKey: string, body: Record<string, unknown>) =>
-    createAgent(strapi)({
-      url: '/mcp',
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/event-stream',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessKey}`,
-      },
-      body,
-    });
-
-  const mcpRpc = async (accessKey: string, method: string, params?: Record<string, unknown>) => {
-    rpcId += 1;
-    return mcpPost(accessKey, { jsonrpc: '2.0', id: rpcId, method, params });
-  };
-
-  const initializeMcpSession = async (accessKey: string): Promise<void> => {
-    rpcId += 1;
-    const initRes = await mcpPost(accessKey, {
-      jsonrpc: '2.0',
-      id: rpcId,
-      method: 'initialize',
-      params: {
-        protocolVersion: MCP_PROTOCOL_VERSION,
-        capabilities: {},
-        clientInfo: { name: 'strapi-mcp-audit-test', version: '1.0.0' },
-      },
-    });
-
-    expect(initRes.statusCode).toBe(200);
-
-    await mcpPost(accessKey, { jsonrpc: '2.0', method: 'notifications/initialized' });
-  };
-
   const createAdminToken = async (adminPermissions: AdminPermission[]): Promise<AdminToken> => {
     tokenCount += 1;
     const res = await rq({
@@ -188,15 +105,6 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     });
     expect(res.statusCode).toBe(201);
     return res.body.data;
-  };
-
-  const callTool = async (
-    accessKey: string,
-    name: string,
-    args: Record<string, unknown>
-  ): Promise<JsonRpcResponse> => {
-    const res = await mcpRpc(accessKey, 'tools/call', { name, arguments: args });
-    return parseMcpResponse(res);
   };
 
   const fieldPermission = (action: string, fields: string[]): AdminPermission => ({
@@ -214,9 +122,15 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     properties: {},
   });
 
-  // entry.* events fire on a microtask after commit; let the subscriber run.
-  const flushEvents = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+  // entry.* events fire on a microtask after commit, so poll rather than sleep.
+  const waitForAuditLog = async (action: string, timeout = 2000) => {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      const [log] = await findLogsForModel(action);
+      if (log) return log;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    throw new Error(`Expected a ${action} audit log within ${timeout}ms`);
   };
 
   // ---------------------------------------------------------------------------
@@ -231,11 +145,8 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     });
     expect(statusCode).toBe(201);
 
-    await flushEvents();
-
-    const logs = await findEntryCreateLogs();
-    expect(logs).toHaveLength(1);
-    expect(logs[0].payload).toMatchObject({ origin: 'admin' });
+    const log = await waitForAuditLog('entry.create');
+    expect(log.payload).toMatchObject({ origin: 'admin' });
   });
 
   test('a create through MCP is audited and tagged with the mcp origin', async () => {
@@ -243,9 +154,9 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
       fieldPermission(CM_ACTIONS.create, ['title']),
       fieldPermission(CM_ACTIONS.read, ['title']),
     ]);
-    await initializeMcpSession(token.accessKey);
+    await mcp.initializeSession(token.accessKey);
 
-    const response = await callTool(token.accessKey, `create_${SLUG}`, {
+    const response = await mcp.callTool(token.accessKey, `create_${SLUG}`, {
       data: { title: 'created via mcp' },
     });
 
@@ -255,11 +166,8 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     expect(stored).toHaveLength(1);
     expect(stored[0].title).toBe('created via mcp');
 
-    await flushEvents();
-
-    const logs = await findEntryCreateLogs();
-    expect(logs).toHaveLength(1);
-    expect(logs[0].payload).toMatchObject({ origin: 'mcp' });
+    const log = await waitForAuditLog('entry.create');
+    expect(log.payload).toMatchObject({ origin: 'mcp' });
   });
 
   test('a read through MCP is NOT audited', async () => {
@@ -267,18 +175,28 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
       data: { title: 'seed for read' },
     });
 
-    const token = await createAdminToken([fieldPermission(CM_ACTIONS.read, ['title'])]);
-    await initializeMcpSession(token.accessKey);
+    const token = await createAdminToken([
+      fieldPermission(CM_ACTIONS.read, ['title']),
+      fieldPermission(CM_ACTIONS.create, ['title']),
+    ]);
+    await mcp.initializeSession(token.accessKey);
 
-    const response = await callTool(token.accessKey, `list_${SLUG}`, {});
-    expect(response.error).toBeUndefined();
-    expect(response.result?.isError).not.toBe(true);
+    const read = await mcp.callTool(token.accessKey, `list_${SLUG}`, {});
+    expect(read.error).toBeUndefined();
+    expect(read.result?.isError).not.toBe(true);
 
-    await flushEvents();
+    // Reads emit no entry.* event. Fire a create afterwards and wait for its
+    // log: once it lands, the subscriber has processed everything before it in
+    // order, so the read having produced nothing is now a deterministic check.
+    const create = await mcp.callTool(token.accessKey, `create_${SLUG}`, {
+      data: { title: 'after read' },
+    });
+    expect(create.result?.isError).not.toBe(true);
+    await waitForAuditLog('entry.create');
 
-    // Reads don't emit entry.* events, so nothing is recorded.
     const logs = await findLogsForModel();
-    expect(logs).toHaveLength(0);
+    expect(logs).toHaveLength(1);
+    expect(logs[0].action).toBe('entry.create');
   });
 
   test('a delete through MCP is audited and tagged with the mcp origin', async () => {
@@ -290,18 +208,15 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
       actionPermission(CM_ACTIONS.delete),
       fieldPermission(CM_ACTIONS.read, ['title']),
     ]);
-    await initializeMcpSession(token.accessKey);
+    await mcp.initializeSession(token.accessKey);
 
-    const response = await callTool(token.accessKey, `delete_${SLUG}`, {
+    const response = await mcp.callTool(token.accessKey, `delete_${SLUG}`, {
       documentId: seeded.documentId,
     });
     expect(response.error).toBeUndefined();
     expect(response.result?.isError).not.toBe(true);
 
-    await flushEvents();
-
-    const logs = await findLogsForModel('entry.delete');
-    expect(logs).toHaveLength(1);
-    expect(logs[0].payload).toMatchObject({ origin: 'mcp' });
+    const log = await waitForAuditLog('entry.delete');
+    expect(log.payload).toMatchObject({ origin: 'mcp' });
   });
 });
