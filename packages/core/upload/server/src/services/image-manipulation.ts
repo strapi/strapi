@@ -6,7 +6,7 @@ import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
-import type { UploadableFile } from '../types';
+import type { Config, UploadableFile } from '../types';
 
 type Dimensions = {
   width: number | null;
@@ -14,6 +14,22 @@ type Dimensions = {
 };
 
 const { bytesToKbytes } = fileUtils;
+
+/**
+ * Instance-level sharp options from the plugin config (e.g. `limitInputPixels`).
+ * Global settings (`cache`, `concurrency`) are applied once in the plugin register phase.
+ * Returns `undefined` when nothing is configured so bare stream pipelines can use `sharp()`.
+ */
+const getSharpOptions = (): sharp.SharpOptions | undefined => {
+  const { limitInputPixels } =
+    strapi.config.get<Config['sharp']>('plugin::upload.sharp', {}) ?? {};
+
+  if (limitInputPixels === undefined) {
+    return undefined;
+  }
+
+  return { limitInputPixels };
+};
 
 const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
@@ -35,15 +51,17 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
   });
 
 const getMetadata = (file: UploadableFile): Promise<Metadata> => {
+  const options = getSharpOptions();
+
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
-      const pipeline = sharp();
+      const pipeline = options ? sharp(options) : sharp();
       pipeline.metadata().then(resolve).catch(reject);
       file.getStream().pipe(pipeline);
     });
   }
 
-  return sharp(file.filepath).metadata();
+  return sharp(file.filepath, options).metadata();
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
@@ -73,7 +91,7 @@ const resizeFileTo = async (
 
   let newInfo;
   if (!file.filepath) {
-    const transform = sharp({ animated: true })
+    const transform = sharp({ ...getSharpOptions(), animated: true })
       .resize(options)
       .on('info', (info) => {
         newInfo = info;
@@ -81,7 +99,9 @@ const resizeFileTo = async (
 
     await writeStreamToFile(file.getStream().pipe(transform), filePath);
   } else {
-    newInfo = await sharp(file.filepath, { animated: true }).resize(options).toFile(filePath);
+    newInfo = await sharp(file.filepath, { ...getSharpOptions(), animated: true })
+      .resize(options)
+      .toFile(filePath);
   }
 
   const { width, height, size, pageHeight } = newInfo ?? {};
@@ -135,9 +155,9 @@ const optimize = async (file: UploadableFile) => {
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
     if (!file.filepath) {
-      transformer = sharp({ animated: true });
+      transformer = sharp({ ...getSharpOptions(), animated: true });
     } else {
-      transformer = sharp(file.filepath, { animated: true });
+      transformer = sharp(file.filepath, { ...getSharpOptions(), animated: true });
     }
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
@@ -248,16 +268,18 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
 const isFaultyImage = async (file: UploadableFile) => {
+  const options = getSharpOptions();
+
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
-      const pipeline = sharp();
+      const pipeline = options ? sharp(options) : sharp();
       pipeline.stats().then(resolve).catch(reject);
       file.getStream().pipe(pipeline);
     });
   }
 
   try {
-    await sharp(file.filepath).stats();
+    await sharp(file.filepath, options).stats();
     return false;
   } catch {
     return true;
