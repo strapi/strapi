@@ -515,12 +515,16 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCancelled = file.status === 'cancelled';
 
   if (isCurrentFile) {
-    // A row with no known size can't report a fraction — the URL flow starts rows at
-    // `size: 0` while the server is still fetching, and only learns the real size on
-    // the `file:uploading` event. Showing a determinate bar here pins it at 0% for the
-    // whole fetch, reading as "stuck"; the bar switches to determinate on its own once
-    // a size arrives.
-    const hasKnownSize = file.size > 0;
+    // Determinate only once bytes are actually being reported — a known `size` is not
+    // enough. The two upload flows differ here:
+    //  - the direct-file flow streams real byte counts from XHR, so `uploadedBytes`
+    //    climbs and a determinate bar is meaningful;
+    //  - the URL flow learns the size from the `file:uploading` SSE event but receives
+    //    no incremental counts at all (the next event is `file:complete`), so
+    //    `uploadedBytes` stays 0 for the whole transfer.
+    // Keying off `size` alone froze URL rows at a determinate 0% for the entire upload;
+    // keying off reported bytes keeps them animating until there is a fraction to show.
+    const hasReportedProgress = file.size > 0 && file.uploadedBytes > 0;
 
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
@@ -530,7 +534,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        {hasKnownSize ? (
+        {hasReportedProgress ? (
           <DeterminateBar percent={(file.uploadedBytes / file.size) * 100} />
         ) : (
           <IndeterminateBar />

@@ -246,7 +246,7 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('Uploading...')).toBeInTheDocument();
     });
 
-    it('reports byte progress on a determinate bar when the size is known', () => {
+    it('reports byte progress on a determinate bar once bytes are flowing', () => {
       setup(
         createMockState({
           files: [
@@ -271,6 +271,26 @@ describe('UploadProgressDialog', () => {
             {
               ...createMockFile(0, 'https://example.com/photo.png', 'uploading'),
               size: 0,
+              uploadedBytes: 0,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
+
+    it('stays indeterminate when the size is known but no bytes are reported', () => {
+      // The URL flow's `file:uploading` event carries the real size, but the server
+      // sends no incremental byte counts — the next event is `file:complete`. Keying the
+      // bar off `size` alone froze these rows at a determinate 0% for the whole upload
+      // (observed on a 512MB URL import that took ~10s).
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, '512MB.zip', 'uploading'),
+              size: 536870912,
               uploadedBytes: 0,
             },
           ],
