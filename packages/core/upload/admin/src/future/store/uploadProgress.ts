@@ -230,22 +230,70 @@ export const selectAggregateProgress = createSelector(
 );
 
 /**
- * Count-based metadata progress across the rows that actually entered the metadata
- * phase: `settled / total`, where settled means any terminal metadata status.
+ * Count-based metadata progress across the whole batch: `settled / expected`.
  *
- * Count-based rather than byte-weighted because the generation endpoint answers in
- * one go — there is no intermediate progress to weight. Returns `null` when no row
- * has a metadata phase, so the header can hide the subtitle entirely.
+ * Count-based rather than byte-weighted because the generation endpoint answers in one
+ * go — there is no intermediate progress to weight.
+ *
+ * The denominator is every row *expected* to enter the phase, not just those that
+ * already have. Generation is fired per file as each upload finishes, so counting only
+ * started rows made the denominator grow mid-batch and the percentage jump backwards
+ * (1/1 = 100%, then a second row starts and it drops to 1/2 = 50%), which flickered the
+ * header subtitle on and off once per file.
+ *
+ * "Expected" is derived from upload outcome rather than from the AI-metadata flag:
+ *  - a row still uploading may yet enter the phase, so it counts toward the total;
+ *  - an errored or cancelled row never will, so it must not — otherwise a batch with
+ *    one failure could never reach 100%.
+ *
+ * Returns `null` when nothing has entered the phase and nothing is pending — i.e. AI
+ * metadata is off, or the batch is done — so the header can hide the subtitle.
  */
 export const selectMetadataProgress = createSelector(
   (state: RootState) => state.uploadProgress.files,
   (files): number | null => {
-    const withMetadata = files.filter((f) => f.metadataStatus !== undefined);
+    const started = files.filter((f) => f.metadataStatus !== undefined);
 
-    if (withMetadata.length === 0) return null;
+    // Nothing has entered the phase yet: with no started row there is no evidence AI
+    // metadata is even enabled, so stay silent rather than showing a premature 0%.
+    if (started.length === 0) return null;
 
-    const settled = withMetadata.filter((f) => f.metadataStatus !== 'generating').length;
-    return Math.round((settled / withMetadata.length) * 100);
+    // Rows whose upload is still in flight are counted in the denominator so the
+    // percentage only ever climbs as the batch progresses.
+    const pending = files.filter(
+      (f) => f.metadataStatus === undefined && (f.status === 'pending' || f.status === 'uploading')
+    ).length;
+
+    const expected = started.length + pending;
+    const settled = started.filter((f) => f.metadataStatus !== 'generating').length;
+
+    return Math.round((settled / expected) * 100);
+  }
+);
+
+/**
+ * Whether the metadata phase is still ongoing for the batch as a whole.
+ *
+ * The header uses this — not `selectMetadataProgress === 100` — to decide when to drop
+ * the subtitle. Two distinct reasons the phase can be unfinished:
+ *  - a row is generating right now;
+ *  - no row is generating this instant, but rows are still uploading and will enter the
+ *    phase when they finish.
+ *
+ * The second clause is what keeps the subtitle stable. Generation for file N typically
+ * finishes before file N+1 finishes uploading, so a naive "is anything generating?"
+ * check goes false between every pair of files and blinks the subtitle out and back in.
+ */
+export const selectIsGeneratingMetadata = createSelector(
+  (state: RootState) => state.uploadProgress.files,
+  (files): boolean => {
+    if (files.some((f) => f.metadataStatus === 'generating')) return true;
+
+    // Only bridge the gap if some row has already entered the phase — otherwise a batch
+    // with AI metadata disabled would report the phase as ongoing for its whole upload.
+    const hasStarted = files.some((f) => f.metadataStatus !== undefined);
+
+    return hasStarted && files.some((f) => f.status === 'pending' || f.status === 'uploading');
   }
 );
 

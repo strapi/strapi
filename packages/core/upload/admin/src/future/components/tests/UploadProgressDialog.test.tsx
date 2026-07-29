@@ -393,6 +393,23 @@ describe('UploadProgressDialog', () => {
       expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
     });
 
+    it('keeps the subtitle up between files while later rows are still uploading', () => {
+      // Nothing is generating at this instant — file 0's generation beat file 1's upload
+      // — but the phase is not over, so the subtitle must not blink out.
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            createMockFile(1, 'b.png', 'uploading'),
+          ],
+        })
+      );
+
+      // 1 settled of 2 expected, counting the row still uploading.
+      expect(screen.getByText('Generating metadata with AI (50%)')).toBeInTheDocument();
+    });
+
     it('hides the subtitle when no row entered the metadata phase (AI disabled)', () => {
       setup(
         createMockState({

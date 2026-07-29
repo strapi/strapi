@@ -25,6 +25,7 @@ import {
   cancelUpload,
   selectAggregateProgress,
   selectMetadataProgress,
+  selectIsGeneratingMetadata,
 } from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
 
@@ -90,6 +91,8 @@ type HeaderStatusProps = {
    * Shown as an extra subtitle while generation is still in flight.
    */
   metadataProgress: number | null;
+  /** Whether any row is still generating — drives whether the subtitle shows at all. */
+  isGeneratingMetadata: boolean;
 };
 
 const HeaderStatus = ({
@@ -99,13 +102,18 @@ const HeaderStatus = ({
   successfulCount,
   errorCount,
   metadataProgress,
+  isGeneratingMetadata,
 }: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
 
   // Completion is upload-driven, so the terminal header can appear while metadata is
   // still generating — the subtitle keeps ticking underneath until it settles.
+  //
+  // Gated on work actually being in flight rather than on `progress < 100`: in a
+  // sequential batch the percentage touches 100% between files, which would blink the
+  // subtitle out and back in on every upload.
   const metadataSubtitle =
-    metadataProgress !== null && metadataProgress < 100
+    metadataProgress !== null && isGeneratingMetadata
       ? formatMessage(
           {
             id: getTranslationKey('upload.progress.generatingMetadata.withCount'),
@@ -245,6 +253,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   );
   const progress = useTypedSelector(selectAggregateProgress);
   const metadataProgress = useTypedSelector(selectMetadataProgress);
+  const isGeneratingMetadata = useTypedSelector(selectIsGeneratingMetadata);
   const dispatch = useTypedDispatch();
   const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
@@ -299,6 +308,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
         successfulCount={successfulCount}
         errorCount={errorCount}
         metadataProgress={metadataProgress}
+        isGeneratingMetadata={isGeneratingMetadata}
       />
       <Flex gap={1}>
         {!isAllUploaded && (

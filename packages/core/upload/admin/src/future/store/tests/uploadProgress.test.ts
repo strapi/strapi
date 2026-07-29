@@ -12,6 +12,7 @@ import {
   retryCancelledFiles,
   selectAggregateProgress,
   selectMetadataProgress,
+  selectIsGeneratingMetadata,
   type FileProgress,
   type FileProgressStatus,
   type UploadProgressState,
@@ -44,6 +45,9 @@ const aggregate = (state: UploadProgressState) =>
 
 const metadataProgress = (state: UploadProgressState) =>
   selectMetadataProgress({ uploadProgress: state });
+
+const isGenerating = (state: UploadProgressState) =>
+  selectIsGeneratingMetadata({ uploadProgress: state });
 
 describe('uploadProgress slice', () => {
   describe('openUploadProgress', () => {
@@ -324,12 +328,38 @@ describe('uploadProgress slice', () => {
         { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
         { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'failed' as const },
         { ...makeFile(2, 'complete', 100, 100), metadataStatus: 'generating' as const },
-        // Non-image row: excluded from both numerator and denominator.
+        // Settled upload that never entered the phase: excluded from both sides.
         makeFile(3, 'complete', 100, 100),
       ]);
 
       // 2 of 3 rows settled → 67%
       expect(metadataProgress(state)).toBe(67);
+    });
+
+    it('counts still-uploading rows in the denominator so the percentage never regresses', () => {
+      // Generation is fired per file as uploads finish, so a batch is normally observed
+      // mid-flight: one row settled, the rest not yet started. Counting only started
+      // rows would report 100% here and then drop back as each later row begins.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        makeFile(1, 'uploading', 100, 20),
+        makeFile(2, 'pending', 100),
+      ]);
+
+      // 1 settled of 3 expected → 33%, not 1-of-1 = 100%.
+      expect(metadataProgress(state)).toBe(33);
+    });
+
+    it('excludes errored and cancelled rows from the denominator', () => {
+      // Those rows never enter the phase, so counting them would strand the batch
+      // below 100% forever.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        makeFile(1, 'error', 100),
+        makeFile(2, 'cancelled', 100),
+      ]);
+
+      expect(metadataProgress(state)).toBe(100);
     });
 
     it('counts skipped rows as settled', () => {
@@ -348,6 +378,85 @@ describe('uploadProgress slice', () => {
       ]);
 
       expect(metadataProgress(state)).toBe(100);
+    });
+  });
+
+  describe('selectIsGeneratingMetadata', () => {
+    it('is true while a row is generating', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generating' as const },
+      ]);
+
+      expect(isGenerating(state)).toBe(true);
+    });
+
+    it('bridges the gap between files while later rows are still uploading', () => {
+      // The flicker this guards against: generation for file 0 finished before file 1
+      // finished uploading, so nothing is generating at this instant — but the phase is
+      // not over, and the header subtitle must not blink out.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        makeFile(1, 'uploading', 100, 40),
+      ]);
+
+      expect(isGenerating(state)).toBe(true);
+    });
+
+    it('is false once the batch is fully settled', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'skipped' as const },
+      ]);
+
+      expect(isGenerating(state)).toBe(false);
+    });
+
+    it('stays false for an in-flight batch with AI metadata disabled', () => {
+      // No row ever enters the phase, so the pending-upload clause must not fire.
+      const state = makeState([
+        makeFile(0, 'complete', 100, 100),
+        makeFile(1, 'uploading', 100, 40),
+      ]);
+
+      expect(isGenerating(state)).toBe(false);
+    });
+  });
+
+  describe('metadata phase over a whole sequential batch', () => {
+    it('reports one continuous, monotonically climbing phase', () => {
+      // End-to-end guard for the original bug: the subtitle appeared and disappeared on
+      // every file, and the percentage jumped backwards each time a new row started.
+      let state = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 3, fileNames: ['a', 'b', 'c'], fileSizes: [10, 10, 10] })
+      );
+
+      const observed: Array<{ pct: number | null; visible: boolean }> = [];
+      const observe = () => {
+        const pct = metadataProgress(state);
+        observed.push({ pct, visible: pct !== null && isGenerating(state) });
+      };
+
+      for (let index = 0; index < 3; index += 1) {
+        state = uploadProgressReducer(state, setFileUploading({ name: 'x', index, size: 10 }));
+        state = uploadProgressReducer(
+          state,
+          setFileComplete({ index, file: { id: index } as never })
+        );
+        state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
+        observe();
+        state = uploadProgressReducer(
+          state,
+          setFileMetadataResult({ index, uploadId: 1, status: 'generated' })
+        );
+        observe();
+      }
+
+      const percentages = observed.map((o) => o.pct as number);
+      expect(percentages).toStrictEqual([0, 33, 33, 67, 67, 100]);
+
+      // Visible throughout, hidden only on the final settle — exactly one transition.
+      expect(observed.map((o) => o.visible)).toStrictEqual([true, true, true, true, true, false]);
     });
   });
 });
