@@ -293,4 +293,38 @@ describe('Restore ', () => {
     expect(strapi.db.query).toBeCalledWith('strapi::webhook');
     expect(result.data).toMatchObject(omit(['id'])(config.value));
   });
+
+  test('Should write content-structure groups.json through the core service', async () => {
+    const write = jest.fn(async () => {});
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      get: jest.fn((token: string) => (token === 'content-structure' ? { write } : undefined)),
+    })();
+
+    const config: IConfiguration = {
+      type: 'content-structure',
+      value: {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                parent: null,
+                name: 'Blog',
+                id: 'grp_blog01',
+                children: [{ type: 'contentType', uid: 'api::article.article' }],
+              },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      },
+    };
+
+    await restoreConfigs(strapi, config);
+
+    expect(strapi.get).toBeCalledWith('content-structure');
+    expect(write).toBeCalledTimes(1);
+    expect(write).toBeCalledWith(config.value);
+  });
 });
