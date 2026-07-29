@@ -576,6 +576,84 @@ function previewScript(config) {
     let focusedField = null;
 
     /**
+     * Block-level HTML tags produced by standard Strapi blocks renderers.
+     * Each corresponds to exactly one top-level Slate block in the editor.
+     */
+    const BLOCK_LEVEL_TAGS = [
+      'P',
+      'H1',
+      'H2',
+      'H3',
+      'H4',
+      'H5',
+      'H6',
+      'UL',
+      'OL',
+      'BLOCKQUOTE',
+      'PRE',
+    ];
+
+    /**
+     * Find the nearest common ancestor of a set of elements — the deepest
+     * single element that is an ancestor of (or equal to) every element in
+     * the list. Reliable for 2+ elements; for a single element it returns
+     * the immediate parent (which may not be the container you want — use
+     * the BLOCK_LEVEL_TAGS fallback in findBlocksFieldContainer instead).
+     * @param {HTMLElement[]} elements
+     * @returns {HTMLElement | null}
+     */
+    const findNearestCommonAncestor = (elements) => {
+      if (elements.length === 0) return null;
+      let candidate = elements[0].parentElement;
+      while (candidate && candidate !== document.documentElement) {
+        if (elements.every((el) => candidate === el || candidate.contains(el))) {
+          return candidate;
+        }
+        candidate = candidate.parentElement;
+      }
+      return null;
+    };
+
+    /**
+     * Find the 0-based index of the Slate block that was clicked in a blocks
+     * field. We cannot use `group.elements.indexOf(anchor)` because
+     * `group.elements` has one entry per stega text-span, not one per block —
+     * formatted text (bold, italic…) produces multiple spans per block, so an
+     * element-list index is not the same as the Slate block index.
+     *
+     * Instead: locate the blocks-field container (the direct parent of all
+     * top-level block elements) and find which of its children contains the
+     * clicked element.
+     * @param {HTMLElement} anchor - stega span that was clicked
+     * @param {HighlightGroup} group - stega group for the field
+     * @returns {number} 0-based block index, or -1 if it cannot be determined
+     */
+    const findBlockIndex = (anchor, group) => {
+      const allElements = [...group.elements];
+      // NCA is reliable for 2+ spans; single-span groups (plain text block)
+      // need the BLOCK_LEVEL_TAGS walk-up fallback.
+      let fieldContainer = allElements.length >= 2 ? findNearestCommonAncestor(allElements) : null;
+      if (!fieldContainer) {
+        let el = anchor.parentElement;
+        while (el && el !== document.documentElement) {
+          if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
+            fieldContainer = el;
+            break;
+          }
+          el = el.parentElement;
+        }
+      }
+      if (!fieldContainer) return -1;
+      let blockEl = anchor;
+      while (blockEl.parentElement && blockEl.parentElement !== fieldContainer) {
+        blockEl = /** @type {HTMLElement} */ (blockEl.parentElement);
+      }
+      return blockEl.parentElement === fieldContainer
+        ? Array.from(fieldContainer.children).indexOf(blockEl)
+        : -1;
+    };
+
+    /**
      * @param {HighlightGroup} group
      */
     const computeGroupRect = (group) => {
@@ -594,6 +672,25 @@ function previewScript(config) {
         if (r.bottom > maxBottom) maxBottom = r.bottom;
       });
       if (!any) return null;
+
+      // For blocks fields, extend the highlight below the last rendered element
+      // to cover empty trailing paragraphs (those have zero-size stega rects and
+      // are skipped above). We deliberately do NOT use findNearestCommonAncestor
+      // here — it can climb to a full-page-width layout container and make the
+      // highlight span the whole viewport.
+      const firstEl = group.elements.values().next().value;
+      if (firstEl) {
+        const firstSourceAttr = firstEl.getAttribute(SOURCE_ATTRIBUTE);
+        if (firstSourceAttr && new URLSearchParams(firstSourceAttr).has('fieldPath')) {
+          return {
+            left: minLeft,
+            top: minTop,
+            width: maxRight - minLeft,
+            height: maxBottom - minTop + 80,
+          };
+        }
+      }
+
       return {
         left: minLeft,
         top: minTop,
@@ -625,6 +722,8 @@ function previewScript(config) {
      * Pick the underlying source element under the pointer so single-click
      * redispatch hits the specific item the user clicked, even when the group
      * highlight covers several elements (multi-media gallery).
+     * When no element rect contains the point (e.g. click in empty space within
+     * a blocks field), falls back to the nearest element by distance to rect.
      *
      * @param {HighlightGroup} group
      * @param {number} x
@@ -638,8 +737,21 @@ function previewScript(config) {
           return el;
         }
       }
-      const first = group.elements.values().next().value;
-      return first ?? null;
+      // No exact hit — find the nearest element by squared distance to its rect.
+      let nearest = null;
+      let minDist = Infinity;
+      for (const el of group.elements) {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        const dx = Math.max(r.left - x, 0, x - r.right);
+        const dy = Math.max(r.top - y, 0, y - r.bottom);
+        const dist = dx * dx + dy * dy;
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = el;
+        }
+      }
+      return nearest ?? group.elements.values().next().value ?? null;
     };
 
     /**
@@ -662,6 +774,10 @@ function previewScript(config) {
 
         event.preventDefault();
         event.stopPropagation();
+
+        // Notify admin immediately so it can close any open popover.
+        // (highlights call stopPropagation so the document-level listener below won't fire)
+        sendMessage(INTERNAL_EVENTS.STRAPI_IFRAME_CLICK, null);
 
         const existingTimeout = pendingClicks.get(group);
         if (existingTimeout) {
@@ -737,8 +853,32 @@ function previewScript(config) {
         const sourceAttribute = anchor.getAttribute(SOURCE_ATTRIBUTE);
         if (!sourceAttribute) return;
         const path = getFocusPath(sourceAttribute, anchor);
-        const rect = computeGroupRect(group);
+        // For blocks fields, use the specific clicked element's rect so the
+        // popover opens adjacent to the clicked block, not the entire field.
+        // If the stega element is zero-width (empty block with only invisible
+        // chars), walk up to the nearest block-level ancestor that has a real
+        // width so the popover isn't anchored to a point at the far edge of a line.
+        const isBlocksField = new URLSearchParams(sourceAttribute).has('fieldPath');
+        let rect;
+        if (isBlocksField) {
+          let anchorRect = anchor.getBoundingClientRect();
+          if (anchorRect.width <= 5) {
+            let el = anchor.parentElement;
+            while (el && el !== document.documentElement) {
+              const r = el.getBoundingClientRect();
+              if (r.width > 5) {
+                anchorRect = r;
+                break;
+              }
+              el = el.parentElement;
+            }
+          }
+          rect = anchorRect;
+        } else {
+          rect = computeGroupRect(group);
+        }
         if (!rect) return;
+        const blockIndex = isBlocksField ? findBlockIndex(anchor, group) : -1;
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
           path,
           position: {
@@ -749,6 +889,7 @@ function previewScript(config) {
             width: rect.width,
             height: rect.height,
           },
+          blockIndex: blockIndex >= 0 ? blockIndex : null,
         });
       };
 
@@ -1461,6 +1602,13 @@ function previewScript(config) {
 
     window.addEventListener('message', handleMessage);
 
+    // Notify admin of any click on non-highlighted page areas so it can close an open popover.
+    // Highlight click handlers call stopPropagation, so this only fires for background clicks.
+    const documentClickHandler = () => {
+      sendMessage(INTERNAL_EVENTS.STRAPI_IFRAME_CLICK, null);
+    };
+    document.addEventListener('click', documentClickHandler);
+
     // Add the message handler to the cleanup list
     const messageEventListener = {
       element: window,
@@ -1468,7 +1616,13 @@ function previewScript(config) {
       handler: /** @type {EventListener} */ (handleMessage),
     };
 
-    return [...highlightManager.eventListeners, messageEventListener];
+    const documentClickEventListener = {
+      element: /** @type {any} */ (document),
+      type: /** @type {keyof HTMLElementEventMap} */ ('click'),
+      handler: /** @type {EventListener} */ (documentClickHandler),
+    };
+
+    return [...highlightManager.eventListeners, messageEventListener, documentClickEventListener];
   };
 
   /**

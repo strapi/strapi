@@ -14,6 +14,7 @@ interface BlocksInputProps extends Omit<InputProps, 'type'> {
   livePreviewSync?: boolean;
   onFocus?: React.FocusEventHandler<HTMLElement>;
   onBlur?: React.FocusEventHandler<HTMLElement>;
+  blockIndex?: number | null;
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(

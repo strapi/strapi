@@ -16,7 +16,10 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
+import {
+  useHasInputPopoverParent,
+  usePreviewPopoverBlockIndex,
+} from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 import {
   getConditionDependencyPaths,
@@ -69,6 +72,7 @@ const BaseInputRenderer = ({
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
   const isInPreviewPopover = useHasInputPopoverParent();
+  const blockIndex = usePreviewPopoverBlockIndex();
   const shouldIgnorePermissions = isInDynamicZone || isInPreviewPopover;
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
@@ -191,8 +195,9 @@ const BaseInputRenderer = ({
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}
-          autoFocus={isInPreviewPopover}
+          autoFocus={isInPreviewPopover && blockIndex == null}
           livePreviewSync={isInPreviewPopover}
+          blockIndex={blockIndex}
         />
       );
     case 'component':
