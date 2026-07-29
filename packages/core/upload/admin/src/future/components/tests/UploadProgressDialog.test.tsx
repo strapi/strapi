@@ -245,6 +245,40 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('uploading-file.png')).toBeInTheDocument();
       expect(screen.getByText('Uploading...')).toBeInTheDocument();
     });
+
+    it('reports byte progress on a determinate bar when the size is known', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'uploading-file.png', 'uploading'),
+              size: 1000,
+              uploadedBytes: 250,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
+    });
+
+    it('falls back to an indeterminate bar while the size is still unknown', () => {
+      // The URL flow opens rows at size 0 during the server-side fetch; a determinate
+      // bar would sit at 0% for the whole phase and read as stalled.
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'https://example.com/photo.png', 'uploading'),
+              size: 0,
+              uploadedBytes: 0,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
   });
 
   describe('FileRowRenderer - completed file', () => {
@@ -268,12 +302,18 @@ describe('UploadProgressDialog', () => {
         files: [{ ...createMockFile(0, 'photo.png', 'complete'), metadataStatus }],
       });
 
-    it('shows the generating subline with a spinner while metadata is in flight', () => {
+    it('shows the generating subline with an indeterminate bar while metadata is in flight', () => {
       setup(completedWithMetadata('generating'));
 
       expect(screen.getByText('Uploaded • Generating metadata…')).toBeInTheDocument();
-      // The DS Loader announces itself as a live status region.
-      expect(screen.getByRole('status')).toBeInTheDocument();
+      // Generation reports no fraction, so the bar carries no aria-valuenow.
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
+
+    it('shows no progress bar once the metadata phase has settled', () => {
+      setup(completedWithMetadata('generated'));
+
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     });
 
     it('shows the generated subline once metadata succeeds', () => {

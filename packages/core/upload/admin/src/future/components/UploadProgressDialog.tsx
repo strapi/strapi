@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, IconButton, Loader, TextButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -15,7 +15,7 @@ import {
   WarningCircle,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { keyframes, styled } from 'styled-components';
 
 import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
@@ -374,6 +374,57 @@ const DeterminateBar = ({ percent }: { percent: number }) => {
   );
 };
 
+const INDETERMINATE_INDICATOR_WIDTH = 40;
+
+/**
+ * `translateX` percentages resolve against the *indicator's* own width, not the track's.
+ * So -100% is exactly "fully off the left edge" regardless of the width above, and the
+ * end offset converts a full track width into those same own-width units. Both ends sit
+ * flush off-track, which keeps entry and exit symmetric — a smaller start offset would
+ * make the bar pop in already partly visible.
+ */
+const indeterminateSlide = keyframes`
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(${(100 / INDETERMINATE_INDICATOR_WIDTH) * 100}%);
+  }
+`;
+
+const IndeterminateIndicator = styled.div`
+  height: 100%;
+  width: ${INDETERMINATE_INDICATOR_WIDTH}%;
+  background-color: ${({ theme }) => theme.colors.primary700};
+  border-radius: 4px;
+  /* Linear, not an eased curve: the DS easings decelerate to a stop, which on a loop
+     reads as a stall at the wrap point. Constant speed is what makes it read as a sweep. */
+  animation: ${indeterminateSlide} 1.2s linear infinite;
+
+  /* A perpetually moving bar is a vestibular trigger; fall back to a static track fill. */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+`;
+
+/**
+ * Progress bar for work whose completion fraction is genuinely unknowable, rather
+ * than merely unknown-yet: the AI metadata endpoint answers in one go, and the URL
+ * flow can't report bytes until the server has fetched the file and knows its size.
+ *
+ * Deliberately omits `aria-valuenow` — that absence is precisely how ARIA conveys
+ * an indeterminate progressbar, so assistive tech announces "busy" instead of "0%".
+ */
+const IndeterminateBar = () => {
+  return (
+    <ProgressTrack role="progressbar" aria-valuemin={0} aria-valuemax={100}>
+      <IndeterminateIndicator />
+    </ProgressTrack>
+  );
+};
+
 const FileRow = ({
   icon,
   fileName,
@@ -454,7 +505,13 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCancelled = file.status === 'cancelled';
 
   if (isCurrentFile) {
-    const percent = file.size > 0 ? (file.uploadedBytes / file.size) * 100 : 0;
+    // A row with no known size can't report a fraction — the URL flow starts rows at
+    // `size: 0` while the server is still fetching, and only learns the real size on
+    // the `file:uploading` event. Showing a determinate bar here pins it at 0% for the
+    // whole fetch, reading as "stuck"; the bar switches to determinate on its own once
+    // a size arrives.
+    const hasKnownSize = file.size > 0;
+
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
@@ -463,7 +520,11 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        <DeterminateBar percent={percent} />
+        {hasKnownSize ? (
+          <DeterminateBar percent={(file.uploadedBytes / file.size) * 100} />
+        ) : (
+          <IndeterminateBar />
+        )}
       </FileRow>
     );
   }
@@ -498,12 +559,11 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
 
     return (
       <FileRow icon={icon} fileName={file.name}>
-        <Flex gap={2}>
-          <Typography variant="pi" textColor="neutral600">
-            {formatMessage(message)}
-          </Typography>
-          {file.metadataStatus === 'generating' && <Loader small />}
-        </Flex>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage(message)}
+        </Typography>
+        {/* Generation has no intermediate progress to report, so the bar stays indeterminate. */}
+        {file.metadataStatus === 'generating' && <IndeterminateBar />}
       </FileRow>
     );
   }
