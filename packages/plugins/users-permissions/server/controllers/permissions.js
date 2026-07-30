@@ -5,9 +5,26 @@ const { getService } = require('../utils');
 
 module.exports = {
   async getPermissions(ctx) {
-    const permissions = await getService('users-permissions').getActions();
+    // The admin router serves the full action catalogue (all disabled), used to build the
+    // role matrix. On the content API, callers get their own effective permissions.
+    if (ctx.state.route?.info?.type !== 'content-api') {
+      ctx.send({ permissions: getService('users-permissions').getActions() });
 
-    ctx.send({ permissions });
+      return;
+    }
+
+    const permissionService = getService('permission');
+    const roleId = ctx.state.user?.role?.id;
+
+    // A request without a user reached this route through the public role, which is also how
+    // the authentication strategy built the ability for it.
+    const permissions = roleId
+      ? await permissionService.findRolePermissions(roleId)
+      : await permissionService.findPublicPermissions();
+
+    ctx.send({
+      permissions: getService('users-permissions').getActionsForPermissions(permissions),
+    });
   },
 
   async getPolicies(ctx) {

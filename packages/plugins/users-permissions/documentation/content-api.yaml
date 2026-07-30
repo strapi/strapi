@@ -294,7 +294,11 @@ paths:
     get:
       tags:
         - Users-Permissions - Users & Roles
-      summary: Get default generated permissions
+      summary: Get the permissions of the requesting user's role
+      description:
+        Returns the whole permissions tree, with `enabled` set to `true` for every action the
+        role of the requesting user holds. Requests without a token are resolved against the
+        public role.
       responses:
         200:
           description: Returns the permissions tree
@@ -311,7 +315,7 @@ paths:
                     controllers:
                       controllerA:
                         find:
-                          enabled: false
+                          enabled: true
                           policy: ''
                         findOne:
                           enabled: false

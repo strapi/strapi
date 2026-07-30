@@ -108,6 +108,25 @@ module.exports = ({ strapi }) => ({
     return _.cloneDeep(actionMap);
   },
 
+  /**
+   * Merge a flat list of permissions ({ action: 'api::a.b.find' }) onto the action map,
+   * enabling every action the list contains.
+   */
+  getActionsForPermissions(permissions = []) {
+    const actions = this.getActions();
+
+    permissions.forEach(({ action }) => {
+      const [type, controller, actionName] = action.split('.');
+
+      _.set(actions, `${type}.controllers.${controller}.${actionName}`, {
+        enabled: true,
+        policy: '',
+      });
+    });
+
+    return actions;
+  },
+
   async getRoutes() {
     const routesMap = {};
 

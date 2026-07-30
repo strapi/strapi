@@ -50,21 +50,9 @@ module.exports = ({ strapi }) => ({
       throw new NotFoundError('Role not found');
     }
 
-    const allActions = getService('users-permissions').getActions();
-
-    // Group by `type`.
-    role.permissions.forEach((permission) => {
-      const [type, controller, action] = permission.action.split('.');
-
-      _.set(allActions, `${type}.controllers.${controller}.${action}`, {
-        enabled: true,
-        policy: '',
-      });
-    });
-
     return {
       ...role,
-      permissions: allActions,
+      permissions: getService('users-permissions').getActionsForPermissions(role.permissions),
     };
   },
 
