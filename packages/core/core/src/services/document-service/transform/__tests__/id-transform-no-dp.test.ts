@@ -83,6 +83,30 @@ describe('Transform relational data', () => {
       });
     });
 
+    it('Connect relation operation to the published product version', async () => {
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: {
+            connect: {
+              documentId: 'product-1',
+              locale: 'en',
+              status: 'published',
+            },
+          },
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        products: {
+          connect: [{ id: 'product-1-en-published' }],
+        },
+      });
+    });
+
     it('Connect to both draft and publish by default', async () => {
       // Should connect to the default locale if not provided in the relation
       const { data } = await transformParamsDocumentId(SHOP_UID, {

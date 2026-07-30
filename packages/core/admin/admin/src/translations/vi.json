@@ -133,7 +133,7 @@
   "Settings.application.description": "Thông tin tổng quan của bảng quản trị",
   "Settings.application.edition-title": "phiên bản hiện tại",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Phiên bản cộng đồng} other {Phiên bản doanh nghiệp}}",
-  "Settings.application.ee.admin-seats.add-seats": "Quản lý số lượng người dùng",
+  "Settings.application.ee.admin-seats.add-seats": "Quản lý đăng ký",
   "Settings.application.ee.admin-seats.support": "Liên hệ bộ phận kinh doanh",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Đạt giới hạn: thêm chỗ để mời thêm người dùng",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",

@@ -12,6 +12,7 @@ interface CategoryEntry {
   parent?: CategoryRelation | null;
   children?: CategoryRelation[];
   related?: CategoryRelation[];
+  relatedMany?: CategoryRelation[];
 }
 
 const builder = createTestBuilder();
@@ -39,11 +40,45 @@ const category = {
       target: 'api::category.category',
       targetAttribute: 'children',
     },
-    // Unidirectional self-referential
+    // Unidirectional self-referential (one to many)
     related: {
       type: 'relation',
       relation: 'oneToMany',
       target: 'api::category.category',
+    },
+    // Unidirectional self-referential (many to many)
+    relatedMany: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+    },
+  },
+} as const;
+
+const localizedCategory = {
+  displayName: 'localized category',
+  singularName: 'localized-category',
+  pluralName: 'localized-categories',
+  kind: 'collectionType',
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    related: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::localized-category.localized-category',
     },
   },
 } as const;
@@ -60,12 +95,128 @@ const getCategory = async (
   return res.body.data as CategoryEntry;
 };
 
+const createCategory = async (name: string): Promise<CategoryEntry> => {
+  const res = await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/api::category.category',
+    body: { name },
+  });
+
+  return res.body.data as CategoryEntry;
+};
+
+const createLocalizedCategory = async (name: string, locale: string): Promise<CategoryEntry> => {
+  const res = await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/api::localized-category.localized-category',
+    qs: { locale },
+    body: { name },
+  });
+
+  return res.body.data as CategoryEntry;
+};
+
+const updateCategory = async (documentId: string, body: Record<string, unknown>) =>
+  rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/api::category.category/${documentId}`,
+    body,
+  });
+
+const updateLocalizedCategory = async (
+  documentId: string,
+  locale: string,
+  body: Record<string, unknown>
+) =>
+  rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/api::localized-category.localized-category/${documentId}`,
+    qs: { locale },
+    body,
+  });
+
+const publishCategory = async (documentId: string, body?: Record<string, unknown>) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+    body,
+  });
+
+const publishLocalizedCategory = async (documentId: string, locale: string) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::localized-category.localized-category/${documentId}/actions/publish`,
+    qs: { locale },
+  });
+
+const discardCategory = async (documentId: string) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::category.category/${documentId}/actions/discard`,
+  });
+
+// Returns the target documentIds linked through `field` for the given status.
+const getRelationTargets = async (
+  documentId: string,
+  field: string,
+  status: 'draft' | 'published',
+  locale?: string
+): Promise<string[]> => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/api::category.category/${documentId}/${field}`,
+    qs: { status, locale },
+  });
+
+  return res.body.results.map((result: { documentId: string }) => result.documentId);
+};
+
+const getLocalizedRelationTargets = async (
+  documentId: string,
+  field: string,
+  status: 'draft' | 'published',
+  locale: string
+): Promise<string[]> => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/api::localized-category.localized-category/${documentId}/${field}`,
+    qs: { status, locale },
+  });
+
+  return res.body.results.map((result: { documentId: string }) => result.documentId);
+};
+
+const getCategoryVersionId = async (
+  documentId: string,
+  status: 'draft' | 'published'
+): Promise<number> => {
+  const [entry] = await strapi.db.query('api::category.category').findMany({
+    where: {
+      documentId,
+      publishedAt: status === 'published' ? { $notNull: true } : null,
+    },
+    select: ['id'],
+  });
+
+  return entry.id;
+};
+
 describe('CM API - Self-referential relations with Draft & Publish', () => {
   beforeAll(async () => {
-    await builder.addContentType(category).build();
+    await builder.addContentTypes([category, localizedCategory]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    await rq({
+      method: 'POST',
+      url: '/i18n/locales',
+      body: {
+        code: 'fr',
+        name: 'French',
+        isDefault: false,
+      },
+    });
 
     // Create two categories
     for (const name of ['Category A', 'Category B']) {
@@ -157,5 +308,536 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     // Verify the reverted draft still has the self-relation
     const draft = await getCategory(catA.documentId, 'draft');
     expect(draft.parent).toMatchObject({ count: 1 });
+  });
+
+  test('regression: relation in published parent is preserved when only the child is independently republished', async () => {
+    // This directly reproduces the GitHub bug report:
+    // 1. "Home" is published with two children.
+    // 2. One child ("Category B") is independently edited and republished.
+    // 3. The child must still appear in Home's PUBLISHED relation list.
+    //    Before the fix, it was silently deleted.
+    const [catA, catB] = data.categories;
+
+    // Set catA (Home) to reference catB (Test 3122) via the unidirectional "related" field
+    await rq({
+      method: 'PUT',
+      url: `/content-manager/collection-types/api::category.category/${catA.documentId}`,
+      body: { name: 'Home', related: [{ documentId: catB.documentId, locale: null }] },
+    });
+
+    // Publish catA (Home) — now the published version has catB in its "related" list
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::category.category/${catA.documentId}/actions/publish`,
+    });
+
+    // Publish catB (the child) — previously this deleted the relation in Home's published version
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::category.category/${catB.documentId}/actions/publish`,
+    });
+
+    // catB must still appear in catA's PUBLISHED relation list
+    const publishedHome = await getCategory(catA.documentId, 'published');
+    expect(publishedHome.related).toMatchObject({ count: 1 });
+
+    // The preserved relation must point at catB specifically — not just be "some" relation.
+    // This guards against the row being re-pointed to a wrong/stale target during the
+    // delete-and-recreate publish cycle.
+    const relatedRes = await rq({
+      method: 'GET',
+      url: `/content-manager/relations/api::category.category/${catA.documentId}/related`,
+      qs: { status: 'published' },
+    });
+    expect(relatedRes.statusCode).toBe(200);
+    expect(relatedRes.body.results).toHaveLength(1);
+    expect(relatedRes.body.results[0]).toMatchObject({ documentId: catB.documentId });
+
+    // DB-level guard for the cascade-delete assumption behind the fix.
+    // The fix relies on the old published target's join row being cascade-deleted
+    // before sync() re-inserts the re-pointed row. The CM relation endpoint above
+    // joins to live target rows, so it would silently hide an orphan row left
+    // pointing at the deleted old published target. Assert directly on the join
+    // table that (a) no orphan rows survive and (b) there is exactly one
+    // published-side link Home(pub) -> catB(pub). If the publish pipeline ever
+    // stops cascade-deleting the stale row, this fails even though the count above
+    // would still pass.
+    const connection = strapi.db.getConnection();
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.related.joinTable;
+
+    const liveCategoryIds = new Set(
+      (await connection.select('id').from(categoryMeta.tableName)).map((row: any) => row.id)
+    );
+
+    const joinRows = await connection.select('*').from(joinTableName);
+
+    // (a) No orphans: both sides of every row reference a live category row.
+    for (const row of joinRows) {
+      expect(liveCategoryIds.has(row[joinColumn.name])).toBe(true);
+      expect(liveCategoryIds.has(row[inverseJoinColumn.name])).toBe(true);
+    }
+
+    // (b) Exactly one published-side link, pointing Home(pub) -> catB(pub).
+    const [publishedA] = await strapi.db.query('api::category.category').findMany({
+      where: { documentId: catA.documentId, publishedAt: { $notNull: true } },
+      select: ['id'],
+    });
+    const [publishedB] = await strapi.db.query('api::category.category').findMany({
+      where: { documentId: catB.documentId, publishedAt: { $notNull: true } },
+      select: ['id'],
+    });
+
+    const publishedLinks = joinRows.filter((row: any) => row[joinColumn.name] === publishedA.id);
+    expect(publishedLinks).toHaveLength(1);
+    expect(publishedLinks[0][inverseJoinColumn.name]).toBe(publishedB.id);
+  });
+
+  test('regression: published self-referential oneToMany order is preserved when a child is republished', async () => {
+    const parent = await createCategory('Page 1');
+    const childA = await createCategory('Page 1.1');
+    const childB = await createCategory('Page 1.2');
+    const childC = await createCategory('Page 1.3');
+    const childD = await createCategory('Page 1.4');
+    const expectedOrder = [
+      childA.documentId,
+      childB.documentId,
+      childC.documentId,
+      childD.documentId,
+    ];
+    const expectChildrenToPointToParent = async () => {
+      for (const child of [childA, childB, childC, childD]) {
+        expect(await getRelationTargets(child.documentId, 'parent', 'published')).toEqual([
+          parent.documentId,
+        ]);
+      }
+    };
+
+    for (const child of [childA, childB, childC, childD]) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [childD, childC, childB, childA].map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+
+    for (const child of [childA, childB, childC, childD]) {
+      await publishCategory(child.documentId);
+    }
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+
+    for (const child of [childA, childB, childC, childD]) {
+      await updateCategory(child.documentId, {
+        name: `${child.name} - edited`,
+      });
+      await publishCategory(child.documentId);
+
+      expect({
+        republishedChild: child.name,
+        publishedOrder: await getRelationTargets(parent.documentId, 'children', 'published'),
+      }).toEqual({
+        republishedChild: child.name,
+        publishedOrder: expectedOrder,
+      });
+      await expectChildrenToPointToParent();
+    }
+
+    await updateCategory(parent.documentId, { name: 'Page 1 - edited' });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+
+    await updateCategory(childC.documentId, { name: 'Page 1.3 - draft edit' });
+    await discardCategory(childC.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+  });
+
+  test('regression: published self-referential oneToMany order is preserved when children are published after the parent', async () => {
+    const parent = await createCategory('Draft-child Page 1');
+    const childA = await createCategory('Draft-child Page 1.1');
+    const childB = await createCategory('Draft-child Page 1.2');
+    const childC = await createCategory('Draft-child Page 1.3');
+    const childD = await createCategory('Draft-child Page 1.4');
+    const children = [childA, childB, childC, childD];
+    const expectedOrder = children.map((child) => child.documentId);
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+
+    await publishCategory(parent.documentId);
+
+    for (const [index, child] of children.entries()) {
+      await publishCategory(child.documentId);
+
+      expect({
+        publishedChild: child.name,
+        publishedOrder: await getRelationTargets(parent.documentId, 'children', 'published'),
+      }).toEqual({
+        publishedChild: child.name,
+        publishedOrder: expectedOrder.slice(0, index + 1),
+      });
+    }
+  });
+
+  test('regression: removed self-referential oneToMany relation stays removed after publishing the parent', async () => {
+    const parent = await createCategory('Removed-child Page 1');
+    const childA = await createCategory('Removed-child Page 1.1');
+    const childB = await createCategory('Removed-child Page 1.2');
+    const childC = await createCategory('Removed-child Page 1.3');
+    const children = [childA, childB, childC];
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      children.map((child) => child.documentId)
+    );
+
+    const remainingChildren = [childA, childC];
+    await updateCategory(parent.documentId, {
+      name: `${parent.name} - removed child`,
+      children: [...remainingChildren].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      remainingChildren.map((child) => child.documentId)
+    );
+  });
+
+  test('regression: publish drops one-sided self-referential relations to draft-only targets', async () => {
+    const parent = await createCategory('Draft-only target Page 1');
+    const child = await createCategory('Draft-only target Page 1.1');
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      related: [{ documentId: child.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'related', 'draft')).toEqual([
+      child.documentId,
+    ]);
+
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'related', 'published')).toEqual([]);
+
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.related.joinTable;
+    const parentPublishedId = await getCategoryVersionId(parent.documentId, 'published');
+    const childDraftId = await getCategoryVersionId(child.documentId, 'draft');
+    const stalePublishedRows = await strapi.db
+      .getConnection()
+      .select('*')
+      .from(joinTableName)
+      .where({
+        [joinColumn.name]: parentPublishedId,
+        [inverseJoinColumn.name]: childDraftId,
+      });
+
+    expect(stalePublishedRows).toHaveLength(0);
+  });
+
+  test('regression: discarding parent draft preserves multi-entry self-referential relations without mixed-state rows', async () => {
+    const parent = await createCategory('Discard parent Page 1');
+    const childA = await createCategory('Discard parent Page 1.1');
+    const childB = await createCategory('Discard parent Page 1.2');
+    const childC = await createCategory('Discard parent Page 1.3');
+    const children = [childA, childB, childC];
+    const expectedOrder = children.map((child) => child.documentId);
+
+    await publishCategory(parent.documentId);
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    await updateCategory(parent.documentId, { name: `${parent.name} - draft edit` });
+    await discardCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+
+    const parentDraftId = await getCategoryVersionId(parent.documentId, 'draft');
+    const parentPublishedId = await getCategoryVersionId(parent.documentId, 'published');
+    const childVersionIds = await Promise.all(
+      children.map(async (child) => ({
+        draft: await getCategoryVersionId(child.documentId, 'draft'),
+        published: await getCategoryVersionId(child.documentId, 'published'),
+      }))
+    );
+
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.parent.joinTable;
+    const joinRows = await strapi.db.getConnection().select('*').from(joinTableName);
+    const pairCount = (sourceId: number, targetId: number) =>
+      joinRows.filter(
+        (row: Record<string, unknown>) =>
+          row[joinColumn.name] === sourceId && row[inverseJoinColumn.name] === targetId
+      ).length;
+
+    for (const childIds of childVersionIds) {
+      expect(pairCount(childIds.draft, parentDraftId)).toBe(1);
+      expect(pairCount(childIds.published, parentPublishedId)).toBe(1);
+      expect(pairCount(childIds.published, parentDraftId)).toBe(0);
+      expect(pairCount(childIds.draft, parentPublishedId)).toBe(0);
+    }
+  });
+
+  test('regression: self-referential manyToMany order and removals are preserved in published relations', async () => {
+    const parent = await createCategory('ManyToMany Page 1');
+    const childA = await createCategory('ManyToMany Page 1.1');
+    const childB = await createCategory('ManyToMany Page 1.2');
+    const childC = await createCategory('ManyToMany Page 1.3');
+    const children = [childA, childB, childC];
+
+    for (const child of children) {
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      relatedMany: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'relatedMany', 'published')).toEqual(
+      children.map((child) => child.documentId)
+    );
+
+    const remainingChildren = [childA, childC];
+    await updateCategory(parent.documentId, {
+      name: `${parent.name} - removed child`,
+      relatedMany: [...remainingChildren].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'relatedMany', 'published')).toEqual(
+      remainingChildren.map((child) => child.documentId)
+    );
+  });
+
+  test('regression: localized self-referential relations map to the same locale on publish', async () => {
+    const parent = await createLocalizedCategory('Localized Page 1', 'fr');
+    const childA = await createLocalizedCategory('Localized Page 1.1', 'fr');
+    const childB = await createLocalizedCategory('Localized Page 1.2', 'fr');
+    const children = [childA, childB];
+
+    for (const child of children) {
+      await publishLocalizedCategory(child.documentId, 'fr');
+    }
+
+    await updateLocalizedCategory(parent.documentId, 'fr', {
+      name: parent.name,
+      related: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: 'fr',
+      })),
+    });
+    await publishLocalizedCategory(parent.documentId, 'fr');
+
+    expect(
+      await getLocalizedRelationTargets(parent.documentId, 'related', 'published', 'fr')
+    ).toEqual(children.map((child) => child.documentId));
+
+    const remainingChildren = [childA];
+    await updateLocalizedCategory(parent.documentId, 'fr', {
+      name: `${parent.name} - removed child`,
+      related: remainingChildren.map((child) => ({
+        documentId: child.documentId,
+        locale: 'fr',
+      })),
+    });
+    await publishLocalizedCategory(parent.documentId, 'fr');
+
+    expect(
+      await getLocalizedRelationTargets(parent.documentId, 'related', 'published', 'fr')
+    ).toEqual(remainingChildren.map((child) => child.documentId));
+  });
+
+  // A single entry whose unidirectional relation points at itself must keep that relation in
+  // its published version: during the delete-and-recreate publish cycle the self-link has to
+  // be re-pointed to the entry's own published version rather than dropped. These cover the
+  // unidirectional `oneToMany` and `manyToMany` self-links; the bidirectional `parent`
+  // self-link is covered by the tests above.
+  test('unidirectional oneToMany self-link (entry to itself) is preserved after first publish', async () => {
+    const cat = await createCategory('OneToMany self publish');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'draft')).toEqual([cat.documentId]);
+
+    await publishCategory(cat.documentId);
+
+    // The published self-link must exist and point at the entry itself.
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional manyToMany self-link (entry to itself) is preserved after first publish', async () => {
+    const cat = await createCategory('ManyToMany self publish');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      relatedMany: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(cat.documentId, 'relatedMany', 'draft')).toEqual([
+      cat.documentId,
+    ]);
+
+    await publishCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'relatedMany', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional oneToMany self-link (entry to itself) is preserved when added before a republish', async () => {
+    const cat = await createCategory('Self republish');
+
+    // First publish with no self-link, so a published version already exists.
+    await publishCategory(cat.documentId);
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([]);
+
+    // Add the self-link on the draft, then republish.
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await publishCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional oneToMany self-link (entry to itself) is preserved after discarding the draft', async () => {
+    const cat = await createCategory('Self discard');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await publishCategory(cat.documentId);
+
+    // Modify the draft (keeping the self-link), then discard back to the published version.
+    await updateCategory(cat.documentId, {
+      name: `${cat.name} - modified`,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await discardCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'draft')).toEqual([cat.documentId]);
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('countDraftRelations ignores self-referential relations', async () => {
+    const cat = await createCategory('Self count');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      parent: { documentId: cat.documentId, locale: null },
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    const { body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/api::category.category/${cat.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(body.data.unpublishedRelations).toBe(0);
+    expect(body.data.draftM2mLinks).toBe(0);
   });
 });

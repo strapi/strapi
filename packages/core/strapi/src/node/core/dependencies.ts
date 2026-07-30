@@ -1,182 +1,260 @@
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
 import execa, { CommonOptions, ExecaReturnValue } from 'execa';
 import readPkgUp, { PackageJson } from 'read-pkg-up';
-import type { BuildOptions } from '../build';
+
+import type { Logger } from '../../cli/utils/logger';
 import { getPackageManager } from './managers';
+
+const CACHE_PATH = path.join('node_modules', '.strapi', 'deps-check.hash');
+
+const hashPackageJson = async (cwd: string): Promise<string | null> => {
+  try {
+    const content = await fs.readFile(path.join(cwd, 'package.json'), 'utf8');
+    return crypto.createHash('sha1').update(content).digest('hex');
+  } catch {
+    return null;
+  }
+};
+
+const readCachedHash = (cwd: string): Promise<string | null> =>
+  fs.readFile(path.join(cwd, CACHE_PATH), 'utf8').catch(() => null);
+
+const writeCachedHash = async (cwd: string, hash: string): Promise<void> => {
+  try {
+    await fs.mkdir(path.dirname(path.join(cwd, CACHE_PATH)), { recursive: true });
+    await fs.writeFile(path.join(cwd, CACHE_PATH), hash, 'utf8');
+  } catch {
+    // best-effort cache write — silently ignore
+  }
+};
 
 /**
  * From V5 this will be imported from the package.json of `@strapi/strapi`.
  */
-const PEER_DEPS = {
+const ADMIN_PEER_DEPS = {
   react: '^18.0.0',
   'react-dom': '^18.0.0',
   'react-router-dom': '^6.0.0',
   'styled-components': '^6.0.0',
-};
+} as const;
 
-interface CheckRequiredDependenciesResult {
-  didInstall: boolean;
-}
-
-interface DepToInstall {
+interface AdminPeerDep {
   name: string;
   wantedVersion: string;
-  declaredVersion?: never;
 }
 
-/**
- * Checks the user's project that it has declared and installed the required dependencies
- * needed by the Strapi admin project. Whilst generally speaking most modules will be
- * declared by the actual packages there are some packages where you only really want one of
- * and thus they are declared as peer dependencies – react / styled-components / etc.
- *
- * If these deps are not installed or declared, then we prompt the user to correct this. In
- * V4 this is not a hard requirement, but in V5 it will be. Might as well get people started now.
- */
-const checkRequiredDependencies = async ({
-  cwd,
-  logger,
-}: Pick<BuildOptions, 'cwd' | 'logger'>): Promise<CheckRequiredDependenciesResult> => {
-  /**
-   * This enables us to use experimental deps for libraries like
-   * react or styled-components. This is useful for testing against.
-   */
-  if (process.env.USE_EXPERIMENTAL_DEPENDENCIES === 'true') {
-    logger.warn('You are using experimental dependencies that may not be compatible with Strapi.');
-    return { didInstall: false };
-  }
+interface DeclaredAdminPeerDep extends AdminPeerDep {
+  declaredVersion: string;
+}
 
+class MissingAdminPeerDepsError extends Error {
+  readonly missing: AdminPeerDep[];
+
+  constructor(missing: AdminPeerDep[]) {
+    super('Missing required dependencies. Please install them and re-run this command.');
+    this.name = 'MissingAdminPeerDepsError';
+    this.missing = missing;
+  }
+}
+
+const loadProjectPackageJson = async (cwd: string) => {
   const pkg = await readPkgUp({ cwd });
 
   if (!pkg) {
     throw new Error(`Could not find package.json at path: ${cwd}`);
   }
 
-  logger.debug('Loaded package.json:', os.EOL, pkg.packageJson);
-
-  interface DepToReview {
-    name: string;
-    wantedVersion: string;
-    declaredVersion: string;
+  if (!pkg.packageJson.dependencies) {
+    throw new Error(`Could not find dependencies in package.json at path: ${cwd}`);
   }
 
-  /**
-   * Run through each of the peer deps and figure out if they need to be
-   * installed or they need their version checked against.
-   */
-  const { install, review } = Object.entries(PEER_DEPS).reduce<{
-    install: DepToInstall[];
-    review: DepToReview[];
-  }>(
-    (acc, [name, version]) => {
-      if (!pkg.packageJson.dependencies) {
-        throw new Error(`Could not find dependencies in package.json at path: ${cwd}`);
-      }
+  return pkg;
+};
 
+/**
+ * Returns admin peer dependencies that are not declared in the project's package.json.
+ */
+const findUndeclaredAdminPeerDeps = async (cwd: string): Promise<AdminPeerDep[]> => {
+  const pkg = await loadProjectPackageJson(cwd);
+
+  return Object.entries(ADMIN_PEER_DEPS).reduce<AdminPeerDep[]>((missing, [name, version]) => {
+    const declaredVersion =
+      pkg.packageJson.dependencies?.[name] ?? pkg.packageJson.devDependencies?.[name];
+
+    if (!declaredVersion) {
+      missing.push({
+        name,
+        wantedVersion: version,
+      });
+    }
+
+    return missing;
+  }, []);
+};
+
+const getDeclaredAdminPeerDeps = (packageJson: PackageJson): DeclaredAdminPeerDep[] => {
+  return Object.entries(ADMIN_PEER_DEPS).reduce<DeclaredAdminPeerDep[]>(
+    (declared, [name, version]) => {
       const declaredVersion =
-        pkg.packageJson.dependencies[name] ?? pkg.packageJson.devDependencies?.[name];
+        packageJson.dependencies?.[name] ?? packageJson.devDependencies?.[name];
 
-      if (!declaredVersion) {
-        acc.install.push({
-          name,
-          wantedVersion: version,
-        });
-      } else {
-        acc.review.push({
+      if (declaredVersion) {
+        declared.push({
           name,
           wantedVersion: version,
           declaredVersion,
         });
       }
 
-      return acc;
+      return declared;
     },
-    {
-      install: [],
-      review: [],
-    }
+    []
   );
+};
 
-  if (install.length > 0) {
-    logger.info(
-      'The Strapi admin needs to install the following dependencies:',
-      os.EOL,
-      install.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL)
+const getInstallCommandHint = (missing: AdminPeerDep[]) => {
+  const packages = missing.map(({ name, wantedVersion }) => `${name}@${wantedVersion}`).join(' ');
+  const packageManager = getPackageManager();
+
+  if (packageManager === 'yarn') {
+    return `yarn add ${packages}`;
+  }
+
+  if (packageManager === 'pnpm') {
+    return `pnpm add --save-prod ${packages}`;
+  }
+
+  // Do not use --legacy-peer-deps: it rewrites package-lock in a mode that
+  // breaks plain `npm ci` (#27019). Fresh apps install cleanly without it.
+  return `npm install --save ${packages}`;
+};
+
+const reportMissingAdminPeerDeps = (logger: Logger, missing: AdminPeerDep[]) => {
+  logger.error(
+    'The Strapi admin is missing required dependencies:',
+    os.EOL,
+    missing.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL)
+  );
+  logger.error(
+    'Please install them manually before re-running this command:',
+    os.EOL,
+    `  ${getInstallCommandHint(missing)}`
+  );
+};
+
+/**
+ * Validates declared admin peer dependencies (versions and node_modules presence).
+ */
+const validateDeclaredAdminPeerDeps = async (cwd: string, logger: Logger) => {
+  const pkg = await loadProjectPackageJson(cwd);
+  const declared = getDeclaredAdminPeerDeps(pkg.packageJson);
+
+  if (!declared.length) {
+    return;
+  }
+
+  logger.debug('Loaded package.json:', os.EOL, pkg.packageJson);
+
+  const errors: string[] = [];
+
+  for (const dep of declared) {
+    let minDeclaredVersion: SemVer | null = null;
+
+    try {
+      minDeclaredVersion = semver.minVersion(dep.declaredVersion);
+    } catch (err) {
+      // Intentional fall-through (variable will be left as null, throwing below)
+    }
+
+    if (!minDeclaredVersion) {
+      errors.push(
+        `The declared dependency, ${dep.name} has an invalid version in package.json: ${dep.declaredVersion}`
+      );
+    } else if (!semver.satisfies(minDeclaredVersion, dep.wantedVersion)) {
+      logger.warn(
+        [
+          `Declared version of ${dep.name} (${minDeclaredVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
+          'You may experience issues, we recommend you change this.',
+        ].join(os.EOL)
+      );
+    }
+
+    const installedVersion = await getModuleVersion(dep.name, cwd);
+
+    if (!installedVersion) {
+      errors.push(
+        `The declared dependency, ${dep.name} is not installed. You should install before re-running this command`
+      );
+    } else if (!semver.satisfies(installedVersion, dep.wantedVersion)) {
+      logger.warn(
+        [
+          `Declared version of ${dep.name} (${installedVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
+          'You may experience issues, we recommend you change this.',
+        ].join(os.EOL)
+      );
+    }
+  }
+
+  if (errors.length > 0 && process.env.NODE_ENV === 'development') {
+    throw new Error(`${os.EOL}- ${errors.join(`${os.EOL}- `)}`);
+  }
+};
+
+const installAdminPeerDeps = async (
+  missing: AdminPeerDep[],
+  { cwd, logger }: { cwd: string; logger: Logger }
+) => {
+  const packageManager = getPackageManager();
+
+  if (!packageManager) {
+    logger.error(
+      'Could not find a supported package manager, please install the dependencies manually.'
     );
-
-    await installDependencies(install, {
-      cwd,
-      logger,
-    });
-
-    const [file, ...args] = process.argv;
-
-    /**
-     * Re-run the same command after installation e.g. strapi build because the yarn.lock might
-     * not be the same and could break installations. It's not the best solution, but it works.
-     */
-    await execa(file, args, { cwd, stdio: 'inherit' });
-    return { didInstall: true };
+    process.exit(1);
   }
 
-  if (review.length) {
-    const errors: string[] = [];
+  const execOptions: CommonOptions<'utf8'> = {
+    encoding: 'utf8',
+    cwd,
+    stdio: 'inherit',
+  };
 
-    for (const dep of review) {
-      // The version specified in package.json could be incorrect, eg `foo`
-      let minDeclaredVersion: SemVer | null = null;
-      try {
-        minDeclaredVersion = semver.minVersion(dep.declaredVersion);
-      } catch (err) {
-        // Intentional fall-through (variable will be left as null, throwing below)
-      }
+  const packages = missing.map(({ name, wantedVersion }) => `${name}@${wantedVersion}`);
 
-      if (!minDeclaredVersion) {
-        errors.push(
-          `The declared dependency, ${dep.name} has an invalid version in package.json: ${dep.declaredVersion}`
-        );
-      } else if (!semver.satisfies(minDeclaredVersion, dep.wantedVersion)) {
-        /**
-         * The delcared version should be semver compatible with our required version
-         * of the dependency. If it's not, we should advise the user to change it.
-         */
-        logger.warn(
-          [
-            `Declared version of ${dep.name} (${minDeclaredVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
-            'You may experience issues, we recommend you change this.',
-          ].join(os.EOL)
-        );
-      }
+  let result: ExecaReturnValue<string> | undefined;
 
-      const installedVersion = await getModuleVersion(dep.name, cwd);
-
-      if (!installedVersion) {
-        /**
-         * TODO: when we know the packageManager we can advise the actual install command.
-         */
-        errors.push(
-          `The declared dependency, ${dep.name} is not installed. You should install before re-running this command`
-        );
-      } else if (!semver.satisfies(installedVersion, dep.wantedVersion)) {
-        logger.warn(
-          [
-            `Declared version of ${dep.name} (${installedVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
-            'You may experience issues, we recommend you change this.',
-          ].join(os.EOL)
-        );
-      }
-    }
-
-    if (errors.length > 0 && process.env.NODE_ENV === 'development') {
-      throw new Error(`${os.EOL}- ${errors.join(`${os.EOL}- `)}`);
-    }
+  if (packageManager === 'npm') {
+    const npmArgs = ['install', '--save', ...packages];
+    logger.info(`Running 'npm ${npmArgs.join(' ')}'`);
+    result = await execa('npm', npmArgs, execOptions);
+  } else if (packageManager === 'yarn') {
+    const yarnArgs = ['add', ...packages];
+    logger.info(`Running 'yarn ${yarnArgs.join(' ')}'`);
+    result = await execa('yarn', yarnArgs, execOptions);
+  } else if (packageManager === 'pnpm') {
+    const pnpmArgs = ['add', '--save-prod', ...packages];
+    logger.info(`Running 'pnpm ${pnpmArgs.join(' ')}'`);
+    result = await execa('pnpm', pnpmArgs, execOptions);
   }
 
-  return { didInstall: false };
+  if (result?.exitCode || result?.failed) {
+    throw new Error('Package installation failed');
+  }
+};
+
+const reexecCurrentCommand = async (cwd: string) => {
+  const [file, ...args] = process.argv;
+
+  /**
+   * Re-run the same command after installation e.g. strapi build because the yarn.lock might
+   * not be the same and could break installations. It's not the best solution, but it works.
+   */
+  await execa(file, args, { cwd, stdio: 'inherit' });
 };
 
 const getModule = async (name: string, cwd: string): Promise<PackageJson | null> => {
@@ -195,47 +273,18 @@ const getModuleVersion = async (name: string, cwd: string): Promise<string | nul
   return pkg?.version || null;
 };
 
-const installDependencies = async (
-  install: DepToInstall[],
-  { cwd, logger }: Pick<BuildOptions, 'cwd' | 'logger'>
-) => {
-  const packageManager = getPackageManager();
-
-  if (!packageManager) {
-    logger.error(
-      'Could not find a supported package manager, please install the dependencies manually.'
-    );
-    process.exit(1);
-  }
-
-  const execOptions: CommonOptions<'utf8'> = {
-    encoding: 'utf8',
-    cwd,
-    stdio: 'inherit',
-  };
-
-  const packages = install.map(({ name, wantedVersion }) => `${name}@${wantedVersion}`);
-
-  let result: ExecaReturnValue<string> | undefined;
-
-  if (packageManager === 'npm') {
-    const npmArgs = ['install', '--legacy-peer-deps', '--save', ...packages];
-    logger.info(`Running 'npm ${npmArgs.join(' ')}'`);
-    result = await execa('npm', npmArgs, execOptions);
-  } else if (packageManager === 'yarn') {
-    const yarnArgs = ['add', ...packages];
-    logger.info(`Running 'yarn ${yarnArgs.join(' ')}'`);
-    result = await execa('yarn', yarnArgs, execOptions);
-  } else if (packageManager === 'pnpm') {
-    const pnpmArgs = ['add', '--save-prod', ...packages];
-    logger.info(`Running 'pnpm ${pnpmArgs.join(' ')}'`);
-    result = await execa('pnpm', pnpmArgs, execOptions);
-  }
-
-  if (result?.exitCode || result?.failed) {
-    throw new Error('Package installation failed');
-  }
+export {
+  ADMIN_PEER_DEPS,
+  findUndeclaredAdminPeerDeps,
+  validateDeclaredAdminPeerDeps,
+  installAdminPeerDeps,
+  reexecCurrentCommand,
+  reportMissingAdminPeerDeps,
+  getInstallCommandHint,
+  MissingAdminPeerDepsError,
+  getModule,
+  hashPackageJson,
+  readCachedHash,
+  writeCachedHash,
 };
-
-export { checkRequiredDependencies, getModule };
-export type { CheckRequiredDependenciesResult, PackageJson };
+export type { AdminPeerDep, PackageJson };

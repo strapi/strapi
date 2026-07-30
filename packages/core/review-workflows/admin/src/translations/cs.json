@@ -13,5 +13,6 @@
   "settings.page.purchase.perks2": "Správa uživatelských oprávnění",
   "settings.page.purchase.perks3": "Podpora webhooků",
   "widget.assigned.title": "Přiřazeno mně",
-  "widget.assigned.no-data": "Žádné záznamy"
+  "widget.assigned.no-data": "Žádné záznamy",
+  "stage.label": "Fáze schvalování"
 }

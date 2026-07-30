@@ -8,7 +8,7 @@ import {
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
-import type { IEntity } from '../../../../../types';
+import type { IEntity } from '../../../../types';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -128,7 +128,7 @@ describe('Local Strapi Source Destination', () => {
                 },
               },
             }),
-            /* @ts-ignore: disable-next-line */
+            // @ts-expect-error -- Invalid strategy exercises provider validation.
             strategy: 'foo',
           });
           await invalidProvider.bootstrap();

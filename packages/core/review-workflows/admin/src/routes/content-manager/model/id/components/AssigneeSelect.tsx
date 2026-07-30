@@ -160,7 +160,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
       toggleNotification({
         type: 'success',
         message: formatMessage({
-          id: 'content-manager.reviewWorkflows.assignee.notification.saved',
+          id: 'review-workflows.assignee.notification.saved',
           defaultMessage: 'Assignee updated',
         }),
       });
@@ -180,15 +180,15 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const hasMoreItems = page < pageCount;
 
   const assigneeLabel = formatMessage({
-    id: 'content-manager.reviewWorkflows.assignee.label',
+    id: 'review-workflows.assignee.label',
     defaultMessage: 'Assignee',
   });
   const assigneeClearLabel = formatMessage({
-    id: 'content-manager.reviewWorkflows.assignee.clear',
+    id: 'review-workflows.assignee.clear',
     defaultMessage: 'Clear assignee',
   });
   const assigneePlaceholder = formatMessage({
-    id: 'content-manager.reviewWorkflows.assignee.placeholder',
+    id: 'review-workflows.assignee.placeholder',
     defaultMessage: 'Select…',
   });
 
@@ -236,7 +236,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
         ((isError &&
           canRead &&
           formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.error',
+            id: 'review-workflows.assignee.error',
             defaultMessage: 'An error occurred while fetching users',
           })) ||
           (error && formatAPIError(error))) ??

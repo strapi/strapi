@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { async, validate } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
@@ -28,7 +28,6 @@ function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown
 export default {
   /**
    * List all stages
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx: Context) {
     const { workflow_id: workflowId } = ctx.params;
@@ -47,7 +46,6 @@ export default {
   },
   /**
    * Get one stage
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async findById(ctx: Context) {
     const { id, workflow_id: workflowId } = ctx.params;
@@ -160,20 +158,12 @@ export default {
 
     // Load entity
     const locale = (await validateLocale(query?.locale)) ?? undefined;
-    const entity = await strapi.documents(modelUID).findOne({
-      documentId,
-      locale,
-      populate: [ENTITY_STAGE_ATTRIBUTE],
-    });
-
-    if (!entity) {
-      ctx.throw(404, 'Entity not found');
-    }
-
-    const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
-    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
-
-    const [workflowCount, workflowResult] = await Promise.all([
+    const [entity, workflowCount, workflowResult] = await Promise.all([
+      strapi.documents(modelUID).findOne({
+        documentId,
+        locale,
+        populate: [ENTITY_STAGE_ATTRIBUTE],
+      }),
       workflowService.count(),
       workflowService.getAssignedWorkflow(modelUID, {
         populate: { stages: { populate: { permissions: { populate: ['role'] } } } },
@@ -181,11 +171,29 @@ export default {
     ]);
 
     const workflowStages = workflowResult ? workflowResult.stages : [];
+    const entityStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id;
+    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
     const meta = {
       stageCount: workflowStages.length,
       workflowCount,
+      canTransition,
     };
+
+    // The entity may not exist yet for the requested locale (e.g. switching to a
+    // locale that has not been saved).
+    if (!entity) {
+      if (!workflowResult) {
+        ctx.throw(404, 'Entity not found');
+      }
+
+      ctx.body = {
+        data: [],
+        meta,
+      };
+
+      return;
+    }
 
     if (!canTransition) {
       ctx.body = {

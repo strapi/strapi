@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { Umzug } from 'umzug';
+import type { Umzug } from 'umzug';
 
 import { createStorage } from './storage';
 import { wrapTransaction } from './common';
@@ -46,40 +46,48 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   const context = { db };
 
-  const umzugProvider = new Umzug({
-    storage: createStorage({ db, tableName: 'strapi_migrations' }),
-    logger: {
-      info(message) {
-        // NOTE: only log internal migration in debug mode
-        db.logger.info(transformLogMessage('info', message));
+  // Lazy: defer `umzug` (and its inquirer / @rushstack chain) until first call
+  let lazyProvider: Umzug<typeof context> | undefined;
+  const provider = (): Umzug<typeof context> => {
+    if (lazyProvider) return lazyProvider;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { Umzug: UmzugCtor } = require('umzug') as typeof import('umzug');
+    lazyProvider = new UmzugCtor({
+      storage: createStorage({ db, tableName: 'strapi_migrations' }),
+      logger: {
+        info(message) {
+          // NOTE: only log internal migration in debug mode
+          db.logger.info(transformLogMessage('info', message));
+        },
+        warn(message) {
+          db.logger.warn(transformLogMessage('warn', message));
+        },
+        error(message) {
+          db.logger.error(transformLogMessage('error', message));
+        },
+        debug(message) {
+          db.logger.debug(transformLogMessage('debug', message));
+        },
       },
-      warn(message) {
-        db.logger.warn(transformLogMessage('warn', message));
+      context,
+      migrations: {
+        glob: ['*.{js,sql}', { cwd: dir }],
+        resolve: migrationResolver,
       },
-      error(message) {
-        db.logger.error(transformLogMessage('error', message));
-      },
-      debug(message) {
-        db.logger.debug(transformLogMessage('debug', message));
-      },
-    },
-    context,
-    migrations: {
-      glob: ['*.{js,sql}', { cwd: dir }],
-      resolve: migrationResolver,
-    },
-  });
+    });
+    return lazyProvider;
+  };
 
   return {
     async shouldRun() {
-      const pendingMigrations = await umzugProvider.pending();
+      const pendingMigrations = await provider().pending();
       return pendingMigrations.length > 0 && db.config?.settings?.runMigrations === true;
     },
     async up() {
-      await umzugProvider.up();
+      await provider().up();
     },
     async down() {
-      await umzugProvider.down();
+      await provider().down();
     },
   };
 };

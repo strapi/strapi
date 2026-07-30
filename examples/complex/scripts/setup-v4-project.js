@@ -84,8 +84,8 @@ const packageJson = {
     '@strapi/plugin-i18n': '4.26.0',
     '@strapi/plugin-users-permissions': '4.26.0',
     '@strapi/strapi': '4.26.0',
-    'better-sqlite3': '9.6.0',
     entities: '2.2.0',
+    sqlite3: '5.1.7',
     mysql2: '3.20.0',
     pg: '8.20.0',
     react: '^18.0.0',
@@ -132,7 +132,7 @@ module.exports = ({ env }) => {
   if (client === 'sqlite') {
     return {
       connection: {
-        client: 'better-sqlite3',
+        client: 'sqlite',
         connection: {
           filename: path.resolve(
             __dirname,

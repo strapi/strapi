@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
-import { ILink } from '../../../types';
+import { ILink } from '../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 

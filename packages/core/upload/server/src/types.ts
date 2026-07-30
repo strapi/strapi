@@ -31,7 +31,7 @@ export interface File {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   isUrlSigned?: boolean;
-  folder?: number;
+  folder?: number | null;
   folderPath?: string;
   related?: {
     id: string | number;
@@ -70,6 +70,10 @@ export interface Config {
     concurrency?: number;
   };
   concurrentUploadSize?: number;
+  security?: {
+    allowedTypes?: string[];
+    deniedTypes?: string[];
+  };
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
@@ -85,5 +89,5 @@ export type FileInfo = {
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;
-  folder?: number;
+  folder?: number | null;
 };

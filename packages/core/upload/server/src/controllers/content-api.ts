@@ -46,6 +46,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
+    async findPage(ctx: Context) {
+      await validateQuery(ctx.query, ctx);
+      const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+      const { results, pagination } = await getService('upload').findAndCountPage(sanitizedQuery);
+
+      const data = await sanitizeOutput(results, ctx);
+
+      ctx.body = { data, meta: { pagination } };
+    },
+
     async findOne(ctx: Context) {
       const {
         params: { id },
@@ -107,18 +118,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      // cannot replace with more than one file
+      if (Array.isArray(filesInput) && filesInput.length > 1) {
+        throw new ValidationError('Cannot replace a file with multiple ones');
+      }
+
+      const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
+
       const {
         validFiles,
         filteredBody,
         errors: validationErrors,
-      } = await prepareUploadRequest(filesInput, body, strapi);
+      } = await prepareUploadRequest(files, body, strapi);
       if (validFiles.length === 0) {
         throw new errors.ValidationError(validationErrors[0].message);
-      }
-
-      // cannot replace with more than one file
-      if (Array.isArray(filesInput)) {
-        throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
       if (!id || (typeof id !== 'string' && typeof id !== 'number')) {

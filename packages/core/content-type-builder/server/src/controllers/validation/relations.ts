@@ -8,7 +8,7 @@ import { isValidName } from './common';
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<string | undefined> =>
-  function (this: TestContext, value) {
+  function isValidRelationValue(this: TestContext, value) {
     // NOTE: In case of an undefined value, delegate the check to .required()
     if (value === undefined) {
       return true;

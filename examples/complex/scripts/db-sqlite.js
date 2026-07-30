@@ -5,20 +5,23 @@ const path = require('path');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
-const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
+const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
+const V4_PROJECT_DIR = process.env.V4_OUTSIDE_DIR
+  ? path.resolve(process.cwd(), process.env.V4_OUTSIDE_DIR)
+  : path.resolve(MONOREPO_ROOT, '..', 'complex-v4');
 
 /**
  * SQLite lives entirely as files; no container and no compose runtime.
  *
- * The v4 project resolves its DB filename relative to its own cwd, so a
- * pair-compatible path is written to the v4 scaffold in setup-v4-project.js.
- * For operations run from here in the v5 `complex/` project, we use the same
- * filename so snapshots produced by either side are interchangeable.
+ * The v4 project stores its database under V4_PROJECT_DIR/.tmp/data.db.
+ * v5 reads/writes the same file so snapshots are interchangeable.
  */
 const DATABASE_FILENAME =
   process.env.SQLITE_DATABASE_FILENAME ||
   process.env.DATABASE_FILENAME ||
-  path.join(COMPLEX_DIR, '..', 'complex-v4', '.tmp', 'data.db');
+  path.join(V4_PROJECT_DIR, '.tmp', 'data.db');
+
+const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const command = process.argv[2];
 const snapshotName = process.argv[3];

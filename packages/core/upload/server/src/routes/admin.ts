@@ -43,8 +43,8 @@ export const routes = {
     },
     {
       method: 'POST',
-      path: '/unstable/stream',
-      handler: 'admin-upload.unstable_uploadFilesStream',
+      path: '/unstable/upload-file',
+      handler: 'admin-upload.unstable_uploadFile',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },

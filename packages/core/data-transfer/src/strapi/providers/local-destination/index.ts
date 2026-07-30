@@ -3,7 +3,7 @@ import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
 import type { Core, Struct } from '@strapi/types';
-import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import { createAssetsDestinationWritable } from './assets-destination-writable';

@@ -16,6 +16,9 @@ import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
 
+const contentApiTokenService = createTokenService('content-api');
+const adminTokenService = createTokenService('admin');
+
 // TODO: TS - Export services one by one as this export is cjs
 export default {
   auth,
@@ -29,8 +32,10 @@ export default {
   constants,
   condition,
   action,
-  'api-token-content-api': createTokenService('content-api'),
-  'api-token-admin': createTokenService('admin'),
+  /** @deprecated Use 'api-token-content-api' instead */
+  'api-token': contentApiTokenService,
+  'api-token-content-api': contentApiTokenService,
+  'api-token-admin': adminTokenService,
   transfer,
   'project-settings': projectSettings,
   encryption,

@@ -526,6 +526,88 @@ describe('Release service', () => {
       expect(articleIndex).toBeGreaterThanOrEqual(0);
       expect(categoryIndex).toBeLessThan(articleIndex);
     });
+
+    it('publishes documents within a content type sequentially', async () => {
+      const PAGE_UID = 'api::page.page';
+
+      mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
+
+      const callOrder: string[] = [];
+      let resolveFirst: () => void;
+      const firstPublishGate = new Promise<void>((resolve) => {
+        resolveFirst = resolve;
+      });
+
+      const publishMock = jest
+        .fn()
+        .mockImplementationOnce(async (params: { documentId: string }) => {
+          callOrder.push(`call:${params.documentId}`);
+          await firstPublishGate;
+          callOrder.push(`resolve:${params.documentId}`);
+        })
+        .mockImplementationOnce(async (params: { documentId: string }) => {
+          callOrder.push(`call:${params.documentId}`);
+          callOrder.push(`resolve:${params.documentId}`);
+        });
+
+      const pageModel = {
+        info: { displayName: 'Page' },
+        options: { draftAndPublish: true },
+        attributes: {
+          parent: { type: 'relation', target: PAGE_UID },
+        },
+      };
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        getModel: jest.fn(() => pageModel),
+        contentTypes: { [PAGE_UID]: {} },
+        documents: jest.fn(() => ({
+          findFirst: jest.fn().mockReturnValue({ id: 1 }),
+          publish: publishMock,
+          unpublish: mockUnpublish,
+        })),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockImplementation((modelUid: string) => {
+            if (modelUid === 'plugin::content-releases.release-action') {
+              return {
+                findMany: jest.fn().mockResolvedValue([
+                  { contentType: PAGE_UID, type: 'publish', entryDocumentId: 'parentDoc' },
+                  { contentType: PAGE_UID, type: 'publish', entryDocumentId: 'childDoc' },
+                ]),
+              };
+            }
+            return {
+              update: jest
+                .fn()
+                .mockResolvedValue({ id: 1, status: 'done', releasedAt: new Date() }),
+            };
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const publishComplete = releaseService.publish(1);
+
+      for (let i = 0; i < 5; i += 1) {
+        await Promise.resolve();
+      }
+
+      expect(callOrder).toEqual(['call:parentDoc']);
+
+      resolveFirst!();
+      await publishComplete;
+
+      expect(callOrder).toEqual([
+        'call:parentDoc',
+        'resolve:parentDoc',
+        'call:childDoc',
+        'resolve:childDoc',
+      ]);
+    });
   });
 
   describe('delete', () => {

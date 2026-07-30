@@ -1,8 +1,9 @@
 import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
-import { ILink, Transaction } from '../../../../../../types';
+import { ILink, Transaction } from '../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
+import { resolveLinkRef } from './resolve-link-ref';
 
 interface ErrorWithCode extends Error {
   code: string;
@@ -40,9 +41,30 @@ export const createLinksWriteStream = (
         const originalLeftRef = left.ref;
         const originalRightRef = right.ref;
 
-        // Map IDs if needed
-        left.ref = mapID(left.type, originalLeftRef) ?? originalLeftRef;
-        right.ref = mapID(right.type, originalRightRef) ?? originalRightRef;
+        const mappedLeftRef = resolveLinkRef(strapi, link, 'left', mapID);
+        const mappedRightRef = resolveLinkRef(strapi, link, 'right', mapID);
+
+        // A missing mapping means the referenced row was never transferred
+        // during the entities stage (e.g. an orphaned component or a dangling
+        // reference in the source database). Falling back to the original ID
+        // would either violate a foreign key constraint — which aborts the
+        // whole transaction on PostgreSQL — or silently attach the link to an
+        // unrelated row, so the link is skipped instead.
+        if (mappedLeftRef === undefined || mappedRightRef === undefined) {
+          const missingRefs = [
+            ...(mappedLeftRef === undefined ? [`${left.type}:${originalLeftRef}`] : []),
+            ...(mappedRightRef === undefined ? [`${right.type}:${originalRightRef}`] : []),
+          ].join(' and ');
+
+          onWarning?.(
+            `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} because ${missingRefs} was not transferred during the entities stage.`
+          );
+
+          return callback(null);
+        }
+
+        left.ref = mappedLeftRef;
+        right.ref = mappedRightRef;
 
         try {
           await query().insert(link);

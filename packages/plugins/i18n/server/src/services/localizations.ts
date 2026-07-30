@@ -11,7 +11,7 @@ import { getService } from '../utils';
 const normalizeMediaIds = (
   schema: Schema.ContentType | Schema.Component,
   data: Record<string, any>
-) => {
+): Record<string, any> => {
   if (!schema?.attributes || !data || typeof data !== 'object') {
     return data;
   }

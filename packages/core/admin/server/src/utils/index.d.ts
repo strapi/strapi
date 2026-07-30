@@ -21,6 +21,8 @@ type S = {
   token: typeof token;
   auth: typeof auth;
   metrics: typeof metrics;
+  /** @deprecated Use 'api-token-content-api' instead */
+  'api-token': ContentApiTokenService;
   'api-token-content-api': ContentApiTokenService;
   'api-token-admin': AdminTokenService;
   'project-settings': typeof projectSettings;

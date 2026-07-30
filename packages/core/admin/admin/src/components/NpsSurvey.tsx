@@ -149,7 +149,7 @@ const NpsSurvey = () => {
     comment: string;
     environment?: string;
     version?: string;
-    license: 'Enterprise' | 'Community';
+    license: 'Enterprise' | 'Growth' | 'Community';
   }
 
   // Only check on first render if the survey should be shown

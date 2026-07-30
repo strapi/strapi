@@ -20,6 +20,7 @@ export type {
   ListFieldLayout,
   ListLayout,
 } from './hooks/useDocumentLayout';
+export type { InjectableListViewFilter } from './constants/hooks';
 export * from './features/DocumentRBAC';
 export type {
   EditViewContext,

@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { transformData } from '../data';
+import { clearTransformDataRequestCache, transformData } from '../data';
 import { createIdMap } from '../id-map';
 
 jest.mock('../id-map', () => ({
@@ -20,6 +20,8 @@ jest.mock('../relations/transform/default-locale', () => ({
 }));
 
 describe('transformData request cache', () => {
+  let idMap: { clear: jest.Mock; load: jest.Mock };
+
   beforeEach(() => {
     jest.clearAllMocks();
     const requestState = {};
@@ -30,9 +32,12 @@ describe('transformData request cache', () => {
       },
     } as unknown as Core.Strapi;
 
-    (createIdMap as jest.Mock).mockReturnValue({
+    idMap = {
+      clear: jest.fn(),
       load: jest.fn(async () => undefined),
-    });
+    };
+
+    (createIdMap as jest.Mock).mockReturnValue(idMap);
   });
 
   it('reuses the same idMap across calls within a request', async () => {
@@ -40,5 +45,20 @@ describe('transformData request cache', () => {
     await transformData({ foo: 'baz' }, { uid: 'api::test.test' });
 
     expect(createIdMap).toHaveBeenCalledTimes(1);
+  });
+
+  it('bypasses the request cache when disabled', async () => {
+    await transformData({ foo: 'bar' }, { uid: 'api::test.test', useRequestCache: false });
+    await transformData({ foo: 'baz' }, { uid: 'api::test.test', useRequestCache: false });
+
+    expect(createIdMap).toHaveBeenCalledTimes(2);
+  });
+
+  it('clears the request cache when invalidated', async () => {
+    await transformData({ foo: 'bar' }, { uid: 'api::test.test' });
+
+    clearTransformDataRequestCache();
+
+    expect(idMap.clear).toHaveBeenCalledTimes(1);
   });
 });

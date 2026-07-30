@@ -22,7 +22,7 @@ function buildLinearUpdateBody(stats: WeeklyStats, viewUrl: string): string {
   const newThisWeekLines = stats.newThisWeek.map((a) => prLine(a)).join('\n');
 
   return [
-    `📊 Weekly Community PR Report — ${date}`,
+    `## 📊 Weekly Community PR Report — ${date}`,
     '',
     `📁 Total open PRs: ${stats.totalOpen}`,
     `🆕 New this week: ${stats.newThisWeek.length}`,
