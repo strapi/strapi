@@ -44,11 +44,9 @@ interface MoveWidgetOptions extends BaseWidgetContext {
 interface SaveLayoutOptions {
   widgets: WidgetWithUID[];
   widths: Record<string, number>;
-  updateHomepageLayout: (data: {
-    widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
-  }) => Promise<any>;
+  updateHomepageLayout: ReturnType<typeof useUpdateHomepageLayoutMutation>[0];
   toggleNotification: (config: { type: 'danger'; message: string }) => void;
-  formatAPIError: (error: any) => string;
+  formatAPIError: ReturnType<typeof useAPIErrorHandler>['_unstableFormatAPIError'];
   formatMessage: (descriptor: { id: string; defaultMessage: string }) => string;
 }
 

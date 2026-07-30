@@ -4,6 +4,12 @@ const TIMEOUT = 'timeout';
 
 const timeout = 30 * 1000;
 
+type UpdateSchemaStatusResponse = {
+  data?: {
+    isUpdating?: boolean;
+  };
+};
+
 export const useServerRestartWatcher = () => {
   const { get } = useFetchClient();
 
@@ -15,7 +21,9 @@ export const useServerRestartWatcher = () => {
     }
 
     try {
-      const res = await get(`/content-type-builder/update-schema-status`);
+      const res = await get<UpdateSchemaStatusResponse>(
+        `/content-type-builder/update-schema-status`
+      );
 
       if (res?.data?.data?.isUpdating === true) {
         return new Promise((resolve) => {

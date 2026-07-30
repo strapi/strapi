@@ -1,13 +1,16 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
-import { Schema } from '../../types/schema';
-
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
+import type { Schema, SchemaAttribute } from '../../types/schema';
+import type { Struct, UID } from '@strapi/types';
 
 const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
+
+const isContentTypeKind = (kind: Schema['kind']): kind is Struct.ContentTypeKind => {
+  return kind === 'collectionType' || kind === 'singleType';
+};
 
 /**
  * Plugin / extension content-types use server-derived identity (globalId, collectionName, …).
@@ -35,7 +38,7 @@ const ACTION_TO_STATUS: Record<Schema['action'], ContentType['status']> = {
  */
 const createAttributeWithStatus = (
   name: string,
-  attributeData: Record<string, any>,
+  attributeData: SchemaAttribute | AnyAttribute,
   status: AnyAttribute['status']
 ): AnyAttribute =>
   ({
@@ -48,7 +51,7 @@ const createAttributeWithStatus = (
  * Determines the status of an attribute by comparing new and old versions
  */
 const determineAttributeStatus = (
-  newAttr: Record<string, any>,
+  newAttr: Record<string, unknown>,
   oldAttr?: AnyAttribute,
   oldSchema?: ContentType | Component
 ): AnyAttribute['status'] => {
@@ -165,26 +168,27 @@ export const transformChatToCTB = (
         // icon: schema.icon,
       },
       modelType: schema.modelType,
-      uid: schema.uid as any,
+      uid: schema.uid as UID.Component,
       collectionName: pluralName,
       status: transformStatusFromChatToCTB(schema, oldSchema),
       globalId: singularName,
     } satisfies Component;
   }
 
+  const previousContentType = oldSchema?.modelType === 'contentType' ? oldSchema : undefined;
+  const kind = isContentTypeKind(schema.kind) ? schema.kind : 'collectionType';
+
   const contentTypeBase = {
-    uid: schema.uid as any,
-    modelType: schema.modelType,
+    uid: schema.uid as UID.ContentType,
+    modelType: 'contentType',
     modelName: singularName,
-    kind: schema.kind!,
+    kind,
     info: {
       displayName: schema.name.charAt(0).toUpperCase() + schema.name.slice(1),
       // Always keep the old by default
-      // @ts-expect-error - not in types
-      singularName: oldSchema?.info?.singularName || singularName,
+      singularName: previousContentType?.info.singularName ?? singularName,
       // Always keep the old by default
-      // @ts-expect-error - not in types
-      pluralName: oldSchema?.info?.pluralName || pluralName,
+      pluralName: previousContentType?.info.pluralName ?? pluralName,
     },
     collectionName: pluralName,
     attributes: transformAttributesFromChatToCTB(schema, oldSchema),

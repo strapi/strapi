@@ -14,7 +14,7 @@ const createRegisterSchema = (config) =>
     password: yup
       .string()
       .required()
-      .test(function (value) {
+      .test(function validateRegisterPasswordMaxLength(value) {
         if (!value) return true;
         const isValid = new TextEncoder().encode(value).length <= 72;
         if (!isValid) {
@@ -22,7 +22,7 @@ const createRegisterSchema = (config) =>
         }
         return true;
       })
-      .test(async function (value) {
+      .test(async function validateRegisterPassword(value) {
         if (typeof config?.validatePassword === 'function') {
           try {
             const isValid = await config.validatePassword(value);
@@ -57,7 +57,7 @@ const createResetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(function (value) {
+        .test(function validateResetPasswordMaxLength(value) {
           if (!value) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
           if (!isValid) {
@@ -65,7 +65,7 @@ const createResetPasswordSchema = (config) =>
           }
           return true;
         })
-        .test(async function (value) {
+        .test(async function validateResetPassword(value) {
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
@@ -93,7 +93,7 @@ const createChangePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(function (value) {
+        .test(function validateChangePasswordMaxLength(value) {
           if (!value) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
           if (!isValid) {
@@ -101,7 +101,7 @@ const createChangePasswordSchema = (config) =>
           }
           return true;
         })
-        .test(async function (value) {
+        .test(async function validateChangePassword(value) {
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);

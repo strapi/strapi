@@ -1,28 +1,41 @@
 import type { Schema, Struct, UID } from '@strapi/types';
+import type { PrimitiveType } from 'react-intl';
 
 export type IntlLabel = {
   id: string;
   defaultMessage: string;
-  values?: Record<string, any>;
+  values?: Record<string, PrimitiveType>;
 };
+
+export type FormChange<TValue = unknown, TType extends string = string> = {
+  target: {
+    name: string;
+    value?: TValue;
+    type?: TType;
+  };
+};
+
+export type FormChangeHandler<TValue = unknown, TType extends string = string> = (
+  value: FormChange<TValue, TType>
+) => void;
 
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
 export type Status = 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
 
-type Schema = {
-  modelType: Struct.ModelType;
-  attributes: any[];
-  [key: string]: any;
+export type AttributeConditionValue = string | number | boolean;
+
+export type AttributeConditionRule = [{ var: string }, AttributeConditionValue];
+
+export type AttributeConditions = {
+  visible?: Record<string, AttributeConditionRule>;
 };
 
 export type Base = {
   name: string;
   status?: Status;
-  customField?: any;
-  conditions?: {
-    visible?: Record<string, any>;
-  };
+  customField?: string;
+  conditions?: AttributeConditions;
 };
 
 export type Relation = Base & {
@@ -32,7 +45,7 @@ export type Relation = Base & {
   targetAttribute?: string | null;
   configurable?: boolean;
   private?: boolean;
-  pluginOptions?: Record<string, any>;
+  pluginOptions?: Record<string, unknown>;
 };
 
 export type Media = Base & {
@@ -42,7 +55,7 @@ export type Media = Base & {
   configurable?: boolean;
   private?: boolean;
   allowedTypes?: string[];
-  pluginOptions?: Record<string, any>;
+  pluginOptions?: Record<string, unknown>;
 };
 
 export type AnyAttribute = Base &

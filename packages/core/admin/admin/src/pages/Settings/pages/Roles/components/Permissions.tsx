@@ -647,15 +647,25 @@ const reducer = (state: State, action: Action) =>
         let nextModifiedDataState = cloneDeep(state.modifiedData);
         const oldValues = get(nextModifiedDataState, pathToValue, {});
 
+        const root = pathToValue[0];
+        // Plugin & setting permissions are stored with `subject: null` and their real
+        // action id is the full `plugin::`/`admin::` leaf segment (not the UI subcategory).
+        // For those, let the checker derive the action from each leaf path (subject stays null).
+        const isPluginOrSetting = root === 'plugins' || root === 'settings';
+
         let actionId: string | undefined;
-        let subject: string | undefined;
+        let subject: string | null | undefined;
 
-        if (pathToValue.length >= 2) {
-          subject = pathToValue[1];
-        }
+        if (isPluginOrSetting) {
+          subject = null;
+        } else {
+          if (pathToValue.length >= 2) {
+            subject = pathToValue[1];
+          }
 
-        if (pathToValue.length >= 3) {
-          actionId = pathToValue[2];
+          if (pathToValue.length >= 3) {
+            actionId = pathToValue[2];
+          }
         }
 
         const permissionChecker = createDynamicActionPermissionChecker(
@@ -668,7 +678,6 @@ const reducer = (state: State, action: Action) =>
 
         // In App Token context, when enabling, inherit conditions from the user's permissions.
         if (value === true && userPermissions !== undefined) {
-          const root = pathToValue[0];
           const subjectForLookup =
             root === 'collectionTypes' || root === 'singleTypes' ? (subject ?? null) : null;
 

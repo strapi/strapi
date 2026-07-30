@@ -628,9 +628,9 @@ const DocumentActionModal = ({
   );
 };
 
-const transformData = (data: Record<string, any>): any => {
+const transformData = (data: unknown): unknown => {
   if (Array.isArray(data)) {
-    return data.map(transformData);
+    return data.map((value) => transformData(value));
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -638,11 +638,13 @@ const transformData = (data: Record<string, any>): any => {
       return data.apiData;
     }
 
-    return mapValues(transformData)(data);
+    return mapValues((value) => transformData(value))(data as Record<string, unknown>);
   }
 
   return data;
 };
+
+const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
@@ -747,7 +749,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
+    setLocalDraftRelationCounts(
+      countLocalDraftRelations(formValues as AnyData, schema, components, model)
+    );
   }, [components, formValues, model, schema]);
 
   const fetchDraftRelationsCount = React.useCallback(async () => {
@@ -872,7 +876,7 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      const { data } = handleInvisibleAttributes(transformData(getValues()), {
+      const { data } = handleInvisibleAttributes(transformDocumentData(getValues()), {
         schema,
         components,
       });
@@ -990,7 +994,7 @@ const PublishAction: DocumentActionComponent = ({
       resolveDraftRelationCounts(
         documentId,
         modified,
-        countLocalDraftRelations(getValues(), schema, components, model),
+        countLocalDraftRelations(getValues() as AnyData, schema, components, model),
         serverDraftRelationCounts
       ),
     [components, documentId, getValues, model, modified, schema, serverDraftRelationCounts]
@@ -1002,14 +1006,8 @@ const PublishAction: DocumentActionComponent = ({
     localDraftRelationCounts,
     serverDraftRelationCounts
   );
-  const {
-    hasUnpublishedRelations,
-    hasDraftM2mLinks,
-    hasDraftRelations,
-    dialogVariant,
-    bodyIcon,
-    confirmLabel,
-  } = getDraftRelationsPublishState(draftRelationCounts);
+  const { hasUnpublishedRelations, hasDraftM2mLinks, dialogVariant, bodyIcon, confirmLabel } =
+    getDraftRelationsPublishState(draftRelationCounts);
 
   const supportsDraftRelationWarning = Boolean(schema?.options?.draftAndPublish);
 
@@ -1301,7 +1299,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId: cloneMatch.params.origin!,
             params: currentDocumentMeta.params,
           },
-          transformData(latestValues)
+          transformDocumentData(latestValues)
         );
 
         if ('data' in res) {
@@ -1320,7 +1318,7 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
@@ -1341,7 +1339,7 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm(latestValues);
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
