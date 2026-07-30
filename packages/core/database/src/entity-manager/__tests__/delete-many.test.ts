@@ -76,4 +76,33 @@ describe('entity-manager deleteMany', () => {
       filters: { published: true },
     });
   });
+
+  it('handles nested entity filters with operators', async () => {
+    const init = jest.fn().mockReturnThis();
+    const deleteFn = jest.fn().mockReturnThis();
+    const execute = jest.fn().mockResolvedValue(3);
+
+    (createQueryBuilder as jest.Mock).mockReturnValue({
+      init,
+      delete: deleteFn,
+      execute,
+    });
+
+    const db = {
+      lifecycles: {
+        run: jest.fn(async () => undefined),
+      },
+    } as any;
+
+    const em = createEntityManager(db);
+    const params = { where: { B: { id: { $eq: 123 } } } };
+
+    const result = await em.deleteMany('api::test.test', params);
+
+    expect(createQueryBuilder).toHaveBeenCalledWith('api::test.test', db);
+    expect(init).toHaveBeenCalledWith({ where: { B: { id: { $eq: 123 } } } });
+    expect(deleteFn).toHaveBeenCalled();
+    expect(execute).toHaveBeenCalledWith({ mapResults: false });
+    expect(result).toEqual({ count: 3 });
+  });
 });

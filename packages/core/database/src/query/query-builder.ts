@@ -437,12 +437,17 @@ const createQueryBuilder = (
 
     runSubQuery() {
       const originalType = state.type;
+      const originalSelect = state.select;
 
       this.select('id');
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const connection = db.getConnection(tableName);
+
+      // Restore the original state after creating the subquery
+      state.type = originalType;
+      state.select = originalSelect;
 
       return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
     },
