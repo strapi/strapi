@@ -182,7 +182,7 @@ Reports land in `results/`:
 ### Bench subcommands
 
 - **`yarn bench:seed --db <db> --multiplier <n>`** — wipe + boot v4 + seed + snapshot. One-time per (db, multiplier). Runtime scales with multiplier; at `m=100` expect ~8–10 min per DB depending on hardware.
-- **`yarn bench:run --db <db> --multiplier <n> --label <label>`** — restore snapshot + spawn Strapi v5 in migrate-then-exit mode + capture per-migration timings via a Node `--require` preload that subscribes to Umzug's native `migrating`/`migrated` events. Emits a result JSON to `results/<db>-<label>-<timestamp>.json`. Typically ~15s to several minutes depending on dataset size.
+- **`yarn bench:run --db <db> --multiplier <n> --label <label>`** — restore snapshot + spawn Strapi v5 in migrate-then-exit mode + capture per-migration timings via a Node `--require` preload that wraps the internal migration runner logger (`migrating`/`migrated` events). Emits a result JSON to `results/<db>-<label>-<timestamp>.json`. Typically ~15s to several minutes depending on dataset size.
 - **`yarn bench:compare --baseline <label> --candidate <label>`** — render a multiplier × database matrix plus per-cell per-migration breakdowns, to both markdown and self-contained HTML. Accepts partial data (missing cells render as `—`).
 - **`yarn bench:suite --multiplier <n> [--dbs postgres,mysql,mariadb,sqlite]`** — chained `bench:run` across DBs for a given multiplier. Runs under whatever Strapi version is currently checked out; label via `--label`.
 

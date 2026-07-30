@@ -325,7 +325,7 @@ function cmdRun(args) {
 
   if (!hookData.migrations.length) {
     console.warn(
-      '[bench] WARNING: hook captured zero migrations. Either Umzug API changed, or migrations were skipped as already-applied. Check the output below.'
+      '[bench] WARNING: hook captured zero migrations. Either the bench hook failed to patch the migration runner, or migrations were skipped as already-applied. Check the output below.'
     );
   }
 
