@@ -30,9 +30,11 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
  *   validation (both server-side in the entity validator and admin-side), so hard-gating
  *   them here would make MCP stricter than the admin panel.
  *
- * Derived rules (see `applyRequired` / `applyMin`):
+ * Derived rules (see `applyRequired` / `applyAggregateRequired` / `applyMin`):
  * - `targetsDraft`  = `draftAndPublish` — a draft is written on D&P models in either operation.
- * - relax required  = `targetsDraft || operation === 'update'`.
+ * - relax required  = `targetsDraft || operation === 'update'`, for scalars and non-repeatable
+ *   components. Aggregates (repeatable components, dynamic zones) relax only on `update`,
+ *   because the entity validator requires their key on create even for drafts.
  * - relax min       = `targetsDraft` — only draft writes skip `min`/`minLength`.
  * - hint wording     — publish-oriented on D&P models, lifecycle-neutral otherwise (see
  *   `requiredHint`), because non-D&P writes have no publish step.
@@ -113,10 +115,9 @@ const withRelationalRequiredHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.Z
  * "include every item you keep" — it depends on document state, and a shorter array is
  * also the legitimate way to delete items. The description must carry the semantics.
  *
- * Repeatable components accept `{ "id": N }` to keep a row as-is (see
- * `buildComponentInputSchema`), so the wording points at that rather than asking for the
- * full contents. Dynamic zones share this hint but have no such id branch — their items are
- * always recreated — which is why the phrasing keeps "or its full contents" as the fallback.
+ * Both repeatable components and dynamic-zone entries accept `{ "id": N }` to keep a row
+ * as-is (see `buildComponentInputSchema` and `buildDynamicZoneItemSchema`), so the wording
+ * points at that first and keeps "or its full contents" for entries being created.
  */
 const WHOLESALE_REPLACE_HINT =
   'Replaces the entire list: include every item you want to keep — either its "id" to ' +
@@ -173,6 +174,42 @@ const applyMin = <T extends z.ZodString | z.ZodNumber>(
 ): T => (relaxesMin(mode) === true ? s : (s.min(min) as T));
 
 /**
+ * Applies the required constraint to *aggregate* attributes — repeatable components and
+ * dynamic zones — which do not follow the scalar draft projection.
+ *
+ * Scalar `required` is genuinely draft-lenient: the entity validator passes
+ * `required: !isDraft && attr.required` for scalars and non-repeatable components, so a
+ * draft may omit them. Aggregates are not. `createComponentValidator` (repeatable branch)
+ * and `createDzValidator` both pass a hard-coded `required: true` to
+ * `addRequiredValidation`, ignoring `isDraft` entirely, and `addDefault` only substitutes
+ * `[]` for aggregates that are *not* required. So on creation a required aggregate is
+ * `notNil()` with no default, and omitting the key throws `"<field> must be defined"` —
+ * draft or not.
+ *
+ * Relaxing the key here would therefore advertise a contract the server rejects: the agent
+ * would send `{}` and get a 400 back. The key stays required on create, and is relaxed only
+ * on update, where `addRequiredValidation` uses `notNull()` and an absent key is genuinely
+ * accepted.
+ *
+ * This is deliberately stricter than the scalar projection, and should be revisited if the
+ * entity validator ever starts honouring `isDraft` for aggregates.
+ */
+const applyAggregateRequired = (
+  s: z.ZodTypeAny,
+  required: boolean,
+  mode: InputSchemaMode
+): z.ZodTypeAny => {
+  if (required === true) {
+    // Only a partial update lets the key be absent; drafts do not.
+    if (mode.operation === 'update') {
+      return withRequiredHint(s, mode).optional();
+    }
+    return s;
+  }
+  return s.optional();
+};
+
+/**
  * Applies the required constraint to relation/media schemas, which are never hard-gated.
  * Required entries always get the hint (relations/media are optional in every mode), using
  * the configuration-neutral relational wording rather than the scalar guarantee.
@@ -187,6 +224,37 @@ const applyRelationalRequired = (
   }
   return s.optional();
 };
+
+/**
+ * Identity of an existing component row, used by the `id` patch branch.
+ *
+ * A row id is always a positive integer, so anything else is a malformed identity rather
+ * than a value worth coercing. Bare `z.coerce.number()` is too permissive here: it turns
+ * `null`, `false` and `""` into `0`, `true` into `1`, and lets fractional and negative
+ * values through — each of which silently becomes "patch some row" instead of failing. The
+ * association guard blocks rows belonging to another field or entity, but it cannot stop a
+ * bogus id from selecting the wrong sibling already attached to this field, so the schema
+ * has to reject those shapes up front.
+ *
+ * Numeric strings stay accepted (JSON clients routinely stringify ids, and the server
+ * stringifies ids to compare them), but only when they are digits — validated explicitly
+ * rather than by coercion, so `""` and `"1.5"` fail instead of collapsing to a number.
+ *
+ * This does advertise a two-member `anyOf` (`integer` / digit-`pattern` string) instead of
+ * the plain `number` the previous `z.coerce.number()` emitted. That is the cost of stating
+ * the real contract: coercion advertised `number` while silently accepting `null` and
+ * `false`, so the simpler JSON Schema was simply inaccurate.
+ */
+const componentIdSchema = z
+  .union([
+    z.number().int().positive(),
+    z
+      .string()
+      .regex(/^\d+$/)
+      .transform((value) => Number(value))
+      .pipe(z.number().int().positive()),
+  ])
+  .describe('ID of an existing component row.');
 
 /**
  * Builds a structured Zod object schema for a Strapi component UID.
@@ -254,10 +322,7 @@ export function buildComponentInputSchema(
   // semantics instead of inheriting the update's blanket optionality.
   const patchBranch = z
     .object({
-      // Coerced rather than `union([number, string])`: component ids are numeric but JSON
-      // clients often send them as strings, and coercion keeps the advertised JSON Schema a
-      // plain `number` instead of a nested anyOf the agent has to reason about.
-      id: z.coerce.number().describe('ID of the existing component row to update in place.'),
+      id: componentIdSchema.describe('ID of the existing component row to update in place.'),
       ...shapeFor(mode),
     })
     .strict();
@@ -274,6 +339,64 @@ export function buildComponentInputSchema(
         'replacement is created from scratch, so it must satisfy the required fields.'
     );
 }
+
+/**
+ * Builds the item schema for a dynamic zone: a union over the components the zone allows,
+ * discriminated by `__component`.
+ *
+ * Dynamic-zone entries reach `updateOrCreateComponent` through the same dispatch as ordinary
+ * components, so they inherit the same hazard: an entry carrying `id` patches that row, while
+ * an id-less entry CREATEs a replacement and deletes the old row. Modelling items as
+ * `z.array(z.any())` validated neither `__component` nor the component's required fields, so
+ * an id-less `{ __component: 'shared.hero', subtitle: 'new' }` could replace a hero and drop
+ * its required `title` — recursive entity validation applies update semantics and only checks
+ * `notNull`, which an absent key satisfies. On a non-D&P model that incomplete content is
+ * immediately live.
+ *
+ * Delegating to `buildComponentInputSchema` means each branch gets the id-patch / id-less-create
+ * split for free, so required fields are enforced exactly on the branch that creates a row.
+ *
+ * A zone declaring no components keeps the previous permissive item schema — there is nothing
+ * to discriminate on, so rejecting every entry would be worse than accepting any.
+ *
+ * Note that a UID that does not resolve in the registry degrades to `z.record` inside
+ * `buildComponentInputSchema`, and a `z.record` branch accepts any object. One unresolvable
+ * component therefore makes the whole zone's union permissive again. That is the pre-existing
+ * behaviour for unknown components rather than a regression, and it only arises for a zone
+ * pointing at a component that was never registered.
+ */
+const buildDynamicZoneItemSchema = (
+  strapi: Core.Strapi,
+  componentUids: string[],
+  visited: Set<string>,
+  mode: InputSchemaMode
+): z.ZodTypeAny => {
+  const branches = componentUids.map((uid) => {
+    // `__component` selects which component the entry is, so it is required on every entry
+    // regardless of mode — without it the server cannot resolve a model at all.
+    const componentSchema = buildComponentInputSchema(strapi, uid, new Set(visited), mode);
+    const withDiscriminator = (branch: z.ZodTypeAny): z.ZodTypeAny =>
+      branch instanceof z.ZodObject
+        ? branch.extend({ __component: z.literal(uid) }).strict()
+        : branch;
+
+    // On update `buildComponentInputSchema` returns the patch/create union — extend each of
+    // its branches rather than wrapping, so the discriminator sits on the objects themselves.
+    if (componentSchema instanceof z.ZodUnion) {
+      const options = (componentSchema.options as z.ZodTypeAny[]).map(withDiscriminator);
+      return z.union(options as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]);
+    }
+    return withDiscriminator(componentSchema);
+  });
+
+  if (branches.length === 0) {
+    return z.any();
+  }
+  if (branches.length === 1) {
+    return branches[0];
+  }
+  return z.union(branches as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]);
+};
 
 /**
  * Maps a single Strapi attribute to a Zod input schema, carrying constraints
@@ -394,17 +517,32 @@ export const attributeToInputSchema = (
       if (componentAttr.repeatable === true) {
         s = withWholesaleReplaceHint(s, mode);
       }
-      return applyRequired(s, componentAttr.required === true, mode);
+      // Repeatable components are aggregates: the entity validator requires the key on
+      // create even for drafts. Non-repeatable ones follow the scalar draft projection.
+      return componentAttr.repeatable === true
+        ? applyAggregateRequired(s, componentAttr.required === true, mode)
+        : applyRequired(s, componentAttr.required === true, mode);
     }
     case 'dynamiczone': {
-      const dzAttr = attr as unknown as { required?: boolean; min?: number; max?: number };
-      let s: z.ZodTypeAny = z.array(z.any());
+      const dzAttr = attr as unknown as {
+        required?: boolean;
+        min?: number;
+        max?: number;
+        components?: string[];
+      };
+      const itemSchema = buildDynamicZoneItemSchema(
+        strapi,
+        Array.isArray(dzAttr.components) === true ? (dzAttr.components as string[]) : [],
+        visited,
+        mode
+      );
+      let s: z.ZodTypeAny = z.array(itemSchema);
       if (dzAttr.min !== undefined && relaxesMin(mode) !== true) {
-        s = (s as z.ZodArray<z.ZodAny>).min(dzAttr.min);
+        s = (s as z.ZodArray<z.ZodTypeAny>).min(dzAttr.min);
       }
-      if (dzAttr.max !== undefined) s = (s as z.ZodArray<z.ZodAny>).max(dzAttr.max);
+      if (dzAttr.max !== undefined) s = (s as z.ZodArray<z.ZodTypeAny>).max(dzAttr.max);
       s = withWholesaleReplaceHint(s, mode);
-      return applyRequired(s, dzAttr.required === true, mode);
+      return applyAggregateRequired(s, dzAttr.required === true, mode);
     }
     case 'media': {
       const mediaAttr = attr as unknown as { required?: boolean; multiple?: boolean };
@@ -548,7 +686,13 @@ export type BuildDataSchemaOptions = {
  *   `api.documents.strictRelations`.
  * - Component values on update are a union: an `id`-bearing patch (contents optional, the
  *   server UPDATEs that row) or an id-less replacement (validated as a create, since the
- *   server CREATEs a fresh row). See `buildComponentInputSchema`.
+ *   server CREATEs a fresh row). See `buildComponentInputSchema`. Dynamic-zone entries are a
+ *   `__component`-discriminated union over the zone's allowed components and inherit the same
+ *   split, so an id-less entry cannot omit that component's required fields.
+ * - Required *aggregates* (repeatable components, dynamic zones) are the one exception to
+ *   draft leniency: the entity validator requires their key on create regardless of
+ *   `isDraft`, so relaxing it here would advertise a write the server rejects. See
+ *   `applyAggregateRequired`.
  *
  * NOTE: `update_*` (collection) and `write_*` (single-type upsert) can reach a *create*
  * on the server — a missing locale is created (`collection-handlers.ts`), and an upsert

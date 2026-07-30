@@ -11,6 +11,10 @@ const resources = createMinimalArticleCategoryResources({
   withComponents: true,
   withCategory: false,
   withFixtures: false,
+  // Non-D&P: writes are published immediately. On a D&P model these same writes would land
+  // on a draft, where a missing required leaf is *intentionally* valid — which would prove
+  // draft leniency rather than the replacement hazard.
+  draftAndPublish: false,
 });
 
 /**
@@ -26,10 +30,17 @@ const resources = createMinimalArticleCategoryResources({
  * `notNull`, so a replacement that omits a required nested field is persisted rather than
  * rejected — the component silently loses data that `required` was supposed to guarantee.
  *
+ * The article here is deliberately **non-D&P**, so every write below is published content.
+ * That is what makes the hazard a data-integrity problem rather than draft leniency: on a
+ * D&P model these writes would target a draft, where a missing required leaf is *intentionally*
+ * valid and gets caught later at publish time. With draft & publish off there is no later
+ * gate — the incomplete component is live the moment it is written.
+ *
  * MCP guards this at the schema boundary (`buildComponentInputSchema` validates id-less
- * component objects with create semantics). These tests document the underlying
- * Document Service behaviour that makes the guard necessary — if the server ever starts
- * rejecting these writes, the expectations below are what should change.
+ * component objects with create semantics, and `buildDynamicZoneItemSchema` extends the same
+ * split to dynamic-zone entries). These tests document the underlying Document Service
+ * behaviour that makes the guard necessary — if the server ever starts rejecting these
+ * writes, the expectations below are what should change.
  *
  * These reuse `createMinimalArticleCategoryResources` and its existing `article.comp`
  * component (`text` required, `note` optional) rather than registering new schemas.
@@ -188,6 +199,42 @@ describe('Document Service | component replacement on update', () => {
       expect(dz[0].name).toBe('first');
       expect(dz[1].id).not.toBe(second.id);
       expect(dz[1].name).toBe('replaced');
+    });
+
+    it('an id-less entry persists a missing required field on published content', async () => {
+      // The dynamic-zone counterpart of the non-repeatable case above, and the reason the MCP
+      // schema models entries as a `__component`-discriminated union with the same id split.
+      // `dz-comp.name` is required, the article is non-D&P, and this write is live.
+      const created = await strapi.documents(ARTICLE_UID).create({
+        data: {
+          title: 'Article',
+          dz: [{ __component: 'article.dz-comp', name: 'original' }],
+        },
+        populate: ['dz'],
+        locale: 'en',
+      });
+
+      const [original] = (created as any).dz;
+
+      const updated = await strapi.documents(ARTICLE_UID).update({
+        documentId: created.documentId,
+        // No `id` → the old row is deleted and a new one created from these fields alone.
+        // `name` is required on the component but omitted.
+        data: { dz: [{ __component: 'article.dz-comp' }] },
+        populate: ['dz'],
+        locale: 'en',
+      });
+
+      // Accepted rather than rejected: a different row, with the required field empty.
+      expect((updated as any).dz).toHaveLength(1);
+      expect((updated as any).dz[0].id).not.toBe(original.id);
+      expect((updated as any).dz[0].name).toBeNull();
+
+      // Read back from the database, and live — the model has no draft to fix it in.
+      const persisted = await strapi.db
+        .query(ARTICLE_UID)
+        .findOne({ where: { documentId: created.documentId, locale: 'en' }, populate: ['dz'] });
+      expect((persisted as any).dz[0].name).toBeNull();
     });
 
     it('omitting an existing entry from the array deletes it (wholesale replacement)', async () => {

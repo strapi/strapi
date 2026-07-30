@@ -251,6 +251,13 @@ type MinimalArticleCategoryOptions = {
   withCategory?: boolean;
   withFixtures?: boolean;
   withFindOneFixtures?: boolean;
+  /**
+   * Draft & publish on the article content type. Defaults to `true` (every existing consumer
+   * relies on it). Set to `false` to exercise behaviour that only manifests on published
+   * writes — draft leniency intentionally makes some invalid states valid, so a hazard that
+   * only bites published content cannot be proven on a D&P draft.
+   */
+  draftAndPublish?: boolean;
 };
 
 export const createMinimalArticleCategoryResources = (
@@ -262,13 +269,18 @@ export const createMinimalArticleCategoryResources = (
     withCategory = true,
     withFixtures = true,
     withFindOneFixtures = false,
+    draftAndPublish = true,
   } = options;
 
-  const articleSchema = withComponents
+  const baseArticleSchema = withComponents
     ? withCategory
       ? articleWithComponentsSchemaWithCategories
       : articleWithComponentsSchema
     : articleWithCategoriesSchema;
+
+  const articleSchema = draftAndPublish
+    ? baseArticleSchema
+    : { ...baseArticleSchema, draftAndPublish: false };
 
   const components = withComponents
     ? {
