@@ -1,7 +1,7 @@
 'use strict';
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createRequest } = require('api-tests/request');
+const { createRequest, createAuthRequest } = require('api-tests/request');
 const { createAuthenticatedUser } = require('../utils');
 
 const GET_PERMISSIONS_ACTION = 'plugin::users-permissions.permissions.getPermissions';
@@ -38,6 +38,24 @@ const getPermissionsFor = (action, permissions) => {
   return permissions?.[type]?.controllers?.[controller]?.[actionName];
 };
 
+const createFullAccessToken = async () => {
+  const adminRq = await createAuthRequest({ strapi });
+
+  const res = await adminRq({
+    method: 'POST',
+    url: '/admin/api-tokens',
+    body: {
+      name: 'U&P permissions - full access',
+      description: '',
+      type: 'full-access',
+      lifespan: null,
+      permissions: null,
+    },
+  });
+
+  return res.body.data.accessKey;
+};
+
 describe('Permissions API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({ bypassAuth: false });
@@ -49,6 +67,7 @@ describe('Permissions API', () => {
 
     data.user = user;
     data.jwt = jwt;
+    data.apiToken = await createFullAccessToken();
   });
 
   afterAll(async () => {
@@ -56,6 +75,7 @@ describe('Permissions API', () => {
       .query('plugin::users-permissions.permission')
       .deleteMany({ where: { action: GET_PERMISSIONS_ACTION } });
     await strapi.db.query('plugin::users-permissions.user').deleteMany();
+    await strapi.db.query('admin::api-token').deleteMany();
     await strapi.destroy();
   });
 
@@ -91,5 +111,21 @@ describe('Permissions API', () => {
     expect(
       getPermissionsFor('plugin::users-permissions.auth.register', res.body.permissions)
     ).toEqual({ enabled: true, policy: '' });
+  });
+
+  test('Reports every action as enabled for a full-access API token', async () => {
+    const rq = createRequest({ strapi }).setToken(data.apiToken);
+
+    const res = await rq({ method: 'GET', url: '/api/users-permissions/permissions' });
+
+    expect(res.statusCode).toBe(200);
+
+    // A token is not backed by a role, so it must not be answered with the public role's tree
+    const allActions = Object.values(res.body.permissions).flatMap((group) =>
+      Object.values(group.controllers).flatMap((controller) => Object.values(controller))
+    );
+
+    expect(allActions.length).toBeGreaterThan(0);
+    expect(allActions.every(({ enabled }) => enabled === true)).toBe(true);
   });
 });

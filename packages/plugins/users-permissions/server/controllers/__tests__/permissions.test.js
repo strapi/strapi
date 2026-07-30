@@ -4,36 +4,16 @@
 
 const permissionsController = require('../permissions');
 
-const CATALOGUE = {
-  'api::article': {
-    controllers: {
-      article: {
-        find: { enabled: false, policy: '' },
-        findOne: { enabled: false, policy: '' },
-      },
-    },
-  },
-  'plugin::users-permissions': {
-    controllers: {
-      permissions: {
-        getPermissions: { enabled: false, policy: '' },
-      },
-    },
-  },
-};
+// Sentinels: the merge itself is covered by the users-permissions service tests
+const CATALOGUE = Symbol('catalogue');
+const FULL_CATALOGUE = Symbol('catalogue with every action enabled');
+const MERGED = Symbol('merged permissions');
 
 const usersPermissionsService = {
-  getActions: jest.fn(() => JSON.parse(JSON.stringify(CATALOGUE))),
-  getActionsForPermissions(permissions = []) {
-    const actions = this.getActions();
-
-    permissions.forEach(({ action }) => {
-      const [type, controller, actionName] = action.split('.');
-      actions[type].controllers[controller][actionName] = { enabled: true, policy: '' };
-    });
-
-    return actions;
-  },
+  getActions: jest.fn(({ defaultEnable = false } = {}) =>
+    defaultEnable ? FULL_CATALOGUE : CATALOGUE
+  ),
+  getActionsForPermissions: jest.fn(() => MERGED),
 };
 
 const permissionService = {
@@ -41,13 +21,19 @@ const permissionService = {
   findPublicPermissions: jest.fn(),
 };
 
-const makeCtx = ({ routeType, user } = {}) => ({
+const makeCtx = ({ routeType, user, strategy = 'users-permissions', credentials } = {}) => ({
   state: {
     route: routeType ? { info: { type: routeType } } : undefined,
+    auth: { strategy: { name: strategy }, credentials },
     user,
   },
   send: jest.fn(),
 });
+
+const expectNoRoleLookup = () => {
+  expect(permissionService.findRolePermissions).not.toHaveBeenCalled();
+  expect(permissionService.findPublicPermissions).not.toHaveBeenCalled();
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -67,20 +53,21 @@ beforeEach(() => {
 
 describe('getPermissions', () => {
   test('returns the all-disabled action catalogue on the admin router', async () => {
-    const ctx = makeCtx({ routeType: 'admin' });
+    const ctx = makeCtx({ routeType: 'admin', strategy: 'admin' });
 
     await permissionsController.getPermissions(ctx);
 
     expect(ctx.send).toHaveBeenCalledWith({ permissions: CATALOGUE });
-    expect(permissionService.findRolePermissions).not.toHaveBeenCalled();
-    expect(permissionService.findPublicPermissions).not.toHaveBeenCalled();
+    expect(usersPermissionsService.getActionsForPermissions).not.toHaveBeenCalled();
+    expectNoRoleLookup();
   });
 
   test("returns the authenticated caller's role permissions on the content API", async () => {
-    permissionService.findRolePermissions.mockResolvedValue([
+    const rolePermissions = [
       { action: 'plugin::users-permissions.permissions.getPermissions' },
       { action: 'api::article.article.find' },
-    ]);
+    ];
+    permissionService.findRolePermissions.mockResolvedValue(rolePermissions);
 
     const ctx = makeCtx({ routeType: 'content-api', user: { role: { id: 2 } } });
 
@@ -88,26 +75,13 @@ describe('getPermissions', () => {
 
     expect(permissionService.findRolePermissions).toHaveBeenCalledWith(2);
     expect(permissionService.findPublicPermissions).not.toHaveBeenCalled();
-
-    const { permissions } = ctx.send.mock.calls[0][0];
-
-    expect(permissions['plugin::users-permissions'].controllers.permissions.getPermissions).toEqual(
-      { enabled: true, policy: '' }
-    );
-    expect(permissions['api::article'].controllers.article.find).toEqual({
-      enabled: true,
-      policy: '',
-    });
-    expect(permissions['api::article'].controllers.article.findOne).toEqual({
-      enabled: false,
-      policy: '',
-    });
+    expect(usersPermissionsService.getActionsForPermissions).toHaveBeenCalledWith(rolePermissions);
+    expect(ctx.send).toHaveBeenCalledWith({ permissions: MERGED });
   });
 
   test('falls back to the public role permissions when there is no user', async () => {
-    permissionService.findPublicPermissions.mockResolvedValue([
-      { action: 'api::article.article.find' },
-    ]);
+    const publicPermissions = [{ action: 'api::article.article.find' }];
+    permissionService.findPublicPermissions.mockResolvedValue(publicPermissions);
 
     const ctx = makeCtx({ routeType: 'content-api' });
 
@@ -115,15 +89,55 @@ describe('getPermissions', () => {
 
     expect(permissionService.findPublicPermissions).toHaveBeenCalled();
     expect(permissionService.findRolePermissions).not.toHaveBeenCalled();
-
-    const { permissions } = ctx.send.mock.calls[0][0];
-
-    expect(permissions['api::article'].controllers.article.find).toEqual({
-      enabled: true,
-      policy: '',
-    });
-    expect(permissions['plugin::users-permissions'].controllers.permissions.getPermissions).toEqual(
-      { enabled: false, policy: '' }
+    expect(usersPermissionsService.getActionsForPermissions).toHaveBeenCalledWith(
+      publicPermissions
     );
+    expect(ctx.send).toHaveBeenCalledWith({ permissions: MERGED });
+  });
+
+  test('enables every action for a full-access API token', async () => {
+    const ctx = makeCtx({
+      routeType: 'content-api',
+      strategy: 'content-api-token',
+      credentials: { type: 'full-access' },
+    });
+
+    await permissionsController.getPermissions(ctx);
+
+    expect(usersPermissionsService.getActions).toHaveBeenCalledWith({ defaultEnable: true });
+    expect(ctx.send).toHaveBeenCalledWith({ permissions: FULL_CATALOGUE });
+    expectNoRoleLookup();
+  });
+
+  test("returns a custom API token's own actions", async () => {
+    const ctx = makeCtx({
+      routeType: 'content-api',
+      strategy: 'content-api-token',
+      credentials: {
+        type: 'custom',
+        permissions: ['api::article.article.find'],
+      },
+    });
+
+    await permissionsController.getPermissions(ctx);
+
+    expect(usersPermissionsService.getActionsForPermissions).toHaveBeenCalledWith([
+      { action: 'api::article.article.find' },
+    ]);
+    expect(ctx.send).toHaveBeenCalledWith({ permissions: MERGED });
+    expectNoRoleLookup();
+  });
+
+  test('never reports the public role permissions to an API token caller', async () => {
+    const ctx = makeCtx({
+      routeType: 'content-api',
+      strategy: 'content-api-token',
+      credentials: { type: 'read-only' },
+    });
+
+    await permissionsController.getPermissions(ctx);
+
+    expect(ctx.send).toHaveBeenCalledWith({ permissions: CATALOGUE });
+    expectNoRoleLookup();
   });
 });
