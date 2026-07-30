@@ -17,12 +17,15 @@ export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
 
 interface GetFoldersParams {
   parentId?: number | null;
+  /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
+  sort?: string;
 }
 
 interface BulkMoveParams {
   fileIds?: number[];
   folderIds?: number[];
-  destinationFolderId: number;
+  /** `null` moves the items to the root of the Media Library. */
+  destinationFolderId: number | null;
 }
 
 type DataEnvelope<T> = {
@@ -39,11 +42,11 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId } = params as GetFoldersParams;
+        const { parentId, sort } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
-          // Match sidebar FolderTree order (server getStructure uses sortBy('name')).
-          sort: 'name:ASC',
+          // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
+          sort: sort ?? 'name:ASC',
         };
 
         if (parentId != null) {
