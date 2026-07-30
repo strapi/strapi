@@ -77,6 +77,21 @@ describe('applyWhere - LIKE operator escaping', () => {
       expect(bindings).toContain('%a\\_c');
     });
 
+    // Issue #26468: endsWith=100% must not become LIKE %100% (trailing % as wildcard).
+    test('$endsWith escapes a trailing % in the value (#26468)', () => {
+      const { sql, bindings } = compile(client, { handle: { $endsWith: '100%' } });
+
+      expect(sql).toMatch(/LIKE/i);
+      expect(bindings).toContain('%100\\%');
+      expect(bindings).not.toContain('%100%');
+    });
+
+    test('$contains escapes _ so it is not a single-character wildcard', () => {
+      const { bindings } = compile(client, { handle: { $contains: 'a_c' } });
+
+      expect(bindings).toContain('%a\\_c%');
+    });
+
     test('$notContains compiles to NOT LIKE with an escaped value', () => {
       const { sql, bindings } = compile(client, { handle: { $notContains: '%' } });
 
