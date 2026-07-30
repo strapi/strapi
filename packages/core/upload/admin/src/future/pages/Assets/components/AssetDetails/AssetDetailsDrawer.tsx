@@ -309,7 +309,21 @@ const DetailField = ({ name, label, required }: DetailFieldProps) => {
   const { formatMessage } = useIntl();
   const field = useField<string>(name);
   const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
-  const value = field.value ?? '';
+
+  // The form context (use-context-selector) echoes changes back
+  // asynchronously — driving the input straight from `field.value` makes
+  // React rewrite the DOM value after the keystroke, which throws the cursor
+  // to the end of the field. The input is therefore controlled by local state
+  // (synchronous, cursor-safe) and the form follows; the effect below only
+  // matters for EXTERNAL value changes (discard/reset), where a cursor jump
+  // is fine because the user isn't typing.
+  const fieldValue = field.value ?? '';
+  const [value, setValue] = React.useState(fieldValue);
+
+  React.useEffect(() => {
+    setValue(fieldValue);
+  }, [fieldValue]);
+
   const emptyTooltipLabel = formatMessage(
     {
       id: getTranslationKey('asset-details.field.empty'),
@@ -323,9 +337,10 @@ const DetailField = ({ name, label, required }: DetailFieldProps) => {
       <Field.Label>{label}</Field.Label>
       <TextInput
         value={value}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-          field.onChange(name, event.target.value)
-        }
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(event.target.value);
+          field.onChange(name, event.target.value);
+        }}
         endAction={
           !value ? (
             <Tooltip label={emptyTooltipLabel}>
