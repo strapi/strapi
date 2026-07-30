@@ -145,6 +145,7 @@ const collectNestedCloneRelationAdjustments = async (
   getModel: (uid: string) => Schema.Schema,
   data: Record<string, unknown>
 ) => {
+  let adjustedData = data;
   const deferredCopies: DeferredRelationCopy[] = [];
   const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
@@ -174,7 +175,7 @@ const collectNestedCloneRelationAdjustments = async (
         usesJoinTable(attribute) &&
         hasPopulatedRelation(value)
       ) {
-        unset(relationPath, data);
+        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -190,7 +191,7 @@ const collectNestedCloneRelationAdjustments = async (
         !usesJoinTable(attribute) &&
         hasPopulatedRelation(value)
       ) {
-        unset(relationPath, data);
+        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -202,7 +203,7 @@ const collectNestedCloneRelationAdjustments = async (
 
       // Always defer morphToOne: populate can be null even when morph columns are set.
       if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
-        unset(relationPath, data);
+        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -217,7 +218,7 @@ const collectNestedCloneRelationAdjustments = async (
         isBidirectionalOneToManyMappedBy(attribute) &&
         hasPopulatedRelationList(value)
       ) {
-        unset(relationPath, data);
+        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
         return;
       }
 
@@ -227,7 +228,7 @@ const collectNestedCloneRelationAdjustments = async (
         hasMeaningfulRelationOperations(submittedValue) &&
         (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
       ) {
-        unset(relationPath, data);
+        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
         postCloneUpdates.push({
           dataPath: relationPath,
           value: submittedValue,
@@ -238,7 +239,7 @@ const collectNestedCloneRelationAdjustments = async (
     originalData as TraversableData
   );
 
-  return { deferredCopies, postCloneUpdates };
+  return { data: adjustedData, deferredCopies, postCloneUpdates };
 };
 
 export const prepareCloneData = async (
@@ -344,6 +345,7 @@ export const prepareCloneData = async (
     getModel,
     data
   );
+  data = nested.data;
   deferredCopies.push(...nested.deferredCopies);
   postCloneUpdates.push(...nested.postCloneUpdates);
 
