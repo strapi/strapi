@@ -102,7 +102,11 @@ export const createMcpClient = (strapi: Core.Strapi, clientName = 'strapi-mcp-te
     args: Record<string, unknown>
   ): Promise<JsonRpcResponse> => {
     const res = await rpc(accessKey, 'tools/call', { name, arguments: args });
-    return parseMcpResponse(res);
+    expect(res.statusCode).toBe(200);
+    const parsed = parseMcpResponse(res);
+    // A failed transport parses to {}; require a real JSON-RPC envelope.
+    expect(parsed.result ?? parsed.error).toBeDefined();
+    return parsed;
   };
 
   const listToolNames = async (accessKey: string): Promise<string[]> => {

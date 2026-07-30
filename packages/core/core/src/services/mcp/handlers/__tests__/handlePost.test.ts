@@ -247,6 +247,37 @@ describe('handlePost', () => {
     expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
   });
 
+  test('should expose the authenticated user and mcp audit source on ctx.state', async () => {
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn().mockReturnValue({
+        mcpServer: {
+          connect: jest.fn().mockResolvedValue(undefined),
+          close: jest.fn().mockResolvedValue(undefined),
+        },
+        registries: {},
+      }),
+      capabilityDefinitions: {} as any,
+    };
+
+    const { StreamableHTTPServerTransport } = jest.requireMock(
+      '@modelcontextprotocol/sdk/server/streamableHttp.js'
+    );
+    StreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler(deps);
+    const ctx = makeCtx(makeReq(), { headersSent: false } as unknown as ServerResponse);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(ctx.state.user).toEqual({ id: 1 });
+    expect(ctx.state.auditSource).toBe('mcp');
+  });
+
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {
     const mockMcpServer = {
       connect: jest.fn().mockResolvedValue(undefined),

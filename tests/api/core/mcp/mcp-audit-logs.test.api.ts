@@ -59,10 +59,19 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
 
   // Scope to this suite's own content type, isolated from other suites' rows.
   const findLogsForModel = async (action?: string) => {
-    const logs = await strapi.db
-      .query('admin::audit-log')
-      .findMany(action ? { where: { action } } : {});
+    const logs = await strapi.db.query('admin::audit-log').findMany({
+      ...(action ? { where: { action } } : {}),
+      populate: ['user'],
+    });
     return logs.filter((log: { payload?: { uid?: string } }) => log.payload?.uid === MODEL_UID);
+  };
+
+  // Admin tokens are owned by the super admin creating them via createAuthRequest.
+  const getTokenOwnerId = async () => {
+    const owner = await strapi.db
+      .query('admin::user')
+      .findOne({ where: { email: 'admin@strapi.io' } });
+    return owner.id;
   };
 
   beforeAll(async () => {
@@ -93,7 +102,9 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
   afterEach(async () => {
     await deleteAllDocuments();
     await deleteAllAdminTokens();
-    await deleteAllAuditLogs();
+    // Deferred audit writes may still be in flight; drain then clear so a
+    // pending row can't leak into the next test.
+    await quiesceAuditLogs();
   });
 
   const createAdminToken = async (adminPermissions: AdminPermission[]): Promise<AdminToken> => {
@@ -122,15 +133,40 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     properties: {},
   });
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   // entry.* events fire on a microtask after commit, so poll rather than sleep.
   const waitForAuditLog = async (action: string, timeout = 2000) => {
     const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
       const [log] = await findLogsForModel(action);
       if (log) return log;
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await sleep(50);
     }
     throw new Error(`Expected a ${action} audit log within ${timeout}ms`);
+  };
+
+  // Assert exactly one row landed, catching a late duplicate from a second
+  // subscription/emission that arrives after the first row appears.
+  const expectExactlyOneLog = async (action: string) => {
+    await waitForAuditLog(action);
+    await sleep(200);
+    const logs = await findLogsForModel(action);
+    expect(logs).toHaveLength(1);
+    return logs[0];
+  };
+
+  // Delete audit rows, then drain any deferred write still in flight so it
+  // can't leak into the next test.
+  const quiesceAuditLogs = async (timeout = 2000) => {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      await deleteAllAuditLogs();
+      await sleep(150);
+      const [leaked] = await findLogsForModel();
+      if (!leaked) return;
+    }
+    throw new Error('Audit logs did not quiesce; a deferred write kept landing');
   };
 
   // ---------------------------------------------------------------------------
@@ -145,7 +181,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     });
     expect(statusCode).toBe(201);
 
-    const log = await waitForAuditLog('entry.create');
+    const log = await expectExactlyOneLog('entry.create');
     expect(log.payload).toMatchObject({ origin: 'admin' });
   });
 
@@ -166,11 +202,14 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     expect(stored).toHaveLength(1);
     expect(stored[0].title).toBe('created via mcp');
 
-    const log = await waitForAuditLog('entry.create');
+    const log = await expectExactlyOneLog('entry.create');
     expect(log.payload).toMatchObject({ origin: 'mcp' });
+    // The audited actor is the admin token's owner.
+    expect(log.user.id).toBe(await getTokenOwnerId());
   });
 
   test('a read through MCP is NOT audited', async () => {
+    // Seed before subscribing below, so its create event can't match the signal.
     await strapi.documents(MODEL_UID as UID.CollectionType).create({
       data: { title: 'seed for read' },
     });
@@ -181,19 +220,38 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     ]);
     await mcp.initializeSession(token.accessKey);
 
-    const read = await mcp.callTool(token.accessKey, `list_${SLUG}`, {});
-    expect(read.error).toBeUndefined();
-    expect(read.result?.isError).not.toBe(true);
-
-    // Reads emit no entry.* event. Fire a create afterwards and wait for its
-    // log: once it lands, the subscriber has processed everything before it in
-    // order, so the read having produced nothing is now a deterministic check.
-    const create = await mcp.callTool(token.accessKey, `create_${SLUG}`, {
-      data: { title: 'after read' },
+    // A test subscriber registered now runs after the audit-logs subscriber in
+    // the emit loop, so when it sees the sentinel's entry.create the audit row
+    // is already committed — an explicit completion signal, not a timed guess.
+    let onSentinelAudited!: () => void;
+    const sentinelAudited = new Promise<void>((resolve) => {
+      onSentinelAudited = resolve;
     });
-    expect(create.result?.isError).not.toBe(true);
-    await waitForAuditLog('entry.create');
+    const unsubscribe = strapi.eventHub.subscribe(async (name: string, ...args: any[]) => {
+      if (name === 'entry.create' && args[0]?.uid === MODEL_UID) onSentinelAudited();
+    });
 
+    try {
+      const read = await mcp.callTool(token.accessKey, `list_${SLUG}`, {});
+      expect(read.error).toBeUndefined();
+      expect(read.result?.isError).not.toBe(true);
+      // Guard against an empty/failed read silently passing: it must return rows.
+      const readResults = read.result?.structuredContent?.results as unknown[] | undefined;
+      expect(Array.isArray(readResults)).toBe(true);
+      expect(readResults?.length).toBeGreaterThan(0);
+
+      // The read emits no entry.* event. Fire a sentinel create and wait for the
+      // subscriber signal confirming its audit row was written.
+      const create = await mcp.callTool(token.accessKey, `create_${SLUG}`, {
+        data: { title: 'after read' },
+      });
+      expect(create.result?.isError).not.toBe(true);
+      await sentinelAudited;
+    } finally {
+      unsubscribe();
+    }
+
+    // The sentinel's row is the only one: the read produced nothing.
     const logs = await findLogsForModel();
     expect(logs).toHaveLength(1);
     expect(logs[0].action).toBe('entry.create');
@@ -216,7 +274,8 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     expect(response.error).toBeUndefined();
     expect(response.result?.isError).not.toBe(true);
 
-    const log = await waitForAuditLog('entry.delete');
+    const log = await expectExactlyOneLog('entry.delete');
     expect(log.payload).toMatchObject({ origin: 'mcp' });
+    expect(log.user.id).toBe(await getTokenOwnerId());
   });
 });
