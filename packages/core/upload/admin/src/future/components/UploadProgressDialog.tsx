@@ -463,8 +463,9 @@ const FileRow = ({
  * renders exactly as before this feature existed. Non-images do enter the phase and
  * land on `skipped`.
  *
- * Note the `skipped` visuals are a placeholder pending the updated design mock: a
- * neutral `Information` icon, deliberately distinct from generated/failed/cancelled.
+ * `skipped` uses a neutral `Information` icon, deliberately distinct from
+ * generated/failed/cancelled — skipping is an expected outcome for a non-image, not a
+ * problem to flag.
  */
 const COMPLETED_ROW_PRESENTATION: Record<
   FileMetadataStatus | 'none',
