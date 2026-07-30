@@ -9,7 +9,8 @@ const makeSort = (overrides: Partial<ListSort> = {}): ListSort => ({
   direction: null,
   foldersPosition: 'top',
   assetsSort: 'updatedAt:DESC',
-  foldersSort: 'updatedAt:DESC',
+  // Default state keeps the folders band alphabetical — see useListSort.
+  foldersSort: 'name:ASC',
   setSortBy: jest.fn(),
   setDirection: jest.fn(),
   setFoldersPosition: jest.fn(),
@@ -26,20 +27,32 @@ describe('SortMenu', () => {
     expect(screen.getByText('Sort')).toBeInTheDocument();
     expect(screen.getByText('Folders')).toBeInTheDocument();
 
-    // The active option of each group carries a visually-hidden "(active)"
-    // suffix for screen readers, hence the non-exact matching.
     for (const label of [
       'Oldest uploads',
-      'Most recent updates (active)',
+      'Most recent updates',
       'A to Z',
       'Z to A',
       'File size ascending',
       'File size descending',
-      'On top (active)',
+      'On top',
       'Mixed with files',
     ]) {
-      expect(screen.getByRole('menuitem', { name: label })).toBeInTheDocument();
+      expect(screen.getByRole('menuitemradio', { name: label })).toBeInTheDocument();
     }
+  });
+
+  it('exposes the active option of each section as the checked radio', async () => {
+    const { user } = render(<SortMenu sort={makeSort()} />);
+
+    await user.click(screen.getByRole('button', { name: /sort:/i }));
+
+    // The checkmark icon is aria-hidden, so aria-checked is the only thing
+    // assistive tech has to go on.
+    expect(screen.getByRole('menuitemradio', { name: 'Most recent updates' })).toBeChecked();
+    expect(screen.getByRole('menuitemradio', { name: 'On top' })).toBeChecked();
+    expect(screen.getByRole('menuitemradio', { name: 'Oldest uploads' })).not.toBeChecked();
+    expect(screen.getByRole('menuitemradio', { name: 'A to Z' })).not.toBeChecked();
+    expect(screen.getByRole('menuitemradio', { name: 'Mixed with files' })).not.toBeChecked();
   });
 
   it('labels the trigger with the direction when the primary is cleared', () => {
@@ -55,11 +68,11 @@ describe('SortMenu', () => {
     const { user } = render(<SortMenu sort={sort} />);
 
     await user.click(screen.getByRole('button', { name: /sort:/i }));
-    await user.click(screen.getByRole('menuitem', { name: 'A to Z' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'A to Z' }));
 
     expect(sort.setDirection).toHaveBeenCalledWith('nameAsc');
     // preventDefault on select keeps the dropdown open for further tuning.
-    expect(screen.getByRole('menuitem', { name: 'Z to A' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: 'Z to A' })).toBeInTheDocument();
   });
 
   it('clicking the checked option clears the facet', async () => {
@@ -67,7 +80,7 @@ describe('SortMenu', () => {
     const { user } = render(<SortMenu sort={sort} />);
 
     await user.click(screen.getByRole('button', { name: /sort:/i }));
-    await user.click(screen.getByRole('menuitem', { name: 'Most recent updates (active)' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'Most recent updates' }));
 
     expect(sort.setSortBy).toHaveBeenCalledWith(null);
   });
@@ -78,9 +91,11 @@ describe('SortMenu', () => {
     await user.click(screen.getByRole('button', { name: /sort:/i }));
 
     expect(screen.queryByText('Folders')).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Mixed with files' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('menuitemradio', { name: 'Mixed with files' })
+    ).not.toBeInTheDocument();
     // The other groups stay.
-    expect(screen.getByRole('menuitem', { name: 'A to Z' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: 'A to Z' })).toBeInTheDocument();
   });
 
   it('switches the folders position', async () => {
@@ -88,7 +103,7 @@ describe('SortMenu', () => {
     const { user } = render(<SortMenu sort={sort} />);
 
     await user.click(screen.getByRole('button', { name: /sort:/i }));
-    await user.click(screen.getByRole('menuitem', { name: 'Mixed with files' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'Mixed with files' }));
 
     expect(sort.setFoldersPosition).toHaveBeenCalledWith('mixed');
   });

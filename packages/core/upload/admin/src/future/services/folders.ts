@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -19,7 +21,8 @@ interface GetFoldersParams {
   parentId?: number | null;
   /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
   sort?: string;
-  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent scope. */
+  search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent/search scope. */
   filters?: Record<string, unknown>[];
 }
 
@@ -44,19 +47,33 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId, sort, filters = [] } = params as GetFoldersParams;
+        const { parentId, sort, search, filters = [] } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
         };
 
-        const parentScope =
-          parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+        // List filters (dates) apply in BOTH modes — search composes with them,
+        // only the parent scope is dropped while searching.
+        if (search) {
+          // Search is global: the parent filter is dropped so matching folders
+          // anywhere in the library surface. The endpoint is unpaginated — it
+          // returns every match — so callers can treat the array length as the
+          // true total. Bounding it is a separate decision.
+          queryParams['_q'] = encodeSearchQuery(search);
 
-        queryParams['filters'] = {
-          $and: [parentScope, ...filters],
-        };
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
+        } else {
+          const parentScope =
+            parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+
+          queryParams['filters'] = {
+            $and: [parentScope, ...filters],
+          };
+        }
 
         return {
           url: '/upload/folders',

@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -13,7 +15,8 @@ interface GetAssetsParams {
   pageSize?: number;
   folder?: number | null;
   sort?: string;
-  /** Extra `filters[$and]` entries (list filters), AND-ed with the folder scope. */
+  search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the folder/search scope. */
   filters?: Record<string, unknown>[];
 }
 
@@ -39,16 +42,29 @@ const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
       query: (params = {}) => {
-        const { folder, filters = [], ...rest } = params as GetAssetsParams;
+        // `search` is destructured out so it never reaches the server as-is —
+        // it is re-added below as the `_q` the API actually understands.
+        const { folder, search, filters = [], ...rest } = params as GetAssetsParams;
 
         const queryParams: Record<string, unknown> = { ...rest };
 
-        const folderScope =
-          folder != null ? { folder: { id: folder } } : { folder: { id: { $null: true } } };
+        // List filters apply in BOTH modes: search composes with them (a
+        // filtered search), only the folder scope is dropped while searching.
+        if (search) {
+          // Search is global: folder scoping is intentionally dropped so results span the whole library.
+          queryParams['_q'] = encodeSearchQuery(search);
 
-        queryParams['filters'] = {
-          $and: [folderScope, ...filters],
-        };
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
+        } else {
+          const folderScope =
+            folder != null ? { folder: { id: folder } } : { folder: { id: { $null: true } } };
+
+          queryParams['filters'] = {
+            $and: [folderScope, ...filters],
+          };
+        }
 
         return {
           url: '/upload/files',
