@@ -328,7 +328,7 @@ describe('useContentManagerInitData', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    // Backwards compatibility: An older server (or one with the experimental flag off) omits contentStructure completely, but links still populate.
+    // Backwards compatibility: An older server omits contentStructure completely, but links still populate.
     expect(result.current.contentStructure).toBeUndefined();
     expect(result.current.collectionTypeLinks).toHaveLength(contentTypes.length);
   });
