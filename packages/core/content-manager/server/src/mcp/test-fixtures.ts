@@ -48,6 +48,14 @@ export const mockStrapi = {
         },
       },
     },
+    // Second component with a required leaf, so dynamic-zone tests can assert that the
+    // `__component` union picks the right branch rather than accepting any shape.
+    'shared.hero': {
+      attributes: {
+        title: { type: 'string', required: true },
+        subtitle: { type: 'string' },
+      },
+    },
   },
 } as unknown as Core.Strapi;
 
