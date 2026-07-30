@@ -41,6 +41,7 @@ import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../../hooks/useTracking';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
@@ -688,6 +689,7 @@ interface AssetFormState {
 
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const { trackUsage } = useTracking();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();
@@ -742,6 +744,12 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       return;
     }
 
+    trackUsage('didEditMediaLibraryElements', {
+      location: MEDIA_LIBRARY_LOCATION,
+      type: 'asset',
+      changeLocation: values.folder !== initialValues.folder,
+    });
+
     notify({
       type: 'success',
       message: formatMessage({
@@ -772,6 +780,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notify({ type: 'danger', message });
       return;
     }
+    trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
     notify({
       type: 'success',
       message: formatMessage({
@@ -834,6 +843,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError();
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
     notify({
       type: 'success',
       message: formatMessage({
@@ -862,6 +872,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError();
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });
     notify({
       type: 'success',
       message: formatMessage({

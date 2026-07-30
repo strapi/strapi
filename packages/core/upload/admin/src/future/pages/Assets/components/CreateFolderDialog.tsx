@@ -5,6 +5,7 @@ import { Button, Field, Flex, Modal, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { useCreateFolderMutation } from '../../../services/folders';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -26,6 +27,7 @@ export const CreateFolderDialog = ({
   onClose,
 }: CreateFolderDialogProps) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const { toggleNotification } = useNotification();
   const [name, setName] = useState('');
   const [fieldError, setFieldError] = useState<string | undefined>();
@@ -55,6 +57,8 @@ export const CreateFolderDialog = ({
 
     try {
       await createFolder({ name: trimmedName, parent: parentFolderId }).unwrap();
+
+      trackUsage('didAddMediaLibraryFolders', { location: MEDIA_LIBRARY_LOCATION });
 
       toggleNotification({
         type: 'success',

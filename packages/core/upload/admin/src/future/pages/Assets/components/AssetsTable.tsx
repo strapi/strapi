@@ -16,6 +16,7 @@ import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
@@ -475,6 +476,7 @@ export const AssetsTable = ({
 }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
 
   const visibleHeaders = isMobile
@@ -504,6 +506,7 @@ export const AssetsTable = ({
     if (allSelected) {
       clear();
     } else {
+      trackUsage('didSelectAllMediaLibraryElements');
       selectAll(orderedItemKeys);
     }
   };

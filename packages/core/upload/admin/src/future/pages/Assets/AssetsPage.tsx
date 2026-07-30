@@ -22,6 +22,8 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { typeFromMime } from '../../../utils/typeFromMime';
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../hooks/useTracking';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
@@ -382,6 +384,8 @@ export const AssetsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
+  const { trackUsage } = useTracking();
+
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
@@ -403,6 +407,19 @@ export const AssetsPage = () => {
     });
 
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
+
+    // Mirror the legacy `willAddMediaLibraryAssets` payload: the count of files
+    // about to upload, broken down by asset type.
+    const assetsCountByType = files.reduce<Record<string, number>>((acc, file) => {
+      const type = typeFromMime(file.type);
+      acc[type] = (acc[type] ?? 0) + 1;
+      return acc;
+    }, {});
+    trackUsage('willAddMediaLibraryAssets', {
+      location: MEDIA_LIBRARY_LOCATION,
+      ...assetsCountByType,
+    });
+
     try {
       await uploadFiles({ formData, totalFiles: files.length }).unwrap();
     } catch (error) {
@@ -417,16 +434,22 @@ export const AssetsPage = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
+      trackUsage('didSelectFile', { source: 'computer', location: MEDIA_LIBRARY_LOCATION });
       await uploadFilesToFolder(Array.from(files), currentFolderId);
     }
     e.target.value = '';
   };
 
   const handleDrop = async (files: globalThis.File[]) => {
+    trackUsage('didSelectFile', { source: 'computer', location: MEDIA_LIBRARY_LOCATION });
     await uploadFilesToFolder(files, currentFolderId);
   };
 
   const handleUrlUpload = async (urls: string[]) => {
+    trackUsage('didSelectFile', { source: 'url', location: MEDIA_LIBRARY_LOCATION });
+    // Counts-by-type aren't available client-side for the URL flow (the server
+    // fetches the files), so this fires the event with location only.
+    trackUsage('willAddMediaLibraryAssets', { location: MEDIA_LIBRARY_LOCATION });
     try {
       await uploadFromUrls({ urls, folderId: currentFolderId }).unwrap();
     } catch (error) {

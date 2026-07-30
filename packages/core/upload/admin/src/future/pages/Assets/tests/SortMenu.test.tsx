@@ -4,6 +4,17 @@ import { SortMenu } from '../components/SortMenu';
 
 import type { ListSort } from '../hooks/useListSort';
 
+const mockTrackUsage = jest.fn();
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
+beforeEach(() => {
+  mockTrackUsage.mockClear();
+});
+
 const makeSort = (overrides: Partial<ListSort> = {}): ListSort => ({
   sortBy: 'mostRecentUpdates',
   direction: null,
@@ -73,6 +84,29 @@ describe('SortMenu', () => {
     expect(sort.setDirection).toHaveBeenCalledWith('nameAsc');
     // preventDefault on select keeps the dropdown open for further tuning.
     expect(screen.getByRole('menuitemradio', { name: 'Z to A' })).toBeInTheDocument();
+  });
+
+  it('tracks the sort selection', async () => {
+    const sort = makeSort();
+    const { user } = render(<SortMenu sort={sort} />);
+
+    await user.click(screen.getByRole('button', { name: /sort:/i }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'A to Z' }));
+
+    expect(mockTrackUsage).toHaveBeenCalledWith('didSortMediaLibraryElements', {
+      location: 'upload',
+      sort: 'nameAsc',
+    });
+  });
+
+  it('does not track when re-selecting the already-active sort (clearing)', async () => {
+    const sort = makeSort();
+    const { user } = render(<SortMenu sort={sort} />);
+
+    await user.click(screen.getByRole('button', { name: /sort:/i }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'Most recent updates' }));
+
+    expect(mockTrackUsage).not.toHaveBeenCalled();
   });
 
   it('clicking the checked option clears the facet', async () => {
