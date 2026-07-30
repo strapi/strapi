@@ -1,12 +1,13 @@
 import { useState, type MouseEvent } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Dialog, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Box, Button, Dialog, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
 import { ArrowRight, Cross, Sparkle, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { AI_METADATA_MAX_FILES } from '../../../constants';
 import {
   useBulkDeleteItemsMutation,
   useGenerateAiMetadataMutation,
@@ -62,12 +63,20 @@ export const BulkActionsBar = () => {
   const isBusy = isDeleting || isGeneratingMetadata;
 
   /**
+   * The server processes the whole selection inside a single request and
+   * rejects anything above the cap with a 400. Disable the action up front so
+   * the limit is discoverable before the user commits to a request.
+   */
+  const isOverMetadataLimit = selectedIds.size > AI_METADATA_MAX_FILES;
+
+  /**
    * Metadata generation only applies to files — folders in the selection are
    * ignored rather than blocking the action.
    */
   const handleCreateMetadata = async () => {
-    // Guard re-entry while pending.
-    if (isGeneratingMetadata) {
+    // Guard re-entry while pending, and never send a selection the server
+    // would reject outright.
+    if (isGeneratingMetadata || isOverMetadataLimit) {
       return;
     }
 
@@ -90,6 +99,19 @@ export const BulkActionsBar = () => {
     const skippedCount = res.data.filter(({ status }) => status === 'skipped').length;
     const errorCount = res.data.filter(({ status }) => status === 'error').length;
 
+    if (errorCount === res.data.length) {
+      // Nothing was written — treat it like a request-level failure and keep
+      // the selection so the user can retry.
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('list.bulk-actions.create-metadata.error'),
+          defaultMessage: 'An error occurred while generating metadata.',
+        }),
+      });
+      return;
+    }
+
     if (skippedCount === 0 && errorCount === 0) {
       toggleNotification({
         type: 'success',
@@ -110,7 +132,7 @@ export const BulkActionsBar = () => {
           {
             id: getTranslationKey('list.bulk-actions.create-metadata.partial'),
             defaultMessage:
-              '{successCount} generated, {skippedCount} skipped (not an image), {errorCount} failed',
+              '{successCount} generated, {skippedCount} skipped (unsupported file type), {errorCount} failed',
           },
           { successCount, skippedCount, errorCount }
         ),
@@ -189,18 +211,37 @@ export const BulkActionsBar = () => {
 
       <ActionCluster>
         {isAiMetadataEnabled && (
-          <Button
-            size="S"
-            startIcon={<Sparkle />}
-            disabled={isBusy || selectedIds.size === 0}
-            loading={isGeneratingMetadata}
-            onClick={handleCreateMetadata}
+          <Tooltip
+            label={
+              isOverMetadataLimit
+                ? formatMessage(
+                    {
+                      id: getTranslationKey('list.bulk-actions.create-metadata.too-many'),
+                      defaultMessage:
+                        'Metadata can be generated for up to {max} assets at a time. Select fewer assets to continue.',
+                    },
+                    { max: AI_METADATA_MAX_FILES }
+                  )
+                : undefined
+            }
           >
-            {formatMessage({
-              id: getTranslationKey('list.bulk-actions.create-metadata'),
-              defaultMessage: 'Create metadata',
-            })}
-          </Button>
+            {/* Wrapped so the tooltip still receives pointer events while the
+                button itself is disabled. */}
+            <Box>
+              <Button
+                size="S"
+                startIcon={<Sparkle />}
+                disabled={isBusy || selectedIds.size === 0 || isOverMetadataLimit}
+                loading={isGeneratingMetadata}
+                onClick={handleCreateMetadata}
+              >
+                {formatMessage({
+                  id: getTranslationKey('list.bulk-actions.create-metadata'),
+                  defaultMessage: 'Create metadata',
+                })}
+              </Button>
+            </Box>
+          </Tooltip>
         )}
 
         <IconButton

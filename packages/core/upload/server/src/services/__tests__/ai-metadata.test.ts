@@ -593,6 +593,35 @@ describe('AI Metadata Service', () => {
       expect(aiMetadataService.processFiles).not.toHaveBeenCalled();
     });
 
+    it('skips image formats the AI provider does not support', async () => {
+      const svg = { id: 1, name: 'logo.svg', mime: 'image/svg+xml' } as File;
+      mockFindMany.mockResolvedValue([svg]);
+
+      const results = await aiMetadataService.generateForFiles([1], user);
+
+      expect(results).toEqual([{ id: 1, status: 'skipped' }]);
+      expect(aiMetadataService.processFiles).not.toHaveBeenCalled();
+    });
+
+    it('normalises numeric string ids so they match the database rows', async () => {
+      const files = [image(1), image(2)];
+      const metadataResults = [
+        { altText: 'Alt 1', caption: 'Caption 1' },
+        { altText: 'Alt 2', caption: 'Caption 2' },
+      ];
+
+      mockFindMany.mockResolvedValue(files);
+      jest.spyOn(aiMetadataService, 'processFiles').mockResolvedValue(metadataResults);
+
+      const results = await aiMetadataService.generateForFiles(['1', '2'], user);
+
+      expect(mockFindMany).toHaveBeenCalledWith({ where: { id: { $in: [1, 2] } } });
+      expect(results).toEqual([
+        { id: 1, status: 'success' },
+        { id: 2, status: 'success' },
+      ]);
+    });
+
     it('reports success and persists metadata for images', async () => {
       const files = [image(1), image(2)];
       const metadataResults = [

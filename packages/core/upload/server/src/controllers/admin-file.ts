@@ -207,7 +207,7 @@ export default {
       return ctx.forbidden();
     }
 
-    await validateGenerateAIMetadataBody(body);
+    const { fileIds } = await validateGenerateAIMetadataBody(body);
 
     const aiMetadataService = getService('aiMetadata');
 
@@ -215,7 +215,7 @@ export default {
       return ctx.badRequest('AI Metadata service is not enabled');
     }
 
-    const results = await aiMetadataService.generateForFiles(body.fileIds, ctx.state.user);
+    const results = await aiMetadataService.generateForFiles(fileIds, ctx.state.user);
 
     ctx.body = { data: results };
   },

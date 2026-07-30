@@ -4,6 +4,7 @@ import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { buildFormDataFromFiles } from '../utils/images';
+import { AI_METADATA_CHUNK_SIZE } from '../constants';
 
 import type { UnstableGenerateAIMetadata } from '../../../shared/contracts/files';
 
@@ -21,11 +22,10 @@ const SUPPORTED_IMAGE_TYPES = [
   'image/heif',
 ] as const;
 
-/**
- * Number of images sent to the AI server per request when generating metadata
- * for an explicit selection. Matches the URL cap of the bulk URL upload flow.
- */
-const AI_METADATA_CHUNK_SIZE = 20;
+type SupportedImageType = (typeof SUPPORTED_IMAGE_TYPES)[number];
+
+const isSupportedImage = (file: File): boolean =>
+  SUPPORTED_IMAGE_TYPES.includes(file.mime as SupportedImageType);
 
 const chunk = <T>(items: T[], size: number): T[][] => {
   const chunks: T[][] = [];
@@ -193,10 +193,14 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
      * @experimental
      */
     async generateForFiles(
-      fileIds: number[],
+      fileIds: Array<number | string>,
       user: { id: string | number }
     ): Promise<AIMetadataFileResult[]> {
-      const uniqueIds = [...new Set(fileIds)];
+      // `yup.strapiID()` accepts both numbers and numeric strings without
+      // coercing, so normalise here — otherwise a request sending `["1"]`
+      // would never match the numeric ids coming back from the database.
+      const normalisedIds = fileIds.map(Number);
+      const uniqueIds = [...new Set(normalisedIds)];
 
       const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
         where: { id: { $in: uniqueIds } },
@@ -216,9 +220,10 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           return;
         }
 
-        // Mirrors the filter `processFiles` applies internally, so classification
-        // and processing always agree on what counts as an image.
-        if (!file.mime?.startsWith('image/')) {
+        // Only the formats the AI provider understands are sent; anything else
+        // (non-images, but also exotic image formats like SVG or TIFF) is
+        // reported as skipped rather than failed.
+        if (!isSupportedImage(file)) {
           resultsById.set(id, { id, status: 'skipped' });
           return;
         }
@@ -254,7 +259,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      return fileIds.map(
+      return normalisedIds.map(
         (id) => resultsById.get(id) ?? { id, status: 'error', error: 'File not processed' }
       );
     },

@@ -472,7 +472,7 @@ describe('AssetsTable', () => {
       await waitFor(() =>
         expect(mockToggleNotification).toHaveBeenCalledWith({
           type: 'warning',
-          message: '1 generated, 1 skipped (not an image), 1 failed',
+          message: '1 generated, 1 skipped (unsupported file type), 1 failed',
         })
       );
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
@@ -502,6 +502,38 @@ describe('AssetsTable', () => {
           message: 'An error occurred while generating metadata.',
         })
       );
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+    });
+
+    it('keeps the selection and shows an error toast when every file fails server-side', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json({
+              data: [
+                { id: 1, status: 'error', error: 'AI server unavailable' },
+                { id: 2, status: 'error', error: 'AI server unavailable' },
+              ],
+            }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while generating metadata.',
+        })
+      );
+      // A 200 where nothing was written must not clear the selection.
       expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
       expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
     });
