@@ -64,7 +64,7 @@ export interface Proxy {
   fetch?: string;
   koa?: boolean;
   ipHeader?: string;
-  maxIpsCount?: string;
+  maxIpsCount?: number;
 }
 
 export interface Webhooks {
