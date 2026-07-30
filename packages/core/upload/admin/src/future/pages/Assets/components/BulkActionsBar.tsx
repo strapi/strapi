@@ -11,6 +11,7 @@ import {
   isAIMetadataSupportedMime,
 } from '../../../../../../shared/constants';
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import {
   useBulkDeleteItemsMutation,
   useGenerateAiMetadataMutation,
@@ -70,6 +71,9 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // Every bulk action (move, delete, metadata) is an `assets.update` mutation
+  // server-side — one flag gates the whole cluster.
+  const { canUpdate } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
@@ -245,7 +249,11 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
     clear();
   };
 
-  if (count === 0) {
+  // Every bulk action is behind `assets.update`; with nothing selected, or
+  // without the permission, the bar has nothing to offer — drop it entirely
+  // rather than show a count + "Clear selection" over no actions (mirrors the
+  // drawer footer, which hides when no permitted action survives).
+  if (count === 0 || !canUpdate) {
     return null;
   }
 
@@ -268,6 +276,8 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
         )}
       </Typography>
 
+      {/* Past the early return the user always has `assets.update`, so the
+          individual actions no longer re-check it. */}
       <ActionCluster>
         {isAiMetadataEnabled && (
           <Tooltip label={metadataDisabledReason}>
@@ -363,7 +373,10 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
             <Dialog.Footer>
               <Dialog.Cancel>
                 <Button variant="tertiary" disabled={isDeleting} fullWidth>
-                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                  {formatMessage({
+                    id: 'app.components.Button.cancel',
+                    defaultMessage: 'Cancel',
+                  })}
                 </Button>
               </Dialog.Cancel>
               <Dialog.Action>
