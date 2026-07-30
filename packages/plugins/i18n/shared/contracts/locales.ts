@@ -5,6 +5,16 @@ export interface Locale extends Entity {
   code: string;
   isDefault: boolean;
   name: string;
+  /**
+   * Space visibility binding, populated when `@strapi/plugin-spaces` is installed
+   * (empty array = platform-wide). Absent otherwise.
+   */
+  spaces?: Array<{ id: number; slug: string; name: string; color: string | null }>;
+  /**
+   * Slugs of the spaces this locale is the effective default locale of. Attached
+   * by the spaces default-locale strategy; absent when spaces isn't installed.
+   */
+  isDefaultIn?: string[];
 }
 
 /**

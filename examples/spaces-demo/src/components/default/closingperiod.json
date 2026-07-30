@@ -1,0 +1,34 @@
+{
+  "collectionName": "components_closingperiods",
+  "info": {
+    "displayName": "closingperiod",
+    "description": "",
+    "icon": "angry"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": "toto"
+    },
+    "start_date": {
+      "type": "date",
+      "required": true
+    },
+    "end_date": {
+      "type": "date",
+      "required": true
+    },
+    "media": {
+      "type": "media",
+      "multiple": false,
+      "required": false
+    },
+    "dish": {
+      "component": "default.dish",
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "min": 2
+    }
+  }
+}

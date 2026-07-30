@@ -53,7 +53,14 @@ const SettingsErrrorTooltip = ({
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
+  // `scope: 'all'` — Settings is the one surface where every locale must stay
+  // visible/manageable regardless of the active space (see services/locales.ts).
+  // Note: `isDefault` still reflects the *active* space's default by design.
+  const {
+    data: locales,
+    isLoading: isLoadingLocales,
+    error,
+  } = useGetLocalesQuery({ scope: 'all' });
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },

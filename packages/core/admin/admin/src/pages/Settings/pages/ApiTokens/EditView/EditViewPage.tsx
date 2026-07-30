@@ -30,6 +30,11 @@ import {
 } from './apiTokenPermissions';
 import { Permissions } from './components/Permissions';
 import { initialState, reducer } from './reducer';
+import {
+  getTokenFormExtensionInitialValues,
+  getTokenFormExtensions,
+  pickTokenFormExtensionValues,
+} from './tokenFormExtensions';
 
 import type { ContentApiApiToken, Get } from '../../../../../../../shared/contracts/api-token';
 
@@ -203,6 +208,8 @@ export const EditView = () => {
           type: body.type!,
           lifespan: buildLifespan(body.lifespan),
           permissions: body.type === 'custom' ? state.selectedActions : null,
+          // Extra fields registered by plugins (see tokenFormExtensions.ts).
+          ...pickTokenFormExtensionValues(body as unknown as Record<string, unknown>),
         });
 
         if ('error' in res) {
@@ -242,6 +249,8 @@ export const EditView = () => {
           description: body.description,
           type: body.type!,
           permissions: body.type === 'custom' ? state.selectedActions : null,
+          // Extra fields registered by plugins (see tokenFormExtensions.ts).
+          ...pickTokenFormExtensionValues(body as unknown as Record<string, unknown>),
         });
 
         if ('error' in res) {
@@ -355,6 +364,8 @@ export const EditView = () => {
             description: apiToken?.description || '',
             type: initialType,
             lifespan: apiToken?.lifespan,
+            // Extra fields registered by plugins (see tokenFormExtensions.ts).
+            ...getTokenFormExtensionInitialValues(apiToken),
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}
@@ -410,6 +421,16 @@ export const EditView = () => {
                       onDispatch={dispatch}
                       setHasChangedPermissions={setHasChangedPermissions}
                     />
+
+                    {getTokenFormExtensions().map(({ id: extensionId, field, Component }) => (
+                      <Component
+                        key={extensionId}
+                        token={apiToken}
+                        value={(values as unknown as Record<string, unknown>)[field]}
+                        onChange={(value) => setFieldValue(field, value)}
+                        disabled={!canEditInputs}
+                      />
+                    ))}
 
                     <Permissions
                       disabled={

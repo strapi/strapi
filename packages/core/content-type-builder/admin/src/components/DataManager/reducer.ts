@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
 import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
@@ -275,7 +275,14 @@ const removeAttributeByName = (type: ContentType | Component, name: string) => {
 };
 
 const updateType = (type: ContentType | Component, data: Record<string, unknown>) => {
-  merge(type, data);
+  // Arrays replace instead of lodash's index-wise merge: plugin options can
+  // carry array values (e.g. a list of workspace slugs) and a plain merge can
+  // neither shrink nor empty them — `merge(['a'], [])` keeps `['a']` and
+  // `merge(['a', 'b'], ['b'])` yields `['b', 'b']` — so edits silently kept
+  // stale values.
+  mergeWith(type, data, (_objValue: unknown, srcValue: unknown) =>
+    Array.isArray(srcValue) ? srcValue : undefined
+  );
   setStatus(type, 'CHANGED');
 };
 

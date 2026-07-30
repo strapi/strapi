@@ -31,6 +31,7 @@ import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
+import { getLocaleFormExtensionInitialValues, getLocaleFormExtensions } from '../i18n-plugin';
 import { useCreateLocaleMutation, useGetDefaultLocalesQuery } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
@@ -152,7 +153,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
     <Modal.Content>
       <Form
         method="POST"
-        initialValues={initialFormValues}
+        initialValues={{ ...initialFormValues, ...getLocaleFormExtensionInitialValues() }}
         validationSchema={LOCALE_SCHEMA}
         onSubmit={handleSubmit}
       >
@@ -194,6 +195,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
             <Box paddingTop={7} paddingBottom={7}>
               <Tabs.Content value="basic">
                 <BaseForm />
+                <LocaleFormExtensions mode="create" />
               </Tabs.Content>
               <Tabs.Content value="advanced">
                 <AdvancedForm />
@@ -356,6 +358,31 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * LocaleFormExtensions
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Renders the form sections other plugins registered via
+ * `registerLocaleFormExtension` (see ../i18n-plugin.ts). Rendered inside the
+ * modal's `<Form>` so extension components can bind extra fields with `useField`.
+ */
+const LocaleFormExtensions = ({ mode }: { mode: 'create' | 'edit' }) => {
+  const extensions = getLocaleFormExtensions();
+
+  if (extensions.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {extensions.map(({ id, Component }) => (
+        <Component key={id} mode={mode} />
+      ))}
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * FormRenderer
  * -----------------------------------------------------------------------------------------------*/
 
@@ -425,4 +452,4 @@ const EnumerationInput = ({
   );
 };
 
-export { CreateLocale, BaseForm, AdvancedForm, SubmitButton, LOCALE_SCHEMA };
+export { CreateLocale, BaseForm, AdvancedForm, SubmitButton, LocaleFormExtensions, LOCALE_SCHEMA };

@@ -26,6 +26,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
+import { getRoleFormExtensionInitialValues, getRoleFormExtensions } from './roleFormExtensions';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -185,13 +186,24 @@ const EditPage = () => {
           {
             name: role.name ?? '',
             description: role.description ?? '',
-          } satisfies EditRoleFormValues
+            // Extra fields registered by plugins (see roleFormExtensions.ts) —
+            // submitted with the update body; their owners handle them server-side.
+            ...getRoleFormExtensionInitialValues(role),
+          } as EditRoleFormValues
         }
         onSubmit={handleEditRoleSubmit}
         validationSchema={EDIT_ROLE_SCHEMA}
         validateOnChange={false}
       >
-        {({ handleSubmit, values, errors, handleChange, handleBlur, isSubmitting }) => (
+        {({
+          handleSubmit,
+          values,
+          errors,
+          handleChange,
+          handleBlur,
+          isSubmitting,
+          setFieldValue,
+        }) => (
           <form onSubmit={handleSubmit}>
             <Layouts.Header
               primaryAction={
@@ -233,6 +245,15 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
+                {getRoleFormExtensions().map(({ id: extensionId, field, Component }) => (
+                  <Component
+                    key={extensionId}
+                    role={role}
+                    value={(values as unknown as Record<string, unknown>)[field]}
+                    onChange={(value) => setFieldValue(field, value)}
+                    disabled={isFormDisabled}
+                  />
+                ))}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

@@ -44,6 +44,21 @@ describe('Settings Page', () => {
     );
   });
 
+  it('requests the unscoped locale list (scope=all) so every space binding stays manageable', async () => {
+    let requestedScope: string | null = null;
+    server.use(
+      http.get('/i18n/locales', ({ request }) => {
+        requestedScope = new URL(request.url).searchParams.get('scope');
+        return HttpResponse.json([]);
+      })
+    );
+
+    render(<SettingsPage />);
+    await screen.findByRole('heading', { name: 'Internationalization' });
+
+    expect(requestedScope).toBe('all');
+  });
+
   it('renders the no locales layout correctly', async () => {
     server.use(http.get('/i18n/locales', () => HttpResponse.json([])));
 

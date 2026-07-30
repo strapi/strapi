@@ -9528,6 +9528,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/icons@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@strapi/icons@npm:2.2.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    styled-components: ^6.0.0
+  checksum: 10c0/62d74b0d97fbd16cf67904dcbf1cfb786d8850f3e88a119df478555cfdd02f71b71fa8d4f201760ca3ead50de32e8e2a6818a8f6aade40a222aceb11564ad14e
+  languageName: node
+  linkType: hard
+
 "@strapi/icons@npm:2.2.3":
   version: 2.2.3
   resolution: "@strapi/icons@npm:2.2.3"
@@ -9760,6 +9771,37 @@ __metadata:
     styled-components: "npm:6.4.1"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.30.3
+    styled-components: ^6.0.0
+  languageName: unknown
+  linkType: soft
+
+"@strapi/plugin-spaces@workspace:*, @strapi/plugin-spaces@workspace:packages/plugins/spaces":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-spaces@workspace:packages/plugins/spaces"
+  dependencies:
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:5.51.1"
+    "@strapi/content-manager": "npm:5.51.1"
+    "@strapi/database": "npm:5.51.1"
+    "@strapi/design-system": "npm:2.2.3"
+    "@strapi/icons": "npm:2.2.3"
+    "@strapi/types": "npm:5.51.1"
+    "@strapi/utils": "npm:5.51.1"
+    koa: "npm:2.16.4"
+    lodash: "npm:4.18.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-intl: "npm:6.6.2"
+    react-redux: "npm:8.1.3"
+    react-router-dom: "npm:6.30.3"
+    styled-components: "npm:6.4.1"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0
+    "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.30.3
@@ -28733,6 +28775,35 @@ __metadata:
   checksum: 10c0/6173e1d903dca41dcab6a2deed8b4caf61bd13b6d7af8374713500570aa929ff9414ae09a0519f4f8772df993300305a395d4871f35bc4ca72b6db57e1f30af8
   languageName: node
   linkType: hard
+
+"spaces-demo@workspace:examples/spaces-demo":
+  version: 0.0.0-use.local
+  resolution: "spaces-demo@workspace:examples/spaces-demo"
+  dependencies:
+    "@strapi/blocks-react-renderer": "npm:1.0.2"
+    "@strapi/icons": "npm:2.2.0"
+    "@strapi/plugin-color-picker": "workspace:*"
+    "@strapi/plugin-documentation": "workspace:*"
+    "@strapi/plugin-graphql": "workspace:*"
+    "@strapi/plugin-sentry": "workspace:*"
+    "@strapi/plugin-spaces": "workspace:*"
+    "@strapi/plugin-users-permissions": "workspace:*"
+    "@strapi/provider-email-mailgun": "workspace:*"
+    "@strapi/provider-upload-aws-s3": "workspace:*"
+    "@strapi/provider-upload-cloudinary": "workspace:*"
+    "@strapi/strapi": "workspace:*"
+    better-sqlite3: "npm:12.8.0"
+    lodash: "npm:4.18.1"
+    mysql2: "npm:3.20.0"
+    passport-google-oauth2: "npm:0.2.0"
+    pg: "npm:8.20.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-intl: "npm:6.6.2"
+    react-router-dom: "npm:6.30.3"
+    styled-components: "npm:6.4.1"
+  languageName: unknown
+  linkType: soft
 
 "spawn-command@npm:0.0.2":
   version: 0.0.2

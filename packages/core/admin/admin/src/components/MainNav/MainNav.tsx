@@ -12,6 +12,14 @@ const MainNavWrapper = styled(Flex)`
     border-bottom: none;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
     height: 100dvh;
+    /* Workspace accent: plugins may set --strapi-workspace-color on the root
+       (e.g. @strapi/plugin-spaces) — the color then rises from the bottom of
+       the nav. Without the variable the gradient is transparent → invisible. */
+    background-image: linear-gradient(
+      to bottom,
+      transparent 55%,
+      color-mix(in srgb, var(--strapi-workspace-color, transparent) 22%, transparent) 100%
+    );
   }
 `;
 

@@ -20,6 +20,7 @@ import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
 import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
+import { registerLocaleFormExtension, registerLocaleTableColumn } from './i18n-plugin';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
 import { localeMiddleware } from './middlewares/rbac-middleware';
@@ -77,6 +78,12 @@ export default {
     app.registerPlugin({
       id: pluginId,
       name: pluginId,
+      apis: {
+        // Extension points for plugins that augment the locale settings UI
+        // (used by @strapi/plugin-spaces) — see ./i18n-plugin.ts.
+        registerLocaleFormExtension,
+        registerLocaleTableColumn,
+      },
     });
   },
   bootstrap(app: StrapiApp) {

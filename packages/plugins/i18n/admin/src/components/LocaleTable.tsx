@@ -13,6 +13,7 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { getLocaleTableColumns } from '../i18n-plugin';
 import { getTranslation } from '../utils/getTranslation';
 
 import { DeleteLocale } from './DeleteLocale';
@@ -36,6 +37,10 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
   const [editLocaleId, setEditLocaleId] = React.useState<Locale['id']>();
   const { formatMessage } = useIntl();
 
+  // Columns registered by other plugins (e.g. @strapi/plugin-spaces adds
+  // "Available in spaces" / "Default in") — see ../i18n-plugin.ts.
+  const extraColumns = getLocaleTableColumns();
+
   const handleClick = (localeId: Locale['id']) => () => {
     if (canUpdate) {
       setEditLocaleId(localeId);
@@ -43,7 +48,7 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
   };
 
   return (
-    <Table colCount={4} rowCount={locales.length + 1}>
+    <Table colCount={4 + extraColumns.length} rowCount={locales.length + 1}>
       <Thead>
         <Tr>
           <Th>
@@ -70,6 +75,13 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
               })}
             </Typography>
           </Th>
+          {extraColumns.map((column) => (
+            <Th key={column.id}>
+              <Typography variant="sigma" textColor="neutral600">
+                {formatMessage(column.header)}
+              </Typography>
+            </Th>
+          ))}
           <Th>
             <VisuallyHidden>Actions</VisuallyHidden>
           </Th>
@@ -98,6 +110,11 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
                     : null}
                 </Typography>
               </Td>
+              {extraColumns.map((column) => (
+                <Td key={column.id}>
+                  <column.Cell locale={locale} />
+                </Td>
+              ))}
               <Td>
                 <Flex gap={1} justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
                   {canUpdate && <EditLocale {...locale} />}

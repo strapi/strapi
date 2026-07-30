@@ -25,8 +25,16 @@ const localesApi = i18nApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Locale', id }, 'HomepageKeyStatistics'],
     }),
-    getLocales: builder.query<GetLocales.Response, void>({
-      query: () => '/i18n/locales',
+    /**
+     * `scope: 'all'` opts out of the per-space visibility filter applied when
+     * `@strapi/plugin-spaces` is installed — the Settings page passes it so a
+     * locale bound to another space stays manageable from any active space.
+     * Scoped consumers (CM locale picker, header actions) call with no arg.
+     * Both cache entries provide the same `Locale` tags, so locale mutations
+     * refetch whichever variants are mounted.
+     */
+    getLocales: builder.query<GetLocales.Response, { scope?: 'all' } | void>({
+      query: (params) => (params?.scope === 'all' ? '/i18n/locales?scope=all' : '/i18n/locales'),
       providesTags: (res) => [
         { type: 'Locale', id: 'LIST' },
         ...(Array.isArray(res)

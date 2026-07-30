@@ -12,6 +12,7 @@ import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
 
 import { MainNav } from './MainNav/MainNav';
 import { MainNavIcons } from './MainNav/MainNavLinks';
+import { getMainNavAddons } from './MainNav/navAddons';
 import { NavBrand } from './MainNav/NavBrand';
 import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
@@ -163,6 +164,24 @@ const LeftMenu = ({
             />
           </NavListWrapper>
           <TrialCountdown />
+          {getMainNavAddons().map(({ id, Component }) => (
+            <Box
+              key={id}
+              display={{
+                initial: 'none',
+                large: 'flex',
+              }}
+              borderStyle="solid"
+              borderWidth={{
+                initial: 0,
+                large: '1px 0 0 0',
+              }}
+              borderColor="neutral150"
+              padding={3}
+            >
+              <Component />
+            </Box>
+          ))}
           <Box
             display={{
               initial: 'none',

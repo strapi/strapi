@@ -25,6 +25,25 @@ export * from './components/Table';
 export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
+export { registerMainNavAddon, type MainNavAddon } from './components/MainNav/navAddons';
+export {
+  registerRoleFormExtension,
+  type RoleFormExtension,
+  type RoleFormExtensionComponentProps,
+} from './pages/Settings/pages/Roles/roleFormExtensions';
+export {
+  registerTokenFormExtension,
+  type TokenFormExtension,
+  type TokenFormExtensionComponentProps,
+} from './pages/Settings/pages/ApiTokens/EditView/tokenFormExtensions';
+export {
+  registerSettingsMenuMutator,
+  type SettingsMenuMutator,
+  type SettingsMenuMutatorHook,
+} from './hooks/settingsMenuMutators';
+export type { SettingsMenu } from './hooks/useSettingsMenu';
+export { registerMenuMutator, type MenuMutator, type MenuMutatorHook } from './hooks/menuMutators';
+export type { Menu } from './hooks/useMenu';
 
 /** @internal */
 export { tours } from './components/GuidedTour/Tours';

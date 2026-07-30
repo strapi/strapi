@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spaces — Virtual Multi-tenancy for Strapi 5 · Design Document</title>
+    <style>
+      :root {
+        --ink: #1c1c28;
+        --muted: #62627a;
+        --accent: #4945ff;
+        --surface: #f6f6f9;
+        --border: #e4e4ef;
+        --code-bg: #f0f0f7;
+        --warn-bg: #fdf4dc;
+        --warn-border: #e9c46a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0 auto;
+        max-width: 60rem;
+        padding: 3rem 1.5rem 6rem;
+        font:
+          16px/1.65 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+      }
+      h2 {
+        margin-top: 3rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      h3 {
+        margin-top: 2rem;
+      }
+      .subtitle {
+        color: var(--muted);
+        margin-top: 0;
+      }
+      code,
+      pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.875em;
+        background: var(--code-bg);
+        border-radius: 4px;
+      }
+      code {
+        padding: 0.1em 0.35em;
+      }
+      pre {
+        padding: 1rem;
+        overflow-x: auto;
+        line-height: 1.5;
+      }
+      pre code {
+        padding: 0;
+        background: none;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        background: var(--surface);
+      }
+      .decision {
+        background: var(--surface);
+        border-left: 4px solid var(--accent);
+        padding: 0.75rem 1rem;
+        margin: 1rem 0;
+        border-radius: 0 6px 6px 0;
+      }
+      .warn {
+        background: var(--warn-bg);
+        border-left: 4px solid var(--warn-border);
+        padding: 0.75rem 1rem;
+        margin: 1rem 0;
+        border-radius: 0 6px 6px 0;
+      }
+      .toc {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+      }
+      .toc ol {
+        margin: 0.5rem 0;
+        padding-left: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Spaces — Virtual Multi-tenancy for Strapi 5</h1>
+    <p class="subtitle">
+      Design document for <code>@strapi/plugin-spaces</code> · branch
+      <code>feature/spaces-multitenancy</code> · regenerated 2026-07-30 (the original 150&nbsp;KB
+      revision was lost to worktree corruption; this version is rebuilt from the README, the
+      handover notes and the implementation itself).
+    </p>
+
+    <nav class="toc">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#vision">Vision &amp; product model</a></li>
+        <li><a href="#concepts">Core concepts</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#storage">Storage model</a></li>
+        <li><a href="#lifecycle">Request lifecycle</a></li>
+        <li><a href="#visibility">The settings-visibility pattern</a></li>
+        <li><a href="#i18n">i18n integration</a></li>
+        <li><a href="#move">Moving entries between spaces</a></li>
+        <li><a href="#guarantees">Isolation guarantees</a></li>
+        <li><a href="#decisions">Key design decisions</a></li>
+        <li><a href="#phases">Phasing &amp; roadmap</a></li>
+        <li><a href="#risks">Known risks &amp; gotchas</a></li>
+      </ol>
+    </nav>
+
+    <h2 id="vision">1. Vision &amp; product model</h2>
+    <p>
+      One Strapi deployment, one database, one admin shell — many isolated
+      <strong>Spaces</strong> (workspaces). An agency runs one Strapi for ten client sites; a
+      company runs one Strapi for every brand. Admins switch between spaces from a header dropdown;
+      each space sees only its own content.
+    </p>
+    <p>The full product model (target state, later phases):</p>
+    <ul>
+      <li>
+        A space grants access to specific
+        <strong>collection types, single types and components</strong>. Some are shared across
+        spaces, some aren't.
+      </li>
+      <li>
+        <strong>Webhooks, API tokens, permissions, roles and users</strong> are space-specific.
+      </li>
+      <li>The <strong>Media Library</strong> is split per space.</li>
+      <li>
+        A <strong>default space</strong> always exists. Assigning a role grants that role's users
+        access to a space (role → space mapping).
+      </li>
+    </ul>
+    <p>
+      The architecture mirrors <code>@strapi/plugin-i18n</code>: where i18n injects a
+      <code>locale</code> dimension into every query, Spaces injects a <code>space</code>
+      dimension.
+    </p>
+
+    <h2 id="concepts">2. Core concepts</h2>
+    <table>
+      <tr>
+        <th>Concept</th>
+        <th>Definition</th>
+      </tr>
+      <tr>
+        <td><strong>Space</strong></td>
+        <td>
+          A virtual tenant: <code>plugin::spaces.space</code> collection type with
+          <code>slug</code> (unique), <code>name</code>, <code>color</code>,
+          <code>status</code> (<code>active</code>/<code>archived</code>). Hidden from the Content
+          Manager and CTB.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Space-scoped CT</strong></td>
+        <td>
+          A content type opting in via <code>pluginOptions.spaces.scope: 'space'</code>
+          in its schema.json. Its entries are partitioned per space through an injected
+          <code>space</code> relation (a real <code>space_id</code> FK column).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Platform CT</strong></td>
+        <td>
+          Any CT without the opt-in (or <code>scope: 'platform'</code>). Shared across every space,
+          untouched by the plugin.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Visibility binding</strong></td>
+        <td>
+          <code>pluginOptions.spaces.visibleIn: string[]</code> — which spaces a CT appears in.
+          <strong>Empty/missing = visible everywhere.</strong> The same convention applies to
+          settings resources (locales today) via a hidden <code>spaces</code> many-to-many.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Active space</strong></td>
+        <td>
+          Per-request state resolved from the <code>X-Strapi-Space-Id</code> header (slug). No
+          header = <em>platform view</em>: no tenant filter.
+        </td>
+      </tr>
+    </table>
+
+    <h2 id="architecture">3. Architecture</h2>
+    <pre><code>              ┌────────────────────────────────────────────────────────┐
+              │ Admin app                                              │
+              │  SpaceSwitcher (localStorage slug)                     │
+              │  window.fetch interceptor → X-Strapi-Space-Id header   │
+              └───────────────────────┬────────────────────────────────┘
+                                      ▼
+Request ──► resolve-space middleware (register.ts, strapi.server.use)
+              reads X-Strapi-Space-Id → ctx.state.spaceId / spaceSlug
+              unknown or archived space → 400
+                                      │
+                                      ▼
+            document-service multitenancy middleware (bootstrap.ts)
+              reads : force-merge params.filters.space = { id }
+              writes: stamp params.data.space = id
+                                      │
+                                      ▼
+            DB lifecycle subscriber (beforeCreate safety net)
+              stamps space on raw strapi.db.query().create() bypasses
+</code></pre>
+    <p>Server-side building blocks (all under <code>packages/plugins/spaces/server/src</code>):</p>
+    <table>
+      <tr>
+        <th>Module</th>
+        <th>Role</th>
+      </tr>
+      <tr>
+        <td><code>register.ts</code></td>
+        <td>
+          Injects the <code>space</code> FK on scoped CTs, the hidden <code>spaces</code> M2M on
+          <code>plugin::i18n.locale</code>, and registers the resolve-space Koa middleware globally.
+        </td>
+      </tr>
+      <tr>
+        <td><code>bootstrap.ts</code></td>
+        <td>
+          Registers the RBAC action, the document-service middleware, the lifecycle subscriber;
+          seeds <code>default</code>/<code>acme</code>; runs <code>patchI18nForSpaces()</code>.
+        </td>
+      </tr>
+      <tr>
+        <td><code>document-service/multitenancy.ts</code></td>
+        <td>The core enforcement middleware (reads + writes).</td>
+      </tr>
+      <tr>
+        <td><code>settings-visibility/index.ts</code></td>
+        <td>Reusable visibility-binding pattern for settings resources (see §6).</td>
+      </tr>
+      <tr>
+        <td><code>i18n-integration.ts</code></td>
+        <td>Locale visibility per space + per-space default locale (see §7).</td>
+      </tr>
+      <tr>
+        <td><code>services/move.ts</code></td>
+        <td>Cross-space move with locale + visibility validation (see §8).</td>
+      </tr>
+    </table>
+
+    <h2 id="storage">4. Storage model</h2>
+    <ul>
+      <li><strong>Spaces table</strong> — <code>spaces</code> (from the plugin CT).</li>
+      <li>
+        <strong>Scoped CTs</strong> — the injected relation is <code>manyToOne</code> with
+        <code>useJoinTable: false</code>, so each scoped table gains a real
+        <code>space_id</code> column (no join table). The attribute is <code>private</code>: API
+        consumers never read or write it directly.
+      </li>
+      <li>
+        <strong>Settings resources</strong> — a hidden <code>spaces</code>
+        <code>manyToMany</code> per resource (link table), where
+        <em>zero link rows = platform-wide</em>.
+      </li>
+      <li>
+        <strong>Per-space default locale</strong> — i18n core store keys
+        <code>default_locale_&lt;spaceSlug&gt;</code>, falling back to the global
+        <code>default_locale</code>.
+      </li>
+    </ul>
+
+    <h2 id="lifecycle">5. Request lifecycle</h2>
+    <ol>
+      <li>The admin (or an API consumer) sends <code>X-Strapi-Space-Id: acme</code>.</li>
+      <li>
+        <code>resolve-space</code> loads the space row; 400 on unknown/archived; sets
+        <code>ctx.state.spaceId</code> + <code>ctx.state.spaceSlug</code>.
+      </li>
+      <li>
+        Controllers call the document service; the multitenancy middleware reads the request context
+        (<code>strapi.requestContext</code>) and injects the tenant dimension:
+        <ul>
+          <li>
+            <em>Reads</em> (<code>findMany/findOne/findFirst/findPage/count/clone</code>):
+            <code>params.filters.space = { id }</code> — deliberately
+            <strong>clobbering</strong> any user-supplied <code>space</code> filter.
+          </li>
+          <li>
+            <em>Writes</em> (<code>create/update</code>): <code>params.data.space = id</code> when
+            absent.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Raw <code>strapi.db.query()</code> writes that skip the document service are caught by the
+        <code>beforeCreate</code> lifecycle subscriber.
+      </li>
+      <li>No header → steps 3–4 are no-ops (platform view).</li>
+    </ol>
+
+    <h2 id="visibility">6. The settings-visibility pattern</h2>
+    <p>
+      Settings resources (locales today; API tokens, transfer tokens, webhooks, media folders next)
+      are defined <em>once</em> and made <em>visible</em> in N spaces. Three reusable helpers in
+      <code>settings-visibility/index.ts</code>:
+    </p>
+    <ol>
+      <li>
+        <code>injectVisibilityRelation(strapi, uid)</code> — register-time; hidden
+        <code>spaces</code> M2M on the resource CT.
+      </li>
+      <li>
+        <code>wrapControllerForVisibility(strapi, opts)</code> — bootstrap-time Koa middleware
+        around the host plugin's create/update routes. Extracts <code>spaces: string[]</code> (and
+        extra fields like <code>defaultIn</code>) from the body <em>before</em> the host's strict
+        Yup validation rejects them, lets the original controller run, then writes the M2M rows.
+        Includes a <code>validateRemoval</code> pre-check that 400s before the host controller runs
+        (atomicity) and normalizes "explicitly all spaces checked" to the empty (platform-wide)
+        binding.
+      </li>
+      <li>
+        <code>scopeReadByCurrentSpace(strapi, service, methods)</code> — bootstrap-time read
+        wrapper: filters rows to <code>spaces.slug = active OR spaces empty</code>, auto-populates
+        <code>spaces</code> on results. Bypasses: <code>?scope=all</code> (settings pages) and
+        <code>runUnscoped()</code> (AsyncLocalStorage-based, for internal code that needs global
+        reads such as permission syncs).
+      </li>
+    </ol>
+    <div class="decision">
+      <strong>Why a Koa middleware, not a controller monkey-patch?</strong>
+      <code>Strapi.bootstrap()</code> runs <code>initRouting()</code> before plugin bootstrap hooks,
+      and route composition binds controller methods — a later swap is never observed. Koa
+      middleware registered via <code>strapi.server.use()</code> in bootstrap <em>is</em> picked up
+      because the router mounts lazily at listen time.
+    </div>
+
+    <h2 id="i18n">7. i18n integration</h2>
+    <p>
+      All wired from the spaces side (<code>i18n-integration.ts</code>), guarded by
+      <code>strapi.plugin('i18n')</code> checks:
+    </p>
+    <ul>
+      <li>
+        <strong>Read scope</strong> — <code>locales.find/count</code> wrapped;
+        <code>findByCode</code> re-implemented via the wrapped <code>find</code>.
+      </li>
+      <li>
+        <strong>Write scope</strong> — create/update locale routes wrapped; the
+        <code>validateRemoval</code> hook refuses removing a locale from a space where it's still
+        load-bearing (space's default locale, or entries in that space use it).
+      </li>
+      <li>
+        <strong>Per-space default</strong> — a <em>default-locale strategy</em> installed through
+        i18n's extension hook <code>localesService.setDefaultLocaleStrategy()</code> (added to i18n
+        for this): <code>get/set/isDefault</code> resolve per-space override → platform default →
+        first visible locale (self-healing), and <code>listDefaults()</code> feeds the
+        <code>isDefaultIn: string[]</code> arrays the Settings table renders.
+      </li>
+      <li>
+        <strong>Permission-sync fix</strong> — i18n's
+        <code>syncSuperAdminPermissionsWithLocales</code> re-implemented to run under
+        <code>runUnscoped()</code> (otherwise a locale created inside a tenant view would rewrite
+        super-admin permissions with a space-filtered locale list) and to skip orphan permission
+        rows instead of aborting.
+      </li>
+    </ul>
+    <p>
+      On the admin side, i18n exposes two extension points (<code>admin/src/i18n-plugin.ts</code>):
+      <code>registerLocaleFormExtension</code>
+      (extra form sections in the locale create/edit modal) and
+      <code>registerLocaleTableColumn</code> (extra Settings-table columns). The spaces plugin
+      registers its "Available in spaces" / "Default in spaces" fields and the two chip columns
+      through them — i18n has zero dependency on spaces.
+    </p>
+
+    <h2 id="move">8. Moving entries between spaces</h2>
+    <p>
+      <code>POST /spaces/move</code> · body <code>{ uid, documentIds[], targetSpaceSlug }</code> ·
+      gated by the <code>plugin::spaces.move-entry</code> RBAC action. Validation order:
+    </p>
+    <ol>
+      <li>CT exists and is space-scoped.</li>
+      <li>Target space exists and is active.</li>
+      <li>Target space is in the CT's <code>visibleIn</code> binding.</li>
+      <li>
+        For localized CTs: every locale carried by the source rows must be available in the target
+        space (otherwise the move would orphan translations).
+      </li>
+    </ol>
+    <div class="decision">
+      The move deliberately bypasses the document service and writes the
+      <code>space</code> FK via <code>strapi.db.query()</code> in a single transaction: the
+      multitenancy middleware would otherwise filter the source rows out of reach (they belong to
+      another space than the caller's active one).
+    </div>
+    <p>
+      Admin surfaces: a header action on the edit view (navigates back to the list on success — the
+      document no longer exists in the current space) and a bulk action on the list view
+      (invalidates the CM's RTK Query caches instead of reloading).
+    </p>
+
+    <h2 id="guarantees">9. Isolation guarantees</h2>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Guarantee</th>
+        <th>Mechanism</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Reads through the document service never return another space's rows.</td>
+        <td>
+          Multitenancy middleware force-merges the filter, clobbering user-supplied
+          <code>space</code> filters.
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Writes are stamped with the active space even on raw-DB bypass paths.</td>
+        <td>
+          Middleware (canonical) + <code>beforeCreate</code> lifecycle subscriber (safety net).
+        </td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>An invalid tenant selector fails loudly.</td>
+        <td>
+          <code>resolve-space</code> 400s on unknown/archived slugs instead of silently serving
+          platform data.
+        </td>
+      </tr>
+      <tr>
+        <td>—</td>
+        <td class="warn" style="border: none; background: none; padding: 0">
+          <div class="warn">
+            <strong>Not yet guaranteed:</strong> reads via raw <code>strapi.db.query()</code> (a
+            <code>beforeFindMany/beforeFindOne/beforeCount</code> net is deferred), GraphQL, and the
+            content API without a header (platform view by design in phase 1).
+          </div>
+        </td>
+        <td></td>
+      </tr>
+    </table>
+
+    <h2 id="decisions">10. Key design decisions</h2>
+    <ol>
+      <li>
+        <strong><code>params.filters</code>, not <code>params.lookup</code></strong> — i18n uses
+        <code>lookup</code>, but <code>validateParams</code> throws on unknown lookup keys for
+        third-party dimensions (<code>document-service/repository.ts</code>). Filters are validated
+        against the schema, and the injected <code>space</code> relation makes them legal.
+      </li>
+      <li>
+        <strong><code>space_id</code> join column, no join table</strong> — <code>manyToOne</code> +
+        <code>useJoinTable: false</code>. Cheap filtering, obvious raw-SQL debugging.
+      </li>
+      <li>
+        <strong>Relation descriptors are factories</strong> — Strapi mutates attribute metadata
+        during registration; sharing one descriptor object across CTs makes one CT's link table
+        silently steal another's writes. Learned the hard way.
+      </li>
+      <li>
+        <strong>Empty binding = platform-wide</strong> — shared convention for CT
+        <code>visibleIn</code> and settings M2Ms; new spaces automatically inherit platform-wide
+        resources. "Explicitly all checked" normalizes to empty at write time.
+      </li>
+      <li>
+        <strong><code>AsyncLocalStorage</code>-based <code>runUnscoped()</code></strong> — survives
+        async boundaries without leaking across concurrent requests; used by internal enumerations
+        (permission sync, <code>listDefaults</code>).
+      </li>
+      <li><strong>Move bypasses the document service</strong> — see §8.</li>
+      <li>
+        <strong><code>pluginOptions.spaces.*</code>, not <code>options.multiTenancy</code></strong>
+        — plugin options live under the plugin's namespace (mirrors
+        <code>pluginOptions.i18n.localized</code>), keeping core CTB byte-identical when the plugin
+        isn't installed. (Older README/comment references to <code>options.multiTenancy</code> are
+        stale.)
+      </li>
+      <li>
+        <strong>Space header carries the slug</strong> — human-readable in curl and logs; numeric id
+        accepted as a fallback.
+      </li>
+    </ol>
+
+    <h2 id="phases">11. Phasing &amp; roadmap</h2>
+    <table>
+      <tr>
+        <th>Phase</th>
+        <th>Scope</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>1 — Vertical slice</td>
+        <td>
+          Header resolution, document-service filtering, lifecycle stamping, seeding, CT opt-in.
+        </td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>2 — Settings visibility</td>
+        <td>
+          Reusable visibility pattern; i18n locales integration (visibility + per-space defaults).
+        </td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>3 — Admin UX</td>
+        <td>
+          Space switcher, move actions, CTB scope/visibility fields, locale form/table extensions.
+        </td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>4 — Access control</td>
+        <td>
+          Role → space mapping; <code>GET /spaces/mine</code> filtered per user; space-specific
+          roles/users/permissions.
+        </td>
+        <td>⏳ next</td>
+      </tr>
+      <tr>
+        <td>5 — Settings rollout</td>
+        <td>API tokens, transfer tokens, webhooks through the settings-visibility pattern.</td>
+        <td>⏳</td>
+      </tr>
+      <tr>
+        <td>6 — Media Library</td>
+        <td>Per-space upload folders/assets.</td>
+        <td>⏳</td>
+      </tr>
+      <tr>
+        <td>7 — Hardening</td>
+        <td>
+          Raw-DB read net, GraphQL coverage, subdomain routing, <code>config/spaces.ts</code> sync,
+          components inheritance, releases/workflows compat, CLI.
+        </td>
+        <td>⏳</td>
+      </tr>
+    </table>
+
+    <h2 id="risks">12. Known risks &amp; gotchas</h2>
+    <ul>
+      <li>
+        <strong>i18n locale isolation</strong> — moving a localized entry to a space that can't
+        surface its locale would orphan it; guarded in the move service and in
+        <code>validateRemoval</code>.
+      </li>
+      <li>
+        <strong>Sanitizer vs. populated bindings</strong> — the content-API sanitizer strips
+        <code>private</code> attributes; the locale <code>spaces</code> M2M is deliberately
+        <code>private: false</code> so the Settings UI can round-trip it.
+      </li>
+      <li>
+        <strong>Bound controller references</strong> — bootstrap-time controller swaps are never
+        observed (see §6); always go through route middleware.
+      </li>
+      <li>
+        <strong>Raw-DB reads</strong> — not yet filtered; plugins doing
+        <code>strapi.db.query().findMany()</code> on scoped CTs see every space until the read net
+        lands.
+      </li>
+      <li>
+        <strong>Per-request space resolution</strong> — one indexed DB lookup per request carrying
+        the header; add caching if it ever shows up in profiles.
+      </li>
+      <li>
+        <strong>Platform view is unauthenticated-by-design in phase 1</strong> — any admin (and any
+        content-API consumer omitting the header) sees all spaces until phase 4's role → space
+        mapping lands.
+      </li>
+    </ul>
+  </body>
+</html>

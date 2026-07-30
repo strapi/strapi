@@ -8,6 +8,8 @@ import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
+import { getMenuMutators } from './menuMutators';
+
 /* -------------------------------------------------------------------------------------------------
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
@@ -134,7 +136,15 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     currentEnvironment,
   ]);
 
-  return menuWithUserPermissions;
+  // Plugin-registered menu mutators (see menuMutators.ts). The list is frozen
+  // before the first render, so calling the hooks in a loop keeps a stable
+  // order across renders.
+  const mutators = getMenuMutators().map(({ useMutator }) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useMutator()
+  );
+
+  return mutators.reduce((current, mutate) => mutate(current), menuWithUserPermissions);
 };
 
 /* -------------------------------------------------------------------------------------------------

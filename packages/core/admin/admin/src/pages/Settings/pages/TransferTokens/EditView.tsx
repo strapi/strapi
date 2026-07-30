@@ -27,6 +27,11 @@ import { TokenBox } from '../../components/Tokens/TokenBox';
 import { TokenDescription } from '../../components/Tokens/TokenDescription';
 import { TokenName } from '../../components/Tokens/TokenName';
 import { TokenTypeSelect } from '../../components/Tokens/TokenTypeSelect';
+import {
+  getTokenFormExtensionInitialValues,
+  getTokenFormExtensions,
+  pickTokenFormExtensionValues,
+} from '../ApiTokens/EditView/tokenFormExtensions';
 
 import type {
   TransferToken,
@@ -173,6 +178,8 @@ const EditView = () => {
             name: body.name,
             description: body.description,
             permissions,
+            // Extra fields registered by plugins (see ../ApiTokens/EditView/tokenFormExtensions.ts).
+            ...pickTokenFormExtensionValues(body as unknown as Record<string, unknown>),
           });
 
           if ('error' in res) {
@@ -246,12 +253,14 @@ const EditView = () => {
              * use an empty string.
              */
             permissions: (transferToken?.permissions.join('-') ?? '') as FormValues['permissions'],
-          } satisfies FormValues
+            // Extra fields registered by plugins (see ../ApiTokens/EditView/tokenFormExtensions.ts).
+            ...getTokenFormExtensionInitialValues(transferToken),
+          } as FormValues
         }
         enableReinitialize
         onSubmit={(body, actions) => handleSubmit(body, actions)}
       >
-        {({ errors, handleChange, isSubmitting, values }) => {
+        {({ errors, handleChange, isSubmitting, values, setFieldValue }) => {
           return (
             <Form>
               <FormHead
@@ -282,6 +291,15 @@ const EditView = () => {
                     values={values}
                     transferToken={transferToken}
                   />
+                  {getTokenFormExtensions().map(({ id: extensionId, field, Component }) => (
+                    <Component
+                      key={extensionId}
+                      token={transferToken}
+                      value={(values as unknown as Record<string, unknown>)[field]}
+                      onChange={(value) => setFieldValue(field, value)}
+                      disabled={!canEditInputs}
+                    />
+                  ))}
                 </Flex>
               </Layouts.Content>
             </Form>

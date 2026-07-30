@@ -10,6 +10,7 @@ import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
 
+import { getSettingsMenuMutators } from './settingsMenuMutators';
 import { useEnterprise } from './useEnterprise';
 
 import type {
@@ -186,12 +187,22 @@ const useSettingsMenu = (): {
     checkUserHasPermission,
   ]);
 
+  // Plugin-registered menu mutators (see settingsMenuMutators.ts). The list is
+  // frozen before the first render, so calling the hooks in a loop keeps a
+  // stable order across renders.
+  const mutators = getSettingsMenuMutators().map(({ useMutator }) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useMutator()
+  );
+
+  const displayedMenu = menu.map((menuItem) => ({
+    ...menuItem,
+    links: menuItem.links.filter((link) => link.isDisplayed),
+  }));
+
   return {
     isLoading,
-    menu: menu.map((menuItem) => ({
-      ...menuItem,
-      links: menuItem.links.filter((link) => link.isDisplayed),
-    })),
+    menu: mutators.reduce((current, mutate) => mutate(current), displayedMenu),
   };
 };
 

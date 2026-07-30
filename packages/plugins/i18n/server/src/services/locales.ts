@@ -2,6 +2,29 @@ import { isNil } from 'lodash/fp';
 import { DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 
+/**
+ * Extension point: a plugin (e.g. `@strapi/plugin-spaces`) can replace how the
+ * default locale is resolved/persisted by installing a strategy. All three internal
+ * consumers (`getDefaultLocale`, `setDefaultLocale`, `setIsDefault`) route through
+ * it, so module-local calls inside this service observe the override too — a plain
+ * service-method monkey-patch would miss them.
+ *
+ * `listDefaults` (optional) enumerates the effective default locale per scope
+ * (e.g. per space slug); when provided, `setIsDefault` attaches an
+ * `isDefaultIn: string[]` array to each locale row for the admin UI.
+ */
+interface DefaultLocaleStrategy {
+  get(): Promise<string | null | undefined>;
+  set(code: string): Promise<void>;
+  listDefaults?(): Promise<Record<string, string>>;
+}
+
+let defaultLocaleStrategy: DefaultLocaleStrategy | null = null;
+
+const setDefaultLocaleStrategy = (strategy: DefaultLocaleStrategy | null) => {
+  defaultLocaleStrategy = strategy;
+};
+
 const find = (params: any = {}) =>
   strapi.db.query('plugin::i18n.locale').findMany({ where: params });
 
@@ -46,13 +69,45 @@ const deleteFn = async ({ id }: any) => {
 };
 
 const setDefaultLocale = ({ code }: any) =>
-  getCoreStore().set({ key: 'default_locale', value: code });
+  defaultLocaleStrategy
+    ? defaultLocaleStrategy.set(code)
+    : getCoreStore().set({ key: 'default_locale', value: code });
 
-const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
+const getDefaultLocale = () =>
+  defaultLocaleStrategy
+    ? defaultLocaleStrategy.get()
+    : getCoreStore().get({ key: 'default_locale' });
 
 const setIsDefault = async (locales: any) => {
   if (isNil(locales)) {
     return locales;
+  }
+
+  if (defaultLocaleStrategy) {
+    const strategy = defaultLocaleStrategy;
+    // Resolve ONCE for the whole list: a per-row `isDefault(code)` check would
+    // repeat the same store reads and locale-list query for every row
+    // (O(rows × queries) on each GET /i18n/locales), while `get()` follows the
+    // exact same resolution (per-scope override → platform default → first
+    // visible locale), so `isDefault ≡ get() === code`.
+    const [effectiveDefault, defaultsByScope] = await Promise.all([
+      strategy.get(),
+      strategy.listDefaults?.() ?? null,
+    ]);
+
+    const decorate = (locale: any) => ({
+      ...locale,
+      isDefault: effectiveDefault === locale.code,
+      ...(defaultsByScope
+        ? {
+            isDefaultIn: Object.entries(defaultsByScope)
+              .filter(([, code]) => code === locale.code)
+              .map(([scope]) => scope),
+          }
+        : {}),
+    });
+
+    return Array.isArray(locales) ? locales.map(decorate) : decorate(locales);
   }
 
   const actualDefault = await getDefaultLocale();
@@ -92,6 +147,7 @@ const locales = () => ({
   count,
   setDefaultLocale,
   getDefaultLocale,
+  setDefaultLocaleStrategy,
   setIsDefault,
   delete: deleteFn,
   initDefaultLocale,
@@ -100,4 +156,4 @@ const locales = () => ({
 type LocaleService = typeof locales;
 
 export default locales;
-export type { LocaleService };
+export type { LocaleService, DefaultLocaleStrategy };

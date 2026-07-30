@@ -22,11 +22,18 @@ import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Locale, UpdateLocale } from '../../../shared/contracts/locales';
+import { getLocaleFormExtensionInitialValues } from '../i18n-plugin';
 import { useUpdateLocaleMutation } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
 
-import { AdvancedForm, BaseForm, LOCALE_SCHEMA, SubmitButton } from './CreateLocale';
+import {
+  AdvancedForm,
+  BaseForm,
+  LocaleFormExtensions,
+  LOCALE_SCHEMA,
+  SubmitButton,
+} from './CreateLocale';
 
 /* -------------------------------------------------------------------------------------------------
  * EditLocale
@@ -64,7 +71,8 @@ const EditLocale = (props: EditLocaleProps) => {
  * EditModal
  * -----------------------------------------------------------------------------------------------*/
 
-interface EditModalProps extends Pick<Locale, 'id' | 'isDefault' | 'name' | 'code'> {
+interface EditModalProps
+  extends Pick<Locale, 'id' | 'isDefault' | 'name' | 'code' | 'spaces' | 'isDefaultIn'> {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -75,7 +83,16 @@ type FormValues = UpdateLocale.Request['body'] & { code: string };
  * @internal
  * @description Exported to be used when someone clicks on a table row.
  */
-const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalProps) => {
+const EditModal = ({
+  id,
+  code,
+  isDefault,
+  name,
+  spaces,
+  isDefaultIn,
+  open,
+  onOpenChange,
+}: EditModalProps) => {
   const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -141,6 +158,14 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
             code,
             name,
             isDefault,
+            ...getLocaleFormExtensionInitialValues({
+              id,
+              code,
+              isDefault,
+              name,
+              spaces,
+              isDefaultIn,
+            }),
           }}
           validationSchema={LOCALE_SCHEMA}
         >
@@ -185,6 +210,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
               <Box paddingTop={7} paddingBottom={7}>
                 <Tabs.Content value="basic">
                   <BaseForm mode="edit" />
+                  <LocaleFormExtensions mode="edit" />
                 </Tabs.Content>
                 <Tabs.Content value="advanced">
                   <AdvancedForm isDefaultLocale={isDefault} />
