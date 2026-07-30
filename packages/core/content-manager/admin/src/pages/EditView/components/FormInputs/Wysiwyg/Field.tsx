@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-admin';
-import { Field, Flex } from '@strapi/design-system';
+import { useField, useStrapiApp, useIsMobile, type InputProps } from '@strapi/admin/strapi-admin';
+import { Box, Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
@@ -10,7 +10,7 @@ import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
 import { insertFile } from './utils/utils';
 import { WysiwygFooter } from './WysiwygFooter';
-import { WysiwygNav } from './WysiwygNav';
+import { WysiwygNav, WysiwygPreviewToggleButton } from './WysiwygNav';
 
 import type { Schema } from '@strapi/types';
 
@@ -19,9 +19,16 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
   type: Schema.Attribute.RichText['type'];
 }
 
+type SelectedAsset = {
+  alternativeText?: string | null;
+  name: string;
+  url: string;
+  mime: string;
+};
+
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   ({ hint, disabled, label, name, placeholder, required, labelAction }, forwardedRef) => {
-    const field = useField(name);
+    const field = useField<string>(name);
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const editorRef = React.useRef<EditorFromTextArea>(
       null
@@ -29,6 +36,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [isPreviewMode, setIsPreviewMode] = React.useState(false);
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
+    const isMobile = useIsMobile();
     const components = useStrapiApp('ImageDialog', (state) => state.components);
 
     const MediaLibraryDialog = components['media-library'];
@@ -40,10 +48,10 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
       setIsExpandMode((prev) => !prev);
     };
 
-    const handleSelectAssets = (files: any[]) => {
+    const handleSelectAssets = (files: SelectedAsset[]) => {
       const formattedFiles = files.map((f) => ({
         alt: f.alternativeText || f.name,
-        url: prefixFileUrlWithBackendUrl(f.url),
+        url: prefixFileUrlWithBackendUrl(f.url) ?? f.url,
         mime: f.mime,
       }));
 
@@ -69,7 +77,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
               disabled={disabled}
             />
-
             <Editor
               disabled={disabled}
               isExpandMode={isExpandMode}
@@ -80,11 +87,22 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               onChange={field.onChange}
               placeholder={placeholder}
               textareaRef={textareaRef}
-              value={field.value}
+              value={field.value ?? ''}
               ref={forwardedRef}
             />
-
-            {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {!isExpandMode && !isMobile && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {isMobile && (
+              <Box position="absolute" bottom={0} right={0} left={0} pointerEvents="none">
+                <Flex justifyContent="flex-end" padding={4}>
+                  <Box pointerEvents="auto" display="inline-flex">
+                    <WysiwygPreviewToggleButton
+                      isPreviewMode={isPreviewMode}
+                      onTogglePreviewMode={handleTogglePreviewMode}
+                    />
+                  </Box>
+                </Flex>
+              </Box>
+            )}
           </EditorLayout>
           <Field.Hint />
           <Field.Error />

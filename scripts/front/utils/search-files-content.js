@@ -5,7 +5,7 @@ const path = require('path');
 const readFile = promisify(require('fs').readFile);
 const { readFileSync, writeFileSync } = require('fs');
 const _ = require('lodash');
-const glob = promisify(require('glob').glob);
+const { glob } = require('glob');
 const chalk = require('chalk');
 
 const findFilesInDirectories = async (

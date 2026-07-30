@@ -10,8 +10,8 @@ export interface RecentDocument {
   locale: string | null;
   status?: 'draft' | 'published' | 'modified';
   title: string;
-  updatedAt: Date;
-  publishedAt?: Date | null;
+  updatedAt: string;
+  publishedAt?: string | null;
 }
 
 export declare namespace GetRecentDocuments {
@@ -24,6 +24,21 @@ export declare namespace GetRecentDocuments {
 
   export interface Response {
     data: RecentDocument[];
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetCountDocuments {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      draft: number;
+      published: number;
+      modified: number;
+    };
     error?: errors.ApplicationError;
   }
 }

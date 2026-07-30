@@ -752,27 +752,90 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiMixedContentMixedContent extends Struct.CollectionTypeSchema {
+  collectionName: 'mixed_contents';
+  info: {
+    singularName: 'mixed-content';
+    pluralName: 'mixed-contents';
+    displayName: 'Mixed Content';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    localizedText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    sharedText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    sharedMedia: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    nestedSharedComponent: Schema.Attribute.Component<'mixed-content.mixed-content-nested-media-wrapper'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToOne',
+      'admin::user'
+    > &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToOne',
+      'admin::user'
+    > &
+      Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToMany',
+      'api::mixed-content.mixed-content'
+    >;
+    locale: Schema.Attribute.String;
+  };
+}
+
 declare module '@strapi/types' {
-  export module Public {
-    export module Registries {
-      export interface ContentTypesSchemas {
-        'admin::permission': AdminPermission;
-        'admin::user': AdminUser;
-        'admin::role': AdminRole;
-        'admin::api-token': AdminApiToken;
-        'admin::api-token-permission': AdminApiTokenPermission;
-        'admin::transfer-token': AdminTransferToken;
-        'admin::transfer-token-permission': AdminTransferTokenPermission;
-        'plugin::upload.file': PluginUploadFile;
-        'plugin::upload.folder': PluginUploadFolder;
-        'plugin::i18n.locale': PluginI18NLocale;
-        'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
-        'plugin::users-permissions.role': PluginUsersPermissionsRole;
-        'plugin::users-permissions.user': PluginUsersPermissionsUser;
-        'api::article.article': ApiArticleArticle;
-        'api::author.author': ApiAuthorAuthor;
-        'api::category.category': ApiCategoryCategory;
-      }
+  export namespace Public {
+    export interface ContentTypeSchemas {
+      'admin::permission': AdminPermission;
+      'admin::user': AdminUser;
+      'admin::role': AdminRole;
+      'admin::api-token': AdminApiToken;
+      'admin::api-token-permission': AdminApiTokenPermission;
+      'admin::transfer-token': AdminTransferToken;
+      'admin::transfer-token-permission': AdminTransferTokenPermission;
+      'plugin::upload.file': PluginUploadFile;
+      'plugin::upload.folder': PluginUploadFolder;
+      'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
+      'plugin::users-permissions.role': PluginUsersPermissionsRole;
+      'plugin::users-permissions.user': PluginUsersPermissionsUser;
+      'api::article.article': ApiArticleArticle;
+      'api::author.author': ApiAuthorAuthor;
+      'api::category.category': ApiCategoryCategory;
+      'api::mixed-content.mixed-content': ApiMixedContentMixedContent;
     }
   }
 }

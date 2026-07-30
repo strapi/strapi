@@ -15,6 +15,8 @@ import type { File } from '../../../../shared/contracts/files';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
 export interface MediaLibraryDialogProps {
   allowedTypes?: AllowedTypes[];
+  multiple?: boolean;
+  initiallySelectedAssets?: File[];
   onClose: () => void;
   onSelectAssets: (selectedAssets: File[]) => void;
 }
@@ -23,6 +25,8 @@ export const MediaLibraryDialog = ({
   onClose,
   onSelectAssets,
   allowedTypes = ['files', 'images', 'videos', 'audios'],
+  multiple = true,
+  initiallySelectedAssets = [],
 }: MediaLibraryDialogProps) => {
   const [step, setStep] = React.useState(STEPS.AssetSelect);
   const [folderId, setFolderId] = React.useState<number | null>(null);
@@ -36,10 +40,11 @@ export const MediaLibraryDialog = ({
           open
           onClose={onClose}
           onValidate={onSelectAssets}
+          initiallySelectedAssets={initiallySelectedAssets}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
           onChangeFolder={(folderId) => setFolderId(folderId)}
-          multiple
+          multiple={multiple}
         />
       );
 

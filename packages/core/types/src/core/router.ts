@@ -1,32 +1,16 @@
-import type { MiddlewareHandler } from './middleware';
+import type { Strapi } from './strapi';
+import type { Route, RouteInput } from './route';
 
 export type RouterType = 'admin' | 'content-api';
 
-export type RouteInfo = {
-  apiName?: string;
-  pluginName?: string;
-  type?: string;
-};
-
-export type RouteConfig = {
-  prefix?: string;
-  middlewares?: Array<string | MiddlewareHandler>;
-  policies?: Array<string | { name: string; config: unknown }>;
-  auth?: false | { scope?: string[]; strategies?: string[] };
-};
-
-export type Route = {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';
-  path: string;
-  handler: string | MiddlewareHandler | MiddlewareHandler[];
-  info: RouteInfo;
-  config?: RouteConfig;
-};
-
-export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
-
-export type Router = {
+export interface Router {
   type: RouterType;
   prefix?: string;
   routes: Route[];
-};
+}
+
+export interface RouterInput extends Omit<Router, 'routes'> {
+  routes: RouteInput[];
+}
+
+export type RouterConfig = RouterInput | ((params: { strapi: Strapi }) => RouterInput);

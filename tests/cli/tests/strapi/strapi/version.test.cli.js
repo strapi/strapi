@@ -4,7 +4,7 @@ const coffee = require('coffee');
 const semver = require('semver');
 const assert = require('assert');
 
-const utils = require('../../../utils');
+const utils = require('../../../../utils');
 
 describe('--version', () => {
   let appPath;

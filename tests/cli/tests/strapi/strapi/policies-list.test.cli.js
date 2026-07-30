@@ -2,7 +2,7 @@
 
 const coffee = require('coffee');
 
-const utils = require('../../../utils');
+const utils = require('../../../../utils');
 
 describe('policies:list', () => {
   let appPath;
@@ -19,22 +19,6 @@ describe('policies:list', () => {
       .expect('code', 0)
       .end();
 
-    const output = stdout.trim();
-
-    const expected = `
-┌────────────────────────────────────────┐
-│ Name                                   │
-├────────────────────────────────────────┤
-│ plugin::content-manager.hasPermissions │
-├────────────────────────────────────────┤
-│ admin::isAuthenticatedAdmin            │
-├────────────────────────────────────────┤
-│ admin::hasPermissions                  │
-├────────────────────────────────────────┤
-│ admin::isTelemetryEnabled              │
-└────────────────────────────────────────┘
-    `;
-
-    utils.helpers.expectConsoleLinesToInclude(output, expected);
+    expect(utils.helpers.normalizeCliOutputForSnapshot(stdout)).toMatchSnapshot();
   });
 });

@@ -115,7 +115,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
 
             <Modal.Body>
               <Grid.Root gap={4}>
-                <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
+                <Grid.Item xs={12} direction="column" alignItems="stretch">
                   <Field.Root id="folder-destination">
                     <Field.Label>
                       {formatMessage({
@@ -152,11 +152,11 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
             <Modal.Footer>
               <Modal.Close>
                 <Button variant="tertiary" name="cancel">
-                  {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                  {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
                 </Button>
               </Modal.Close>
               <Button type="submit" loading={isLoading}>
-                {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
+                {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
               </Button>
             </Modal.Footer>
           </Form>

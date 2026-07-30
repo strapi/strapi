@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "원하는 색상을 선택하세요",
+  "color-picker.input.aria-label": "색상 선택기 입력",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "색상",
+  "color-picker.options.advanced.regex": "정규식 패턴",
+  "color-picker.options.advanced.regex.description": "HEX 값을 검증할 정규식을 입력하세요",
+  "color-picker.options.advanced.requiredField": "필수 필드",
+  "color-picker.options.advanced.requiredField.description": "이 필드가 비어 있으면 항목을 생성할 수 없습니다",
+  "color-picker.settings": "설정",
+  "color-picker.toggle.aria-label": "색상 선택기 토글",
+  "plugin.description.long": "Strapi가 유지 관리하는 색상 선택기 커스텀 필드입니다. 채도와 색조 슬라이더를 사용해 색상을 선택하고 HEX 문자열로 값을 저장합니다.",
+  "plugin.description.short": "Strapi가 유지 관리하는 색상 선택기 커스텀 필드입니다.",
+  "plugin.name": "색상 선택기"
+}

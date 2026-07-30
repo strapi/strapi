@@ -9,21 +9,25 @@ import { BulkMoveDialog } from '../../../components/BulkMoveDialog/BulkMoveDialo
 import type { File } from '../../../../../shared/contracts/files';
 import type { Folder as FolderDefinition } from '../../../../../shared/contracts/folders';
 
-interface FileWithType extends File {
+interface FolderWithType extends FolderDefinition {
   type: string;
 }
 
-interface FolderWithType extends FolderDefinition {
+interface FileWithType extends File {
   type: string;
 }
 
 export interface BulkMoveButtonProps {
   onSuccess: () => void;
   currentFolder?: FolderWithType;
-  selected: Array<FolderWithType | FileWithType>;
+  selected?: Array<FolderWithType | FileWithType>;
 }
 
-export const BulkMoveButton = ({ selected, onSuccess, currentFolder }: BulkMoveButtonProps) => {
+export const BulkMoveButton = ({
+  selected = [],
+  onSuccess,
+  currentFolder,
+}: BulkMoveButtonProps) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 

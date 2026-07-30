@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useState } from 'react';
 
-import { Layouts } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
 
@@ -9,6 +8,8 @@ import { useDataManager } from '../../DataManager/useDataManager';
 import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
 import { mockData } from './mockData';
+
+import type { DataManagerContextValue } from '../../DataManager/DataManagerContext';
 
 const mockSearchOnChange = jest.fn(); // Spy function
 
@@ -35,53 +36,77 @@ const mockUndo = jest.fn();
 const mockRedo = jest.fn();
 const mockDiscardAllChanges = jest.fn();
 
+type DataManagerMockOptions = Partial<Omit<DataManagerContextValue, 'history'>> & {
+  history?: Partial<DataManagerContextValue['history']>;
+};
+
+const mockDataManager = ({
+  history,
+  ...overrides
+}: DataManagerMockOptions = {}): DataManagerContextValue => ({
+  isLoading: false,
+  addAttribute() {},
+  editAttribute() {},
+  moveAttribute() {},
+  addCustomFieldAttribute() {},
+  editCustomFieldAttribute() {},
+  addCreatedComponentToDynamicZone() {},
+  createComponentSchema() {},
+  createSchema() {},
+  changeDynamicZoneComponents() {},
+  removeAttribute() {},
+  deleteComponent() {},
+  deleteContentType() {},
+  removeComponentFromDynamicZone() {},
+  sortedContentTypesList: [],
+  updateComponentSchema() {},
+  updateComponentUid() {},
+  updateSchema() {},
+  initialComponents: {},
+  components: {},
+  componentsGroupedByCategory: {},
+  componentsThatHaveOtherComponentInTheirAttributes: [],
+  initialContentTypes: {},
+  contentTypes: {},
+  isInDevelopmentMode: true,
+  nestedComponents: [],
+  reservedNames: {
+    models: [],
+    attributes: [],
+  },
+  allComponentsCategories: [],
+  async saveSchema() {},
+  isModified: false,
+  isSaving: false,
+  applyChange() {},
+  ...overrides,
+  history: {
+    canUndo: true,
+    canRedo: true,
+    canDiscardAll: true,
+    undo: mockUndo,
+    redo: mockRedo,
+    discardAllChanges: mockDiscardAllChanges,
+    ...history,
+  },
+});
+
 jest.mock('../../DataManager/useDataManager.ts', () => {
   return {
-    useDataManager: jest.fn(() => ({
-      saveSchema() {},
-      isModified: false,
-      history: {
-        canUndo: true,
-        canRedo: true,
-        canDiscardAll: true,
-        undo: mockUndo,
-        redo: mockRedo,
-        discardAllChanges: mockDiscardAllChanges,
-      },
-      isInDevelopmentMode: true,
-    })),
+    useDataManager: jest.fn(() => mockDataManager()),
   };
 });
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const App = (
-  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
-    <div />
-  </Layouts.Root>
-);
+const App = <ContentTypeBuilderNav />;
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
     mockUndo.mockClear();
     mockRedo.mockClear();
     mockDiscardAllChanges.mockClear();
-    mockedUseDataManager.mockImplementation(
-      () =>
-        ({
-          saveSchema() {},
-          isModified: true,
-          history: {
-            canUndo: true,
-            canRedo: true,
-            canDiscardAll: true,
-            undo: mockUndo,
-            redo: mockRedo,
-            discardAllChanges: mockDiscardAllChanges,
-          },
-          isInDevelopmentMode: true,
-        }) as any
-    );
+    mockedUseDataManager.mockImplementation(() => mockDataManager({ isModified: true }));
 
     mockSearchOnChange.mockClear();
   });
@@ -101,16 +126,13 @@ describe('<ContentTypeBuilderNav />', () => {
     });
 
     it('should be disabled when there are no changes', () => {
-      mockedUseDataManager.mockImplementationOnce(
-        () =>
-          ({
-            saveSchema() {},
-            isModified: false,
-            history: {
-              undo() {},
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementationOnce(() =>
+        mockDataManager({
+          isModified: false,
+          history: {
+            undo() {},
+          },
+        })
       );
 
       const { getByRole } = render(App);
@@ -122,16 +144,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it.each([true, false])(
       'should be disabled when not in development mode & isModified=%s',
       (isModified) => {
-        mockedUseDataManager.mockImplementation(
-          () =>
-            ({
-              saveSchema() {},
-              isModified,
-              history: {
-                undo() {},
-              },
-              isInDevelopmentMode: false,
-            }) as any
+        mockedUseDataManager.mockImplementation(() =>
+          mockDataManager({
+            isModified,
+            history: {
+              undo() {},
+            },
+            isInDevelopmentMode: false,
+          })
         );
 
         const { getByRole } = render(App);
@@ -142,16 +162,13 @@ describe('<ContentTypeBuilderNav />', () => {
     );
 
     it('should be enabled when there are changes', () => {
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            isModified: true,
-            history: {
-              undo() {},
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          isModified: true,
+          history: {
+            undo() {},
+          },
+        })
       );
 
       const { getByRole } = render(App);
@@ -197,16 +214,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the undo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canUndo: true,
-              undo: mockUndo,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canUndo: true,
+            undo: mockUndo,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -221,16 +236,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the redo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canRedo: true,
-              redo: mockRedo,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canRedo: true,
+            redo: mockRedo,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -245,16 +258,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the discard item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canDiscardAll: true,
-              discardAllChanges: mockDiscardAllChanges,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canDiscardAll: true,
+            discardAllChanges: mockDiscardAllChanges,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -276,17 +287,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the undo item when there are changes to undo', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canUndo: true,
-              undo: mockUndo,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canUndo: true,
+            undo: mockUndo,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -308,17 +317,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the redo item when there are changes to redo', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canRedo: true,
-              redo: mockRedo,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canRedo: true,
+            redo: mockRedo,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -340,17 +347,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the discard item when there are changes to discard', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canDiscardAll: true,
-              discardAllChanges: mockDiscardAllChanges,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canDiscardAll: true,
+            discardAllChanges: mockDiscardAllChanges,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -452,7 +457,7 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the search input', () => {
       render(App);
 
-      expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument();
+      expect(screen.getByRole('searchbox', { name: /search/i })).toBeInTheDocument();
     });
 
     it('Should call search.onChange when the input value changes', async () => {
@@ -460,7 +465,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
       render(App);
 
-      const input = screen.getByRole('textbox', { name: /search/i });
+      const input = screen.getByRole('searchbox', { name: /search/i });
       await user.type(input, 'test');
 
       expect(input).toHaveValue('test');
@@ -472,7 +477,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
       render(App);
 
-      const input = screen.getByRole('textbox', { name: /search/i });
+      const input = screen.getByRole('searchbox', { name: /search/i });
       await user.type(input, 'test');
 
       expect(input).toHaveValue('test');

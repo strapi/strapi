@@ -1,10 +1,13 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   root: true,
   extends: [
     '@strapi/eslint-config/back/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'eslint-plugin-rxjs'],
+  plugins: ['@typescript-eslint'],
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
   },
@@ -13,9 +16,6 @@ module.exports = {
   },
   rules: {
     ...require('./index').rules,
-    'rxjs/finnish': 'error',
-    'node/no-unsupported-features/es-syntax': 'off',
-    'node/no-missing-import': 'off',
     // TODO: The following rules from @strapi/eslint-config/back/typescript are disabled because they're causing problems we need to solve or fix
     // to be solved in configuration
     'node/no-unsupported-features/es-syntax': 'off',
@@ -41,3 +41,5 @@ module.exports = {
     },
   ],
 };
+
+module.exports = config;

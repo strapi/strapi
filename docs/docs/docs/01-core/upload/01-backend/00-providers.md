@@ -1,6 +1,6 @@
 ---
 title: Providers
-slug: /upload
+slug: /upload/providers
 tags:
   - upload
 ---

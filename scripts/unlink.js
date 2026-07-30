@@ -1,10 +1,9 @@
 'use strict';
 
 const { join } = require('path');
-const { promisify } = require('util');
 const execa = require('execa');
 const fs = require('fs-extra');
-const glob = promisify(require('glob').glob);
+const { glob } = require('glob');
 
 async function run() {
   const packageDirs = await glob('packages/**/*', { ignore: '**/node_modules/**' });

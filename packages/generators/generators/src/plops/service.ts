@@ -1,8 +1,11 @@
-import type { NodePlopAPI } from 'plop';
-import tsUtils from '@strapi/typescript-utils';
+import type { ActionType, NodePlopAPI } from 'plop';
+import { join } from 'path';
+import fs from 'fs';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';
 import getFilePath from './utils/get-file-path';
+import getGeneratorLanguage from './utils/get-generator-language';
+import { appendToFile } from './utils/extend-plugin-index-files';
 
 export default (plop: NodePlopAPI) => {
   // Service generator
@@ -22,16 +25,41 @@ export default (plop: NodePlopAPI) => {
       }
 
       const filePath = getFilePath(answers?.destination);
-      const currentDir = process.cwd();
-      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      const language = getGeneratorLanguage({ plugin: answers.plugin, filePath }, plop);
 
-      return [
+      const baseActions: Array<ActionType> = [
         {
           type: 'add',
           path: `${filePath}/services/{{ id }}.${language}`,
           templateFile: `templates/${language}/service.${language}.hbs`,
         },
       ];
+
+      if (answers.plugin) {
+        const indexPath = join(plop.getDestBasePath(), `${filePath}/services/index.${language}`);
+        const exists = fs.existsSync(indexPath);
+
+        if (!exists) {
+          // Create index file if it doesn't exist
+          baseActions.push({
+            type: 'add',
+            path: `${filePath}/services/index.${language}`,
+            templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+            skipIfExists: true,
+          });
+        }
+
+        // Append the new service to the index.ts file
+        baseActions.push({
+          type: 'modify',
+          path: `${filePath}/services/index.${language}`,
+          transform(template: string) {
+            return appendToFile(template, { type: 'index', singularName: answers.id });
+          },
+        });
+      }
+
+      return baseActions;
     },
   });
 };

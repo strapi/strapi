@@ -54,7 +54,6 @@ describe('<ColorPickerInput />', () => {
     expect(getByRole('slider', { name: 'Color' })).toBeVisible();
     expect(getByRole('slider', { name: 'Hue' })).toBeVisible();
     expect(getByRole('textbox', { name: 'Color picker input' })).toBeVisible();
-    expect(getByRole('textbox', { name: 'Color picker input' })).toHaveValue('#000000');
   });
 
   it('can change color via text input', async () => {

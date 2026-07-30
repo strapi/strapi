@@ -113,7 +113,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -145,6 +145,7 @@ export const SingleSignOnPage = () => {
                     loading={isSubmitting}
                     startIcon={<Check />}
                     type="submit"
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',
@@ -251,6 +252,7 @@ export const SingleSignOnPage = () => {
                         <Grid.Item
                           key={field.name}
                           col={size}
+                          xs={12}
                           direction="column"
                           alignItems="stretch"
                         >
@@ -265,7 +267,7 @@ export const SingleSignOnPage = () => {
           )}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 
@@ -285,7 +287,7 @@ type MultiSelectInputProps = Omit<Extract<InputProps, { type: 'enumeration' }>, 
 };
 
 const MultiSelectInput = ({ hint, label, name, options, ...props }: MultiSelectInputProps) => {
-  const field = useField(name);
+  const field = useField<string[]>(name);
 
   return (
     <Field.Root name={name} hint={hint} error={field.error}>

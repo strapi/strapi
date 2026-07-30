@@ -1,8 +1,6 @@
-import type { PromptQuestion } from 'node-plop';
-
 import validateInput from '../utils/validate-input';
 
-const questions: Array<PromptQuestion> = [
+const questions = [
   {
     type: 'list',
     name: 'kind',

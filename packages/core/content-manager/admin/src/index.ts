@@ -1,4 +1,7 @@
-import { CheckCircle, Feather, Pencil } from '@strapi/icons';
+// NOTE: preload before content-manager so Blocks code-editor prism language plugins see global Prism.
+import 'prismjs';
+
+import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -8,12 +11,11 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-// NOTE: we have to preload it to ensure chunks will have it available as global
-import 'prismjs';
+import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     const cm = new ContentManagerPlugin();
 
     app.addReducers({
@@ -45,9 +47,8 @@ export default {
 
     app.registerPlugin(cm.config);
 
-    // Register homepage widgets
-    app.widgets.register([
-      {
+    app.widgets.register((widgets: WidgetArgs[]) => {
+      const lastEditedWidget: WidgetArgs = {
         icon: Pencil,
         title: {
           id: `${PLUGIN_ID}.widget.last-edited.title`,
@@ -60,8 +61,8 @@ export default {
         pluginId: PLUGIN_ID,
         id: 'last-edited-entries',
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
-      },
-      {
+      };
+      const lastPublishedWidget: WidgetArgs = {
         icon: CheckCircle,
         title: {
           id: `${PLUGIN_ID}.widget.last-published.title`,
@@ -74,10 +75,38 @@ export default {
         pluginId: PLUGIN_ID,
         id: 'last-published-entries',
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
-      },
-    ]);
+      };
+      const entriesWidget: WidgetArgs = {
+        icon: PuzzlePiece,
+        title: {
+          id: `${PLUGIN_ID}.widget.chart-entries.title`,
+          defaultMessage: 'Entries',
+        },
+        component: async () => {
+          const { ChartEntriesWidget } = await import('./components/Widgets');
+          return ChartEntriesWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'chart-entries',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      };
+
+      const profileInfoIndex = widgets.findIndex(
+        (widget) => widget.id === 'profile-info' && widget.pluginId === 'admin'
+      );
+
+      // Insert chart-entries after the profile-info widget
+      if (profileInfoIndex !== -1) {
+        const newWidgets: WidgetArgs[] = [...widgets];
+        newWidgets.splice(profileInfoIndex + 1, 0, entriesWidget);
+        return [lastEditedWidget, lastPublishedWidget, ...newWidgets];
+      }
+
+      // Fallback: add to the end if the target widget aren't found
+      return [lastEditedWidget, lastPublishedWidget, ...widgets, entriesWidget];
+    });
   },
-  bootstrap(app: any) {
+  bootstrap(app: StrapiApp) {
     if (typeof historyAdmin.bootstrap === 'function') {
       historyAdmin.bootstrap(app);
     }

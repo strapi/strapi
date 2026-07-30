@@ -1,6 +1,16 @@
-import { Job, Spec } from 'node-schedule';
+import type { Job, Spec } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
 import type { Core } from '@strapi/types';
+
+// Lazy: only required when a cron task is actually scheduled
+let lazyNs: typeof import('node-schedule') | undefined;
+const ns = (): typeof import('node-schedule') => {
+  if (!lazyNs) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyNs = require('node-schedule');
+  }
+  return lazyNs as typeof import('node-schedule');
+};
 
 interface JobSpec {
   job: Job;
@@ -52,7 +62,10 @@ const createCronService = () => {
         const fnWithStrapi = (...args: unknown[]) => fn({ strapi }, ...args);
 
         // const job = new Job(null, fnWithStrapi);
-        const job = new Job(fnWithStrapi);
+        const job: Job = new (ns().Job)(fnWithStrapi);
+        job.on('error', (error) => {
+          strapi.log.error(`Cron job "${taskName ?? taskExpression}" failed`, error);
+        });
         jobsSpecs.push({ job, options, name: taskName });
 
         if (running) {

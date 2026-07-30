@@ -14,6 +14,7 @@ const {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
+  FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
 } = contentTypesUtils.constants;
@@ -50,7 +51,25 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   addCreatorFields(schema);
 
+  addFirstPublishedAt(schema);
+
+  warnDraftAndPublishReservedAttributes(uid, schema);
+
   return schema;
+};
+
+const warnDraftAndPublishReservedAttributes = (uid: string, schema: Schema.ContentType) => {
+  if (schema.options?.draftAndPublish !== true) {
+    return;
+  }
+
+  for (const attributeName of contentTypesUtils.findDraftAndPublishReservedAttributeNames(
+    Object.keys(schema.attributes)
+  )) {
+    strapi.log.warn(
+      contentTypesUtils.getDraftAndPublishReservedAttributeWarning(uid, attributeName)
+    );
+  }
 };
 
 const addTimestamps = (schema: Schema.ContentType) => {
@@ -75,11 +94,28 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
     type: 'datetime',
     configurable: false,
     writable: true,
-    visible: false,
+    visible: true,
     default() {
       return new Date();
     },
   };
+};
+
+const addFirstPublishedAt = (schema: Schema.ContentType) => {
+  const isEnabled = contentTypesUtils.hasFirstPublishedAtField(schema);
+
+  // Note: As an expertimental feature, we are okay if this data is deleted if this feature is
+  // switched off. Once "preserve_attributes" come into play, this will be updated.
+  if (isEnabled) {
+    strapi.log.warn(`Experimental feature enabled: firstPublishedAt on ${schema.collectionName}`);
+    schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
+      type: 'datetime',
+      configurable: false,
+      writable: true,
+      visible: false,
+      private: !isEnabled,
+    };
+  }
 };
 
 const addCreatorFields = (schema: Schema.ContentType) => {

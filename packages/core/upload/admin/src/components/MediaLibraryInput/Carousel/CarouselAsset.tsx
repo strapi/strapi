@@ -1,9 +1,9 @@
 import { Box, Flex } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { ASSET_TYPES } from '../../../enums';
 import { createAssetUrl } from '../../../utils';
+import { getFileIconComponent } from '../../../utils/icons';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 
@@ -29,7 +29,7 @@ const AudioPreviewWrapper = styled(Box)`
 `;
 
 export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
-  if (asset.mime?.includes(AssetType.Video)) {
+  if (asset.mime?.includes(ASSET_TYPES.Video)) {
     return (
       <VideoPreviewWrapper height="100%">
         <VideoPreview
@@ -41,7 +41,7 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
-  if (asset.mime?.includes(AssetType.Audio)) {
+  if (asset.mime?.includes(ASSET_TYPES.Audio)) {
     return (
       <AudioPreviewWrapper>
         <AudioPreview
@@ -52,16 +52,28 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
-  if (asset.mime?.includes(AssetType.Image)) {
+  if (asset.mime?.includes(ASSET_TYPES.Image)) {
     const assetUrl = createAssetUrl(asset, true);
     if (!assetUrl) return null;
 
     // Adding a param to the url to bust the cache and force the refresh of the image when replaced
-    const cacheBustedUrl = `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
+    // Only add updatedAt parameter if the URL is not signed to prevent signature invalidation
+    const cacheBustedUrl = asset.isUrlSigned
+      ? assetUrl
+      : `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
+
+    // Only set crossOrigin for signed remote URLs. Signed URLs are loaded
+    // without a cache-buster (see cacheBustedUrl above), so the thumbnail and
+    // preview hit the identical URL and would collide in the browser's cache
+    // unless both opt into CORS. Public/unsigned remote URLs get the
+    // ?updatedAt= buster, so they never collide and must NOT require a bucket
+    // CORS rule just to render a plain <img>. See #26581.
+    const crossOrigin = !asset.isLocal && asset.isUrlSigned ? 'anonymous' : undefined;
 
     return (
       <Box
         tag="img"
+        crossOrigin={crossOrigin}
         maxHeight="100%"
         maxWidth="100%"
         src={cacheBustedUrl}
@@ -70,13 +82,11 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
+  const IconComponent = getFileIconComponent(asset.ext);
+
   return (
     <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
-      {asset.ext?.includes('pdf') ? (
-        <FilePdf aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      ) : (
-        <File aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      )}
+      <IconComponent aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
     </DocAsset>
   );
 };

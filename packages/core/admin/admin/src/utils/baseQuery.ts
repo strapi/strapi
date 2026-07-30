@@ -1,7 +1,14 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import { getFetchClient, type FetchOptions, ApiError, isFetchError } from '../utils/getFetchClient';
+import { logout as logoutAction } from '../reducer';
+import {
+  getFetchClient,
+  triggerSessionExpired,
+  type FetchOptions,
+  ApiError,
+  isFetchError,
+} from '../utils/getFetchClient';
 
 interface QueryArguments {
   url: string;
@@ -19,56 +26,64 @@ interface UnknownApiError {
 
 type BaseQueryError = ApiError | UnknownApiError;
 
-const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> = async (
-  query,
-  { signal }
-) => {
-  try {
+const isAuthPath = (url: string) => /^\/admin\/(login|logout|access-token)\b/.test(url);
+
+const simpleQuery: BaseQueryFn<
+  string | QueryArguments,
+  unknown,
+  BaseQueryError | SerializedError
+> = async (query, api) => {
+  const { signal, dispatch } = api;
+
+  const executeQuery = async (queryToExecute: string | QueryArguments) => {
     const { get, post, del, put } = getFetchClient();
-
-    if (typeof query === 'string') {
-      const result = await get(query, { signal });
-      return { data: result.data };
-    } else {
-      const { url, method = 'GET', data, config } = query;
-
-      if (method === 'POST') {
-        const result = await post(url, data, {
-          ...config,
-          signal,
-        });
-        return { data: result.data };
-      }
-
-      if (method === 'DELETE') {
-        const result = await del(url, {
-          ...config,
-          signal,
-        });
-        return { data: result.data };
-      }
-
-      if (method === 'PUT') {
-        const result = await put(url, data, {
-          ...config,
-          signal,
-        });
-        return { data: result.data };
-      }
-
-      /**
-       * Default is GET.
-       */
-      const result = await get(url, {
-        ...config,
-        signal,
-      });
-      return { data: result.data };
+    if (typeof queryToExecute === 'string') {
+      const result = await get(queryToExecute, { signal });
+      return result;
     }
+
+    const { url, method = 'GET', data, config } = queryToExecute;
+    if (method === 'POST') {
+      return post(url, data, { ...config, signal });
+    }
+    if (method === 'DELETE') {
+      return del(url, { ...config, signal });
+    }
+    if (method === 'PUT') {
+      return put(url, data, { ...config, signal });
+    }
+    return get(url, { ...config, signal });
+  };
+
+  try {
+    const result = await executeQuery(query);
+    return { data: result.data };
   } catch (err) {
     // Handle error of type FetchError
 
     if (isFetchError(err)) {
+      // If we receive a 401 here, getFetchClient already tried to refresh and failed.
+      // Log the user out since their session is no longer valid.
+      if (err.status === 401) {
+        const url = typeof query === 'string' ? query : query.url;
+
+        if (!isAuthPath(url)) {
+          try {
+            const { post } = getFetchClient();
+            await post('/admin/logout');
+          } catch {
+            // no-op
+          }
+
+          dispatch(logoutAction());
+          // Notify the React layer so the active tab redirects to /auth/login.
+          // Without this, only other tabs (via the storage event) would react;
+          // the tab that originated the failing request would stay put until
+          // the user clicked something or refreshed.
+          triggerSessionExpired();
+        }
+      }
+
       if (
         typeof err.response?.data === 'object' &&
         err.response?.data !== null &&
@@ -77,7 +92,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response?.data.error as any };
+        return { data: undefined, error: err.response?.data.error as BaseQueryError };
       } else {
         return {
           data: undefined,
@@ -91,7 +106,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
       }
     }
 
-    const error = err as Error;
+    const error = err instanceof Error ? err : new Error('Unknown error');
     return {
       data: undefined,
       error: {

@@ -1,6 +1,6 @@
 import { capitalize } from 'lodash/fp';
 
-import type { IDestinationProvider, ISourceProvider, ProviderType } from '../../../types';
+import type { IDestinationProvider, ISourceProvider, ProviderType } from '../../types';
 import { TransferEngineValidationError } from '../errors';
 
 const reject = (reason: string): never => {

@@ -13,7 +13,7 @@ const WysiwygFooter = ({ onToggleExpand }: WysiwygFooterProps) => {
 
   return (
     <Box padding={2} background="neutral100" borderRadius={`0 0 0.4rem 0.4rem`}>
-      <Flex justifyContent="flex-end" alignItems="flex-end">
+      <Flex justifyContent="flex-end" alignItems="flex-end" gap={{ initial: 2, medium: 0 }}>
         <ExpandButton id="expand" onClick={onToggleExpand} variant="tertiary" size="M">
           <Typography textColor="neutral800">
             {formatMessage({

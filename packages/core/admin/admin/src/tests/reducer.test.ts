@@ -10,6 +10,7 @@ import {
 import { setCookie, deleteCookie } from '../utils/cookies';
 
 jest.mock('../utils/cookies', () => ({
+  ...jest.requireActual('../utils/cookies'),
   setCookie: jest.fn(),
   deleteCookie: jest.fn(),
 }));
@@ -128,6 +129,11 @@ describe('admin_app reducer', () => {
       expect(localStorage.getItem('jwtToken')).toBe(null);
       expect(localStorage.getItem('isLoggedIn')).toBe(null);
       expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
+    });
+
+    it('login persist=false should not touch localStorage token', () => {
+      reducer(undefined, login({ token: 'abcd', persist: false }));
+      expect(localStorage.getItem('jwtToken')).toBe(null);
     });
   });
 });

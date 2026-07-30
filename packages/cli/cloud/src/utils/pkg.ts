@@ -103,7 +103,7 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
             throw new Error(
               `'${err.path}' in 'package.json' contains the unknown key ${chalk.magenta(
                 err.params.unknown
-              )}, for compatability only the following keys are allowed: ${chalk.magenta(
+              )}, for compatibility only the following keys are allowed: ${chalk.magenta(
                 "['types', 'source', 'import', 'require', 'default']"
               )}`
             );
@@ -114,7 +114,7 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
             throw new Error(
               `'${err.path}' in 'package.json' must be of type '${chalk.magenta(
                 err.params.type
-              )}' (recieved '${chalk.magenta(typeof err.params.value)}')`
+              )}' (received '${chalk.magenta(typeof err.params.value)}')`
             );
           }
       }

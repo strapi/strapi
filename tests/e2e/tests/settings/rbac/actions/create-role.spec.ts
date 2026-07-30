@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the created role
 const NEW_ROLE = { name: 'Publisher', description: 'Role with publishing capabilities' };
@@ -20,8 +20,7 @@ test.describe('RBAC - Create Roles', () => {
     await sharedSetup('rbac-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
-      skipTour: true,
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page
@@ -29,7 +28,7 @@ test.describe('RBAC - Create Roles', () => {
   });
 
   // Test for verifying Super Admin can create a new role
-  test('Super Admin can create a new role', async ({ page }) => {
+  test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page }) => {
     // Step 1: click "Create new role"
     await clickAndWait(page, page.getByRole('button', { name: 'Add new role' }).first());
 

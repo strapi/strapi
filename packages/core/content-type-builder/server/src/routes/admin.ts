@@ -1,3 +1,5 @@
+import { isDevelopmentMode } from '../middlewares';
+
 export default {
   type: 'admin',
   routes: [
@@ -51,6 +53,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -64,6 +67,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -77,6 +81,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -116,6 +121,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -129,6 +135,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -142,6 +149,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -155,6 +163,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -168,6 +177,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -194,6 +204,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {

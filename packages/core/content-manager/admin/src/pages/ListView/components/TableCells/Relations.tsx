@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Typography, Loader, useNotifyAT, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -31,14 +32,13 @@ const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
 interface RelationMultipleProps
   extends Pick<CellContentProps, 'mainField' | 'content' | 'name' | 'rowId'> {}
 
-/**
- * TODO: fix this component – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
- */
 const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleProps) => {
   const { model } = useDoc();
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   const [targetField] = name.split('.');
 
@@ -47,6 +47,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
       model,
       id: rowId,
       targetField,
+      params: { locale },
     },
     {
       skip: !isOpen,
@@ -60,7 +61,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     if (data) {
       notifyStatus(
         formatMessage({
-          id: getTranslation('DynamicTable.relation-loaded'),
+          id: getTranslation('ListViewTable.relation-loaded'),
           defaultMessage: 'Relations have been loaded',
         })
       );

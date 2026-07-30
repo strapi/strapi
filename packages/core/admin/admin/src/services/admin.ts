@@ -22,7 +22,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft', 'GuidedTourMeta'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({

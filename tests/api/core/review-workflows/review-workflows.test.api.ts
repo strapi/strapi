@@ -854,6 +854,18 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         expect(res.body.data).toHaveLength(0);
       });
+
+      test('It should return workflow metadata with an empty stage list when the entity does not exist for the requested locale', async () => {
+        const res = await requests.admin.get(endpoint('non-existent-document-id'));
+
+        expect(res.status).toBe(200);
+        expect(res.body.data).toEqual([]);
+        expect(res.body.meta).toMatchObject({
+          workflowCount: expect.any(Number),
+          stageCount: expect.any(Number),
+        });
+        expect(res.body.meta.stageCount).toBeGreaterThan(0);
+      });
     });
 
     test('Document Status should not change to "Modified" when updating the stage', async () => {

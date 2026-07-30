@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification } from '@strapi/admin/strapi-admin';
 import { Button, Field, Flex, Grid, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
@@ -11,6 +11,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';

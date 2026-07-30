@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { Box, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { TrackingEvent, useTracking } from '../features/Tracking';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 interface SearchInputProps {
@@ -32,6 +33,7 @@ const SearchInput = ({
 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const isMobile = useIsMobile();
 
   const handleToggle = () => setIsOpen((prev) => !prev);
 
@@ -61,27 +63,39 @@ const SearchInput = ({
     }
   };
 
+  const renderSearchForm = (opts?: { enableBlurClose?: boolean }) => (
+    <SearchForm onSubmit={handleSubmit}>
+      <Searchbar
+        ref={inputRef}
+        name="search"
+        onChange={(e) => setValue(e.target.value)}
+        value={value}
+        clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+        onClear={handleClear}
+        placeholder={isMobile ? undefined : placeholder}
+        disabled={disabled}
+        onBlur={
+          opts?.enableBlurClose
+            ? (e) => {
+                if (!e.currentTarget.contains(e.relatedTarget) && e.currentTarget.value === '') {
+                  setIsOpen(false);
+                }
+              }
+            : undefined
+        }
+      >
+        {label}
+      </Searchbar>
+    </SearchForm>
+  );
+
+  if (isMobile) {
+    // Add wrapper so that the Searchbar takes up the rest of the available space.
+    return <Box width="100%">{renderSearchForm()}</Box>;
+  }
+
   if (isOpen) {
-    return (
-      <SearchForm onSubmit={handleSubmit}>
-        <Searchbar
-          ref={inputRef}
-          name="search"
-          onChange={(e) => setValue(e.target.value)}
-          value={value}
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          onClear={handleClear}
-          placeholder={placeholder}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget) && e.currentTarget.value === '') {
-              setIsOpen(false);
-            }
-          }}
-        >
-          {label}
-        </Searchbar>
-      </SearchForm>
-    );
+    return renderSearchForm({ enableBlurClose: true });
   }
 
   return (

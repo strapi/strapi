@@ -7,24 +7,31 @@ import {
   BadgeProps,
   AccessibleIcon,
 } from '@strapi/design-system';
-import { NavLink as RouterLink, LinkProps, To } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
+import { styled, css } from 'styled-components';
 
-import { tours as unstable_tours } from '../UnstableGuidedTour/Tours';
+const isExternalLink = (to: LinkProps['to']) =>
+  typeof to === 'string' && (to.startsWith('http://') || to.startsWith('https://'));
 
 /* -------------------------------------------------------------------------------------------------
  * Link
  * -----------------------------------------------------------------------------------------------*/
-const MainNavLinkWrapper = styled(RouterLink)`
+const MainNavLinkStyles = css`
   text-decoration: none;
   display: flex;
+  align-items: center;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
-  width: fit-content;
-  padding-block: 0.6rem;
-  padding-inline: 0.6rem;
+  width: 100%;
+  padding-block: 0.4rem;
+  padding-inline: 1.2rem;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-block: 0.6rem;
+    padding-inline: 0.6rem;
+  }
 
   &:hover {
     svg path {
@@ -41,28 +48,55 @@ const MainNavLinkWrapper = styled(RouterLink)`
   }
 `;
 
-const getGuidedTourTooltip = (to: To) => {
-  const normalizedTo = to.toString().replace(/\//g, '');
+const MainNavLinkWrapper = styled(RouterLink)`
+  ${MainNavLinkStyles}
+`;
 
-  switch (normalizedTo) {
-    case 'content-manager':
-      return unstable_tours.contentTypeBuilder.Finish;
-    case '':
-      return unstable_tours.apiTokens.Finish;
-    case 'settings':
-      return unstable_tours.contentManager.Finish;
-    default:
-      return React.Fragment;
+const MainNavLinkAnchor = styled.a`
+  ${MainNavLinkStyles}
+`;
+
+const MainNavButtonStyles = css`
+  padding-block: 1rem;
+  padding-inline: 1rem;
+`;
+
+const MainNavButtonWrapper = styled(MainNavLinkWrapper)`
+  ${MainNavButtonStyles}
+`;
+
+const MainNavButtonAnchor = styled(MainNavLinkAnchor)`
+  ${MainNavButtonStyles}
+`;
+
+const LinkImpl = ({ children, to, ...props }: LinkProps) => {
+  if (isExternalLink(to)) {
+    return (
+      <MainNavLinkAnchor href={to as string} {...props}>
+        {children}
+      </MainNavLinkAnchor>
+    );
   }
+  return (
+    <MainNavLinkWrapper to={to} {...props}>
+      {children}
+    </MainNavLinkWrapper>
+  );
 };
 
-const LinkImpl = ({ children, ...props }: LinkProps) => {
-  const GuidedTourTooltip = getGuidedTourTooltip(props.to);
+const NavButtonImpl = ({ children, to, ...props }: LinkProps) => {
+  if (isExternalLink(to)) {
+    return (
+      <MainNavButtonAnchor href={to as string} {...props}>
+        {children}
+      </MainNavButtonAnchor>
+    );
+  }
 
   return (
-    <GuidedTourTooltip>
-      <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
-    </GuidedTourTooltip>
+    <MainNavButtonWrapper to={to} {...props}>
+      {children}
+    </MainNavButtonWrapper>
   );
 };
 
@@ -120,6 +154,7 @@ const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
 
 const NavLink = {
   Link: LinkImpl,
+  NavButton: NavButtonImpl,
   Tooltip: TooltipImpl,
   Icon: IconImpl,
   Badge: BadgeImpl,

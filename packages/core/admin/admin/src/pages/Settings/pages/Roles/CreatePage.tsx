@@ -64,6 +64,7 @@ const CreatePage = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -100,6 +101,11 @@ const CreatePage = () => {
     data: CreateRoleFormValues,
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       if (id) {
         trackUsage('willDuplicateRole');
@@ -191,20 +197,27 @@ const CreatePage = () => {
             <>
               <Layouts.Header
                 primaryAction={
-                  <Flex gap={2}>
+                  <Flex width="100%" gap={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
                         handleReset();
                         permissionsRef.current?.resetForm();
                       }}
+                      fullWidth
                     >
                       {formatMessage({
                         id: 'app.components.Button.reset',
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
+                    <Button
+                      type="submit"
+                      loading={isSubmitting}
+                      disabled={hasLocaleValidationErrors}
+                      startIcon={<Check />}
+                      fullWidth
+                    >
                       {formatMessage({
                         id: 'global.save',
                         defaultMessage: 'Save',
@@ -220,7 +233,12 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                navigationAction={<BackButton fallback="../roles" />}
+                navigationAction={
+                  // The back link for mobile works differently; it is placed higher up in the DOM.
+                  <Box display={{ initial: 'none', medium: 'block' }}>
+                    <BackButton fallback="../roles" />
+                  </Box>
+                }
               />
               <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
@@ -257,7 +275,7 @@ const CreatePage = () => {
                         </UsersRoleNumber>
                       </Flex>
                       <Grid.Root gap={4}>
-                        <Grid.Item col={6} direction="column" alignItems="stretch">
+                        <Grid.Item m={6} xs={12} direction="column" alignItems="stretch">
                           <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
@@ -269,11 +287,11 @@ const CreatePage = () => {
                                 defaultMessage: 'Name',
                               })}
                             </Field.Label>
-                            <TextInput onChange={handleChange} value={values.name} />
+                            <TextInput type="text" onChange={handleChange} value={values.name} />
                             <Field.Error />
                           </Field.Root>
                         </Grid.Item>
-                        <Grid.Item col={6} direction="column" alignItems="stretch">
+                        <Grid.Item m={6} xs={12} direction="column" alignItems="stretch">
                           <Field.Root
                             name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
@@ -293,6 +311,7 @@ const CreatePage = () => {
                   <Box shadow="filterShadow" hasRadius>
                     <Permissions
                       isFormDisabled={false}
+                      onLocaleValidationChange={setHasLocaleValidationErrors}
                       ref={permissionsRef}
                       permissions={rolePermissions}
                       layout={permissionsLayout}

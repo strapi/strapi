@@ -45,17 +45,15 @@ It's within this context that we've developed this new package, designed to offe
 This package provides APIs and tools to:
 
 - Programmatically generate OpenAPI documents **specifically** tailored for Strapi applications
-- Validate generated documents for compliance and accuracy
-- Customize the document generation process to suit your needs
+- Customize the document generation process through providers, matchers, assemblers, and processors
 
 **What it's not intended to be ❌**
 
 - A direct replacement for the documentation plugin (including Swagger UI)
 - A generic OpenAPI specification generator for non-Strapi applications
-- A tool for generating OpenAPI documents as static files
-- A command-line interface (CLI)
+- A standalone file writer (generation returns an in-memory document; see [Usage](./03-usage.md) for the experimental CLI wrapper)
 
 ### Limitations
 
-- Currently unable to represent cyclical references (awaiting zod v4), which are temporarily represented as simple "any" objects
+- Cyclical references between models (_relations, components, dynamic zones, media_) are not fully represented in component schemas yet
 - Limited customization capabilities in the current version; these will be expanded in future releases (our priority is making it ready for client use before iterating further)

@@ -74,4 +74,41 @@ export default class PostgresDialect extends Dialect {
       }
     }
   }
+
+  /**
+   * Get column type conversion SQL with USING clause for PostgreSQL
+   * @param currentType - The current PostgreSQL data type
+   * @param targetType - The target Strapi type
+   * @returns SQL string with USING clause or null if no special conversion needed
+   */
+  getColumnTypeConversionSQL(
+    currentType: string,
+    targetType: string
+  ): {
+    sql: string;
+    typeClause: string;
+    warning?: string;
+  } | null {
+    // Time to datetime conversion
+    if (targetType === 'datetime' && currentType === 'time without time zone') {
+      return {
+        sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE timestamp(6) USING ('1970-01-01 ' || ??::text)::timestamp`,
+        typeClause: 'timestamp(6)',
+        warning:
+          'Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.',
+      };
+    }
+
+    // Datetime to time conversion
+    if (targetType === 'time' && currentType === 'timestamp without time zone') {
+      return {
+        sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE time(3) USING ??::time`,
+        typeClause: 'time(3)',
+        warning: 'Datetime values will be converted to time only. Date information will be lost.',
+      };
+    }
+
+    // No special conversion needed
+    return null;
+  }
 }

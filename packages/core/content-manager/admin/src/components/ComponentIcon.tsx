@@ -6,10 +6,12 @@ import * as Symbols from '@strapi/icons/symbols';
 
 import type { Struct } from '@strapi/types';
 
-interface ComponentIconProps extends FlexProps {
+type ComponentIconProps = FlexProps & {
   showBackground?: boolean;
   icon?: Struct.ContentTypeSchemaInfo['icon'];
-}
+};
+
+type IconComponent = React.ComponentType<Pick<React.SVGProps<SVGSVGElement>, 'height' | 'width'>>;
 
 const ComponentIcon = ({
   showBackground = true,
@@ -34,7 +36,7 @@ const ComponentIcon = ({
   );
 };
 
-const COMPONENT_ICONS: Record<string, React.ComponentType<any>> = {
+const COMPONENT_ICONS: Record<string, IconComponent> = {
   alien: Icons.Alien,
   apps: Icons.GridNine,
   archive: Icons.Archive,
@@ -82,6 +84,9 @@ const COMPONENT_ICONS: Record<string, React.ComponentType<any>> = {
   file: Icons.File,
   fileError: Icons.FileError,
   filePdf: Icons.FilePdf,
+  fileXls: Icons.FileXls,
+  fileZip: Icons.FileZip,
+  fileCsv: Icons.FileCsv,
   filter: Icons.Filter,
   folder: Icons.Folder,
   gate: Icons.CastleTurret,

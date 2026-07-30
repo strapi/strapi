@@ -1,28 +1,36 @@
 import { errors } from '@strapi/utils';
-import { act, renderHook, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { renderHook, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
 
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useGetAiFeatureConfigQuery: () => ({ data: undefined }),
+  useAIAvailability: () => false,
+}));
+
 describe('useDocumentActions', () => {
-  it('should return an object with the correct methods', () => {
+  it('should return an object with the correct methods', async () => {
     const { result } = renderHook(() => useDocumentActions());
 
-    expect(result.current).toEqual({
-      autoClone: expect.any(Function),
-      publishMany: expect.any(Function),
-      clone: expect.any(Function),
-      create: expect.any(Function),
-      discard: expect.any(Function),
-      delete: expect.any(Function),
-      deleteMany: expect.any(Function),
-      getDocument: expect.any(Function),
-      publish: expect.any(Function),
-      update: expect.any(Function),
-      unpublish: expect.any(Function),
-      unpublishMany: expect.any(Function),
-      isLoading: expect.any(Boolean),
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        autoClone: expect.any(Function),
+        publishMany: expect.any(Function),
+        clone: expect.any(Function),
+        create: expect.any(Function),
+        discard: expect.any(Function),
+        delete: expect.any(Function),
+        deleteMany: expect.any(Function),
+        getDocument: expect.any(Function),
+        publish: expect.any(Function),
+        update: expect.any(Function),
+        unpublish: expect.any(Function),
+        unpublishMany: expect.any(Function),
+        isLoading: expect.any(Boolean),
+      });
     });
   });
 
@@ -32,7 +40,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -59,12 +67,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/clone/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/clone/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't clone entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -73,7 +81,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -107,7 +115,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -129,16 +137,19 @@ describe('useDocumentActions', () => {
           title: 'test',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't create entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -147,7 +158,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -179,7 +190,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -194,16 +205,19 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.delete('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.delete('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -212,7 +226,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -240,7 +254,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -255,16 +269,19 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully deleted.');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/collection-types/:uid/actions/bulkDelete', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/collection-types/:uid/actions/bulkDelete', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entries."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -273,7 +290,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -301,7 +318,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -316,16 +333,19 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Changes discarded');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/discard', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/discard', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't discard entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -334,7 +354,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -362,7 +382,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -377,16 +397,19 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.delete('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.delete('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -395,7 +418,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -423,7 +446,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -444,16 +467,19 @@ describe('useDocumentActions', () => {
         publishedAt: '2024-01-23T16:23:38.948Z',
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Published document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/publish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/publish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't publish entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -462,7 +488,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -495,7 +521,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -522,16 +548,19 @@ describe('useDocumentActions', () => {
           updatedAt: '',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.put('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.put('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't update entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -540,7 +569,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -574,7 +603,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -590,16 +619,19 @@ describe('useDocumentActions', () => {
         publishedAt: null,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Unpublished document');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't unpublish entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -608,7 +640,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -636,7 +668,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -648,16 +680,19 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully unpublished.');
     });
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/collection-types/:uid/actions/bulkUnpublish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/collection-types/:uid/actions/bulkUnpublish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't unpublish entries."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -666,7 +701,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],

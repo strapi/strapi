@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
+import resources from './resources/article-query';
 import { ARTICLE_UID, findArticlesDb } from './utils';
 
 let strapi: Core.Strapi;
@@ -125,6 +125,25 @@ describe('Document Service', () => {
       articles.forEach((article) => {
         expect(article.publishedAt).toBe(null);
       });
+
+      // expect count to be the same as findMany
+      const count = await strapi.documents(ARTICLE_UID).count(params);
+      expect(count).toBe(articles.length);
+    });
+
+    it('Find all documents with locale="*"', async () => {
+      const params = {
+        locale: '*',
+      } as const;
+
+      const articles = await findArticles(params);
+
+      // Should return articles from all locales
+      expect(articles.length).toBeGreaterThan(0);
+
+      // Verify we have articles from different locales
+      const locales = [...new Set(articles.map((article) => article.locale))];
+      expect(locales.length).toBeGreaterThan(1);
 
       // expect count to be the same as findMany
       const count = await strapi.documents(ARTICLE_UID).count(params);

@@ -8,6 +8,29 @@ import {
   validateUpdateContentTypeInput,
   validateKind,
 } from './validation/content-type';
+import { isContentTypeVisible } from '../services/content-types';
+
+/**
+ * Telemetry uses a bounded HTTP timeout (~1s in the metrics sender); cap how long we defer
+ * dev reload so a stuck client cannot block restart indefinitely.
+ */
+const RELOAD_AFTER_TELEMETRY_MAX_MS = 2500;
+
+const scheduleReloadAfterOutboundTelemetry = (sendPromise: Promise<unknown>): void => {
+  setImmediate(() => {
+    const settled = sendPromise.catch(() => {});
+    Promise.race([
+      settled,
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, RELOAD_AFTER_TELEMETRY_MAX_MS);
+      }),
+    ])
+      .catch(() => {})
+      .finally(() => {
+        strapi.reload();
+      });
+  });
+};
 
 export default {
   async getContentTypes(ctx: Context) {
@@ -46,6 +69,10 @@ export default {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
+    if (!isContentTypeVisible(contentType)) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
     const contentTypeService = getService('content-types');
 
     ctx.send({ data: contentTypeService.formatContentType(contentType) });
@@ -76,20 +103,20 @@ export default {
         },
       };
 
-      if (_.isEmpty(strapi.apis)) {
-        await strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
-      } else {
-        await strapi.telemetry.send('didCreateContentType', metricsPayload);
-      }
+      const telemetryPromise = _.isEmpty(strapi.apis)
+        ? strapi.telemetry.send('didCreateFirstContentType', metricsPayload)
+        : strapi.telemetry.send('didCreateContentType', metricsPayload);
 
-      setImmediate(() => strapi.reload());
+      scheduleReloadAfterOutboundTelemetry(telemetryPromise);
 
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (err) {
       strapi.log.error(err);
-      await strapi.telemetry.send('didNotCreateContentType', {
-        eventProperties: { error: (err as Error).message || err },
-      });
+      strapi.telemetry
+        .send('didNotCreateContentType', {
+          eventProperties: { error: (err as Error).message || err },
+        })
+        .catch(() => {});
       ctx.send({ error: (err as Error).message || 'Unknown error' }, 400);
     }
   },

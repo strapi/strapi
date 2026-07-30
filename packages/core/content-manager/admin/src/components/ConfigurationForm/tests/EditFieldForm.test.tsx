@@ -41,6 +41,7 @@ describe('EditFieldForm', () => {
   type FieldData = ConfigurationFormData['layout'][number]['children'][number];
   interface RenderProps extends Partial<EditFieldFormProps> {
     initialValues?: Record<string, FieldData>;
+    onChange?: (data: FieldData) => void;
   }
 
   const INITIAL_DATA: Record<string, FieldData> = {
@@ -115,29 +116,27 @@ describe('EditFieldForm', () => {
       });
     });
 
-    ['component', 'dynamiczone'].forEach((type) => {
-      it(`should hide all but the label and editable fields for the attribute type: ${type}`, () => {
-        render({
-          attribute: {
-            // @ts-expect-error - ignore the error as we are testing the form for each attribute type
-            type,
-          },
-        });
-
-        expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
-
-        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
-
-        expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-        expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
-
-        expect(screen.queryByRole('textbox', { name: 'Description' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
+    it(`should hide all but the label and editable fields for the attribute type: component`, () => {
+      render({
+        // @ts-expect-error - ignore the error as we are testing the form for each attribute type
+        attribute: {
+          type: 'component',
+        },
       });
+
+      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+
+      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+
+      expect(screen.queryByRole('textbox', { name: 'Description' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
     });
 
     ['blocks', 'richtext'].forEach((type) => {
@@ -190,26 +189,29 @@ describe('EditFieldForm', () => {
       });
     });
 
-    it(`should hide the placeholder and size fields for the attribute type: json`, () => {
-      render({
-        attribute: {
-          type: 'json',
-        },
+    ['json', 'dynamiczone'].forEach((type) => {
+      it(`should hide the placeholder and size fields for the attribute type: ${type}`, () => {
+        render({
+          attribute: {
+            // @ts-expect-error - ignore the error as we are testing the form for each attribute type
+            type,
+          },
+        });
+
+        expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+
+        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+
+        expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+        expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+        expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+
+        expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
       });
-
-      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
-
-      expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
-
-      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
-
-      expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
     });
 
     it("should render the mainField option for relation attributes and have a list of potential mainField attributes from it's targetModel", async () => {
@@ -240,6 +242,32 @@ describe('EditFieldForm', () => {
       await user.click(await screen.findByRole('combobox', { name: 'Entry title' }));
 
       expect(await screen.findByRole('option', { name: 'id' })).toBeInTheDocument();
+    });
+  });
+
+  describe('Nullable field validation regression tests', () => {
+    it('should accept empty description field without validation errors', async () => {
+      const { user } = render({
+        initialValues: {
+          field: {
+            __temp_key__: 'a',
+            description: '', // Test empty description (nullable field)
+            editable: true,
+            name: 'field',
+            label: 'Field',
+            size: 12,
+          },
+        },
+      });
+
+      const descriptionInput = await screen.findByRole('textbox', { name: 'Description' });
+      expect(descriptionInput).toHaveValue('');
+
+      // Submit the form to trigger validation
+      await user.click(await screen.findByRole('button', { name: 'Finish' }));
+
+      // Should not show validation errors for empty description (nullable field)
+      expect(screen.queryByText(/description.*required/i)).not.toBeInTheDocument();
     });
   });
 });

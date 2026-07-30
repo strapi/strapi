@@ -4,14 +4,15 @@ import * as React from 'react';
 import { useField, useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
-import { getTrad, getAllowedFiles, AllowedFiles } from '../../utils';
+import { AllowedFiles, getAllowedFiles, getTrad } from '../../utils';
 import { AssetDialog } from '../AssetDialog/AssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog/EditFolderDialog';
-import { UploadAssetDialog, Asset } from '../UploadAssetDialog/UploadAssetDialog';
+import { Asset, UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 
 import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carousel/CarouselAssets';
 
 import type { File } from '../../../../shared/contracts/files';
+
 type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 const STEPS = {
@@ -47,7 +48,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
-    const { onChange, value, error } = useField(name);
+    const { onChange, value, error } = useField<File | File[] | null>(name);
     const [uploadedFiles, setUploadedFiles] = React.useState<Asset[] | File[]>([]);
     const [step, setStep] = React.useState<string | undefined>(undefined);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -66,7 +67,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
 
     if (Array.isArray(value)) {
       selectedAssets = value;
-    } else if (value) {
+    } else if (value !== null && value !== undefined) {
       selectedAssets = [value];
     }
 
@@ -176,6 +177,11 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
         : [allowedUploadedFiles[0]];
     }
 
+    const handleDoubleClickAsset = (asset: File) => {
+      if (disabled) return;
+      handleAssetEdit(asset);
+    };
+
     return (
       <>
         <CarouselAssets
@@ -191,6 +197,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
           onEditAsset={handleAssetEdit}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          onDoubleClickAsset={handleDoubleClickAsset}
           error={error}
           hint={hint}
           required={required}

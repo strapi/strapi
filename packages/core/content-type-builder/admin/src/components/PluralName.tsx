@@ -6,21 +6,15 @@ import { useIntl } from 'react-intl';
 
 import { nameToSlug } from '../utils/nameToSlug';
 
-import type { IntlLabel } from '../types';
-
-interface Description {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface PluralNameProps {
-  description?: Description;
+  description?: IntlLabel;
   error?: string;
   intlLabel: IntlLabel;
-  modifiedData: Record<string, any>;
+  modifiedData: { displayName?: string };
   name: string;
-  onChange: (value: { target: { name: string; value: string } }) => void;
+  onChange: FormChangeHandler<string>;
   value?: string;
 }
 
@@ -36,21 +30,29 @@ export const PluralName = ({
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
   const displayName = modifiedData?.displayName || '';
+  const previousDisplayName = useRef(displayName);
+  const previousValue = useRef(value);
 
   useEffect(() => {
-    if (displayName) {
-      const value = nameToSlug(displayName);
+    if (displayName && displayName !== previousDisplayName.current) {
+      const baseValue = nameToSlug(displayName);
+      let newValue = baseValue;
 
       try {
-        const plural = pluralize(value, 2);
-        onChangeRef.current({ target: { name, value: plural } });
+        newValue = pluralize(baseValue, 2);
       } catch (err) {
-        onChangeRef.current({ target: { name, value } });
+        // If pluralize fails, use the base value
       }
-    } else {
+
+      onChangeRef.current({ target: { name, value: newValue } });
+      previousValue.current = newValue;
+      previousDisplayName.current = displayName;
+    } else if (!displayName) {
       onChangeRef.current({ target: { name, value: '' } });
+      previousValue.current = '';
+      previousDisplayName.current = '';
     }
-  }, [displayName, name]);
+  }, [displayName, name, value]);
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
@@ -64,7 +66,7 @@ export const PluralName = ({
   return (
     <Field.Root error={errorMessage} hint={hint} name={name}>
       <Field.Label>{label}</Field.Label>
-      <TextInput onChange={onChange} value={value || ''} />
+      <TextInput onChange={onChange} value={value || ''} type="text" />
       <Field.Error />
     </Field.Root>
   );

@@ -29,6 +29,34 @@ const StyledPopoverFlex = styled(Flex)`
   }
 `;
 
+const ButtonContent = styled(Flex)`
+  svg {
+    fill: currentColor;
+  }
+`;
+
+const CustomStatusButton = ({
+  children,
+  icon,
+  color,
+}: {
+  icon: React.ReactElement;
+  color: string;
+} & React.PropsWithChildren) => {
+  return (
+    <Popover.Trigger>
+      <Button variant="ghost" endIcon={<CaretDown />}>
+        <ButtonContent color={color} gap={2}>
+          {icon}
+          <Typography textColor={color} variant="omega" fontWeight="bold">
+            {children}
+          </Typography>
+        </ButtonContent>
+      </Button>
+    </Popover.Trigger>
+  );
+};
+
 interface EntryValidationPopoverProps {
   action: ReleaseAction['type'];
   schema?: Struct.ContentTypeSchema & {
@@ -59,109 +87,65 @@ const EntryStatusTrigger = ({
   if (action === 'publish') {
     if (hasErrors || (requiredStage && requiredStage.id !== entryStage?.id)) {
       return (
-        <Popover.Trigger>
-          <Button
-            variant="ghost"
-            startIcon={<CrossCircle fill="danger600" />}
-            endIcon={<CaretDown />}
-          >
-            <Typography textColor="danger600" variant="omega" fontWeight="bold">
-              {formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.not-ready',
-                defaultMessage: 'Not ready to publish',
-              })}
-            </Typography>
-          </Button>
-        </Popover.Trigger>
+        <CustomStatusButton icon={<CrossCircle />} color="danger600">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.not-ready',
+            defaultMessage: 'Not ready to publish',
+          })}
+        </CustomStatusButton>
       );
     }
 
     if (status === 'draft') {
       return (
-        <Popover.Trigger>
-          <Button
-            variant="ghost"
-            startIcon={<CheckCircle fill="success600" />}
-            endIcon={<CaretDown />}
-          >
-            <Typography textColor="success600" variant="omega" fontWeight="bold">
-              {formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
-                defaultMessage: 'Ready to publish',
-              })}
-            </Typography>
-          </Button>
-        </Popover.Trigger>
+        <CustomStatusButton icon={<CheckCircle />} color="success600">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
+            defaultMessage: 'Ready to publish',
+          })}
+        </CustomStatusButton>
       );
     }
 
     if (status === 'modified') {
       return (
-        <Popover.Trigger>
-          <Button
-            variant="ghost"
-            startIcon={<ArrowsCounterClockwise fill="alternative600" />}
-            endIcon={<CaretDown />}
-          >
-            <Typography variant="omega" fontWeight="bold" textColor="alternative600">
-              {formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
-                defaultMessage: 'Ready to publish changes',
-              })}
-            </Typography>
-          </Button>
-        </Popover.Trigger>
+        <CustomStatusButton icon={<ArrowsCounterClockwise />} color="alternative600">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
+            defaultMessage: 'Ready to publish changes',
+          })}
+        </CustomStatusButton>
       );
     }
 
     return (
-      <Popover.Trigger>
-        <Button
-          variant="ghost"
-          startIcon={<CheckCircle fill="success600" />}
-          endIcon={<CaretDown />}
-        >
-          <Typography textColor="success600" variant="omega" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-              defaultMessage: 'Already published',
-            })}
-          </Typography>
-        </Button>
-      </Popover.Trigger>
+      <CustomStatusButton icon={<CheckCircle />} color="success600">
+        {formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+          defaultMessage: 'Already published',
+        })}
+      </CustomStatusButton>
     );
   }
 
   if (status === 'published') {
     return (
-      <Popover.Trigger>
-        <Button
-          variant="ghost"
-          startIcon={<CheckCircle fill="success600" />}
-          endIcon={<CaretDown />}
-        >
-          <Typography textColor="success600" variant="omega" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
-              defaultMessage: 'Ready to unpublish',
-            })}
-          </Typography>
-        </Button>
-      </Popover.Trigger>
+      <CustomStatusButton icon={<CheckCircle />} color="success600">
+        {formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
+          defaultMessage: 'Ready to unpublish',
+        })}
+      </CustomStatusButton>
     );
   }
 
   return (
-    <Popover.Trigger>
-      <Button variant="ghost" startIcon={<CheckCircle fill="success600" />} endIcon={<CaretDown />}>
-        <Typography textColor="success600" variant="omega" fontWeight="bold">
-          {formatMessage({
-            id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
-            defaultMessage: 'Already unpublished',
-          })}
-        </Typography>
-      </Button>
-    </Popover.Trigger>
+    <CustomStatusButton icon={<CheckCircle />} color="success600">
+      {formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
+        defaultMessage: 'Already unpublished',
+      })}
+    </CustomStatusButton>
   );
 };
 

@@ -21,5 +21,5 @@ if [[ "$distTag" == "latest" || "$distTag" == "beta" || "$distTag" == "alpha" ||
   exit 1
 fi
 
-# Run npm dist-tag rm $distTag on each package
-./node_modules/.bin/lerna exec --no-private --stream -- "npm dist-tag rm \$LERNA_PACKAGE_NAME $distTag"
+# Run npm dist-tag rm $distTag on each publishable (non-private) package
+yarn workspaces foreach -A --no-private exec "npm dist-tag rm \$(node -p \"require('./package.json').name\") $distTag"

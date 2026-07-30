@@ -24,6 +24,10 @@ export default (auth: unknown): Visitor =>
     const handleMorphRelation = async () => {
       const elements: any = (data as Record<string, MorphArray>)[key];
 
+      if (!elements) {
+        return;
+      }
+
       if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
         const newValue: Record<string, unknown> = {};
 

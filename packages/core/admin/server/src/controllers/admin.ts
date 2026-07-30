@@ -6,7 +6,6 @@ import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
-import tsUtils from '@strapi/typescript-utils';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -24,7 +23,18 @@ import type {
   GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 
-const { isUsingTypeScript } = tsUtils;
+// Lazy: only resolved on first GET /admin/project-type request
+type TsUtilsModule = typeof import('@strapi/typescript-utils');
+let lazyTsUtils: TsUtilsModule | undefined;
+const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
+  ...args: Parameters<TsUtilsModule['isUsingTypeScript']>
+) => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return (lazyTsUtils as TsUtilsModule).isUsingTypeScript(...args);
+};
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -38,7 +48,7 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags } };
+    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -175,7 +185,7 @@ export default {
         packageName: plugin.info.packageName,
       }));
 
-    ctx.send({ plugins }) satisfies Plugins.Response;
+    ctx.send({ plugins } satisfies Plugins.Response);
   },
 
   async licenseTrialTimeLeft() {
@@ -187,15 +197,12 @@ export default {
   },
 
   async getGuidedTourMeta(ctx: Context) {
-    const [isFirstSuperAdminUser, completedActions] = await Promise.all([
-      getService('user').isFirstSuperAdminUser(ctx.state.user.id),
-      getService('guided-tour').getCompletedActions(),
-    ]);
+    const isFirstSuperAdminUser = await getService('user').isFirstSuperAdminUser(ctx.state.user.id);
 
     return {
       data: {
         isFirstSuperAdminUser,
-        completedActions,
+        schemas: strapi.contentTypes,
       },
     } satisfies GetGuidedTourMeta.Response;
   },

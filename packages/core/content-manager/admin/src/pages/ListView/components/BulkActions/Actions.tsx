@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
+import { useDocumentLayout } from '../../../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 import {
@@ -25,6 +26,7 @@ import {
 import { PublishAction } from './PublishAction';
 
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
+import type { Document } from '../../../../hooks/useDocument';
 
 interface BulkActionDescription {
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
@@ -50,7 +52,9 @@ const BulkActionsRenderer = () => {
   const plugins = useStrapiApp('BulkActionsRenderer', (state) => state.plugins);
 
   const { model, collectionType } = useDoc();
+  const { list } = useDocumentLayout(model);
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
+  const selectedDocuments = selectedRows as Document[];
 
   return (
     <Flex gap={2}>
@@ -58,13 +62,17 @@ const BulkActionsRenderer = () => {
         props={{
           model,
           collectionType,
-          documents: selectedRows,
+          documents: selectedDocuments,
         }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getBulkActions()}
       >
-        {(actions) => actions.map((action) => <DocumentActionButton key={action.id} {...action} />)}
+        {(actions) =>
+          actions.map(({ type: _bulkType, ...action }) => {
+            return list.settings.bulkable && <DocumentActionButton key={action.id} {...action} />;
+          })
+        }
       </DescriptionComponentRenderer>
     </Flex>
   );
@@ -149,7 +157,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { schema } = useDoc();
   const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
-  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const hasDraftAndPublishEnabled = Boolean(schema?.options?.draftAndPublish);
   const { unpublishMany: bulkUnpublishAction, isLoading } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
@@ -191,22 +198,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
-          {hasI18nEnabled && (
-            <Box textAlign="center" padding={3}>
-              <Typography textColor="danger500">
-                {formatMessage(
-                  {
-                    id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
-                    defaultMessage:
-                      'This will unpublish the active locale versions <em>(from Internationalization)</em>',
-                  },
-                  {
-                    em: Emphasis,
-                  }
-                )}
-              </Typography>
-            </Box>
-          )}
         </Flex>
       ),
       confirmButton: formatMessage({

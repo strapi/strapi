@@ -132,7 +132,7 @@ const ListPage = () => {
       <Layouts.Header
         primaryAction={
           canCreate ? (
-            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
+            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S" fullWidth>
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',

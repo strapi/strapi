@@ -7,6 +7,7 @@ const IGNORED_PATTERNS = [
   '**/.git/**',
   '**/node_modules/**',
   '**/build/**',
+  '**/data/uploads/**',
   '**/dist/**',
   '**/.cache/**',
   '**/.circleci/**',
@@ -15,6 +16,7 @@ const IGNORED_PATTERNS = [
   '**/.gitkeep',
   '**/.gitlab-ci.yml',
   '**/.idea/**',
+  '**/public/uploads/**',
   '**/.vscode/**',
 ];
 

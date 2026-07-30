@@ -15,11 +15,17 @@ import {
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
-import * as yup from 'yup';
 
 import { AttributeIcon } from '../../../components/AttributeIcon';
+import { getFirstVisibleConditionEntry } from '../../../utils/conditions';
 import { getTrad } from '../../../utils/getTrad';
 import { ApplyConditionButton } from '../../ApplyConditionButton';
+
+import type {
+  AttributeConditions,
+  AttributeConditionRule,
+  AttributeConditionValue,
+} from '../../../types';
 
 const SmallAttributeIcon = styled(AttributeIcon)`
   width: 16px !important;
@@ -32,8 +38,8 @@ const SmallAttributeIcon = styled(AttributeIcon)`
 
 interface ConditionFormProps {
   name: string;
-  value: any;
-  onChange: (e: { target: { name: string; value: any } }) => void;
+  value?: AttributeConditions | null;
+  onChange: (e: { target: { name: string; value?: AttributeConditions | null } }) => void;
   onDelete: () => void;
   attributeName?: string;
   conditionFields?: Array<{
@@ -47,21 +53,17 @@ interface ConditionFormProps {
   }>;
 }
 
-interface JsonLogicValue {
-  visible?: {
-    [key: string]: [{ var: string }, any];
-  };
-}
-
 interface LocalValue {
   dependsOn: string;
   operator: 'is' | 'isNot';
-  value: string | boolean;
+  value: AttributeConditionValue;
   action: 'show' | 'hide';
 }
 
-const convertFromJsonLogic = (jsonLogic: JsonLogicValue): LocalValue => {
-  if (!jsonLogic?.visible) {
+const convertFromJsonLogic = (jsonLogic?: AttributeConditions | null): LocalValue => {
+  const conditionEntry = getFirstVisibleConditionEntry(jsonLogic);
+
+  if (conditionEntry === null) {
     return {
       dependsOn: '',
       operator: 'is',
@@ -70,19 +72,19 @@ const convertFromJsonLogic = (jsonLogic: JsonLogicValue): LocalValue => {
     };
   }
 
-  const [[operator, conditions]] = Object.entries(jsonLogic.visible);
-  const [fieldVar, value] = conditions as [{ var: string }, any];
+  const { operator, fieldVar, value } = conditionEntry;
 
+  // Assume 'visible' implies 'show' for now; adjust if backend uses 'hidden' key
   return {
     dependsOn: fieldVar.var,
     operator: operator === '==' ? 'is' : 'isNot',
     value: value,
-    action: operator === '==' ? 'show' : 'hide',
+    action: 'show', // Default to 'show' for 'visible'; adjust based on backend logic
   };
 };
 
-const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
-  if (!value.dependsOn) {
+const convertToJsonLogic = (value: LocalValue): AttributeConditions | null => {
+  if (value.dependsOn === '') {
     return null;
   }
 
@@ -95,10 +97,16 @@ const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
 
   try {
     rulesEngine.validate(condition);
-    const action = value.action === 'show' ? '==' : '!=';
+    // Determine JSON Logic operator based on operator and action
+    const operator =
+      (value.operator === 'is' && value.action === 'show') ||
+      (value.operator === 'isNot' && value.action === 'hide')
+        ? '=='
+        : '!=';
+    const conditionRule: AttributeConditionRule = [{ var: value.dependsOn }, value.value];
     return {
       visible: {
-        [action]: [{ var: value.dependsOn }, value.value],
+        [operator]: conditionRule,
       },
     };
   } catch (error) {
@@ -117,7 +125,7 @@ export const ConditionForm = ({
   const { formatMessage } = useIntl();
   const [localValue, setLocalValue] = React.useState<LocalValue>(convertFromJsonLogic(value));
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const hasCondition = Boolean(value?.visible);
+  const hasCondition = getFirstVisibleConditionEntry(value) !== null;
 
   // Add safety check for conditionFields
   if (!Array.isArray(conditionFields)) {
@@ -138,11 +146,19 @@ export const ConditionForm = ({
     };
     try {
       rulesEngine.validate(condition);
-      const action = updatedValue.action === 'show' ? '==' : '!=';
-      const jsonLogic = updatedValue.dependsOn
+      const operator =
+        (updatedValue.operator === 'is' && updatedValue.action === 'show') ||
+        (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
+          ? '=='
+          : '!=';
+      const conditionRule: AttributeConditionRule = [
+        { var: updatedValue.dependsOn },
+        updatedValue.value,
+      ];
+      const jsonLogic: AttributeConditions | null = updatedValue.dependsOn
         ? {
             visible: {
-              [action]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+              [operator]: conditionRule,
             },
           }
         : null;
@@ -155,7 +171,7 @@ export const ConditionForm = ({
         });
       }
     } catch {
-      // Do nothing if invalid
+      // Optionally, show an error to the user
     }
   };
 
@@ -330,6 +346,7 @@ export const ConditionForm = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
+
             <Box minWidth={0} flex={1}>
               <Field.Root name={`${name}.value`}>
                 <SingleSelect

@@ -126,7 +126,12 @@ const formatAttribute = (attr: AnyAttribute) => {
   }
 
   if ('targetAttribute' in attr) {
-    return { ...attr, targetAttribute: attr.targetAttribute === '-' ? null : attr.targetAttribute };
+    return {
+      ...attr,
+      targetAttribute: attr.targetAttribute === '-' ? null : attr.targetAttribute,
+      // Explicitly preserve conditions for relations
+      ...(attr.conditions && { conditions: attr.conditions }),
+    };
   }
 
   return attr;

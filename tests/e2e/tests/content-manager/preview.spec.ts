@@ -1,17 +1,44 @@
-import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
-import { resetFiles } from '../../utils/file-reset';
+import { test, expect, type Page } from '@playwright/test';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../utils/shared';
+import { resetFiles } from '../../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+/**
+ * Opens the preview page from the currently open edit view — deterministically.
+ *
+ * "Open preview" triggers a client-side navigation, and the side panel
+ * re-renders while the document queries settle: a click can land on a link
+ * node that is replaced before the event dispatches, silently doing nothing
+ * (observed on Firefox in CI). The old follow-up assertions ("Draft" text and
+ * the document heading) did not catch this because the edit view displays the
+ * same texts, so the tests only failed later on a preview-only element.
+ *
+ * Retry the click until the preview route is actually reached, then let the
+ * page settle.
+ */
+const openPreview = async (page: Page) => {
+  await expect(async () => {
+    if (!/\/preview($|\?)/.test(page.url())) {
+      await page.getByRole('link', { name: /open preview/i }).click();
+    }
+    await page.waitForURL(/\/preview($|\?)/, { timeout: 5_000 });
+  }).toPass({ timeout: 30_000 });
+  await page.waitForLoadState('networkidle');
+};
+
 test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });
@@ -23,13 +50,15 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Copies the link of the page
-    await page.getByRole('button', { name: /copy preview link/i }).click();
+    const copyPreviewLink = page.getByRole('button', { name: /copy preview link/i });
+    await expect(copyPreviewLink).toBeVisible();
+    await copyPreviewLink.click();
     await findAndClose(page, 'Copied preview link');
 
     // Should go back to the edit view on close
@@ -68,7 +97,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
@@ -88,10 +117,10 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Publish the document
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
 
     // Check if the iframe is present
     const iframe = page.getByTitle('Preview');
@@ -109,17 +138,39 @@ test.describe('Preview', () => {
       /\/preview\/api::article\.article\/.+\/en\/published$/
     );
   });
+
+  test('Publishing from preview with conditional fields should not trigger validation errors', async ({
+    page,
+  }) => {
+    // Navigate to an existing article
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Open the preview page
+    await openPreview(page);
+
+    // Try to publish - should work without conditional field validation errors
+    const publishButton = page.getByRole('button', { name: /publish/i });
+    await expect(publishButton).toBeEnabled();
+    await publishAndConfirmDraftRelations(page, publishButton);
+
+    // Verify publication succeeded and no error notifications appeared
+    await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
+
+    // Check that no validation error toast appeared
+    await expect(page.getByText(/There are validation errors in your document/i)).not.toBeVisible();
+  });
 });
 
 // TODO: add license check in condition
 describeOnCondition(edition === 'EE')('Advanced Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, {
       coreStore: false,
     });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });
@@ -133,7 +184,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Open the preview page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
 
     const titleBox = page.getByRole('textbox', { name: 'title' });
     const saveButton = page.getByRole('button', { name: /save/i });
@@ -158,7 +209,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
 
     // Publish
     await expect(publishButton).toBeEnabled();
-    await clickAndWait(page, publishButton);
+    await publishAndConfirmDraftRelations(page, publishButton);
     await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
     await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
     await expect(publishedTab).toBeEnabled();

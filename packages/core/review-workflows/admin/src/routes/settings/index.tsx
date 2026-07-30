@@ -138,6 +138,7 @@ export const ReviewWorkflowsListView = () => {
               tag={NavLink}
               to="create"
               onClick={handleCreateClick}
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.review-workflows.list.page.create',
@@ -213,6 +214,7 @@ export const ReviewWorkflowsListView = () => {
                       {canRead || canUpdate ? (
                         <IconButton
                           tag={Link}
+                          onClick={(e) => e.stopPropagation()}
                           to={workflow.id.toString()}
                           label={formatMessage(
                             {
@@ -266,14 +268,14 @@ export const ReviewWorkflowsListView = () => {
         <LimitsModal.Root open={showLimitModal} onOpenChange={() => setShowLimitModal(false)}>
           <LimitsModal.Title>
             {formatMessage({
-              id: 'Settings.review-workflows.list.page.workflows.limit.title',
+              id: 'review-workflows.workflows.limit.title',
               defaultMessage: 'You’ve reached the limit of workflows in your plan',
             })}
           </LimitsModal.Title>
 
           <LimitsModal.Body>
             {formatMessage({
-              id: 'Settings.review-workflows.list.page.workflows.limit.body',
+              id: 'review-workflows.workflows.limit.body',
               defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
             })}
           </LimitsModal.Body>

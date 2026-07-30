@@ -82,8 +82,14 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const [showColorPicker, setShowColorPicker] = React.useState(false);
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
-    const field = useField(name);
-    const color = field.value ?? '#000000';
+    const field = useField<string>(name);
+
+    /**
+     * The color that will show in the field. We can't presume to show black or something
+     *   if no value is currently set (as `null` really corresponds to no color, not
+     *   black), so default to empty string if nothing else is available. */
+    const color = field.value ?? props.placeholder ?? '';
+    const hasColor = field.value !== undefined && field.value !== null && field.value !== '';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
@@ -111,7 +117,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                   <ColorPreview color={color} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
-                    textColor={field.value ? undefined : 'neutral600'}
+                    textColor={hasColor === true ? undefined : 'neutral500'}
                     variant="omega"
                   >
                     {color}
@@ -139,7 +145,10 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     })}
                     style={{ textTransform: 'uppercase' }}
                     name={name}
-                    defaultValue={color}
+                    // No default value. If nothing is selected, the input will be empty.
+                    defaultValue={field.value ?? ''}
+                    // Here we default to #000000 as the placeholder, because, absent a
+                    //   user defined placeholder, we want to indicate the desired format.
                     placeholder="#000000"
                     onChange={field.onChange}
                     {...props}

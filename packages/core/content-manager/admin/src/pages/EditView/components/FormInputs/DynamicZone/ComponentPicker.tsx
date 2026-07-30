@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Accordion, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -19,6 +18,7 @@ const ComponentPicker = ({
   onClickAddComponent,
 }: ComponentPickerProps) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   const handleAddComponentToDz = (componentUid: string) => () => {
     onClickAddComponent(componentUid);
@@ -29,25 +29,28 @@ const ComponentPicker = ({
   }
 
   return (
-    <Box
-      paddingTop={6}
-      paddingBottom={6}
-      paddingLeft={5}
-      paddingRight={5}
-      background="neutral0"
-      shadow="tableShadow"
-      borderColor="neutral150"
-      hasRadius
+    <Flex
+      paddingTop={{ initial: 0, medium: 6 }}
+      paddingBottom={{ initial: 0, medium: 6 }}
+      paddingLeft={{ initial: 0, medium: 5 }}
+      paddingRight={{ initial: 0, medium: 5 }}
+      background={isMobile ? 'transparent' : 'neutral0'}
+      shadow={isMobile ? 'none' : 'tableShadow'}
+      borderColor={isMobile ? 'transparent' : 'neutral150'}
+      hasRadius={!isMobile}
+      gap={{ initial: 4, medium: 2 }}
+      direction="column"
+      alignItems="stretch"
     >
       <Flex justifyContent="center">
-        <Typography fontWeight="bold" textColor="neutral600">
+        <Typography fontWeight="bold" textColor="neutral600" fontSize={1}>
           {formatMessage({
             id: getTranslation('components.DynamicZone.ComponentPicker-label'),
             defaultMessage: 'Pick one component',
           })}
         </Typography>
       </Flex>
-      <Box paddingTop={2}>
+      <Box>
         <Accordion.Root defaultValue={Object.keys(dynamicComponentsByCategory)[0]}>
           {Object.entries(dynamicComponentsByCategory).map(([category, components], index) => (
             <ComponentCategory
@@ -60,7 +63,7 @@ const ComponentPicker = ({
           ))}
         </Accordion.Root>
       </Box>
-    </Box>
+    </Flex>
   );
 };
 

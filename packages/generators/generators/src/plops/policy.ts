@@ -1,9 +1,12 @@
-import type { NodePlopAPI } from 'plop';
-import tsUtils from '@strapi/typescript-utils';
+import type { ActionType, NodePlopAPI } from 'plop';
+import { join } from 'path';
+import fs from 'fs';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';
 import validateInput from './utils/validate-input';
 import getFilePath from './utils/get-file-path';
+import getGeneratorLanguage from './utils/get-generator-language';
+import { appendToFile } from './utils/extend-plugin-index-files';
 
 export default (plop: NodePlopAPI) => {
   // Policy generator
@@ -23,17 +26,42 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const currentDir = process.cwd();
       const filePath = getFilePath(answers.destination);
-      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      const language = getGeneratorLanguage({ plugin: answers.plugin, filePath }, plop);
 
-      return [
+      const baseActions: Array<ActionType> = [
         {
           type: 'add',
           path: `${filePath}/policies/{{ id }}.${language}`,
           templateFile: `templates/${language}/policy.${language}.hbs`,
         },
       ];
+
+      if (answers.plugin) {
+        const indexPath = join(plop.getDestBasePath(), `${filePath}/policies/index.${language}`);
+        const exists = fs.existsSync(indexPath);
+
+        if (!exists) {
+          // Create index file if it doesn't exist
+          baseActions.push({
+            type: 'add',
+            path: `${filePath}/policies/index.${language}`,
+            templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+            skipIfExists: true,
+          });
+        }
+
+        // Append the new policy to the index.ts file
+        baseActions.push({
+          type: 'modify',
+          path: `${filePath}/policies/index.${language}`,
+          transform(template: string) {
+            return appendToFile(template, { type: 'index', singularName: answers.id });
+          },
+        });
+      }
+
+      return baseActions;
     },
   });
 };

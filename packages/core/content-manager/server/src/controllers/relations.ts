@@ -6,6 +6,7 @@ import type { Data, Modules, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+import { indexByDocumentId } from './utils/document-status';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -77,12 +78,13 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     filters,
   });
 
+  const statusByDocumentId = indexByDocumentId(availableStatus);
+
   return relations.map((relation: RelationEntity) => {
-    const availableStatuses = availableStatus.filter(
-      (availableDocument: RelationEntity) =>
-        availableDocument.documentId === relation.documentId &&
-        (relation.locale ? availableDocument.locale === relation.locale : true)
-    );
+    const candidates = statusByDocumentId.get(relation.documentId as string) || [];
+    const availableStatuses = relation.locale
+      ? candidates.filter((c) => c.locale === relation.locale)
+      : candidates;
 
     return {
       ...relation,
@@ -130,7 +132,9 @@ const validateStatus = (
   const isSourceDP = isDP(sourceModel);
 
   // Default to draft if not set
-  if (!isSourceDP) return { status: undefined };
+  if (!isSourceDP && sourceModel.modelType === 'contentType') {
+    return { status: undefined };
+  }
 
   switch (status) {
     case 'published':
@@ -292,7 +296,13 @@ export default {
       },
     } = await this.extractAndValidateRequestInfo(ctx, id);
 
-    const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
+    const {
+      idsToOmit,
+      idsToInclude,
+      // `_q` is the public query parameter name; keep the alias grep-able.
+      _q: search,
+      ...query
+    } = ctx.request.query;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility: ctx.state.userAbility,
@@ -385,9 +395,9 @@ export default {
      * Apply a filter to the mainField based on the search query and filter operator
      * searching should be allowed only on mainField for permission reasons
      */
-    if (_q) {
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    if (search) {
+      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
     if (idsToOmit?.length > 0) {
@@ -450,7 +460,7 @@ export default {
       publishedAt?: Record<string, any>;
     } = {};
 
-    if (sourceSchema?.options?.draftAndPublish) {
+    if (sourceSchema?.options?.draftAndPublish || sourceSchema?.modelType === 'component') {
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };
@@ -498,7 +508,7 @@ export default {
       ordering: 'desc',
     });
 
-    // NOTE: the order is very import to make sure sanitized relations are kept in priority
+    // NOTE: the order is very important to make sure sanitized relations are kept in priority
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {

@@ -40,6 +40,7 @@ describe('Configuration settings service', () => {
         filterable: true,
         mainField: 'id',
         pageSize: 10,
+        relationOpenMode: 'modal',
         searchable: true,
       });
     });

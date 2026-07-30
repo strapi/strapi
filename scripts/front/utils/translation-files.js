@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
+const { globSync } = require('glob');
 
 const PACKAGES_DIR_PATH = 'packages/';
 const TRANSLATION_FILE_PATH = '/admin/src/translations/en.json';
@@ -23,8 +23,8 @@ const writeTranslationFile = (file) => {
 
 const readAllTranslationFiles = () => {
   const translationFilesPaths = [
-    ...glob.sync(path.join(PACKAGES_DIR_PATH, 'core/*/', TRANSLATION_FILE_PATH)),
-    ...glob.sync(path.join(PACKAGES_DIR_PATH, 'plugins/*/', TRANSLATION_FILE_PATH)),
+    ...globSync(path.join(PACKAGES_DIR_PATH, 'core/*/', TRANSLATION_FILE_PATH)),
+    ...globSync(path.join(PACKAGES_DIR_PATH, 'plugins/*/', TRANSLATION_FILE_PATH)),
   ];
 
   return translationFilesPaths.map(readTranslationFile);

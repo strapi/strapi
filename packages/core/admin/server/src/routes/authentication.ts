@@ -10,15 +10,20 @@ export default [
   },
   {
     method: 'POST',
-    path: '/renew-token',
-    handler: 'authentication.renewToken',
-    config: { auth: false },
+    path: '/access-token',
+    handler: 'authentication.accessToken',
+    config: {
+      auth: false,
+    },
   },
   {
     method: 'POST',
     path: '/register-admin',
     handler: 'authentication.registerAdmin',
-    config: { auth: false },
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
   },
   {
     method: 'GET',

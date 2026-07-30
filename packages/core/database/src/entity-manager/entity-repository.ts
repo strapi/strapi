@@ -98,8 +98,15 @@ export const createRepository = (uid: string, db: Database): Repository => {
       return db.entityManager.count(uid, params);
     },
 
-    attachRelations(id, data) {
-      return db.entityManager.attachRelations(uid, id, data);
+    async attachRelations(id, data) {
+      const trx = await db.transaction();
+      try {
+        await db.entityManager.attachRelations(uid, id, data, { transaction: trx.get() });
+        return await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
     },
 
     async updateRelations(id, data) {

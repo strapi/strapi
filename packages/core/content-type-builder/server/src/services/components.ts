@@ -3,6 +3,7 @@ import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
+import type { SchemaHandler } from './schema-builder/schema-handler';
 
 /**
  * Formats a component attributes
@@ -29,7 +30,10 @@ export const formatComponent = (component: any) => {
 /**
  * Creates a component and handle the nested components sent with it
  */
-export const createComponent = async ({ component, components = [] }: any) => {
+export const createComponent = async ({
+  component,
+  components = [],
+}: any): Promise<SchemaHandler> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
@@ -60,7 +64,7 @@ type ComponentToCreate = {
 export const editComponent = async (
   uid: Internal.UID.Component,
   { component, components = [] }: ComponentToCreate
-) => {
+): Promise<SchemaHandler> => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);

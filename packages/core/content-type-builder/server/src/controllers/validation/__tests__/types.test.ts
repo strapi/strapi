@@ -39,6 +39,56 @@ describe('Type validators', () => {
     expect(validator.isValidSync(attributes.title)).toBe(true);
   });
 
+  describe('String field maxLength validation', () => {
+    test('maxLength cannot be over 255', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          maxLength: 256,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(false);
+    });
+
+    test('maxLength of 255 is allowed', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          maxLength: 255,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+
+    test('maxLength less than 255 is allowed', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          maxLength: 100,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+  });
+
   describe('Dynamiczone type validator', () => {
     test('Components cannot be empty', () => {
       const attributes = {

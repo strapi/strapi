@@ -1,8 +1,6 @@
-export interface FeaturesConfig {
-  future?: {
-    unstableGuidedTour?: boolean;
-  };
-}
+import type { Features } from '../core/config/features';
+
+export type FeaturesConfig = Features;
 
 export interface FeaturesService {
   /**
@@ -11,6 +9,5 @@ export interface FeaturesService {
   config: FeaturesConfig | undefined;
   future: {
     isEnabled: (futureFlagName: string) => boolean;
-    unstableGuidedTour?: boolean;
   };
 }

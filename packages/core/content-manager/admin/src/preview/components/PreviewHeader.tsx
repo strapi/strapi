@@ -155,7 +155,6 @@ const PreviewHeader = () => {
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
-  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
 
   const [{ query }] = useQueryParams<{
@@ -217,7 +216,6 @@ const PreviewHeader = () => {
         </Flex>
         <Flex gap={2}>
           <IconButton
-            type="button"
             label={formatMessage({
               id: 'preview.copy.label',
               defaultMessage: 'Copy preview link',

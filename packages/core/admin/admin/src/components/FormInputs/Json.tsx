@@ -14,7 +14,7 @@ import { InputProps } from './types';
 
 const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
-    const field = useField(name);
+    const field = useField<string | boolean | number | object | null>(name);
     const fieldRef = useFocusInputField(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
@@ -25,7 +25,12 @@ const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
         <JSONInputImpl
           ref={composedRefs}
           value={
-            typeof field.value == 'object' ? JSON.stringify(field.value, null, 2) : field.value
+            field.value !== undefined &&
+            (typeof field.value === 'object' || // accounts for objects, arrays, null
+              typeof field.value === 'boolean' ||
+              typeof field.value === 'number')
+              ? JSON.stringify(field.value, null, 2)
+              : field.value
           }
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value

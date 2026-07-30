@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_shared_references",
+  "info": {
+    "displayName": "reference",
+    "description": "Single reference with relation to relation-dp (for nested component migration test)"
+  },
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "article": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp.relation-dp"
+    }
+  }
+}

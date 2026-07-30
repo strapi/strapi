@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import type { ILink } from '../../../../types';
+import type { ILink } from '../../../types';
 import { createLinkQuery } from '../../queries/link';
 
 /**

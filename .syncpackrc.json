@@ -1,0 +1,18 @@
+{
+  "source": ["package.json", "**/package.json"],
+  "dependencyTypes": ["prod", "dev"],
+  "lintFormatting": false,
+  "lintSemverRanges": false,
+  "versionGroups": [
+    {
+      "label": "Yarn catalog references (catalog:) — version resolved from .yarnrc.yml [catalog] section, syncpack v13 classifies these as 'unsupported' specifiers",
+      "specifierTypes": ["unsupported"],
+      "isIgnored": true
+    },
+    {
+      "label": "Ignore non-exact (workspace, ranges, etc.)",
+      "specifierTypes": ["!exact"],
+      "isIgnored": true
+    }
+  ]
+}

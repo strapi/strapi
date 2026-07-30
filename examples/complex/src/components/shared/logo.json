@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_shared_logos",
+  "info": { "displayName": "logo", "description": "Logo component with media" },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}

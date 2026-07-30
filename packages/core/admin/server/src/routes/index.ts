@@ -5,8 +5,11 @@ import users from './users';
 import roles from './roles';
 import webhooks from './webhooks';
 import apiTokens from './api-tokens';
+import adminTokens from './admin-tokens';
 import contentApi from './content-api';
 import transfer from './transfer';
+import homepage from './homepage';
+import aiRoutes from '../ai/routes/ai';
 
 const routes = {
   admin: {
@@ -19,8 +22,11 @@ const routes = {
       ...roles,
       ...webhooks,
       ...apiTokens,
+      ...adminTokens,
       ...contentApi,
       ...transfer,
+      ...homepage,
+      ...aiRoutes.routes,
     ],
   },
 };

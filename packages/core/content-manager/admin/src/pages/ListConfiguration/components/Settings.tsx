@@ -50,10 +50,13 @@ const Settings = () => {
   });
   const { schema } = useDoc();
 
-  const layout = useForm<FormData['layout']>('Settings', (state) => state.values.layout ?? []);
+  const layout = useForm<FormData['layout']>(
+    'Settings',
+    (state) => (state.values as FormData).layout ?? []
+  );
   const currentSortBy = useForm<FormData['settings']['defaultSortBy']>(
     'Settings',
-    (state) => state.values.settings.defaultSortBy
+    (state) => (state.values as FormData).settings.defaultSortBy
   );
   const onChange = useForm('Settings', (state) => state.onChange);
 
@@ -114,7 +117,7 @@ const Settings = () => {
       <Grid.Root key="bottom" gap={4}>
         {formLayout.map((row) =>
           row.map(({ size, ...field }) => (
-            <Grid.Item key={field.name} s={12} col={size} direction="column" alignItems="stretch">
+            <Grid.Item key={field.name} xs={12} col={size} direction="column" alignItems="stretch">
               {/* @ts-expect-error – issue with EnumerationProps conflicting with InputProps */}
               <InputRenderer {...field} />
             </Grid.Item>

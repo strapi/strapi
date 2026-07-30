@@ -10,6 +10,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Core } from '@strapi/types';
+import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
@@ -21,7 +22,7 @@ const merge = mergeWith((a, b) => {
 });
 
 type StrapiGraphQLContext = BaseContext & {
-  rootQueryArgs?: Record<string, unknown>;
+  rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
 };
 
 export const determineLandingPage = (
@@ -137,8 +138,14 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
           return {
             willResolveField({ source, args, contextValue, info }) {
               if (!source && info.operation.operation === 'query') {
-                // NOTE: context.rootQueryArgs is intended for internal use only
-                contextValue.rootQueryArgs = args;
+                // Key args per root field (alias)
+                if (!contextValue.rootQueryArgsByPath) {
+                  contextValue.rootQueryArgsByPath = new Map();
+                }
+                contextValue.rootQueryArgsByPath.set(info.path.key, {
+                  ...args,
+                  _originField: info.fieldName,
+                });
               }
             },
           };
@@ -148,7 +155,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   };
 
   type CustomOptions = {
-    cors: boolean;
+    cors?: boolean | Options;
     uploads: boolean;
     bodyParserConfig: boolean;
   };
@@ -164,7 +171,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     formatError: formatGraphqlError,
 
     // Misc
-    cors: false,
+    cors: undefined,
     uploads: false,
     bodyParserConfig: true,
     // send 400 http status instead of 200 for input validation errors
@@ -197,8 +204,14 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const handler: Core.MiddlewareHandler[] = [];
 
   // add cors middleware
-  if (cors) {
+  if (serverConfig.cors === false) {
+    // Explicitly disabled - don't add middleware
+  } else if (serverConfig.cors === undefined || serverConfig.cors === true) {
+    // enable with defaults (backwards compatible)
     handler.push(cors());
+  } else {
+    // Custom options object
+    handler.push(cors(serverConfig.cors));
   }
 
   // add koa bodyparser middleware

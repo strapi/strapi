@@ -1,4 +1,4 @@
-import type { Data } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 
 export interface Entity {
   id: Data.ID;
@@ -12,7 +12,7 @@ export interface Permission extends Entity {
   subject?: string | null;
   properties: {
     fields?: string[];
-    locales?: string[];
+    locales?: string[] | null;
     [key: string]: any;
   };
   conditions: string[];
@@ -25,6 +25,7 @@ export interface AdminUser extends Entity {
   email?: string;
   password?: string;
   resetPasswordToken?: string | null;
+  resetPasswordTokenExpiresAt?: string | Date | null;
   registrationToken?: string | null;
   isActive: boolean;
   roles: AdminRole[];
@@ -43,9 +44,17 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
   roles: Data.ID[];
 };
 
-export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
+export type SanitizedAdminUser = Omit<
+  AdminUser,
+  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'roles'
+> & {
   roles: SanitizedAdminRole[];
 };
+
+export type AdminTokenOwner = Pick<
+  AdminUser,
+  'id' | 'firstname' | 'lastname' | 'username' | 'email'
+>;
 export interface AdminRole extends Entity {
   name: string;
   code: string;
@@ -64,4 +73,13 @@ export interface Pagination {
   pageSize: number;
   pageCount: number;
   total: number;
+}
+
+export interface FieldContentSourceMap {
+  path: string;
+  type: Struct.SchemaAttributes[string]['type'];
+  documentId: string;
+  locale: string | null;
+  model?: UID.Schema;
+  kind?: Struct.ContentTypeKind;
 }

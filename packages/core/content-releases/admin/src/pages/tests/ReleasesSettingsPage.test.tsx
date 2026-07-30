@@ -1,6 +1,6 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 import { render, server, screen, waitFor, fireEvent } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { ProtectedReleasesSettingsPage } from '../ReleasesSettingsPage';
 
@@ -75,15 +75,13 @@ const setupGetSettingsResponse = (defaultTimezone: string | null) => {
 
 const setupUpdateSettingsResponse = (putMock: jest.Mock, responseTimezone: string | null) => {
   server.use(
-    rest.put('/content-releases/settings', async (req, res, ctx) => {
-      putMock(await req.json());
-      return res(
-        ctx.json({
-          data: {
-            defaultTimezone: responseTimezone,
-          },
-        })
-      );
+    http.put('/content-releases/settings', async ({ request }) => {
+      putMock(await request.json());
+      return HttpResponse.json({
+        data: {
+          defaultTimezone: responseTimezone,
+        },
+      });
     })
   );
 };
@@ -207,8 +205,10 @@ describe('Releases Settings page', () => {
     const saveButton = await screen.findByText('Save');
     fireEvent.click(saveButton);
 
-    // Wait for the error message
-    const errorMessage = await screen.findAllByText('The value provided is not valid');
-    expect(errorMessage).toHaveLength(2);
+    // Wait for the error message (field error and notification with animation)
+    await waitFor(async () => {
+      const errorMessage = await screen.findAllByText('The value provided is not valid');
+      expect(errorMessage).toHaveLength(2);
+    });
   });
 });

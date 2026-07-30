@@ -1,16 +1,11 @@
 import { getTrad } from './utils';
 
-export enum AssetType {
-  Video = 'video',
-  Image = 'image',
-  Document = 'doc',
-  Audio = 'audio',
-}
+export const ASSET_SOURCES = {
+  Url: 'url',
+  Computer: 'computer',
+} as const;
 
-export enum AssetSource {
-  Url = 'url',
-  Computer = 'computer',
-}
+export type AssetSource = (typeof ASSET_SOURCES)[keyof typeof ASSET_SOURCES];
 
 export const PERMISSIONS = {
   // This permission regards the main component (App) and is used to tell

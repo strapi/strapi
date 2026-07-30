@@ -86,6 +86,14 @@ const FILE_9 = {
   ...COMMON_PROPERTIES,
 };
 
+const FILE_10 = {
+  id: 10,
+  mime: '',
+  name: 'animation.lottie',
+  url: '/uploads/animation.lottie',
+  ...COMMON_PROPERTIES,
+};
+
 const files = [FILE_1, FILE_2, FILE_3, FILE_4, FILE_5, FILE_6, FILE_7, FILE_8, FILE_9];
 
 describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', () => {
@@ -129,5 +137,23 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], files);
 
     expect(results).toEqual(files);
+  });
+
+  it('allows files with empty MIME type when "files" is an allowed type', () => {
+    const results = getAllowedFiles(['files'], [FILE_10]);
+
+    expect(results).toEqual([FILE_10]);
+  });
+
+  it('rejects files with empty MIME type when "files" is not an allowed type', () => {
+    const results = getAllowedFiles(['images', 'videos', 'audios'], [FILE_10]);
+
+    expect(results).toEqual([]);
+  });
+
+  it('allows files with empty MIME type alongside other types when "files" is included', () => {
+    const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], [...files, FILE_10]);
+
+    expect(results).toEqual([...files, FILE_10]);
   });
 });

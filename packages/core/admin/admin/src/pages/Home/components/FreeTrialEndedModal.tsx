@@ -4,10 +4,10 @@ import { Box, Button, Flex, LinkButton, Modal, Typography } from '@strapi/design
 import { Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
-import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useScopedPersistentState } from '../../../hooks/usePersistentState';
 
 const StyledModalContent = styled(Modal.Content)`
   max-width: 51.6rem;
@@ -30,11 +30,11 @@ const StyledButton = styled(Button)`
 export const FreeTrialEndedModal = () => {
   const { formatMessage } = useIntl();
   const [open, setOpen] = useState(true);
-  const [previouslyOpen, setPreviouslyOpen] = usePersistentState(
+  const [previouslyOpen, setPreviouslyOpen] = useScopedPersistentState(
     'STRAPI_FREE_TRIAL_ENDED_MODAL',
     false
   );
-  const [cachedTrialEndsAt] = usePersistentState<string | undefined>(
+  const [cachedTrialEndsAt] = useScopedPersistentState<string | undefined>(
     'STRAPI_FREE_TRIAL_ENDS_AT',
     undefined
   );
@@ -148,7 +148,7 @@ export const FreeTrialEndedModal = () => {
                 </ul>
               </Box>
               <Flex marginTop={4} gap={2}>
-                <LinkButton href="https://strapi.chargebeeportal.com/" target="_blank">
+                <LinkButton href="https://billing.strapi.io/" target="_blank">
                   {formatMessage({
                     id: 'app.components.FreeTrialEndedModal.button.upgrade',
                     defaultMessage: 'Stay on the Growth plan',

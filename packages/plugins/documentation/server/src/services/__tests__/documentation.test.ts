@@ -1,3 +1,4 @@
+import path from 'path';
 import _ from 'lodash/fp';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
@@ -19,6 +20,7 @@ const mockStrapiInstance = {
   apis,
   plugins,
   config: {
+    environment: 'development',
     get: () => defaultConfig,
   },
   log: {
@@ -61,6 +63,7 @@ describe('Documentation plugin | Documentation service', () => {
 
   afterEach(() => {
     // Reset the mocked strapi config
+    global.strapi.config.environment = 'development';
     global.strapi.config.get = () => defaultConfig as any;
   });
 
@@ -509,6 +512,77 @@ describe('Documentation plugin | Documentation service', () => {
       expect(mockFinalDoc.paths['/kitchensinks']).toEqual({
         get: { responses: { 200: { description: 'test' } } },
       });
+    });
+  });
+
+  /**
+   * Regression: OpenAPI files must resolve to dist.* in production when distDir !== appDir (TypeScript builds).
+   * @see https://github.com/strapi/strapi/issues/22701
+   */
+  describe('Filesystem paths for generated OpenAPI (app vs dist)', () => {
+    let previousDirs: typeof global.strapi.dirs;
+    let previousEnvironment: string;
+
+    beforeAll(() => {
+      previousDirs = global.strapi.dirs;
+      previousEnvironment = global.strapi.config.environment;
+      global.strapi.dirs = {
+        app: {
+          extensions: '/mock-project/src/extensions',
+          api: '/mock-project/src/api',
+        },
+        dist: {
+          extensions: '/mock-project/dist/src/extensions',
+          api: '/mock-project/dist/src/api',
+        },
+      } as any;
+    });
+
+    afterAll(() => {
+      global.strapi.dirs = previousDirs;
+      global.strapi.config.environment = previousEnvironment;
+    });
+
+    afterEach(() => {
+      global.strapi.config.environment = previousEnvironment;
+    });
+
+    it('uses dist.extensions for getFullDocumentationPath when config.environment is production', () => {
+      global.strapi.config.environment = 'production';
+      const docService = documentation({ strapi: global.strapi });
+      expect(docService.getFullDocumentationPath()).toBe(
+        path.join('/mock-project/dist/src/extensions', 'documentation', 'documentation')
+      );
+    });
+
+    it('uses app.extensions for getFullDocumentationPath when config.environment is not production', () => {
+      global.strapi.config.environment = 'development';
+      const docService = documentation({ strapi: global.strapi });
+      expect(docService.getFullDocumentationPath()).toBe(
+        path.join('/mock-project/src/extensions', 'documentation', 'documentation')
+      );
+    });
+
+    it('uses dist paths for plugin and API docs when config.environment is production', () => {
+      global.strapi.config.environment = 'production';
+      const docService = documentation({ strapi: global.strapi });
+      expect(docService.getApiDocumentationPath({ name: 'upload', getter: 'plugin' })).toBe(
+        path.join('/mock-project/dist/src/extensions', 'upload', 'documentation')
+      );
+      expect(docService.getApiDocumentationPath({ name: 'kitchensink', getter: 'api' })).toBe(
+        path.join('/mock-project/dist/src/api', 'kitchensink', 'documentation')
+      );
+    });
+
+    it('uses app paths for plugin and API docs when config.environment is not production', () => {
+      global.strapi.config.environment = 'test';
+      const docService = documentation({ strapi: global.strapi });
+      expect(docService.getApiDocumentationPath({ name: 'upload', getter: 'plugin' })).toBe(
+        path.join('/mock-project/src/extensions', 'upload', 'documentation')
+      );
+      expect(docService.getApiDocumentationPath({ name: 'kitchensink', getter: 'api' })).toBe(
+        path.join('/mock-project/src/api', 'kitchensink', 'documentation')
+      );
     });
   });
 });

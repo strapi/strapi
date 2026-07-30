@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_basic_team_members",
+  "info": {
+    "displayName": "teamMembers",
+    "icon": "emotionHappy"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    },
+    "bio": {
+      "type": "blocks"
+    },
+    "organization": {
+      "type": "component",
+      "component": "default.org",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

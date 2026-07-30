@@ -248,8 +248,19 @@ const URLForm = () => {
     try {
       const res = await axios.get(url.toString(), { responseType: 'blob', timeout: 8000 });
 
+      // Axios types Content-Type as AxiosHeaderValue (string | array | null | …); File#type only accepts string | undefined.
+      const contentType = res.headers['content-type'];
+      const mimeType =
+        typeof contentType === 'string'
+          ? contentType
+          : Array.isArray(contentType)
+            ? contentType[0]
+            : contentType != null && typeof contentType !== 'object'
+              ? String(contentType)
+              : undefined;
+
       const file = new File([res.data], res.config.url ?? '', {
-        type: res.headers['content-type'],
+        type: mimeType,
       });
 
       const asset = await parseFileMetadatas(file);
@@ -282,7 +293,7 @@ const URLForm = () => {
               defaultMessage: 'URL',
             })}
           </Field.Label>
-          <TextInput onChange={handleChange} value={logoUrl} />
+          <TextInput type="url" onChange={handleChange} value={logoUrl} />
           <Field.Error />
         </Field.Root>
       </Box>

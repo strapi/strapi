@@ -123,7 +123,6 @@ dist
 ############################
 
 .vscode/
-!.vscode/settings.json
 front-workspace.code-workspace
 .yarnrc
 
@@ -146,11 +145,28 @@ npm-debug.log
 # Playwright
 ############################
 playwright-report
+tests/e2e/playwright-storage-state.json
 test-results
-!tests/e2e/data/*.tar
 tests/e2e/.env
 !tests/cli/data/*.tar.gz
 tests/cli/.env
+
+############################
+# AI tools
+############################
+.brain
+.brain.*
+
+# Claude
+CLAUDE.local.md
+.claude/
+
+# Cursor
+.cursor/
+!.cursor/worktrees.json
+
+# Codex
+.agents/
 
 ############################
 # Strapi

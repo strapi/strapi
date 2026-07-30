@@ -54,18 +54,20 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangeFilters?.([{ some: 'thing' }]);
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-      filters: {
-        ...FIXTURE_QUERY.filters,
-        $and: [
-          {
-            some: 'thing',
-          },
-        ],
-      },
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+        filters: {
+          ...FIXTURE_QUERY.filters,
+          $and: [
+            {
+              some: 'thing',
+            },
+          ],
+        },
+      })
+    );
   });
 
   test('onChangeFolder', async () => {
@@ -77,14 +79,16 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangeFolder?.({ id: 1 }, '/1');
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-      folder: {
-        id: 1,
-      },
-      folderPath: '/1',
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+        folder: {
+          id: 1,
+        },
+        folderPath: '/1',
+      })
+    );
   });
 
   test('onChangePage', async () => {
@@ -96,13 +100,15 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangePage?.({ id: 1 });
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-      page: {
-        id: 1,
-      },
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+        page: {
+          id: 1,
+        },
+      })
+    );
   });
 
   test('onChangePageSize', async () => {
@@ -114,10 +120,12 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangePageSize?.(5);
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 5,
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 5,
+      })
+    );
   });
 
   test('onChangePageSize - converts string to numbers', async () => {
@@ -129,10 +137,12 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangePageSize?.('5');
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 5,
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 5,
+      })
+    );
   });
 
   test('onChangeSort', async () => {
@@ -144,11 +154,13 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangeSort?.('name:DESC');
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-      sort: 'name:DESC',
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+        sort: 'name:DESC',
+      })
+    );
   });
 
   test('onChangeSearch', async () => {
@@ -160,11 +172,13 @@ describe('useModalQueryParams', () => {
       result.current[1]?.onChangeSearch?.('something');
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-      _q: 'something',
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+        _q: 'something',
+      })
+    );
   });
 
   test('onChangeSearch - empty string resets all values and removes _q and page', async () => {
@@ -174,19 +188,15 @@ describe('useModalQueryParams', () => {
 
     act(() => {
       result.current[1]?.onChangePage?.({ id: 1 });
-    });
-
-    act(() => {
       result.current[1]?.onChangeSearch?.('something');
-    });
-
-    act(() => {
       result.current[1]?.onChangeSearch?.('');
     });
 
-    expect(result.current[0].queryObject).toStrictEqual({
-      ...FIXTURE_QUERY,
-      pageSize: 20,
-    });
+    await waitFor(() =>
+      expect(result.current[0].queryObject).toStrictEqual({
+        ...FIXTURE_QUERY,
+        pageSize: 20,
+      })
+    );
   });
 });

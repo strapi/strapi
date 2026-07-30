@@ -31,19 +31,21 @@ This domain could potentially be moved to the Strapi core or Strapi utils in the
 
 This domain contains all the components necessary to generate a valid OpenAPI document from a Strapi application:
 
-| Component         | Path                                       |
-| ----------------- | ------------------------------------------ |
-| OpenAPI Generator | `src/generator`                            |
-| Assemblers        | `src/assemblers`                           |
-| Contexts          | `src/context`                              |
-| Registries        | `src/registries`                           |
-| Processors        | `src/pre-processor`, `src/post-processors` |
+| Component         | Path                                      |
+| ----------------- | ----------------------------------------- |
+| OpenAPI Generator | `src/generator`                           |
+| Assemblers        | `src/assemblers`                          |
+| Contexts          | `src/context`                             |
+| Registries        | `src/registries`                          |
+| Processors        | `src/pre-processor`, `src/post-processor` |
 
 ---
 
 Additionally, the package centralizes all exports for the public API in an `src/exports.ts` file.
 
 This approach decouples the package root exports from the public programmatic API it exposes.
+
+For step-by-step extension guides, see the [Contributing](./contributing/00-overview.md) section.
 
 ## Design Pattern
 
@@ -137,7 +139,7 @@ Generates valid OpenAPI documents from a Strapi application:
   - Holds information and instances for assembly processes
   - Maintains reference to the final built object in `context.output.data`
   - **Registries**
-    - Data structures for storing/retrieving configurations and common objects
+    - Reserved for shared assembly state (`RegistriesFactory` currently returns an empty object)
 
 ```mermaid
 erDiagram

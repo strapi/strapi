@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import {
+  clickAndWait,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -16,318 +19,340 @@ test.describe('Edit View', () => {
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
 
-    // TODO: Skip this test for now since there is a known bug with the draft relations check
-    test.fixme(
-      'as a user I want to be warned if I try to publish content that has draft relations',
-      async ({ page }) => {
-        await page.getByLabel('Content Manager').click();
-        await page.getByRole('link', { name: 'Create new entry' }).click();
-
-        // Wait for the URL to match the CREATE_URL pattern
-        await page.waitForURL(CREATE_URL);
-
-        // Add a new relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Coach BeardDraft').click();
-        // Attempt to publish the entry
-        await page.getByRole('button', { name: 'Publish' }).click();
-
-        // Verify that a warning about a single draft relation is displayed
-        await expect(page.getByText('This entry is related to 1')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
-
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
-
-        // Add another relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Led TassoDraft').click();
-        // Attempt to publish the entry again
-        await page.getByRole('button', { name: 'Publish' }).click();
-
-        // Verify that a warning about two draft relations is displayed
-        await expect(page.getByText('This entry is related to 2')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
-
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
-
-        // Attempt to publish the entry once more
-        await page.getByRole('button', { name: 'Publish' }).click();
-
-        // Verify that the warning about three draft relations is still displayed
-        await expect(page.getByText('This entry is related to 3')).toBeVisible();
-      }
-    );
-
-    test('as a user without read permission for a required field, I should see an error when trying to publish', async ({
+    test('as a user I want to be warned if I try to publish content that has draft relations', async ({
       page,
     }) => {
-      // As super admin create a new draft product entry
-      await page.getByLabel('Content Manager').click();
-      await page.getByRole('link', { name: 'Products' }).click();
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('link', { name: 'Create new entry' }).click();
 
-      const slug = 'product-for-required-test';
-      await page.getByLabel('slug*This value is unique for').fill(slug);
+      // Wait for the URL to match the CREATE_URL pattern
+      await page.waitForURL(CREATE_URL);
 
+      // Add a new relation to the entry
+      await page.getByRole('textbox', { name: 'title' }).fill('Draft relations warning test');
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Coach BeardDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
+      // Attempt to publish the entry
+      await page.getByRole('button', { name: 'Publish' }).click();
+
+      // Verify that a warning about a single draft relation is displayed
+      await expect(confirmationDialog).toBeVisible();
+      await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/will appear on the live site once that entry is published/)
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
+
+      // Save the current state of the entry
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
 
-      // As super admin remove read permission for the name field for the Editor role
-      await page.getByLabel('Settings').click();
-      await page.getByRole('link', { name: 'Roles' }).first().click();
-      await page.getByText('Editor', { exact: true }).click();
-
-      await page.getByLabel('Select all Product permissions').click();
-      await page.getByRole('button', { name: 'Product' }).click();
-      await page.getByLabel('Select name Read permission').click();
-
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved');
-
-      await page.getByRole('button', { name: 'test testing' }).click();
-      await page.getByRole('menuitem', { name: 'Log out' }).click();
-
-      // As editor login and try to publish the entry
-      await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
-
-      await page.getByLabel('Content Manager').click();
-      await page.getByRole('link', { name: 'Products' }).click();
-      await page.getByText(slug).click();
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Led TassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+      // Attempt to publish the entry again
       await page.getByRole('button', { name: 'Publish' }).click();
 
+      // Verify that a warning about two draft relations is displayed
+      await expect(confirmationDialog).toBeVisible();
       await expect(
-        page.getByText(
-          'Your current permissions prevent access to certain required fields. Please request access from an administrator to proceed.'
+        confirmationDialog.getByText(/2 linked entries are still in draft/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
+        )
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
+
+      // Save the current state of the entry
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Ted LassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+      // Attempt to publish the entry again
+      await page.getByRole('button', { name: 'Publish' }).click();
+
+      // Verify that a warning about three draft relations is displayed
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/3 linked entries are still in draft/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
         )
       ).toBeVisible();
     });
 
-    test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
-      page,
-    }) => {
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: /Create new entry/ }).click();
+    test(
+      'as a user I want to create and publish a document at the same time, then modify and save that document.',
+      { tag: ['@critical'] },
+      async ({ page }) => {
+        await page.getByRole('link', { name: 'Content Manager' }).click();
+        await page.getByRole('link', { name: /Create new entry/ }).click();
 
-      /**
-       * Now we're in the edit view.
-       */
-      await page.waitForURL(CREATE_URL);
+        /**
+         * Now we're in the edit view.
+         */
+        await page.waitForURL(CREATE_URL);
 
-      await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
+        await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
 
-      /**
-       * There should be two tabs, draft and published.
-       * The draft tab should be active by default.
-       * The published tab should be disabled.
-       */
-      await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeVisible();
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+        /**
+         * There should be two tabs, draft and published.
+         * The draft tab should be active by default.
+         * The published tab should be disabled.
+         */
+        await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeVisible();
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
-      /**
-       * Both the publish & save button should be enabled only after we start filling in the form
-       * and it should disable itself after we save the entry. The publish button should still be enabled.
-       */
-      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
-      await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
+        /**
+         * Both the publish & save button should be enabled only after we start filling in the form
+         * and it should disable itself after we save the entry. The publish button should still be enabled.
+         */
+        await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+        await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
 
-      await page.getByRole('button', { name: 'Publish' }).click();
-      await findAndClose(page, 'Published Document');
+        await page.getByRole('button', { name: 'Publish' }).click();
+        await findAndClose(page, 'Published Document');
 
-      /**
-       * When we click publish, we should stay on the draft tab but check the published tab to ensure
-       * all the actions are disabled, going back to the draft tab will tell us what actions are then
-       * available.
-       */
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
-      await page.getByRole('tab', { name: 'Published' }).click();
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
+        /**
+         * When we click publish, we should stay on the draft tab but check the published tab to ensure
+         * all the actions are disabled, going back to the draft tab will tell us what actions are then
+         * available.
+         */
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
+        await page.getByRole('tab', { name: 'Published' }).click();
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
 
-      await page.getByRole('tab', { name: 'Draft' }).click();
-      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).not.toBeDisabled();
+        await page.getByRole('tab', { name: 'Draft' }).click();
+        await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
+        await expect(
+          page.getByRole('button', { name: 'More document actions' })
+        ).not.toBeDisabled();
 
-      await page.getByRole('button', { name: 'More document actions' }).click();
-      await expect(
-        page.getByRole('menuitem', { name: 'Unpublish', exact: true })
-      ).not.toBeDisabled();
-      await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
-      await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
+        await page.getByRole('button', { name: 'More document actions' }).click();
+        await expect(
+          page.getByRole('menuitem', { name: 'Unpublish', exact: true })
+        ).not.toBeDisabled();
+        await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
+        await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      /**
-       * Now we go back to the list view to confirm our new entry has been correctly added to the database.
-       */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.waitForURL(LIST_URL);
-      await expect(page.getByRole('gridcell', { name: 'Being from Kansas City' })).toBeVisible();
-      await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
+        /**
+         * Now we go back to the list view to confirm our new entry has been correctly added to the database.
+         */
+        await page.getByRole('link', { name: 'Content Manager' }).click();
+        await page.waitForURL(LIST_URL);
+        await expect(page.getByRole('gridcell', { name: 'Being from Kansas City' })).toBeVisible();
+        await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
 
-      await page.getByRole('combobox', { name: 'authors' }).click();
-      const draft = page
-        .locator('role=option')
-        .filter({ hasText: 'Led Tasso' })
-        .filter({ hasText: 'Draft' });
+        await page.getByRole('combobox', { name: 'authors' }).click();
+        const draft = page
+          .locator('role=option')
+          .filter({ hasText: 'Led Tasso' })
+          .filter({ hasText: 'Draft' });
 
-      await expect(draft).toBeEnabled();
-      await draft.click();
+        await expect(draft).toBeEnabled();
+        await draft.click();
 
-      await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
 
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved Document');
+        await page.getByRole('button', { name: 'Save' }).click();
+        await findAndClose(page, 'Saved Document');
 
-      await expect(page.getByText('Modified')).toBeVisible();
-    });
+        await expect(page.getByText('Modified')).toBeVisible();
+      }
+    );
 
-    test('as a user I want to create a document, then modify that document', async ({ page }) => {
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: /Create new entry/ }).click();
+    test(
+      'as a user I want to create a document, then modify that document',
+      { tag: ['@critical'] },
+      async ({ page }) => {
+        await page.getByRole('link', { name: 'Content Manager' }).click();
+        await page.getByRole('link', { name: /Create new entry/ }).click();
 
-      /**
-       * Now we're in the edit view.
-       */
-      await page.waitForURL(CREATE_URL);
+        /**
+         * Now we're in the edit view.
+         */
+        await page.waitForURL(CREATE_URL);
 
-      await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
+        await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
 
-      /**
-       * There should be two tabs, draft and published.
-       * The draft tab should be active by default.
-       * The published tab should be disabled.
-       */
-      await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeVisible();
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+        /**
+         * There should be two tabs, draft and published.
+         * The draft tab should be active by default.
+         * The published tab should be disabled.
+         */
+        await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeVisible();
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
-      /**
-       * Both the publish & save button should be enabled only after we start filling in the form
-       * and it should disable itself after we save the entry. The publish button should still be enabled.
-       */
-      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
-      await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
+        /**
+         * Both the publish & save button should be enabled only after we start filling in the form
+         * and it should disable itself after we save the entry. The publish button should still be enabled.
+         */
+        await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+        await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
 
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved Document');
+        await page.getByRole('button', { name: 'Save' }).click();
+        await findAndClose(page, 'Saved Document');
 
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Draft' })).toBeEnabled();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Draft' })).toBeEnabled();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
-      // the title should update post save because it's the `mainField` of the content-type
-      await expect(page.getByRole('heading', { name: 'Being from Kansas City' })).toBeVisible();
-      await expect(page.getByRole('heading', { name: 'Create an entry' })).not.toBeVisible();
-      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
+        // the title should update post save because it's the `mainField` of the content-type
+        await expect(page.getByRole('heading', { name: 'Being from Kansas City' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Create an entry' })).not.toBeVisible();
+        await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
-      await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill('I miss the denver broncos, now I can only watch it on the evening.');
+        await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
+        const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+        await contentBlock.fill(
+          'I miss the denver broncos, now I can only watch it on the evening.'
+        );
 
-      await page.getByRole('combobox', { name: 'authors' }).click();
+        await page.getByRole('combobox', { name: 'authors' }).click();
 
-      const draft = page
-        .locator('role=option')
-        .filter({ hasText: 'Led Tasso' })
-        .filter({ hasText: 'Draft' });
+        const draft = page
+          .locator('role=option')
+          .filter({ hasText: 'Led Tasso' })
+          .filter({ hasText: 'Draft' });
 
-      await expect(draft).toBeEnabled();
-      await draft.click();
+        await expect(draft).toBeEnabled();
+        await draft.click();
 
-      await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
 
-      await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved Document');
+        await page.getByRole('button', { name: 'Save' }).click();
+        await findAndClose(page, 'Saved Document');
 
-      // Check that we can save with keyboard shortcuts
-      await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
-      await page.keyboard.press('Control+Enter');
-      await findAndClose(page, 'Saved Document');
+        // Check that we can save with keyboard shortcuts
+        await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
+        await page.getByRole('textbox', { name: 'title' }).press('Enter');
+        await findAndClose(page, 'Saved Document');
 
-      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      await expect(page.getByRole('tab', { name: 'Draft' })).toBeEnabled();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
-      await expect(page.getByText('Modified')).not.toBeVisible();
+        // Ctrl + Enter saves a draft (without publishing)
+        await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft');
+        await page.keyboard.press('Control+Enter');
+        await findAndClose(page, 'Saved Document');
+        // The document was only saved as a draft, so the published tab stays disabled
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
-      /**
-       * Now we go back to the list view to confirm our new entry has been correctly added to the database.
-       */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.waitForURL(LIST_URL);
-      await expect(page.getByRole('gridcell', { name: 'Being an American' })).toBeVisible();
-      await page.getByRole('gridcell', { name: 'Being an American' }).click();
+        // Ctrl + S is an alias for saving a draft
+        await page
+          .getByRole('textbox', { name: 'title' })
+          .fill('Being an American draft via Ctrl+S');
+        await page.keyboard.press('Control+s');
+        await findAndClose(page, 'Saved Document');
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
-      await expect(page.getByRole('heading', { name: 'Being an American' })).toBeVisible();
-    });
+        // Restore the title for the publish assertions below
+        await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
+        await page.getByRole('textbox', { name: 'title' }).press('Enter');
+        await findAndClose(page, 'Saved Document');
+
+        await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        await expect(page.getByRole('tab', { name: 'Draft' })).toBeEnabled();
+        await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+        await expect(page.getByText('Modified')).not.toBeVisible();
+
+        // Press Ctrl + Shift + Enter to publish the document
+        await page.keyboard.press('Control+Shift+Enter');
+        const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+        await expect(confirmationDialog).toBeVisible();
+        await clickAndWait(
+          page,
+          confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
+        );
+        await findAndClose(page, 'Published Document');
+
+        /**
+         * Now we go back to the list view to confirm our new entry has been correctly added to the database.
+         */
+        await page.getByRole('link', { name: 'Content Manager' }).click();
+        await page.waitForURL(LIST_URL);
+        await expect(page.getByRole('gridcell', { name: 'Being an American' })).toBeVisible();
+        await page.getByRole('gridcell', { name: 'Being an American' }).click();
+
+        await expect(page.getByRole('heading', { name: 'Being an American' })).toBeVisible();
+      }
+    );
 
     test('as a user I want to be able to discard my changes', async ({ page }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
 
       await findAndClose(page, 'Published Document');
 
@@ -365,7 +390,7 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
       await findAndClose(page, 'Published Document');
 
       await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();

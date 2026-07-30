@@ -1,15 +1,18 @@
-version: '3'
-
 services:
   postgres:
     image: postgres
     restart: always
     volumes:
-      - pgdata_test:/var/lib/postgresql/data
+      - pgdata_test:/var/lib/postgresql
     environment:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
       POSTGRES_DB: strapi_test
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - '5432:5432'
 
@@ -24,6 +27,11 @@ services:
       MYSQL_ROOT_PASSWORD: strapi
     volumes:
       - mysqldata_test:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
     ports:
       - '3306:3306'
 

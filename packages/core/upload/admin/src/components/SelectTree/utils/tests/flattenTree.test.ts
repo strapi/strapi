@@ -36,6 +36,7 @@ describe('flattenTree', () => {
         depth: 0,
         label: 'Folder 1',
         parent: undefined,
+        path: '/f-1',
         value: 'f-1',
       },
       {
@@ -58,12 +59,14 @@ describe('flattenTree', () => {
         depth: 0,
         label: 'Folder 2',
         parent: undefined,
+        path: '/f-2',
         value: 'f-2',
       },
       {
         depth: 1,
         label: 'Folder 2-1',
         parent: 'f-2',
+        path: '/f-2/f-2-1',
         value: 'f-2-1',
       },
       {
@@ -76,12 +79,14 @@ describe('flattenTree', () => {
         depth: 1,
         label: 'Folder 2-2',
         parent: 'f-2',
+        path: '/f-2/f-2-2',
         value: 'f-2-2',
       },
       {
         depth: 2,
         label: 'Folder 2-2-1',
         parent: 'f-2-2',
+        path: '/f-2/f-2-2/f-2-2-1',
         value: 'f-2-2-1',
       },
     ]);

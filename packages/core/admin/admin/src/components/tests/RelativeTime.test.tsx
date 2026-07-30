@@ -30,7 +30,6 @@ describe('RelativeTime', () => {
     render(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />);
 
     expect(screen.getByRole('time')).toHaveTextContent('in 5 minutes');
-    // expect(getByText('in 5 minutes')).toBeInTheDocument();
   });
 
   it('can display the relative time for a past date', () => {
@@ -38,6 +37,13 @@ describe('RelativeTime', () => {
     render(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />);
 
     expect(screen.getByRole('time')).toHaveTextContent('5 minutes ago');
-    // expect(getByText('5 minutes ago')).toBeInTheDocument();
+  });
+
+  it('renders "now" when the timestamp is within the same second', () => {
+    const now = 1443686400000; // 2015-10-01 08:00:00
+    spiedDateNow = setDateNow(now);
+    render(<RelativeTime timestamp={new Date(now)} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('now');
   });
 });

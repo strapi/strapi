@@ -1,9 +1,8 @@
 'use strict';
 
 const { join } = require('path');
-const { promisify } = require('util');
 const fs = require('fs-extra');
-const glob = promisify(require('glob').glob);
+const { glob } = require('glob');
 
 const cleanFile = async (filePath) => {
   try {

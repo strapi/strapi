@@ -18,7 +18,7 @@ export type FindFirst<
 
 export type FindOne<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.FindFirst<TContentTypeUID>,
+  TParams extends Params.FindOne<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
 export type Delete<

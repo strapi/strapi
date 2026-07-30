@@ -24,7 +24,7 @@ const editAssetRequest = (
   signal: AbortSignal,
   onProgress: (progress: number) => void,
   post: FetchClient['post']
-) => {
+): Promise<UpdateFile.Response['data']> => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
 
   const formData = new FormData();
@@ -38,6 +38,7 @@ const editAssetRequest = (
     JSON.stringify({
       alternativeText: asset.alternativeText,
       caption: asset.caption,
+      focalPoint: asset.focalPoint,
       folder: asset.folder,
       name: asset.name,
     })
@@ -48,7 +49,7 @@ const editAssetRequest = (
    * need to look into an alternative to make it work
    * perhaps using xhr like Axios does
    */
-  return post(endpoint, formData, {
+  return post<UpdateFile.Response['data'], UpdateFile.Request['body']>(endpoint, formData, {
     signal,
   }).then((res) => res.data);
 };

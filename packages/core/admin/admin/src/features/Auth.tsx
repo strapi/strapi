@@ -6,8 +6,15 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
+import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
+import {
+  getStoredToken,
+  login as loginAction,
+  logout as logoutAction,
+  setLocale,
+  setToken,
+} from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -15,8 +22,14 @@ import {
   useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
-  useRenewTokenMutation,
 } from '../services/auth';
+import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
+import { getOrCreateDeviceId } from '../utils/deviceId';
+import {
+  attemptTokenRefresh,
+  setOnSessionExpired,
+  setOnTokenUpdate,
+} from '../utils/getFetchClient';
 
 import type {
   Permission as PermissionContract,
@@ -45,7 +58,7 @@ interface AuthContextValue {
    * empty, the user does not have any of those permissions.
    */
   checkUserHasPermissions: (
-    permissions?: Permission[],
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>,
     passedPermissions?: Permission[],
     rawQueryContext?: string
   ) => Promise<Permission[]>;
@@ -55,6 +68,23 @@ interface AuthContextValue {
   token: string | null;
   user?: User;
 }
+
+/**
+ * ensure the Auth context never exposes a non-function for checkUserHasPermissions.
+ * When this is undefined (e.g. context timing in production builds), consumers would throw
+ * "p is not a function" / "checkUserHasPermissions is not a function". By always passing
+ * a function here, all current and future consumers are protected without per-call-site guards.
+ *
+ * When would the fallback run? Only if the real checkUserHasPermissions were ever undefined
+ * when we pass to the Provider (e.g. a rare timing/build edge case). In normal runs it is
+ * always defined (useCallback), so the real function is passed and behavior is unchanged.
+ *
+ * If the fallback ever did run: it returns [] so consumers (which use .length > 0) treat it
+ * as "no permission" for that render—under-permissive. On the next AuthProvider re-render we
+ * pass the real function again, so the context updates and the view corrects quickly.
+ * @see https://github.com/strapi/strapi/issues/24384
+ */
+const NOOP_CHECK_USER_HAS_PERMISSIONS: AuthContextValue['checkUserHasPermissions'] = async () => [];
 
 const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
 
@@ -113,7 +143,6 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
-  const [renewTokenMutation] = useRenewTokenMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -123,33 +152,121 @@ const AuthProvider = ({
   }, [dispatch, navigate]);
 
   /**
-   * Fetch data from storages on mount and store it in our state.
-   * It's not normally stored in session storage unless the user
-   * does click "remember me" when they login. We also need to renew the token.
+   * Clear *only this tab's* session and redirect to login, without removing the
+   * shared `isLoggedIn`/`jwtToken` storage keys. Unlike `clearStateAndLogout`,
+   * this does not dispatch `logoutAction`, so it does not fire the cross-tab
+   * `storage` event that logs every tab out. Used by the speculative idle timer,
+   * which fires per-tab at the access token's `exp`: an idle tab must never tear
+   * down a session that another tab is still actively using. A genuine logout
+   * (user-initiated, or a server-confirmed 401 via `setOnSessionExpired`) still
+   * goes through `clearStateAndLogout` and broadcasts to all tabs.
    */
+  const clearLocalSessionAndRedirect = React.useCallback(() => {
+    dispatch(adminApi.util.resetApiState());
+    dispatch(setToken(null));
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
+
+  const resyncToken = React.useCallback(
+    (newToken: string) => {
+      dispatch(setToken(newToken));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Track the timestamp of the user's last interaction. This is the activity
+   * signal `useIdleSessionLogout` uses to tell an active user (silently renew
+   * their session) apart from a genuinely idle one (log out). Successful API
+   * calls don't refresh the short-lived access token on their own, so without
+   * this an actively-working user is logged out the moment the token expires.
+   */
+  const lastActivityRef = React.useRef(Date.now());
   React.useEffect(() => {
-    if (token && !_disableRenewToken) {
-      renewTokenMutation({ token }).then((res) => {
-        if ('data' in res) {
-          dispatch(
-            loginAction({
-              token: res.data.token,
-            })
-          );
-        } else {
-          clearStateAndLogout();
-        }
-      });
+    const markActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+    const events = ['pointerdown', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach((event) =>
+      window.addEventListener(event, markActivity, { passive: true, capture: true })
+    );
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, markActivity, { capture: true }));
+    };
+  }, []);
+  const getLastActivityAt = React.useCallback(() => lastActivityRef.current, []);
+
+  /**
+   * Silently rotate the refresh token and mint a new access token. Returns
+   * `true` on success (the resulting `setToken` re-arms the idle timer) and
+   * `false` when the server rejects it (session genuinely over).
+   */
+  const renewSession = React.useCallback(async () => {
+    try {
+      await attemptTokenRefresh();
+      return true;
+    } catch {
+      return false;
     }
-  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
+  }, []);
 
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {
-        dispatch(setLocale(user.preferedLanguage));
+        dispatch(setLocale(normalizeAdminLocale(user.preferedLanguage)));
       }
     }
   }, [dispatch, user]);
+
+  /**
+   * Register a callback to update Redux state when the token is refreshed.
+   * This ensures the app state stays in sync with the token stored in localStorage/cookies.
+   */
+  React.useEffect(() => {
+    setOnTokenUpdate((newToken) => {
+      dispatch(setToken(newToken));
+    });
+
+    return () => {
+      setOnTokenUpdate(null);
+    };
+  }, [dispatch]);
+
+  /**
+   * Register the session-expired handler that the fetch layer / RTK baseQuery
+   * call when the server rejects the refresh token. This is what redirects
+   * the active tab to /auth/login on a 401, instead of leaving the user on
+   * a stale page until they click something.
+   */
+  React.useEffect(() => {
+    setOnSessionExpired(() => {
+      clearStateAndLogout();
+    });
+
+    return () => {
+      setOnSessionExpired(null);
+    };
+  }, [clearStateAndLogout]);
+
+  /**
+   * Session lifecycle at access-token expiry. The timer fires per-tab; the hook
+   * then either (1) re-syncs from a token another tab refreshed, (2) silently
+   * renews when the user has been active, or (3) logs out. Idle logout is local
+   * so an idle tab can't force-logout an actively-used one; a server-confirmed
+   * dead session (renewal rejected) broadcasts globally. See
+   * `useIdleSessionLogout` for the full rationale.
+   */
+  useIdleSessionLogout({
+    token,
+    onExpired: clearLocalSessionAndRedirect,
+    onSessionDead: clearStateAndLogout,
+    getStoredToken,
+    onResync: resyncToken,
+    getLastActivityAt,
+    renewSession,
+    disabled: _disableRenewToken,
+  });
 
   React.useEffect(() => {
     /**
@@ -170,7 +287,7 @@ const AuthProvider = ({
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
-      const res = await loginMutation(body);
+      const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
 
       /**
        * There will always be a `data` key in the response
@@ -193,7 +310,7 @@ const AuthProvider = ({
   );
 
   const logout = React.useCallback(async () => {
-    await logoutMutation();
+    await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
   }, [clearStateAndLogout, logoutMutation]);
 
@@ -288,7 +405,7 @@ const AuthProvider = ({
       login={login}
       logout={logout}
       permissions={userPermissions}
-      checkUserHasPermissions={checkUserHasPermissions}
+      checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
       refetchPermissions={refetchPermissions}
       isLoading={isLoading}
     >

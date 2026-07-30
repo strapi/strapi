@@ -62,8 +62,9 @@ export const EmptyAttributes = () => {
           </Box>
           <LinkButton
             tag={Link}
-            to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
+            to={`https://market.strapi.io?${qs.stringify({ categories: 'Custom fields' })}`}
             variant="secondary"
+            target="_blank"
             startIcon={<Plus />}
           >
             {formatMessage({

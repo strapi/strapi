@@ -11,10 +11,13 @@ import {
   useTracking,
   useAPIErrorHandler,
   useQueryParams,
+  useScopedPersistentState,
   useRBAC,
   Layouts,
   useTable,
-  unstable_tours,
+  useIsMobile,
+  useClipboard,
+  tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -23,10 +26,10 @@ import {
   ButtonProps,
   Box,
   EmptyStateLayout,
+  IconButton,
 } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import { Duplicate, Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
@@ -42,6 +45,10 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import {
+  type PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -50,9 +57,9 @@ import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
-import { Filters } from './components/Filters';
+import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
-import { CellContent } from './components/TableCells/CellContent';
+import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
 import type { Modules } from '@strapi/types';
@@ -66,41 +73,137 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
+type ListViewQuery = {
+  filters?: {
+    $and?: Array<{
+      __status?: {
+        $eq?: unknown;
+      };
+    }>;
+  };
+  plugins?: Record<string, unknown>;
+  page?: string;
+  pageSize?: string;
+  sort?: string;
+};
+
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
+  const isMobile = useIsMobile();
+
+  const handleCopyDocumentId = React.useCallback(
+    async (e: React.MouseEvent, documentId: string | undefined) => {
+      e.stopPropagation();
+      if (!documentId) return;
+      const didCopy = await copy(documentId);
+      if (didCopy) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-manager.actions.copy-documentId.success',
+            defaultMessage: 'Document ID copied to clipboard',
+          }),
+        });
+      }
+    },
+    [copy, formatMessage, toggleNotification]
+  );
 
   const { collectionType, model, schema } = useDoc();
-  const { list } = useDocumentLayout(model);
+  const { list, listViewConversionContext, isLoading: isLoadingLayout } = useDocumentLayout(model);
 
-  const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
+        paths: ['sort', 'filters', 'pageSize'],
+        scoped: true,
+      },
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    [model]
+  );
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
-  const listLayout = usePrev(list.layout);
-  React.useEffect(() => {
-    /**
-     * ONLY update the displayedHeaders if the document
-     * layout has actually changed in value.
-     */
-    if (!isEqual(listLayout, list.layout)) {
-      setDisplayedHeaders(list.layout);
-    }
-  }, [list.layout, listLayout]);
+  const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
+    `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
+    null
+  );
 
-  const handleSetHeaders = (headers: string[]) => {
-    setDisplayedHeaders(
-      convertListLayoutToFieldLayouts(headers, schema!.attributes, list.metadatas)
+  const mapDisplayedHeaders = React.useCallback(
+    (headers: ListFieldLayout[]) => headers.map((header) => header.name),
+    []
+  );
+
+  const displayedHeaders: ListFieldLayout[] = React.useMemo(() => {
+    if (
+      !displayedHeaderNames ||
+      !list.metadatas ||
+      Object.keys(list.metadatas).length <= 0 ||
+      !schema?.attributes ||
+      !listViewConversionContext
+    )
+      return [];
+
+    return convertListLayoutToFieldLayouts(
+      displayedHeaderNames,
+      schema.attributes,
+      list.metadatas,
+      {
+        configurations: listViewConversionContext.componentConfigurations,
+        schemas: listViewConversionContext.componentSchemas,
+      },
+      listViewConversionContext.contentTypeSchemas
     );
-  };
+  }, [displayedHeaderNames, schema, list, listViewConversionContext]);
 
-  const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
-    page?: string;
-    pageSize?: string;
-    sort?: string;
-  }>({
+  const handleSetHeaders = React.useCallback(
+    (headers: string[]) => {
+      setDisplayedHeaderNames(headers);
+    },
+    [setDisplayedHeaderNames]
+  );
+
+  const handleResetHeaders = React.useCallback(() => {
+    setDisplayedHeaderNames(mapDisplayedHeaders(list.layout));
+  }, [list.layout, mapDisplayedHeaders, setDisplayedHeaderNames]);
+
+  /**
+   * If the persistent displayedHeaders are not yet initialized, set them to list.layout
+   */
+  React.useEffect(() => {
+    // wait for list.layout to be loaded
+    if (list.layout.length === 0) {
+      return;
+    }
+
+    if (!displayedHeaderNames) {
+      handleResetHeaders();
+    }
+  }, [displayedHeaderNames, handleResetHeaders, list.layout]);
+
+  React.useEffect(() => {
+    if (!schema?.attributes) return;
+    if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
+    if (schema.uid !== model) return;
+
+    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
+      Object.keys(schema?.attributes).includes(header)
+    );
+
+    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(allowedDisplayHeaders);
+    }
+  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
+
+  const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
     pageSize: list.settings.pageSize.toString(),
     sort: list.settings.defaultSortBy
@@ -109,11 +212,36 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
+  const hasStatusFilter = Boolean(
+    query.filters?.$and?.some(
+      (filter) => filter.__status?.$eq !== undefined && filter.__status.$eq !== null
+    )
+  );
 
-  const { data, error, isFetching } = useGetAllDocumentsQuery({
-    model,
-    params,
-  });
+  // If a __status filter becomes active while sort=status:* is in the URL, strip the status sort.
+  React.useEffect(() => {
+    if (
+      hasStatusFilter &&
+      typeof query.sort === 'string' &&
+      /(?:^|,)\s*status:/i.test(query.sort)
+    ) {
+      const cleaned = query.sort
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+        .join(',');
+      setQuery({ sort: cleaned || undefined }, 'push', true);
+    }
+  }, [hasStatusFilter, query.sort, setQuery]);
+
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
+    {
+      model,
+      params,
+    },
+    { skip: isLoadingLayout || !isHydrated }
+  );
 
   /**
    * If the API returns an error, display a notification
@@ -190,7 +318,7 @@ const ListViewPage = () => {
           defaultMessage: 'status',
         }),
         searchable: false,
-        sortable: false,
+        sortable: !hasStatusFilter,
       } satisfies ListFieldLayout);
     }
 
@@ -198,13 +326,14 @@ const ListViewPage = () => {
   }, [
     displayedHeaders,
     formatMessage,
+    hasStatusFilter,
     list,
     runHookWaterfall,
     schema?.options?.draftAndPublish,
     model,
   ]);
 
-  if (isFetching) {
+  if (isLoadingLayout || !isHydrated || isLoading) {
     return <Page.Loading />;
   }
 
@@ -227,65 +356,134 @@ const ListViewPage = () => {
     });
   };
 
-  if (!isFetching && results.length === 0) {
-    return (
-      <>
-        <unstable_tours.contentManager.Introduction>
-          {/* Invisible Anchor */}
-          <Box paddingTop={5} />
-        </unstable_tours.contentManager.Introduction>
-        <Page.Main>
-          <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-          <LayoutsHeaderCustom
-            primaryAction={canCreate ? <CreateButton /> : null}
-            subtitle={formatMessage(
-              {
-                id: getTranslation('pages.ListView.header-subtitle'),
-                defaultMessage:
-                  '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-              },
-              { number: pagination?.total }
-            )}
-            title={contentTypeTitle}
-            navigationAction={<BackButton />}
-          />
-          <Layouts.Action
-            endActions={
-              <>
-                <InjectionZone area="listView.actions" />
-                <ViewSettingsMenu
-                  setHeaders={handleSetHeaders}
-                  resetHeaders={() => setDisplayedHeaders(list.layout)}
-                  headers={displayedHeaders.map((header) => header.name)}
-                />
-              </>
-            }
-            startActions={
-              <>
-                {list.settings.searchable && (
-                  <SearchInput
-                    disabled={results.length === 0}
-                    label={formatMessage(
-                      { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                      { target: contentTypeTitle }
-                    )}
-                    placeholder={formatMessage({
-                      id: 'global.search',
-                      defaultMessage: 'Search',
-                    })}
-                    trackedEvent="didSearch"
-                  />
-                )}
-                {list.settings.filterable && schema ? (
-                  <Filters disabled={results.length === 0} schema={schema} />
-                ) : null}
-              </>
-            }
-          />
-          <Layouts.Content>
+  /**
+   * The entry link is rendered on the first non-interactive column *that has a
+   * value for the row* (resolved per row, so an empty cell — rendered as "-" —
+   * is skipped and the next candidate carries the link instead). Any scalar
+   * column qualifies — text, numbers, dates (createdAt/updatedAt), `id`, and
+   * `documentId` (its id text becomes the link, the copy button stays separate).
+   * Only genuinely interactive cells are skipped: relations, media, components,
+   * dynamic zones (they embed their own links/menus), plugin-formatted columns
+   * (`cellFormatter`), and the synthetic `status` column.
+   */
+  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  const linkCandidates = tableHeaders.filter(
+    ({ name, attribute, cellFormatter }) =>
+      name !== 'status' &&
+      typeof cellFormatter !== 'function' &&
+      attribute &&
+      !NON_LINKABLE_TYPES.includes(attribute.type)
+  );
+
+  // The link column for a given row: the first candidate that actually has a
+  // value (uses CellContent's own hasContent so it matches the "-" the cell
+  // would otherwise render). documentId is checked directly (its own cell).
+  const getRowLinkField = (row: (typeof results)[number]) =>
+    linkCandidates.find((header) => {
+      if (header.name === 'documentId') {
+        return Boolean(row.documentId);
+      }
+      const value = row[header.name.split('.')[0]];
+      return hasContent(value, header.mainField, header.attribute);
+    })?.name;
+
+  const isEmptyState = !isFetching && results.length === 0;
+
+  const endActions = (
+    <>
+      {isMobile && list.settings.filterable && schema && <Filters.Trigger />}
+      <InjectionZone area="listView.actions" />
+      <ViewSettingsMenu
+        setHeaders={handleSetHeaders}
+        resetHeaders={handleResetHeaders}
+        headers={displayedHeaderNames ?? []}
+      />
+    </>
+  );
+
+  const searchInput = (
+    <>
+      {list.settings.searchable && (
+        <SearchInput
+          label={formatMessage(
+            { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+            { target: contentTypeTitle }
+          )}
+          placeholder={formatMessage({
+            id: 'global.search',
+            defaultMessage: 'Search',
+          })}
+          trackedEvent="didSearch"
+        />
+      )}
+    </>
+  );
+
+  const startActions = (
+    <>
+      {searchInput}
+      {!isMobile && list.settings.filterable && schema && (
+        <>
+          <Filters.Trigger />
+          <Filters.List />
+        </>
+      )}
+    </>
+  );
+
+  const actions =
+    list.settings.filterable && schema ? (
+      <Filters.Root schema={schema} layout={list}>
+        <Layouts.Action
+          endActions={endActions}
+          startActions={startActions}
+          bottomActions={isMobile && hasAppliedFilters ? <Filters.List /> : null}
+        />
+        <Filters.Popover />
+      </Filters.Root>
+    ) : (
+      <Layouts.Action endActions={endActions} startActions={startActions} />
+    );
+
+  return (
+    <>
+      <tours.contentManager.Introduction>
+        {/* Invisible Anchor */}
+        <Box />
+      </tours.contentManager.Introduction>
+      <Page.Main>
+        <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+        <LayoutsHeaderCustom
+          primaryAction={
+            canCreate ? (
+              <tours.contentManager.CreateNewEntry>
+                <CreateButton />
+              </tours.contentManager.CreateNewEntry>
+            ) : null
+          }
+          subtitle={formatMessage(
+            {
+              id: getTranslation('pages.ListView.header-subtitle'),
+              defaultMessage:
+                '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+            },
+            { number: pagination?.total }
+          )}
+          title={contentTypeTitle}
+          navigationAction={<BackButton />}
+        />
+        {actions}
+        <Layouts.Content>
+          {isEmptyState ? (
             <Box background="neutral0" shadow="filterShadow" hasRadius>
               <EmptyStateLayout
-                action={canCreate ? <CreateButton variant="secondary" /> : null}
+                action={
+                  canCreate && (
+                    <Box>
+                      <CreateButton variant="secondary" />
+                    </Box>
+                  )
+                }
                 content={formatMessage({
                   id: 'app.components.EmptyStateLayout.content-document',
                   defaultMessage: 'No content found',
@@ -294,145 +492,145 @@ const ListViewPage = () => {
                 icon={<EmptyDocuments width="16rem" />}
               />
             </Box>
-          </Layouts.Content>
-        </Page.Main>
-      </>
-    );
-  }
+          ) : (
+            <Flex gap={4} direction="column" alignItems="stretch">
+              <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
+                <TableActionsBar />
+                <Table.Content>
+                  <Table.Head>
+                    <Table.HeaderCheckboxCell />
+                    {tableHeaders.map((header: ListFieldLayout) => (
+                      <Table.HeaderCell key={header.name} {...header} />
+                    ))}
+                  </Table.Head>
+                  <Table.Loading />
+                  <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
+                  <Table.Body>
+                    {results.map((row) => {
+                      const rowLinkField = getRowLinkField(row);
+                      return (
+                        <Table.Row
+                          cursor="pointer"
+                          key={row.id}
+                          onClick={handleRowClick(row.documentId)}
+                        >
+                          <Table.CheckboxCell id={row.id} />
+                          {tableHeaders.map(({ cellFormatter, ...header }) => {
+                            if (header.name === 'status') {
+                              const { status } = row;
 
-  return (
-    <Page.Main>
-      <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <LayoutsHeaderCustom
-        primaryAction={canCreate ? <CreateButton /> : null}
-        subtitle={formatMessage(
-          {
-            id: getTranslation('pages.ListView.header-subtitle'),
-            defaultMessage:
-              '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-          },
-          { number: pagination?.total }
-        )}
-        title={contentTypeTitle}
-        navigationAction={<BackButton />}
-      />
-      <Layouts.Action
-        endActions={
-          <>
-            <InjectionZone area="listView.actions" />
-            <ViewSettingsMenu
-              setHeaders={handleSetHeaders}
-              resetHeaders={() => setDisplayedHeaders(list.layout)}
-              headers={displayedHeaders.map((header) => header.name)}
-            />
-          </>
-        }
-        startActions={
-          <>
-            {list.settings.searchable && (
-              <SearchInput
-                disabled={results.length === 0}
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: contentTypeTitle }
-                )}
-                placeholder={formatMessage({
-                  id: 'global.search',
-                  defaultMessage: 'Search',
-                })}
-                trackedEvent="didSearch"
-              />
-            )}
-            {list.settings.filterable && schema ? (
-              <Filters disabled={results.length === 0} schema={schema} />
-            ) : null}
-          </>
-        }
-      />
-      <Layouts.Content>
-        <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
-            <TableActionsBar />
-            <Table.Content>
-              <Table.Head>
-                <Table.HeaderCheckboxCell />
-                {tableHeaders.map((header: ListFieldLayout) => (
-                  <Table.HeaderCell key={header.name} {...header} />
-                ))}
-              </Table.Head>
-              <Table.Loading />
-              <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
-              <Table.Body>
-                {results.map((row) => {
-                  return (
-                    <Table.Row
-                      cursor="pointer"
-                      key={row.id}
-                      onClick={handleRowClick(row.documentId)}
-                    >
-                      <Table.CheckboxCell id={row.id} />
-                      {tableHeaders.map(({ cellFormatter, ...header }) => {
-                        if (header.name === 'status') {
-                          const { status } = row;
-
-                          return (
-                            <Table.Cell key={header.name}>
-                              <DocumentStatus status={status} maxWidth={'min-content'} />
-                            </Table.Cell>
-                          );
-                        }
-                        if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
-                          // Display the users full name
-                          // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                          // In this case, we display a dash
-                          return (
-                            <Table.Cell key={header.name}>
-                              <Typography textColor="neutral800">
-                                {row[header.name.split('.')[0]]
-                                  ? getDisplayName(row[header.name.split('.')[0]])
-                                  : '-'}
-                              </Typography>
-                            </Table.Cell>
-                          );
-                        }
-                        if (typeof cellFormatter === 'function') {
-                          return (
-                            <Table.Cell key={header.name}>
-                              {/* @ts-expect-error – TODO: fix this TS error */}
-                              {cellFormatter(row, header, { collectionType, model })}
-                            </Table.Cell>
-                          );
-                        }
-                        return (
-                          <Table.Cell key={header.name}>
-                            <CellContent
-                              content={row[header.name.split('.')[0]]}
-                              rowId={row.documentId}
-                              {...header}
-                            />
-                          </Table.Cell>
-                        );
-                      })}
-                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
-                      <ActionsCell onClick={(e) => e.stopPropagation()}>
-                        <TableActions document={row} />
-                      </ActionsCell>
-                    </Table.Row>
-                  );
-                })}
-              </Table.Body>
-            </Table.Content>
-          </Table.Root>
-          <Pagination.Root
-            {...pagination}
-            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
-          >
-            <Pagination.PageSize />
-            <Pagination.Links />
-          </Pagination.Root>
-        </Flex>
-      </Layouts.Content>
-    </Page.Main>
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <DocumentStatus status={status} maxWidth={'min-content'} />
+                                </Table.Cell>
+                              );
+                            }
+                            if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
+                              // Display the users full name
+                              // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                              // In this case, we display a dash
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <Typography textColor="neutral800">
+                                    {row[header.name.split('.')[0]]
+                                      ? getDisplayName(row[header.name.split('.')[0]])
+                                      : '-'}
+                                  </Typography>
+                                </Table.Cell>
+                              );
+                            }
+                            if (header.name === 'documentId') {
+                              // When documentId is the primary link column, only its
+                              // id text becomes the link; the copy button stays outside.
+                              const isDocumentIdLink =
+                                header.name === rowLinkField && Boolean(row.documentId);
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
+                                    {isDocumentIdLink ? (
+                                      <Typography
+                                        tag={ReactRouterLink}
+                                        to={{
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }}
+                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                        textColor="neutral800"
+                                        maxWidth="30rem"
+                                        ellipsis
+                                      >
+                                        {row.documentId}
+                                      </Typography>
+                                    ) : (
+                                      <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                        {row.documentId || '-'}
+                                      </Typography>
+                                    )}
+                                    {row.documentId && (
+                                      <IconButton
+                                        variant="ghost"
+                                        size="S"
+                                        label={formatMessage({
+                                          id: 'content-manager.actions.copy-documentId.label',
+                                          defaultMessage: 'Copy',
+                                        })}
+                                        onClick={(e) => handleCopyDocumentId(e, row.documentId)}
+                                      >
+                                        <Duplicate />
+                                      </IconButton>
+                                    )}
+                                  </Flex>
+                                </Table.Cell>
+                              );
+                            }
+                            if (typeof cellFormatter === 'function') {
+                              return (
+                                <Table.Cell key={header.name}>
+                                  {/* @ts-expect-error – TODO: fix this TS error */}
+                                  {cellFormatter(row, header, { collectionType, model })}
+                                </Table.Cell>
+                              );
+                            }
+                            return (
+                              <Table.Cell key={header.name}>
+                                <CellContent
+                                  content={row[header.name.split('.')[0]]}
+                                  rowId={row.documentId}
+                                  {...header}
+                                  linkTo={
+                                    header.name === rowLinkField
+                                      ? {
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }
+                                      : undefined
+                                  }
+                                />
+                              </Table.Cell>
+                            );
+                          })}
+                          {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
+                          <ActionsCell onClick={(e) => e.stopPropagation()}>
+                            <TableActions document={row} />
+                          </ActionsCell>
+                        </Table.Row>
+                      );
+                    })}
+                  </Table.Body>
+                </Table.Content>
+              </Table.Root>
+              <Pagination.Root
+                {...pagination}
+                onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+              >
+                <Pagination.PageSize />
+                <Pagination.Links />
+              </Pagination.Root>
+            </Flex>
+          )}
+        </Layouts.Content>
+      </Page.Main>
+    </>
   );
 };
 
@@ -490,7 +688,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         search: stringify({ plugins: query.plugins }),
       }}
       minWidth="max-content"
-      marginLeft={2}
+      fullWidth
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),
@@ -531,7 +729,7 @@ const ProtectedListViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <ListViewPage />
+          <ListViewPage key={slug} />
         </DocumentRBAC>
       )}
     </Page.Protect>

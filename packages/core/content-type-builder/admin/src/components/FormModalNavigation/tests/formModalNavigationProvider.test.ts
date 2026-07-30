@@ -1,5 +1,8 @@
+import * as React from 'react';
+
 import { act, renderHook } from '@testing-library/react';
 
+import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import {
   FormModalNavigationProvider,
   State,
@@ -16,21 +19,52 @@ const removeFunctionsFromObject = (state: State) => {
 
 describe('FromModalNavigationProvider', () => {
   it('sets the initial state', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
-    expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
+    // Asserted against explicit literals rather than the imported INITIAL_STATE_DATA constant:
+    // the lint cleanup flipped these defaults from `null` to concrete values, and comparing the
+    // state to the same constant it is built from could never catch a regression in those defaults.
+    expect(currentStateWithoutFunctions).toEqual({
+      actionType: 'create',
+      attributeName: '',
+      attributeType: '',
+      dynamicZoneTarget: '',
+      forTarget: 'contentType',
+      modalType: null,
+      isOpen: true,
+      showBackLink: false,
+      kind: 'collectionType',
+      step: null,
+      targetUid: '',
+      customFieldUid: '',
+      activeTab: 'basic',
+    });
   });
 
   it('updates the state when selecting a custom field for a new attribute', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     act(() => {
-      (result.current as any).onClickSelectCustomField({
+      result.current.onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
       });
@@ -49,12 +83,19 @@ describe('FromModalNavigationProvider', () => {
   });
 
   it('updates the state when editing a custom field attribute', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     act(() => {
-      (result.current as any).onOpenModalEditCustomField({
+      result.current.onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',
         attributeName: 'color',

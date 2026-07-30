@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const request = require('supertest');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -25,6 +26,27 @@ const dogModel = {
   },
 };
 
+const uploadFile = async (request, filePath = path.join(__dirname, '../utils/rec.jpg')) => {
+  const res = await request({
+    method: 'POST',
+    url: '/upload',
+    formData: { files: fs.createReadStream(filePath) },
+  });
+  return res;
+};
+
+const getFiles = async (request) => {
+  const res = await request({ method: 'GET', url: '/upload/files' });
+  return res;
+};
+
+const parseBinaryResponse = (res, callback) => {
+  const chunks = [];
+
+  res.on('data', (chunk) => chunks.push(chunk));
+  res.on('end', () => callback(null, Buffer.concat(chunks)));
+};
+
 describe('Upload', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
@@ -45,12 +67,7 @@ describe('Upload', () => {
     });
 
     test('Can upload a file', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/upload',
-        formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-      });
-
+      const res = await uploadFile(rq);
       expect(res.statusCode).toBe(201);
     });
   });
@@ -132,7 +149,7 @@ describe('Upload', () => {
     });
 
     test('GET /upload/files => Find files', async () => {
-      const res = await rq({ method: 'GET', url: '/upload/files' });
+      const res = await getFiles(rq);
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
@@ -170,4 +187,167 @@ describe('Upload', () => {
       });
     });
   });
+
+  describe('File restriction', () => {
+    afterEach(() => {
+      // Reset config after each test
+      strapi.config.set('plugin::upload.security', {});
+    });
+
+    describe('uploadFiles endpoint', () => {
+      test('Rejects file when MIME type is in denied list', async () => {
+        strapi.config.set('plugin::upload.security', { deniedTypes: ['image/*'] });
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+
+        // Should be rejected due to security configuration
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toBeDefined();
+        // MIME detection may fail in test environment, so check for either error
+        expect(res.body.error.message).toMatch(/image\/jpeg|Cannot verify file type/);
+      });
+
+      test('Rejects file when not in allowed types list', async () => {
+        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+
+        // Should be rejected because it's not a PDF
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toBeDefined();
+      });
+
+      test('Accepts file when no restrictions are configured', async () => {
+        // No security config - should accept any file
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+
+        expect(res.statusCode).toBe(201);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].mime).toBe('image/jpeg');
+      });
+
+      test('Rejects multiple files when they do not match allowed types', async () => {
+        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: {
+            files: [
+              fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+              fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            ],
+          },
+        });
+
+        // When all files are rejected, should return 400
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toBeDefined();
+      });
+    });
+
+    describe('replaceFile endpoint', () => {
+      let fileToReplace;
+
+      beforeEach(async () => {
+        // Upload an initial file to replace (without restrictions)
+        const uploadRes = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+        fileToReplace = uploadRes.body[0];
+      });
+
+      afterEach(async () => {
+        // Clean up uploaded files
+        if (fileToReplace) {
+          await rq({ method: 'DELETE', url: `/upload/files/${fileToReplace.id}` });
+        }
+      });
+
+      test('Rejects replacement file when MIME type is in denied list', async () => {
+        strapi.config.set('plugin::upload.security', { deniedTypes: ['image/*'] });
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${fileToReplace.id}`,
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+
+        // Should be rejected due to security configuration
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toBeDefined();
+      });
+
+      test('Accepts replacement file when no restrictions are configured', async () => {
+        // No security config - should accept replacement
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${fileToReplace.id}`,
+          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.mime).toBe('image/jpeg');
+      });
+
+      test('Accepts replacement file submitted as a single-element files array', async () => {
+        const replacementPath = path.join(__dirname, '../utils/rec.pdf');
+
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${fileToReplace.id}`,
+          formData: {
+            files: [
+              {
+                path: replacementPath,
+                filename: 'rec.pdf',
+                contentType: 'application/pdf',
+              },
+            ],
+            fileInfo: JSON.stringify({ name: 'rec.pdf' }),
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          id: fileToReplace.id,
+          name: 'rec.pdf',
+          mime: 'application/pdf',
+        });
+
+        const { body: file } = await rq({
+          method: 'GET',
+          url: `/upload/files/${fileToReplace.id}`,
+        });
+
+        expect(file).toMatchObject({
+          id: fileToReplace.id,
+          name: 'rec.pdf',
+          mime: 'application/pdf',
+          provider: 'local',
+          url: expect.any(String),
+        });
+
+        const downloadRes = await request(strapi.server.httpServer)
+          .get(file.url)
+          .buffer(true)
+          .parse(parseBinaryResponse);
+
+        expect(downloadRes.statusCode).toBe(200);
+        expect(downloadRes.body).toEqual(fs.readFileSync(replacementPath));
+      });
+    });
+  });
 });
+
+module.exports = { uploadFile, getFiles };

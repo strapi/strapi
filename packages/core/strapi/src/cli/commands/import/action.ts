@@ -2,15 +2,17 @@ import type { Core } from '@strapi/types';
 import { isObject } from 'lodash/fp';
 import chalk from 'chalk';
 
+import fs from 'fs-extra';
+
 import {
   engine as engineDataTransfer,
   strapi as strapiDataTransfer,
   file as fileDataTransfer,
+  directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
 
 import {
   buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -20,6 +22,10 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
+  buildTransferTransforms,
+  normalizeTransferFilterOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -44,6 +50,9 @@ interface CmdOptions {
   force?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
 }
 
@@ -52,7 +61,7 @@ type EngineOptions = Parameters<typeof createTransferEngine>[2];
 /**
  * Import command.
  *
- * It transfers data from a file to a local Strapi instance
+ * It transfers data from a Strapi backup file or unpacked export directory to a local Strapi instance
  */
 export default async (opts: CmdOptions) => {
   // validate inputs from Commander
@@ -60,17 +69,20 @@ export default async (opts: CmdOptions) => {
     exitWith(1, 'Could not parse arguments');
   }
 
-  /**
-   * From strapi backup file
-   */
-  const sourceOptions = getLocalFileSourceOptions(opts);
+  normalizeTransferFilterOptions(opts);
 
-  const source = createLocalFileSourceProvider(sourceOptions);
+  const backupPath = opts.file ?? '';
+  const source = (await fs.stat(backupPath)).isDirectory()
+    ? directoryDataTransfer.providers.createLocalDirectorySourceProvider({
+        directory: { path: backupPath },
+      })
+    : createLocalFileSourceProvider(getLocalFileSourceOptions(opts));
 
   /**
    * To local Strapi instance
    */
   const strapiInstance = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapiInstance);
 
   /**
    * Configure and run the transfer engine
@@ -81,23 +93,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
-          },
-        },
-      ],
-      entities: [
-        {
-          filter: (entity) => !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type),
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   };
 
   const destinationOptions = {
@@ -106,7 +102,7 @@ export default async (opts: CmdOptions) => {
     },
     autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: parseRestoreFromOptions(engineOptions),
+    restore: parseRestoreFromOptions(opts, strapiInstance),
   };
 
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
@@ -136,6 +132,13 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
+    });
     await strapiInstance.telemetry.send(
       'didDEITSProcessStart',
       getTransferTelemetryPayload(engine)

@@ -75,4 +75,18 @@ describe('Test for URLs', () => {
     const isFromBucket = isUrlFromBucket(url, 'bucket', 'https://cdn.example.com/v1/');
     expect(isFromBucket).toEqual(false);
   });
+
+  describe('Malformed URLs', () => {
+    test('returns false for invalid URL string', () => {
+      expect(isUrlFromBucket('not-a-url', 'bucket')).toEqual(false);
+    });
+
+    test('returns false for empty string', () => {
+      expect(isUrlFromBucket('', 'bucket')).toEqual(false);
+    });
+
+    test('returns false for broken protocol', () => {
+      expect(isUrlFromBucket('://broken', 'bucket')).toEqual(false);
+    });
+  });
 });

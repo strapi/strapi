@@ -46,7 +46,7 @@ interface LoadingProps {
  */
 const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
   return (
-    <PageMain height="100vh" aria-busy={true}>
+    <PageMain height="100dvh" aria-busy={true}>
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Loader>{children}</Loader>
       </Flex>
@@ -183,7 +183,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const matchingPermissions = userPermissions.filter(
+  const matchingPermissions = (userPermissions || []).filter(
     (permission) =>
       permissions.findIndex(
         (perm) => perm.action === permission.action && perm.subject === permission.subject

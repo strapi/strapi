@@ -35,5 +35,8 @@
   "pages.SettingsPage.toggle.label": "Acceso restringido",
   "plugin.description.long": "Cree un documento OpenAPI y visualice su API con Swagger UI.",
   "plugin.description.short": "Cree un documento OpenAPI y visualice su API con Swagger UI.",
-  "plugin.name": "Documentación"
+  "plugin.name": "Documentación",
+  "Input.error.contain.lowercase": "La contraseña debe contener al menos un carácter en minúscula",
+  "Input.error.contain.number": "La contraseña debe contener al menos un número",
+  "Input.error.contain.uppercase": "La contraseña debe contener al menos un carácter en mayúscula"
 }

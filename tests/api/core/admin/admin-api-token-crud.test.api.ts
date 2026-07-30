@@ -1,38 +1,34 @@
-'use strict';
-
 import { omit } from 'lodash';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import type { Core } from '@strapi/types';
 import constants from '../../../../packages/core/admin/server/src/services/constants';
 
-describe('Admin API Token v2 CRUD (api)', () => {
-  let rq;
-  let strapi;
-  let now;
-  let nowSpy;
+describe('Admin Content API Token CRUD (api)', () => {
+  let rq: Awaited<ReturnType<typeof createAuthRequest>>;
+  let strapi: Core.Strapi;
+  let now: number;
+  let nowSpy: jest.SpyInstance;
 
   const deleteAllTokens = async () => {
-    const tokens = await strapi.service('admin::api-token').list();
-    const promises = [];
-    tokens.forEach(({ id }) => {
-      promises.push(strapi.service('admin::api-token').revoke(id));
+    const tokens = await strapi.db.query('admin::api-token').findMany({
+      select: ['id'],
+      where: { $or: [{ kind: 'content-api' }, { kind: { $null: true } }] },
     });
-    await Promise.all(promises);
+    await Promise.all(
+      tokens.map(({ id }) => strapi.db.query('admin::api-token').delete({ where: { id } }))
+    );
   };
 
-  // Initialization Actions
   beforeAll(async () => {
     strapi = await createStrapiInstance();
+    strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key-for-api-tokens');
     rq = await createAuthRequest({ strapi });
-    // To eliminate latency in the request and predict the expiry timestamp, we freeze Date.now()
     now = Date.now();
     nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
-
-    // delete tokens
     await deleteAllTokens();
   });
 
-  // Cleanup actions
   afterAll(async () => {
     nowSpy.mockRestore();
     await strapi.destroy();
@@ -42,7 +38,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
     await deleteAllTokens();
   });
 
-  // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
     currentTokens += 1;
@@ -64,9 +59,9 @@ describe('Admin API Token v2 CRUD (api)', () => {
     return req.body.data;
   };
 
-  test('Fails to create an api token (missing parameters from the body)', async () => {
+  test('Creates a content-api token without type (type stores as null)', async () => {
     const body = {
-      name: 'api-token_tests-failBody',
+      name: 'api-token_tests-no-type',
       description: 'api-token_tests-description',
     };
 
@@ -76,23 +71,11 @@ describe('Admin API Token v2 CRUD (api)', () => {
       body,
     });
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toStrictEqual({
-      data: null,
-      error: {
-        status: 400,
-        name: 'ValidationError',
-        message: 'type is a required field',
-        details: {
-          errors: [
-            {
-              path: ['type'],
-              name: 'ValidationError',
-              message: 'type is a required field',
-            },
-          ],
-        },
-      },
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toMatchObject({
+      name: body.name,
+      description: body.description,
+      kind: 'content-api',
     });
   });
 
@@ -150,6 +133,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -181,6 +165,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -197,7 +182,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       name: 'api-token_tests-lifespan7',
       description: 'api-token_tests-description',
       type: 'read-only',
-      lifespan: 7 * 24 * 60 * 60 * 1000, // 7 days
+      lifespan: 7 * 24 * 60 * 60 * 1000,
     };
 
     const res = await rq({
@@ -213,6 +198,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -224,7 +210,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lifespan: String(body.lifespan),
     });
 
-    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
 
@@ -236,7 +221,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       name: 'api-token_tests-lifespan30',
       description: 'api-token_tests-description',
       type: 'read-only',
-      lifespan: 30 * 24 * 60 * 60 * 1000, // 30 days
+      lifespan: 30 * 24 * 60 * 60 * 1000,
     };
 
     const res = await rq({
@@ -252,6 +237,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -263,7 +249,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lifespan: String(body.lifespan),
     });
 
-    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
 
@@ -275,7 +260,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       name: 'api-token_tests-lifespan90',
       description: 'api-token_tests-description',
       type: 'read-only',
-      lifespan: 90 * 24 * 60 * 60 * 1000, // 90 days
+      lifespan: 90 * 24 * 60 * 60 * 1000,
     };
 
     const res = await rq({
@@ -291,6 +276,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -302,7 +288,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lifespan: String(body.lifespan),
     });
 
-    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
 
@@ -330,6 +315,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       // @ts-expect-error - Add `expect.toBeISODate()` to jest types
       createdAt: expect.toBeISODate(),
@@ -421,6 +407,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       createdAt: expect.any(String),
       lastUsedAt: null,
@@ -456,6 +443,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       createdAt: expect.any(String),
       lastUsedAt: null,
@@ -537,6 +525,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: '',
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       createdAt: expect.any(String),
       lastUsedAt: null,
@@ -566,6 +555,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
+      kind: 'content-api',
       id: expect.any(Number),
       createdAt: expect.any(String),
       lastUsedAt: null,
@@ -583,7 +573,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
       'admin::model.model.create',
     ]);
 
-    // create 4 tokens
     const tokens = [];
     tokens.push(
       await createValidToken({
@@ -603,9 +592,8 @@ describe('Admin API Token v2 CRUD (api)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(tokens.length);
-    // check that each token exists in data
     tokens.forEach((token) => {
-      const t = res.body.data.find((t) => t.id === token.id);
+      const t = res.body.data.find((t: { id: number }) => t.id === token.id);
       if (t.permissions) {
         t.permissions = t.permissions.sort();
         Object.assign(token, { permissions: token.permissions.sort() });
@@ -628,6 +616,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: token.permissions,
       description: token.description,
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -663,12 +652,82 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: token.permissions,
       description: token.description,
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
       expiresAt: null,
       lifespan: null,
+    });
+  });
+
+  test('Retrieves a legacy content-api token with null kind (db-backed)', async () => {
+    const token = await createValidToken({
+      type: 'read-only',
+    });
+
+    // Simulate a legacy row created before kind was persisted.
+    const updatedRows = await strapi.db
+      .connection('strapi_api_tokens')
+      .where({ id: token.id })
+      .update({
+        kind: null,
+      });
+
+    expect(updatedRows).toBe(1);
+
+    const dbRow = await strapi.db
+      .connection('strapi_api_tokens')
+      .select('id', 'kind')
+      .where({ id: token.id })
+      .first();
+
+    expect(dbRow).toMatchObject({ id: token.id, kind: null });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      id: token.id,
+      name: token.name,
+      kind: 'content-api',
+    });
+  });
+
+  test('Updates a legacy content-api token with null kind (db-backed)', async () => {
+    const token = await createValidToken({
+      type: 'read-only',
+    });
+
+    // Simulate a legacy row created before kind was persisted.
+    const updatedRows = await strapi.db
+      .connection('strapi_api_tokens')
+      .where({ id: token.id })
+      .update({
+        kind: null,
+      });
+
+    expect(updatedRows).toBe(1);
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'PUT',
+      body: {
+        name: token.name,
+        description: 'updated description',
+        type: token.type,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      id: token.id,
+      description: 'updated description',
+      kind: 'content-api',
     });
   });
 
@@ -689,6 +748,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: token.permissions,
       description: token.description,
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -717,7 +777,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
   });
 
   test('Updates a token (successfully)', async () => {
-    // create a token
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -749,6 +808,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: [],
       description: updatedBody.description,
       type: updatedBody.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -756,7 +816,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
       expiresAt: null,
       lifespan: null,
     });
-    // expect(updatedRes.body.data.updated)
   });
 
   test('Returns a 404 if the ressource to update does not exist', async () => {
@@ -801,8 +860,9 @@ describe('Admin API Token v2 CRUD (api)', () => {
     expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
-      description: body.description, // updated field
+      description: body.description,
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -864,6 +924,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       permissions: token.permissions,
       description: '',
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -892,6 +953,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       description: token.description,
       permissions: token.permissions,
       type: token.type,
+      kind: 'content-api',
       id: token.id,
       createdAt: token.createdAt,
       lastUsedAt: null,
@@ -929,5 +991,132 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test.todo('Custom token can only be created with valid permissions that exist');
+  test('Custom token can only be created with valid permissions', async () => {
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => [
+      'api::foo.foo.find',
+      'api::foo.foo.create',
+    ]);
+
+    const invalidBody = {
+      name: 'api-token_tests-invalid-perms',
+      description: 'Testing invalid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::invalid.action'],
+    };
+
+    const invalidRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: invalidBody,
+    });
+
+    expect(invalidRes.statusCode).toBe(400);
+    expect(invalidRes.body.error).toMatchObject({
+      name: 'ValidationError',
+      message: 'Unknown permissions provided: api::invalid.action',
+    });
+
+    const validBody = {
+      name: 'api-token_tests-valid-perms',
+      description: 'Testing valid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::foo.foo.create'],
+    };
+
+    const validRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: validBody,
+    });
+
+    expect(validRes.statusCode).toBe(201);
+    expect(validRes.body.data.permissions).toEqual(expect.arrayContaining(validBody.permissions));
+  });
+
+  test('Supports viewable API tokens', async () => {
+    const body = {
+      name: 'api-token_tests-viewable',
+      description: 'Testing viewable token functionality',
+      type: 'read-only',
+    };
+
+    const createRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(createRes.statusCode).toBe(201);
+    expect(createRes.body.data.accessKey).toBeDefined();
+
+    const storedToken = await strapi.db.query('admin::api-token').findOne({
+      where: { id: createRes.body.data.id },
+      select: ['encryptedKey'],
+    });
+
+    const decryptedKey = strapi.service('admin::encryption').decrypt(storedToken.encryptedKey);
+    expect(decryptedKey).toBe(createRes.body.data.accessKey);
+
+    const getRes = await rq({
+      url: `/admin/api-tokens/${createRes.body.data.id}`,
+      method: 'GET',
+    });
+
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.body.data.accessKey).toBe(decryptedKey);
+    expect(getRes.body.data.accessKey).toBe(createRes.body.data.accessKey);
+  });
+
+  test('Revokes a legacy content-api token with null kind and returns kind: content-api (db-backed)', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    await strapi.db.connection('strapi_api_tokens').where({ id: token.id }).update({ kind: null });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.kind).toBe('content-api');
+  });
+
+  test('Revoke response for a content-api token does not include adminPermissions or adminUserOwner', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect('adminPermissions' in res.body.data).toBe(false);
+    expect('adminUserOwner' in res.body.data).toBe(false);
+  });
+
+  test('Regenerated api token response includes kind: content-api', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data.kind).toBe('content-api');
+  });
+
+  test('Regenerates a legacy content-api token with null kind and returns kind: content-api (db-backed)', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    await strapi.db.connection('strapi_api_tokens').where({ id: token.id }).update({ kind: null });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data.kind).toBe('content-api');
+  });
 });

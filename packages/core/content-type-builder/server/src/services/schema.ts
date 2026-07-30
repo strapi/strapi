@@ -78,6 +78,8 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
     return {
       ...attribute,
       targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
+      // Explicitly preserve conditions if they exist
+      ...(attribute.conditions && { conditions: attribute.conditions }),
     };
   }
 
@@ -179,12 +181,14 @@ export const updateSchema = async (schema: CTBSchema) => {
         }, {})
       );
 
-      await getService('content-types').generateAPI({
-        displayName: contentType!.displayName,
-        singularName: contentType!.singularName,
-        pluralName: contentType!.pluralName,
-        kind: contentType!.kind,
-      });
+      if (!contentType.plugin) {
+        await getService('content-types').generateAPI({
+          displayName: contentType!.displayName,
+          singularName: contentType!.singularName,
+          pluralName: contentType!.pluralName,
+          kind: contentType!.kind,
+        });
+      }
     }
 
     if (action === 'update') {

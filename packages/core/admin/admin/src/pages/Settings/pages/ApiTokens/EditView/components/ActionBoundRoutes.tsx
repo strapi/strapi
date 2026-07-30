@@ -14,6 +14,8 @@ export const ActionBoundRoutes = () => {
 
   return (
     <Grid.Item
+      xs={12}
+      m={5}
       col={5}
       background="neutral150"
       paddingTop={6}

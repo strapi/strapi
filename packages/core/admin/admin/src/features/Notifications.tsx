@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Alert, AlertVariant, Flex, useCallbackRef, Link } from '@strapi/design-system';
+import { Alert, AlertVariant, Link, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { Toaster, toast } from 'sonner';
 
 interface NotificationLink {
   label: string;
@@ -38,148 +39,72 @@ const NotificationsContext = React.createContext<NotificationsContextValue>({
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-interface NotificationsProviderProps {
-  children: React.ReactNode;
-}
-interface Notification extends NotificationConfig {
-  id: number;
-}
-
 /**
  * @internal
- * @description DO NOT USE. This will be removed before stable release of v5.
+ * @description exposes the `NotificationsContext` to its children and renders notifications
  */
-const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
-  const notificationIdRef = React.useRef(0);
-
-  const [notifications, setNotifications] = React.useState<Notification[]>([]);
-
+const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
   const toggleNotification = React.useCallback(
     ({ type, message, link, timeout, blockTransition, onClose, title }: NotificationConfig) => {
-      setNotifications((s) => [
-        ...s,
-        {
-          id: notificationIdRef.current++,
-          type,
-          message,
-          link,
-          timeout,
-          blockTransition,
-          onClose,
-          title,
+      toast.custom(
+        (id) => {
+          return (
+            <Box width="50rem" maxWidth="100%">
+              <Notification
+                type={type}
+                message={message}
+                title={title}
+                link={link}
+                clearNotification={() => {
+                  toast.dismiss(id);
+                  onClose?.();
+                }}
+              />
+            </Box>
+          );
         },
-      ]);
+        { duration: blockTransition ? Infinity : timeout }
+      );
     },
     []
   );
 
-  const clearNotification = React.useCallback((id: number) => {
-    setNotifications((s) => s.filter((n) => n.id !== id));
-  }, []);
-
   const value = React.useMemo(() => ({ toggleNotification }), [toggleNotification]);
 
   return (
-    <NotificationsContext.Provider value={value}>
-      <Flex
-        left="50%"
-        marginLeft="-250px"
-        position="fixed"
-        direction="column"
-        alignItems="stretch"
-        gap={2}
-        top={`4.6rem`}
-        width={`50rem`}
-        zIndex="notification"
-      >
-        {notifications.map((notification) => {
-          return (
-            <Notification
-              key={notification.id}
-              {...notification}
-              clearNotification={clearNotification}
-            />
-          );
-        })}
-      </Flex>
-      {children}
-    </NotificationsContext.Provider>
+    <>
+      <Toaster position="top-center" />
+      <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>
+    </>
   );
 };
 
-interface NotificationProps extends Notification {
-  clearNotification: (id: number) => void;
+interface NotificationProps extends Omit<NotificationConfig, 'blockTransition' | 'timeout'> {
+  clearNotification: () => void;
 }
 
 const Notification = ({
   clearNotification,
-  blockTransition = false,
-  id,
   link,
   message,
   onClose,
-  timeout = 2500,
   title,
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();
-  /**
-   * Chances are `onClose` won't be classed as stabilised,
-   * so we use `useCallbackRef` to avoid make it stable.
-   */
-  const onCloseCallback = useCallbackRef(onClose);
 
-  const handleClose = React.useCallback(() => {
-    onCloseCallback();
-
-    clearNotification(id);
-  }, [clearNotification, id, onCloseCallback]);
-
-  // eslint-disable-next-line consistent-return
-  React.useEffect(() => {
-    if (!blockTransition) {
-      const timeoutReference = setTimeout(() => {
-        handleClose();
-      }, timeout);
-
-      return () => {
-        clearTimeout(timeoutReference);
-      };
+  const getVariant = (): AlertVariant => {
+    switch (type) {
+      case 'info':
+        return 'default';
+      case 'danger':
+        return 'danger';
+      case 'warning':
+        return 'warning';
+      default:
+        return 'success';
     }
-  }, [blockTransition, handleClose, timeout]);
-
-  let variant: AlertVariant;
-  let alertTitle: string;
-
-  if (type === 'info') {
-    variant = 'default';
-    alertTitle = formatMessage({
-      id: 'notification.default.title',
-      defaultMessage: 'Information:',
-    });
-  } else if (type === 'danger') {
-    variant = 'danger';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else if (type === 'warning') {
-    variant = 'warning';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else {
-    variant = 'success';
-    alertTitle = formatMessage({
-      id: 'notification.success.title',
-      defaultMessage: 'Success:',
-    });
-  }
-
-  if (title) {
-    alertTitle = title;
-  }
+  };
 
   return (
     <Alert
@@ -190,13 +115,16 @@ const Notification = ({
           </Link>
         ) : undefined
       }
-      onClose={handleClose}
+      onClose={() => {
+        onClose?.();
+        clearNotification();
+      }}
       closeLabel={formatMessage({
         id: 'global.close',
         defaultMessage: 'Close',
       })}
-      title={alertTitle}
-      variant={variant}
+      title={title}
+      variant={getVariant()}
     >
       {message}
     </Alert>

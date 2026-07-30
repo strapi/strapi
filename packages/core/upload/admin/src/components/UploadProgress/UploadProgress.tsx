@@ -49,7 +49,12 @@ export const UploadProgress = ({ onCancel, progress = 0, error }: UploadProgress
   const { formatMessage } = useIntl();
 
   return (
-    <BoxWrapper alignItems="center" background={error ? 'danger100' : 'neutral150'} error={error}>
+    <BoxWrapper
+      justifyContent="center"
+      alignItems="center"
+      background={error ? 'danger100' : 'neutral150'}
+      error={error}
+    >
       {error ? (
         <Cross aria-label={error?.message} />
       ) : (

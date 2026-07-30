@@ -1,8 +1,7 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["src"],
+  "include": ["src", "./custom.d.ts"],
   "compilerOptions": {
-    "rootDir": "../",
-    "baseUrl": "."
+    "types": ["@testing-library/jest-dom", "jest"]
   }
 }

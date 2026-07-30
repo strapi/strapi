@@ -18,6 +18,7 @@ import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { DIMENSION, SIZE } from './utils/constants';
 
 const AdminSeatInfoCE = () => null;
+const AIUageDataCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
  * ApplicationInfoPage
@@ -30,7 +31,6 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
   const latestStrapiReleaseTag = useAppInfo(
     'ApplicationInfoPage',
     (state) => state.latestStrapiReleaseTag
@@ -47,6 +47,19 @@ const ApplicationInfoPage = () => {
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
+  );
+  const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const AIUsageData = useEnterprise(
+    AIUageDataCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AIUsage'
+        )
+      ).AIUsage,
+    {
+      enabled: isAiEnabled,
+    }
   );
 
   const {
@@ -95,11 +108,15 @@ const ApplicationInfoPage = () => {
     return null;
   }
 
+  if (!AIUsageData) {
+    return null;
+  }
+
   const isSaveDisabled =
     logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -124,7 +141,7 @@ const ApplicationInfoPage = () => {
             })}
             primaryAction={
               canUpdate && (
-                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />}>
+                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />} fullWidth>
                   {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                 </Button>
               )
@@ -152,7 +169,7 @@ const ApplicationInfoPage = () => {
                 </Typography>
 
                 <Grid.Root gap={5} tag="dl">
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
@@ -165,6 +182,8 @@ const ApplicationInfoPage = () => {
                         <Link
                           href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
                           endIcon={<ExternalLink />}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           {formatMessage({
                             id: 'Settings.application.link-upgrade',
@@ -174,25 +193,20 @@ const ApplicationInfoPage = () => {
                       )}
                     </Flex>
                   </Grid.Item>
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
-                        id: 'Settings.application.edition-title',
-                        defaultMessage: 'current edition',
+                        id: 'Settings.application.plan-title',
+                        defaultMessage: 'current plan',
                       })}
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'Settings.application.ee-or-ce',
-                            defaultMessage:
-                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
-                          },
-                          { communityEdition }
-                        )}
-                      </Typography>
-                      <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                      <Typography>{window.strapi.projectType}</Typography>
+                      <Link
+                        href="https://strapi.io/pricing-self-hosted"
+                        endIcon={<ExternalLink />}
+                        target="_blank"
+                      >
                         {formatMessage({
                           id: 'Settings.application.link-pricing',
                           defaultMessage: 'See all pricing plans',
@@ -201,7 +215,7 @@ const ApplicationInfoPage = () => {
                     </Flex>
                   </Grid.Item>
 
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.node-version',
@@ -211,6 +225,7 @@ const ApplicationInfoPage = () => {
                     <Typography tag="dd">{nodeVersion}</Typography>
                   </Grid.Item>
                   <AdminSeatInfo />
+                  <AIUsageData />
                 </Grid.Root>
               </Flex>
               {canRead && (
@@ -240,7 +255,7 @@ const ApplicationInfoPage = () => {
                     )}
                   </Typography>
                   <Grid.Root paddingTop={4} gap={4}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.menu.custom}
@@ -256,7 +271,7 @@ const ApplicationInfoPage = () => {
                         onChangeLogo={handleChangeLogo('menu')}
                       />
                     </Grid.Item>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.auth.custom}
@@ -279,7 +294,7 @@ const ApplicationInfoPage = () => {
           </Layouts.Content>
         </form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

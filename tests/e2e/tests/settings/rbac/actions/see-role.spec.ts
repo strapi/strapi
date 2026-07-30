@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 test.describe('RBAC - See Roles', () => {
   // Runs before each test
@@ -10,8 +10,7 @@ test.describe('RBAC - See Roles', () => {
     await sharedSetup('rbac-see-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
-      skipTour: true,
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page

@@ -1,13 +1,20 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+  publishAndConfirmDraftRelations,
+  withContentManagerSave,
+} from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 describeOnCondition(edition === 'EE')('settings', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -18,8 +25,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
     /**
      * Get to the settings page
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
 
     await page.getByRole('link', { name: 'Create new workflow' }).click();
 
@@ -70,8 +76,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
   });
 
   test('as a user I want to be able to edit an existing workflow', async ({ page }) => {
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
 
     // Click on the existing workflow
     await page.getByRole('link', { name: 'Default' }).click();
@@ -98,8 +103,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
   });
 
   test('as a user I want to be able to set a required stage for publishing', async ({ page }) => {
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
     await page.getByRole('link', { name: 'Create new workflow' }).click();
 
     /**
@@ -145,6 +149,22 @@ describeOnCondition(edition === 'EE')('settings', () => {
 
     await page.getByRole('gridcell', { name: 'Ted Lasso' }).click();
     await page.getByRole('textbox', { name: 'Name' }).fill('Ted Laso');
+    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await findAndClose(page, 'Saved');
+
+    // Ted Lasso is linked to draft articles in seed data — clear them so publish hits
+    // review-workflow validation instead of the draft-relations confirmation dialog.
+    const articleRemoveButtons = page
+      .locator('div')
+      .filter({ has: page.getByRole('combobox', { name: 'articles' }) })
+      .getByRole('button', { name: 'Remove' });
+
+    while ((await articleRemoveButtons.count()) > 0) {
+      await articleRemoveButtons.first().click();
+    }
+
+    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await findAndClose(page, 'Saved');
 
     // Try to publish without reaching the required stage
     await page.getByRole('button', { name: 'Publish' }).click();
@@ -155,7 +175,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
     await page.getByRole('option', { name: 'Done' }).click();
     await findAndClose(page, 'Review stage updated');
 
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await publishAndConfirmDraftRelations(page);
 
     await expect(page.getByText('Published document')).toBeVisible();
   });

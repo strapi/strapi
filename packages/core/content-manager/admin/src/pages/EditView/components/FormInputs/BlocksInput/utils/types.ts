@@ -1,4 +1,3 @@
-import type { Schema } from '@strapi/types';
 import type { Element, Node } from 'slate';
 
 type Block<T extends Element['type']> = Extract<Node, { type: T }>;
@@ -10,12 +9,8 @@ const getEntries = <T extends object>(object: T) =>
 // Wrap Object.keys to get the correct types
 const getKeys = <T extends object>(object: T) => Object.keys(object) as (keyof T)[];
 
-const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
-  return element.type === 'link';
-};
+function isNonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
 
-const isListNode = (element: Element): element is Schema.Attribute.ListBlockNode => {
-  return element.type === 'list';
-};
-
-export { type Block, getEntries, getKeys, isLinkNode, isListNode };
+export { type Block, getEntries, getKeys, isNonNullable };

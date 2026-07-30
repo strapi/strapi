@@ -4,6 +4,11 @@ import { within } from '@testing-library/react';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsMobile: jest.fn().mockReturnValue(false),
+}));
+
 import { HistoryProvider } from '../../pages/History';
 import { mockHistoryVersionsData } from '../../tests/mockData';
 import { VersionsList } from '../VersionsList';
@@ -41,11 +46,8 @@ describe('VersionsList', () => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    // Shows sidebar header and total count
-    const header = screen.getByRole('banner');
-    expect(within(header).getByText('Versions')).toBeInTheDocument();
-    expect(screen.getByText('14')).toBeInTheDocument();
     expect(screen.getByText('Versions')).toBeInTheDocument();
+    expect(screen.getByText('14')).toBeInTheDocument();
 
     // Displays the right info for each version
     const versions = screen.getAllByRole('link');
@@ -58,12 +60,10 @@ describe('VersionsList', () => {
 
     // Redirects to 2nd version on click
     await user.click(versions[1]);
-    expect(screen.queryByText('?id=26')).not.toBeInTheDocument();
-    expect(screen.getByText('?id=25')).toBeInTheDocument();
+    expect(await screen.findByText('?id=25')).toBeInTheDocument();
 
     // Redirects to 1st version again on click
     await user.click(versions[0]);
-    expect(screen.queryByText('?id=25')).not.toBeInTheDocument();
-    expect(screen.getByText('?id=26')).toBeInTheDocument();
+    expect(await screen.findByText('?id=26')).toBeInTheDocument();
   });
 });

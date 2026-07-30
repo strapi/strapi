@@ -3,13 +3,10 @@ import { render as renderRTL, screen } from '@tests/utils';
 
 import { AssigneeFilter, AssigneeFilterProps } from '../AssigneeFilter';
 
-/**
- * Filters are not currently supported
- */
-describe.skip('AssigneeFilter', () => {
+describe('AssigneeFilter', () => {
   const render = (props?: Partial<AssigneeFilterProps>) =>
     renderRTL(
-      <AssigneeFilter name="assignee" type="enumeration" aria-label="Assignee" {...props} />,
+      <AssigneeFilter name="strapi_assignee" type="relation" aria-label="Assignee" {...props} />,
       {
         renderOptions: {
           wrapper({ children }) {

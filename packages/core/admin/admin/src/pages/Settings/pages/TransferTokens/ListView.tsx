@@ -78,7 +78,7 @@ const ListView = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
-    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) }, { replace: true });
   }, [navigate]);
 
   useOnce(() => {
@@ -133,7 +133,7 @@ const ListView = () => {
     } catch {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
@@ -173,6 +173,7 @@ const ListView = () => {
                 })
               }
               to="/settings/transfer-tokens/create"
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.transferTokens.create',

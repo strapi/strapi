@@ -6,14 +6,19 @@ describe('Get-File-Path util', () => {
     expect(filePath).toBe(`api/{{ api }}`);
   });
 
+  test('with destination set as new', () => {
+    const filePath = getFilePath('new');
+    expect(filePath).toBe(`api/{{ id }}`);
+  });
+
   test('with destination set as plugin', () => {
     const filePath = getFilePath('plugin');
-    expect(filePath).toBe(`plugins/{{ plugin }}/server`);
+    expect(filePath).toBe(`plugins/{{ plugin }}/server/src`);
   });
 
   test('with destination set as root', () => {
     const filePath = getFilePath('root');
-    expect(filePath).toBe(`./`);
+    expect(filePath).toBe(`.`);
   });
 
   test('with empty destination string', () => {

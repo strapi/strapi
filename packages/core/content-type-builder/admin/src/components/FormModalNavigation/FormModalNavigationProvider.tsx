@@ -2,8 +2,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 
+import { useCTBSession } from '../CTBSession/useCTBSession';
+
 import { FormModalNavigationContext } from './FormModalNavigationContext';
 
+import type { TrackingEvent } from '@strapi/admin/strapi-admin';
 import type { Internal, Struct } from '@strapi/types';
 
 type FormModalNavigationProviderProps = {
@@ -21,21 +24,37 @@ export type ModalType =
   | 'contentType'
   | 'component';
 
-export type State = Record<string, any>;
+export type ActionType = 'create' | 'edit' | null;
+
+export type State = {
+  actionType: Exclude<ActionType, null>;
+  attributeName: string;
+  attributeType: string;
+  dynamicZoneTarget: string;
+  forTarget: Struct.ModelType;
+  modalType: ModalType | null;
+  isOpen: boolean;
+  showBackLink: boolean;
+  kind: Struct.ContentTypeKind;
+  step: string | null;
+  targetUid: Internal.UID.Schema;
+  customFieldUid: string;
+  activeTab: Tab;
+};
 
 export const INITIAL_STATE_DATA: State = {
-  actionType: null,
-  attributeName: null,
-  attributeType: null,
-  dynamicZoneTarget: null,
-  forTarget: null,
+  actionType: 'create',
+  attributeName: '',
+  attributeType: '',
+  dynamicZoneTarget: '',
+  forTarget: 'contentType',
   modalType: null,
   isOpen: true,
   showBackLink: false,
-  kind: null,
+  kind: 'collectionType',
   step: null,
-  targetUid: null,
-  customFieldUid: null,
+  targetUid: '' as Internal.UID.Schema,
+  customFieldUid: '',
   activeTab: 'basic',
 };
 
@@ -91,9 +110,27 @@ export type NavigateToAddCompoToDZModalPayload = {
   dynamicZoneTarget: string;
 };
 
+export type OpenModalCreateSchemaPayload = Pick<
+  State,
+  'actionType' | 'forTarget' | 'kind' | 'modalType'
+>;
+
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
-  const { trackUsage } = useTracking();
+  const { trackUsage: originalTrackUsage } = useTracking();
+  const { sessionId } = useCTBSession();
+
+  // Create a trackUsage that includes session ID from CTBSessionContext
+  const trackUsage = useCallback(
+    <TEvent extends TrackingEvent>(event: TEvent['name'], properties?: TEvent['properties']) => {
+      const propertiesWithSessionId = {
+        ...(properties as Record<string, unknown>),
+        ctbSessionId: sessionId,
+      };
+      return originalTrackUsage(event, propertiesWithSessionId as TEvent['properties']);
+    },
+    [originalTrackUsage, sessionId]
+  );
 
   const onClickSelectCustomField = useCallback(
     ({ attributeType, customFieldUid }: SelectCustomFieldPayload) => {
@@ -132,7 +169,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
     ({ dynamicZoneTarget, targetUid }: OpenModalAddComponentsToDZPayload) => {
       setFormModalNavigationState((prevState: State) => ({
         ...prevState,
-        dynamicZoneTarget,
+        dynamicZoneTarget: dynamicZoneTarget ?? '',
         targetUid,
         modalType: 'addComponentToDynamicZone',
         forTarget: 'contentType',
@@ -149,7 +186,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
       ...prevState,
       actionType: 'create',
       forTarget,
-      targetUid,
+      targetUid: targetUid ?? ('' as Internal.UID.Schema),
       modalType: 'chooseAttribute',
       isOpen: true,
       showBackLink: false,
@@ -157,7 +194,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
     }));
   }, []);
 
-  const onOpenModalCreateSchema = useCallback((nextState: State) => {
+  const onOpenModalCreateSchema = useCallback((nextState: OpenModalCreateSchemaPayload) => {
     setFormModalNavigationState((prevState) => ({
       ...prevState,
       ...nextState,
@@ -215,7 +252,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
         actionType: 'edit',
         forTarget,
         targetUid,
-        kind,
+        kind: kind === 'singleType' ? 'singleType' : 'collectionType',
         isOpen: true,
         activeTab: 'basic',
       }));
@@ -258,8 +295,8 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
         modalType: 'addComponentToDynamicZone',
         actionType: 'create',
         step: '1',
-        attributeType: null,
-        attributeName: null,
+        attributeType: '',
+        attributeName: '',
         activeTab: 'basic',
       }));
     },

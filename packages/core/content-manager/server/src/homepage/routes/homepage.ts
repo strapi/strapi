@@ -14,6 +14,15 @@ const homepageRouter: Plugin.LoadedPlugin['routes'][string] = {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    {
+      method: 'GET',
+      info,
+      path: '/homepage/count-documents',
+      handler: 'homepage.getCountDocuments',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };
 

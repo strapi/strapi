@@ -125,7 +125,7 @@ const ReleasesSettingsPage = () => {
   });
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -154,6 +154,7 @@ const ReleasesSettingsPage = () => {
                         loading={isSubmitting}
                         startIcon={<Check />}
                         type="submit"
+                        fullWidth
                       >
                         {formatMessage({
                           id: 'global.save',
@@ -193,7 +194,7 @@ const ReleasesSettingsPage = () => {
                       })}
                     </Typography>
                     <Grid.Root>
-                      <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                         <TimezoneDropdown />
                       </Grid.Item>
                     </Grid.Root>
@@ -204,7 +205,7 @@ const ReleasesSettingsPage = () => {
           }}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 
@@ -217,7 +218,7 @@ const TimezoneDropdown = () => {
   } = useRBAC(permissions);
   const { formatMessage } = useIntl();
   const { timezoneList } = getTimezones(new Date());
-  const field = useField('defaultTimezone');
+  const field = useField<UpdateDefaultTimezone['defaultTimezone']>('defaultTimezone');
   return (
     <Field.Root
       name="defaultTimezone"

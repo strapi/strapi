@@ -102,6 +102,7 @@ const DraggableCard = ({
                 { item: label }
               )}
               onClick={(e) => e.stopPropagation()}
+              type="button"
             >
               <Drag />
             </DragButton>

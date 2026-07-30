@@ -1,9 +1,5 @@
 import { NoJavascript } from './NoJavascript';
 
-/**
- * TODO: add favicons.........
- */
-
 const globalStyles = `
   html,
   body,

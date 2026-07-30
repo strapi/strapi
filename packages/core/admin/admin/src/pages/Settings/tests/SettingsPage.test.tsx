@@ -2,11 +2,27 @@ import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { RBAC } from '../../../core/apis/rbac';
+import { Widgets } from '../../../core/apis/Widgets';
 import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
 
 jest.mock('../../../hooks/useSettingsMenu');
+
+jest.mock('../../../hooks/useMediaQuery', () => ({
+  useIsDesktop: jest.fn(() => true),
+  useIsMobile: jest.fn(() => false),
+  useIsTablet: jest.fn(() => false),
+  useMediaQuery: jest.fn(() => true),
+}));
+
+jest.mock('../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -23,11 +39,7 @@ const render = (settings: StrapiAppContextValue['settings']) =>
           <StrapiAppProvider
             components={{}}
             fields={{}}
-            widgets={{
-              widgets: {},
-              register: jest.fn(),
-              getAll: jest.fn(),
-            }}
+            widgets={new Widgets()}
             customFields={{
               customFields: {},
               get: jest.fn(),

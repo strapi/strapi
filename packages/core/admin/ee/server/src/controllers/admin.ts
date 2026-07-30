@@ -1,11 +1,15 @@
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
+
 import { getService } from '../utils';
 
 export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
+    const isAILicense = strapi.ee.features.isEnabled('cms-ai');
+    const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
+
     try {
       return {
         data: {
@@ -14,10 +18,14 @@ export default {
           features: strapi.ee.features.list(),
           flags,
           type: strapi.ee.type,
+          planPriceId: strapi.ee.planPriceId,
+          ai: {
+            enabled: isAILicense && isAIConfigured.enabled,
+          },
         },
       };
     } catch (err) {
-      return { data: { isEE: false, features: [], flags } };
+      return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },
 

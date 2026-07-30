@@ -1,8 +1,10 @@
-import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { configureStore } from '@reduxjs/toolkit';
+import { adminApi, NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils';
@@ -102,17 +104,24 @@ const queryClient = new QueryClient({
   },
 });
 
+const store = configureStore({
+  reducer: { [adminApi.reducerPath]: adminApi.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
+});
+
 const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: true }) =>
   render(
-    <QueryClientProvider client={queryClient}>
-      <DesignSystemProvider>
-        <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-          <NotificationsProvider>
-            <EditAssetDialog open asset={asset} onClose={jest.fn()} {...props} />
-          </NotificationsProvider>
-        </IntlProvider>
-      </DesignSystemProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <DesignSystemProvider>
+          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+            <NotificationsProvider>
+              <EditAssetDialog open asset={asset} onClose={jest.fn()} {...props} />
+            </NotificationsProvider>
+          </IntlProvider>
+        </DesignSystemProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 
 describe('<EditAssetDialog />', () => {

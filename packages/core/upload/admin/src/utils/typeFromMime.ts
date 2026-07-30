@@ -1,15 +1,24 @@
-import { AssetType } from '../constants';
+import { AssetType, ASSET_TYPES, DocType, DOC_TYPES } from '../enums';
 
-export const typeFromMime = (mime: string) => {
-  if (mime.includes(AssetType.Image)) {
-    return AssetType.Image;
-  }
-  if (mime.includes(AssetType.Video)) {
-    return AssetType.Video;
-  }
-  if (mime.includes(AssetType.Audio)) {
-    return AssetType.Audio;
-  }
+type MimeTypeMapKeys = Exclude<AssetType | DocType, 'xls' | 'doc'> | 'excel';
 
-  return AssetType.Document;
+const MIME_TYPE_MAP: Record<MimeTypeMapKeys, AssetType | DocType> = {
+  image: ASSET_TYPES.Image,
+  video: ASSET_TYPES.Video,
+  audio: ASSET_TYPES.Audio,
+  pdf: DOC_TYPES.Pdf,
+  csv: DOC_TYPES.Csv,
+  // For XLS files the mime is application/vnd.ms-excel so we need to check for 'excel' not 'xls'
+  excel: DOC_TYPES.Xls,
+  zip: DOC_TYPES.Zip,
+};
+
+const MIME_TYPE_KEYS = Object.keys(MIME_TYPE_MAP) as MimeTypeMapKeys[];
+
+export const typeFromMime = (mime: string): AssetType | DocType => {
+  const mimeTypeKey = MIME_TYPE_KEYS.find((m) => mime.toLowerCase().includes(m));
+
+  if (mimeTypeKey === undefined) return ASSET_TYPES.Document;
+
+  return MIME_TYPE_MAP[mimeTypeKey] ?? ASSET_TYPES.Document;
 };

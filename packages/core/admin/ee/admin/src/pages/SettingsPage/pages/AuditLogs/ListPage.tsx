@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -18,32 +20,51 @@ import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
 
+const USERS_PAGE_SIZE = 10;
+
 const ListPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
   const {
-    allowedActions: { canRead: canReadAuditLogs, canReadUsers },
+    allowedActions: { canRead: canReadAuditLogs },
     isLoading: isLoadingRBAC,
-  } = useRBAC({
-    ...permissions?.auditLogs,
-    readUsers: permissions?.users.read || [],
-  });
+  } = useRBAC(permissions?.auditLogs?.read || []);
 
   const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
+  const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
     auditLogs,
     users,
+    usersPagination,
+    isLoadingUsers,
     isLoading: isLoadingData,
     hasError,
   } = useAuditLogsData({
     canReadAuditLogs,
-    canReadUsers,
+    usersPageSize,
   });
+
+  const { page = 1, pageCount = 1 } = usersPagination ?? {};
+  const hasMoreUsers = page < pageCount;
+
+  const handleLoadMoreUsers = () => {
+    if (hasMoreUsers) {
+      setUsersPageSize((prevPageSize) => prevPageSize + USERS_PAGE_SIZE);
+    }
+  };
 
   const formatTimeStamp = useFormatTimeStamp();
 
-  const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
+  const displayedFilters = getDisplayedFilters({
+    formatMessage,
+    users,
+    usersFilter: {
+      loading: isLoadingUsers,
+      hasMoreItems: hasMoreUsers,
+      onLoadMore: handleLoadMoreUsers,
+    },
+  });
 
   const headers: Table.Header<AuditLog, object>[] = [
     {
@@ -109,7 +130,7 @@ const ListPage = () => {
         startActions={
           <Filters.Root options={displayedFilters}>
             <Filters.Trigger />
-            <Filters.Popover />
+            <Filters.Popover zIndex={499} />
             <Filters.List />
           </Filters.Root>
         }
@@ -126,7 +147,7 @@ const ListPage = () => {
             <Table.Loading />
             <Table.Body>
               {results.map((log) => (
-                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id })}>
+                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id }, 'push', true)}>
                   {headers.map((header) => {
                     const { name, cellFormatter } = header;
 
@@ -175,7 +196,7 @@ const ListPage = () => {
                   <Table.Cell onClick={(e) => e.stopPropagation()}>
                     <Flex justifyContent="end">
                       <IconButton
-                        onClick={() => setQuery({ id: log.id })}
+                        onClick={() => setQuery({ id: log.id }, 'push', true)}
                         withTooltip={false}
                         label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
@@ -199,7 +220,10 @@ const ListPage = () => {
         </Pagination.Root>
       </Layouts.Content>
       {query?.id && (
-        <Modal handleClose={() => setQuery({ id: '' }, 'remove')} logId={query.id.toString()} />
+        <Modal
+          handleClose={() => setQuery({ id: '' }, 'remove', true)}
+          logId={query.id.toString()}
+        />
       )}
     </Page.Main>
   );

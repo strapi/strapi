@@ -8,6 +8,7 @@ import {
   validateUsersDeleteInput,
 } from '../validation/user';
 import { getService } from '../utils';
+import { normalizeEmail } from '../utils/normalize-email';
 import {
   Create,
   DeleteMany,
@@ -93,14 +94,14 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Params;
-    const { body: input } = ctx.request as Update.Request;
+    const data = normalizeEmail((ctx.request as Update.Request).body);
 
-    await validateUserUpdateInput(input);
+    await validateUserUpdateInput(data);
 
-    if (_.has(input, 'email')) {
+    if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
-        email: input.email,
+        email: data.email,
       });
 
       if (uniqueEmailCheck) {
@@ -108,7 +109,7 @@ export default {
       }
     }
 
-    const updatedUser = await getService('user').updateById(id, input);
+    const updatedUser = await getService('user').updateById(id, data);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');
@@ -121,6 +122,11 @@ export default {
 
   async deleteOne(ctx: Context) {
     const { id } = ctx.params as DeleteOne.Params;
+    const user = ctx.state.user as AdminUser | undefined;
+
+    if (user && user.id === id) {
+      throw new ApplicationError('You cannot delete your own user');
+    }
 
     const deletedUser = await getService('user').deleteById(id);
 
@@ -139,8 +145,14 @@ export default {
    */
   async deleteMany(ctx: Context) {
     const { body } = ctx.request as DeleteMany.Request;
+    const user = ctx.state.user as AdminUser | undefined;
     await validateUsersDeleteInput(body);
+    const idsSet = new Set(body.ids);
 
+    // Prevent self-deletion
+    if (user && idsSet.has(user.id)) {
+      throw new ApplicationError('You cannot delete your own user');
+    }
     const users = await getService('user').deleteByIds(body.ids);
 
     const sanitizedUsers = users.map(getService('user').sanitizeUser);

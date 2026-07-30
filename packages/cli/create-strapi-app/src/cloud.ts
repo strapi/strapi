@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
 
@@ -40,6 +39,7 @@ export async function handleCloudLogin(): Promise<boolean> {
     logger.error(defaultErrorMessage);
     return false;
   }
+  const { default: inquirer } = await import('inquirer');
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>(
     cloudApiConfig.projectCreation?.userChoice || [
       {
@@ -53,6 +53,7 @@ export async function handleCloudLogin(): Promise<boolean> {
 
   if (!userChoice.toLowerCase().includes('skip')) {
     const cliContext = {
+      user: { id: '' }, // This will be set later when the user logs in
       logger,
       cwd: process.cwd(),
       ...(cloudApiConfig.projectCreation?.reference && {

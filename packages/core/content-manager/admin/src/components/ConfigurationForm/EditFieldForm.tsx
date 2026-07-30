@@ -26,7 +26,8 @@ import type { Schema } from '@strapi/types';
 
 const FIELD_SCHEMA = yup.object().shape({
   label: yup.string().required().nullable(),
-  description: yup.string(),
+  description: yup.string().nullable(),
+  placeholder: yup.string().nullable(),
   editable: yup.boolean(),
   size: yup.number().required(),
 });
@@ -202,7 +203,13 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             ]
               .filter(filterFieldsBasedOnAttributeType(attribute.type))
               .map(({ size, ...field }) => (
-                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                <Grid.Item
+                  key={field.name}
+                  col={size}
+                  xs={12}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <InputRenderer {...field} />
                 </Grid.Item>
               ))}
@@ -237,8 +244,8 @@ const filterFieldsBasedOnAttributeType = (type: Schema.Attribute.Kind) => (field
     case 'media':
       return field.name !== 'placeholder' && field.name !== 'mainField';
     case 'component':
-    case 'dynamiczone':
       return field.name === 'label' || field.name === 'editable';
+    case 'dynamiczone':
     case 'json':
       return field.name !== 'placeholder' && field.name !== 'mainField' && field.name !== 'size';
     case 'relation':

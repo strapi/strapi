@@ -26,7 +26,7 @@ export const getAllowedFiles = (pluralTypes: string[] | null, files: AllowedFile
     const fileType = file?.mime?.split('/')[0];
 
     if (!fileType) {
-      return false;
+      return singularTypes.includes('file');
     }
 
     if (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType)) {

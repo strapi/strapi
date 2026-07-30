@@ -1,6 +1,16 @@
 import os from 'os';
-import ts from 'typescript';
+import type ts from 'typescript';
 import type { Logger } from './logger';
+
+// Lazy: defer `typescript` (~115 ms) until a CLI command actually loads tsconfig
+let lazyTs: typeof ts | undefined;
+const tsLib = (): typeof ts => {
+  if (!lazyTs) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTs = require('typescript');
+  }
+  return lazyTs as typeof ts;
+};
 
 interface TsConfig {
   config: ts.ParsedCommandLine;
@@ -21,15 +31,16 @@ const loadTsConfig = ({
   path: string;
   logger: Logger;
 }): TsConfig | undefined => {
-  const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, path);
+  const tsApi = tsLib();
+  const configPath = tsApi.findConfigFile(cwd, tsApi.sys.fileExists, path);
 
   if (!configPath) {
     return undefined;
   }
 
-  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+  const configFile = tsApi.readConfigFile(configPath, tsApi.sys.readFile);
 
-  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
+  const parsedConfig = tsApi.parseJsonConfigFileContent(configFile.config, tsApi.sys, cwd);
 
   logger.debug(`Loaded user TS config:`, os.EOL, parsedConfig);
 

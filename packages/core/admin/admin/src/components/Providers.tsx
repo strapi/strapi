@@ -10,10 +10,9 @@ import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 
-import { GuidedTourProvider } from './GuidedTour/Provider';
+import { GuidedTourProvider } from './GuidedTour/GuidedTourProvider';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
-import { UnstableGuidedTourContext } from './UnstableGuidedTour/Context';
 
 import type { Store } from '../core/store/configure';
 import type { StrapiApp } from '../StrapiApp';
@@ -58,15 +57,13 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                   <NotificationsProvider>
                     <TrackingProvider>
                       <GuidedTourProvider>
-                        <UnstableGuidedTourContext>
-                          <ConfigurationProvider
-                            defaultAuthLogo={strapi.configurations.authLogo}
-                            defaultMenuLogo={strapi.configurations.menuLogo}
-                            showReleaseNotification={strapi.configurations.notifications.releases}
-                          >
-                            {children}
-                          </ConfigurationProvider>
-                        </UnstableGuidedTourContext>
+                        <ConfigurationProvider
+                          defaultAuthLogo={strapi.configurations.authLogo}
+                          defaultMenuLogo={strapi.configurations.menuLogo}
+                          showReleaseNotification={strapi.configurations.notifications.releases}
+                        >
+                          {children}
+                        </ConfigurationProvider>
                       </GuidedTourProvider>
                     </TrackingProvider>
                   </NotificationsProvider>

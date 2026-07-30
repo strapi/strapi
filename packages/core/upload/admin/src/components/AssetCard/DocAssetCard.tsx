@@ -1,7 +1,8 @@
 import { Flex, Typography } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+
+import { getFileIconComponent } from '../../utils/icons';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
@@ -27,6 +28,7 @@ export const DocAssetCard = ({
   ...restProps
 }: DocAssetCardProps) => {
   const { formatMessage } = useIntl();
+  const IconComponent = getFileIconComponent(extension);
   return (
     <AssetCardBase
       name={name}
@@ -37,12 +39,7 @@ export const DocAssetCard = ({
     >
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
         <Flex gap={2} direction="column" alignItems="center">
-          {extension === 'pdf' ? (
-            <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
-          ) : (
-            <File aria-label={name} fill="neutral500" width={24} height={24} />
-          )}
-
+          <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
           <Typography textColor="neutral500" variant="pi">
             {formatMessage({
               id: 'noPreview',

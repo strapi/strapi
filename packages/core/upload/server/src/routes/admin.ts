@@ -42,6 +42,22 @@ export const routes = {
       },
     },
     {
+      method: 'POST',
+      path: '/unstable/upload-file',
+      handler: 'admin-upload.unstable_uploadFile',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/unstable/stream-from-urls',
+      handler: 'admin-upload.unstable_uploadFromUrls',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'GET',
       path: '/files',
       handler: 'admin-file.find',
@@ -199,6 +215,62 @@ export const routes = {
             },
           },
         ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/actions/bulk-update',
+      handler: 'admin-upload.bulkUpdateFileInfo',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/actions/generate-ai-metadata',
+      handler: 'admin-file.generateAIMetadata',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/actions/generate-ai-metadata/count',
+      handler: 'admin-file.getAIMetadataCount',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/actions/generate-ai-metadata/latest',
+      handler: 'admin-file.getLatestAIMetadataJob',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
   ],

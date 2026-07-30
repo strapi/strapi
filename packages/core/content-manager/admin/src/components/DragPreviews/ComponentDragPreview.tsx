@@ -1,3 +1,4 @@
+import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import { Flex, FlexComponent, IconButton, Typography } from '@strapi/design-system';
 import { CaretDown, Drag, Trash } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -7,6 +8,7 @@ interface ComponentDragPreviewProps {
 }
 
 const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => {
+  const isDesktop = useIsDesktop();
   return (
     <Flex
       background="neutral0"
@@ -41,9 +43,11 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
           <Trash />
         </IconButton>
 
-        <IconButton withTooltip={false} label="" variant="ghost">
-          <Drag />
-        </IconButton>
+        {isDesktop && (
+          <IconButton withTooltip={false} label="" variant="ghost">
+            <Drag />
+          </IconButton>
+        )}
       </Flex>
     </Flex>
   );

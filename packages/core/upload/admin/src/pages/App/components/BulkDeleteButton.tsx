@@ -5,12 +5,8 @@ import { useIntl } from 'react-intl';
 
 import { useBulkRemove } from '../../../hooks/useBulkRemove';
 
-import type { File } from '../../../../../shared/contracts/files';
 import type { FolderDefinition } from '../../../../../shared/contracts/folders';
-
-export interface FileWithType extends File {
-  type: string;
-}
+import type { FileWithType } from '../../../hooks/useBulkRemove';
 
 export interface BulkDeleteButtonProps {
   selected: Array<FileWithType | FolderDefinition>;

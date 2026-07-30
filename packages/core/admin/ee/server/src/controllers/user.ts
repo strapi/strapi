@@ -5,6 +5,7 @@ import { pick, isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
+import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 
@@ -65,14 +66,14 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { body: input } = ctx.request;
+    const data = normalizeEmail(ctx.request.body);
 
-    await validateUserUpdateInput(input);
+    await validateUserUpdateInput(data);
 
-    if (_.has(input, 'email')) {
+    if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
-        email: input.email,
+        email: data.email,
       });
 
       if (uniqueEmailCheck) {
@@ -82,11 +83,11 @@ export default {
 
     const user = await getService('user').findOne(id, null);
 
-    if (!(await hasAdminSeatsAvaialble()) && !user.isActive && input.isActive) {
+    if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
     }
 
-    const updatedUser = await getService('user').updateById(id, input);
+    const updatedUser = await getService('user').updateById(id, data);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
+import { useTracking } from '../../../hooks/useTracking';
 import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
@@ -149,7 +149,14 @@ export const PendingAssetStep = ({
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
                   return (
-                    <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
+                    <Grid.Item
+                      m={4}
+                      s={6}
+                      xs={12}
+                      key={assetKey}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles!}

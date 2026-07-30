@@ -104,7 +104,8 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
                     ].map(({ size, ...field }) => (
                       <Grid.Item
                         key={field.name}
-                        col={size}
+                        m={size}
+                        xs={12}
                         direction="column"
                         alignItems="stretch"
                       >

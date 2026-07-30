@@ -1,14 +1,18 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "5.17.0",
+  "version": "5.51.1",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
     "generators"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git",
+    "url": "https://github.com/strapi/strapi.git",
     "directory": "packages/utils/typescript"
   },
   "license": "SEE LICENSE IN LICENSE",
@@ -24,29 +28,44 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
-  "types": "index.d.ts",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "tsconfigs/"
+  ],
   "scripts": {
-    "lint": "run -T eslint .",
-    "test": "run -T jest",
-    "test:watch": "run -T jest --watch"
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf dist",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
-    "fs-extra": "11.2.0",
-    "lodash": "4.17.21",
+    "fs-extra": "11.3.4",
+    "lodash": "4.18.1",
     "prettier": "3.3.3",
-    "typescript": "5.4.4"
+    "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@types/fs-extra": "11.0.4"
+    "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "20.19.41",
+    "eslint-config-custom": "5.51.1",
+    "jest": "29.6.0",
+    "tsconfig": "5.51.1"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

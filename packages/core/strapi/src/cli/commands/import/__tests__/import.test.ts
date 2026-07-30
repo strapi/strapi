@@ -1,11 +1,21 @@
+import type { Stats } from 'fs';
+
+import fs from 'fs-extra';
 import {
   engine as engineDataTransfer,
   strapi as strapiDataTransfer,
   file as fileDataTransfer,
+  directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
 
 import importAction from '../action';
+import { UPLOAD_CONTENT_TYPE_UIDS } from '../../../utils/data-transfer';
 import { expectExit } from '../../__tests__/commands.test.utils';
+
+jest.mock('@strapi/core', () => ({
+  createStrapi: jest.fn(),
+  compileStrapi: jest.fn(),
+}));
 
 jest.mock('../../../utils/data-transfer', () => {
   return {
@@ -18,6 +28,11 @@ jest.mock('../../../utils/data-transfer', () => {
         send: jest.fn(),
       },
       destroy: jest.fn(),
+      contentTypes: {
+        'api::article.article': {},
+        'plugin::upload.file': {},
+        'plugin::upload.folder': {},
+      },
     }),
     buildTransferTable: jest.fn(() => {
       return {
@@ -37,6 +52,17 @@ jest.mock('@strapi/data-transfer', () => {
 
   return {
     ...actual,
+    directory: {
+      ...actual.directory,
+      providers: {
+        ...actual.directory?.providers,
+        createLocalDirectorySourceProvider: jest.fn().mockReturnValue({
+          name: 'testDirSource',
+          type: 'source',
+          getMetadata: jest.fn(),
+        }),
+      },
+    },
     file: {
       ...actual.file,
       providers: {
@@ -98,6 +124,7 @@ describe('Import', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => false } as Stats);
   });
 
   it('creates providers with correct options ', async () => {
@@ -136,6 +163,53 @@ describe('Import', () => {
       expect.objectContaining({
         schemaStrategy: engineDataTransfer.DEFAULT_SCHEMA_STRATEGY,
         versionStrategy: engineDataTransfer.DEFAULT_VERSION_STRATEGY,
+      })
+    );
+  });
+
+  it('uses directory source when backup path is a directory', async () => {
+    jest.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as Stats);
+
+    const options = {
+      file: '/path/to/export',
+      decrypt: false,
+      decompress: false,
+      exclude: [],
+      only: [],
+    };
+
+    await expectExit(0, async () => {
+      await importAction(options);
+    });
+
+    expect(directoryDataTransfer.providers.createLocalDirectorySourceProvider).toHaveBeenCalledWith(
+      {
+        directory: { path: '/path/to/export' },
+      }
+    );
+    expect(fileDataTransfer.providers.createLocalFileSourceProvider).not.toHaveBeenCalled();
+  });
+
+  it('excludes upload types from restore for issue #25008-style import', async () => {
+    const options = {
+      file: 'test.tar',
+      exclude: ['files'],
+      excludeContentTypes: [...UPLOAD_CONTENT_TYPE_UIDS],
+      only: [],
+    };
+
+    await expectExit(0, async () => {
+      await importAction(options);
+    });
+
+    expect(strapiDataTransfer.providers.createLocalStrapiDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        restore: expect.objectContaining({
+          assets: false,
+          entities: expect.objectContaining({
+            exclude: expect.arrayContaining([...UPLOAD_CONTENT_TYPE_UIDS]),
+          }),
+        }),
       })
     );
   });

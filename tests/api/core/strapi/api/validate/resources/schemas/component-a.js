@@ -14,5 +14,10 @@ module.exports = {
     password: {
       type: 'password',
     },
+    nestedComponent: {
+      type: 'component',
+      component: 'default.component-nested',
+      repeatable: false,
+    },
   },
 };
