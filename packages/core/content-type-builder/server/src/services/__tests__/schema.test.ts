@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
 
-import { updateSchema } from '../schema';
+import { getSchema, updateSchema } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
 
 const builderServiceMock = {
@@ -726,6 +726,32 @@ describe('Content Type Builder - Schema service', () => {
       expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
         contentType: mockContentType,
       });
+    });
+  });
+
+  describe('getSchema', () => {
+    const getCleanedFile = jest.fn();
+
+    const setupStrapi = () => {
+      global.strapi = {
+        contentTypes: {},
+        components: {},
+        get: jest.fn((name: string) => (name === 'content-structure' ? { getCleanedFile } : {})),
+      } as any;
+    };
+
+    it('returns the folder structure from the core service', async () => {
+      const file = {
+        version: 1,
+        sections: { collectionTypes: { groups: [] }, singleTypes: { groups: [] } },
+      };
+      getCleanedFile.mockResolvedValue(file);
+      setupStrapi();
+
+      const result = await getSchema();
+
+      expect(result.contentStructure).toBe(file);
+      expect(getCleanedFile).toHaveBeenCalledTimes(1);
     });
   });
 });
