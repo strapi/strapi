@@ -82,4 +82,36 @@ describe('future folders service - getFolders filter shape', () => {
       filters: { $and: [{ parent: { id: '7' } }] },
     });
   });
+
+  describe('search combined with list filters', () => {
+    const DATE_FILTER = { createdAt: { $gte: '2026-07-01T00:00:00.000Z' } };
+
+    it('sends _q AND the date filters together, without the parent scope', async () => {
+      const { result } = renderHook(() =>
+        useGetFoldersQuery({ parentId: 7, search: 'photos', filters: [DATE_FILTER] })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams?._q).toBe('photos');
+      const clauses = (lastRequestParams?.filters?.$and ?? []) as Record<string, unknown>[];
+      expect(clauses.some((clause) => 'parent' in clause)).toBe(false);
+      expect(clauses.some((clause) => 'createdAt' in clause)).toBe(true);
+    });
+
+    it('appends the date filters after the parent scope when not searching', async () => {
+      const { result } = renderHook(() =>
+        useGetFoldersQuery({ parentId: 7, filters: [DATE_FILTER] })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams).toMatchObject({
+        filters: {
+          $and: [{ parent: { id: '7' } }, { createdAt: { $gte: '2026-07-01T00:00:00.000Z' } }],
+        },
+      });
+      expect(lastRequestParams).not.toHaveProperty('_q');
+    });
+  });
 });
