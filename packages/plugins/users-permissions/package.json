@@ -32,7 +32,7 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./server/index.js",
+      "source": "./server/src/index.js",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
