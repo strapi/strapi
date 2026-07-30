@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useGetAssetsQuery } from '../../../services/assets';
 
@@ -12,97 +12,133 @@ interface UseInfiniteAssetsOptions {
   search?: string;
 }
 
-const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOptions = {}) => {
-  const [page, setPage] = useState(1);
-  const lastResultsRef = useRef<File[]>([]);
-  const lastPaginationRef = useRef<Pagination | undefined>(undefined);
-  const isMountRef = useRef(true);
-  const isSearchMountRef = useRef(true);
+/**
+ * Everything loaded for one query identity.
+ *
+ * `queryKey` lags the live key while a new query is in flight — that lag is
+ * what keeps the previous results on screen across a search change.
+ */
+interface Accumulated {
+  queryKey: string;
+  listKey: string;
+  pages: Record<number, File[]>;
+  pagination?: Pagination;
+}
 
-  const {
-    currentData: data,
-    isLoading,
-    isFetching,
-    error,
-  } = useGetAssetsQuery({
-    folder,
-    page,
-    pageSize: PAGE_SIZE,
-    sort,
-    search,
-  });
+interface PageState {
+  queryKey: string;
+  page: number;
+}
 
-  const pagination = data?.pagination;
+/**
+ * Concatenates the pages in ascending order, one entry per asset id.
+ *
+ * `Map.set` keeps the first insertion position but takes the latest value, so
+ * an asset that moved between pages after a mutation holds its place and shows
+ * fresh data instead of rendering twice under a duplicate key.
+ */
+const flattenPages = (pages: Record<number, File[]>): File[] => {
+  const byId = new Map<number, File>();
 
-  if (pagination) {
-    lastPaginationRef.current = pagination;
+  for (const page of Object.keys(pages)
+    .map(Number)
+    .sort((a, b) => a - b)) {
+    for (const asset of pages[page]) {
+      byId.set(asset.id, asset);
+    }
   }
 
-  // Accumulate pages. When cache is invalidated the current page is refetched
-  // detect this and reset to avoid a gap in the results.
-  const assets = useMemo(() => {
-    if (!data) {
-      return lastResultsRef.current;
-    }
+  return [...byId.values()];
+};
 
-    const currentPageResults = data.results;
+/**
+ * Infinite scroll over `/upload/files`, keeping one accumulated slot per page.
+ *
+ * Known limitation: only the current page is subscribed, so a mutation
+ * invalidating `{Asset, LIST}` refetches that page alone. Earlier pages are
+ * detached copies and can go stale — a deleted asset lingers, a new upload
+ * never appears, rows shift across the page boundary. The id dedupe above
+ * keeps that from producing duplicate React keys or confusing
+ * `useAssetSelection`, but the list only becomes consistent again on the next
+ * folder/sort/search change.
+ */
+const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOptions = {}) => {
+  // Derived from the request args themselves, so a new filter can't reach the
+  // API without also invalidating what was accumulated under the old one.
+  const queryArgs = { folder, sort, search };
+  const queryKey = JSON.stringify(queryArgs);
+  // Identifies the list being viewed, ignoring the search term — a search
+  // keeps the previous results on screen, a folder or sort change doesn't.
+  const listKey = JSON.stringify({ folder, sort });
 
-    if (page === 1) {
-      lastResultsRef.current = currentPageResults;
-    } else {
-      // If accumulated length doesn't match expectation, cache was cleared
-      const expectedPrior = (page - 1) * PAGE_SIZE;
-      if (lastResultsRef.current.length < expectedPrior - PAGE_SIZE) {
-        return lastResultsRef.current;
-      }
+  const [pageState, setPageState] = useState<PageState>({ queryKey, page: 1 });
+  const [accumulated, setAccumulated] = useState<Accumulated>({ queryKey, listKey, pages: {} });
 
-      // Only append if these aren't already accumulated
-      if (lastResultsRef.current.length < page * PAGE_SIZE) {
-        lastResultsRef.current = [...lastResultsRef.current, ...currentPageResults];
-      }
-    }
+  // Derived rather than read straight from state: the render that discovers
+  // the key change still reaches the query below, and a list with no page 1
+  // must never be requested at page 2.
+  const page = pageState.queryKey === queryKey ? pageState.page : 1;
 
-    return lastResultsRef.current;
-  }, [data, page]);
+  if (pageState.queryKey !== queryKey) {
+    setPageState({ queryKey, page: 1 });
+  }
 
-  // Reset on filter/sort change — skip the initial mount since the memo
-  // already handles page 1 correctly
-  useEffect(() => {
-    if (isMountRef.current) {
-      isMountRef.current = false;
+  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery({
+    ...queryArgs,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
-      return;
-    }
-    setPage(1);
-    lastResultsRef.current = [];
-  }, [folder, sort]);
+  const isSameQuery = accumulated.queryKey === queryKey;
 
-  // A search change resets pagination but keeps the previous results rendered
-  // until the new page 1 lands, which replaces them.
-  useEffect(() => {
-    if (isSearchMountRef.current) {
-      isSearchMountRef.current = false;
+  // `currentData` is only ever the payload for the args just passed, so it
+  // belongs to this key at this page — nothing to infer. Its reference is
+  // stable per cache entry, so this settles after one extra render.
+  if (currentData && (!isSameQuery || accumulated.pages[page] !== currentData.results)) {
+    setAccumulated(
+      isSameQuery
+        ? {
+            ...accumulated,
+            pages: { ...accumulated.pages, [page]: currentData.results },
+            pagination: currentData.pagination,
+          }
+        : {
+            queryKey,
+            listKey,
+            pages: { [page]: currentData.results },
+            pagination: currentData.pagination,
+          }
+    );
+  }
 
-      return;
-    }
-    setPage(1);
-  }, [search]);
+  // Until the new list's first page lands the accumulator still holds the
+  // previous folder. Reported as loading so the page shows a spinner instead
+  // of the outgoing folder's assets under the incoming folder's header.
+  const isChangingList = accumulated.listKey !== listKey;
+
+  const assets = useMemo(
+    () => (isChangingList ? [] : flattenPages(accumulated.pages)),
+    [isChangingList, accumulated.pages]
+  );
 
   // Deliberately the live value, not the stale-tolerant one below: paging must
   // never be driven by a total that belongs to the previous query.
-  const hasNextPage = pagination ? page < pagination.pageCount : false;
+  const hasNextPage = currentData ? page < currentData.pagination.pageCount : false;
   const isFetchingMore = isFetching && page > 1;
 
   const fetchNextPage = useCallback(() => {
-    setPage((prev) => prev + 1);
-  }, []);
+    setPageState((prev) => ({
+      queryKey,
+      page: (prev.queryKey === queryKey ? prev.page : 1) + 1,
+    }));
+  }, [queryKey]);
 
   return {
     assets,
-    // Reported alongside the stale `assets` above so a consumer showing the total
-    // doesn't flash zero mid-transition.
-    pagination: pagination ?? lastPaginationRef.current,
-    isLoading,
+    // Falls back to the accumulated total so a consumer showing the count
+    // doesn't flash zero mid-transition, matching the possibly stale `assets`.
+    pagination: currentData?.pagination ?? accumulated.pagination,
+    isLoading: isLoading || isChangingList,
     isFetchingMore,
     hasNextPage,
     fetchNextPage,

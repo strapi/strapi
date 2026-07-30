@@ -1,6 +1,6 @@
 import { act, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AssetsPage } from '../AssetsPage';
 
@@ -56,6 +56,25 @@ const LocationProbe = () => {
   return <span data-testid="location-search">{search}</span>;
 };
 
+/**
+ * Folder navigation without coupling the test to the sidebar markup, which
+ * would also mean mocking `/upload/folder-structure`.
+ */
+const NavProbe = () => {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <button type="button" onClick={() => navigate('/')}>
+        Go to root
+      </button>
+      <button type="button" onClick={() => navigate('/?folder=1')}>
+        Go to folder 1
+      </button>
+    </>
+  );
+};
+
 const respondWithAssets = (results: File[]) =>
   server.use(
     http.get('*/upload/files', () =>
@@ -74,6 +93,7 @@ const renderPage = (search = '') =>
     <>
       <AssetsPage />
       <LocationProbe />
+      <NavProbe />
     </>,
     { initialEntries: [`/${search}`] }
   );
@@ -243,11 +263,24 @@ describe('AssetsPage search', () => {
       createAsset(index + 1, `page-one-${index}.png`)
     );
     const PAGE_TWO = [createAsset(100, 'page-two.png')];
+    const ROOT_ASSETS = [createAsset(300, 'root.png')];
 
-    /** Two pages of assets for the folder list, one page for the search. */
+    /**
+     * Two pages of assets for the folder list, one page for the search, and a
+     * distinct single asset at the root so a test can prove it left the folder.
+     * `filters` is serialized unencoded, so the root list is the one asking for
+     * a `$null` parent.
+     */
     const respondWithPagedAssets = () =>
       server.use(
         http.get('*/upload/files', ({ request }) => {
+          if (request.url.includes('$null')) {
+            return HttpResponse.json({
+              results: ROOT_ASSETS,
+              pagination: { page: 1, pageSize: 20, pageCount: 1, total: ROOT_ASSETS.length },
+            });
+          }
+
           const isPageTwo = new URL(request.url).searchParams.get('page') === '2';
 
           return HttpResponse.json({
@@ -292,6 +325,27 @@ describe('AssetsPage search', () => {
         mockShowLoadMoreSentinel();
       });
     };
+
+    it('keeps every loaded page when a folder is re-entered and scrolled again', async () => {
+      respondWithPagedAssets();
+
+      const { user } = renderPage('?folder=1');
+
+      expect(await screen.findByText('page-one-0.png')).toBeInTheDocument();
+
+      await scrollToLoadMore();
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to root' }));
+      expect(await screen.findByText('root.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to folder 1' }));
+      await scrollToLoadMore();
+
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+      expect(screen.getByText('page-one-0.png')).toBeInTheDocument();
+      expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
+    });
 
     it('keeps the folder assets rendered while a search started inside a folder is in flight', async () => {
       respondWithPagedAssets();
