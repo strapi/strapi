@@ -584,13 +584,20 @@ class Strapi extends Container implements Core.Strapi {
   getModel(uid: UID.ContentType): Schema.ContentType;
   getModel(uid: UID.Component): Schema.Component;
   getModel<TUID extends UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component | undefined {
-    if (uid in this.contentTypes) {
-      return this.contentTypes[uid as UID.ContentType];
+    // Looked up on the registries directly rather than through the `contentTypes` /
+    // `components` getters. Those getters call `getAll()`, and the content-type registry
+    // builds a fresh copy of every registered schema on each call. Reading `uid in
+    // this.contentTypes` and then `this.contentTypes[uid]` therefore built that copy
+    // twice per lookup, and a component uid built it four times over. `getModel` runs
+    // once per relation, component, media and dynamic-zone node of every sanitized
+    // response, which made this the single hottest path in a REST request.
+    const contentType = this.get('content-types').get(uid as UID.ContentType);
+
+    if (contentType !== undefined) {
+      return contentType;
     }
 
-    if (uid in this.components) {
-      return this.components[uid as UID.Component];
-    }
+    return this.get('components').get(uid as UID.Component);
   }
 
   /**

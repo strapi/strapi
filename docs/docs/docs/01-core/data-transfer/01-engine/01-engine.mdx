@@ -235,6 +235,38 @@ When skipping the assets stage, sync upload binaries separately — for example 
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
+### Excluding content types from the CLI
+
+Export, import, and transfer accept `--exclude-content-types` and `--only-content-types` with comma-separated content type UIDs (for example `plugin::upload.file,plugin::upload.folder`). These filters apply to the **entities** and **links** stages:
+
+- Excluded types are omitted from the transfer stream and related links touching those types are skipped automatically.
+- On import/transfer restore, excluded types are not deleted on the destination before data is inserted.
+- `--only-content-types` limits transferred entities and links to the listed UIDs and scopes pre-transfer deletion to those types only.
+
+To skip upload binaries as well, combine with `--exclude files`, use `--exclude media-library`, or rely on automatic files-stage skipping when upload content types are out of scope. Programmatic transfers can use the same rules via entity and link transform filters.
+
+#### Excluding the media library (issue #25008)
+
+To omit **all** media — upload binaries and media library database records — use `--exclude media-library`. That preset expands to `--exclude files` plus both upload content types (`plugin::upload.file`, `plugin::upload.folder`).
+
+When upload content types are not in transfer scope (via `--exclude-content-types`, `--only-content-types`, or the `media-library` preset), the **files** stage is skipped automatically so export and import stay consistent.
+
+`--exclude files` alone only skips the **assets** stage; media library DB records still transfer unless you also exclude their content types (or use `media-library`).
+
+```bash
+# Export without media (matches the intent behind #25008)
+yarn strapi export --no-encrypt --exclude media-library
+
+# Import the same archive with matching filters
+yarn strapi import -f export_YYYYMMDDHHMMSS.tar --force --exclude media-library
+
+# Equivalent explicit form
+yarn strapi export --no-encrypt --exclude files \
+  --exclude-content-types plugin::upload.file,plugin::upload.folder
+```
+
+npm users: `npm run strapi export -- --no-encrypt --exclude media-library`
+
 ## Setting up the transfer engine
 
 A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](../02-providers/01-source-providers.md), a [destination provider](../02-providers/02-destination-providers.md), and an options object.
