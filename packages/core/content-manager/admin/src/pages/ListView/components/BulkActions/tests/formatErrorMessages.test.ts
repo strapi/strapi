@@ -1,11 +1,23 @@
 import { formatErrorMessages } from '../PublishAction';
 
+import type { FormErrors } from '@strapi/admin/strapi-admin';
+import type { IntlShape } from 'react-intl';
+
+type FormatMessage = IntlShape['formatMessage'];
+type ErrorMessageDescriptor = Parameters<FormatMessage>[0] & {
+  id: string;
+  defaultMessage: string;
+};
+type FormatMessageValues = Parameters<FormatMessage>[1] & {
+  field: string;
+};
+
 /**
  * A minimal formatMessage stub: returns the defaultMessage as-is.
  * For cases where we want to assert the field is forwarded we inspect the
  * second argument via a spy instead.
  */
-const fmt = (msg: { defaultMessage: string }) => msg.defaultMessage;
+const fmt = ((msg: ErrorMessageDescriptor) => msg.defaultMessage) as FormatMessage;
 
 describe('formatErrorMessages', () => {
   // -------------------------------------------------------------------------
@@ -24,13 +36,13 @@ describe('formatErrorMessages', () => {
       name: { id: 'error.required', defaultMessage: 'This value is required.' },
     };
 
-    const calls: Array<[{ id: string; defaultMessage: string }, { field: string }]> = [];
-    const spy = (msg: any, values: any) => {
+    const calls: Array<[ErrorMessageDescriptor, FormatMessageValues]> = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
       calls.push([msg, values]);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(errors, 'component', spy as any);
+    formatErrorMessages(errors, 'component', spy);
 
     expect(calls[0][1]).toEqual({ field: 'component.name' });
   });
@@ -49,20 +61,20 @@ describe('formatErrorMessages', () => {
   // -------------------------------------------------------------------------
   it('skips null values', () => {
     const errors = { title: null };
-    expect(formatErrorMessages(errors as any, '', fmt)).toEqual([]);
+    expect(formatErrorMessages(errors as unknown as FormErrors, '', fmt)).toEqual([]);
   });
 
   it('skips undefined values', () => {
     const errors = { title: undefined };
-    expect(formatErrorMessages(errors as any, '', fmt)).toEqual([]);
+    expect(formatErrorMessages(errors as unknown as FormErrors, '', fmt)).toEqual([]);
   });
 
   it('returns empty array for null errors argument', () => {
-    expect(formatErrorMessages(null as any, '', fmt)).toEqual([]);
+    expect(formatErrorMessages(null as unknown as FormErrors, '', fmt)).toEqual([]);
   });
 
   it('returns empty array for undefined errors argument', () => {
-    expect(formatErrorMessages(undefined as any, '', fmt)).toEqual([]);
+    expect(formatErrorMessages(undefined as unknown as FormErrors, '', fmt)).toEqual([]);
   });
 
   it('returns empty array for empty errors object', () => {
@@ -89,13 +101,13 @@ describe('formatErrorMessages', () => {
       },
     };
 
-    const calls: Array<{ field: string }> = [];
-    const spy = (msg: any, values: any) => {
+    const calls: FormatMessageValues[] = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
       calls.push(values);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(errors, '', spy as any);
+    formatErrorMessages(errors, '', spy);
 
     expect(calls[0].field).toBe('address.city');
   });
@@ -105,13 +117,13 @@ describe('formatErrorMessages', () => {
       street: { id: 'error.required', defaultMessage: 'Street is required.' },
     };
 
-    const calls: Array<{ field: string }> = [];
-    const spy = (msg: any, values: any) => {
+    const calls: FormatMessageValues[] = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
       calls.push(values);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(errors, 'address', spy as any);
+    formatErrorMessages(errors, 'address', spy);
 
     expect(calls[0].field).toBe('address.street');
   });
@@ -125,13 +137,13 @@ describe('formatErrorMessages', () => {
       },
     };
 
-    const calls: Array<{ field: string }> = [];
-    const spy = (msg: any, values: any) => {
+    const calls: FormatMessageValues[] = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
       calls.push(values);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(errors, '', spy as any);
+    formatErrorMessages(errors, '', spy);
 
     expect(calls[0].field).toBe('section.block.title');
   });
@@ -161,13 +173,13 @@ describe('formatErrorMessages', () => {
       },
     };
 
-    const calls: Array<{ field: string }> = [];
-    const spy = (msg: any, values: any) => {
+    const calls: FormatMessageValues[] = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
       calls.push(values);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(errors, '', spy as any);
+    formatErrorMessages(errors, '', spy);
 
     expect(calls[0].field).toBe('Content.0.cards');
   });
@@ -205,17 +217,13 @@ describe('formatErrorMessages', () => {
   // formatMessage receives the correct id suffix (.withField)
   // -------------------------------------------------------------------------
   it('appends .withField to the id when calling formatMessage', () => {
-    const calls: Array<{ id: string }> = [];
-    const spy = (msg: any) => {
+    const calls: ErrorMessageDescriptor[] = [];
+    const spy = ((msg: ErrorMessageDescriptor) => {
       calls.push(msg);
       return msg.defaultMessage;
-    };
+    }) as FormatMessage;
 
-    formatErrorMessages(
-      { name: { id: 'error.required', defaultMessage: 'Required.' } },
-      '',
-      spy as any
-    );
+    formatErrorMessages({ name: { id: 'error.required', defaultMessage: 'Required.' } }, '', spy);
 
     expect(calls[0].id).toBe('error.required.withField');
   });

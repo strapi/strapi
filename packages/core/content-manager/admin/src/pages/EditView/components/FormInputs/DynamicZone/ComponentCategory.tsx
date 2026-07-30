@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -31,7 +32,7 @@ const ComponentCategory = ({
     <Accordion.Item value={category}>
       <Accordion.Header variant={variant}>
         <Accordion.Trigger>
-          {formatMessage({ id: category, defaultMessage: category })}
+          {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
         </Accordion.Trigger>
       </Accordion.Header>
       <ResponsiveAccordionContent>

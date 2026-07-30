@@ -8,7 +8,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { CloudDeploy } from '../components/CloudDeploy';
-import { CloudFree } from '../components/CloudFree';
+import { CloudFeatures } from '../components/CloudFeatures';
 import { getTrad } from '../utils/getTrad';
 
 export const HomePage = () => {
@@ -20,7 +20,7 @@ export const HomePage = () => {
         <Typography variant="alpha">
           {formatMessage({
             id: getTrad('Homepage.title'),
-            defaultMessage: 'Deploy with Strapi Cloud for Free!',
+            defaultMessage: 'Deploy with Strapi Cloud',
           })}
         </Typography>
 
@@ -29,14 +29,14 @@ export const HomePage = () => {
             {formatMessage({
               id: getTrad('Homepage.subTitle'),
               defaultMessage:
-                'Start with our completely free plan - no credit card required, no time limits.',
+                'Host your Strapi project on our managed cloud platform with automated deployments and global CDN.',
             })}
           </Typography>
         </Flex>
       </Flex>
 
       <Box padding={8}>
-        <CloudFree />
+        <CloudFeatures />
         <Box paddingTop={8}>
           <Box padding={6} background="neutral0" shadow="tableShadow">
             <CloudDeploy />

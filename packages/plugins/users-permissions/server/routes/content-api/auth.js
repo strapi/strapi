@@ -127,5 +127,17 @@ module.exports = (strapi) => {
       handler: 'auth.logout',
       config: { prefix: '' },
     },
+    {
+      method: 'GET',
+      path: '/auth/sessions',
+      handler: 'auth.getSessions',
+      config: { prefix: '' },
+    },
+    {
+      method: 'DELETE',
+      path: '/auth/sessions/:sessionId',
+      handler: 'auth.revokeSession',
+      config: { prefix: '' },
+    },
   ];
 };

@@ -76,7 +76,10 @@ const DynamicZone = ({
       __temp_key__: string;
     };
 
-  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+  const { value: rawValue, error } = useField<Array<DzWithTempKey>>(name);
+  // `value` can be `null` (for example after closing a relation modal). Match
+  // RepeatableComponent: only accept arrays, otherwise treat as empty. (#26815)
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   /**
    * Track the previous value array to detect when a new component is added.

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, navToHeader } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
@@ -168,7 +168,11 @@ test.describe('Home as super admin', () => {
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
       await page.getByRole('textbox', { name: /title/i }).fill('Test article');
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/content-manager\/collection-types\/api::article\.article\/[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
+      await findAndClose(page, 'Saved document');
 
       // Upload an asset
       await navToHeader(page, ['Media Library'], 'Media Library');
@@ -183,7 +187,6 @@ test.describe('Home as super admin', () => {
       } catch {
         await page.getByRole('button', { name: /^finish$/i }).click();
       }
-      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
@@ -241,8 +244,20 @@ test.describe('Home as super admin', () => {
       await page.getByRole('option', { name: 'Full access' }).click();
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Go back to the home page
-      await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+      // Go back to the home page and wait for refreshed statistics.
+      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
+      // keep that RTK query warm, so Home remount often serves cache and no GET is issued
+      // (waitForResponse then times out). Entries still come from count-documents — assert
+      // via expect() polling once the widget is ready.
+      const keyStatisticsReady = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/homepage/key-statistics') &&
+          response.ok()
+      );
+      await page.getByRole('link', { name: /^home$/i }).click();
+      await keyStatisticsReady;
 
       // The numbers should be updated
       await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
@@ -286,7 +301,7 @@ test.describe('Home as super admin', () => {
   });
 
   test('a super admin should see the deploy now widget', async ({ page }) => {
-    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
     await expect(deployWidget).toBeVisible();
     await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
     await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
@@ -309,7 +324,7 @@ test.describe('Home as editor', () => {
   });
 
   test('a user should see the deploy now widget regardless of their role', async ({ page }) => {
-    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
     await expect(deployWidget).toBeVisible();
     await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
   });

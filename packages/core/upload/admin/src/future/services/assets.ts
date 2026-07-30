@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -13,6 +15,7 @@ interface GetAssetsParams {
   pageSize?: number;
   folder?: number | null;
   sort?: string;
+  search?: string;
 }
 
 interface GetAssetsResponse {
@@ -37,11 +40,16 @@ const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
       query: (params = {}) => {
-        const { folder, ...rest } = params as GetAssetsParams;
+        // `search` is destructured out so it never reaches the server as-is —
+        // it is re-added below as the `_q` the API actually understands.
+        const { folder, search, ...rest } = params as GetAssetsParams;
 
         const queryParams: Record<string, unknown> = { ...rest };
 
-        if (folder != null) {
+        if (search) {
+          // Search is global: folder scoping is intentionally dropped so results span the whole library.
+          queryParams['_q'] = encodeSearchQuery(search);
+        } else if (folder != null) {
           queryParams['filters'] = {
             $and: [{ folder: { id: folder } }],
           };
@@ -135,6 +143,26 @@ const assetsApi = uploadApi.injectEndpoints({
         { type: 'Asset' as const, id: 'LIST' },
       ],
     }),
+    /**
+     * Permanently delete several assets and/or folders in one request. Same
+     * endpoint as the legacy bulk remove (`POST /upload/actions/bulk-delete`,
+     * handled by `admin-folder-file.deleteMany`) so server behaviour is
+     * unchanged — folder deletion cascades to everything inside.
+     */
+    bulkDeleteItems: builder.mutation<unknown, { fileIds: number[]; folderIds: number[] }>({
+      query: ({ fileIds, folderIds }) => ({
+        url: '/upload/actions/bulk-delete',
+        method: 'POST',
+        data: { fileIds, folderIds },
+      }),
+      invalidatesTags: [
+        { type: 'Asset' as const, id: 'LIST' },
+        { type: 'Folder' as const, id: 'LIST' },
+        // The sidebar FolderTree reads /upload/folder-structure, which carries
+        // its own tag — without it, deleted folders linger in the tree.
+        { type: 'Folder' as const, id: 'STRUCTURE' },
+      ],
+    }),
   }),
 });
 
@@ -144,4 +172,5 @@ export const {
   useUpdateAssetMutation,
   useReplaceAssetMutation,
   useDeleteAssetMutation,
+  useBulkDeleteItemsMutation,
 } = assetsApi;

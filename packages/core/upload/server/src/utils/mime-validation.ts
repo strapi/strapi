@@ -277,12 +277,21 @@ export async function validateFile(
     Array.isArray(allowedTypes) &&
     allowedTypes.length > 0 &&
     matchesMimePattern(expectedMimeFromExt, allowedTypes);
+  // Exception: file-type often returns application/xml for SVG; trust .svg extension when image/svg+xml is allowed.
+  const isSvgXmlWithAllowedExt =
+    detectedMime === 'application/xml' &&
+    fileExt === '.svg' &&
+    expectedMimeFromExt === 'image/svg+xml' &&
+    Array.isArray(allowedTypes) &&
+    allowedTypes.length > 0 &&
+    matchesMimePattern(expectedMimeFromExt, allowedTypes);
   if (
     detectedMime &&
     Array.isArray(allowedTypes) &&
     allowedTypes.length > 0 &&
     !matchesMimePattern(detectedMime, allowedTypes) &&
-    !isZipWithAllowedExt
+    !isZipWithAllowedExt &&
+    !isSvgXmlWithAllowedExt
   ) {
     return {
       isValid: false,

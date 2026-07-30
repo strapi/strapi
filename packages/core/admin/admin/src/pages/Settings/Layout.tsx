@@ -1,8 +1,9 @@
 import { Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Navigate, Outlet, useMatch } from 'react-router-dom';
+import { Navigate, useMatch } from 'react-router-dom';
 
 import { Layouts } from '../../components/Layouts/Layout';
+import { LazyOutlet } from '../../components/LazyOutlet';
 import { Page } from '../../components/PageHelpers';
 import { SubNav } from '../../components/SubNav';
 import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
@@ -67,7 +68,7 @@ const Layout = () => {
       >
         <BackButton fallback="/settings" />
       </Box>
-      <Outlet />
+      <LazyOutlet nested />
     </Layouts.Root>
   );
 };
