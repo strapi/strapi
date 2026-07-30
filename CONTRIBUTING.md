@@ -64,6 +64,8 @@ The Strapi core team will review your pull request and either merge it, request 
 - Ensure the following test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
+  - `yarn test:e2e:vitest`
+    - Vitest e2e pilot (`tests/e2e/tests/**/*.vitest.spec.ts`). Vitest is the runner; the browser is driven by the `playwright` library. Boots a test app automatically — run `yarn test:e2e --setup` once first, and `yarn playwright install chromium` if needed. See [`tests/e2e/README.md`](tests/e2e/README.md).
   - `yarn test:e2e --setup --concurrency=1`
     - you **_may_** need to install Playwright browsers first: `yarn playwright install`
     - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/guides/e2e/00-setup.md`](docs/docs/guides/e2e/00-setup.md))
