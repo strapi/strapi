@@ -260,6 +260,10 @@ describe('buildDataSchema | scalars, required/min projection, permissions', () =
     // for aggregates that are *not* required. So on creation the key is `notNil()` with no
     // default and omitting it throws "<field> must be defined" — draft or not. Relaxing it
     // here would advertise a write the server rejects.
+    //
+    // This test covers the schema projection only; the server-side behaviour it mirrors is
+    // pinned by "aggregates are not draft-exempt" in
+    // packages/core/core/src/services/entity-validator/__tests__/index.test.ts.
     const attrs = {
       title: { type: 'string', required: true },
       links: { type: 'component', component: 'shared.seo', repeatable: true, required: true },

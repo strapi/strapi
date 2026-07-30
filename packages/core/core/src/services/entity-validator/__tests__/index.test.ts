@@ -446,6 +446,63 @@ describe('Entity validator', () => {
         expect(data).toEqual({ title: null });
       });
 
+      test('Throws on omitted required repeatable component and dynamic zone (aggregates are not draft-exempt)', async () => {
+        // Aggregates are the carve-out from draft required-leniency: `createComponentValidator`
+        // (repeatable branch) and `createDzValidator` both pass a hard-coded `required: true` to
+        // `addRequiredValidation` regardless of `isDraft`, and `addDefault` only substitutes `[]`
+        // for aggregates that are *not* required. So the key must be present even on a draft.
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            links: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: true,
+              required: true,
+            },
+            sections: {
+              type: 'dynamiczone',
+              components: ['default.seo'],
+              required: true,
+            },
+          },
+        };
+
+        // Omitting either aggregate key throws, unlike the required scalar above.
+        await expect(
+          entityValidator.validateEntityCreation(model, { sections: [] }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        await expect(
+          entityValidator.validateEntityCreation(model, { links: [] }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        // Present-but-empty satisfies it — the validator wants the key, not the contents.
+        await expect(
+          entityValidator.validateEntityCreation(
+            model,
+            { links: [], sections: [] },
+            { isDraft: true }
+          )
+        ).resolves.toMatchObject({ links: [], sections: [] });
+      });
+
       it('Supports custom field types', async () => {
         const model: Schema.ContentType = {
           ...modelBase,
