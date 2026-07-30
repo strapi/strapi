@@ -1,4 +1,12 @@
-import { parseFiltersParam, serializeFilters, type ListFilter } from '../useListFilters';
+import { renderHook, act } from '@tests/utils';
+import { useLocation, useNavigationType } from 'react-router-dom';
+
+import {
+  parseFiltersParam,
+  serializeFilters,
+  useListFilters,
+  type ListFilter,
+} from '../useListFilters';
 
 describe('useListFilters codec', () => {
   describe('parseFiltersParam', () => {
@@ -123,5 +131,32 @@ describe('useListFilters codec', () => {
 
       expect(parseFiltersParam(serializeFilters(filters))).toEqual(filters);
     });
+  });
+});
+
+describe('useListFilters URL writes', () => {
+  it('updates the URL with history replace so filter micro-edits do not pile Back entries', () => {
+    const { result } = renderHook(
+      () => ({
+        listFilters: useListFilters(),
+        navigationType: useNavigationType(),
+        location: useLocation(),
+      }),
+      { initialEntries: ['/'] }
+    );
+
+    act(() => {
+      result.current.listFilters.addFilter({ kind: 'type', condition: 'is', values: ['picture'] });
+    });
+
+    expect(result.current.location.search).toContain('filters=');
+    expect(result.current.navigationType).toBe('REPLACE');
+
+    act(() => {
+      result.current.listFilters.clearFilters();
+    });
+
+    expect(result.current.location.search).not.toContain('filters=');
+    expect(result.current.navigationType).toBe('REPLACE');
   });
 });
