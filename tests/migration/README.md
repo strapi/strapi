@@ -63,7 +63,7 @@ Job **`migration_v5`** runs when the **`migrations`** path filter matches the PR
 
 ## Implementation
 
-- Runner: [`scripts/run-migration-scenario.js`](scripts/run-migration-scenario.js)
-- Version aliases: [`framework/resolve-strapi-version.js`](framework/resolve-strapi-version.js)
+- Runner: [`scripts/run-migration-scenario.ts`](scripts/run-migration-scenario.ts)
+- Version aliases: [`framework/resolve-strapi-version.ts`](framework/resolve-strapi-version.ts)
 - Fixture spec + validators: [`fixture/`](fixture/)
 - Canonical scenario: [`scenarios/v4-to-head.json`](scenarios/v4-to-head.json)

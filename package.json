@@ -95,9 +95,9 @@
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
-    "test:migrations": "node tests/migration/scripts/run-migration-scenario.js",
-    "test:migrations:plan": "node tests/migration/scripts/run-migration-scenario.js --print-plan",
-    "test:migrations:smoke": "node tests/migration/scripts/run-migration-scenario.js --initial legacy --database sqlite --skip-build",
+    "test:migrations": "node --import tsx tests/migration/scripts/run-migration-scenario.ts",
+    "test:migrations:plan": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --print-plan",
+    "test:migrations:smoke": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --initial legacy --database sqlite --skip-build",
     "test:migrations:unit": "jest --config tests/migration/fixture/jest.config.js"
   },
   "resolutions": {
