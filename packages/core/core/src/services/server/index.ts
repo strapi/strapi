@@ -19,7 +19,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy.koa'),
     proxyIpHeader: strapi.config.get('server.proxy.ipHeader'),
-    maxIpsCount: strapi.config.get('server.proxy.maxIpCount'),
+    maxIpsCount: strapi.config.get('server.proxy.maxIpsCount'),
     keys: strapi.config.get('server.app.keys'),
   });
 
