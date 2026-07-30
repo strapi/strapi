@@ -18,7 +18,7 @@ export interface ArticleDzComp extends Schema.Component {
     displayName: 'dz_comp';
   };
   attributes: {
-    name: Attribute.String;
+    name: Attribute.String & Attribute.Required;
     media: Attribute.Media;
   };
 }
