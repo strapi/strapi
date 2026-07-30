@@ -52,7 +52,8 @@ export const EmptyState = ({ onAddAssets, searchQuery, onClearSearch }: EmptySta
         </Typography>
       </Flex>
       {isSearchEmptyState ? (
-        <Button variant="tertiary" onClick={onClearSearch}>
+        // Same look as the filters empty state's "Clear filters" action.
+        <Button variant="secondary" startIcon={<Cross aria-hidden />} onClick={onClearSearch}>
           {formatMessage({
             id: getTranslationKey('list.search.empty.clear'),
             defaultMessage: 'Clear search',
