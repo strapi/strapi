@@ -7,6 +7,13 @@ describe('useListFilters codec', () => {
       expect(parseFiltersParam('')).toEqual([]);
     });
 
+    it('returns an empty list for non-string input (qs can produce arrays/objects)', () => {
+      // `?filters[]=a&filters[]=b` parses to an array; hand-edited URLs are user input.
+      expect(parseFiltersParam(['type:is:picture', 'created:within:1week'])).toEqual([]);
+      expect(parseFiltersParam({ 0: 'type:is:picture' })).toEqual([]);
+      expect(parseFiltersParam(42)).toEqual([]);
+    });
+
     it('parses a type badge with several values', () => {
       expect(parseFiltersParam('type:is:picture,audio')).toEqual([
         { kind: 'type', condition: 'is', values: ['picture', 'audio'] },

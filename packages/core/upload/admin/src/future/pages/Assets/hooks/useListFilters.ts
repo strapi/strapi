@@ -158,8 +158,13 @@ const parseBadge = (raw: string): ListFilter | null => {
   return null;
 };
 
-export const parseFiltersParam = (raw: string | undefined): ListFilter[] => {
-  if (!raw) {
+/**
+ * `unknown` on purpose: the query string is user-editable, and qs parses
+ * shapes like `?filters[]=a&filters[]=b` into arrays — the guard is what
+ * makes the caller's `?filters=` type an assertion rather than a crash.
+ */
+export const parseFiltersParam = (raw: unknown): ListFilter[] => {
+  if (typeof raw !== 'string' || raw === '') {
     return [];
   }
 

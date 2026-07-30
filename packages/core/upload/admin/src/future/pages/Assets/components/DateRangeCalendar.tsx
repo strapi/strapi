@@ -118,7 +118,19 @@ export const DateRangeCalendar = ({ from, to, onSelect }: DateRangeCalendarProps
   const weekDayLabels = weeks[0].map((day) => formatDate(day, { weekday: 'short' }).slice(0, 2));
 
   return (
-    <Box padding={2} width="100%" role="application" data-testid="date-range-calendar">
+    // role="group" (not "application"): these are plain buttons — hijacking
+    // the screen reader's own key handling would take away navigation and
+    // give nothing back.
+    <Box
+      padding={2}
+      width="100%"
+      role="group"
+      aria-label={formatMessage({
+        id: getTranslationKey('list.filters.calendar.label'),
+        defaultMessage: 'Select date range',
+      })}
+      data-testid="date-range-calendar"
+    >
       <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
         <IconButton
           variant="ghost"

@@ -187,6 +187,7 @@
   "list.filters.clear": "Clear filters",
   "list.filters.calendar.previous-month": "Previous month",
   "list.filters.calendar.next-month": "Next month",
+  "list.filters.calendar.label": "Select date range",
   "list.sort.trigger": "Sort: {active}",
   "list.sort.section": "Sort",
   "list.sort.oldest-uploads": "Oldest uploads",

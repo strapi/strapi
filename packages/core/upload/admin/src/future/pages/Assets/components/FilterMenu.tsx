@@ -54,9 +54,6 @@ export const DATE_FIELD_LABELS: Record<DateField, MessageDescriptor> = {
   },
 };
 
-// Stretch to the toolbar row height, like the sort trigger.
-const FilterTrigger = styled(Menu.Trigger)``;
-
 // The DS SubTrigger renders its chevron inline right after the label — push it
 // to the far edge so every field row reads label · · · ›, like the mock.
 const FieldSubTrigger = styled(Menu.SubTrigger)`
@@ -144,7 +141,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
       {/* endIcon={null} drops the DS default chevron — the mock has none. */}
-      <FilterTrigger variant="tertiary" startIcon={<FilterIcon aria-hidden />} endIcon={null}>
+      <Menu.Trigger variant="tertiary" startIcon={<FilterIcon aria-hidden />} endIcon={null}>
         <Flex gap={2} alignItems="center" tag="span">
           {formatMessage({
             id: getTranslationKey('list.filters.trigger'),
@@ -152,7 +149,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
           })}
           {filters.length > 0 && <CountBadge>{filters.length}</CountBadge>}
         </Flex>
-      </FilterTrigger>
+      </Menu.Trigger>
       <Menu.Content
         popoverPlacement="bottom-start"
         zIndex={2}
@@ -167,21 +164,20 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
             })}
           </FieldSubTrigger>
           <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
+            {/* Multi-select semantics: menuitemcheckbox + aria-checked carry the
+                state for assistive tech; the Checkbox is purely decorative
+                (aria-hidden, unfocusable) — the Menu.Item is the control. */}
             {TYPE_VALUES.map((value) => (
               <Menu.Item
                 key={value}
+                role="menuitemcheckbox"
+                aria-checked={checkedValues.includes(value)}
                 onSelect={(e: Event) => {
                   e.preventDefault();
                   toggleTypeValue(value);
                 }}
                 startIcon={
-                  <Checkbox
-                    checked={checkedValues.includes(value)}
-                    tabIndex={-1}
-                    aria-hidden
-                    onCheckedChange={() => toggleTypeValue(value)}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  />
+                  <Checkbox checked={checkedValues.includes(value)} tabIndex={-1} aria-hidden />
                 }
               >
                 {formatMessage(TYPE_LABELS[value])}

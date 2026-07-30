@@ -54,7 +54,7 @@ describe('FilterMenu', () => {
 
     await user.click(screen.getByRole('button', { name: 'Filter' }));
     await user.click(screen.getByText('Type'));
-    await user.click(await screen.findByRole('menuitem', { name: 'Picture' }));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
 
     expect(listFilters.addFilter).toHaveBeenCalledWith({
       kind: 'type',
@@ -70,7 +70,7 @@ describe('FilterMenu', () => {
 
     await user.click(screen.getByRole('button', { name: /Filter/ }));
     await user.click(screen.getByText('Type'));
-    await user.click(await screen.findByRole('menuitem', { name: 'Audio' }));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Audio' }));
 
     expect(listFilters.updateFilter).toHaveBeenCalledWith(0, {
       kind: 'type',
@@ -86,7 +86,7 @@ describe('FilterMenu', () => {
 
     await user.click(screen.getByRole('button', { name: /Filter/ }));
     await user.click(screen.getByText('Type'));
-    await user.click(await screen.findByRole('menuitem', { name: 'Picture' }));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
 
     // A type filter with no values is not a state — the badge goes away
     // instead of writing a malformed `type:is:` to the URL.
