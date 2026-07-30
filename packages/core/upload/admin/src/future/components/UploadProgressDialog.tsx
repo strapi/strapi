@@ -15,6 +15,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
+import { useGetSettingsQuery } from '../services/settings';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
 import {
   closeUploadProgress,
@@ -207,6 +208,10 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const progress = useTypedSelector(selectAggregateProgress);
   const dispatch = useTypedDispatch();
   const [retryCancelledFiles] = useRetryCancelledFilesMutation();
+  // Same pool size as the original run — the config echo; missing settings
+  // fall back to sequential.
+  const { data: settings } = useGetSettingsQuery();
+  const concurrency = settings?.data?.concurrentUploadSize ?? 1;
 
   // The batch is complete once every file has reached a terminal state. Byte-weighted
   // progress can't be used here because errored/cancelled rows never reach 100%.
@@ -235,7 +240,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
 
   const handleRetry = async () => {
     try {
-      await retryCancelledFiles().unwrap();
+      await retryCancelledFiles({ concurrency }).unwrap();
     } catch {
       // Error is already dispatched to store from the API queryFn
     }

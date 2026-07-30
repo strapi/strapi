@@ -25,6 +25,16 @@ import type {
 interface UploadFilesArgs {
   formData: FormData;
   totalFiles: number;
+  /**
+   * How many files to upload in parallel — the server's `concurrentUploadSize`
+   * settings value. Defaults to 1 (sequential).
+   */
+  concurrency?: number;
+}
+
+interface RetryCancelledFilesArgs {
+  /** Same contract as {@link UploadFilesArgs.concurrency}. */
+  concurrency?: number;
 }
 
 interface UploadFromUrlsArgs {
@@ -111,7 +121,7 @@ interface UploadError {
   status?: number;
 }
 
-type SequentialUploadResult =
+type UploadPoolResult =
   | { data: UploadedFile[]; error?: undefined }
   | { error: UploadError; data?: undefined };
 
@@ -123,13 +133,14 @@ type SequentialUploadResult =
  * "complete" or "error". Each file is wrapped in its own try/catch so one failure
  * does not stop the batch. An abort stops the loop without starting further files.
  */
-const runSequentialUpload = async ({
+const runUploadPool = async ({
   entries,
   indices,
   token,
   uploadId,
   abortController,
   dispatch,
+  concurrency = 1,
 }: {
   entries: UploadEntry[];
   indices: number[];
@@ -137,19 +148,21 @@ const runSequentialUpload = async ({
   uploadId: number;
   abortController: AbortController;
   dispatch: Dispatch;
-}): Promise<SequentialUploadResult> => {
+  /** Parallel workers pulling from the queue. 1 (the default) = sequential. */
+  concurrency?: number;
+}): Promise<UploadPoolResult> => {
   const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
   const uploaded: UploadedFile[] = [];
 
-  for (const index of indices) {
-    if (abortController.signal.aborted) {
-      break;
-    }
+  // Shared queue: each worker shifts the next index when it frees up, so N
+  // files are in flight at any moment (not N-sized waves). With concurrency 1
+  // this degenerates to the original strictly sequential loop.
+  const queue = [...indices];
 
+  const uploadOne = async (index: number) => {
     const entry = entries[index];
     if (!entry) {
-      // eslint-disable-next-line no-continue
-      continue;
+      return;
     }
 
     const fileName = entry.fileInfo?.name ?? entry.file.name;
@@ -176,15 +189,35 @@ const runSequentialUpload = async ({
       batcher.cancel();
 
       if (err instanceof UploadAbortedError) {
-        // Batch was cancelled — stop without starting further files.
+        // Batch was cancelled — the worker loop checks the signal and stops.
         // cancelUpload (dispatched from the dialog) marks the remaining rows.
-        break;
+        return;
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
       dispatch(setFileError({ index, name: fileName, message }));
     }
-  }
+  };
+
+  const workerCount = Math.min(Math.max(1, Math.floor(concurrency)), queue.length);
+
+  const worker = async () => {
+    while (queue.length > 0) {
+      if (abortController.signal.aborted) {
+        break;
+      }
+
+      const index = queue.shift();
+      if (index === undefined) {
+        break;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await uploadOne(index);
+    }
+  };
+
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   unregisterAbortController(uploadId);
 
@@ -345,11 +378,13 @@ const uploadApi = adminApi
   .injectEndpoints({
     endpoints: (builder) => ({
       /**
-       * Upload files sequentially, one request per file, to `/upload/unstable/upload-file`.
-       * Real per-file byte progress comes from `XHR.upload.onprogress`.
+       * Upload files to `/upload/unstable/upload-file`, one request per file,
+       * through a worker pool of `concurrency` parallel requests (default 1 =
+       * sequential). Real per-file byte progress comes from
+       * `XHR.upload.onprogress`.
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
-        queryFn: async ({ formData, totalFiles }, { dispatch, getState }) => {
+        queryFn: async ({ formData, totalFiles, concurrency }, { dispatch, getState }) => {
           const token = (getState() as RootState).admin_app?.token;
 
           // Extract the original files and their per-file fileInfo from the combined FormData.
@@ -383,13 +418,14 @@ const uploadApi = adminApi
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runSequentialUpload({
+          return runUploadPool({
             entries,
             indices: entries.map((_, index) => index),
             token,
             uploadId,
             abortController,
             dispatch,
+            concurrency,
           });
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
@@ -431,10 +467,10 @@ const uploadApi = adminApi
       /**
        * Retry uploading cancelled files.
        * Maps cancelled rows back to their original entries and re-runs only those
-       * through the same sequential loop with a fresh AbortController.
+       * through the same upload pool with a fresh AbortController.
        */
-      retryCancelledFiles: builder.mutation<UploadedFile[], void>({
-        queryFn: async (_, { dispatch, getState }) => {
+      retryCancelledFiles: builder.mutation<UploadedFile[], RetryCancelledFilesArgs | void>({
+        queryFn: async (args, { dispatch, getState }) => {
           const { uploadId, files: stateFiles } = (getState() as RootState).uploadProgress;
           const token = (getState() as RootState).admin_app?.token;
 
@@ -458,13 +494,14 @@ const uploadApi = adminApi
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runSequentialUpload({
+          return runUploadPool({
             entries,
             indices: cancelledIndices,
             token,
             uploadId,
             abortController,
             dispatch,
+            concurrency: args?.concurrency,
           });
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],

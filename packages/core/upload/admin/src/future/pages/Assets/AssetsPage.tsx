@@ -24,6 +24,7 @@ import { styled } from 'styled-components';
 
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
+import { useGetSettingsQuery } from '../../services/settings';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -385,6 +386,11 @@ export const AssetsPage = () => {
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
+  // `concurrentUploadSize` echoes the app config. Missing settings (still
+  // loading, no permission) fall back to sequential — never faster than the
+  // server asked for.
+  const { data: settings } = useGetSettingsQuery();
+  const concurrency = settings?.data?.concurrentUploadSize ?? 1;
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
@@ -404,7 +410,7 @@ export const AssetsPage = () => {
 
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFiles({ formData, totalFiles: files.length }).unwrap();
+      await uploadFiles({ formData, totalFiles: files.length, concurrency }).unwrap();
     } catch (error) {
       // Error is already dispatched to store from the API queryFn
     }

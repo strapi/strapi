@@ -17,6 +17,12 @@ jest.mock('../../services/api', () => ({
   useRetryCancelledFilesMutation: () => [mockRetryCancelledFiles],
 }));
 
+// Mocked because the api module above is fully mocked — the real settings
+// service would call `uploadApi.injectEndpoints` on the mock's undefined.
+jest.mock('../../services/settings', () => ({
+  useGetSettingsQuery: () => ({ data: { data: { concurrentUploadSize: 1 } } }),
+}));
+
 const { useTypedSelector } = jest.requireMock('../../store/hooks');
 const { abortUpload } = jest.requireMock('../../services/api');
 
