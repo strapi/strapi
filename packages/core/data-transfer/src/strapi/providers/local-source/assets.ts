@@ -6,6 +6,9 @@ import type { Core } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../types';
 
+const HTTP_OK_STATUS = 200;
+const DECIMAL_RADIX = 10;
+
 function getFileStream(
   filepath: string,
   strapi: Core.Strapi,
@@ -22,7 +25,7 @@ function getFileStream(
   strapi
     .fetch(filepath)
     .then((res: Response) => {
-      if (res.status !== 200) {
+      if (res.status !== HTTP_OK_STATUS) {
         readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
       }
@@ -41,7 +44,7 @@ function getFileStream(
   return readableStream;
 }
 
-export function getFileStatsForTransfer(
+export async function getFileStatsForTransfer(
   filepath: string,
   strapi: Core.Strapi,
   isLocal = false
@@ -49,26 +52,35 @@ export function getFileStatsForTransfer(
   if (isLocal) {
     return stat(filepath);
   }
-  return new Promise((resolve, reject) => {
-    strapi
-      .fetch(filepath)
-      .then((res: Response) => {
-        if (res.status !== 200) {
-          reject(new Error(`Request failed with status code ${res.status}`));
-          return;
-        }
 
-        const contentLength = res.headers.get('content-length');
-        const stats = {
-          size: contentLength ? parseInt(contentLength, 10) : 0,
-        };
+  const response = await strapi.fetch(filepath);
+  if (response.status !== HTTP_OK_STATUS) {
+    throw new Error(`Request failed with status code ${response.status}`);
+  }
 
-        resolve(stats);
-      })
-      .catch((error: unknown) => {
-        reject(error);
-      });
-  });
+  const contentLength = response.headers.get('content-length');
+  if (contentLength) {
+    return { size: parseInt(contentLength, DECIMAL_RADIX) };
+  }
+
+  if (!response.body) {
+    return { size: 0 };
+  }
+
+  const reader = response.body.getReader();
+  let size = 0;
+
+  try {
+    let result = await reader.read();
+    while (!result.done) {
+      size += result.value.byteLength;
+      result = await reader.read();
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return { size };
 }
 
 export async function signUploadFileForTransfer(strapi: Core.Strapi, file: IFile) {

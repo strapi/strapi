@@ -2,8 +2,37 @@ import { Readable } from 'stream';
 import { mkdtemp, mkdir, writeFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import type { Core } from '@strapi/types';
 
-import { createAssetsStream } from '../assets';
+import { createAssetsStream, getFileStatsForTransfer } from '../assets';
+
+const REMOTE_FILE_URL = 'https://cdn.example.com/file.pdf';
+const REMOTE_FILE_CHUNKS = ['compressed response ', 'contents'];
+
+describe('getFileStatsForTransfer', () => {
+  test('uses the response body size when a remote response has no content-length header', async () => {
+    const encoder = new TextEncoder();
+    const response = new Response(
+      new ReadableStream({
+        start(controller) {
+          for (const chunk of REMOTE_FILE_CHUNKS) {
+            controller.enqueue(encoder.encode(chunk));
+          }
+          controller.close();
+        },
+      })
+    );
+    const arrayBufferSpy = jest.spyOn(response, 'arrayBuffer');
+    const strapi = {
+      fetch: jest.fn().mockResolvedValue(response),
+    } as unknown as Core.Strapi;
+
+    await expect(getFileStatsForTransfer(REMOTE_FILE_URL, strapi)).resolves.toEqual({
+      size: Buffer.byteLength(REMOTE_FILE_CHUNKS.join('')),
+    });
+    expect(arrayBufferSpy).not.toHaveBeenCalled();
+  });
+});
 
 describe('Local source assets stream warnings', () => {
   let publicDir: string;
