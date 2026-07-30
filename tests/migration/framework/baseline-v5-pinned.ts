@@ -22,7 +22,7 @@ type V5PinnedBaselineOpts = {
 };
 
 /**
- * Pinned published Strapi v5 at `initialVersion` + same DB as the rest of the run + canonical v5 seed (seed-v5.js).
+ * Pinned published Strapi v5 at `initialVersion` + same DB as the rest of the run + canonical v5 seed (seed-v5.ts).
  * Used when baseline.type is "v5-pinned" (no v4 step).
  */
 async function runV5PinnedBaseline(
@@ -35,15 +35,22 @@ async function runV5PinnedBaseline(
   console.log(
     `\n📁 Pinned Strapi v5 baseline ${initialVersion} (canonical v5 seed) at ${pinnedRoot}...`
   );
-  await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-pinned-v5-project.js')], {
-    cwd: ctx.REPO_ROOT,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      PINNED_STRAPI_VERSION: initialVersion,
-      PINNED_V5_OUT_DIR: pinnedRoot,
-    },
-  });
+  await execa(
+    process.execPath,
+    ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-pinned-v5-project.ts')],
+    {
+      cwd: ctx.REPO_ROOT,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        PINNED_STRAPI_VERSION: initialVersion,
+        PINNED_V5_OUT_DIR: pinnedRoot,
+        NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
+          .filter(Boolean)
+          .join(path.delimiter),
+      },
+    }
+  );
 
   const { writeAppDotenv, prepareDockerDatabase, nestedYarnInstallEnv } = require('./shared');
   writeAppDotenv({ ...ctx, V4_APP_DIR: pinnedRoot }, dbEnv);
@@ -69,17 +76,16 @@ async function runV5PinnedBaseline(
   const scriptsDir = path.join(pinnedRoot, 'scripts');
   fs.mkdirSync(scriptsDir, { recursive: true });
   fs.copyFileSync(
-    path.join(ctx.COMPLEX_DIR, 'scripts', 'seed-v5.js'),
-    path.join(scriptsDir, 'seed-v5.js')
+    path.join(ctx.COMPLEX_DIR, 'scripts', 'seed-v5.ts'),
+    path.join(scriptsDir, 'seed-v5.ts')
   );
-  // examples/complex require-fixture stays .js (sibling/glue scope)
   fs.copyFileSync(
-    path.join(ctx.COMPLEX_DIR, 'scripts', 'require-fixture.js'),
-    path.join(scriptsDir, 'require-fixture.js')
+    path.join(ctx.COMPLEX_DIR, 'scripts', 'require-fixture.ts'),
+    path.join(scriptsDir, 'require-fixture.ts')
   );
 
-  console.log(`\n🌱 Seeding (seed-v5.js) against Strapi ${initialVersion}...`);
-  await execa('node', [path.join('scripts', 'seed-v5.js')], {
+  console.log(`\n🌱 Seeding (seed-v5.ts) against Strapi ${initialVersion}...`);
+  await execa(process.execPath, ['--import', 'tsx', path.join('scripts', 'seed-v5.ts')], {
     cwd: pinnedRoot,
     stdio: 'inherit',
     env: {
@@ -87,6 +93,9 @@ async function runV5PinnedBaseline(
       ...dbEnv,
       SEED_MULTIPLIER: String(multiplier),
       MIGRATION_MULTIPLIER: String(multiplier),
+      NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
+        .filter(Boolean)
+        .join(path.delimiter),
     },
   });
 

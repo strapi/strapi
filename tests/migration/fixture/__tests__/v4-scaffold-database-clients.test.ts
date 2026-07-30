@@ -8,7 +8,7 @@ const INVALID_KNEX_DRIVER_NAMES = ['better-sqlite3', 'pg', 'sqlite3'];
 
 const setupScriptPath = path.resolve(
   __dirname,
-  '../../../../examples/complex/scripts/setup-v4-project.js'
+  '../../../../examples/complex/scripts/setup-v4-project.ts'
 );
 
 describe('setup-v4-project generated database.js', () => {

@@ -28,15 +28,22 @@ async function runV4Baseline(ctx: MigrationContext, opts: V4BaselineOpts): Promi
   const { database, multiplier, dbEnv, initialVersion = 'legacy' } = opts;
 
   console.log('\n📁 Scaffolding Strapi v4 app...');
-  await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-v4-project.js')], {
-    cwd: ctx.REPO_ROOT,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      V4_OUTSIDE_DIR: ctx.V4_APP_DIR,
-      STRAPI_V4_VERSION: initialVersion,
-    },
-  });
+  await execa(
+    process.execPath,
+    ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-v4-project.ts')],
+    {
+      cwd: ctx.REPO_ROOT,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        V4_OUTSIDE_DIR: ctx.V4_APP_DIR,
+        STRAPI_V4_VERSION: initialVersion,
+        NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
+          .filter(Boolean)
+          .join(path.delimiter),
+      },
+    }
+  );
 
   const { writeAppDotenv, prepareDockerDatabase, nestedYarnInstallEnv } = require('./shared');
   writeAppDotenv(ctx, dbEnv);
@@ -61,11 +68,22 @@ async function runV4Baseline(ctx: MigrationContext, opts: V4BaselineOpts): Promi
   });
 
   console.log('\n🌱 Seeding v4 database...');
-  await execa('node', [path.join('scripts', 'seed.js'), '--multiplier', String(multiplier)], {
-    cwd: ctx.V4_APP_DIR,
-    stdio: 'inherit',
-    env: { ...process.env, ...dbEnv, SEED_MULTIPLIER: String(multiplier) },
-  });
+  await execa(
+    process.execPath,
+    ['--import', 'tsx', path.join('scripts', 'seed.ts'), '--multiplier', String(multiplier)],
+    {
+      cwd: ctx.V4_APP_DIR,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        ...dbEnv,
+        SEED_MULTIPLIER: String(multiplier),
+        NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
+          .filter(Boolean)
+          .join(path.delimiter),
+      },
+    }
+  );
 
   return dbEnv;
 }

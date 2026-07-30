@@ -90,7 +90,7 @@ switch (command) {
   case 'snapshot': {
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mariadb.js snapshot <name>');
+      console.error('Usage: node --import tsx db-mariadb.ts snapshot <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
@@ -123,7 +123,7 @@ switch (command) {
   case 'restore': {
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mariadb.js restore <name>');
+      console.error('Usage: node --import tsx db-mariadb.ts restore <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
@@ -311,6 +311,8 @@ switch (command) {
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-mariadb.js <start|stop|snapshot|restore|wipe|check> [name]');
+    console.error(
+      'Usage: node --import tsx db-mariadb.ts <start|stop|snapshot|restore|wipe|check> [name]'
+    );
     process.exit(1);
 }

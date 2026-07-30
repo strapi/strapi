@@ -17,7 +17,7 @@
  *
  * Activation:
  *   STRAPI_BENCH_HOOK_OUTPUT=/tmp/bench-$$.json \
- *     node --require /abs/path/to/bench-hook.js <strapi launcher>
+ *     node --require /abs/path/to/bench-hook.ts <strapi launcher>
  *
  * If STRAPI_BENCH_HOOK_OUTPUT is unset, the hook self-disables — cheap to
  * leave `--require` in dev configs without affecting normal runs.

@@ -181,7 +181,7 @@ yarn test:migrations --initial legacy --database sqlite --skip-build
 
 You must pass **`--initial <4.x semver>`** (or use **`--scenario tests/migration/scenarios/v4-to-head.json`**): v4 baseline npm version. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
 
-The orchestrator (`tests/migration/scripts/run-migration-scenario.ts`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.js`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial legacy`.
+The orchestrator (`tests/migration/scripts/run-migration-scenario.ts`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.ts`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial legacy`.
 
 **CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
 
@@ -256,7 +256,7 @@ Snapshots are reused across `bench:run` invocations — you only re-seed when th
 
 ### Benchmark-specific env vars
 
-- `STRAPI_BENCH_HOOK_OUTPUT=<path>` — enables the timing preload (set automatically by `bench.js`, exposed for debugging). The hook self-disables when this isn't set, so the `--require` can safely live in other dev configs.
+- `STRAPI_BENCH_HOOK_OUTPUT=<path>` — enables the timing preload (set automatically by `bench.ts`, exposed for debugging). The hook self-disables when this isn't set, so the `--require` can safely live in other dev configs.
 - `STRAPI_BENCH_HOOK_DEBUG=1` — verbose preload output (migration attach/record events to stderr).
 - `STRAPI_BENCH_RUNTIME=podman|docker` — override the auto-detected container runtime.
 - `SEED_CONCURRENCY=<n>` — how many entity-creation tasks run in parallel during `bench:seed` / `seed`. Default `5`, which stays under Strapi v4's default knex pool of `{min: 2, max: 10}`. Tune up only if you've also raised the pool max.

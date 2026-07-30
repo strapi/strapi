@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-'use strict';
-
 /**
  * Copy examples/complex app sources into an isolated directory and write a package.json
  * that depends on a published Strapi v5 version (for migration ladder tests).
@@ -24,7 +22,7 @@ const outDir = process.env.PINNED_V5_OUT_DIR;
 
 if (!version || !outDir) {
   console.error(
-    'Usage: PINNED_STRAPI_VERSION=5.30.0 PINNED_V5_OUT_DIR=/abs/path node setup-pinned-v5-project.js'
+    'Usage: PINNED_STRAPI_VERSION=5.30.0 PINNED_V5_OUT_DIR=/abs/path node --import tsx setup-pinned-v5-project.ts'
   );
   process.exit(1);
 }

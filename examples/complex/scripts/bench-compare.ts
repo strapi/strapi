@@ -5,8 +5,8 @@
  * Compare benchmark result sets across multipliers and databases.
  *
  * Usage:
- *   node bench-compare.js --baseline <label> --candidate <label>
- *   node bench-compare.js <baseline-label> <candidate-label>     # legacy positional form
+ *   node bench-compare.ts --baseline <label> --candidate <label>
+ *   node bench-compare.ts <baseline-label> <candidate-label>     # legacy positional form
  *
  * Result files are loaded from `results/*.json` and indexed by:
  *   { label, multiplier, dbEngine }
@@ -58,8 +58,8 @@ const baselineLabel = flags.baseline ?? positional[0];
 const candidateLabel = flags.candidate ?? positional[1];
 
 if (!baselineLabel || !candidateLabel) {
-  console.error('Usage: node bench-compare.js --baseline <label> --candidate <label>');
-  console.error('       node bench-compare.js <baseline-label> <candidate-label>');
+  console.error('Usage: node bench-compare.ts --baseline <label> --candidate <label>');
+  console.error('       node bench-compare.ts <baseline-label> <candidate-label>');
   process.exit(1);
 }
 
@@ -618,7 +618,7 @@ function renderHtml() {
   </section>
 
   <footer>
-    Generated ${new Date().toISOString()} · bench-compare.js · Strapi migration benchmark harness
+    Generated ${new Date().toISOString()} · bench-compare.ts · Strapi migration benchmark harness
   </footer>
 
   <script>

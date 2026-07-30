@@ -183,9 +183,9 @@ function snapshotExists(db, name) {
 }
 
 function restoreSnapshot(db, name) {
-  const script = `db-${db}.js`;
+  const script = `db-${db}.ts`;
   console.log(`Restoring ${db} snapshot "${name}"...`);
-  execSync(`node ${path.join('scripts', script)} restore ${name}`, {
+  execSync(`node --import tsx ${path.join('scripts', script)} restore ${name}`, {
     cwd: COMPLEX_DIR,
     stdio: 'inherit',
   });
@@ -194,9 +194,9 @@ function restoreSnapshot(db, name) {
 // ─── row count collection ─────────────────────────────────────────────────────
 
 function collectRowCounts(db) {
-  const script = `db-${db}.js`;
+  const script = `db-${db}.ts`;
   try {
-    const output = execSync(`node ${path.join('scripts', script)} check`, {
+    const output = execSync(`node --import tsx ${path.join('scripts', script)} check`, {
       cwd: COMPLEX_DIR,
       encoding: 'utf8',
     });
@@ -256,10 +256,10 @@ function runMigrationsOnce(db, hookOutputPath) {
     });
   `;
 
-  const hookPath = path.resolve(SCRIPT_DIR, 'bench-hook.js');
+  const hookPath = path.resolve(SCRIPT_DIR, 'bench-hook.ts');
   const start = performance.now();
 
-  const result = spawnSync('node', ['--require', hookPath, '-e', script], {
+  const result = spawnSync('node', ['--import', 'tsx', '--require', hookPath, '-e', script], {
     cwd: COMPLEX_DIR,
     env,
     stdio: 'inherit',
@@ -389,7 +389,7 @@ function cmdSeed(args) {
 
   // Step 1: wipe DB (destructive; explicit per plan)
   console.log(`[bench:seed] wiping ${db}...`);
-  execSync(`node ${path.join('scripts', `db-${db}.js`)} wipe`, {
+  execSync(`node --import tsx ${path.join('scripts', `db-${db}.ts`)} wipe`, {
     cwd: COMPLEX_DIR,
     stdio: 'inherit',
   });
@@ -397,14 +397,14 @@ function cmdSeed(args) {
   // Step 2: run v4 seed via the v4 project's seed-with-db wrapper.
   // This boots Strapi v4, which creates the schema + bootstrap data, then runs seed.js.
   console.log(`[bench:seed] seeding via Strapi v4 API (multiplier=${multiplier})...`);
-  execSync(`node scripts/seed-with-db.js ${db} ${multiplier}`, {
+  execSync(`node --import tsx scripts/seed-with-db.ts ${db} ${multiplier}`, {
     cwd: V4_PROJECT_DIR,
     stdio: 'inherit',
   });
 
   // Step 3: snapshot
   console.log(`[bench:seed] snapshotting as "${snapshotName}"...`);
-  execSync(`node ${path.join('scripts', `db-${db}.js`)} snapshot ${snapshotName}`, {
+  execSync(`node --import tsx ${path.join('scripts', `db-${db}.ts`)} snapshot ${snapshotName}`, {
     cwd: COMPLEX_DIR,
     stdio: 'inherit',
   });
@@ -463,7 +463,7 @@ switch (subcommand) {
     cmdSuite(args);
     break;
   default:
-    console.error('Usage: node bench.js <run|seed|suite> [options]');
+    console.error('Usage: node --import tsx bench.ts <run|seed|suite> [options]');
     console.error('');
     console.error('  run    --db <db> --label <label> [--multiplier <n>] [--snapshot <name>]');
     console.error('  seed   --db <db> --multiplier <n> [--seed-mode strapi|knex]');

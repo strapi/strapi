@@ -38,8 +38,8 @@ function nestedYarnInstallEnv(extra: EnvRecord = {}): NodeJS.ProcessEnv {
 }
 
 async function dockerComposeDownVolumes(ctx: MigrationContext): Promise<void> {
-  // Dynamic require of examples/complex compose (remains .js / extensionless resolve)
-  const { runCompose } = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'compose'));
+  // Dynamic require of examples/complex compose (.ts; parent process loads via tsx)
+  const { runCompose } = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'compose.ts'));
   try {
     runCompose(['-f', ctx.DOCKER_COMPOSE_FILE, 'down', '-v'], {
       cwd: ctx.COMPLEX_DIR,
@@ -172,17 +172,26 @@ DATABASE_PASSWORD=${dbEnv.DATABASE_PASSWORD}
 }
 
 async function prepareDockerDatabase(ctx: MigrationContext, client: DbClient): Promise<void> {
-  // Dynamic requires of examples/complex scripts remain .js
-  const dbUtils = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'db-utils.js'));
+  // Dynamic requires of examples/complex scripts (.ts; parent process loads via tsx)
+  const dbUtils = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'db-utils.ts'));
   const { startContainer, getContainerId, waitForPostgresReady, waitForMysqlReady } = dbUtils;
   const env = composeEnv(ctx);
 
   if (client === 'postgres') {
-    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-postgres.js'), 'wipe'], {
-      cwd: ctx.COMPLEX_DIR,
-      stdio: 'inherit',
-      env,
-    });
+    await execa(
+      process.execPath,
+      ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'db-postgres.ts'), 'wipe'],
+      {
+        cwd: ctx.COMPLEX_DIR,
+        stdio: 'inherit',
+        env: {
+          ...env,
+          NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), env.NODE_PATH]
+            .filter(Boolean)
+            .join(path.delimiter),
+        },
+      }
+    );
     const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'postgres', env);
     if (cid) {
       waitForPostgresReady(cid);
@@ -196,11 +205,20 @@ async function prepareDockerDatabase(ctx: MigrationContext, client: DbClient): P
     if (cid) {
       waitForMysqlReady(cid);
     }
-    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mysql.js'), 'wipe'], {
-      cwd: ctx.COMPLEX_DIR,
-      stdio: 'inherit',
-      env,
-    });
+    await execa(
+      process.execPath,
+      ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mysql.ts'), 'wipe'],
+      {
+        cwd: ctx.COMPLEX_DIR,
+        stdio: 'inherit',
+        env: {
+          ...env,
+          NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), env.NODE_PATH]
+            .filter(Boolean)
+            .join(path.delimiter),
+        },
+      }
+    );
   }
 
   if (client === 'mariadb') {
@@ -209,11 +227,20 @@ async function prepareDockerDatabase(ctx: MigrationContext, client: DbClient): P
     if (cid) {
       waitForMysqlReady(cid);
     }
-    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mariadb.js'), 'wipe'], {
-      cwd: ctx.COMPLEX_DIR,
-      stdio: 'inherit',
-      env,
-    });
+    await execa(
+      process.execPath,
+      ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mariadb.ts'), 'wipe'],
+      {
+        cwd: ctx.COMPLEX_DIR,
+        stdio: 'inherit',
+        env: {
+          ...env,
+          NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), env.NODE_PATH]
+            .filter(Boolean)
+            .join(path.delimiter),
+        },
+      }
+    );
   }
 }
 

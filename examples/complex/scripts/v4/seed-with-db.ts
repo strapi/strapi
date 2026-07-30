@@ -24,7 +24,9 @@ const multiplier = process.argv[multiplierArgIndex] || '1';
 
 if (!dbType || !['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node scripts/seed-with-db.js <postgres|mysql|mariadb|sqlite> [multiplier]');
+  console.error(
+    'Usage: node --import tsx scripts/seed-with-db.ts <postgres|mysql|mariadb|sqlite> [multiplier]'
+  );
   process.exit(1);
 }
 
@@ -67,12 +69,16 @@ function runSeed() {
   console.log(`\n🌱 Seeding database (${dbType}) with multiplier: ${multiplier}...\n`);
 
   const isWindows = process.platform === 'win32';
-  const seedProcess = spawn(isWindows ? 'node.exe' : 'node', ['scripts/seed.js', multiplier], {
-    cwd: PROJECT_DIR,
-    env,
-    stdio: 'inherit',
-    shell: !isWindows,
-  });
+  const seedProcess = spawn(
+    isWindows ? 'node.exe' : 'node',
+    ['--import', 'tsx', 'scripts/seed.ts', multiplier],
+    {
+      cwd: PROJECT_DIR,
+      env,
+      stdio: 'inherit',
+      shell: !isWindows,
+    }
+  );
 
   seedProcess.on('exit', (code) => {
     process.exit(code || 0);

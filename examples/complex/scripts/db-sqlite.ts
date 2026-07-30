@@ -64,7 +64,7 @@ switch (command) {
   case 'snapshot': {
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-sqlite.js snapshot <name>');
+      console.error('Usage: node --import tsx db-sqlite.ts snapshot <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
@@ -83,7 +83,7 @@ switch (command) {
   case 'restore': {
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-sqlite.js restore <name>');
+      console.error('Usage: node --import tsx db-sqlite.ts restore <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
@@ -157,6 +157,8 @@ switch (command) {
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-sqlite.js <start|stop|snapshot|restore|wipe|check> [name]');
+    console.error(
+      'Usage: node --import tsx db-sqlite.ts <start|stop|snapshot|restore|wipe|check> [name]'
+    );
     process.exit(1);
 }

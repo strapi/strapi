@@ -72,17 +72,17 @@ const packageJson = {
     strapi: 'strapi',
     upgrade: 'npx @strapi/upgrade latest',
     'upgrade:dry': 'npx @strapi/upgrade latest --dry',
-    'develop:postgres': 'node scripts/develop-with-db.js postgres',
-    'develop:mysql': 'node scripts/develop-with-db.js mysql',
-    'develop:mariadb': 'node scripts/develop-with-db.js mariadb',
-    'develop:sqlite': 'node scripts/develop-with-db.js sqlite',
+    'develop:postgres': 'node --import tsx scripts/develop-with-db.ts postgres',
+    'develop:mysql': 'node --import tsx scripts/develop-with-db.ts mysql',
+    'develop:mariadb': 'node --import tsx scripts/develop-with-db.ts mariadb',
+    'develop:sqlite': 'node --import tsx scripts/develop-with-db.ts sqlite',
     // Run the simple seeder directly (no DB wrapper)
-    seed: 'node scripts/seed.js',
+    seed: 'node --import tsx scripts/seed.ts',
     // Wrapper commands that will start DB containers when needed
-    'seed:postgres': 'node scripts/seed-with-db.js postgres',
-    'seed:mysql': 'node scripts/seed-with-db.js mysql',
-    'seed:mariadb': 'node scripts/seed-with-db.js mariadb',
-    'seed:sqlite': 'node scripts/seed-with-db.js sqlite',
+    'seed:postgres': 'node --import tsx scripts/seed-with-db.ts postgres',
+    'seed:mysql': 'node --import tsx scripts/seed-with-db.ts mysql',
+    'seed:mariadb': 'node --import tsx scripts/seed-with-db.ts mariadb',
+    'seed:sqlite': 'node --import tsx scripts/seed-with-db.ts sqlite',
   },
   dependencies: {
     '@strapi/plugin-i18n': STRAPI_V4_VERSION,
@@ -90,6 +90,8 @@ const packageJson = {
     '@strapi/strapi': STRAPI_V4_VERSION,
     // Pin to v9 — better-sqlite3 v12 requires newer Node than Strapi v4 supports (Node ≤20).
     'better-sqlite3': '9.6.0',
+    // Needed to run scaffolded TypeScript seed/db helpers via `node --import tsx`.
+    tsx: '4.22.4',
     entities: '2.2.0',
     sqlite3: '5.1.7',
     mysql2: '3.20.0',
@@ -536,9 +538,9 @@ if (!fs.existsSync(v4ScriptsDir)) {
   fs.mkdirSync(v4ScriptsDir, { recursive: true });
 }
 
-// Write shared db-utils.js + compose.js for the v4 scripts.
-// compose.js is a dep of db-utils.js (runtime auto-detection for docker/podman).
-for (const name of ['db-utils.js', 'compose.js']) {
+// Write shared db-utils.ts + compose.ts for the v4 scripts.
+// compose.ts is a dep of db-utils.ts (runtime auto-detection for docker/podman).
+for (const name of ['db-utils.ts', 'compose.ts']) {
   const src = path.join(SCRIPT_DIR, name);
   const contents = fs.readFileSync(src, 'utf8');
   fs.writeFileSync(path.join(v4ScriptsDir, name), contents);
@@ -549,19 +551,19 @@ for (const name of ['db-utils.js', 'compose.js']) {
   }
 }
 
-// Create develop-with-db.js script for v4 project
+// Create develop-with-db.ts script for v4 project
 const dockerComposePath = findDockerComposeFile(V4_PROJECT_DIR);
-const developTemplatePath = path.join(SCRIPT_DIR, 'v4', 'develop-with-db.js');
+const developTemplatePath = path.join(SCRIPT_DIR, 'v4', 'develop-with-db.ts');
 const developTemplate = fs.readFileSync(developTemplatePath, 'utf8');
 const developWithDbScript = developTemplate.replace(
   '__DOCKER_COMPOSE_FILE__',
   dockerComposePath.replace(/\\/g, '/')
 );
 
-fs.writeFileSync(path.join(v4ScriptsDir, 'develop-with-db.js'), developWithDbScript);
+fs.writeFileSync(path.join(v4ScriptsDir, 'develop-with-db.ts'), developWithDbScript);
 // Make it executable
 try {
-  fs.chmodSync(path.join(v4ScriptsDir, 'develop-with-db.js'), 0o755);
+  fs.chmodSync(path.join(v4ScriptsDir, 'develop-with-db.ts'), 0o755);
 } catch (error) {
   // chmod might fail on Windows, that's okay
 }
@@ -569,12 +571,12 @@ try {
 console.log('✅ Created database development scripts');
 
 // Copy seed script (always overwrite) - use the simpler seeder
-const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.js');
-const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
+const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.ts');
+const seedScriptDest = path.join(v4ScriptsDir, 'seed.ts');
 fs.copyFileSync(seedScriptSource, seedScriptDest);
 fs.copyFileSync(
-  path.join(SCRIPT_DIR, 'require-fixture.js'),
-  path.join(v4ScriptsDir, 'require-fixture.js')
+  path.join(SCRIPT_DIR, 'require-fixture.ts'),
+  path.join(v4ScriptsDir, 'require-fixture.ts')
 );
 try {
   fs.chmodSync(seedScriptDest, 0o755);
@@ -583,21 +585,21 @@ try {
 }
 console.log('✅ Created/updated seed script');
 
-// Create seed-with-db.js wrapper script
-const seedTemplatePath = path.join(SCRIPT_DIR, 'v4', 'seed-with-db.js');
+// Create seed-with-db.ts wrapper script
+const seedTemplatePath = path.join(SCRIPT_DIR, 'v4', 'seed-with-db.ts');
 const seedTemplate = fs.readFileSync(seedTemplatePath, 'utf8');
 const seedWithDbScript = seedTemplate.replace(
   '__DOCKER_COMPOSE_FILE__',
   dockerComposePath.replace(/\\/g, '\\\\')
 );
 
-fs.writeFileSync(path.join(v4ScriptsDir, 'seed-with-db.js'), seedWithDbScript);
+fs.writeFileSync(path.join(v4ScriptsDir, 'seed-with-db.ts'), seedWithDbScript);
 try {
-  fs.chmodSync(path.join(v4ScriptsDir, 'seed-with-db.js'), 0o755);
+  fs.chmodSync(path.join(v4ScriptsDir, 'seed-with-db.ts'), 0o755);
 } catch (error) {
   // chmod might fail on Windows, that's okay
 }
-console.log('✅ Created/updated seed-with-db.js wrapper script');
+console.log('✅ Created/updated seed-with-db.ts wrapper script');
 
 console.log('\n✅ V4 project structure created successfully!');
 console.log(`\nProject location: ${V4_PROJECT_DIR}`);

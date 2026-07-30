@@ -7,6 +7,7 @@ const path = require('path');
 const {
   getContainerName: getComposeContainerName,
   getComposeEnv,
+  startContainer,
   COMPOSE_PROJECT_NAME,
   assertSafeSnapshotName,
 } = require('./db-utils');
@@ -19,23 +20,29 @@ const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
-const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
 
+/**
+ * Build a shell-safe compose command prefix string.
+ * e.g. "podman compose" or "docker-compose" or "docker compose"
+ */
 function composeCmd() {
   const { exe, prefixArgs } = getComposeCommand();
   return [exe, ...prefixArgs].join(' ');
 }
 
+/**
+ * Container runtime binary for `<runtime> exec <container> ...` invocations.
+ */
 function containerCmd() {
   return getContainerCommand();
 }
 
 // Try to find the container name dynamically, fallback to expected name
-function getContainerName() {
-  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'mysql');
+function resolveContainerName() {
+  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'postgres');
   if (!name) {
     throw new Error(
-      `MySQL container not found. Start it with "yarn db:start:mysql" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
+      `Postgres container not found. Start it with "yarn db:start:postgres" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
     );
   }
   return name;
@@ -61,32 +68,32 @@ function execShell(cmd) {
 
 switch (command) {
   case 'start':
-    console.log('Starting mysql container...');
-    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d mysql`);
-    console.log('✅ MySQL started');
+    console.log('Starting postgres container...');
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d postgres`);
+    console.log('✅ Postgres started');
     break;
 
   case 'stop':
-    console.log('Stopping mysql container...');
-    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop mysql`);
-    console.log('✅ MySQL stopped');
+    console.log('Stopping postgres container...');
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop postgres`);
+    console.log('✅ Postgres stopped');
     break;
 
   case 'snapshot':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mysql.js snapshot <name>');
+      console.error('Usage: node --import tsx db-postgres.ts snapshot <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
     ensureSnapshotsDir();
-    const snapshotPath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
+    const snapshotPath = path.join(SNAPSHOTS_DIR, `postgres-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         execSync(
-          `${containerCmd()} exec ${containerName} mysqldump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
+          `${containerCmd()} exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
@@ -100,27 +107,31 @@ switch (command) {
   case 'restore':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mysql.js restore <name>');
+      console.error('Usage: node --import tsx db-postgres.ts restore <name>');
       process.exit(1);
     }
     assertSafeSnapshotName(snapshotName);
-    const restorePath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
+    const restorePath = path.join(SNAPSHOTS_DIR, `postgres-${snapshotName}.sql`);
     if (!fs.existsSync(restorePath)) {
       console.error(`Error: Snapshot not found: ${restorePath}`);
       process.exit(1);
     }
     console.log(`Restoring snapshot: ${snapshotName}...`);
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         // Drop and recreate database
         execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+        );
+        execSync(
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         // Restore from snapshot
         execSync(
-          `${containerCmd()} exec -i ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
+          `${containerCmd()} exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
@@ -132,12 +143,27 @@ switch (command) {
     break;
 
   case 'wipe':
-    console.log('Wiping mysql database...');
+    // Ensure container is running first
+    console.log('Ensuring postgres container is running...');
+    try {
+      startContainer(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'postgres');
+      // Wait a moment for container to be ready
+      execSync('sleep 2', { stdio: 'inherit' });
+    } catch (error) {
+      console.error(`Error starting postgres container: ${error.message}`);
+      process.exit(1);
+    }
+
+    console.log('Wiping postgres database...');
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+        );
+        execSync(
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
@@ -150,43 +176,28 @@ switch (command) {
 
   case 'check':
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
-        // Refresh information_schema.tables.table_rows with fresh stats.
-        // The default values can lag reality by hours, which is unacceptable
-        // for benchmark reports. ANALYZE TABLE triggers a stats refresh.
-        const analyzeQuery = `
-          SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
-          FROM information_schema.tables
-          WHERE table_schema = '${DB_NAME}';
-        `;
-        try {
-          const analyzeList = execSync(
-            `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
-            { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
-          );
-          const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
-          if (cmds) {
-            execSync(
-              `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
-              { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
-            );
-          }
-        } catch {
-          // Best-effort; fall through to stale stats rather than fail the check.
-        }
+        // Refresh pg_stat_user_tables with fresh row-count estimates before
+        // reading — without ANALYZE the n_live_tup numbers can lag reality
+        // by minutes (autovacuum interval), which is unacceptable for a
+        // benchmark report that publishes row counts.
+        execSync(
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -c "ANALYZE;"`,
+          { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+        );
 
+        // Use pg_stat_user_tables statistics for fast approximate counts
         const query = `
           SELECT
-            table_name,
-            table_rows
-          FROM information_schema.tables
-          WHERE table_schema = '${DB_NAME}'
-          ORDER BY table_name;
+            schemaname||'.'||relname as table_name,
+            COALESCE(n_live_tup, 0)::text as row_count
+          FROM pg_stat_user_tables
+          ORDER BY schemaname, relname;
         `;
 
         const output = execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -t -c "${query.trim()}"`,
           { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 
@@ -203,10 +214,13 @@ switch (command) {
           console.log('------------------------------------|----------');
 
           for (const line of lines) {
-            const [table, count] = line.trim().split('\t');
-            const paddedName = (table || '').padEnd(35);
-            const rowCount = count || '0';
-            console.log(`${paddedName} | ${rowCount}`);
+            const [table, count] = line
+              .trim()
+              .split('|')
+              .map((s) => s.trim());
+            const tableName = table.replace(/^public\./, ''); // Remove schema prefix
+            const paddedName = tableName.padEnd(35);
+            console.log(`${paddedName} | ${count}`);
           }
         }
       } catch (error) {
@@ -218,6 +232,8 @@ switch (command) {
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-mysql.js <start|stop|snapshot|restore|wipe|check> [name]');
+    console.error(
+      'Usage: node --import tsx db-postgres.ts <start|stop|snapshot|restore|wipe|check> [name]'
+    );
     process.exit(1);
 }
