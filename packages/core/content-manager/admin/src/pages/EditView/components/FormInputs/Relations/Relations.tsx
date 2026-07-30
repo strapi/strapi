@@ -735,8 +735,6 @@ const RelationModalWithContext = ({
           }
           onCreateOption={() => {
             if (canCreate) {
-              const parentFormValues = getParentFormValuesWithCurrentRelation();
-
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -744,7 +742,7 @@ const RelationModalWithContext = ({
                   shouldBypassConfirmation: false,
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
-                  parentFormValues,
+                  getParentFormValues: getParentFormValuesWithCurrentRelation,
                 },
               });
             }

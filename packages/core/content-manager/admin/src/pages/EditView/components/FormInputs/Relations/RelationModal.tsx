@@ -82,7 +82,7 @@ interface State {
   hasUnsavedChanges: boolean;
   fieldToConnect?: string;
   fieldToConnectUID?: string;
-  parentFormValues?: AnyData;
+  getParentFormValues?: () => AnyData;
 }
 
 type Action =
@@ -93,7 +93,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
-        parentFormValues?: AnyData;
+        getParentFormValues?: () => AnyData;
       };
     }
   | {
@@ -110,7 +110,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
-        parentFormValues?: AnyData;
+        getParentFormValues?: () => AnyData;
       };
     }
   | {
@@ -134,7 +134,7 @@ function reducer(state: State, action: Action): State {
           confirmDialogIntent: action.payload.document,
           fieldToConnect: action.payload.fieldToConnect,
           fieldToConnectUID: action.payload.fieldToConnectUID,
-          parentFormValues: action.payload.parentFormValues,
+          getParentFormValues: action.payload.getParentFormValues,
         };
       }
 
@@ -151,7 +151,9 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
         fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
-        parentFormValues: hasToResetDocumentHistory ? undefined : action.payload.parentFormValues,
+        getParentFormValues: hasToResetDocumentHistory
+          ? undefined
+          : action.payload.getParentFormValues,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -186,7 +188,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
-        parentFormValues: undefined,
+        getParentFormValues: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -206,7 +208,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: false,
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
-        parentFormValues: undefined,
+        getParentFormValues: undefined,
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
@@ -539,7 +541,7 @@ const RelationModalBody = () => {
           shouldBypassConfirmation: true,
           fieldToConnect: state.fieldToConnect,
           fieldToConnectUID: state.fieldToConnectUID,
-          parentFormValues: state.parentFormValues,
+          getParentFormValues: state.getParentFormValues,
         },
       });
     }

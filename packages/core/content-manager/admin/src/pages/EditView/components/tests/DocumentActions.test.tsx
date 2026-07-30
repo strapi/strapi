@@ -12,7 +12,7 @@ let relationModalState = {
   isModalOpen: true,
   fieldToConnect: 'relation',
   fieldToConnectUID: undefined as string | undefined,
-  parentFormValues: undefined as Record<string, unknown> | undefined,
+  getParentFormValues: undefined as (() => Record<string, unknown>) | undefined,
   documentHistory: [
     {
       documentId: 'parent',
@@ -130,7 +130,7 @@ describe('relation parent updates', () => {
       isModalOpen: true,
       fieldToConnect: 'relation',
       fieldToConnectUID: undefined,
-      parentFormValues: undefined,
+      getParentFormValues: undefined,
       documentHistory: [
         {
           documentId: 'parent',
@@ -184,7 +184,7 @@ describe('relation parent updates', () => {
   });
 
   it('connects a missing top-level relation without creating an empty field when no component UID exists', async () => {
-    relationModalState.parentFormValues = {};
+    relationModalState.getParentFormValues = () => ({});
     const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
 
     await user.click(screen.getByRole('button', { name: 'Save child' }));
@@ -207,7 +207,7 @@ describe('relation parent updates', () => {
     relationModalState = {
       ...relationModalState,
       fieldToConnect: 'component.relation',
-      parentFormValues: { component: { __component: 'shared.component' } },
+      getParentFormValues: () => ({ component: { __component: 'shared.component' } }),
     };
     const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
 
@@ -223,6 +223,24 @@ describe('relation parent updates', () => {
           connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
           disconnect: [],
         },
+      },
+    });
+  });
+
+  it('uses the live parent values when creating a relation', async () => {
+    relationModalState.getParentFormValues = () => ({ title: 'Unsaved parent title' });
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      title: 'Unsaved parent title',
+      relation: {
+        connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+        disconnect: [],
       },
     });
   });

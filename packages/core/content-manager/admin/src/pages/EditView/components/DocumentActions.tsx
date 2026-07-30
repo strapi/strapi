@@ -754,9 +754,9 @@ const PublishAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnectUID,
     false
   );
-  const parentFormValues = useRelationModal(
+  const getParentFormValues = useRelationModal(
     'PublishAction',
-    (state) => state.state.parentFormValues,
+    (state) => state.state.getParentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -970,7 +970,7 @@ const PublishAction: DocumentActionComponent = ({
                 ? getInitialFormValues()
                 : parentDocumentData.getInitialFormValues();
             const parentDataToUpdate = prepareParentDataForRelationUpdate(
-              parentFormValues,
+              getParentFormValues?.(),
               fallbackParentFormValues,
               {
                 schema: parentDocumentData.schema,
@@ -1267,9 +1267,9 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnectUID,
     false
   );
-  const parentFormValues = useRelationModal(
+  const getParentFormValues = useRelationModal(
     'UpdateAction',
-    (state) => state.state.parentFormValues,
+    (state) => state.state.getParentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -1429,7 +1429,7 @@ const UpdateAction: DocumentActionComponent = ({
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
               const parentDataToUpdate = prepareParentDataForRelationUpdate(
-                parentFormValues,
+                getParentFormValues?.(),
                 fallbackParentFormValues,
                 {
                   schema: parentDocumentData.schema,

@@ -117,21 +117,21 @@ describe('Document Modal Reducer', () => {
       });
     });
 
-    it('should retain the parent form snapshot while creating a relation', () => {
-      const parentFormValues = { title: 'Unsaved parent title' };
+    it('should retain the parent form accessor while creating a relation', () => {
+      const getParentFormValues = () => ({ title: 'Unsaved parent title' });
       const action: Action = {
         type: 'GO_TO_RELATION',
         payload: {
           document: doc1,
           shouldBypassConfirmation: false,
           fieldToConnect: 'products',
-          parentFormValues,
+          getParentFormValues,
         },
       };
 
       const result = reducer(initialState, action);
 
-      expect(result.parentFormValues).toBe(parentFormValues);
+      expect(result.getParentFormValues).toBe(getParentFormValues);
       expect(result.fieldToConnect).toBe('products');
     });
   });
