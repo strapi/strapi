@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useMemo, useState, type MouseEvent } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Button, Dialog, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
@@ -6,8 +6,11 @@ import { ArrowRight, Cross, Sparkle, Trash, WarningCircle } from '@strapi/icons'
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import {
+  AI_METADATA_MAX_FILES,
+  isAIMetadataSupportedMime,
+} from '../../../../../../shared/constants';
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
-import { AI_METADATA_MAX_FILES } from '../../../constants';
 import {
   useBulkDeleteItemsMutation,
   useGenerateAiMetadataMutation,
@@ -16,6 +19,8 @@ import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
+
+import type { File } from '../../../../../../shared/contracts/files';
 
 /**
  * Floating bulk action bar for the future Media Library.
@@ -49,7 +54,19 @@ const VerticalDivider = styled(Box)`
   margin-left: ${({ theme }) => theme.spaces[1]};
 `;
 
-export const BulkActionsBar = () => {
+interface BulkActionsBarProps {
+  /**
+   * The assets currently rendered in the list, used to resolve the mime types
+   * of the selection — the bar needs them to know which selected assets the AI
+   * provider can actually read.
+   *
+   * Selection is page-scoped and cleared whenever the list identity changes, so
+   * every selected asset id is guaranteed to appear here.
+   */
+  assets?: File[];
+}
+
+export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
@@ -70,13 +87,51 @@ export const BulkActionsBar = () => {
   const isOverMetadataLimit = selectedIds.size > AI_METADATA_MAX_FILES;
 
   /**
-   * Metadata generation only applies to files — folders in the selection are
-   * ignored rather than blocking the action.
+   * How many selected assets the AI provider can actually read. The server
+   * stays authoritative — it still reports what it skipped — but a selection
+   * with nothing eligible (a lone PDF, say) would only ever come back fully
+   * skipped, so there is no point sending it.
+   */
+  const eligibleCount = useMemo(() => {
+    const mimeById = new Map(assets.map(({ id, mime }) => [id, mime]));
+
+    return [...selectedIds].filter((id) => isAIMetadataSupportedMime(mimeById.get(id))).length;
+  }, [assets, selectedIds]);
+
+  const hasNoEligibleAssets = selectedIds.size > 0 && eligibleCount === 0;
+
+  /**
+   * Why the action is unavailable, surfaced on hover. `undefined` leaves the
+   * button without a tooltip — either it is usable, or it is disabled for a
+   * reason the selection count already makes obvious.
+   */
+  let metadataDisabledReason: string | undefined;
+
+  if (isOverMetadataLimit) {
+    metadataDisabledReason = formatMessage(
+      {
+        id: getTranslationKey('list.bulk-actions.create-metadata.too-many'),
+        defaultMessage:
+          'Metadata can be generated for up to {max} assets at a time. Select fewer assets to continue.',
+      },
+      { max: AI_METADATA_MAX_FILES }
+    );
+  } else if (hasNoEligibleAssets) {
+    metadataDisabledReason = formatMessage({
+      id: getTranslationKey('list.bulk-actions.create-metadata.no-eligible'),
+      defaultMessage:
+        'Metadata can only be generated for images. None of the selected assets are supported.',
+    });
+  }
+
+  /**
+   * Metadata generation only applies to images — folders and unsupported files
+   * in the selection are reported back rather than blocking the action.
    */
   const handleCreateMetadata = async () => {
     // Guard re-entry while pending, and never send a selection the server
-    // would reject outright.
-    if (isGeneratingMetadata || isOverMetadataLimit) {
+    // would reject outright or skip in full.
+    if (isGeneratingMetadata || isOverMetadataLimit || hasNoEligibleAssets) {
       return;
     }
 
@@ -98,6 +153,9 @@ export const BulkActionsBar = () => {
     const successCount = res.data.filter(({ status }) => status === 'success').length;
     const skippedCount = res.data.filter(({ status }) => status === 'skipped').length;
     const errorCount = res.data.filter(({ status }) => status === 'error').length;
+    // Folders are never sent, so they are not part of the response — but the
+    // user selected them, and a silent omission reads as a bug.
+    const folderCount = selectedFolderIds.size;
 
     if (errorCount === res.data.length) {
       // Nothing was written — treat it like a request-level failure and keep
@@ -112,7 +170,7 @@ export const BulkActionsBar = () => {
       return;
     }
 
-    if (skippedCount === 0 && errorCount === 0) {
+    if (skippedCount === 0 && errorCount === 0 && folderCount === 0) {
       toggleNotification({
         type: 'success',
         message: formatMessage(
@@ -125,16 +183,17 @@ export const BulkActionsBar = () => {
         ),
       });
     } else {
-      // Partial outcome: report every bucket so the user knows what was left out.
+      // Partial outcome: report every bucket so the user knows what was left
+      // out — including folders, which were never eligible in the first place.
       toggleNotification({
         type: 'warning',
         message: formatMessage(
           {
             id: getTranslationKey('list.bulk-actions.create-metadata.partial'),
             defaultMessage:
-              '{successCount} generated, {skippedCount} skipped (unsupported file type), {errorCount} failed',
+              '{successCount} generated, {skippedCount} skipped (unsupported file type), {errorCount} failed{folderCount, plural, =0 {} one {, # folder ignored} other {, # folders ignored}}',
           },
-          { successCount, skippedCount, errorCount }
+          { successCount, skippedCount, errorCount, folderCount }
         ),
       });
     }
@@ -211,27 +270,16 @@ export const BulkActionsBar = () => {
 
       <ActionCluster>
         {isAiMetadataEnabled && (
-          <Tooltip
-            label={
-              isOverMetadataLimit
-                ? formatMessage(
-                    {
-                      id: getTranslationKey('list.bulk-actions.create-metadata.too-many'),
-                      defaultMessage:
-                        'Metadata can be generated for up to {max} assets at a time. Select fewer assets to continue.',
-                    },
-                    { max: AI_METADATA_MAX_FILES }
-                  )
-                : undefined
-            }
-          >
+          <Tooltip label={metadataDisabledReason}>
             {/* Wrapped so the tooltip still receives pointer events while the
                 button itself is disabled. */}
             <Box>
               <Button
                 size="S"
                 startIcon={<Sparkle />}
-                disabled={isBusy || selectedIds.size === 0 || isOverMetadataLimit}
+                disabled={
+                  isBusy || selectedIds.size === 0 || isOverMetadataLimit || hasNoEligibleAssets
+                }
                 loading={isGeneratingMetadata}
                 onClick={handleCreateMetadata}
               >

@@ -86,7 +86,7 @@ const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
   render(
     <>
       <AssetsTable assets={assets} folders={folders} onAssetItemClick={mockOnAssetItemClick} />
-      <BulkActionsBar />
+      <BulkActionsBar assets={assets} />
     </>,
     { renderOptions: { wrapper: AssetSelectionProvider } }
   );
@@ -476,6 +476,57 @@ describe('AssetsTable', () => {
         })
       );
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('disables the action when no selected asset is a supported image', async () => {
+      const { user } = setup({
+        assets: [createMockAsset(1, 'doc.pdf', 'application/pdf', '.pdf')],
+      });
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select doc.pdf' }));
+
+      // The server would only ever report this back as fully skipped, so the
+      // request is never worth sending.
+      expect(screen.getByRole('button', { name: 'Create metadata' })).toBeDisabled();
+    });
+
+    it('keeps the action enabled when the selection mixes supported and unsupported files', async () => {
+      const { user } = setup({
+        assets: [
+          createMockAsset(1, 'image1.png'),
+          createMockAsset(2, 'doc.pdf', 'application/pdf', '.pdf'),
+        ],
+      });
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select doc.pdf' }));
+
+      expect(screen.getByRole('button', { name: 'Create metadata' })).toBeEnabled();
+    });
+
+    it('reports folders in the selection as ignored rather than silently dropping them', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () => HttpResponse.json({ data: [{ id: 1, status: 'success' }] }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      // Everything sent succeeded, but the folder was never eligible — warn
+      // rather than reporting a clean success the user did not get.
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'warning',
+          message: '1 generated, 0 skipped (unsupported file type), 0 failed, 1 folder ignored',
+        })
+      );
     });
 
     it('keeps the selection and shows an error toast when metadata generation fails', async () => {

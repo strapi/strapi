@@ -4,28 +4,21 @@ import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { buildFormDataFromFiles } from '../utils/images';
-import { AI_METADATA_CHUNK_SIZE } from '../constants';
+import { AI_METADATA_CHUNK_SIZE, AI_METADATA_SUPPORTED_IMAGE_TYPES } from '../constants';
+
+import { isAIMetadataSupportedMime } from '../../../shared/constants';
 
 import type { UnstableGenerateAIMetadata } from '../../../shared/contracts/files';
 
 export type AIMetadataFileResult = UnstableGenerateAIMetadata.FileResult;
 
 /**
- * Supported image types for AI metadata generation
- * @see https://ai.google.dev/gemini-api/docs/image-understanding
+ * Supported image types for AI metadata generation. Lives in `shared/` so the
+ * admin panel gates the bulk action on exactly what the provider accepts.
  */
-const SUPPORTED_IMAGE_TYPES = [
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/heic',
-  'image/heif',
-] as const;
+const SUPPORTED_IMAGE_TYPES = AI_METADATA_SUPPORTED_IMAGE_TYPES;
 
-type SupportedImageType = (typeof SUPPORTED_IMAGE_TYPES)[number];
-
-const isSupportedImage = (file: File): boolean =>
-  SUPPORTED_IMAGE_TYPES.includes(file.mime as SupportedImageType);
+const isSupportedImage = (file: File): boolean => isAIMetadataSupportedMime(file.mime);
 
 const chunk = <T>(items: T[], size: number): T[][] => {
   const chunks: T[][] = [];
