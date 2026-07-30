@@ -13,6 +13,7 @@ import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
+import { getPackageManagerFromUserAgent } from './utils/get-package-manager-args';
 
 import type { Options, Scope } from './types';
 import { logger } from './utils/logger';
@@ -258,19 +259,7 @@ function getPkgManager(options: Options) {
 
   const userAgent = process.env.npm_config_user_agent || '';
 
-  if (userAgent.startsWith('yarn')) {
-    return 'yarn';
-  }
-
-  if (userAgent.startsWith('pnpm')) {
-    return 'pnpm';
-  }
-
-  if (userAgent.startsWith('nub')) {
-    return 'nub';
-  }
-
-  return 'npm';
+  return getPackageManagerFromUserAgent(userAgent) ?? 'npm';
 }
 
 export { run, createStrapi };
