@@ -1,17 +1,19 @@
-import { useState, type MouseEvent } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Dialog, Flex, IconButton, Typography } from '@strapi/design-system';
-import { ArrowRight, Cross, Sparkle, Trash, WarningCircle } from '@strapi/icons';
+import { Box, Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { ArrowRight, Cross, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
-import { useBulkDeleteItemsMutation } from '../../../services/assets';
+import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
+import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 /**
  * Floating bulk action bar for the future Media Library.
@@ -52,11 +54,22 @@ export const BulkActionsBar = () => {
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
-  const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
+  const { currentFolderId } = useFolderNavigation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
+  // The delete request lives in DeleteItemsDialog; the bar mirrors its pending
+  // state so the rest of the controls stay disabled for the duration.
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
+
+  // The selection is page-scoped, so every selected item lives in the folder
+  // currently open. Stable identity: the move dialog memoizes its destination
+  // walk on it.
+  const moveItems = useMemo(
+    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, currentFolderId),
+    [selectedIds, selectedFolderIds, currentFolderId]
+  );
 
   const showStubNotification = (translationKey: string, defaultMessage: string) => {
     toggleNotification({
@@ -66,50 +79,6 @@ export const BulkActionsBar = () => {
         defaultMessage,
       }),
     });
-  };
-
-  const handleConfirmDelete = async (e: MouseEvent) => {
-    // Radix AlertDialog.Action closes the dialog on click by default; prevent
-    // that so the dialog stays open showing the loader while the request runs
-    // (a bulk delete can take a while depending on the number of assets).
-    e.preventDefault();
-
-    // Guard re-entry while pending.
-    if (isDeleting) {
-      return;
-    }
-
-    const res = await bulkDeleteItems({
-      fileIds: Array.from(selectedIds),
-      folderIds: Array.from(selectedFolderIds),
-    });
-
-    if ('error' in res) {
-      // Keep the dialog open and the selection intact so the user can retry
-      // (Confirm again) or Cancel; only surface the error toast.
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('list.bulk-actions.delete.error'),
-          defaultMessage: 'An error occurred while deleting the items.',
-        }),
-      });
-      return;
-    }
-
-    setIsDeleteDialogOpen(false);
-    toggleNotification({
-      type: 'success',
-      message: formatMessage(
-        {
-          id: getTranslationKey('list.bulk-actions.delete.success'),
-          defaultMessage:
-            '{count, plural, =1 {# item has been deleted} other {# items have been deleted}}',
-        },
-        { count }
-      ),
-    });
-    clear();
   };
 
   if (count === 0) {
@@ -166,85 +135,34 @@ export const BulkActionsBar = () => {
         >
           <ArrowRight />
         </IconButton>
-        <BulkMoveDialog open={isMoveDialogOpen} onClose={() => setIsMoveDialogOpen(false)} />
+        <BulkMoveDialog
+          open={isMoveDialogOpen}
+          onClose={() => setIsMoveDialogOpen(false)}
+          items={moveItems}
+          onSuccess={clear}
+        />
 
-        <Dialog.Root
-          open={isDeleteDialogOpen}
-          onOpenChange={(open: boolean) => {
-            // The dialog must stay open while the request runs — a bulk delete
-            // can't be aborted halfway, so the loader is the source of truth.
-            if (!isDeleting) {
-              setIsDeleteDialogOpen(open);
-            }
-          }}
+        <IconButton
+          variant="danger-light"
+          disabled={isDeleting}
+          label={formatMessage({
+            id: getTranslationKey('list.bulk-actions.delete'),
+            defaultMessage: 'Delete',
+          })}
+          onClick={() => setIsDeleteDialogOpen(true)}
         >
-          <Dialog.Trigger>
-            <IconButton
-              variant="danger-light"
-              disabled={isDeleting}
-              label={formatMessage({
-                id: getTranslationKey('list.bulk-actions.delete'),
-                defaultMessage: 'Delete',
-              })}
-            >
-              <Trash />
-            </IconButton>
-          </Dialog.Trigger>
-          <Dialog.Content>
-            <Dialog.Header>
-              {formatMessage(
-                {
-                  id: getTranslationKey('list.bulk-actions.delete.confirm.title'),
-                  defaultMessage: 'Delete {count, plural, =1 {# item} other {# items}}?',
-                },
-                { count }
-              )}
-            </Dialog.Header>
-            <Dialog.Body
-              icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
-              textAlign="center"
-            >
-              <Typography>
-                {formatMessage({
-                  id: getTranslationKey(
-                    'list.bulk-actions.delete.confirm.description.are-you-sure'
-                  ),
-                  defaultMessage:
-                    'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
-                })}
-              </Typography>
-              <Typography>
-                {formatMessage({
-                  id: getTranslationKey(
-                    'list.bulk-actions.delete.confirm.description.cant-be-undone'
-                  ),
-                  defaultMessage:
-                    'This action can’t be undone. Deleting a folder also removes everything inside it, and any linked content will break – media asset containers will appear empty.',
-                })}
-              </Typography>
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Dialog.Cancel>
-                <Button variant="tertiary" disabled={isDeleting} fullWidth>
-                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-                </Button>
-              </Dialog.Cancel>
-              <Dialog.Action>
-                <Button
-                  variant="danger-light"
-                  loading={isDeleting}
-                  onClick={handleConfirmDelete}
-                  fullWidth
-                >
-                  {formatMessage({
-                    id: 'app.components.Button.confirm',
-                    defaultMessage: 'Confirm',
-                  })}
-                </Button>
-              </Dialog.Action>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Root>
+          <Trash />
+        </IconButton>
+        <DeleteItemsDialog
+          open={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          target={{
+            fileIds: Array.from(selectedIds),
+            folderIds: Array.from(selectedFolderIds),
+          }}
+          onSuccess={clear}
+          onPendingChange={setIsDeleting}
+        />
       </ActionCluster>
 
       <VerticalDivider aria-hidden />

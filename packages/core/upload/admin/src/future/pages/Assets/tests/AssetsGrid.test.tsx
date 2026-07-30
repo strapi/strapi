@@ -1,5 +1,5 @@
 import { userEvent } from '@testing-library/user-event';
-import { render, screen } from '@tests/utils';
+import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { AssetsGrid } from '../components/AssetsGrid';
 import { BulkActionsBar } from '../components/BulkActionsBar';
@@ -21,7 +21,8 @@ jest.mock('../components/Dnd/useAssetDnd', () => ({
     setNodeRef: jest.fn(),
     isDragging: false,
   }),
-  useFolderDraggableDroppable: () => ({
+  useFolderDraggableDroppable: (folder: { id: number; name: string }) => ({
+    dragData: { kind: 'folder', id: folder.id, name: folder.name, parentId: null },
     draggable: {
       attributes: {},
       listeners: {},
@@ -340,6 +341,103 @@ describe('AssetsGrid', () => {
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
+    });
+
+    it('opens the folder actions menu without navigating into the folder', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Copy link to folder' })).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('opens the folder actions menu with Enter without navigating into the folder', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      // The card handles Enter as "open this folder", so the trigger has to
+      // swallow the keydown as well as the click.
+      screen.getByRole('button', { name: 'More actions' }).focus();
+      await user.keyboard('{Enter}');
+
+      expect(screen.getByRole('menuitem', { name: 'Copy link to folder' })).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  // The dialogs the actions menu opens are portaled to the body but are React
+  // children of the card, so the card's handlers see their events. The shield
+  // the menu's wrapper puts up must therefore be scoped to its own DOM subtree —
+  // `stopPropagation` would kill the native event before it reaches `document`,
+  // where Radix listens in order to dismiss its layers.
+  describe('Folder actions menu dismissal', () => {
+    // Folder 5 sits outside the default `/upload/folder-structure` fixture, so
+    // the move dialog has somewhere to offer moving it to.
+    const setupFolderCard = () => setup({ folders: [createMockFolder(5, 'Photos')], assets: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setupFolderCard>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    // `disableOutsidePointerEvents` puts `pointer-events: none` on the body, so
+    // user-event refuses to click there — the document element is where a real
+    // browser lands the click anyway. Radix attaches its document listener on a
+    // `setTimeout(…, 0)` once the layer mounts, so let that land first.
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      // A pointerdown inside the listbox used to leave Radix's "the pointer is
+      // inside my layer" flag stuck, so the next outside click was swallowed.
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('closes the Location select on Escape', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+      expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
+
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+    });
+
+    it('does not navigate into the folder when the open dialog is clicked', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
     });
   });
 

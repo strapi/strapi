@@ -16,6 +16,7 @@ import { styled, css } from 'styled-components';
 import { ASSET_TYPES } from '../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
+import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -23,6 +24,7 @@ import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
+import { FolderActionsMenu } from './FolderActionsMenu';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -30,6 +32,17 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 /* -------------------------------------------------------------------------------------------------
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
+
+// Cards own click, Enter and Space; the controls sitting on them (checkbox, "..."
+// menu) must not let those reach the card. Scoped to the wrapper's own DOM
+// subtree so the menu's portaled content — a React child of the wrapper, but
+// never a DOM descendant — still reaches `document`, where Radix listens in
+// order to dismiss its layers.
+const stopCardEvent = (e: React.SyntheticEvent) => {
+  if (isEventFromWithin(e)) {
+    e.stopPropagation();
+  }
+};
 
 // Top-left selection checkbox overlaid on the asset preview, always visible.
 const CheckboxOverlay = styled(Flex)`
@@ -140,6 +153,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const {
+    dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
     showValidDropHighlight,
@@ -156,7 +170,15 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   // Folders share the selection mechanism with assets (toggle, range,
   // select-all). Only the plain-click semantic differs: it navigates into the
   // folder instead of selecting it.
+  //
+  // The containment guard on this and the handlers below is what keeps the
+  // actions menu's portaled dialogs — React children of this card — from
+  // navigating into the folder or starting a drag.
   const handleClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -167,6 +189,10 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
@@ -198,10 +224,15 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       $isSelected={isSelected(key)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
       role="listitem"
       tabIndex={0}
     >
-      <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+      <Flex onKeyDown={stopCardEvent}>
         <Checkbox
           checked={isSelected(key)}
           onClick={handleCheckboxClick}
@@ -220,16 +251,9 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       <FolderName textColor="neutral800" ellipsis>
         {folder.name}
       </FolderName>
-      <IconButton
-        label={formatMessage({
-          id: getTranslationKey('control-card.more-actions'),
-          defaultMessage: 'More actions',
-        })}
-        variant="ghost"
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
-        <More />
-      </IconButton>
+      <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+        <FolderActionsMenu folder={folder} dragData={dragData} />
+      </Flex>
     </StyledFolderCard>
   );
 };

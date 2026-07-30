@@ -50,6 +50,7 @@ const foldersApi = uploadApi.injectEndpoints({
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
+          populate: { parent: true },
         };
 
         if (search) {
