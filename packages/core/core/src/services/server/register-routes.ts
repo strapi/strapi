@@ -2,6 +2,36 @@ import _ from 'lodash';
 import type { Core } from '@strapi/types';
 import { registerOpenAPIRoute } from './openapi';
 
+/**
+ * Route definitions from `@strapi/*` plugins and the admin (e.g. `@strapi/admin`'s
+ * `export default [{ path: '/init', … }]`) are MODULE-LEVEL singletons loaded
+ * once via native `require`. Route registration mutates routes IN PLACE on the
+ * source arrays (`strapi.admin.routes`, `strapi.plugins[*].routes`,
+ * `strapi.apis[*].routes`): it sets `route.info`, injects `config.auth.scope`
+ * (via `generateRouteScope`), and merges extra request params (via
+ * `applyExtraParamsToRoutes`). Several DEFAULT-PATH consumers READ those
+ * mutations back off the source arrays AFTER registration:
+ *
+ *  - `content-api.getRoutesMap()` → admin `GET /content-api/routes`
+ *    (API-token permissions UI), via `route.info.type === 'content-api'`;
+ *  - `users-permissions` `getRoutes()` → the Roles permission screen, same tag;
+ *  - the OpenAPI generator's `is-of-type` rule (opt-in).
+ *
+ * Registration MUST therefore mutate the source objects in place — cloning would
+ * leave the source pristine and break every one of those consumers.
+ *
+ * When registration runs more than once in a single process — repeated test
+ * setup today, or an in-process reload / HMR path in the future — the SAME
+ * persistent singletons get re-registered. Re-registration is kept safe by
+ * making every mutation IDEMPOTENT:
+ *   - `route.info = {…}` is a full reassignment (idempotent);
+ *   - `generateRouteScope`'s `_.defaultsDeep(config.auth.scope, …)` only fills
+ *     missing keys (idempotent);
+ *   - `applyExtraParamsToRoutes` skips params it has already merged onto a route
+ *     (idempotent — see content-api's APPLIED_EXTRA_PARAMS marker), so the
+ *     second pass no longer throws `param "…" already exists on route`.
+ */
+
 const createRouteScopeGenerator = (namespace: string) => (route: Core.RouteInput) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
 
