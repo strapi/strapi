@@ -424,7 +424,7 @@ const morphX = async (
 
     if (_.isEmpty(referencedValues)) {
       results.forEach((result) => {
-        result[attributeName] = null;
+        result[attributeName] = attribute.relation === 'morphOne' ? null : [];
       });
 
       return;
@@ -442,8 +442,9 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
+      // Match oneToMany/manyToMany: empty morphMany collections serialize as [], not null.
       const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows || [];
 
       result[attributeName] = fromTargetRow(matchingValue);
     });
@@ -497,8 +498,9 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
+      // Match oneToMany/manyToMany: empty morphMany collections serialize as [], not null.
       const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows || [];
 
       result[attributeName] = fromTargetRow(matchingValue);
     });

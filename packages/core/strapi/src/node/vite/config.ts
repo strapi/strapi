@@ -2,7 +2,10 @@ import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
-import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
+import {
+  buildAdminViteResolveAliases,
+  getResolvableSingletonModules,
+} from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -29,6 +32,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   return {
     root: ctx.cwd,
     base: ctx.basePath,
+    // Public files are served by the strapi::public middleware at runtime, so they do not need to
+    // be copied into the admin build output.
+    publicDir: false,
     build: {
       emptyOutDir: false, // Rely on CLI to do this
       outDir: ctx.distDir,
@@ -73,10 +79,16 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'invariant',
         // UMD; without pre-bundling plugin chunks get empty namespace → "Prism is not defined" (#26964).
         'prismjs',
-        // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
-        // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
-        // projects blank-crash the admin (#25070, #26964).
-        'prismjs/components/*.js',
+        // Do NOT add `prismjs/components/*.js` to include. #26978 prebundled every language for
+        // all apps; combined with #27014's optimizeDeps contract, Vite evaluates those chunks in
+        // reverse import order so parents (e.g. basic before vbnet) load too late →
+        // `Cannot set properties of undefined (setting 'comment')` and a blank admin in develop.
+        // Keep `prismjs` only; let language components load as normal ESM side-effect imports.
+        // CodeMirror must be a single instance across design-system, lang-json and uiw or the
+        // JSON custom field crashes on instanceof checks. Pre-bundle for every build — dev and
+        // production — not only monorepo examples. Use the resolvable subset so include stays in
+        // lockstep with resolve.alias (an unresolvable singleton must not be forced into pre-bundling).
+        ...getResolvableSingletonModules(),
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why

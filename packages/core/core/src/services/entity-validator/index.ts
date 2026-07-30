@@ -14,6 +14,7 @@ type CreateOrUpdate = 'creation' | 'update';
 
 const { yup, validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
+const { isAnyToOne } = strapiUtils.relations;
 const { ValidationError } = strapiUtils.errors;
 
 type ID = { id: string | number };
@@ -50,6 +51,7 @@ interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> extends With
 interface ValidatorContext {
   isDraft?: boolean;
   locale?: string | null;
+  strictRelations?: boolean;
 }
 
 interface ModelValidatorMetas extends WithComponentContext {
@@ -144,7 +146,7 @@ const createComponentValidator =
       updatedAttribute,
       componentContext,
     }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
-    { isDraft }: ValidatorContext
+    options: ValidatorContext
   ): strapiUtils.yup.AnySchema => {
     const model = strapi.getModel(attr.component);
     if (!model) {
@@ -160,7 +162,7 @@ const createComponentValidator =
           yup.lazy((item) =>
             createModelValidator(createOrUpdate)(
               { componentContext, model, data: item },
-              { isDraft }
+              options
             ).notNull()
           ) as any
         );
@@ -170,7 +172,7 @@ const createComponentValidator =
         updatedAttribute,
       });
 
-      if (!isDraft) {
+      if (!options.isDraft) {
         validator = addMinMax(validator, { attr, updatedAttribute });
       }
 
@@ -183,11 +185,11 @@ const createComponentValidator =
         data: updatedAttribute.value,
         componentContext,
       },
-      { isDraft }
+      options
     );
 
     validator = addRequiredValidation(createOrUpdate)(validator, {
-      attr: { required: !isDraft && attr.required },
+      attr: { required: !options.isDraft && attr.required },
       updatedAttribute,
     });
 
@@ -198,7 +200,7 @@ const createDzValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
     { attr, updatedAttribute, componentContext }: ValidatorMeta,
-    { isDraft }: ValidatorContext
+    options: ValidatorContext
   ): strapiUtils.yup.AnySchema => {
     let validator;
 
@@ -214,10 +216,7 @@ const createDzValidator =
 
         return model
           ? schema.concat(
-              createModelValidator(createOrUpdate)(
-                { model, data: item, componentContext },
-                { isDraft }
-              )
+              createModelValidator(createOrUpdate)({ model, data: item, componentContext }, options)
             )
           : schema;
       }) as any // FIXME: yup v1
@@ -228,26 +227,201 @@ const createDzValidator =
       updatedAttribute,
     });
 
-    if (!isDraft) {
+    if (!options.isDraft) {
       validator = addMinMax(validator, { attr, updatedAttribute });
     }
 
     return validator;
   };
 
-const createRelationValidator = ({
-  updatedAttribute,
-}: ValidatorMeta<Schema.Attribute.Relation>) => {
-  let validator;
-
-  if (Array.isArray(updatedAttribute.value)) {
-    validator = yup.array().of(yup.mixed());
-  } else {
-    validator = yup.mixed();
+/**
+ * A relation/media value can be supplied in several shapes: a bare id, an array of ids,
+ * or a connect/set object (`{ connect: [...] }` / `{ set: [...] }`). This normalises all
+ * of them to "does this attach at least one entry?" so required validation is consistent
+ * regardless of the input shape (mirrors `buildRelationsStore`'s source extraction).
+ */
+const hasRelationValue = (value: unknown): boolean => {
+  if (isNil(value)) {
+    return false;
   }
 
-  return validator;
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (isObject(value)) {
+    const connect = (value as { connect?: unknown }).connect;
+    const set = (value as { set?: unknown }).set;
+
+    if (!isNil(connect)) {
+      return Array.isArray(connect) ? connect.length > 0 : true;
+    }
+    if (!isNil(set)) {
+      return Array.isArray(set) ? set.length > 0 : true;
+    }
+
+    // Any other object shape (e.g. a bare `{ id }`) counts as a value.
+    return true;
+  }
+
+  return true;
 };
+
+/**
+ * A disconnect-only update payload removes entries without adding or replacing any:
+ * actual removals in `disconnect`, no `set`, and no effective additions in `connect`.
+ * `connect` counts as "no additions" when absent OR an empty array — the Content Manager
+ * initializes every relation as `{ connect: [], disconnect: [] }` and keeps `connect: []`
+ * in place when the user only removes entries, so `{ connect: [], disconnect: [id] }`
+ * is the shape real admin saves produce. A payload with empty `disconnect` (nothing
+ * removed) is NOT disconnect-only — it's the CM's untouched-relation no-op.
+ */
+const isDisconnectOnly = (value: unknown): boolean => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const { connect, set, disconnect } = value as {
+    connect?: unknown;
+    set?: unknown;
+    disconnect?: unknown;
+  };
+
+  if (!isNil(set)) {
+    return false;
+  }
+
+  const hasAdditions = !isNil(connect) && (!Array.isArray(connect) || connect.length > 0);
+  if (hasAdditions) {
+    return false;
+  }
+
+  return !isNil(disconnect) && (!Array.isArray(disconnect) || disconnect.length > 0);
+};
+
+/**
+ * Decides whether a required media/relation value should be rejected as empty,
+ * mirroring the scalar `required` semantics:
+ *
+ * - creation (`notNil` analogue): an absent key is a failure — the field must be
+ *   populated, so anything without a value (`undefined`/`null`/`[]`/empty `set`/`connect`)
+ *   is rejected.
+ * - update (`notNull` analogue): an absent key keeps the existing value, so it passes.
+ *   Only reject when the request is present AND leaves the field empty. A bare
+ *   `{ connect: [] }` (no `set`) neither adds nor removes anything → treated as a no-op
+ *   that passes; `{ set: [] }` / `null` / `[]` explicitly empty the field → rejected.
+ *
+ * `isToOne` marks a to-one relation / single media, which can hold at most one entry.
+ * For those, a disconnect-only update (`{ disconnect: [...] }` with no `connect`/`set`)
+ * always leaves the field empty — no DB read needed — so it is rejected on non-draft
+ * updates. To-many fields can still hold other entries after a disconnect, so their
+ * resulting state can't be known without a DB read and they fall through to a pass
+ * (publish re-validates the populated draft for D&P types; documented limitation for
+ * non-D&P, tied to the null→[] follow-up).
+ *
+ * On creation there are no existing rows, so a disconnect-only payload attaches nothing
+ * and always leaves the field empty — for both to-one and to-many — so it is rejected
+ * regardless of `isToOne`.
+ */
+const relationRequiredFails = (
+  createOrUpdate: CreateOrUpdate,
+  value: unknown,
+  isToOne: boolean
+): boolean => {
+  if (createOrUpdate === 'creation') {
+    // No existing rows on create, so a disconnect attaches nothing and the field stays
+    // empty for both to-one and to-many — reject it before the generic value check, which
+    // would otherwise treat the bare `{ disconnect: [...] }` object as a present value.
+    if (isDisconnectOnly(value)) {
+      return true;
+    }
+  }
+
+  if (createOrUpdate === 'update') {
+    // Absent key on update = keep the existing value.
+    if (value === undefined) {
+      return false;
+    }
+
+    if (isDisconnectOnly(value)) {
+      // A disconnect on a to-one/single field deterministically empties it; on a to-many
+      // field the resulting state depends on the current DB rows, so we can't reject here.
+      return isToOne;
+    }
+
+    // A connect-only empty is a no-op, not an emptying operation.
+    if (isObject(value) && !isNil((value as { connect?: unknown }).connect)) {
+      const connect = (value as { connect?: unknown }).connect;
+      const hasSet = !isNil((value as { set?: unknown }).set);
+      if (!hasSet && Array.isArray(connect) && connect.length === 0) {
+        return false;
+      }
+    }
+  }
+
+  return !hasRelationValue(value);
+};
+
+const createMediaAttributeValidator =
+  (createOrUpdate: CreateOrUpdate) =>
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Media>,
+    options: ValidatorContext
+  ): strapiUtils.yup.AnySchema => {
+    // Media values arrive in several shapes (a bare id, an array of ids, or a
+    // `{ connect }` / `{ set }` object on update). `yup.mixed()` accepts all of them;
+    // coercing `multiple` media to `yup.array()` would reject the connect/set object
+    // syntax that update requests legitimately send. Required-ness is asserted below
+    // via `relationRequiredFails`, which understands every shape.
+    let validator: strapiUtils.yup.AnySchema = yup.mixed();
+
+    // Relational required constraints are only enforced under the strictRelations flag,
+    // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+    if (options.strictRelations && !options.isDraft && attr.required) {
+      // A media value can arrive as an id, an array, or a connect/set object, so a simple
+      // `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      // Single media holds at most one file, so a disconnect-only update always empties it.
+      const isToOne = !attr.multiple;
+      validator = validator.test(
+        'required-media',
+        `${updatedAttribute.name} must be defined.`,
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value, isToOne)
+      );
+    }
+
+    return validator;
+  };
+
+const createRelationValidator =
+  (createOrUpdate: CreateOrUpdate) =>
+  (
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
+    options: ValidatorContext
+  ): strapiUtils.yup.AnySchema => {
+    let validator: strapiUtils.yup.AnySchema;
+
+    if (Array.isArray(updatedAttribute.value)) {
+      validator = yup.array().of(yup.mixed());
+    } else {
+      validator = yup.mixed();
+    }
+
+    // Relational required constraints are only enforced under the strictRelations flag,
+    // and never for drafts (mirrors scalar `required` handling via `!isDraft`).
+    if (options.strictRelations && !options.isDraft && attr.required) {
+      // A relation value can arrive as an id, an array, or a connect/set object, so a
+      // simple `.notNil()`/`.min()` is not enough — normalise the shape before asserting.
+      // A to-one relation holds at most one target, so a disconnect-only update always empties it.
+      const isToOne = isAnyToOne(attr);
+      validator = validator.test(
+        'required-relation',
+        `${updatedAttribute.name} must be defined.`,
+        () => !relationRequiredFails(createOrUpdate, updatedAttribute.value, isToOne)
+      );
+    }
+
+    return validator;
+  };
 
 const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
@@ -283,7 +457,13 @@ const createAttributeValidator =
     }
 
     if (isMediaAttribute(metas.attr)) {
-      validator = yup.mixed();
+      validator = createMediaAttributeValidator(createOrUpdate)(
+        {
+          attr: metas.attr as Schema.Attribute.Media,
+          updatedAttribute: metas.updatedAttribute,
+        },
+        options
+      );
     } else if (isScalarAttribute(metas.attr)) {
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
@@ -332,10 +512,13 @@ const createAttributeValidator =
 
         validator = createDzValidator(createOrUpdate)(metas, options);
       } else if (metas.attr.type === 'relation') {
-        validator = createRelationValidator({
-          attr: metas.attr,
-          updatedAttribute: metas.updatedAttribute,
-        });
+        validator = createRelationValidator(createOrUpdate)(
+          {
+            attr: metas.attr,
+            updatedAttribute: metas.updatedAttribute,
+          },
+          options
+        );
       }
 
       validator = preventCast(validator);
@@ -416,6 +599,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
       {
         isDraft: options?.isDraft ?? false,
         locale: options?.locale ?? null,
+        strictRelations: options?.strictRelations ?? false,
       }
     )
       .test(
