@@ -642,7 +642,7 @@ describe('BlocksToolbar', () => {
     ]);
   });
 
-  it('creates a new node when selecting a block if there is no selection', async () => {
+  it('converts the last block when selecting a block type if there is no selection', async () => {
     const { user } = setup([
       {
         type: 'paragraph',
@@ -650,27 +650,18 @@ describe('BlocksToolbar', () => {
       },
     ]);
 
-    // Convert selection to a code block
+    // Toolbar steals focus (clears selection); convert the existing content, don't insert empty
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     await user.click(blocksDropdown);
     await user.click(screen.getByRole('option', { name: 'Quote' }));
 
     expect(baseEditor.children).toEqual([
       {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Some paragraph',
-          },
-        ],
-      },
-      {
         type: 'quote',
         children: [
           {
             type: 'text',
-            text: '',
+            text: 'Some paragraph',
           },
         ],
       },

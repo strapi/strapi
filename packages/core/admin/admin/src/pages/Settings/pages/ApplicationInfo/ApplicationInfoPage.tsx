@@ -31,7 +31,6 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
   const latestStrapiReleaseTag = useAppInfo(
     'ApplicationInfoPage',
     (state) => state.latestStrapiReleaseTag
@@ -197,21 +196,12 @@ const ApplicationInfoPage = () => {
                   <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
-                        id: 'Settings.application.edition-title',
-                        defaultMessage: 'current edition',
+                        id: 'Settings.application.plan-title',
+                        defaultMessage: 'current plan',
                       })}
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'Settings.application.ee-or-ce',
-                            defaultMessage:
-                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
-                          },
-                          { communityEdition }
-                        )}
-                      </Typography>
+                      <Typography>{window.strapi.projectType}</Typography>
                       <Link
                         href="https://strapi.io/pricing-self-hosted"
                         endIcon={<ExternalLink />}

@@ -1,10 +1,10 @@
 {
-  "extends": "tsconfig/client.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "outDir": "../dist",
-    "noEmit": false
+    "noEmit": false,
+    "types": ["@testing-library/jest-dom"]
   },
   "include": ["./src", "./custom.d.ts", "../shared", "../ee/admin", "../package.json", "./tests"],
   "exclude": [

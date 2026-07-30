@@ -5,7 +5,10 @@ import utils from './utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  buildSessionMetadataFromContext,
   getAccessCookieName,
+  getAccessCookiePath,
+  getAccessCookieDomain,
   getSessionManager,
   generateDeviceId,
 } from '../../../../../shared/utils/session-auth';
@@ -119,6 +122,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
       'admin'
     ).generateRefreshToken(userId, deviceId, {
       type: 'refresh',
+      metadata: buildSessionMetadataFromContext(ctx),
     });
 
     const cookieOptions = buildCookieOptionsWithExpiry('refresh', absoluteExpiresAt);
@@ -136,12 +140,18 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     const isProduction = process.env.NODE_ENV === 'production';
     const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
 
-    const domain: string | undefined = strapi.config.get('admin.auth.domain');
+    // Resolve through the shared helpers so the server write agrees with the
+    // client set/delete (which read the same config inlined at build time);
+    // any divergence leaves a cookie the admin panel cannot clear on logout.
+    const domain = getAccessCookieDomain();
+    const path = getAccessCookiePath();
+
     ctx.cookies.set(getAccessCookieName(), accessToken, {
       httpOnly: false,
       secure: isSecure,
       overwrite: true,
       domain,
+      path,
     });
 
     const sanitizedUser = getService('user').sanitizeUser(user);
