@@ -4,6 +4,8 @@ import * as yup from 'yup';
 import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 
+const APPLICATION_ERROR_BRAND = Symbol.for('strapi.ApplicationError');
+
 /* ApplicationError */
 class ApplicationError<
   TName extends string = 'ApplicationError',
@@ -21,11 +23,52 @@ class ApplicationError<
     details: TDetails = {} as TDetails
   ) {
     super();
+    Object.defineProperty(this, APPLICATION_ERROR_BRAND, { value: true });
     this.name = 'ApplicationError' as TName;
     this.message = message;
     this.details = details;
   }
 }
+
+type ApplicationErrorClass = {
+  name: string;
+  prototype: ApplicationError;
+};
+
+const isErrorOfType = (
+  error: unknown,
+  errorType: ApplicationErrorClass
+): error is ApplicationError => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  let prototype: object | null = Object.getPrototypeOf(error);
+
+  while (prototype !== null) {
+    const constructor = Object.getOwnPropertyDescriptor(prototype, 'constructor')?.value;
+
+    if (typeof constructor === 'function' && constructor.name === errorType.name) {
+      return true;
+    }
+
+    prototype = Object.getPrototypeOf(prototype);
+  }
+
+  return false;
+};
+
+const isApplicationError = (error: unknown): error is ApplicationError => {
+  if (typeof error === 'object' && error !== null) {
+    const candidate = error as Record<PropertyKey, unknown>;
+
+    if (candidate[APPLICATION_ERROR_BRAND] === true) {
+      return true;
+    }
+  }
+
+  return isErrorOfType(error, ApplicationError);
+};
 
 class ValidationError<
   TMessage extends string = string,
@@ -156,6 +199,8 @@ class NotImplementedError<
 export {
   HttpError,
   ApplicationError,
+  isErrorOfType,
+  isApplicationError,
   ValidationError,
   YupValidationError,
   PaginationError,
