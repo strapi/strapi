@@ -85,6 +85,47 @@ describe('AssetsPage search', () => {
     respondWithAssets([createAsset(1, 'image.png')]);
   });
 
+  describe('search combined with list filters', () => {
+    /** Captures the query string of every /upload/files request. */
+    const captureFileRequests = () => {
+      const requests: string[] = [];
+      server.use(
+        http.get('*/upload/files', ({ request }) => {
+          requests.push(new URL(request.url).search);
+          return HttpResponse.json({
+            results: [createAsset(1, 'kitten.png')],
+            pagination: { page: 1, pageSize: 20, pageCount: 1, total: 1 },
+          });
+        })
+      );
+      return requests;
+    };
+
+    it('sends the search term and the type filter in the same request', async () => {
+      const requests = captureFileRequests();
+
+      renderPage('?_q=kitten&filters=type:is:picture');
+
+      await findHeading();
+
+      await waitFor(() => expect(requests.length).toBeGreaterThan(0));
+      const last = decodeURIComponent(requests[requests.length - 1]);
+      // Both facets on the wire: global search + mime clause, no folder scope.
+      expect(last).toContain('_q=kitten');
+      expect(last).toContain('[mime][$contains]=image');
+      expect(last).not.toContain('[folder]');
+    });
+
+    it('shows the filter badge and the search results title together', async () => {
+      captureFileRequests();
+
+      renderPage('?_q=kitten&filters=type:is:picture');
+
+      expect(await findHeading()).toHaveTextContent('Search results for "kitten"');
+      expect(await screen.findByTestId('filter-badge')).toHaveTextContent('Picture');
+    });
+  });
+
   it('shows the folder title and item count when not searching', async () => {
     renderPage();
 
