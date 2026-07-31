@@ -949,14 +949,12 @@ const RelationsList = ({
 
             const relationWithPosition: Relation = {
               ...relation,
-              ...{
-                apiData: {
-                  id: relation.id,
-                  documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
-                  locale: relation.locale || relation.apiData?.locale,
-                  isTemporary: relation.apiData?.isTemporary,
-                  position,
-                },
+              apiData: {
+                id: relation.id,
+                documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
+                locale: relation.locale || relation.apiData?.locale,
+                isTemporary: relation.apiData?.isTemporary,
+                position,
               },
             };
 

@@ -1,14 +1,13 @@
+import passport from 'koa-passport';
+import passportService from '../../../../../server/src/services/passport';
+import eePassportService from '../passport';
+
 jest.mock('koa-passport', () => ({
   use: jest.fn(),
   initialize: jest.fn(),
 }));
 
-import passport from 'koa-passport';
-
 let ssoEnabled = true;
-
-import passportService from '../../../../../server/src/services/passport';
-import eePassportService from '../passport';
 
 const { init } = passportService;
 
