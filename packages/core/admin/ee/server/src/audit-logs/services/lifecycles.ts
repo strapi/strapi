@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -87,7 +87,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       return null;
     }
 
-    const origin = auditSource ?? 'admin';
+    const origin: Modules.AuditLogs.AuditSource = auditSource ?? 'admin';
 
     const getPayload = eventMap[name];
 

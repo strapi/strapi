@@ -1,4 +1,4 @@
-import { describeOnCondition } from 'api-tests/utils';
+import { describeOnCondition, createUtils } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
@@ -41,9 +41,19 @@ const ct = {
 describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
   const builder = createTestBuilder();
   let strapi: Core.Strapi;
+  // Requests are issued by a dedicated admin (not the default super admin) so
+  // that asserting the audited actor is the token owner is discriminating.
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
+  let tokenOwnerId: number;
   let mcp: ReturnType<typeof createMcpClient>;
   let tokenCount = 0;
+
+  const tokenOwner = {
+    email: 'mcp-audit-owner@test.com',
+    firstname: 'Mcp',
+    lastname: 'Owner',
+    password: 'Password123',
+  };
 
   const deleteAllAdminTokens = async () => {
     await strapi.db.query('admin::api-token').deleteMany({ where: { kind: 'admin' } });
@@ -66,14 +76,6 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     return logs.filter((log: { payload?: { uid?: string } }) => log.payload?.uid === MODEL_UID);
   };
 
-  // Admin tokens are owned by the super admin creating them via createAuthRequest.
-  const getTokenOwnerId = async () => {
-    const owner = await strapi.db
-      .query('admin::user')
-      .findOne({ where: { email: 'admin@strapi.io' } });
-    return owner.id;
-  };
-
   beforeAll(async () => {
     await builder.addContentType(ct).build();
 
@@ -86,7 +88,14 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     });
     strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
 
-    rq = await createAuthRequest({ strapi });
+    // A second admin (super-admin role) owns the tokens, so the actor
+    // assertion distinguishes the token owner from the default super admin.
+    const utils = createUtils(strapi);
+    const superAdminRole = await utils.getSuperAdminRole();
+    const owner = await utils.createUser({ ...tokenOwner, roles: [superAdminRole.id] });
+    tokenOwnerId = owner.id;
+
+    rq = await createAuthRequest({ strapi, userInfo: tokenOwner });
     mcp = createMcpClient(strapi, 'strapi-mcp-audit-test');
     await deleteAllAdminTokens();
   });
@@ -205,7 +214,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     const log = await expectExactlyOneLog('entry.create');
     expect(log.payload).toMatchObject({ origin: 'mcp' });
     // The audited actor is the admin token's owner.
-    expect(log.user.id).toBe(await getTokenOwnerId());
+    expect(log.user.id).toBe(tokenOwnerId);
   });
 
   test('a read through MCP is NOT audited', async () => {
@@ -223,6 +232,8 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     // A test subscriber registered now runs after the audit-logs subscriber in
     // the emit loop, so when it sees the sentinel's entry.create the audit row
     // is already committed — an explicit completion signal, not a timed guess.
+    // Assumes the audit subscriber isn't re-registered mid-test (ee.enable/update
+    // re-push it to the end); EE is on at boot here, so that never happens.
     let onSentinelAudited!: () => void;
     const sentinelAudited = new Promise<void>((resolve) => {
       onSentinelAudited = resolve;
@@ -276,6 +287,6 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
 
     const log = await expectExactlyOneLog('entry.delete');
     expect(log.payload).toMatchObject({ origin: 'mcp' });
-    expect(log.user.id).toBe(await getTokenOwnerId());
+    expect(log.user.id).toBe(tokenOwnerId);
   });
 });

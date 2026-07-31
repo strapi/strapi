@@ -52,9 +52,11 @@ describe('handlePost', () => {
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
       authenticate: jest.fn().mockResolvedValue({
+        // Distinct ids so assertions can tell the token owner (user) apart
+        // from the token itself (credentials).
         authenticated: true,
-        credentials: { id: 1 },
-        user: { id: 1 },
+        credentials: { id: 7 },
+        user: { id: 42 },
         ability: { can: jest.fn(() => true) },
       }),
     };
@@ -238,7 +240,7 @@ describe('handlePost', () => {
       definitions: capabilityDefinitions,
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
-      user: { id: 1 },
+      user: { id: 42 },
     });
     expect(StreamableHTTPServerTransport).toHaveBeenCalledWith({ sessionIdGenerator: undefined });
     expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);
@@ -274,7 +276,8 @@ describe('handlePost', () => {
 
     await handler(ctx, () => Promise.resolve());
 
-    expect(ctx.state.user).toEqual({ id: 1 });
+    // user (id 42), not credentials (id 7) — the actor is the token owner.
+    expect(ctx.state.user).toEqual({ id: 42 });
     expect(ctx.state.auditSource).toBe('mcp');
   });
 
