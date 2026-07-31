@@ -43,11 +43,6 @@ const getStringLiteralValue = (node: ts.Expression | undefined): string | null =
     return getStringLiteralValue(node.expression);
   }
 
-  // Prefer the first branch when defaultMessage is a ternary of string literals.
-  if (ts.isConditionalExpression(node)) {
-    return getStringLiteralValue(node.whenTrue) ?? getStringLiteralValue(node.whenFalse);
-  }
-
   return null;
 };
 
