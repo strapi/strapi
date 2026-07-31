@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "Nama ini tidak dapat digunakan dalam proyek Anda karena dapat merusak fungsi lainnya",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Nilai duplikat tidak diperbolehkan (hanya karakter alfanumerik yang dipertimbangkan)",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "String kosong tidak diperbolehkan",
   "error.validation.enum-regex": "Setidaknya satu nilai tidak valid. Nilai harus menyertakan setidaknya satu karakter huruf sebelum kemunculan pertama angka",
   "error.validation.minSupMax": "Tidak bisa lebih unggul",

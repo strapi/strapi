@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "这个内容类型名称不可以在此项目内被使用，有可能会破坏其他功能",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "不允许重复的值 (只考虑字母数字字符)",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "不允许空字符串",
   "error.validation.enum-regex": "有一个以上的数值无效。数值在首个数字前应先有英文字母。",
   "error.validation.minSupMax": "不能超过最大值",

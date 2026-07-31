@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "ชื่อนี้ไม่สามารถใช้ในโปรเจ็กต์ของคุณ เนื่องจากอาจหยุดการทำงานของฟังก์ชันอื่น",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "ไม่อนุญาตให้ใช้ค่าซ้ำ",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "Empty strings are not allowed",
   "error.validation.enum-regex": "At least one value is invalid. Values should have at least one alphabetical character preceding the first occurence of a number.",
   "error.validation.minSupMax": "ไม่สามารถเหนือกว่า",

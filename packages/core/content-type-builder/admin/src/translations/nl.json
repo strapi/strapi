@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "Deze naam kan niet worden gebruikt in het project, omdat andere functionaliteiten zou kunnen breken",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Dubbele waarden zijn niet toegestaan (alleen alfanumerieke tekens worden meegeteld)",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "Lege strings zijn niet toegestaan",
   "error.validation.enum-regex": "Ten minste één waarde is ongeldig. Waarden moeten ten minste één alfabetisch teken hebben vóór het eerste voorkomen van een cijfer.",
   "error.validation.minSupMax": "Kan niet superieur zijn",

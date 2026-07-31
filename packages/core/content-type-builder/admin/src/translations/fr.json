@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "Ce nom ne peut pas être utilisé dans votre projet car il pourrait casser d'autres fonctionnalités",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Les valeurs en double ne sont pas autorisées (seuls les caractères alphanumériques sont pris en compte).",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "Les chaînes vides ne sont pas autorisées",
   "error.validation.enum-regex": "Au moins une valeur est invalide. Les valeurs doivent avoir au moins un caractère alphabétique précédant la première occurrence d'un nombre.",
   "error.validation.minSupMax": "Le minimum ne peut pas être supérieur au maximum",

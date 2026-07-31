@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "لا يمكن استخدام هذا الاسم في مشروعك لأنه قد يكسر وظائف أخرى",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "القيم المكررة غير مسموح بها (يتم أخذ الأحرف الأبجدية الرقمية فقط في الاعتبار).",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "السلاسل الفارغة غير مسموح بها",
   "error.validation.enum-regex": "هناك قيمة واحدة على الأقل غير صالحة. يجب أن تحتوي القيم على حرف أبجدي واحد على الأقل يسبق أول ظهور لرقم.",
   "error.validation.minSupMax": "لا يمكن أن يكون الحد الأدنى أكبر من الحد الأقصى",

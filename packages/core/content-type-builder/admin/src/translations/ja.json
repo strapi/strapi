@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "この名前は他の機能を壊す可能性があるため、プロジェクトで使用できません",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "重複値は許可されていません（英数字のみが考慮されます）。",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "空の文字列は許可されていません",
   "error.validation.enum-regex": "少なくとも1つの値が無効です。値は数字の最初の出現の前に少なくとも1つのアルファベット文字を持つ必要があります。",
   "error.validation.minSupMax": "最小値は最大値より大きくできません",

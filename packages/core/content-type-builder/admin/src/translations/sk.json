@@ -64,6 +64,7 @@
   "error.contentTypeName.reserved-name": "Tento názov je vyhradený a nemôže byť použitý (hrozí poškodenie iných funkcionalít systému)",
   "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Duplicitné hodnoty nie sú povolené",
+  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "Prázdne reťazce nie sú povolené",
   "error.validation.enum-regex": "Aspoň jedna hodnota je neplatná. Hodnoty by mali obsahovať aspoň jeden abecedný znak pred prvým výskytom čísla.",
   "error.validation.minSupMax": "Nemôže byť nadradený",
