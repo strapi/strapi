@@ -28,6 +28,7 @@ import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
 import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
 import { getFolderLabel } from '../../../../utils/getFolderLabel';
+import { emptyItemLocations, type ItemLocations } from '../../../../utils/itemLocations';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetSelectionOptional } from '../../hooks/useAssetSelection';
 import { useFolderNavigation } from '../../hooks/useFolderNavigation';
@@ -71,6 +72,12 @@ export const useAssetsDndOptional = () => useContext(AssetsDndContext);
 
 interface AssetsDndProviderProps {
   children: ReactNode;
+  /**
+   * Real location of every loaded row, so a multi-item drag validates against
+   * each item's own parent. Defaults to a lookup that misses everything, which
+   * falls back to the folder currently open.
+   */
+  locations?: ItemLocations;
 }
 
 interface DragSession {
@@ -100,7 +107,10 @@ const resolveDestination = (
   return null;
 };
 
-export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
+export const AssetsDndProvider = ({
+  children,
+  locations = emptyItemLocations,
+}: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const selection = useAssetSelectionOptional();
@@ -160,11 +170,16 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
         return;
       }
 
-      const { items, fromSelection } = buildDragSet(data, selection?.selectedKeys, currentFolderId);
+      const { items, fromSelection } = buildDragSet(
+        data,
+        selection?.selectedKeys,
+        locations,
+        currentFolderId
+      );
       dragSessionRef.current = { items, fromSelection };
       setDragItems(items);
     },
-    [clearDragState, currentFolderId, selection?.selectedKeys]
+    [clearDragState, currentFolderId, locations, selection?.selectedKeys]
   );
 
   const handleDragEnd = useCallback(
@@ -196,13 +211,15 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       }
 
       const payload = buildBulkMovePayload(items);
-      // Source is always the current folder — dragged items are, by definition,
-      // visible in the current view. Destination is the drop target. Both use
-      // leaf names so the DnD toast reads identically to the dialog's.
+      // Source is the item's own location, not the folder currently open: a
+      // global search result can be dragged out of a folder the user isn't in.
+      // Destination is the drop target. Both use leaf names so the DnD toast
+      // reads identically to the dialog's.
+      const sourceFolderId = items[0].kind === 'folder' ? items[0].parentId : items[0].folderId;
       const successMessage = formatMoveSuccessMessage({
         formatMessage,
         count: items.length,
-        source: getFolderLabel(folderStructure, currentFolderId, rootLabel),
+        source: getFolderLabel(folderStructure, sourceFolderId, rootLabel),
         destination: getFolderLabel(folderStructure, targetFolderId, rootLabel),
       });
       const errorFallback = formatMessage({
@@ -246,7 +263,6 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       announceToLiveRegion,
       bulkMove,
       clearDragState,
-      currentFolderId,
       folderStructure,
       formatMessage,
       isMovePending,
@@ -290,7 +306,12 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           return '';
         }
 
-        const { items } = buildDragSet(activeData, selection?.selectedKeys, currentFolderId);
+        const { items } = buildDragSet(
+          activeData,
+          selection?.selectedKeys,
+          locations,
+          currentFolderId
+        );
 
         if (
           !canDropItemOnFolder({
@@ -313,7 +334,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           defaultMessage: 'Drag cancelled.',
         }),
     }),
-    [currentFolderId, folderStructure, formatMessage, selection?.selectedKeys]
+    [currentFolderId, folderStructure, formatMessage, locations, selection?.selectedKeys]
   );
 
   return (
