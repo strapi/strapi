@@ -1694,6 +1694,14 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         "type": "object",
       },
     },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token for authentication",
+        "scheme": "bearer",
+        "type": "http",
+      },
+    },
   },
   "info": {
     "description": "API documentation for test-app-0 v0.1.0",
@@ -1731,6 +1739,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -1752,6 +1761,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -1766,73 +1776,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -2541,6 +2537,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -2562,6 +2559,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -2828,6 +2826,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -2849,6 +2848,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -4679,6 +4679,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -4697,6 +4698,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -4711,73 +4713,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -5382,6 +5370,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -5400,6 +5389,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -5628,6 +5618,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -5646,6 +5637,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -6170,6 +6162,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -6189,6 +6182,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -6203,73 +6197,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -6803,6 +6783,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -6822,6 +6803,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -7012,6 +6994,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -7031,6 +7014,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -7503,6 +7487,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -7542,6 +7527,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -7556,73 +7542,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -8759,6 +8731,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -8798,6 +8771,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -9163,6 +9137,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -9202,6 +9177,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -10199,6 +10175,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -10218,6 +10195,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -10232,73 +10210,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -10968,6 +10932,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -10987,6 +10952,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -11232,6 +11198,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -11251,6 +11218,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -13670,6 +13638,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -13691,6 +13660,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -13705,73 +13675,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -14373,6 +14329,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -14394,6 +14351,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -14602,6 +14560,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -14623,6 +14582,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -15505,6 +15465,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -15525,6 +15486,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -16120,6 +16082,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -16144,6 +16107,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -16158,73 +16122,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -17102,6 +17052,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -17126,6 +17077,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -17444,6 +17396,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -17468,6 +17421,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -18242,6 +18196,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -18260,6 +18215,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -18274,73 +18230,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -19029,6 +18971,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -19047,6 +18990,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -19300,6 +19244,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -19318,6 +19263,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -19912,6 +19858,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -19930,6 +19877,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -19944,73 +19892,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -20601,6 +20535,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -20619,6 +20554,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -20842,6 +20778,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -20860,6 +20797,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -21651,6 +21589,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -21670,6 +21609,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -22358,6 +22298,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -22377,6 +22318,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -22897,6 +22839,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -22915,6 +22858,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -23392,6 +23336,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -23410,6 +23355,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -23693,6 +23639,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -23713,6 +23660,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -23727,73 +23675,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -24438,6 +24372,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -24458,6 +24393,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -24704,6 +24640,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -24724,6 +24661,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -25294,6 +25232,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -25317,6 +25256,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -25331,73 +25271,59 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
             },
             "x-strapi-serialize": "querystring",
           },
@@ -26144,6 +26070,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -26167,6 +26094,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -26445,6 +26373,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -26468,6 +26397,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -27365,6 +27295,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "x-strapi-serialize": "querystring",
           },
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -27385,6 +27316,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
           {
@@ -28209,77 +28141,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -28292,6 +28211,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -28566,77 +28486,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -28649,6 +28556,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -29402,77 +29310,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
           {
             "in": "query",
-            "name": "pagination",
+            "name": "pagination[withCount]",
             "required": false,
             "schema": {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "allOf": [
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "withCount": {
-                      "description": "Include total count in response",
-                      "type": "boolean",
-                    },
-                  },
-                  "type": "object",
-                },
-                {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "description": "Page-based pagination",
-                      "properties": {
-                        "page": {
-                          "description": "Page number (1-based)",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "pageSize": {
-                          "description": "Number of entries per page",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "additionalProperties": false,
-                      "description": "Offset-based pagination",
-                      "properties": {
-                        "limit": {
-                          "description": "Maximum number of entries to return",
-                          "exclusiveMinimum": 0,
-                          "maximum": 9007199254740991,
-                          "type": "integer",
-                        },
-                        "start": {
-                          "description": "Number of entries to skip",
-                          "maximum": 9007199254740991,
-                          "minimum": 0,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "start",
-                        "limit",
-                      ],
-                      "type": "object",
-                    },
-                  ],
-                },
-              ],
-              "description": "Pagination parameters",
+              "description": "Include total count in response",
+              "type": "boolean",
             },
             "x-strapi-serialize": "querystring",
           },
           {
+            "in": "query",
+            "name": "pagination[page]",
+            "required": false,
+            "schema": {
+              "description": "Page number (1-based)",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[pageSize]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries per page",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[start]",
+            "required": false,
+            "schema": {
+              "description": "Number of entries to skip",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination[limit]",
+            "required": false,
+            "schema": {
+              "description": "Maximum number of entries to return",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -29485,6 +29380,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -30430,6 +30326,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         "operationId": "users-permissions/get/users_count",
         "parameters": [
           {
+            "explode": true,
             "in": "query",
             "name": "filters",
             "required": false,
@@ -30442,6 +30339,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
               },
               "type": "object",
             },
+            "style": "deepObject",
             "x-strapi-serialize": "querystring",
           },
         ],
@@ -31208,6 +31106,17 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
       },
     },
   },
+  "security": [
+    {
+      "bearerAuth": [],
+    },
+  ],
+  "servers": [
+    {
+      "description": "Default server",
+      "url": "",
+    },
+  ],
   "x-powered-by": "strapi",
   "x-strapi-version": "<current-strapi-version>",
 }

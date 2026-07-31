@@ -1,13 +1,38 @@
 import crypto from 'crypto';
+import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';
+import { buildSessionMetadata } from '@strapi/utils';
 
 import { resolveAuthCookieName } from './auth-cookie-name';
+import { resolveAuthCookiePath } from './auth-cookie-path';
+import { resolveAuthCookieDomain } from './auth-cookie-domain';
+
+const ADMIN_ORIGIN = 'admin';
+const SESSION_CONTENT_TYPE = 'admin::session';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
+// The resolvers are browser-shared (also inlined into the admin bundle) so
+// they default to console.warn; on the server, route their warnings through
+// the Strapi logger instead.
+const warnViaStrapiLog = (message: string): void => {
+  strapi.log.warn(message);
+};
+
 export const getAccessCookieName = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.name');
-  return resolveAuthCookieName(configured);
+  return resolveAuthCookieName(configured, warnViaStrapiLog);
+};
+
+export const getAccessCookiePath = (): string => {
+  const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
+  return resolveAuthCookiePath(configured, warnViaStrapiLog);
+};
+
+export const getAccessCookieDomain = (): string | undefined => {
+  const configured: string | undefined =
+    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  return resolveAuthCookieDomain(configured, warnViaStrapiLog);
 };
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
@@ -19,9 +44,8 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
   const isProduction = process.env.NODE_ENV === 'production';
 
-  const domain: string | undefined =
-    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
-  const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+  const domain = getAccessCookieDomain();
+  const path = getAccessCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
@@ -112,4 +136,43 @@ export const extractDeviceParams = (
   const rememberMe = Boolean(body.rememberMe);
 
   return { deviceId, rememberMe };
+};
+
+export const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    userAgent: ctx.request.headers['user-agent'],
+  });
+
+/**
+ * Resolves the device id to use when revoking sessions on logout.
+ * SSO assigns deviceId server-side, so the client-provided value may not match
+ * the active session row. Prefer the deviceId stored on the session backing
+ * the current access token when available.
+ *
+ * Callers should pass `ctx.state.session.id` from the admin auth strategy and
+ * the already-parsed body `deviceId` — the logout route requires authentication,
+ * so sessionId is expected to be present.
+ */
+export const resolveLogoutDeviceId = async (
+  userId: string,
+  sessionId: string | undefined,
+  clientDeviceId: string | undefined
+): Promise<string | undefined> => {
+  if (!sessionId) {
+    strapi.log.debug('resolveLogoutDeviceId: no sessionId; falling back to client deviceId');
+    return clientDeviceId;
+  }
+
+  const session = await strapi.db.query(SESSION_CONTENT_TYPE).findOne({
+    where: { sessionId },
+  });
+
+  if (session?.userId !== userId || session?.origin !== ADMIN_ORIGIN) {
+    strapi.log.debug(
+      'resolveLogoutDeviceId: access-token session missing or not owned; falling back to client deviceId'
+    );
+    return clientDeviceId;
+  }
+
+  return typeof session.deviceId === 'string' ? session.deviceId : clientDeviceId;
 };

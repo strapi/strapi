@@ -129,6 +129,21 @@ describe('Database', () => {
       const db = new Database(configConnectionFunction);
       expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/experimental/));
     });
+
+    it('should call dialect.configure with connection object when connection function is resolved', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
+      const createConnectionSpy = require('../connection').createConnection;
+      createConnectionSpy.mockClear();
+
+      const db = new Database(configConnectionFunction);
+      expect(createConnectionSpy).toHaveBeenCalledTimes(1);
+
+      const knexConfig = createConnectionSpy.mock.calls[0][0];
+      const wrappedConnectionFn = knexConfig.connection;
+      expect(typeof wrappedConnectionFn).toBe('function');
+      const conn = await wrappedConnectionFn();
+      expect(db.dialect.configure).toHaveBeenCalledWith(conn);
+    });
   });
 
   describe('Connection', () => {

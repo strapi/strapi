@@ -116,11 +116,13 @@ interface AssetPreviewProps {
 
 export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
-  const { alternativeText, ext, mime, url, updatedAt } = asset;
+  const { alternativeText, ext, mime, url, updatedAt, isUrlSigned, isLocal } = asset;
   // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
   // file (often served at the same URL) shows the new content instead of the
-  // browser-cached old version.
-  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : undefined;
+  // browser-cached old version. Signed URLs are excluded: their query string
+  // is part of the SigV4 signature, so appending a param invalidates the
+  // signature and the request fails with 403. See #26581.
+  const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
   const appendCacheBuster = (raw: string | undefined) => {
     if (!raw || cacheKey === undefined) return raw;
     return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
@@ -165,6 +167,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
               ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
+              crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />

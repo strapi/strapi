@@ -120,7 +120,12 @@ const DynamicZone = ({
 
       const { category, info } = componentSchema;
 
-      const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
+      const component = {
+        uid: componentUid,
+        displayName: info.displayName,
+        icon: info.icon,
+        preview: info.preview,
+      };
 
       if (!acc[category]) {
         acc[category] = [];
