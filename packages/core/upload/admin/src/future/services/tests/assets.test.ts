@@ -96,4 +96,44 @@ describe('future assets service - getAssets filter shape', () => {
       filters: { $and: [{ folder: { id: '7' } }] },
     });
   });
+
+  describe('search combined with list filters', () => {
+    const MIME_FILTER = { mime: { $contains: 'image' } };
+
+    it('sends _q AND the list filters together — search composes with filters', async () => {
+      const { result } = renderHook(() =>
+        useGetAssetsQuery({ folder: 7, search: 'kitten', filters: [MIME_FILTER] })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams?._q).toBe('kitten');
+      expect(lastRequestParams).toMatchObject({
+        filters: { $and: [{ mime: { $contains: 'image' } }] },
+      });
+    });
+
+    it('drops only the folder scope while searching — list filters survive', async () => {
+      const { result } = renderHook(() =>
+        useGetAssetsQuery({ folder: 7, search: 'kitten', filters: [MIME_FILTER] })
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      const clauses = (lastRequestParams?.filters?.$and ?? []) as Record<string, unknown>[];
+      expect(clauses.some((clause) => 'folder' in clause)).toBe(false);
+      expect(clauses.some((clause) => 'mime' in clause)).toBe(true);
+    });
+
+    it('appends the list filters after the folder scope when not searching', async () => {
+      const { result } = renderHook(() => useGetAssetsQuery({ folder: 7, filters: [MIME_FILTER] }));
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(lastRequestParams).toMatchObject({
+        filters: { $and: [{ folder: { id: '7' } }, { mime: { $contains: 'image' } }] },
+      });
+      expect(lastRequestParams).not.toHaveProperty('_q');
+    });
+  });
 });

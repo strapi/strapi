@@ -10,9 +10,25 @@ interface UseInfiniteAssetsOptions {
   folder?: number | null;
   sort?: string;
   search?: string;
+  /** Extra `filters[$and]` entries for the files query. */
+  filters?: Record<string, unknown>[];
+  /**
+   * Stable fingerprint of `filters` — a change resets the accumulated pages
+   * (the array identity itself changes every render).
+   */
+  filtersKey?: string;
+  /** Structural switch: an `is [folder]`-only type badge means no file can match. */
+  enabled?: boolean;
 }
 
-const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOptions = {}) => {
+const useInfiniteAssets = ({
+  folder = null,
+  sort,
+  search,
+  filters,
+  filtersKey = '',
+  enabled = true,
+}: UseInfiniteAssetsOptions = {}) => {
   const [page, setPage] = useState(1);
   const lastResultsRef = useRef<File[]>([]);
   const lastPaginationRef = useRef<Pagination | undefined>(undefined);
@@ -24,13 +40,17 @@ const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOpt
     isLoading,
     isFetching,
     error,
-  } = useGetAssetsQuery({
-    folder,
-    page,
-    pageSize: PAGE_SIZE,
-    sort,
-    search,
-  });
+  } = useGetAssetsQuery(
+    {
+      folder,
+      page,
+      pageSize: PAGE_SIZE,
+      sort,
+      search,
+      filters,
+    },
+    { skip: !enabled }
+  );
 
   const pagination = data?.pagination;
 
@@ -75,7 +95,7 @@ const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOpt
     }
     setPage(1);
     lastResultsRef.current = [];
-  }, [folder, sort]);
+  }, [folder, sort, filtersKey]);
 
   // A search change resets pagination but keeps the previous results rendered
   // until the new page 1 lands, which replaces them.
@@ -96,6 +116,18 @@ const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOpt
   const fetchNextPage = useCallback(() => {
     setPage((prev) => prev + 1);
   }, []);
+
+  if (!enabled) {
+    return {
+      assets: [] as File[],
+      pagination: undefined,
+      isLoading: false,
+      isFetchingMore: false,
+      hasNextPage: false,
+      fetchNextPage,
+      error: undefined,
+    };
+  }
 
   return {
     assets,
