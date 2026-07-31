@@ -48,7 +48,8 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+    const disableLocalLoginForSSO = strapi.config.get('admin.auth.disableLocalLoginForSSO', false);
+    return { data: { isEE: false, features: [], flags: { ...flags, disableLocalLoginForSSO }, ai: { enabled: false } } };
   },
 
   async init() {

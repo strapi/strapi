@@ -17,11 +17,18 @@ const LoginEE = (loginProps: LoginProps) => {
     skip: !window.strapi.features.isEnabled(window.strapi.features.SSO),
   });
 
-  if (
-    !window.strapi.features.isEnabled(window.strapi.features.SSO) ||
-    (!isLoading && providers.length === 0)
-  ) {
+  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
+
+  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
     return <Login {...loginProps} />;
+  }
+
+  if (window.strapi.flags.disableLocalLoginForSSO) {
+    return (
+      <Login {...loginProps} hideForm>
+        <SSOProviders providers={providers} displayAllProviders={false} />
+      </Login>
+    );
   }
 
   return (

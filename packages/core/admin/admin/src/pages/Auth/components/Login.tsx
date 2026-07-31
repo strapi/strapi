@@ -21,6 +21,7 @@ import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
+  hideForm?: boolean;
 }
 
 const LOGIN_SCHEMA = yup.object().shape({
@@ -36,7 +37,7 @@ const LOGIN_SCHEMA = yup.object().shape({
   rememberMe: yup.bool().nullable(),
 });
 
-const Login = ({ children }: LoginProps) => {
+const Login = ({ children, hideForm }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
@@ -94,73 +95,77 @@ const Login = ({ children }: LoginProps) => {
                 })}
               </Typography>
             </Box>
-            {apiError ? (
+            {!hideForm && apiError ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
                 {apiError}
               </Typography>
             ) : null}
           </Column>
-          <Form
-            method="PUT"
-            initialValues={{
-              email: '',
-              password: '',
-              rememberMe: false,
-            }}
-            onSubmit={(values) => {
-              handleLogin(values);
-            }}
-            validationSchema={LOGIN_SCHEMA}
-          >
-            <Flex direction="column" alignItems="stretch" gap={6}>
-              {[
-                {
-                  label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
-                  name: 'email',
-                  placeholder: formatMessage({
-                    id: 'Auth.form.email.placeholder',
-                    defaultMessage: 'kai@doe.com',
-                  }),
-                  required: true,
-                  type: 'email' as const,
-                },
-                {
-                  label: formatMessage({
-                    id: 'global.password',
-                    defaultMessage: 'Password',
-                  }),
-                  name: 'password',
-                  required: true,
-                  type: 'password' as const,
-                },
-                {
-                  label: formatMessage({
-                    id: 'Auth.form.rememberMe.label',
-                    defaultMessage: 'Remember me',
-                  }),
-                  name: 'rememberMe',
-                  type: 'checkbox' as const,
-                },
-              ].map((field) => (
-                <InputRenderer key={field.name} {...field} />
-              ))}
-              <Button fullWidth type="submit">
-                {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
-              </Button>
-            </Flex>
-          </Form>
+          {!hideForm && (
+            <Form
+              method="PUT"
+              initialValues={{
+                email: '',
+                password: '',
+                rememberMe: false,
+              }}
+              onSubmit={(values) => {
+                handleLogin(values);
+              }}
+              validationSchema={LOGIN_SCHEMA}
+            >
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                {[
+                  {
+                    label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
+                    name: 'email',
+                    placeholder: formatMessage({
+                      id: 'Auth.form.email.placeholder',
+                      defaultMessage: 'kai@doe.com',
+                    }),
+                    required: true,
+                    type: 'email' as const,
+                  },
+                  {
+                    label: formatMessage({
+                      id: 'global.password',
+                      defaultMessage: 'Password',
+                    }),
+                    name: 'password',
+                    required: true,
+                    type: 'password' as const,
+                  },
+                  {
+                    label: formatMessage({
+                      id: 'Auth.form.rememberMe.label',
+                      defaultMessage: 'Remember me',
+                    }),
+                    name: 'rememberMe',
+                    type: 'checkbox' as const,
+                  },
+                ].map((field) => (
+                  <InputRenderer key={field.name} {...field} />
+                ))}
+                <Button fullWidth type="submit">
+                  {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
+                </Button>
+              </Flex>
+            </Form>
+          )}
           {children}
         </LayoutContent>
-        <Flex justifyContent="center">
-          <Box paddingTop={4}>
-            <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
-              {formatMessage({
-                id: 'Auth.link.forgot-password',
-                defaultMessage: 'Forgot your password?',
-              })}
-            </Link>
-          </Box>
-        </Flex>
+        {!hideForm && (
+          <Flex justifyContent="center">
+            <Box paddingTop={4}>
+              <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
+                {formatMessage({
+                  id: 'Auth.link.forgot-password',
+                  defaultMessage: 'Forgot your password?',
+                })}
+              </Link>
+            </Box>
+          </Flex>
+        )}
       </Main>
     </UnauthenticatedLayout>
   );
