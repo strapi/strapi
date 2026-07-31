@@ -389,6 +389,7 @@ const generateRelation = ({
   const opts: any = {
     type: 'relation',
     target: uid,
+    required: targetAttribute.required || undefined,
     private: targetAttribute.private || undefined,
     pluginOptions: targetAttribute.pluginOptions || undefined,
     // Preserve conditions from targetAttribute if they exist
