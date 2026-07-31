@@ -193,6 +193,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ PUT                │ /admin/transfer/tokens/:id                                                      │
 │ POST               │ /admin/transfer/tokens/:id/regenerate                                           │
 │ HEAD|GET           │ /admin/homepage/key-statistics                                                  │
+│ HEAD|GET           │ /admin/homepage/performance-metrics                                             │
 │ HEAD|GET           │ /admin/homepage/layout                                                          │
 │ PUT                │ /admin/homepage/layout                                                          │
 │ HEAD|GET           │ /admin/ai-usage                                                                 │
