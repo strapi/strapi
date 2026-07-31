@@ -54,6 +54,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "2.2.2",
     "@strapi/logger": "5.51.1",
     "@strapi/types": "5.51.1",
     "@strapi/utils": "5.51.1",

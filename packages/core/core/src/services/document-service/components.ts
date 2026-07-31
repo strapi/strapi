@@ -474,7 +474,8 @@ const createComponent = async <TUID extends UID.Component>(
   const transform = pipe(
     // Make sure we don't save the component with a pre-defined ID
     omit('id'),
-    // Preserve componentKey on publish/clone; mint one on first create
+    // Preserve componentKey on publish/discard; mint one on first create.
+    // Document clone strips keys first so this mints fresh identities.
     (value: Input<TUID>) => {
       const existingKey = (value as unknown as { componentKey?: string }).componentKey;
       return {
@@ -710,6 +711,59 @@ const createComponentRelationFilter = () => {
   };
 };
 
+/**
+ * Remove `componentKey` from nested component / dynamic-zone payloads (in place).
+ * Used by document clone so createComponent mints new keys for the duplicate document.
+ * Publish/discard must NOT call this — they intentionally preserve keys across status rows.
+ */
+const stripComponentKeys = <T extends Record<string, unknown>>(
+  schema: Schema.Schema,
+  data: T
+): T => {
+  if (data == null || typeof data !== 'object') {
+    return data;
+  }
+
+  const { attributes = {} } = schema;
+
+  for (const attributeName of Object.keys(attributes)) {
+    const attribute = attributes[attributeName];
+    const value = data[attributeName as keyof T];
+
+    if (value == null) {
+      continue;
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      const stripOne = (entry: any) => {
+        if (entry == null || typeof entry !== 'object') {
+          return;
+        }
+        delete entry.componentKey;
+        stripComponentKeys(componentSchema, entry);
+      };
+
+      if (attribute.repeatable && Array.isArray(value)) {
+        value.forEach(stripOne);
+      } else {
+        stripOne(value);
+      }
+    } else if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
+      value.forEach((entry: any) => {
+        if (entry == null || typeof entry !== 'object' || !entry.__component) {
+          return;
+        }
+        delete entry.componentKey;
+        stripComponentKeys(strapi.getModel(entry.__component), entry);
+      });
+    }
+  }
+
+  return data;
+};
+
 export {
   omitComponentData,
   assignComponentData,
@@ -718,6 +772,7 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
+  stripComponentKeys,
   createComponentRelationFilter,
   findComponentParent,
   getParentSchemasForComponent,

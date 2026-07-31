@@ -464,6 +464,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           contentType,
           (modelUid) => strapi.getModel(modelUid as UID.Schema)
         );
+        // Clone is a new document — mint fresh componentKeys (do not copy source keys)
+        components.stripComponentKeys(contentType, data);
         const dataWithDocumentId = assoc('documentId', newDocumentId, data);
         const doc = await entries.create({
           ...queryParams,

@@ -42,20 +42,21 @@ Today’s supported workaround is to omit ids and replace the whole component ar
 
 Add a system attribute **`componentKey`** (string, cuid2) on every component model:
 
-| Field          | Meaning                                                               |
-| -------------- | --------------------------------------------------------------------- |
-| `id`           | Database row for this status/locale parent (ephemeral across publish) |
-| `componentKey` | Logical instance identity (copied on publish/clone/discard)           |
+| Field          | Meaning                                                                  |
+| -------------- | ------------------------------------------------------------------------ |
+| `id`           | Database row for this status/locale parent (ephemeral across publish)    |
+| `componentKey` | Logical instance identity (copied on publish/discard; reminted on clone) |
 
-Draft and published remain **separate rows** with separate field values. They may share a `componentKey` when they represent the same logical block after publish/clone.
+Draft and published remain **separate rows** with separate field values. They may share a `componentKey` when they represent the same logical block after publish.
 
 ### Behavior
 
-1. **Create** — mint `componentKey` if absent; preserve if present (publish/clone path).
-2. **Publish / discard / clone** — funnel through `createComponents` → `createComponent`; keys copy with other scalars.
-3. **Update** — before delete/update, resolve payload `componentKey` → row `id` on the **parent being updated** (usually draft). Unknown keys → ApplicationError.
-4. **Omit-id full replace** — unchanged.
-5. **Update by draft `id`** — unchanged.
+1. **Create** — mint `componentKey` if absent; preserve if present (publish/discard path).
+2. **Publish / discard** — funnel through `createComponents` → `createComponent`; keys copy with other scalars.
+3. **Document clone** — strip source `componentKey`s so `createComponent` mints **new** keys (clone is a new document, same as a new `documentId`).
+4. **Update** — before delete/update, resolve payload `componentKey` → row `id` on the **parent being updated** (usually draft). Unknown keys → ApplicationError.
+5. **Omit-id full replace** — unchanged.
+6. **Update by draft `id`** — unchanged.
 
 ### Security
 
@@ -82,17 +83,18 @@ Primary touchpoints:
 ## Follow-ups
 
 - [ ] GraphQL / OpenAPI surfacing
-- [ ] data-transfer `createComponent` parity
-- [ ] Unskip Content API component-id tests; add REST `componentKey` cases
+- [x] data-transfer `createComponent` parity
+- [x] Unskip Content API component-id tests; add REST `componentKey` cases
 - [ ] Best-effort twinning migration for existing draft/published pairs
 - [ ] Public docs: document round-trip; retire “not recommended” once shipped
 - [ ] Consider whether REST should de-emphasize numeric component `id` in examples
 
 ## Acceptance criteria
 
-- [ ] Create component → response includes `componentKey`
-- [ ] Publish → draft and published rows share the same `componentKey`, different `id`
-- [ ] Load published → update with `\{ componentKey, …fields \}` updates the draft instance
-- [ ] Omit-id array replace still works
-- [ ] Invalid / foreign `componentKey` → 400
-- [ ] Nested components + dynamic zones covered
+- [x] Create component → response includes `componentKey`
+- [x] Publish → draft and published rows share the same `componentKey`, different `id`
+- [x] Load published → update with `\{ componentKey, …fields \}` updates the draft instance
+- [x] Omit-id array replace still works
+- [x] Invalid / foreign `componentKey` → 400
+- [x] Nested components + dynamic zones covered
+- [x] Document clone mints new `componentKey`s

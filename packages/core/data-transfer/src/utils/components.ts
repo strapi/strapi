@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { get, has, omit, pipe, assign } from 'lodash/fp';
+import { createId } from '@paralleldrive/cuid2';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
@@ -424,6 +425,15 @@ const createComponent = async <TUID extends UID.Component = UID.Component>(
   const transform = pipe(
     // Make sure we don't save the component with a pre-defined ID
     omit('id'),
+    // Preserve componentKey when restoring/transferring; mint one when absent
+    (value: Modules.EntityService.Params.Data.Input<TUID>) => {
+      const existingKey = (value as unknown as { componentKey?: string }).componentKey;
+      return {
+        ...value,
+        componentKey:
+          typeof existingKey === 'string' && existingKey.length > 0 ? existingKey : createId(),
+      };
+    },
     // Remove the component data from the original data object ...
     (payload) => omitComponentData(model, payload),
     // ... and assign the newly created component instead
@@ -443,11 +453,12 @@ const updateComponent = async <TUID extends UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
+  // componentKey is durable identity — do not allow reassignment on update
   return strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
-    data: Object.assign(omitComponentData(model, data), componentData),
+    data: Object.assign(omitComponentData(model, omit('componentKey', data)), componentData),
   });
 };
 
