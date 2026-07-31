@@ -342,6 +342,45 @@ describe('content-types service', () => {
         },
       });
     });
+
+    test('Removes componentKey from components and dynamic zones', () => {
+      const compoModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+
+      global.strapi = {
+        components: {
+          compo: compoModel,
+        },
+      } as any;
+
+      const model = {
+        attributes: {
+          component: {
+            type: 'component',
+            repeatable: true,
+            component: 'compo',
+          },
+          dz: {
+            type: 'dynamiczone',
+            components: ['compo'],
+          },
+        },
+      };
+
+      const input = {
+        component: [{ id: 2, componentKey: 'key-a', name: 'Hello' }],
+        dz: [{ id: 3, componentKey: 'key-b', __component: 'compo', name: 'World' }],
+      };
+
+      const result = copyNonLocalizedAttributes(model, input);
+      expect(result).toEqual({
+        component: [{ name: 'Hello' }],
+        dz: [{ __component: 'compo', name: 'World' }],
+      });
+    });
   });
 
   describe('fillNonLocalizedAttributes', () => {
