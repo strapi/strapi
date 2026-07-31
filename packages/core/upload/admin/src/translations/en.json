@@ -323,6 +323,7 @@
   "list.bulk-actions.move.title": "Move elements to",
   "list.bulk-actions.move.location": "Location",
   "list.bulk-actions.move.no-destination": "There is no other folder to move this to.",
+  "list.bulk-actions.move.load-error": "Couldn't load the folder list. Please try again.",
   "list.bulk-actions.move.submit": "Move",
   "list.bulk-actions.move.success": "{count, plural, =1 {# element has} other {# elements have}} been moved from {source} to {destination}",
   "list.bulk-actions.move.error": "An error occurred while moving the items.",

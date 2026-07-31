@@ -133,4 +133,37 @@ describe('BulkMoveDialog', () => {
     expect(screen.getByText('Location')).toBeInTheDocument();
     expect(screen.queryByText('There is no other folder to move this to.')).not.toBeInTheDocument();
   });
+
+  it('keeps Move disabled until the destinations exist', async () => {
+    // A root-level item defaults to the root destination while the options are
+    // empty — submitting then would post the no-op move that was filtered out.
+    server.use(
+      http.get('*/upload/folder-structure', async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+        return HttpResponse.json({ data: folderStructure });
+      })
+    );
+
+    setup([{ kind: 'file', id: 11, name: 'a.png', folderId: null }]);
+
+    expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Move' })).toBeEnabled());
+  });
+
+  it('reports a failed structure request as a load error, not as an empty destination list', async () => {
+    server.use(
+      http.get('*/upload/folder-structure', () => new HttpResponse(null, { status: 500 }))
+    );
+
+    setup([{ kind: 'folder', id: 1, name: 'Marketing team', parentId: null }]);
+
+    expect(
+      await screen.findByText("Couldn't load the folder list. Please try again.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText('There is no other folder to move this to.')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Move' })).toBeDisabled();
+  });
 });

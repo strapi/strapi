@@ -58,6 +58,7 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
     data: folderStructure = [],
     isUninitialized: isStructureUninitialized,
     isLoading: isLoadingStructure,
+    isError: isStructureError,
   } = useGetFolderStructureQuery(undefined, { skip: !open });
   const [bulkMove, { isLoading: isMoving }] = useBulkMoveMutation();
 
@@ -122,19 +123,23 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
     setDestination(defaultDestination);
   }, [open, defaultDestination]);
 
+  // Until the structure resolves there are no options, so the default falls
+  // back to root ('') — which for a root-level item is the no-op destination
+  // that was deliberately filtered out. Nothing may be submitted before this.
+  const isStructureReady = !isStructureUninitialized && !isLoadingStructure && !isStructureError;
+
   // Moving a single folder that already sits next to every other folder leaves
   // nowhere to go; say so instead of showing an empty select. Only once the
-  // structure has arrived — an in-flight fetch also has no options yet.
-  const hasNoDestination =
-    !isStructureUninitialized &&
-    !isLoadingStructure &&
-    destinationOptions.length === 0 &&
-    !canMoveToRoot;
+  // structure has arrived — an in-flight or failed fetch also has no options,
+  // and a failure is a different story to tell.
+  const hasNoDestination = isStructureReady && destinationOptions.length === 0 && !canMoveToRoot;
 
   const count = items.length;
 
   const handleMove = async () => {
-    if (isMoving) {
+    // The button is disabled in both cases; the dialog can also be submitted
+    // from the keyboard, so guard here too.
+    if (isMoving || !isStructureReady) {
       return;
     }
 
@@ -182,6 +187,56 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
     onClose();
   };
 
+  // Three states: a failed structure request, a genuine dead end, and the
+  // select — which also covers the loading window, so the hint and the error
+  // don't flash in ahead of the options.
+  const renderBody = () => {
+    if (isStructureError) {
+      return (
+        <Typography textColor="danger600">
+          {formatMessage({
+            id: getTranslationKey('list.bulk-actions.move.load-error'),
+            defaultMessage: "Couldn't load the folder list. Please try again.",
+          })}
+        </Typography>
+      );
+    }
+
+    if (hasNoDestination) {
+      return (
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: getTranslationKey('list.bulk-actions.move.no-destination'),
+            defaultMessage: 'There is no other folder to move this to.',
+          })}
+        </Typography>
+      );
+    }
+
+    return (
+      <Field.Root name="destination">
+        <Field.Label>
+          {formatMessage({
+            id: getTranslationKey('list.bulk-actions.move.location'),
+            defaultMessage: 'Location',
+          })}
+        </Field.Label>
+        <SingleSelect
+          value={destination}
+          onChange={(value) => setDestination(String(value))}
+          disabled={isMoving || !isStructureReady}
+        >
+          {canMoveToRoot && <SingleSelectOption value="">{rootLabel}</SingleSelectOption>}
+          {destinationOptions.map((option) => (
+            <SingleSelectOption key={option.id} value={String(option.id)}>
+              {option.label}
+            </SingleSelectOption>
+          ))}
+        </SingleSelect>
+      </Field.Root>
+    );
+  };
+
   return (
     <Modal.Root
       open={open}
@@ -202,43 +257,17 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
             })}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {hasNoDestination ? (
-            <Typography textColor="neutral600">
-              {formatMessage({
-                id: getTranslationKey('list.bulk-actions.move.no-destination'),
-                defaultMessage: 'There is no other folder to move this to.',
-              })}
-            </Typography>
-          ) : (
-            <Field.Root name="destination">
-              <Field.Label>
-                {formatMessage({
-                  id: getTranslationKey('list.bulk-actions.move.location'),
-                  defaultMessage: 'Location',
-                })}
-              </Field.Label>
-              <SingleSelect
-                value={destination}
-                onChange={(value) => setDestination(String(value))}
-                disabled={isMoving}
-              >
-                {canMoveToRoot && <SingleSelectOption value="">{rootLabel}</SingleSelectOption>}
-                {destinationOptions.map((option) => (
-                  <SingleSelectOption key={option.id} value={String(option.id)}>
-                    {option.label}
-                  </SingleSelectOption>
-                ))}
-              </SingleSelect>
-            </Field.Root>
-          )}
-        </Modal.Body>
+        <Modal.Body>{renderBody()}</Modal.Body>
         <Modal.Footer>
           <Flex gap={2} justifyContent="space-between" width="100%">
             <Button variant="tertiary" onClick={onClose} disabled={isMoving} type="button">
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
-            <Button onClick={handleMove} loading={isMoving} disabled={hasNoDestination}>
+            <Button
+              onClick={handleMove}
+              loading={isMoving}
+              disabled={!isStructureReady || hasNoDestination}
+            >
               {formatMessage({
                 id: getTranslationKey('list.bulk-actions.move.submit'),
                 defaultMessage: 'Move',
