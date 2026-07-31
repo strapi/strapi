@@ -39,7 +39,7 @@ const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
 
   // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
   // which causes infinite self references
-  return function (query) {
+  return function findDocumentSiblingIds(query) {
     query
       .select('id')
       .from(tableName)
@@ -376,7 +376,9 @@ const cleanOrderColumns = async ({
     }
   };
 
-  return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
+  // Run updates in a deterministic order to avoid lock cycles on the same join table.
+  await updateOrderColumn();
+  await updateInverseOrderColumn();
 };
 
 export {

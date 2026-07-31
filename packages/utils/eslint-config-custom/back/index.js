@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
     ecmaVersion: 2021,
@@ -22,13 +25,15 @@ module.exports = {
           '**/__tests__/**/*.ts',
           '**/__mocks__/**/*.js',
           '**/__mocks__/**/*.ts',
+          '**/vitest.config.ts',
         ],
       },
     ],
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
-    'no-continue': 'warn',
+    // Allowed in this codebase: continue is clearer in traversal/query/migration loops.
+    'no-continue': 'off',
     'no-process-exit': 'off',
     'no-loop-func': 'off',
     'max-classes-per-file': 'off',
@@ -40,3 +45,5 @@ module.exports = {
     ],
   },
 };
+
+module.exports = config;

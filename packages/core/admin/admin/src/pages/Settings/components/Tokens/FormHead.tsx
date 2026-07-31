@@ -166,7 +166,7 @@ export const FormHead = <TToken extends Token | null>({
               />
             )}
             <Flex width="100%" gap={2}>
-              {token?.id && toggleToken && (
+              {token?.id && toggleToken && canShowToken === true && (
                 <tours.apiTokens.ViewAPIToken>
                   <Tooltip
                     label={

@@ -76,7 +76,15 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
         strapiSource.set('locale', locale);
       }
 
-      return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
+      const encoded = vercelStegaCombine(
+        text,
+        {
+          strapiSource: strapiSource.toString(),
+        },
+        false
+      );
+
+      return encoded;
     },
 
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
@@ -85,16 +93,28 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       }
 
       return traverseEntity(
-        ({ key, value, attribute, schema, path }, { set }) => {
+        ({ key, value, attribute, schema, path, parent }, { set }) => {
           if (!attribute || EXCLUDED_FIELDS.includes(key)) {
             return;
           }
 
           if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
+            // For inner fields of a multi-media field's items (e.g. `medias.0.url`),
+            // drop the array index so all items share the same encoded path. The
+            // preview groups them under one highlight and opens the multi-media
+            // input as a single field, matching the side editor.
+            const parentAttr = parent?.attribute;
+            const isInsideMultiMedia =
+              parentAttr?.type === 'media' && (parentAttr as any).multiple === true;
+            const encodedPath =
+              isInsideMultiMedia && parent?.path?.rawWithIndices
+                ? `${parent.path.rawWithIndices}.${key}`
+                : path.rawWithIndices!;
+
             set(
               key,
               this.encodeField(value, {
-                path: path.rawWithIndices!,
+                path: encodedPath,
                 type: attribute.type,
                 kind: schema.kind,
                 model: schema.uid as UID.Schema,

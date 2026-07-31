@@ -3,7 +3,7 @@ import { SealCheck } from '@strapi/icons';
 import { PLUGIN_ID, FEATURE_ID } from './constants';
 import { Header } from './routes/content-manager/model/id/components/Header';
 import { Panel } from './routes/content-manager/model/id/components/Panel';
-import { addColumnToTableHook } from './utils/cm-hooks';
+import { addColumnToTableHook, addFilterToListViewHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
 import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
@@ -13,6 +13,7 @@ const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
     if (window.strapi.features.isEnabled(FEATURE_ID)) {
       app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+      app.registerHook('Admin/CM/pages/ListView/inject-in-filters', addFilterToListViewHook);
 
       const contentManagerPluginApis = app.getPlugin('content-manager').apis;
 
@@ -32,9 +33,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { Router } = await import('./router');
-          return { default: Router };
+        Component() {
+          return import('./router').then((mod) => ({
+            default: mod.Router,
+          }));
         },
       });
 
@@ -66,9 +68,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
-          return { default: PurchaseReviewWorkflows };
+        Component() {
+          return import('./routes/purchase-review-workflows').then((mod) => ({
+            default: mod.PurchaseReviewWorkflows,
+          }));
         },
       });
     }

@@ -1,7 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-import { Schema } from '../../types/schema';
-
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
+import type { Schema } from '../../types/schema';
+
+type SchemaWithSources = (ContentType | Component) & { sources?: unknown };
 
 const transformAttributesFromCTBToChat = (attributes: AnyAttribute[]) => {
   return attributes.reduce(
@@ -17,7 +17,7 @@ const transformAttributesFromCTBToChat = (attributes: AnyAttribute[]) => {
   );
 };
 
-export const transformCTBToChat = (schema: ContentType | Component): Schema => {
+export const transformCTBToChat = (schema: SchemaWithSources): Schema => {
   if (schema.modelType === 'component') {
     return {
       category: schema.category,
@@ -27,11 +27,10 @@ export const transformCTBToChat = (schema: ContentType | Component): Schema => {
       description: schema.info.description,
       name: schema.info.displayName,
 
-      uid: schema.uid as any,
+      uid: schema.uid,
       attributes: transformAttributesFromCTBToChat(schema.attributes),
-      // @ts-expect-error - injected from previous ai messages
       sources: schema.sources,
-    } as any;
+    } satisfies Schema;
   }
 
   return {
@@ -40,13 +39,13 @@ export const transformCTBToChat = (schema: ContentType | Component): Schema => {
     description: schema.info.description,
     action: 'create',
     name: schema.info.pluralName,
-    uid: schema.uid as any,
+    uid: schema.uid,
+    ...(schema.plugin ? { plugin: schema.plugin } : {}),
     attributes: transformAttributesFromCTBToChat(schema.attributes),
-    // @ts-expect-error - injected from previous ai messages
     sources: schema.sources,
     options: {
       draftAndPublish: schema.options?.draftAndPublish,
       localized: false,
     },
-  } as any;
+  } satisfies Schema;
 };

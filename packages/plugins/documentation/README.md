@@ -16,7 +16,7 @@ This plugin automates your API documentation creation. It basically generates a 
 
 ### Config
 
-Create a `settings.json` file located in `src/extensions/documentation/config` folder where you can specify all your environment variables, licenses, external documentation and so one...
+Create a `settings.json` file located in `src/extensions/documentation/config` folder where you can specify all your environment variables, licenses, external documentation and so on...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
 _NOTE_ if you need to add a custom key you can do it by prefixing your key by `x-{something}`
@@ -82,13 +82,13 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 **_NOTE 2_**
 
-You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/register.js`
+You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/src/register.js`
 
 ### FAQ
 
 #### How does it generate the others plugins documentation ?
 
-In other to reference a plugin's route into the documentation you need to add a `description` key in the `config` object.
+In order to reference a plugin's route into the documentation you need to add a `description` key in the `config` object.
 
 For example this is the plugin email routes.json file
 

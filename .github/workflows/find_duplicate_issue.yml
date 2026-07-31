@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 1
 
       - name: Check for duplicate issues
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.132
         with:
           prompt: |
             Analyze this issue and check if it's a duplicate of other issues in the repository.

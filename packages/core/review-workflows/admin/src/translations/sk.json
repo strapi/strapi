@@ -1,0 +1,17 @@
+{
+  "settings.page.title": "Workflow kontroly",
+  "settings.page.subtitle": "{count, plural, one {# fáza} other {# fázy}}",
+  "settings.page.isLoading": "Workflow sa načítava",
+  "settings.page.delete.confirm.body": "Všetky záznamy priradené k odstráneným fázam budú presunuté do predchádzajúcej fázy. Naozaj chcete uložiť?",
+  "settings.stage.name.label": "Názov fázy",
+  "settings.not-available": "Workflow kontroly je dostupný iba ako súčasť Enterprise Edition. Upgradujte a vytvárajte a spravujte workflow.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Požadovaná fáza na publikovanie",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Ľubovoľná fáza",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Zabráni publikovaniu záznamov, ak nie sú v požadovanej fáze.",
+  "settings.page.purchase.description": "Spravujte proces kontroly obsahu",
+  "settings.page.purchase.perks1": "Prispôsobiteľné fázy kontroly",
+  "settings.page.purchase.perks2": "Správa používateľských oprávnení",
+  "settings.page.purchase.perks3": "Podpora webhookov",
+  "widget.assigned.title": "Priradené mne",
+  "widget.assigned.no-data": "Žiadne záznamy"
+}

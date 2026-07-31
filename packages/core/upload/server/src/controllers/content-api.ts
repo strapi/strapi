@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { errors } from '@strapi/utils';
+import utils, { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -41,7 +41,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const files = await getService('upload').findMany(sanitizedQuery);
 
-      ctx.body = await sanitizeOutput(files, ctx);
+      const signedFiles = await async.map(files, getService('file').signFileUrls);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
+    },
+
+    async findPage(ctx: Context) {
+      await validateQuery(ctx.query, ctx);
+      const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+      const { results, pagination } = await getService('upload').findAndCountPage(sanitizedQuery);
+
+      const data = await sanitizeOutput(results, ctx);
+
+      ctx.body = { data, meta: { pagination } };
     },
 
     async findOne(ctx: Context) {
@@ -58,7 +71,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.notFound('file.notFound');
       }
 
-      ctx.body = await sanitizeOutput(file, ctx);
+      const signedFile = await getService('file').signFileUrls(file);
+
+      ctx.body = await sanitizeOutput(signedFile, ctx);
     },
 
     async destroy(ctx: Context) {
@@ -74,7 +89,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       await getService('upload').remove(file);
 
-      ctx.body = await sanitizeOutput(file, ctx);
+      const signedFile = await getService('file').signFileUrls(file);
+
+      ctx.body = await sanitizeOutput(signedFile, ctx);
     },
 
     async updateFileInfo(ctx: Context) {
@@ -90,7 +107,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const result = await getService('upload').updateFileInfo(id, data.fileInfo as any);
 
-      ctx.body = await sanitizeOutput(result, ctx);
+      const signedResult = await getService('file').signFileUrls(result);
+
+      ctx.body = await sanitizeOutput(signedResult, ctx);
     },
 
     async replaceFile(ctx: Context) {
@@ -99,18 +118,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      // cannot replace with more than one file
+      if (Array.isArray(filesInput) && filesInput.length > 1) {
+        throw new ValidationError('Cannot replace a file with multiple ones');
+      }
+
+      const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
+
       const {
         validFiles,
         filteredBody,
         errors: validationErrors,
-      } = await prepareUploadRequest(filesInput, body, strapi);
+      } = await prepareUploadRequest(files, body, strapi);
       if (validFiles.length === 0) {
         throw new errors.ValidationError(validationErrors[0].message);
-      }
-
-      // cannot replace with more than one file
-      if (Array.isArray(filesInput)) {
-        throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
       if (!id || (typeof id !== 'string' && typeof id !== 'number')) {
@@ -121,7 +142,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
 
-      ctx.body = await sanitizeOutput(replacedFiles, ctx);
+      const signedFiles = await getService('file').signFileUrls(replacedFiles);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
     async uploadFiles(ctx: Context) {
@@ -160,7 +183,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         files: validFiles,
       });
 
-      ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);
+      const signedFiles = await async.map(uploadedFiles as any[], getService('file').signFileUrls);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
       ctx.status = 201;
     },
 

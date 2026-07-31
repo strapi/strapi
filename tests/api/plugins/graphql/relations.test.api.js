@@ -887,10 +887,10 @@ describe('Test Graphql Relations API End to End', () => {
       });
     });
 
-    test(`Can't edit a private relation `, async () => {
+    test('Can update a person with a private relation in mutation input', async () => {
       const newPerson = {
         name: 'Check Norris Junior',
-        privateCars: [],
+        privateCars: [data.cars[0].documentId],
       };
 
       const mutationRes = await graphqlQuery({
@@ -899,6 +899,9 @@ describe('Test Graphql Relations API End to End', () => {
             updatePerson(documentId: $documentId, data: $data) {
               data {
                 documentId
+                attributes {
+                  name
+                }
               }
             }
           }
@@ -909,10 +912,24 @@ describe('Test Graphql Relations API End to End', () => {
         },
       });
 
-      expect(mutationRes.statusCode).toBe(400);
-      expect(mutationRes.body.errors[0].message).toBe(
-        `Variable "$data" got invalid value { name: "Check Norris Junior", privateCars: [] }; Field "privateCars" is not defined by type "PersonInput".`
-      );
+      expect(mutationRes.statusCode).toBe(200);
+      expect(mutationRes.body).toMatchObject({
+        data: {
+          updatePerson: {
+            data: {
+              documentId: data.people[0].documentId,
+              attributes: {
+                name: newPerson.name,
+              },
+            },
+          },
+        },
+      });
+
+      data.people[0] = {
+        ...data.people[0],
+        ...mutationRes.body.data.updatePerson.data.attributes,
+      };
 
       const queryRes = await graphqlQuery({
         query: /* GraphQL */ `

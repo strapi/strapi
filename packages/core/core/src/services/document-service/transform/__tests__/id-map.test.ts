@@ -30,6 +30,15 @@ describe('Extract document ids from relation data', () => {
       getModel: () => ({
         options: { draftAndPublish: true },
       }),
+      plugins: {
+        i18n: {
+          services: {
+            'content-types': {
+              isLocalizedContentType: () => true,
+            },
+          },
+        },
+      },
     } as unknown as Core.Strapi;
   });
 
@@ -64,6 +73,54 @@ describe('Extract document ids from relation data', () => {
 
     // Check that the id is loaded
     expect(idMap.get(keyFields)).toEqual(1);
+  });
+
+  it('Load non-localized entries regardless of stored locale column value', async () => {
+    const PRODUCT_UID = 'api::product.product';
+    const findProducts = jest.fn(() => ({}));
+    findManyQueries[PRODUCT_UID] = findProducts;
+
+    const previousStrapi = global.strapi;
+
+    global.strapi = {
+      db: {
+        query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
+      },
+      getModel: () => ({
+        uid: PRODUCT_UID,
+        options: { draftAndPublish: true },
+      }),
+      plugins: {
+        i18n: {
+          services: {
+            'content-types': {
+              isLocalizedContentType: () => false,
+            },
+          },
+        },
+      },
+    } as unknown as Core.Strapi;
+
+    const idMap = createIdMap({ strapi: global.strapi });
+
+    const documentId = 'product-1';
+    const keyFields = { uid: PRODUCT_UID, documentId, status: 'draft', locale: null } as const;
+
+    findProducts.mockReturnValueOnce([{ id: 10, documentId, locale: 'en', publishedAt: null }]);
+
+    idMap.add(keyFields);
+    await idMap.load();
+
+    expect(findProducts).toHaveBeenCalledWith({
+      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      where: {
+        documentId: { $in: [documentId] },
+        publishedAt: null,
+      },
+    });
+    expect(idMap.get(keyFields)).toEqual(10);
+
+    global.strapi = previousStrapi;
   });
 
   it('Load multiple document ids from different UIDs', async () => {

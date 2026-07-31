@@ -10,6 +10,7 @@ import {
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
+import { getBasename } from '../utils/basename';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
@@ -47,6 +48,11 @@ type PreloadState = Partial<{
   admin_app: AppState;
 }>;
 
+type DefaultMiddlewareOptions = {
+  serializableCheck?: boolean;
+  immutableCheck?: boolean;
+};
+
 /**
  * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
  * which we're trying to phase out. App Middlewares could potentially be improved...?
@@ -58,7 +64,7 @@ const configureStoreImpl = (
 ) => {
   const coreReducers = { ...staticReducers, ...injectedReducers } as const;
 
-  const defaultMiddlewareOptions = {} as any;
+  const defaultMiddlewareOptions: DefaultMiddlewareOptions = {};
 
   // These are already disabled in 'production' env but we also need to disable it in test environments
   // However, we want to leave them on for development so any issues can still be caught
@@ -92,7 +98,8 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     // isRejectedWithValue Or isRejected
     if (isRejected(action) && action.payload?.status === 401) {
       dispatch(logout());
-      window.location.href = '/admin/auth/login';
+      const basename = getBasename();
+      window.location.href = `${basename}/auth/login`;
       return;
     }
 

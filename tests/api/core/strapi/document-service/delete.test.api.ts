@@ -2,8 +2,10 @@ import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils';
-import resources from './resources/index';
+import { createMinimalArticleCategoryResources } from './resources/minimal-article-category';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
+
+const resources = createMinimalArticleCategoryResources({ withComponents: true });
 
 describe('Document Service', () => {
   let testUtils;
@@ -42,7 +44,6 @@ describe('Document Service', () => {
       } as const;
 
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-      // update article
       const updatedArticle = await strapi.documents(ARTICLE_UID).update({
         documentId: articleDb.documentId,
         locale: 'en',
@@ -53,13 +54,11 @@ describe('Document Service', () => {
         populate: ['comp', 'dz'],
       });
 
-      // delete article
       await strapi.documents(ARTICLE_UID).delete({
         documentId: articleDb.documentId,
         locale: 'en',
       });
 
-      // Components should not be in the database anymore
       const compTable = strapi.db.metadata.get('article.comp').tableName;
       const dzTable = strapi.db.metadata.get('article.dz-comp').tableName;
 
@@ -88,11 +87,37 @@ describe('Document Service', () => {
       const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
       expect(articles.length).toBeGreaterThan(0);
-      // Should not have dutch locale
       articles.forEach((article) => {
         expect(article.locale).not.toBe('nl');
       });
     });
+
+    testInTransaction(
+      'Can delete a single document locale and populate the deleted entry',
+      async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
+
+        const deletedDocument = await strapi.documents(ARTICLE_UID).delete({
+          documentId: articleDb.documentId,
+          locale: 'nl',
+          populate: { categories: true },
+        });
+
+        expect(deletedDocument.entries).toHaveLength(1);
+        expect(deletedDocument.entries[0]).toMatchObject({
+          documentId: articleDb.documentId,
+          locale: 'nl',
+          categories: [{ documentId: 'Cat1', name: 'Cat1-NL' }],
+        });
+
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.locale).not.toBe('nl');
+        });
+      }
+    );
 
     testInTransaction('Status is ignored when deleting a document', async () => {
       const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });

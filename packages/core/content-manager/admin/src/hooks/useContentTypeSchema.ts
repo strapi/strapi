@@ -6,12 +6,74 @@ import { useGetInitialDataQuery } from '../services/init';
 
 import type { Component } from '../../../shared/contracts/components';
 import type { ContentType } from '../../../shared/contracts/content-types';
+import type { GetInitData } from '../../../shared/contracts/init';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * useContentTypeSchema
  * -----------------------------------------------------------------------------------------------*/
 type ComponentsDictionary = Record<string, Component>;
+
+const EMPTY_COMPONENTS: ComponentsDictionary = {};
+
+type InitialData = GetInitData.Response['data'];
+
+// Module-level cache preserves schema derivation identities across hook instances;
+// `useMemo` would only stabilize values inside a single component tree.
+const schemaInfoCache = new WeakMap<
+  InitialData,
+  Map<
+    string | undefined,
+    {
+      components?: ComponentsDictionary;
+      contentType?: ContentType;
+      contentTypes: ContentType[];
+    }
+  >
+>();
+
+const getSchemaInfo = (data: InitialData | undefined, model?: string) => {
+  if (!data) {
+    return {
+      components: undefined,
+      contentType: undefined,
+      contentTypes: [],
+    };
+  }
+
+  let cachedByModel = schemaInfoCache.get(data);
+
+  if (!cachedByModel) {
+    cachedByModel = new Map();
+    schemaInfoCache.set(data, cachedByModel);
+  }
+
+  const cached = cachedByModel.get(model);
+
+  if (cached) {
+    return cached;
+  }
+
+  const contentType = data.contentTypes.find((ct) => ct.uid === model);
+
+  const componentsByKey = data.components.reduce<ComponentsDictionary>((acc, component) => {
+    acc[component.uid] = component;
+
+    return acc;
+  }, {});
+
+  const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
+
+  const schemaInfo = {
+    components: Object.keys(components).length === 0 ? undefined : components,
+    contentType,
+    contentTypes: data.contentTypes,
+  };
+
+  cachedByModel.set(model, schemaInfo);
+
+  return schemaInfo;
+};
 
 /**
  * @internal
@@ -28,23 +90,10 @@ const useContentTypeSchema = (model?: string) => {
 
   const { data, error, isLoading, isFetching } = useGetInitialDataQuery(undefined);
 
-  const { components, contentType, contentTypes } = React.useMemo(() => {
-    const contentType = data?.contentTypes.find((ct) => ct.uid === model);
-
-    const componentsByKey = data?.components.reduce<ComponentsDictionary>((acc, component) => {
-      acc[component.uid] = component;
-
-      return acc;
-    }, {});
-
-    const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
-
-    return {
-      components: Object.keys(components).length === 0 ? undefined : components,
-      contentType,
-      contentTypes: data?.contentTypes ?? [],
-    };
-  }, [model, data]);
+  const { components, contentType, contentTypes } = React.useMemo(
+    () => getSchemaInfo(data, model),
+    [model, data]
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -56,8 +105,7 @@ const useContentTypeSchema = (model?: string) => {
   }, [toggleNotification, error, formatAPIError]);
 
   return {
-    // This must be memoized to avoid inifiinite re-renders where the empty object is different everytime.
-    components: React.useMemo(() => components ?? {}, [components]),
+    components: components ?? EMPTY_COMPONENTS,
     schema: contentType,
     schemas: contentTypes,
     isLoading: isLoading || isFetching,
@@ -113,7 +161,10 @@ const extractContentTypeComponents = (
   const uniqueComponentUids = [...new Set(componentUids)];
 
   const componentsByKey = uniqueComponentUids.reduce<ComponentsDictionary>((acc, uid) => {
-    acc[uid] = allComponents[uid];
+    const component = allComponents[uid];
+    if (component) {
+      acc[uid] = component;
+    }
 
     return acc;
   }, {});

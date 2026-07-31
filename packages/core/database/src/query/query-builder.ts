@@ -8,12 +8,14 @@ import { transactionCtx } from '../transaction-context';
 import { isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
+import type { OrderByValue } from './helpers/order-by';
 
 interface State {
-  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
+  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
   select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
+  min: string | null;
   first: boolean;
   data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
   where: Record<string, unknown>[];
@@ -73,6 +75,8 @@ export interface QueryBuilder {
 
   max(column: string): QueryBuilder;
 
+  min(column: string): QueryBuilder;
+
   where(where?: object): QueryBuilder;
 
   limit(limit: number): QueryBuilder;
@@ -109,6 +113,8 @@ export interface QueryBuilder {
 
   processState(): void;
 
+  ensurePaginationOrderStability(): void;
+
   shouldUseDistinct(): boolean;
 
   shouldUseDeepSort(): boolean;
@@ -136,6 +142,7 @@ const createQueryBuilder = (
       select: [],
       count: null,
       max: null,
+      min: null,
       first: false,
       data: null,
       where: [],
@@ -260,6 +267,13 @@ const createQueryBuilder = (
       return this;
     },
 
+    min(column: string) {
+      state.type = 'min';
+      state.min = column;
+
+      return this;
+    },
+
     where(where: Record<string, unknown> = {}) {
       if (!_.isPlainObject(where)) {
         throw new Error('Where must be an object');
@@ -311,14 +325,24 @@ const createQueryBuilder = (
     },
 
     init(params = {}) {
-      const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const {
+        _q: searchQuery,
+        filters,
+        where,
+        select,
+        limit,
+        offset,
+        orderBy,
+        groupBy,
+        populate,
+      } = params;
 
       if (!_.isNil(where)) {
         this.where(where);
       }
 
-      if (!_.isNil(_q)) {
-        this.search(_q);
+      if (!_.isNil(searchQuery)) {
+        this.search(searchQuery);
       }
 
       if (!_.isNil(select)) {
@@ -447,9 +471,48 @@ const createQueryBuilder = (
 
       state.data = helpers.toRow(meta, state.data);
 
+      this.ensurePaginationOrderStability();
+
       this.processSelect();
 
       this.state.processed = true;
+    },
+
+    /**
+     * OFFSET/LIMIT without a unique ORDER BY is undefined behavior on SQL databases (notably MySQL).
+     * That can repeat or skip rows across pages. Deep sort already appends a primary-key tie-breaker;
+     * for all other paginated selects, append id ASC when it is not already the last sort key.
+     */
+    ensurePaginationOrderStability() {
+      if (state.type !== 'select' || state.first) {
+        return;
+      }
+
+      if (state.limit === null && state.offset === null) {
+        return;
+      }
+
+      if (state.limit === -1) {
+        return;
+      }
+
+      if (this.shouldUseDeepSort()) {
+        return;
+      }
+
+      if (!meta.attributes.id) {
+        return;
+      }
+
+      const idColumnName = helpers.toColumnName(meta, 'id');
+      const aliasedId = this.aliasColumn(idColumnName);
+      const lastOrder = state.orderBy[state.orderBy.length - 1];
+
+      if (lastOrder && lastOrder.column === aliasedId) {
+        return;
+      }
+
+      state.orderBy = [...state.orderBy, { column: aliasedId, order: 'asc' }];
     },
 
     shouldUseDistinct() {
@@ -459,9 +522,9 @@ const createQueryBuilder = (
     shouldUseDeepSort() {
       return (
         state.orderBy
-          .filter(({ column }) => column.indexOf('.') >= 0)
-          .filter(({ column }) => {
-            const col = column.split('.');
+          .filter((ob: any) => 'column' in ob && ob.column.indexOf('.') >= 0)
+          .filter((ob: any) => {
+            const col = ob.column.split('.');
 
             for (let i = 0; i < col.length - 1; i += 1) {
               const el = col[i];
@@ -497,9 +560,25 @@ const createQueryBuilder = (
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
-        const orderByColumns = state.orderBy.map(({ column }) => column);
+        // Only include column-based orderBy entries here (raw expressions are handled below)
+        const orderByColumns = state.orderBy
+          .filter((ob: any) => 'column' in ob)
+          .map((ob: any) => ob.column);
 
         state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+
+        // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
+        // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
+        // plain columns, so add them explicitly — using the same builder/alias as the ORDER BY
+        // so the rendered SQL matches and PostgreSQL accepts the query. The deep-sort path
+        // dedupes via row numbering instead of DISTINCT, so it strips these out later.
+        const rawOrderByExpressions = state.orderBy
+          .filter((ob: any) => 'rawExpression' in ob)
+          .map((ob: any) =>
+            helpers.buildStatusSortExpression(db, tableName, this.alias, ob.isI18n)
+          );
+
+        state.select = [...state.select, ...rawOrderByExpressions];
       }
     },
 
@@ -543,6 +622,11 @@ const createQueryBuilder = (
         case 'max': {
           const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
           qb.max({ max: dbColumnName });
+          break;
+        }
+        case 'min': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.min));
+          qb.min({ min: dbColumnName });
           break;
         }
         case 'insert': {
@@ -606,10 +690,6 @@ const createQueryBuilder = (
         qb.offset(state.offset);
       }
 
-      if (state.orderBy.length > 0) {
-        qb.orderBy(state.orderBy);
-      }
-
       if (state.first) {
         qb.first();
       }
@@ -630,8 +710,23 @@ const createQueryBuilder = (
         });
       }
 
+      /**
+       * Join `orderBy` (e.g. join-table ordinal for relations) must precede root `state.orderBy`
+       * when both are emitted. Otherwise pagination stability (`ensurePaginationOrderStability`)
+       * appending `id ASC` on the root alias wins over distinct target ids and breaks relation ordering.
+       */
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
+      }
+
+      if (state.orderBy.length > 0) {
+        // `processState` normalizes entries to OrderByValue[] (string/object input from `.init()`).
+        const knexOrderBy: helpers.KnexOrderByColumnDescriptor[] = (
+          state.orderBy as OrderByValue[]
+        ).map((entry) => helpers.toKnexOrderByDescriptor(db, tableName, this.alias, entry));
+        // Knex compound `orderBy` typings list `column: string | QueryBuilder` — `Knex.Raw` works at runtime
+        // (e.g. `status` sort). See helpers.toKnexOrderByDescriptor / buildStatusSortExpression.
+        qb.orderBy(knexOrderBy as never);
       }
 
       if (this.shouldUseDeepSort()) {

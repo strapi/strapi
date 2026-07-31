@@ -22,23 +22,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      // Check if user disabled AI features globally
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
-      if (!isAIEnabled) {
+      if (strapi.ai.admin.isEnabled() === false) {
         return false;
       }
-
-      // Check if the user's license grants access to AI features
-      const hasAccess = strapi.ee.features.isEnabled('cms-ai');
-      if (!hasAccess) {
-        return false;
-      }
-
-      // Check if feature is specifically enabled, defaulting to true
       const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
-      const aiMetadata: boolean = settings.aiMetadata ?? true;
-
-      return aiMetadata;
+      return settings.aiMetadata ?? true;
     },
 
     async countImagesWithoutMetadata() {
@@ -210,7 +198,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let token: string;
       try {
-        const tokenData = await strapi.get('ai').getAiToken();
+        const tokenData = await strapi.ai.admin.getAiToken();
         token = tokenData.token;
       } catch (error) {
         throw new Error('Failed to retrieve AI token', {

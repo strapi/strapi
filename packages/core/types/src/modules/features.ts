@@ -1,9 +1,6 @@
-export interface FeaturesConfig {
-  future?: {
-    unstableMediaLibrary?: boolean;
-    unstableContentTypeBuilderIndexing?: boolean;
-  };
-}
+import type { Features } from '../core/config/features';
+
+export type FeaturesConfig = Features;
 
 export interface FeaturesService {
   /**

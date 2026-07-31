@@ -14,7 +14,7 @@ jest.mock('../../store/hooks', () => ({
 
 jest.mock('../../services/api', () => ({
   abortUpload: jest.fn(),
-  useRetryCancelledFilesStreamMutation: () => [mockRetryCancelledFiles],
+  useRetryCancelledFilesMutation: () => [mockRetryCancelledFiles],
 }));
 
 const { useTypedSelector } = jest.requireMock('../../store/hooks');
@@ -30,13 +30,14 @@ const createMockFile = (
   index,
   status,
   size: 1024,
+  // Completed files have fully transferred; this drives the byte-weighted aggregate.
+  uploadedBytes: status === 'complete' ? 1024 : 0,
   error,
 });
 
 const createMockState = (overrides: Partial<UploadProgressState> = {}): UploadProgressState => ({
   isVisible: true,
   isMinimized: false,
-  progress: 0,
   totalFiles: 3,
   files: [],
   errors: [],
@@ -73,7 +74,6 @@ describe('UploadProgressDialog', () => {
     it('displays uploading status with progress percentage', () => {
       setup(
         createMockState({
-          progress: 50,
           totalFiles: 4,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
@@ -89,7 +89,6 @@ describe('UploadProgressDialog', () => {
     it('shows Cancel button during upload', () => {
       setup(
         createMockState({
-          progress: 25,
           files: [
             createMockFile(0, 'file1.png', 'uploading'),
             createMockFile(1, 'file2.png', 'pending'),
@@ -103,7 +102,6 @@ describe('UploadProgressDialog', () => {
       setup(
         createMockState({
           uploadId: 5,
-          progress: 25,
           files: [createMockFile(0, 'file1.png', 'uploading')],
         })
       );
@@ -119,7 +117,6 @@ describe('UploadProgressDialog', () => {
     it('displays success status when all files are uploaded', async () => {
       setup(
         createMockState({
-          progress: 100,
           totalFiles: 2,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
@@ -136,7 +133,6 @@ describe('UploadProgressDialog', () => {
     it('shows Close button when upload is complete', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'complete')],
         })
       );
@@ -148,7 +144,6 @@ describe('UploadProgressDialog', () => {
     it('dispatches closeUploadProgress when Close is clicked', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'complete')],
         })
       );
@@ -166,7 +161,6 @@ describe('UploadProgressDialog', () => {
     it('displays error status when all files have errors', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'error', 'File too large'),
             createMockFile(1, 'file2.png', 'error', 'Network error'),
@@ -184,7 +178,6 @@ describe('UploadProgressDialog', () => {
     it('displays canceled status when some files are cancelled', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
             createMockFile(1, 'file2.png', 'cancelled'),
@@ -198,7 +191,6 @@ describe('UploadProgressDialog', () => {
     it('shows Retry button when there are cancelled files', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
             createMockFile(1, 'file2.png', 'cancelled'),
@@ -213,7 +205,6 @@ describe('UploadProgressDialog', () => {
 
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'cancelled')],
         })
       );
@@ -260,7 +251,6 @@ describe('UploadProgressDialog', () => {
     it('displays completed files with uploaded indicator', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'completed-file.png', 'complete')],
         })
       );
@@ -275,7 +265,6 @@ describe('UploadProgressDialog', () => {
     it('displays error files with error message', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'error-file.png', 'error', 'File size exceeded')],
         })
       );
@@ -290,7 +279,6 @@ describe('UploadProgressDialog', () => {
     it('displays cancelled files with canceled indicator', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'cancelled-file.png', 'cancelled')],
         })
       );
@@ -303,7 +291,6 @@ describe('UploadProgressDialog', () => {
     it('sorts completed files by priority: error > cancelled > complete', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'complete-file.png', 'complete'),
             createMockFile(1, 'cancelled-file.png', 'cancelled'),

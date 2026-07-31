@@ -1,6 +1,6 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, waitFor, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { RelationSingle, RelationMultiple } from '../Relations';
@@ -123,34 +123,30 @@ describe('Relation cell content', () => {
 
       // Mock API to return French locale relations
       server.use(
-        rest.get('/content-manager/relations/:model/:id/:targetField', (req, res, ctx) => {
-          const url = new URL(req.url);
+        http.get('/content-manager/relations/:model/:id/:targetField', ({ request }) => {
+          const url = new URL(request.url);
           const localeParam = url.searchParams.get('locale');
 
           // Return different relations based on locale
           if (localeParam === 'fr') {
-            return res(
-              ctx.json({
-                pagination: { page: 1, pageCount: 1, pageSize: 10, total: 2 },
-                results: [
-                  { documentId: '1', name: 'Catégorie française 1' },
-                  { documentId: '2', name: 'Catégorie française 2' },
-                ],
-              })
-            );
+            return HttpResponse.json({
+              pagination: { page: 1, pageCount: 1, pageSize: 10, total: 2 },
+              results: [
+                { documentId: '1', name: 'Catégorie française 1' },
+                { documentId: '2', name: 'Catégorie française 2' },
+              ],
+            });
           }
 
           // Default: return English relations
-          return res(
-            ctx.json({
-              pagination: { page: 1, pageCount: 1, pageSize: 10, total: 3 },
-              results: [
-                { documentId: '1', name: 'English Category 1' },
-                { documentId: '2', name: 'English Category 2' },
-                { documentId: '3', name: 'English Category 3' },
-              ],
-            })
-          );
+          return HttpResponse.json({
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 3 },
+            results: [
+              { documentId: '1', name: 'English Category 1' },
+              { documentId: '2', name: 'English Category 2' },
+              { documentId: '3', name: 'English Category 3' },
+            ],
+          });
         })
       );
 
@@ -183,17 +179,15 @@ describe('Relation cell content', () => {
 
       // Mock API to return default relations when no locale is provided
       server.use(
-        rest.get('/content-manager/relations/:model/:id/:targetField', (req, res, ctx) => {
-          return res(
-            ctx.json({
-              pagination: { page: 1, pageCount: 1, pageSize: 10, total: 3 },
-              results: [
-                { documentId: '1', name: 'Relation entity 1' },
-                { documentId: '2', name: 'Relation entity 2' },
-                { documentId: '3', name: 'Relation entity 3' },
-              ],
-            })
-          );
+        http.get('/content-manager/relations/:model/:id/:targetField', () => {
+          return HttpResponse.json({
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 3 },
+            results: [
+              { documentId: '1', name: 'Relation entity 1' },
+              { documentId: '2', name: 'Relation entity 2' },
+              { documentId: '3', name: 'Relation entity 3' },
+            ],
+          });
         })
       );
 

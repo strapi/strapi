@@ -8,9 +8,9 @@ const isBaseQueryError = (error: BaseQueryError): error is ApiError | UnknownApi
 };
 
 interface Query {
-  plugins?: Record<string, unknown>;
+  plugins?: Record<string, Record<string, string>>;
   _q?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

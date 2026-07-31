@@ -1,8 +1,15 @@
 import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
+import { isScalarAttribute } from '../content-types';
+import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
+import type { Model } from '../types';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
+
+/** True if this object should be walked as a filter subtree (operators / attributes), not an opaque operand. */
+const isFilterLikeObject = (value: Record<string, unknown>, schema?: Model) =>
+  Object.keys(value).some((k) => isOperator(k) || Boolean(schema?.attributes?.[k]));
 
 const filters = traverseFactory()
   .intercept(
@@ -58,6 +65,22 @@ const filters = traverseFactory()
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 
+      // Operator operands that are plain objects (not arrays) are only traversed when they look like
+      // filter subtrees (nested operators or schema attributes). Otherwise treat as opaque operands
+      // (e.g. GraphQL DateTime / Date for $gt, $null / $notNull booleans, or { $null: { anything } }).
+      // Without this, traversing into e.g. { $null: { anything: 'x' } } makes validate throw on "anything".
+      // $not is excluded: its value is always a nested filter map, not an opaque scalar operand.
+      if (
+        isOperator(key) &&
+        key !== '$not' &&
+        isObj(value) &&
+        !isArray(value) &&
+        !isFilterLikeObject(value, schema)
+      ) {
+        set(key, value);
+        return;
+      }
+
       set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
     }
   )
@@ -112,6 +135,16 @@ const filters = traverseFactory()
     );
 
     set(key, newValue);
-  });
+  })
+  // Scalar fields: recurse into operator maps (e.g. { $contains: 'x' }) so visitors see nested keys.
+  .onAttribute(
+    ({ attribute, value }) =>
+      Boolean(isScalarAttribute(attribute)) && isObj(value) && !isArray(value),
+    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+
+      set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
+    }
+  );
 
 export default curry(filters.traverse);

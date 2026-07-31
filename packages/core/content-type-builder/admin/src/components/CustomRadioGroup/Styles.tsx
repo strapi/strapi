@@ -12,7 +12,7 @@ const Wrapper = styled(Flex)`
     flex: 1 1 calc(50% - ${({ theme }) => theme.spaces[2]});
     min-width: 220px;
 
-    ${inputFocusStyle() as any}
+    ${inputFocusStyle()}
   }
 
   @media (max-width: 62rem) {

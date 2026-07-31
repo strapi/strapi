@@ -31,7 +31,7 @@ import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponents
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
 
-import type { ContentTypes, ContentType, Components } from '../../types';
+import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { Internal } from '@strapi/types';
 
@@ -39,8 +39,35 @@ interface DataManagerProviderProps {
   children: React.ReactNode;
 }
 
+type SchemaResponse = {
+  data: {
+    components: Components;
+    contentTypes: ContentTypes;
+  };
+};
+
+type ReservedNamesResponse = DataManagerContextValue['reservedNames'];
+
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
+
+/**
+ * Tag types registered on the shared `adminApi` instance at runtime by
+ * `@strapi/content-manager` via `enhanceEndpoints({ addTagTypes: [...] })`
+ * (see packages/core/content-manager/admin/src/services/api.ts).
+ *
+ * The cast is only required because adminApi's compile-time tag union doesn't see
+ * tags added downstream from this side of the dependency graph.
+ */
+const CONTENT_MANAGER_SCHEMA_CACHE_TAGS = [
+  'InitialData',
+  'ContentTypesConfiguration',
+  'ContentTypeSettings',
+  'ComponentConfiguration',
+] as const;
+
+const invalidateContentManagerSchemaCaches = () =>
+  adminApi.util.invalidateTags(CONTENT_MANAGER_SCHEMA_CACHE_TAGS as never);
 
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
@@ -81,13 +108,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const isInDevelopmentMode = autoReload;
 
-  const getDataRef = React.useRef<any>();
+  const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 
   getDataRef.current = async () => {
     try {
       const [schemaResponse, reservedNamesResponse] = await Promise.all([
-        fetchClient.get(`/content-type-builder/schema`),
-        fetchClient.get(`/content-type-builder/reserved-names`),
+        fetchClient.get<SchemaResponse>(`/content-type-builder/schema`),
+        fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
       const { components, contentTypes } = schemaResponse.data.data;
@@ -219,6 +246,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
+      // Refresh content-manager caches that depend on the CT/component schema.
+      dispatch(invalidateContentManagerSchemaCaches());
     } catch (err) {
       console.error({ err });
       toggleNotification({
@@ -286,16 +315,36 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     sortedContentTypesList,
     isLoading,
     addAttribute(payload) {
-      dispatch(actions.addAttribute(payload));
+      dispatch(
+        actions.addAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editAttribute(payload) {
-      dispatch(actions.editAttribute(payload));
+      dispatch(
+        actions.editAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     addCustomFieldAttribute(payload) {
-      dispatch(actions.addCustomFieldAttribute(payload));
+      dispatch(
+        actions.addCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editCustomFieldAttribute(payload) {
-      dispatch(actions.editCustomFieldAttribute(payload));
+      dispatch(
+        actions.editCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));

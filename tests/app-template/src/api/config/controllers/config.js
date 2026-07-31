@@ -1,4 +1,5 @@
 const { createTestTransferToken } = require('../../../create-transfer-token');
+const resyncSuperAdminAfterImport = require('../utils/resync-super-admin-after-import');
 
 module.exports = {
   rateLimitEnable(ctx) {
@@ -15,6 +16,13 @@ module.exports = {
 
     await permissionService.cleanPermissionsInDatabase();
 
+    ctx.send(200);
+  },
+  /**
+   * After DTS import: E2E-only CM configuration sync + Super Admin permission reset.
+   */
+  async permissionsResyncSuperAdmin(ctx) {
+    await resyncSuperAdminAfterImport(strapi);
     ctx.send(200);
   },
   async resetTransferToken(ctx) {

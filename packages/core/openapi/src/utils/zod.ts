@@ -4,6 +4,18 @@ import * as z from 'zod/v4';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 /**
+ * Zod ≥3.25.76 embeds `$id` in `toJSONSchema` output (set after `override`).
+ * Strip it so OpenAPI documents stay stable — inline schemas use random UUIDs
+ * as registry ids — and match the pre-3.25.76 shape.
+ */
+export const stripJsonSchemaId = <T extends object>(schema: T): T => {
+  if ('$id' in schema) {
+    delete (schema as { $id?: string }).$id;
+  }
+  return schema;
+};
+
+/**
  * Converts a Zod schema to an OpenAPI Schema Object.
  *
  * @description
@@ -31,7 +43,6 @@ import type { OpenAPIV3_1 } from 'openapi-types';
  * const openAPISchema = zodToOpenAPI(userSchema);
  * ```
  */
-
 export const zodToOpenAPI = (
   zodSchema: z.ZodType
 ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject => {
@@ -52,7 +63,7 @@ export const zodToOpenAPI = (
     const { schemas } = z.toJSONSchema(registry, { uri: toComponentsPath });
 
     // TODO: make sure it's compliant
-    return schemas[id] as OpenAPIV3_1.SchemaObject;
+    return stripJsonSchemaId(schemas[id] as OpenAPIV3_1.SchemaObject);
   } catch (e) {
     throw new Error("Couldn't transform the zod schema into an OpenAPI schema");
   }

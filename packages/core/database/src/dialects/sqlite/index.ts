@@ -9,6 +9,9 @@ import type { Database } from '../..';
 
 const UNSUPPORTED_OPERATORS = ['$jsonSupersetOf'];
 
+/** SQLite compound SELECT limit (SQLITE_MAX_COMPOUND_SELECT); Knex batch insert uses UNION ALL per row. */
+const SQLITE_BATCH_INSERT_SIZE = 500;
+
 export default class SqliteDialect extends Dialect {
   schemaInspector: SqliteSchemaInspector;
 
@@ -16,6 +19,10 @@ export default class SqliteDialect extends Dialect {
     super(db, 'sqlite');
 
     this.schemaInspector = new SqliteSchemaInspector(db);
+  }
+
+  getBatchInsertSize(): number {
+    return SQLITE_BATCH_INSERT_SIZE;
   }
 
   configure(conn?: Knex.Sqlite3ConnectionConfig) {

@@ -1,6 +1,7 @@
 // folders
 export type * as EntityService from './entity-service';
 export type * as Documents from './documents';
+export type * as AI from './ai';
 
 // individual files
 export type * as Auth from './auth';
@@ -12,6 +13,7 @@ export type * as EntityValidator from './entity-validator';
 export type * as EventHub from './event-hub';
 export type * as Features from './features';
 export type * as Fetch from './fetch';
+export type * as MCP from './mcp';
 export type * as Metrics from './metrics';
 export type * as RequestContext from './request-context';
 export type * as SessionManager from './session-manager';

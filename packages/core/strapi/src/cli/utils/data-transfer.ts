@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import path from 'node:path';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger, type winston, formats } from '@strapi/logger';
@@ -8,8 +9,13 @@ import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
-import { readableBytes, exitWith } from './helpers';
-import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
+import {
+  readableBytes,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
+  exitWith,
+} from './helpers';
+import { getParseListWithChoices, parseInteger, parseList, confirmMessage } from './commander';
 
 const {
   errors: { TransferEngineInitializationError },
@@ -107,18 +113,19 @@ const buildTransferTable = (resultData: ResultData) => {
   return table;
 };
 
-const DEFAULT_IGNORED_CONTENT_TYPES = [
-  'admin::permission',
-  'admin::user',
-  'admin::role',
-  'admin::api-token',
-  'admin::api-token-permission',
-  'admin::transfer-token',
-  'admin::transfer-token-permission',
-  'admin::audit-log',
+const IGNORED_CONTENT_TYPE_PREFIXES = ['admin::'];
+
+const IGNORED_CONTENT_TYPES = [
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
 ];
+
+/** Media library content types — common target for `--exclude-content-types` (see issue #25008). */
+const UPLOAD_CONTENT_TYPE_UIDS = ['plugin::upload.file', 'plugin::upload.folder'] as const;
+
+const isIgnoredContentType = (type: string) =>
+  IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
+  IGNORED_CONTENT_TYPES.includes(type);
 
 const abortTransfer = async ({
   engine,
@@ -167,6 +174,32 @@ const createStrapiInstance = async (opts: { logLevel?: string } = {}): Promise<C
 
 const transferDataTypes = Object.keys(engineDataTransfer.TransferGroupPresets);
 
+const MEDIA_LIBRARY_PRESET = 'media-library';
+
+const TRANSFER_FILTER_PRESET_DESCRIPTIONS: Record<
+  engineDataTransfer.TransferFilterPreset | typeof MEDIA_LIBRARY_PRESET,
+  string
+> = {
+  content: 'entities and links (incl. media library DB records)',
+  files: 'upload binaries in public/uploads (not media library DB records)',
+  config: 'core store and webhooks',
+  [MEDIA_LIBRARY_PRESET]:
+    'upload binaries and media library DB records (files + plugin::upload.file, plugin::upload.folder)',
+};
+
+const transferExcludePresetChoices = [...transferDataTypes, MEDIA_LIBRARY_PRESET];
+
+const formatTransferPresetHelp = (types: string[]) =>
+  types
+    .map(
+      (type) =>
+        `${type} (${TRANSFER_FILTER_PRESET_DESCRIPTIONS[type as keyof typeof TRANSFER_FILTER_PRESET_DESCRIPTIONS]})`
+    )
+    .join('; ');
+
+const transferExcludePresetsHelp = formatTransferPresetHelp(transferExcludePresetChoices);
+const transferOnlyPresetsHelp = formatTransferPresetHelp(transferDataTypes);
+
 const throttleOption = new Option(
   '--throttle <delay after each entity>',
   `Add a delay in milliseconds between each transferred entity`
@@ -176,13 +209,40 @@ const throttleOption = new Option(
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
-  `Exclude data using comma-separated types. Available types: ${transferDataTypes.join(',')}`
-).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
+  `Exclude data: ${transferExcludePresetsHelp}`
+).argParser(getParseListWithChoices(transferExcludePresetChoices, 'Invalid options for "exclude"'));
 
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+  `Include only these types (plus schemas): ${transferOnlyPresetsHelp}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
+
+const excludeContentTypesOption = new Option(
+  '--exclude-content-types <comma-separated UIDs>',
+  `Exclude content types from entities and links (e.g. ${UPLOAD_CONTENT_TYPE_UIDS.join(',')} to omit the media library; or use --exclude media-library to skip binaries and upload records — see issue #25008)`
+).argParser(parseList);
+
+const onlyContentTypesOption = new Option(
+  '--only-content-types <comma-separated UIDs>',
+  'Transfer only these content types in entities and links (e.g. api::article.article)'
+).argParser(parseList);
+
+type ContentTypeTransferOptions = {
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+};
+
+type TransferExcludePreset = engineDataTransfer.TransferFilterPreset | typeof MEDIA_LIBRARY_PRESET;
+
+type TransferCliFilterOptions = Partial<
+  Omit<engineDataTransfer.ITransferEngineOptions, 'exclude' | 'only'>
+> & {
+  exclude?: TransferExcludePreset[];
+  only?: engineDataTransfer.TransferFilterPreset[];
+} & ContentTypeTransferOptions & {
+    /** Set when the files stage is auto-skipped because upload types are out of scope. */
+    filesAutoExcluded?: boolean;
+  };
 
 const validateExcludeOnly = (command: Command) => {
   const { exclude, only } = command.opts();
@@ -203,6 +263,80 @@ const validateExcludeOnly = (command: Command) => {
   }
 };
 
+const validateContentTypeTransferOptions = (command: Command) => {
+  const { excludeContentTypes, onlyContentTypes } = command.opts();
+
+  if (!excludeContentTypes?.length || !onlyContentTypes?.length) {
+    return;
+  }
+
+  const overlap = excludeContentTypes.filter((uid: string) => onlyContentTypes.includes(uid));
+  if (overlap.length > 0) {
+    exitWith(
+      1,
+      `Content types may not be used in both "--exclude-content-types" and "--only-content-types". Found in both: ${overlap.join(
+        ','
+      )}`
+    );
+  }
+};
+
+const assertKnownContentTypes = (uids: string[], strapi: Core.Strapi, flag: string) => {
+  const known = new Set(Object.keys(strapi.contentTypes));
+  const unknown = uids.filter((uid) => !known.has(uid));
+
+  if (unknown.length > 0) {
+    exitWith(1, `Unknown content type(s) for ${flag}: ${unknown.join(', ')}`);
+  }
+};
+
+const validateContentTypeTransferOptionsForStrapi = (
+  opts: ContentTypeTransferOptions,
+  strapi: Core.Strapi
+) => {
+  if (opts.excludeContentTypes?.length) {
+    assertKnownContentTypes(opts.excludeContentTypes, strapi, '--exclude-content-types');
+  }
+
+  if (opts.onlyContentTypes?.length) {
+    assertKnownContentTypes(opts.onlyContentTypes, strapi, '--only-content-types');
+  }
+};
+
+const shouldIncludeContentTypeInTransfer = (
+  uid: string,
+  opts: TransferCliFilterOptions
+): boolean => {
+  if (isIgnoredContentType(uid)) {
+    return false;
+  }
+
+  if (opts.excludeContentTypes?.includes(uid)) {
+    return false;
+  }
+
+  if (opts.onlyContentTypes?.length) {
+    return opts.onlyContentTypes.includes(uid);
+  }
+
+  return true;
+};
+
+const createEntityFilter = (opts: TransferCliFilterOptions) => {
+  return (entity: { type: string }) => shouldIncludeContentTypeInTransfer(entity.type, opts);
+};
+
+const createLinkFilter = (opts: TransferCliFilterOptions) => {
+  return (link: { left: { type: string }; right: { type: string } }) =>
+    shouldIncludeContentTypeInTransfer(link.left.type, opts) &&
+    shouldIncludeContentTypeInTransfer(link.right.type, opts);
+};
+
+const buildTransferTransforms = (opts: TransferCliFilterOptions) => ({
+  links: [{ filter: createLinkFilter(opts) }],
+  entities: [{ filter: createEntityFilter(opts) }],
+});
+
 const errorColors = {
   fatal: chalk.red,
   error: chalk.red,
@@ -211,23 +345,35 @@ const errorColors = {
 
 const formatDiagnostic = (
   operation: string,
-  info?: boolean
+  verbose?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
-  // Create log file for all incoming diagnostics
   let logger: undefined | winston.Logger;
+  let logFileBasename: string | undefined;
+
   const getLogger = () => {
     if (!logger) {
+      logFileBasename = `${operation}_${Date.now()}.log`;
+      const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
+
       logger = createLogger(
-        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
-          level: 'info',
-          format: formats?.detailedLogs,
-        })
+        configs.createOutputFileConfiguration(
+          logFileBasename,
+          {
+            level: 'info',
+            format: formats?.detailedLogs,
+          },
+          {
+            consoleLevel: verbose ? 'info' : 'warn',
+          }
+        )
+      );
+
+      logger.info(
+        `[${operation}] Diagnostic log file: ${absoluteLogPath} (info-level messages are written here even without --verbose)`
       );
     }
     return logger;
   };
-
-  // We don't want to write a log file until there is something to be logged
 
   return ({ details, kind }) => {
     try {
@@ -239,7 +385,7 @@ const formatDiagnostic = (
 
         getLogger().error(errorMessage);
       }
-      if (kind === 'info' && info) {
+      if (kind === 'info') {
         const { message, params, origin } = details;
 
         const msg = `[${origin ?? 'transfer'}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
@@ -267,7 +413,34 @@ type Data = {
     endTime?: number;
     bytes?: number;
     count?: number;
+    totalBytes?: number;
+    totalCount?: number;
   };
+};
+
+/** Stages where throughput is dominated by DB work; items/s is more meaningful than JSON byte rate. */
+const STAGES_WITH_ITEM_THROUGHPUT = new Set<engineDataTransfer.TransferStage>([
+  'entities',
+  'links',
+]);
+
+const MAX_ETA_MS = 86_400_000;
+
+/**
+ * Linear ETA from completed amount vs total, using average rate so far (done / elapsedMs).
+ * Returns null when progress or totals are not usable yet.
+ */
+const estimateEtaMs = (elapsedMs: number, done: number, total: number): number | null => {
+  if (elapsedMs < 500 || done <= 0 || total <= 0 || done >= total) {
+    return null;
+  }
+  const ratePerMs = done / elapsedMs;
+  const remaining = total - done;
+  const etaMs = remaining / ratePerMs;
+  if (!Number.isFinite(etaMs) || etaMs <= 0 || etaMs >= MAX_ETA_MS) {
+    return null;
+  }
+  return etaMs;
 };
 
 const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
@@ -281,14 +454,40 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     const elapsedTime = stageData?.startTime
       ? (stageData?.endTime || Date.now()) - stageData.startTime
       : 0;
-    const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
-    const elapsed = `elapsed: ${elapsedTime} ms`;
-    const speed =
-      elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
+    const bytes = stageData?.bytes ?? 0;
+    const count = stageData?.count ?? 0;
+    const totalBytes = stageData?.totalBytes;
+    const totalCount = stageData?.totalCount;
 
-    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transferred (${size}) (${elapsed}) ${
-      !stageData?.endTime ? speed : ''
-    }`;
+    const countLabel =
+      totalCount != null && totalCount > 0 ? `${count} / ${totalCount}` : String(count);
+    const sizeCompact =
+      totalBytes != null && totalBytes > 0
+        ? `${readableBytes(bytes)} / ${readableBytes(totalBytes)}`
+        : readableBytes(bytes);
+
+    const parts: string[] = [`${stage}: ${countLabel} transferred`, sizeCompact];
+
+    if (elapsedTime > 0 && !stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage)) {
+        const itemsPerSec = (count * 1000) / elapsedTime;
+        parts.push(`${itemsPerSec.toFixed(1)} items/s`);
+      } else {
+        parts.push(`${readableBytes((bytes * 1000) / elapsedTime)}/s`);
+      }
+    }
+
+    let etaMs: number | null = null;
+    if (!stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage) && totalCount != null) {
+        etaMs = estimateEtaMs(elapsedTime, count, totalCount);
+      } else if (totalBytes != null) {
+        etaMs = estimateEtaMs(elapsedTime, bytes, totalBytes);
+      }
+    }
+    parts.push(formatElapsedAndMaybeRemainingLabel(elapsedTime ?? 0, etaMs));
+
+    loaders[stage].text = parts.join(TRANSFER_PROGRESS_FIELD_SEP);
 
     return loaders[stage];
   };
@@ -448,7 +647,7 @@ const getAssetsBackupHandler = (
 };
 
 const shouldSkipStage = (
-  opts: Partial<engineDataTransfer.ITransferEngineOptions>,
+  opts: Pick<TransferCliFilterOptions, 'exclude' | 'only'>,
   dataKind: engineDataTransfer.TransferFilterPreset
 ) => {
   if (opts.exclude?.includes(dataKind)) {
@@ -461,20 +660,151 @@ const shouldSkipStage = (
   return false;
 };
 
+const areUploadContentTypesInTransferScope = (opts: TransferCliFilterOptions): boolean =>
+  UPLOAD_CONTENT_TYPE_UIDS.every((uid) => shouldIncludeContentTypeInTransfer(uid, opts));
+
+const areAllUploadContentTypesOutOfTransferScope = (opts: TransferCliFilterOptions): boolean =>
+  UPLOAD_CONTENT_TYPE_UIDS.every((uid) => !shouldIncludeContentTypeInTransfer(uid, opts));
+
+const isContentStageActive = (opts: TransferCliFilterOptions): boolean =>
+  !shouldSkipStage(opts, 'content');
+
+const expandMediaLibraryPreset = (opts: TransferCliFilterOptions) => {
+  if (!opts.exclude?.includes(MEDIA_LIBRARY_PRESET)) {
+    return;
+  }
+
+  const exclude = opts.exclude.filter(
+    (item) => item !== MEDIA_LIBRARY_PRESET
+  ) as engineDataTransfer.TransferFilterPreset[];
+
+  opts.exclude = exclude;
+
+  if (!opts.exclude.includes('files')) {
+    opts.exclude.push('files');
+  }
+
+  const excludeContentTypes = new Set(opts.excludeContentTypes ?? []);
+  for (const uid of UPLOAD_CONTENT_TYPE_UIDS) {
+    excludeContentTypes.add(uid);
+  }
+  opts.excludeContentTypes = [...excludeContentTypes];
+};
+
+const autoExcludeFilesWhenUploadTypesOutOfScope = (opts: TransferCliFilterOptions) => {
+  if (
+    opts.filesAutoExcluded ||
+    !isContentStageActive(opts) ||
+    opts.only?.includes('files') ||
+    shouldSkipStage(opts, 'files') ||
+    !areAllUploadContentTypesOutOfTransferScope(opts)
+  ) {
+    return;
+  }
+
+  opts.exclude = [...(opts.exclude ?? []), 'files'] as engineDataTransfer.TransferFilterPreset[];
+  opts.filesAutoExcluded = true;
+};
+
+const normalizeTransferFilterOptions = (opts: TransferCliFilterOptions) => {
+  expandMediaLibraryPreset(opts);
+  autoExcludeFilesWhenUploadTypesOutOfScope(opts);
+  return opts;
+};
+
+const normalizeTransferFilterOptionsHook = (command: Command) => {
+  normalizeTransferFilterOptions(command.opts() as TransferCliFilterOptions);
+};
+
+const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
+  const { exclude, only, excludeContentTypes, onlyContentTypes } = opts;
+  if (
+    !exclude?.length &&
+    !only?.length &&
+    !excludeContentTypes?.length &&
+    !onlyContentTypes?.length
+  ) {
+    return;
+  }
+
+  const parts: string[] = [];
+  if (exclude?.length) {
+    parts.push(`excluding ${exclude.join(', ')}`);
+  }
+  if (only?.length) {
+    parts.push(`only ${only.join(', ')}`);
+  }
+
+  if (parts.length) {
+    console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+  }
+
+  const contentTypeParts: string[] = [];
+  if (excludeContentTypes?.length) {
+    contentTypeParts.push(`excluding ${excludeContentTypes.join(', ')}`);
+  }
+  if (onlyContentTypes?.length) {
+    contentTypeParts.push(`only ${onlyContentTypes.join(', ')}`);
+  }
+
+  if (contentTypeParts.length) {
+    console.log(chalk.dim(`Content type filters: ${contentTypeParts.join('; ')}.`));
+  }
+
+  if (opts.filesAutoExcluded) {
+    console.log(
+      chalk.dim(
+        'Skipping files stage: upload content types are not in transfer scope (plugin::upload.file, plugin::upload.folder).'
+      )
+    );
+  }
+
+  if (
+    shouldSkipStage(opts, 'files') &&
+    !shouldSkipStage(opts, 'content') &&
+    areUploadContentTypesInTransferScope(opts) &&
+    !opts.filesAutoExcluded
+  ) {
+    console.log(
+      chalk.dim(
+        'Note: Media library records (plugin::upload.file, plugin::upload.folder) are still transferred with the rest of your content (the entities stage). Sync upload binaries separately (e.g. rsync public/uploads).'
+      )
+    );
+  }
+};
+
 type RestoreConfig = NonNullable<
   strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore']
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+const parseRestoreFromOptions = (opts: TransferCliFilterOptions, strapi: Core.Strapi) => {
   const entitiesOptions: RestoreConfig['entities'] = {
-    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    exclude: [
+      ...Object.keys(strapi.contentTypes).filter(isIgnoredContentType),
+      ...IGNORED_CONTENT_TYPES,
+      ...(opts.excludeContentTypes ?? []),
+    ],
     include: undefined,
   };
 
-  // if content is not included, send an empty array for include
-  if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
+  const contentInScope = !(
+    (opts.only && !opts.only.includes('content')) ||
+    opts.exclude?.includes('content')
+  );
+
+  if (!contentInScope) {
+    // Nothing from the entities stage is transferred; do not delete any records beforehand.
     entitiesOptions.include = [];
+  } else if (opts.onlyContentTypes?.length) {
+    // Only wipe content types that are being replaced by this transfer.
+    entitiesOptions.include = opts.onlyContentTypes;
+  } else if (shouldSkipStage(opts, 'config')) {
+    // When config is excluded, scope pre-transfer deletion to user content types only.
+    // Internal models (e.g. strapi::core-store) must not be wiped via the entities path.
+    entitiesOptions.include = Object.keys(strapi.contentTypes).filter(
+      (uid) => !isIgnoredContentType(uid) && !opts.excludeContentTypes?.includes(uid)
+    );
   }
 
   const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =
@@ -495,13 +825,24 @@ export {
   buildTransferTable,
   getDefaultExportName,
   getTransferTelemetryPayload,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   excludeOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   exitMessageText,
   onlyOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  normalizeTransferFilterOptions,
+  normalizeTransferFilterOptionsHook,
+  areUploadContentTypesInTransferScope,
+  areAllUploadContentTypesOutOfTransferScope,
+  buildTransferTransforms,
+  createEntityFilter,
+  createLinkFilter,
   formatDiagnostic,
   abortTransfer,
   setSignalHandler,
@@ -509,4 +850,8 @@ export {
   getAssetsBackupHandler,
   shouldSkipStage,
   parseRestoreFromOptions,
+  UPLOAD_CONTENT_TYPE_UIDS,
+  logTransferFilterSummary,
 };
+
+export type { ContentTypeTransferOptions, TransferCliFilterOptions };

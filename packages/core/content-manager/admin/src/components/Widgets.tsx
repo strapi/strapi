@@ -78,7 +78,11 @@ const RecentDocumentsTable = ({
     <Table colCount={5} rowCount={documents?.length ?? 0}>
       <Tbody>
         {documents?.map((document) => (
-          <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
+          <Tr
+            onClick={handleRowClick(document)}
+            cursor="pointer"
+            key={`${document.documentId}-${document.locale ?? 'default'}`}
+          >
             <Td>
               <CellTypography
                 title={document.title}

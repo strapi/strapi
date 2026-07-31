@@ -4,6 +4,7 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  publishAndConfirmDraftRelations,
 } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
@@ -16,7 +17,7 @@ describeOnCondition(edition === 'EE')('Releases - Document status', () => {
     await sharedSetup('history-spec', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
     });
   });
@@ -30,7 +31,7 @@ describeOnCondition(edition === 'EE')('Releases - Document status', () => {
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
     await findAndClose(page, 'Published document');
     await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 

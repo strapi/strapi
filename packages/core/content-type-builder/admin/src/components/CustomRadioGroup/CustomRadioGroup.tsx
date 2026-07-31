@@ -1,4 +1,6 @@
-import { Box, Field, Flex, Typography } from '@strapi/design-system';
+import type { ChangeEventHandler } from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { Wrapper } from './Styles';
@@ -8,13 +10,13 @@ import type { IntlLabel } from '../../types';
 interface Radio {
   title: IntlLabel;
   description: IntlLabel;
-  value: any;
+  value: string | boolean;
 }
 
 interface CustomRadioGroupProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
+  onChange: ChangeEventHandler<HTMLInputElement>;
   radios?: Radio[];
   value?: string | boolean;
 }
@@ -29,20 +31,23 @@ export const CustomRadioGroup = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Field.Root name={name}>
-      <Field.Label>{formatMessage(intlLabel)}</Field.Label>
-      <Field.Hint />
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} tag="label">
+        {formatMessage(intlLabel)}
+      </Typography>
       <Wrapper gap={4} alignItems="stretch">
         {radios.map((radio) => {
+          const radioValue = radio.value.toString();
+
           return (
-            <label htmlFor={radio.value.toString()} key={radio.value} className="container">
+            <label htmlFor={radioValue} key={radioValue} className="container">
               <input
-                id={radio.value.toString()}
+                id={radioValue}
                 name={name}
                 className="option-input"
                 checked={radio.value === value}
-                value={radio.value}
-                key={radio.value}
+                value={radioValue}
+                key={radioValue}
                 onChange={onChange}
                 type="radio"
               />
@@ -63,6 +68,6 @@ export const CustomRadioGroup = ({
           );
         })}
       </Wrapper>
-    </Field.Root>
+    </Flex>
   );
 };

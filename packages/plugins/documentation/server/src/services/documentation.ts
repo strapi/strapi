@@ -28,7 +28,14 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     getFullDocumentationPath() {
-      return path.join(strapi.dirs.app.extensions, 'documentation', 'documentation');
+      // In production, documentation files live under dist/src/extensions/
+      // after the build step. Use dist.extensions for reading.
+      const extensionsDir =
+        strapi.config.environment === 'production'
+          ? strapi.dirs.dist.extensions
+          : strapi.dirs.app.extensions;
+
+      return path.join(extensionsDir, 'documentation', 'documentation');
     },
 
     getDocumentationVersions(): Version[] {
@@ -69,11 +76,17 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     getApiDocumentationPath(api: { name: string; getter: string }) {
+      const isProduction = strapi.config.environment === 'production';
+
       if (api.getter === 'plugin') {
-        return path.join(strapi.dirs.app.extensions, api.name, 'documentation');
+        const extensionsDir = isProduction
+          ? strapi.dirs.dist.extensions
+          : strapi.dirs.app.extensions;
+        return path.join(extensionsDir, api.name, 'documentation');
       }
 
-      return path.join(strapi.dirs.app.api, api.name, 'documentation');
+      const apiDir = isProduction ? strapi.dirs.dist.api : strapi.dirs.app.api;
+      return path.join(apiDir, api.name, 'documentation');
     },
 
     async deleteDocumentation(version: string) {

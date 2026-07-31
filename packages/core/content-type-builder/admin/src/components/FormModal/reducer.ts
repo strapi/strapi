@@ -10,13 +10,67 @@ import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
-import type { Schema, UID } from '@strapi/types';
+import type { Schema, Struct, UID } from '@strapi/types';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
+
+type FormModalError = MessageDescriptor & {
+  values?: Record<string, PrimitiveType>;
+};
+
+export type ComponentToCreateData = Record<string, unknown> & {
+  type?: 'component';
+  displayName?: string;
+  icon?: string;
+  category?: string;
+};
+
+export type FormModalData = Record<string, unknown> & {
+  allowedTypes?: string[];
+  category?: string;
+  component?: UID.Component;
+  components?: UID.Component[];
+  componentToCreate?: ComponentToCreateData;
+  conditions?: unknown;
+  createComponent?: boolean;
+  default?: unknown;
+  displayName?: string;
+  draftAndPublish?: boolean;
+  enum?: string[];
+  icon?: string;
+  kind?: Struct.ContentTypeKind;
+  multiple?: boolean;
+  name?: string;
+  options?: object;
+  pluralName?: string;
+  pluginOptions?: object;
+  relation?: Schema.Attribute.RelationKind.Any;
+  repeatable?: boolean;
+  required?: boolean;
+  singularName?: string;
+  target?: string | null;
+  targetAttribute?: string | null;
+  type?: string;
+};
+
+type CustomFieldOption = {
+  items?: CustomFieldOption[];
+  name?: string;
+  defaultValue?: unknown;
+};
+
+type CustomField = {
+  type: string;
+  options?: {
+    base?: CustomFieldOption[];
+    advanced?: CustomFieldOption[];
+  };
+};
 
 export type State = {
-  formErrors: Record<string, any>;
-  modifiedData: Record<string, any>;
-  initialData: Record<string, any>;
-  componentToCreate: Record<string, any>;
+  formErrors: Record<string, FormModalError>;
+  modifiedData: FormModalData;
+  initialData: FormModalData;
+  componentToCreate: ComponentToCreateData;
   isCreatingComponentWhileAddingAField: boolean;
 };
 
@@ -30,7 +84,7 @@ const initialState: State = {
 
 type OnChangePayload = {
   keys: string[];
-  value: any;
+  value: unknown;
 };
 
 type OnChangeRelationTargetPayload = {
@@ -51,55 +105,55 @@ type OnChangeRelationTypePayload = {
 
 type ResetPropsAndSetFormForAddingAnExistingCompoPayload = {
   uid: UID.Schema;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 };
 
 type ResetPropsAndSaveCurrentDataPayload = {
   uid: UID.Schema;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 };
 
 type SetDataToEditPayload = {
-  data: Record<string, any>;
+  data: FormModalData;
 };
 
 type SetAttributeDataSchemaPayload =
   | {
       isEditing: true;
-      modifiedDataToSetForEditing: Record<string, any>;
+      modifiedDataToSetForEditing: FormModalData;
       uid: UID.Schema;
     }
   | {
       isEditing: false;
-      modifiedDataToSetForEditing: Record<string, any>;
+      modifiedDataToSetForEditing: FormModalData;
       attributeType: string;
       nameToSetForRelation: string;
       targetUid: string;
       step: string | null;
-      options?: Record<string, any>;
+      options?: Record<string, unknown>;
       uid: UID.Schema;
     };
 
 type SetCustomFieldDataSchemaPayload =
   | {
       isEditing: true;
-      modifiedDataToSetForEditing: Record<string, any>;
+      modifiedDataToSetForEditing: FormModalData;
       uid: UID.Schema;
     }
   | {
       isEditing: false;
-      modifiedDataToSetForEditing: Record<string, any>;
-      customField: Record<string, any>;
-      options?: Record<string, any>;
+      modifiedDataToSetForEditing: FormModalData;
+      customField: CustomField;
+      options?: Record<string, unknown>;
       uid: UID.Schema;
     };
 
 type SetDynamicZoneDataSchemaPayload = {
-  attributeToEdit: Record<string, any>;
+  attributeToEdit: FormModalData;
 };
 
 type SetErrorsPayload = {
-  errors: Record<string, any>;
+  errors: Record<string, FormModalError>;
 };
 
 const slice = createSlice({
@@ -109,13 +163,13 @@ const slice = createSlice({
     onChange: (state, action: PayloadAction<OnChangePayload>) => {
       const { keys, value } = action.payload;
       const obj = state.modifiedData;
-      const hasDefaultValue = Boolean(obj.default);
+      const hasDefaultValue = obj.default !== undefined;
 
       // There is no need to remove the default key if the default value isn't defined
       if (hasDefaultValue && keys.length === 1 && keys.includes('type')) {
         const previousType = obj.type;
 
-        if (previousType && ['date', 'datetime', 'time'].includes(previousType)) {
+        if (previousType !== undefined && ['date', 'datetime', 'time'].includes(previousType)) {
           // return obj.updateIn(keys, () => value).remove('default');
           delete state.modifiedData.default;
         }
@@ -168,7 +222,7 @@ const slice = createSlice({
 
       let nameToSet: string;
 
-      if (didChangeRelationTypeBecauseOfRestrictedRelation && changedRelationType) {
+      if (didChangeRelationTypeBecauseOfRestrictedRelation && changedRelationType !== null) {
         nameToSet = pluralize(
           snakeCase(nameToSlug(selectedContentTypeFriendlyName)),
           shouldPluralizeName(changedRelationType)
@@ -193,7 +247,7 @@ const slice = createSlice({
       // Case when we need to change the relation to oneWay (ex: admin user)
       if (
         didChangeRelationTypeBecauseOfRestrictedRelation &&
-        changedRelationType &&
+        changedRelationType !== null &&
         ['oneWay', 'manyWay'].includes(changedRelationType)
       ) {
         set(state, ['modifiedData', 'targetAttribute'], null);
@@ -213,7 +267,7 @@ const slice = createSlice({
         target: { oneThatIsCreatingARelationWithAnother, value },
       } = action.payload;
 
-      const currentName = state.modifiedData.name;
+      const currentName = state.modifiedData.name ?? '';
 
       // Switching from oneWay
       if (!['oneWay', 'manyWay'].includes(value)) {
@@ -276,6 +330,14 @@ const slice = createSlice({
       const { options = {} } = action.payload;
       // This is run when the user has created a new component
       const componentToCreate = state.modifiedData.componentToCreate;
+
+      if (
+        componentToCreate?.displayName === undefined ||
+        componentToCreate.category === undefined
+      ) {
+        return initialState;
+      }
+
       const modifiedData = {
         displayName: componentToCreate.displayName,
         type: 'component',
@@ -288,7 +350,7 @@ const slice = createSlice({
         ...initialState,
         componentToCreate,
         modifiedData,
-        isCreatingComponentWhileAddingAField: state.modifiedData.createComponent,
+        isCreatingComponentWhileAddingAField: state.modifiedData.createComponent === true,
       };
     },
     resetPropsAndSetTheFormForAddingACompoToADz: (state) => {
@@ -296,7 +358,7 @@ const slice = createSlice({
       const dataToSet = {
         ...createdDZ,
         createComponent: true,
-        componentToCreate: { type: 'component' },
+        componentToCreate: { type: 'component' as const },
       };
 
       return { ...initialState, modifiedData: dataToSet };
@@ -391,7 +453,7 @@ const slice = createSlice({
       const optionDefaults = allOptions.reduce(customFieldDefaultOptionsReducer, []);
 
       if (optionDefaults.length) {
-        optionDefaults.forEach(({ name, defaultValue }: { name: string; defaultValue: string }) =>
+        optionDefaults.forEach(({ name, defaultValue }) =>
           set(state.modifiedData, name, defaultValue)
         );
       }

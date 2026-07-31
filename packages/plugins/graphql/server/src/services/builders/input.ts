@@ -39,10 +39,6 @@ export default ({ strapi }: Context) => {
           };
 
           const validAttributes = Object.entries(attributes)
-            // Remove private attributes
-            .filter(
-              ([attributeName]) => !contentTypes.isPrivateAttribute(contentType, attributeName)
-            )
             // Remove non-writable attributes
             .filter(([attributeName]) => isWritableAttribute(contentType, attributeName))
             // Remove filters that have been disabled using the shadow CRUD extension API

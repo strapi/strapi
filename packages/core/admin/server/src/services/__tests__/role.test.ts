@@ -519,6 +519,12 @@ describe('Role', () => {
       const getPermissionsWithNestedFields = jest.fn(() => permissions.map(createPermission)); // cloned, otherwise it is modified inside createRolesIfNoneExist()
 
       global.strapi = {
+        contentTypes: {
+          'plugin::users-permissions.role': {
+            uid: 'plugin::users-permissions.role',
+            pluginOptions: { 'content-manager': { visible: false } },
+          },
+        },
         db: { query: () => ({ count, create }) },
         admin: {
           services: {
@@ -568,7 +574,7 @@ describe('Role', () => {
       });
 
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
-        restrictedSubjects: ['plugin::users-permissions.user'],
+        restrictedSubjects: ['plugin::users-permissions.user', 'plugin::users-permissions.role'],
       });
 
       expect(createMany).toHaveBeenCalledTimes(2);
@@ -739,6 +745,7 @@ describe('Role', () => {
             condition: { isValidCondition },
             'content-type': { getPermissionsWithNestedFields },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {
@@ -775,6 +782,7 @@ describe('Role', () => {
             metrics: { sendDidUpdateRolePermissions },
             permission: { findMany, createMany, actionProvider: { values }, deleteByIds },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {
@@ -798,12 +806,14 @@ describe('Role', () => {
       const findMany = jest.fn(() => Promise.resolve([]));
       const values = jest.fn(() => permissions.map((perm) => ({ actionId: perm.action })));
       const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+      const syncPermissionsForRole = jest.fn();
 
       global.strapi = {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               findMany,
               createMany,
@@ -871,6 +881,8 @@ describe('Role', () => {
           subject: null,
         },
       ]);
+      expect(syncPermissionsForRole).toHaveBeenCalledTimes(1);
+      expect(syncPermissionsForRole).toHaveBeenCalledWith(1);
     });
 
     test('Filter internal permissions on create', async () => {
@@ -890,12 +902,14 @@ describe('Role', () => {
         { actionId: 'action-internal', section: 'internal' },
       ]);
       const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+      const syncPermissionsForRole = jest.fn();
 
       global.strapi = {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               findMany,
               createMany,
@@ -933,6 +947,8 @@ describe('Role', () => {
           subject: null,
         },
       ]);
+      expect(syncPermissionsForRole).toHaveBeenCalledTimes(1);
+      expect(syncPermissionsForRole).toHaveBeenCalledWith(1);
     });
 
     test('Filter internal permissions on delete', async () => {
@@ -945,6 +961,7 @@ describe('Role', () => {
         Promise.resolve([{ action: 'action-internal', id: 1, properties: {} }])
       );
       const deleteByIds = jest.fn();
+      const syncPermissionsForRole = jest.fn();
       const values = jest.fn(() => [
         { actionId: 'action-0', section: 'plugins' },
         { actionId: 'action-1', section: 'plugins' },
@@ -957,6 +974,7 @@ describe('Role', () => {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               deleteByIds,
               findMany,

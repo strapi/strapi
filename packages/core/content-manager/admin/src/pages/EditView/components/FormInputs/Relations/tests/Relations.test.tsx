@@ -1,6 +1,15 @@
-import { RenderOptions, fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
+import {
+  RenderOptions,
+  fireEvent,
+  render as renderRTL,
+  screen,
+  server,
+  waitFor,
+} from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
+import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
 const render = (
@@ -120,6 +129,78 @@ describe('Relations', () => {
   it.todo('should connect a relation');
 
   it.todo('should disconnect a relation');
+
+  it('should search nested component relations using the component id', async () => {
+    const relationSearchRequests: Array<{
+      model: string;
+      fieldName: string;
+      id: string | null;
+    }> = [];
+
+    server.use(
+      http.get<{ model: string; fieldName: string }>(
+        '/content-manager/relations/:model/:fieldName',
+        ({ params, request }) => {
+          const url = new URL(request.url);
+
+          relationSearchRequests.push({
+            model: params.model,
+            fieldName: params.fieldName,
+            id: url.searchParams.get('id'),
+          });
+
+          return HttpResponse.json({
+            results: [],
+            pagination: {
+              page: 1,
+              pageCount: 1,
+              total: 0,
+            },
+          });
+        }
+      )
+    );
+
+    const { user } = renderRTL(
+      <ComponentProvider id={99} level={1} uid="blog.missing-component" type="repeatable">
+        <RelationsInput
+          attribute={{
+            type: 'relation',
+            relation: 'manyToMany',
+            target: 'api::category.category',
+            inversedBy: 'relation_locales',
+            // @ts-expect-error – this is what the API returns
+            targetModel: 'api::category.category',
+            relationType: 'manyToMany',
+          }}
+          label="collection"
+          mainField={{ name: 'name', type: 'string' }}
+          name="variant_selector.default_variants.0.collection"
+          type="relation"
+        />
+      </ComponentProvider>,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Routes>
+              <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
+            </Routes>
+          ),
+        },
+        initialEntries: ['/content-manager/collection-types/api::address.address/12345'],
+      }
+    );
+
+    await user.click(await screen.findByRole('combobox', { name: /collection/ }));
+
+    await waitFor(() => {
+      expect(relationSearchRequests).toContainEqual({
+        model: 'blog.missing-component',
+        fieldName: 'collection',
+        id: '99',
+      });
+    });
+  });
 
   describe.skip('Accessibility', () => {
     it('should have have description text', async () => {

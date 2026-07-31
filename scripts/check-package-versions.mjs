@@ -54,7 +54,14 @@ function getCanonicalVersion() {
 
 // Only enforce alignment for packages that share the same major as canonical (e.g. 5.x.x).
 // Skip examples/test-apps/docs that use 0.0.0 or 0.1.0.
+// NOTE: yarn catalog references ("catalog:", "catalog:default", …) only appear in dependency
+// fields — never in the "version" field — so they are invisible to this script and need no
+// special handling here. Version consistency of catalog-referenced packages is instead
+// enforced by .syncpackrc.json (see the "Yarn catalog references" version group).
 function shouldEnforceVersion(currentVersion, canonicalVersion) {
+  // Defensive guard: a version field that starts with "catalog:" is not a semver string and
+  // should never be enforced. In practice this cannot happen, but we guard anyway.
+  if (currentVersion.startsWith('catalog:') === true) return false;
   const canonicalMajor = canonicalVersion.split('.')[0];
   const currentMajor = currentVersion.split('.')[0];
   return currentMajor === canonicalMajor;

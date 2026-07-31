@@ -157,7 +157,7 @@ describe('Entity validator', () => {
           ...modelBase,
           attributes: {
             uuid: {
-              // @ts-ignore
+              // @ts-expect-error -- Custom field type is intentionally outside the schema type union.
               type: 'uuid',
             },
           },
@@ -451,7 +451,7 @@ describe('Entity validator', () => {
           ...modelBase,
           attributes: {
             uuid: {
-              // @ts-ignore
+              // @ts-expect-error -- Custom field type is intentionally outside the schema type union.
               type: 'uuid',
             },
           },

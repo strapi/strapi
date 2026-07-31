@@ -197,8 +197,9 @@ const GuidedTourContext = ({
     dispatch({ type: 'set_hidden', payload: !isDesktop });
   }, [isDesktop]);
 
-  // Sync local storage
-  React.useEffect(() => {
+  // Sync into usePersistentState in the layout phase so localStorage is updated before the
+  // browser follows an external link (e.g. Strapi Cloud "Read documentation").
+  React.useLayoutEffect(() => {
     setStoredTours(state);
   }, [state, setStoredTours]);
 

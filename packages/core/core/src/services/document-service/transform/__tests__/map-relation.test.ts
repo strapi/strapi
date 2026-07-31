@@ -1,4 +1,4 @@
-import { mapRelation } from '../relations/utils/map-relation';
+import { mapRelation, traverseEntityRelations } from '../relations/utils/map-relation';
 
 const mapper = mapRelation(async (relation) => {
   if (!relation) return 'default';
@@ -112,5 +112,57 @@ describe('map relation', () => {
     const expectedRelation = 'default';
 
     expect(await mapper(relation)).toBe(expectedRelation);
+  });
+});
+
+describe('traverseEntityRelations', () => {
+  const CATEGORY_UID = 'api::category.category';
+
+  const schema = {
+    uid: 'api::article.article',
+    modelType: 'contentType' as const,
+    attributes: {
+      // morphToOne — visitor must be skipped (inline columns, not a join table)
+      related: { type: 'relation' as const, relation: 'morphToOne' as const },
+      // regular relation — visitor must be called
+      category: {
+        type: 'relation' as const,
+        relation: 'manyToOne' as const,
+        target: CATEGORY_UID,
+      },
+    },
+  };
+
+  const options = {
+    schema,
+    getModel: jest.fn().mockReturnValue(null),
+  };
+
+  it('does not call visitor for morphToOne relations', async () => {
+    const visitor = jest.fn();
+    // null value prevents traverseEntity from recursing into the attribute
+    await traverseEntityRelations(visitor, options, { related: null });
+    expect(visitor).not.toHaveBeenCalled();
+  });
+
+  it('calls visitor for regular relation attributes', async () => {
+    const visitor = jest.fn();
+    await traverseEntityRelations(visitor, options, { category: null });
+    expect(visitor).toHaveBeenCalledTimes(1);
+    expect(visitor).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'category' }),
+      expect.anything()
+    );
+  });
+
+  it('skips morphToOne but processes other relations in the same entity', async () => {
+    const visitor = jest.fn();
+    await traverseEntityRelations(visitor, options, { related: null, category: null });
+    // only 'category' should trigger the visitor — 'related' (morphToOne) is skipped
+    expect(visitor).toHaveBeenCalledTimes(1);
+    expect(visitor).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'category' }),
+      expect.anything()
+    );
   });
 });

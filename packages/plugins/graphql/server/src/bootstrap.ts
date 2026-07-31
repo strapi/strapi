@@ -22,7 +22,7 @@ const merge = mergeWith((a, b) => {
 });
 
 type StrapiGraphQLContext = BaseContext & {
-  rootQueryArgs?: Record<string, unknown>;
+  rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
 };
 
 export const determineLandingPage = (
@@ -138,13 +138,14 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
           return {
             willResolveField({ source, args, contextValue, info }) {
               if (!source && info.operation.operation === 'query') {
-                // Track which query field set the rootQueryArgs
-                const fieldName = info.fieldName;
-                // Set rootQueryArgs with the field name that originated it
-                contextValue.rootQueryArgs = {
+                // Key args per root field (alias)
+                if (!contextValue.rootQueryArgsByPath) {
+                  contextValue.rootQueryArgsByPath = new Map();
+                }
+                contextValue.rootQueryArgsByPath.set(info.path.key, {
                   ...args,
-                  _originField: fieldName, // Track which field set this
-                };
+                  _originField: info.fieldName,
+                });
               }
             },
           };

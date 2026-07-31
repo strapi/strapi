@@ -6,7 +6,7 @@ import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('Edit View - Enumeration Fields Testing', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

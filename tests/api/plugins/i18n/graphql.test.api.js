@@ -15,8 +15,14 @@ const recipesModel = {
   attributes: {
     name: {
       type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
   },
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -128,5 +134,124 @@ describe('Test Graphql API create localization', () => {
         },
       },
     });
+  });
+
+  test('Localizations match the publication state of the parent entry', async () => {
+    const englishRecipe = await strapi.documents('api::recipe.recipe').create({
+      locale: 'en',
+      status: 'published',
+      data: {
+        name: 'English published localization state',
+      },
+    });
+
+    await strapi.documents('api::recipe.recipe').update({
+      documentId: englishRecipe.documentId,
+      locale: 'fr',
+      status: 'published',
+      data: {
+        name: 'French published localization state',
+      },
+    });
+
+    await strapi.documents('api::recipe.recipe').update({
+      documentId: englishRecipe.documentId,
+      locale: 'en',
+      data: {
+        name: 'English draft localization state',
+      },
+    });
+
+    await strapi.documents('api::recipe.recipe').update({
+      documentId: englishRecipe.documentId,
+      locale: 'fr',
+      data: {
+        name: 'French draft localization state',
+      },
+    });
+
+    const response = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          live: recipes_connection(
+            locale: "en"
+            filters: { name: { eq: "English published localization state" } }
+          ) {
+            data {
+              attributes {
+                name
+                publishedAt
+                localizations {
+                  data {
+                    attributes {
+                      name
+                      locale
+                      publishedAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          draft: recipes_connection(
+            locale: "en"
+            status: DRAFT
+            filters: { name: { eq: "English draft localization state" } }
+          ) {
+            data {
+              attributes {
+                name
+                publishedAt
+                localizations {
+                  data {
+                    attributes {
+                      name
+                      locale
+                      publishedAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `,
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    const live = response.body.data.live.data[0].attributes;
+    const draft = response.body.data.draft.data[0].attributes;
+    const liveLocalizations = live.localizations.map(
+      (localization) => localization.data.attributes
+    );
+    const draftLocalizations = draft.localizations.map(
+      (localization) => localization.data.attributes
+    );
+
+    expect(live).toMatchObject({
+      name: 'English published localization state',
+      publishedAt: expect.any(String),
+    });
+    expect(liveLocalizations).toEqual([
+      {
+        name: 'French published localization state',
+        locale: 'fr',
+        publishedAt: expect.any(String),
+      },
+    ]);
+
+    expect(draft).toMatchObject({
+      name: 'English draft localization state',
+      publishedAt: null,
+    });
+    expect(draftLocalizations).toEqual([
+      {
+        name: 'French draft localization state',
+        locale: 'fr',
+        publishedAt: null,
+      },
+    ]);
   });
 });

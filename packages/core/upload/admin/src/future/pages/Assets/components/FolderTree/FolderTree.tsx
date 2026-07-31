@@ -1,0 +1,636 @@
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
+import {
+  Box,
+  Flex,
+  IconButton,
+  Loader,
+  Searchbar,
+  Tooltip,
+  Typography,
+  useFilter,
+} from '@strapi/design-system';
+import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { css, styled } from 'styled-components';
+
+import { useGetFolderStructureQuery } from '../../../../services/folders';
+import { getTranslationKey } from '../../../../utils/translations';
+import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
+import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
+
+import { filterFolderTree } from './filterFolderTree';
+import { useSpringLoadedExpand } from './useSpringLoadedExpand';
+
+import type { FolderNode } from '../../../../../../../shared/contracts/folders';
+
+/* -------------------------------------------------------------------------------------------------
+ * RowButton — shared row styling aligned with admin SubNav.Link
+ * -----------------------------------------------------------------------------------------------*/
+
+const RowButton = styled.button<{
+  $isActive: boolean;
+  $isValidDropTarget?: boolean;
+  $isInvalidDropCursor?: boolean;
+  $isMovePending?: boolean;
+}>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[2]};
+  width: 100%;
+  min-height: 3.2rem;
+  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  border: 0;
+  background: ${({ $isActive, $isValidDropTarget, theme }) => {
+    if ($isValidDropTarget) {
+      return theme.colors.primary100;
+    }
+
+    return $isActive ? theme.colors.primary100 : 'transparent';
+  }};
+  color: ${({ $isActive, theme }) =>
+    $isActive ? theme.colors.primary700 : theme.colors.neutral800};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropCursor ? 'not-allowed' : 'pointer';
+  }};
+  text-align: left;
+  font: inherit;
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      outline: 1px dashed ${theme.colors.primary600};
+      outline-offset: -1px;
+    `}
+
+  &:hover {
+    background: ${({ $isActive, $isValidDropTarget, theme }) => {
+      if ($isValidDropTarget) {
+        return theme.colors.primary100;
+      }
+
+      return $isActive ? theme.colors.primary100 : theme.colors.neutral100;
+    }};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: -2px;
+  }
+`;
+
+const TreeRow = styled(Flex)<{
+  $isValidDropTarget?: boolean;
+  $isInvalidDropCursor?: boolean;
+  $isMovePending?: boolean;
+}>`
+  cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropCursor ? 'not-allowed' : 'default';
+  }};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  border-radius: ${({ theme }) => theme.borderRadius};
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      background: ${theme.colors.primary100};
+      outline: 1px dashed ${theme.colors.primary600};
+      outline-offset: -1px;
+    `}
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * useExpandedFolders — local expand/collapse state
+ * -----------------------------------------------------------------------------------------------*/
+
+const findAncestorIds = (
+  nodes: FolderNode[],
+  targetId: number,
+  trail: number[] = []
+): number[] | null => {
+  for (const node of nodes) {
+    if (node.id === targetId) {
+      return trail;
+    }
+
+    if (node.children?.length) {
+      const nextTrail = node.id != null ? [...trail, node.id] : trail;
+      const found = findAncestorIds(node.children, targetId, nextTrail);
+      if (found !== null) {
+        return found;
+      }
+    }
+  }
+
+  return null;
+};
+
+const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: number | null) => {
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(() => new Set());
+
+  useEffect(() => {
+    if (currentFolderId == null) {
+      return;
+    }
+
+    const ancestors = findAncestorIds(folderStructure, currentFolderId);
+    if (!ancestors || ancestors.length === 0) {
+      return;
+    }
+
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      let changed = false;
+      for (const id of ancestors) {
+        if (!next.has(id)) {
+          next.add(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [folderStructure, currentFolderId]);
+
+  const toggleExpanded = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const expandFolder = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      if (prev.has(id)) {
+        return prev;
+      }
+
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
+  const isExpanded = useCallback((id: number) => expandedIds.has(id), [expandedIds]);
+
+  return { isExpanded, toggleExpanded, expandFolder };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * TruncatedFolderName — tooltip when the label is ellipsized
+ * -----------------------------------------------------------------------------------------------*/
+
+const TruncatedFolderName = ({ name, isActive }: { name: string; isActive: boolean }) => {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) {
+      return;
+    }
+
+    const checkTruncation = () => {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    };
+
+    checkTruncation();
+
+    const observer = new ResizeObserver(checkTruncation);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [name]);
+
+  const label = (
+    <Typography
+      ref={textRef}
+      variant="omega"
+      fontWeight={isActive ? 'semiBold' : 'regular'}
+      ellipsis
+    >
+      {name}
+    </Typography>
+  );
+
+  if (isTruncated) {
+    return <Tooltip label={name}>{label}</Tooltip>;
+  }
+
+  return label;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * NavList — unstyled list for tree rows
+ * -----------------------------------------------------------------------------------------------*/
+
+const NavList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * FolderTreeItem — single tree row (internal)
+ * -----------------------------------------------------------------------------------------------*/
+
+const INDENT_PER_LEVEL_REM = 1.6;
+
+const RotatingChevron = styled(ChevronDown)<{ $expanded: boolean }>`
+  transform: rotate(${({ $expanded }) => ($expanded ? '0deg' : '-90deg')});
+  transition: transform 0.2s ease;
+`;
+
+interface FolderTreeItemProps {
+  node: FolderNode;
+  level: number;
+  currentFolderId: number | null;
+  showActiveFolder: boolean;
+  isExpanded: (id: number) => boolean;
+  onToggle: (id: number) => void;
+  onExpand: (id: number) => void;
+  onSelect: (folderId: number) => void;
+  isMovePending: boolean;
+}
+
+interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
+  id: number;
+  name: string;
+  folderChildren: FolderNode[];
+}
+
+const FolderTreeItemInner = ({
+  id,
+  name,
+  folderChildren,
+  level,
+  currentFolderId,
+  showActiveFolder,
+  isExpanded,
+  onToggle,
+  onExpand,
+  onSelect,
+  isMovePending,
+}: FolderTreeItemInnerProps) => {
+  const { formatMessage } = useIntl();
+  const hasChildren = folderChildren.length > 0;
+  const isFolderExpanded = isExpanded(id);
+  const isActive = showActiveFolder && currentFolderId === id;
+
+  const {
+    droppable: { setNodeRef },
+    isOver,
+    showValidDropHighlight,
+    showInvalidDropCursor,
+  } = useFolderTreeDroppable({ id, name });
+
+  const handleExpand = useCallback(() => onExpand(id), [id, onExpand]);
+
+  useSpringLoadedExpand({
+    isOver,
+    canExpand: hasChildren && !isFolderExpanded,
+    onExpand: handleExpand,
+  });
+
+  // TODO: full `role="tree"` + arrow-key treeview navigation before revamp GA
+  // if an accessibility audit requires it (v1 is button rows only).
+  return (
+    <li>
+      <TreeRow
+        ref={setNodeRef}
+        alignItems="center"
+        paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`}
+        gap={1}
+        $isValidDropTarget={showValidDropHighlight}
+        $isInvalidDropCursor={showInvalidDropCursor}
+        $isMovePending={isMovePending}
+      >
+        <IconButton
+          label={formatMessage(
+            {
+              id: getTranslationKey(
+                isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
+              ),
+              defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
+            },
+            { name }
+          )}
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation();
+            onToggle(id);
+          }}
+          variant="ghost"
+          withTooltip={false}
+          aria-expanded={isFolderExpanded}
+        >
+          <RotatingChevron $expanded={isFolderExpanded} fill="neutral500" />
+        </IconButton>
+
+        <Box flex="1" minWidth={0}>
+          <RowButton
+            type="button"
+            $isActive={isActive}
+            $isValidDropTarget={showValidDropHighlight}
+            $isInvalidDropCursor={showInvalidDropCursor}
+            $isMovePending={isMovePending}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={() => onSelect(id)}
+            data-testid={`folder-tree-node-${id}`}
+            data-folder-id={id}
+          >
+            <TruncatedFolderName name={name} isActive={isActive} />
+          </RowButton>
+        </Box>
+      </TreeRow>
+
+      {hasChildren && isFolderExpanded && (
+        <NavList>
+          {folderChildren.map((child) => (
+            <FolderTreeItem
+              key={child.id ?? child.name}
+              node={child}
+              level={level + 1}
+              currentFolderId={currentFolderId}
+              showActiveFolder={showActiveFolder}
+              isExpanded={isExpanded}
+              onToggle={onToggle}
+              onExpand={onExpand}
+              onSelect={onSelect}
+              isMovePending={isMovePending}
+            />
+          ))}
+        </NavList>
+      )}
+    </li>
+  );
+};
+
+const FolderTreeItem = ({ node, ...props }: FolderTreeItemProps) => {
+  if (node.id == null) {
+    return null;
+  }
+
+  return (
+    <FolderTreeItemInner
+      {...props}
+      id={node.id}
+      name={node.name ?? ''}
+      folderChildren={node.children ?? []}
+    />
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * FolderTree — public sidebar component
+ * -----------------------------------------------------------------------------------------------*/
+
+const SidebarNav = styled(Flex)`
+  /* TODO: reconcile 25.6rem (Figma) with admin WIDTH_SIDE_NAVIGATION (23.2rem) */
+  width: 25.6rem;
+  height: 100%;
+  min-height: 100%;
+  background: ${({ theme }) => theme.colors.neutral0};
+  flex-shrink: 0;
+  flex-direction: column;
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const SidebarHeader = styled(Box)`
+  flex-shrink: 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const SidebarBody = styled(Flex)`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+`;
+
+interface FolderTreeProps {
+  currentFolderId: number | null;
+  /**
+   * Set to `false` while a global asset search is active: the results span the
+   * whole library, so highlighting one folder would misrepresent them.
+   * */
+  showActiveFolder?: boolean;
+  onSelectFolder: (folderId: number | null) => void;
+}
+
+/**
+ * Left-rail navigation for the Media Library. Fetches folder structure internally
+ * and renders:
+ *
+ * 1. A "Media library" title
+ * 2. A filter input that prunes the tree to matching destinations
+ * 3. A "Home" entry that clears the folder query param
+ * 4. A "FOLDERS" section header
+ * 5. The folder tree itself
+ *
+ * The filter is purely local: it never touches the URL and never affects the
+ * asset list, which has its own independent search in the content toolbar.
+ *
+ * Presentational with respect to routing — navigation is delegated to the parent
+ * via `onSelectFolder` so the URL stays the single source of truth (see
+ * `useFolderNavigation`).
+ */
+export const FolderTree = ({
+  currentFolderId,
+  showActiveFolder = true,
+  onSelectFolder,
+}: FolderTreeProps) => {
+  const { formatMessage, locale } = useIntl();
+  const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
+  const { isExpanded, toggleExpanded, expandFolder } = useExpandedFolders(
+    folderStructure,
+    currentFolderId
+  );
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+
+  const [treeFilter, setTreeFilter] = useState('');
+  const { contains } = useFilter(locale, { sensitivity: 'base' });
+  const trimmedFilter = treeFilter.trim();
+
+  const { nodes: visibleNodes, expandedIds: filterExpandedIds } = useMemo(
+    () =>
+      trimmedFilter
+        ? filterFolderTree(folderStructure, (name) => contains(name, trimmedFilter))
+        : { nodes: folderStructure, expandedIds: [] },
+    [folderStructure, trimmedFilter, contains]
+  );
+
+  // An override layered on top of the user's own expansion rather than written
+  // into it, so clearing the filter restores exactly what they had open.
+  const isExpandedForRender = useCallback(
+    (id: number) => filterExpandedIds.includes(id) || isExpanded(id),
+    [filterExpandedIds, isExpanded]
+  );
+
+  const isHomeActive = showActiveFolder && currentFolderId == null;
+  const homeLabel = formatMessage({
+    id: getTranslationKey('sidebar.home'),
+    defaultMessage: 'Home',
+  });
+
+  const {
+    droppable: { setNodeRef: setHomeDropRef },
+    showValidDropHighlight: showHomeValidDropHighlight,
+    showInvalidDropCursor: showHomeInvalidDropCursor,
+  } = useFolderTreeDroppable({ id: null, name: homeLabel });
+
+  return (
+    <SidebarNav
+      direction="column"
+      alignItems="stretch"
+      tag="nav"
+      aria-label={formatMessage({
+        id: getTranslationKey('sidebar.tree.aria-label'),
+        defaultMessage: 'Media library folders',
+      })}
+    >
+      <SidebarHeader paddingTop={4} paddingBottom={4} paddingLeft={5} paddingRight={5}>
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          <Typography variant="beta" tag="h2">
+            {formatMessage({
+              id: getTranslationKey('sidebar.title'),
+              defaultMessage: 'Media library',
+            })}
+          </Typography>
+
+          <Searchbar
+            name="search-folders"
+            value={treeFilter}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setTreeFilter(event.target.value)
+            }
+            onClear={() => setTreeFilter('')}
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            placeholder={formatMessage({
+              id: getTranslationKey('sidebar.search.placeholder'),
+              defaultMessage: 'Search folders',
+            })}
+            size="S"
+          >
+            {formatMessage({
+              id: getTranslationKey('sidebar.search.label'),
+              defaultMessage: 'Search folders',
+            })}
+          </Searchbar>
+        </Flex>
+      </SidebarHeader>
+
+      <SidebarBody direction="column" alignItems="stretch" gap={1} padding={3}>
+        <RowButton
+          ref={setHomeDropRef}
+          type="button"
+          $isActive={isHomeActive}
+          $isValidDropTarget={showHomeValidDropHighlight}
+          $isInvalidDropCursor={showHomeInvalidDropCursor}
+          $isMovePending={isMovePending}
+          aria-current={isHomeActive ? 'page' : undefined}
+          onClick={() => onSelectFolder(null)}
+          data-testid="folder-tree-home"
+        >
+          <House aria-hidden width="1.6rem" height="1.6rem" />
+          <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
+            {homeLabel}
+          </Typography>
+        </RowButton>
+
+        <Box marginTop={4}>
+          <Flex
+            alignItems="center"
+            gap={1}
+            paddingTop={1}
+            paddingBottom={1}
+            paddingLeft={2}
+            paddingRight={2}
+            marginBottom={2}
+          >
+            <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+            <Typography
+              variant="sigma"
+              textColor="neutral600"
+              style={{ textTransform: 'uppercase' }}
+            >
+              {formatMessage({
+                id: getTranslationKey('sidebar.folders'),
+                defaultMessage: 'Folders',
+              })}
+            </Typography>
+          </Flex>
+
+          {isLoading ? (
+            // TODO: revisit loading state before revamp GA
+            <Flex justifyContent="center" padding={1} paddingTop={2}>
+              <Loader>
+                {formatMessage({
+                  id: getTranslationKey('sidebar.tree.loading'),
+                  defaultMessage: 'Loading folders...',
+                })}
+              </Loader>
+            </Flex>
+          ) : isError ? (
+            // TODO: revisit error state before revamp GA
+            <Box padding={1} paddingTop={2}>
+              <Typography variant="pi" textColor="danger600">
+                {formatMessage({
+                  id: getTranslationKey('sidebar.tree.error'),
+                  defaultMessage: 'Could not load folders.',
+                })}
+              </Typography>
+            </Box>
+          ) : visibleNodes.length === 0 ? (
+            // TODO: revisit empty state before revamp GA
+            <Box padding={1} paddingTop={2}>
+              <Typography variant="pi" textColor="neutral500">
+                {trimmedFilter
+                  ? formatMessage(
+                      {
+                        id: getTranslationKey('sidebar.tree.no-results'),
+                        defaultMessage: 'No folders match "{query}"',
+                      },
+                      { query: trimmedFilter }
+                    )
+                  : formatMessage({
+                      id: getTranslationKey('sidebar.tree.empty'),
+                      defaultMessage: 'No folders yet',
+                    })}
+              </Typography>
+            </Box>
+          ) : (
+            <NavList>
+              {visibleNodes.map((node) => (
+                <FolderTreeItem
+                  key={node.id ?? node.name}
+                  node={node}
+                  level={0}
+                  currentFolderId={currentFolderId}
+                  showActiveFolder={showActiveFolder}
+                  isExpanded={isExpandedForRender}
+                  onToggle={toggleExpanded}
+                  onExpand={expandFolder}
+                  onSelect={onSelectFolder}
+                  isMovePending={isMovePending}
+                />
+              ))}
+            </NavList>
+          )}
+        </Box>
+      </SidebarBody>
+    </SidebarNav>
+  );
+};

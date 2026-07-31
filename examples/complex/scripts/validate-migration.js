@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
-const path = require('path');
+const { getDatabaseEnv } = require('./db-utils');
 
 // Expected counts per run (kept small for example seeding in this repo)
 const EXPECTED_COUNTS_PER_RUN = {
@@ -644,11 +644,90 @@ async function validateNestedComponentRelationParity(strapi) {
   return { errors };
 }
 
+const DRAFT_PUBLISH_UIDS = [
+  'api::basic-dp.basic-dp',
+  'api::basic-dp-i18n.basic-dp-i18n',
+  'api::relation-dp.relation-dp',
+  'api::relation-dp-i18n.relation-dp-i18n',
+  'api::hc-m2m-source.hc-m2m-source',
+  'api::hc-m2m-target.hc-m2m-target',
+];
+
+async function validateCreatorFieldsOnClonedDrafts(strapi) {
+  const errors = [];
+  const conn = strapi.db.connection;
+
+  for (const uid of DRAFT_PUBLISH_UIDS) {
+    const meta = strapi.db.metadata.get(uid);
+    const contentType = strapi.contentTypes[uid];
+    if (!meta || !contentType) {
+      continue;
+    }
+
+    const createdCol = meta.attributes?.createdBy?.joinColumn?.name ?? 'created_by_id';
+    const updatedCol = meta.attributes?.updatedBy?.joinColumn?.name ?? 'updated_by_id';
+    const localized = isI18nContentType(contentType);
+
+    const rows = await conn(meta.tableName).select(
+      'document_id',
+      'locale',
+      'published_at',
+      createdCol,
+      updatedCol
+    );
+
+    const byKey = new Map();
+    for (const row of rows) {
+      if (!row.document_id) {
+        continue;
+      }
+      const key = localized ? `${row.document_id}::${row.locale || ''}` : row.document_id;
+      const bucket = byKey.get(key) || { published: null, draft: null };
+      if (row.published_at != null) {
+        bucket.published = row;
+      } else {
+        bucket.draft = row;
+      }
+      byKey.set(key, bucket);
+    }
+
+    for (const [key, pair] of byKey.entries()) {
+      if (!pair.published || !pair.draft) {
+        continue;
+      }
+
+      const pubCreated = pair.published[createdCol];
+      const draftCreated = pair.draft[createdCol];
+      if (pubCreated != null && draftCreated == null) {
+        errors.push(
+          `${uid} ${key}: cloned draft is missing ${createdCol} (published=${pubCreated})`
+        );
+      } else if (pubCreated != null && Number(draftCreated) !== Number(pubCreated)) {
+        errors.push(
+          `${uid} ${key}: draft ${createdCol}=${draftCreated} does not match published ${pubCreated}`
+        );
+      }
+
+      const pubUpdated = pair.published[updatedCol];
+      const draftUpdated = pair.draft[updatedCol];
+      if (pubUpdated != null && draftUpdated == null) {
+        errors.push(
+          `${uid} ${key}: cloned draft is missing ${updatedCol} (published=${pubUpdated})`
+        );
+      } else if (pubUpdated != null && Number(draftUpdated) !== Number(pubUpdated)) {
+        errors.push(
+          `${uid} ${key}: draft ${updatedCol}=${draftUpdated} does not match published ${pubUpdated}`
+        );
+      }
+    }
+  }
+
+  return { errors };
+}
+
 /**
- * Optional DB-level verification that the migration fixes are in effect.
- * Runs only when all validations pass. Prints evidence without failing the run.
- * - Bug 1: Morph rows for media: (1) relation-dp direct (none in this seed), (2) component media (e.g. shared.logo) under relation-dp.
- * - Bug 2: Draft and published use distinct nested component IDs for the same document.
+ * Optional DB-level verification for migration-specific regressions.
+ * Prints supplementary evidence when primary validations pass.
  */
 async function verifyMigrationFixAtDbLevel(strapi) {
   const out = [];
@@ -888,21 +967,18 @@ async function verifyMigrationFixAtDbLevel(strapi) {
         const dzRows = await conn(joinTableName)
           .whereIn(entityIdCol, [pair.published, pair.draft])
           .select(entityIdCol, componentIdCol, componentTypeCol);
-        const pubDz = new Set(
-          dzRows
-            .filter((row) => row[entityIdCol] === pair.published)
-            .map((row) => row[componentIdCol])
-        );
-        const draftDz = new Set(
-          dzRows.filter((row) => row[entityIdCol] === pair.draft).map((row) => row[componentIdCol])
-        );
-        if (pubDz.size === 0 && draftDz.size === 0) continue;
+        const pubRows = dzRows.filter((row) => row[entityIdCol] === pair.published);
+        const draftRows = dzRows.filter((row) => row[entityIdCol] === pair.draft);
+        if (pubRows.length === 0 && draftRows.length === 0) continue;
         docsWithDz += 1;
-        const overlaps = [...pubDz].filter((id) => draftDz.has(id));
+        const componentKey = (row) => `${row[componentTypeCol]}::${row[componentIdCol]}`;
+        const pubDzKeys = new Set(pubRows.map(componentKey));
+        const draftDzKeys = new Set(draftRows.map(componentKey));
+        const overlaps = [...pubDzKeys].filter((key) => draftDzKeys.has(key));
         if (overlaps.length > 0) {
           docsWithOverlap += 1;
           errors.push(
-            `relation-dp documentId ${docId}: ${overlaps.length} dynamic-zone component id(s) shared between published and draft`
+            `relation-dp documentId ${docId}: ${overlaps.length} dynamic-zone component(s) shared between published and draft (${overlaps.join(', ')})`
           );
         }
 
@@ -973,6 +1049,10 @@ async function run() {
   const argv = process.argv.slice(2);
   const opts = parseCliArgs(argv);
   const expected = getExpectedCounts(opts.multiplier);
+  const dbType = process.env.DATABASE_CLIENT || 'postgres';
+  if (['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
+    Object.assign(process.env, getDatabaseEnv(dbType));
+  }
 
   console.log('🔍 Starting document-service validator (this will boot Strapi programmatically)...');
   console.log(`  multiplier: ${opts.multiplier}`);
@@ -1001,6 +1081,13 @@ async function run() {
     const docStruct = await validateDocumentStructure(strapi, expected);
     results.errors.push(...docStruct.errors);
     results.sections.push({ name: 'Draft/publish pairing', errors: docStruct.errors });
+
+    const creatorFields = await validateCreatorFieldsOnClonedDrafts(strapi);
+    results.errors.push(...creatorFields.errors);
+    results.sections.push({
+      name: 'Creator fields on cloned drafts',
+      errors: creatorFields.errors,
+    });
 
     const relPresence = await validateRelationsPresence(strapi);
     results.errors.push(...relPresence.errors);

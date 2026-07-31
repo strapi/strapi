@@ -2,13 +2,19 @@ import type { Page } from '@playwright/test';
 
 import { login as loginFunc } from './login';
 import { resetFiles as resetFilesFunc } from './file-reset';
-import { resetDatabaseAndImportDataFromPath } from './dts-import';
+import {
+  resetDatabaseAndImportDataFromPath,
+  resyncSuperAdminPermissionsAfterImport,
+} from './dts-import';
 import { navToHeader } from './shared';
 
 export type SharedSetupOptions = {
   login?: boolean; // Whether to log in to the application
   resetFiles?: boolean; // Whether to reset files before tests
-  importData?: string; // Path to the data to be imported into the database (null if no import is needed)
+  /** DTS packet name under `tests/e2e/data` (e.g. `with-admin`). When set, runs `resetDatabaseAndImportDataFromPath` — the e2e DB reset/seed (see docs/guides/e2e/02-data-transfer.md). Runs after `resetFiles` when `firstRun || resetAlways`. */
+  importData?: string;
+  /** When true, rebuilds CM config + Super Admin permissions after DTS import for tests that need the current permission registry. */
+  resyncSuperAdminPermissions?: boolean;
   afterSetup?: ({ page }: { page: Page }) => Promise<void>; // An async function for custom setup logic that runs after the main setup
   resetAlways?: boolean; // Whether to reset the setup always, even if the setup has already been run
 };
@@ -28,6 +34,8 @@ const setupRegistry: Record<string, boolean> = {};
  *   - resetFiles: Whether to reset files before tests.
  *   - importData: Path to the data to be imported into the database.
  *   - afterSetup: A custom function that runs once after the setup is complete.
+ *   - resetAlways: When true, run resetFiles/importData on every call (not only the first for this id).
+ *     Use when tests mutate app state (e.g. create content types) so retries and later tests start clean.
 
  *
  * WARNING:
@@ -41,7 +49,14 @@ const setupRegistry: Record<string, boolean> = {};
 export const sharedSetup = async (
   id: string,
   page: Page,
-  { login, resetFiles, importData, afterSetup, resetAlways }: SharedSetupOptions
+  {
+    login,
+    resetFiles,
+    importData,
+    resyncSuperAdminPermissions,
+    afterSetup,
+    resetAlways,
+  }: SharedSetupOptions
 ) => {
   let firstRun = !setupRegistry[id];
   const extraRun = !firstRun && resetAlways;
@@ -49,12 +64,15 @@ export const sharedSetup = async (
   if (firstRun || extraRun) {
     setupRegistry[id] = true;
 
-    // Run one-time setup steps
+    // Run one-time setup steps (order: git restore test app → DTS import resets/seeds DB for allowed types)
     if (resetFiles) {
       await resetFilesFunc();
     }
     if (importData) {
       await resetDatabaseAndImportDataFromPath(importData);
+      if (resyncSuperAdminPermissions) {
+        await resyncSuperAdminPermissionsAfterImport();
+      }
     }
 
     if (extraRun) {

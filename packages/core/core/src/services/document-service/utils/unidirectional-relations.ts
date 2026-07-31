@@ -1,13 +1,13 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 
-import type { UID, Schema } from '@strapi/types';
+import type { Data, UID, Schema } from '@strapi/types';
 
 import type { JoinTable } from '@strapi/database';
 
 interface LoadContext {
-  oldVersions: { id: string; locale: string }[];
-  newVersions: { id: string; locale: string }[];
+  oldVersions: { id: Data.ID; locale: string }[];
+  newVersions: { id: Data.ID; locale: string }[];
 }
 
 interface RelationUpdate {
@@ -49,7 +49,13 @@ const load = async (
 
       for (const attribute of Object.values(dbModel.attributes) as any) {
         /**
-         * Only consider unidirectional relations
+         * Only consider unidirectional relations.
+         * Bidirectional relations (inversedBy/mappedBy) are handled by bidirectionalRelations.
+         * Self-referential relations (model.uid === uid) are included here, but rows where
+         * the source entry is also being republished in this same operation are excluded —
+         * those are handled by selfReferentialRelations, which remaps both sides simultaneously.
+         * Without this guard, we would insert rows pointing to a source entry that is about
+         * to be deleted, creating stale foreign-key values.
          */
         if (
           attribute.type !== 'relation' ||
@@ -75,12 +81,23 @@ const load = async (
         // NOTE: when the model has draft and publish, we can assume relation are only draft to draft & published to published
         const ids = oldVersions.map((entry) => entry.id);
 
-        const oldVersionsRelations = await strapi.db
+        let oldVersionsQuery = strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
-          .whereIn(targetColumnName, ids)
-          .transacting(trx);
+          .whereIn(targetColumnName, ids);
+
+        /**
+         * For self-referential relations, exclude join rows where the source entry is also
+         * being republished. When both sides are in the same publish batch, selfReferentialRelations
+         * already handles remapping them. Including them here too would insert a row whose
+         * source FK points at an entry that is about to be deleted.
+         */
+        if (model.uid === uid && ids.length > 0) {
+          oldVersionsQuery = oldVersionsQuery.whereNotIn(sourceColumnName, ids);
+        }
+
+        const oldVersionsRelations = await oldVersionsQuery.transacting(trx);
 
         if (oldVersionsRelations.length > 0) {
           updates.push({ joinTable, relations: oldVersionsRelations });
@@ -155,8 +172,8 @@ const load = async (
  * @param oldRelations The relations that were previously loaded with `load` @see load
  */
 const sync = async (
-  oldEntries: { id: string; locale: string }[],
-  newEntries: { id: string; locale: string }[],
+  oldEntries: { id: Data.ID; locale: string }[],
+  newEntries: { id: Data.ID; locale: string }[],
   oldRelations: { joinTable: any; relations: any[] }[]
 ) => {
   /**
@@ -169,10 +186,10 @@ const sync = async (
     (acc, entry) => {
       const newEntry = newEntryByLocale[entry.locale];
       if (!newEntry) return acc;
-      acc[entry.id] = newEntry.id;
+      acc[String(entry.id)] = newEntry.id;
       return acc;
     },
-    {} as Record<string, string>
+    {} as Record<string, Data.ID>
   );
 
   await strapi.db.transaction(async ({ trx }) => {
@@ -186,8 +203,8 @@ const sync = async (
         return { ...relation, [column]: newId };
       });
 
-      // Insert those relations into the join table
-      await trx.batchInsert(joinTable.name, newRelations, 1000);
+      const batchSize = strapi.db.dialect.getBatchInsertSize();
+      await trx.batchInsert(joinTable.name, newRelations, batchSize);
     }
   });
 };

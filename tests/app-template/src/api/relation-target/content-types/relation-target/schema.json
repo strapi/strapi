@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_targets",
+  "info": {
+    "singularName": "relation-target",
+    "pluralName": "relation-targets",
+    "displayName": "Relation target",
+    "description": "Draft & publish targets for relation-lab E2E tests"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "relationLabs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-lab.relation-lab",
+      "mappedBy": "manyToManyBi"
+    }
+  }
+}

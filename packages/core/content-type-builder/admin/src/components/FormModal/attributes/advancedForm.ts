@@ -401,7 +401,7 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [attributeOptions.private],
+          items: [attributeOptions.required, attributeOptions.private],
         },
         conditionSection,
       ],

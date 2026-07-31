@@ -11,20 +11,43 @@ describe('i18n - Controller - content-types', () => {
     beforeEach(() => {
       const contentType = () => ({});
       const getModel = () => ({});
+
+      const documentMetadataService = {
+        getMetadata: () => ({
+          availableLocales: [{ id: 2, locale: 'it', publishedAt: null }],
+        }),
+      };
+
+      const permissionCheckerService = {
+        create: () => ({
+          cannot: { read: () => false },
+        }),
+      };
+
+      const contentManagerPlugin = {
+        services: {
+          'document-metadata': documentMetadataService,
+          'permission-checker': permissionCheckerService,
+        } as Record<string, unknown>,
+        service(name: string) {
+          return this.services[name];
+        },
+      };
+
       global.strapi = {
         contentType,
         getModel,
+        plugin(name: string) {
+          if (name === 'content-manager') return contentManagerPlugin;
+        },
+        service(name: string) {
+          if (name === 'admin::constants') {
+            return { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } };
+          }
+        },
         plugins: {
           i18n: { services: { 'content-types': ctService } },
-          'content-manager': {
-            services: {
-              'document-metadata': {
-                getMetadata: () => ({
-                  availableLocales: [{ id: 2, locale: 'it', publishedAt: null }],
-                }),
-              },
-            },
-          },
+          'content-manager': contentManagerPlugin,
         },
         admin: {
           services: { constants: { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },

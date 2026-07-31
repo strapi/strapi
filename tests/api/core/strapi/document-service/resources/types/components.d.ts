@@ -61,14 +61,36 @@ export interface ArticleCompoUniqueTopLevel extends Schema.Component {
   };
 }
 
+export interface MixedContentNestedMediaLeaf extends Schema.Component {
+  collectionName: 'components_mixed_content_nested_media_leaves';
+  info: {
+    displayName: 'Mixed Content Nested Media Leaf';
+  };
+  attributes: {
+    media: Attribute.Media;
+  };
+}
+
+export interface MixedContentNestedMediaWrapper extends Schema.Component {
+  collectionName: 'components_mixed_content_nested_media_wrappers';
+  info: {
+    displayName: 'Mixed Content Nested Media Wrapper';
+  };
+  attributes: {
+    nestedLeaf: Attribute.Component<'mixed-content.mixed-content-nested-media-leaf'>;
+  };
+}
+
 declare module '@strapi/types' {
-  export module Shared {
-    export interface Components {
+  export namespace Public {
+    export interface ComponentSchemas {
       'article.comp': ArticleComp;
       'article.dz-comp': ArticleDzComp;
       'article.dz-other-comp': ArticleDzOtherComp;
       'article.compo_unique_all': ArticleCompoUniqueAll;
       'article.compo_unique_top_level': ArticleCompoUniqueTopLevel;
+      'mixed-content.mixed-content-nested-media-leaf': MixedContentNestedMediaLeaf;
+      'mixed-content.mixed-content-nested-media-wrapper': MixedContentNestedMediaWrapper;
     }
   }
 }

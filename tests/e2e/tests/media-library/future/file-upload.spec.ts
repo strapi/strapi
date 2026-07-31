@@ -7,7 +7,7 @@ import { describeOnCondition } from '../../../../utils/shared';
 
 describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('File Upload', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

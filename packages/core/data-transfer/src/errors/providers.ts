@@ -1,4 +1,4 @@
-import { ErrorCode } from '../../types';
+import { ErrorCode } from '../types';
 import { DataTransferError } from './base';
 import { Severity, SeverityKind } from './constants';
 

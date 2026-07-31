@@ -10,7 +10,7 @@ const config = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  modulePathIgnorePatterns: ['.cache'],
+  modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
 };
 
 module.exports = config;
