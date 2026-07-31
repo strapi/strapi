@@ -11,7 +11,7 @@ yarn verify:translations
 # Reorder existing locale keys and prune keys absent from en.json
 yarn verify:translations --fix
 
-# Regenerate `keys.generated.d.ts` in each bundle (TypeScript key unions)
+# Regenerate types for bundles with typed consumers (currently content-manager)
 yarn verify:translations --write-types
 
 # Scope to one package
@@ -38,7 +38,8 @@ Extractions are classified automatically:
 - **error-passthrough** — `formatMessage({ id: error })` from Yup; keys collected from schema literals
 - **registry** — small set of documented patterns (bulk locale titles, etc.)
 
-Plugin authors are unaffected: `getTrad(id: string)` remains valid. Generated types use `string & {}` so custom plugin keys still typecheck.
+Plugin authors are unaffected: typed helpers retain a `string` fallback, so custom plugin keys
+still typecheck.
 
 ## Legacy scripts
 

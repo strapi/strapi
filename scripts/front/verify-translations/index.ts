@@ -24,8 +24,9 @@ const printIssues = (issues: ValidationIssue[]) => {
 
 const main = () => {
   const options = parseArgs();
-  const bundles = discoverBundles(options.bundleFilter);
-  const adminBundle = bundles.find((bundle) => bundle.packageName === 'core/admin');
+  const allBundles = discoverBundles();
+  const bundles = options.bundleFilter ? discoverBundles(options.bundleFilter) : allBundles;
+  const adminBundle = allBundles.find((bundle) => bundle.packageName === 'core/admin');
 
   if (!adminBundle) {
     console.error('Could not find core/admin translation bundle.');
