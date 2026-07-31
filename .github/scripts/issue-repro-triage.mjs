@@ -57,10 +57,12 @@ function removeHtmlComments(input) {
 
   do {
     previous = sanitized;
-    sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
+    // Match comments closed with --> or --!> (HTML allows both terminators).
+    sanitized = sanitized.replace(/<!--[\s\S]*?--!?>/g, '');
   } while (sanitized !== previous);
 
-  return sanitized.replace(/<!--/g, '').replace(/-->/g, '');
+  // Drop dangling delimiters so no comment opener/closer can survive a partial match.
+  return sanitized.replaceAll('<!--', '').replaceAll('--!>', '').replaceAll('-->', '');
 }
 
 function removeHtmlTags(input) {
