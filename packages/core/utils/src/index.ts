@@ -36,6 +36,16 @@ export * from './zod';
 export * from './validation';
 export * from './route-serialization';
 
+export { parseUserAgent, getDeviceName, type ParsedUserAgent } from './user-agent';
+export {
+  sanitizeSessionEntry,
+  buildSessionMetadata,
+  sortSessionsForDisplay,
+  type SanitizedSessionEntry,
+  type SessionDisplayEntry,
+  type SessionEntryLike,
+} from './sessions';
+
 export * from './primitives';
 export { arithmeticMean, percentileNearestSorted } from './primitives/stats';
 export * from './content-api-router';
@@ -47,3 +57,4 @@ export {
 } from './observability/with-admin-permissions-span';
 export * from './publication-filter';
 export * from './has-published-version-param';
+export { hasSort } from './sort-query';

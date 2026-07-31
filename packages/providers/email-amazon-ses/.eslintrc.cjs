@@ -12,6 +12,8 @@ const config = {
     '.eslintrc.cjs',
     'dist/',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
+    'vitest.config.ts',
   ],
 };
 

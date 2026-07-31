@@ -1,8 +1,9 @@
 import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
-import { ILink, Transaction } from '../../../../../../types';
+import { ILink, Transaction } from '../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
+import { resolveLinkRef } from './resolve-link-ref';
 
 interface ErrorWithCode extends Error {
   code: string;
@@ -40,8 +41,8 @@ export const createLinksWriteStream = (
         const originalLeftRef = left.ref;
         const originalRightRef = right.ref;
 
-        const mappedLeftRef = mapID(left.type, originalLeftRef);
-        const mappedRightRef = mapID(right.type, originalRightRef);
+        const mappedLeftRef = resolveLinkRef(strapi, link, 'left', mapID);
+        const mappedRightRef = resolveLinkRef(strapi, link, 'right', mapID);
 
         // A missing mapping means the referenced row was never transferred
         // during the entities stage (e.g. an orphaned component or a dangling

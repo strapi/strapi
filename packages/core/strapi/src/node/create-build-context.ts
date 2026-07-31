@@ -4,7 +4,6 @@ import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import type { Core, Modules } from '@strapi/types';
-import type { Server } from 'node:http';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -19,8 +18,6 @@ interface BaseOptions {
   sourcemaps?: boolean;
   bundler?: 'webpack' | 'vite';
   open?: boolean;
-  hmrServer?: Server;
-  hmrClientPort?: number;
 }
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
@@ -101,6 +98,18 @@ const createBuildContext = async <TOptions extends BaseOptions>({
       process.env.STRAPI_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io',
     STRAPI_ANALYTICS_URL: process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io',
   });
+
+  // NOTE: Transports `admin.auth.cookie.name` / `path` / `domain` into the bundle; always
+  // assigned so ambient STRAPI_ADMIN_AUTH_COOKIE_* env vars cannot make the bundle disagree
+  // with the server. Domain falls back to `admin.auth.domain`, matching the server resolution.
+  env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
+  env.STRAPI_ADMIN_AUTH_COOKIE_PATH =
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') || '';
+  env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN =
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.domain') ||
+    strapiInstance.config.get<string | undefined>('admin.auth.domain') ||
+    '';
 
   const envKeys = Object.keys(env);
 

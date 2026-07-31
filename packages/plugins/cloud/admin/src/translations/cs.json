@@ -1,7 +1,10 @@
 {
   "Plugin.name": "Nasazení",
-  "Homepage.title": "Nasazujte se Strapi Cloud zdarma!",
-  "Homepage.subTitle": "Začněte s naším zcela bezplatným tarifem – bez platební karty a bez časového omezení.",
+  "Homepage.title": "Nasazujte se Strapi Cloud",
+  "Homepage.subTitle": "Hostujte svůj projekt Strapi na naší spravované cloudové platformě s automatizovaným nasazením a globálním CDN.",
+  "Homepage.features.cdn": "Globální CDN",
+  "Homepage.features.pushToDeploy": "Push pro nasazení",
+  "Homepage.features.customDomain": "Vlastní domény",
   "Homepage.deploy.title": "Vyberte preferovaný způsob nasazení",
   "Homepage.deploy.ariaLabel": "Možnosti nasazení",
   "Homepage.deploy.git.badge": "Doporučeno",
@@ -9,13 +12,9 @@
   "Homepage.deploy.git.subTitle": "Nasaďte projekt z GitHubu nebo GitLabu přímo ve Strapi Cloud",
   "Homepage.deploy.git.button": "Nasadit do Strapi Cloud",
   "Homepage.deploy.cli.title": "Nasadit přes CLI",
-  "Homepage.deploy.cli.subTitle": "Pomocí příkazového řádku nasaďte svůj projekt Strapi přímo",
+  "Homepage.deploy.cli.subTitle": "Pomocí příkazového řádku propojte svůj projekt s existujícím projektem Strapi Cloud a nasazujte změny přímo z CLI.",
   "Homepage.deploy.cli.ariaLabel": "Správce balíčků",
   "Homepage.deploy.cli.copy": "Kopírovat",
-  "Homepage.deploy.documentation": "Máte potíže? Podívejte se do naší dokumentace",
-  "Homepage.freePlan.api": "2,5 tis. API požadavků",
-  "Homepage.freePlan.storage": "10 GB úložiště",
-  "Homepage.freePlan.bandwidth": "10 GB přenosu assetů",
-  "Homepage.freePlan.cdn": "Globální CDN",
-  "Homepage.freePlan.pushToDeploy": "Push pro nasazení"
+  "Homepage.deploy.cli.copySuccess": "Příkaz zkopírován do schránky",
+  "Homepage.deploy.documentation": "Máte potíže? Podívejte se do naší dokumentace"
 }

@@ -136,7 +136,7 @@
   "Settings.application.customization.size-details": "Dimensione massima: {dimension}x{dimension}, Peso massimo: {size}KB)",
   "Settings.application.edition-title": "Edizione attuale",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Add seats} other {Contact sales}}",
+  "Settings.application.ee.admin-seats.add-seats": "Gestisci abbonamento",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limite raggiunto: aggiungi altri posti per invitare più utenti",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Chiedi aiuto",

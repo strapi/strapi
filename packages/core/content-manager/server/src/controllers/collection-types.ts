@@ -190,7 +190,9 @@ const removeStatusFromSort = (sort: unknown): unknown => {
   }
 
   if (typeof sort === 'object' && sort !== null) {
-    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    const rest = { ...(sort as Record<string, unknown>) };
+    delete rest.status;
+
     return Object.keys(rest).length ? rest : undefined;
   }
 
@@ -981,8 +983,11 @@ export default {
       }
     }
 
-    // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    // We filter out documentsIds that maybe doesn't exist in a specific locale.
+    // With draft & publish, findLocales returns a row per publication state, so the
+    // same documentId can appear twice (draft + published). Deduplicate to avoid
+    // deleting (and running document service middleware for) the same document twice.
+    const localeDocumentsIds = [...new Set(documentLocales.map((document) => document.documentId))];
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 
@@ -1025,10 +1030,10 @@ export default {
       }
     }
 
-    const number = await documentManager.countDraftRelations(id, model, locale);
+    const counts = await documentManager.countDraftRelations(id, model, locale);
 
     return {
-      data: number,
+      data: counts,
     };
   },
 

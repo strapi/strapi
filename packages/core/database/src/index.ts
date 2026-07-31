@@ -9,6 +9,7 @@ import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
 import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
@@ -36,6 +37,7 @@ import {
 const MAX_INFLIGHT_QUERIES = 10_000;
 
 export { isKnexQuery } from './utils/knex';
+export { isDatabaseClientKind } from './connection';
 
 interface Settings {
   forceMigration?: boolean;
@@ -501,7 +503,7 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration, Event };
 export type {
   DatabaseQueryPerfEvent,
   DatabaseQueryTelemetryInfo,

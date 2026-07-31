@@ -1,4 +1,6 @@
-const serverConfig = ({ env }) => {
+import type { Core } from '@strapi/strapi';
+
+const serverConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server => {
   /** OTLP HTTP base (no trailing slash). Start collector: `cd examples/otel-local && docker compose up`. */
   const otelEnabled = env.bool('STRAPI_OTEL_ENABLED', true);
   const otelHttpBase = env('STRAPI_OTEL_HTTP_ENDPOINT', 'http://127.0.0.1:4318').replace(/\/$/, '');

@@ -1,6 +1,6 @@
 import { entries, mapValues, omit } from 'lodash/fp';
 import { idArg, nonNull } from 'nexus';
-import { pagination } from '@strapi/utils';
+import { hasSort, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
@@ -157,6 +157,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         Object.assign(newArgs, {
           filters: mappers.graphQLFiltersToStrapiQuery(filters, contentType),
         });
+      }
+
+      // GraphQL SortArg defaults to `[]`; omit meaningless sort so join-table UI order is preserved.
+      if (!hasSort(newArgs.sort)) {
+        delete newArgs.sort;
       }
 
       return newArgs;

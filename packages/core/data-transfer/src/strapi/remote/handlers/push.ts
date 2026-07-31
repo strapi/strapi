@@ -3,7 +3,7 @@ import { Writable, PassThrough } from 'stream';
 import type { Core } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
-import type { TransferStage, IAsset, Protocol } from '../../../../types';
+import type { TransferStage, IAsset, Protocol } from '../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
 import { write } from '../../../utils/writable-async-write';

@@ -13,9 +13,9 @@ import type {
   IAsset,
   TransferStage,
   Protocol,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
-import type { Client, Server, Auth } from '../../../../types/remote/protocol';
+import type { Client, Server, Auth } from '../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';

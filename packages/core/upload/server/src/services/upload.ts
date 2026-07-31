@@ -338,6 +338,74 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   /**
+   * Like uploadImage, but pairs the main file and each format with its old
+   * counterpart and routes through provider.replace so providers that implement
+   * an atomic replace can use it. Formats that no longer exist on the new image
+   * are deleted; formats that didn't exist on the old image are uploaded fresh.
+   */
+  async function replaceImage(fileData: UploadableFile, oldFile: File) {
+    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
+      getService('image-manipulation');
+
+    const { width, height } = await getDimensions(fileData);
+
+    _.assign(fileData, {
+      width,
+      height,
+    });
+
+    const replaceFormat = async (key: string, newFormat: UploadableFile) => {
+      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      if (oldFormat) {
+        await getService('provider').replace(newFormat, oldFormat);
+      } else {
+        await getService('provider').upload(newFormat);
+      }
+      _.set(fileData, ['formats', key], newFormat);
+    };
+
+    const promises: Promise<unknown>[] = [];
+
+    // Replace the main file
+    promises.push(getService('provider').replace(fileData, oldFile));
+
+    const newFormatKeys = new Set<string>();
+
+    if (await isResizableImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData);
+      if (thumbnailFile) {
+        newFormatKeys.add('thumbnail');
+        promises.push(replaceFormat('thumbnail', thumbnailFile));
+      }
+
+      const formats = await generateResponsiveFormats(fileData);
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          // eslint-disable-next-line no-continue
+          if (!format) continue;
+          newFormatKeys.add(format.key);
+          promises.push(replaceFormat(format.key, format.file));
+        }
+      }
+    }
+
+    // Delete any formats that existed on the old file but are not present on the new one
+    if (
+      oldFile.formats &&
+      oldFile.provider === strapi.config.get<Config>('plugin::upload').provider
+    ) {
+      for (const oldKey of Object.keys(oldFile.formats)) {
+        if (!newFormatKeys.has(oldKey)) {
+          const oldFormat = oldFile.formats[oldKey] as File;
+          promises.push(strapi.plugin('upload').provider.delete(oldFormat));
+        }
+      }
+    }
+
+    await Promise.all(promises);
+  }
+
+  /**
    * Upload a file. If it is an image it will generate a thumbnail
    * and responsive formats (if enabled).
    */
@@ -422,23 +490,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ext: dbFile.ext,
       });
 
-      // execute delete function of the provider
-      if (dbFile.provider === config.provider) {
-        await strapi.plugin('upload').provider.delete(dbFile);
-
-        if (dbFile.formats) {
-          await Promise.all(
-            Object.keys(dbFile.formats).map((key) => {
-              return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
-            })
-          );
-        }
-      }
-
-      // clear old formats
+      // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
-      if (await isImage(fileData)) {
+      if (dbFile.provider === config.provider) {
+        if (await isImage(fileData)) {
+          await replaceImage(fileData, dbFile);
+        } else {
+          // The new file is not an image, so it has no formats. Replace the main
+          // file, then delete any formats the old image left behind — otherwise
+          // they're orphaned in storage since the DB record no longer tracks them.
+          await getService('provider').replace(fileData, dbFile);
+          if (dbFile.formats) {
+            await Promise.all(
+              Object.keys(dbFile.formats).map((key) =>
+                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
+              )
+            );
+          }
+        }
+      } else if (await isImage(fileData)) {
+        // Cross-provider replacement: no delete on the old provider, upload to the new one.
         await uploadImage(fileData);
       } else {
         await getService('provider').upload(fileData);

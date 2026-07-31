@@ -7,6 +7,15 @@ import {
 } from '../../services/homepage';
 import { KeyStatisticsWidget, PerformanceQuickStatsWidget, ProfileWidget } from '../Widgets';
 
+type MockAuthState = {
+  user: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    roles: Array<{ id: number; name: string }>;
+  };
+};
+
 jest.mock('../../services/homepage', () => ({
   useGetCountDocumentsQuery: jest.fn(),
   useGetKeyStatisticsQuery: jest.fn(),
@@ -16,7 +25,7 @@ jest.mock('../../services/homepage', () => ({
 // Mock the useAuth hook
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useAuth: (_consumerName: string, selector: (state: any) => any) =>
+  useAuth: (_consumerName: string, selector: (state: MockAuthState) => unknown) =>
     selector({
       user: {
         firstname: 'Ted',

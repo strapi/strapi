@@ -1,6 +1,6 @@
 import { Writable, Readable } from 'stream';
 import fse from 'fs-extra';
-import type { IAsset } from '../../../../../types';
+import type { IAsset } from '../../../../types';
 
 import { getStrapiFactory } from '../../../../__tests__/test-utils';
 import { createLocalStrapiDestinationProvider } from '../index';
@@ -65,7 +65,7 @@ const createStrapi = getStrapiFactory({
 
 describe('Local Strapi Destination Provider - Get Assets Stream', () => {
   test('Throws an error if the Strapi instance is not provided', async () => {
-    /* @ts-ignore: disable-next-line */
+    // @ts-expect-error -- Strapi instance is intentionally omitted for validation coverage.
     const provider = createLocalStrapiDestinationProvider({
       strategy: 'restore',
     });

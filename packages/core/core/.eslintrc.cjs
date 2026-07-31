@@ -15,6 +15,8 @@ const config = {
     'scripts/',
     'rollup.config.mjs',
     'coverage/',
+    'lint-staged.config.mjs',
+    'vitest.config.ts',
   ],
   overrides: [
     {

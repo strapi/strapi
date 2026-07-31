@@ -3,6 +3,8 @@ import * as yup from 'yup';
 
 import { getTrad } from './getTrad';
 
+const MAX_URLS = 20;
+
 export const urlSchema = yup.object().shape({
   urls: yup.string().test({
     name: 'isUrlValid',
@@ -11,17 +13,22 @@ export const urlSchema = yup.object().shape({
     test(values = '') {
       const urls = values.split(/\r?\n/);
 
+      /**
+       * Messages are message descriptors rather than bare ids because these translations
+       * interpolate values (`{min}`, `{max}`, `{number}`). Without `values`, react-intl
+       * fails to format them and renders the raw placeholder. See strapi/strapi#19030.
+       */
       if (urls.length === 0) {
         return this.createError({
           path: this.path,
-          message: errorsTrads.min.id,
+          message: { ...errorsTrads.min, values: { min: 1 } },
         });
       }
 
-      if (urls.length > 20) {
+      if (urls.length > MAX_URLS) {
         return this.createError({
           path: this.path,
-          message: errorsTrads.max.id,
+          message: { ...errorsTrads.max, values: { max: MAX_URLS } },
         });
       }
 
@@ -45,13 +52,19 @@ export const urlSchema = yup.object().shape({
 
       const errorMessage =
         filteredLength > 1
-          ? 'form.upload-url.error.url.invalids'
-          : 'form.upload-url.error.url.invalid';
+          ? {
+              id: 'form.upload-url.error.url.invalids',
+              defaultMessage: '{number} URLs are invalids',
+            }
+          : { id: 'form.upload-url.error.url.invalid', defaultMessage: 'One URL is invalid' };
 
       return this.createError({
         path: this.path,
-        message: getTrad(errorMessage),
-        params: { number: filtered.length },
+        message: {
+          ...errorMessage,
+          id: getTrad(errorMessage.id),
+          values: { number: filteredLength },
+        },
       });
     },
   }),

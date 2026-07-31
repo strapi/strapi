@@ -8,7 +8,13 @@ import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
+import {
+  getStoredToken,
+  login as loginAction,
+  logout as logoutAction,
+  setLocale,
+  setToken,
+} from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -19,7 +25,11 @@ import {
 } from '../services/auth';
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { getOrCreateDeviceId } from '../utils/deviceId';
-import { setOnSessionExpired, setOnTokenUpdate } from '../utils/getFetchClient';
+import {
+  attemptTokenRefresh,
+  setOnSessionExpired,
+  setOnTokenUpdate,
+} from '../utils/getFetchClient';
 
 import type {
   Permission as PermissionContract,
@@ -141,6 +151,66 @@ const AuthProvider = ({
     navigate('/auth/login');
   }, [dispatch, navigate]);
 
+  /**
+   * Clear *only this tab's* session and redirect to login, without removing the
+   * shared `isLoggedIn`/`jwtToken` storage keys. Unlike `clearStateAndLogout`,
+   * this does not dispatch `logoutAction`, so it does not fire the cross-tab
+   * `storage` event that logs every tab out. Used by the speculative idle timer,
+   * which fires per-tab at the access token's `exp`: an idle tab must never tear
+   * down a session that another tab is still actively using. A genuine logout
+   * (user-initiated, or a server-confirmed 401 via `setOnSessionExpired`) still
+   * goes through `clearStateAndLogout` and broadcasts to all tabs.
+   */
+  const clearLocalSessionAndRedirect = React.useCallback(() => {
+    dispatch(adminApi.util.resetApiState());
+    dispatch(setToken(null));
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
+
+  const resyncToken = React.useCallback(
+    (newToken: string) => {
+      dispatch(setToken(newToken));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Track the timestamp of the user's last interaction. This is the activity
+   * signal `useIdleSessionLogout` uses to tell an active user (silently renew
+   * their session) apart from a genuinely idle one (log out). Successful API
+   * calls don't refresh the short-lived access token on their own, so without
+   * this an actively-working user is logged out the moment the token expires.
+   */
+  const lastActivityRef = React.useRef(Date.now());
+  React.useEffect(() => {
+    const markActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+    const events = ['pointerdown', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach((event) =>
+      window.addEventListener(event, markActivity, { passive: true, capture: true })
+    );
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, markActivity, { capture: true }));
+    };
+  }, []);
+  const getLastActivityAt = React.useCallback(() => lastActivityRef.current, []);
+
+  /**
+   * Silently rotate the refresh token and mint a new access token. Returns
+   * `true` on success (the resulting `setToken` re-arms the idle timer) and
+   * `false` when the server rejects it (session genuinely over).
+   */
+  const renewSession = React.useCallback(async () => {
+    try {
+      await attemptTokenRefresh();
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {
@@ -180,13 +250,21 @@ const AuthProvider = ({
   }, [clearStateAndLogout]);
 
   /**
-   * Proactive idle-session detection. See `useIdleSessionLogout` for the full
-   * rationale and the UX trade-off (a user actively typing in a form with no
-   * outgoing API calls will still be logged out at `exp`).
+   * Session lifecycle at access-token expiry. The timer fires per-tab; the hook
+   * then either (1) re-syncs from a token another tab refreshed, (2) silently
+   * renews when the user has been active, or (3) logs out. Idle logout is local
+   * so an idle tab can't force-logout an actively-used one; a server-confirmed
+   * dead session (renewal rejected) broadcasts globally. See
+   * `useIdleSessionLogout` for the full rationale.
    */
   useIdleSessionLogout({
     token,
-    onExpired: clearStateAndLogout,
+    onExpired: clearLocalSessionAndRedirect,
+    onSessionDead: clearStateAndLogout,
+    getStoredToken,
+    onResync: resyncToken,
+    getLastActivityAt,
+    renewSession,
     disabled: _disableRenewToken,
   });
 

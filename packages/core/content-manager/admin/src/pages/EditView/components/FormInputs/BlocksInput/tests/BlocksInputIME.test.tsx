@@ -6,6 +6,7 @@ import { createEvent } from '@testing-library/react';
 import { render, screen, fireEvent } from '@tests/utils';
 
 import { BlocksInput } from '../BlocksInput';
+import { defaultBlocksStore } from '../DefaultBlocksStore';
 
 // Mock Component
 const MockEditable = ({ onKeyDown }: { onKeyDown: React.KeyboardEventHandler }) => (
@@ -14,16 +15,30 @@ const MockEditable = ({ onKeyDown }: { onKeyDown: React.KeyboardEventHandler }) 
 
 jest.mock('slate-react', () => ({
   ...jest.requireActual('slate-react'),
-  Editable: (props: any) => <MockEditable {...props} />,
+  Editable: (props: React.ComponentProps<typeof MockEditable>) => <MockEditable {...props} />,
 }));
 
+// `useStrapiApp` is mocked so the blocks store is always available synchronously on the
+// first render. Without this, the toolbar can render before the content-manager plugin's
+// `apis` are registered, leaving `getRichTextBlocks()` empty and crashing on `block.icon`.
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useElementOnScreen: jest.fn(() => ({ current: null })),
+  useStrapiApp: jest
+    .fn()
+    .mockImplementation((_name: string, selector: (state: unknown) => unknown) =>
+      selector({
+        plugins: {
+          'content-manager': {
+            apis: { getRichTextBlocks: () => ({ ...defaultBlocksStore }) },
+          },
+        },
+      })
+    ),
 }));
 
 // Test Helper
-const renderBlocksInput = (initialValues: any) => {
+const renderBlocksInput = (initialValues: Record<string, unknown>) => {
   return render(
     <BlocksInput
       label="blocks type"

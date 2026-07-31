@@ -12,7 +12,6 @@ import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@st
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
@@ -22,6 +21,7 @@ import * as yup from 'yup';
 
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
+import { getFirstVisibleConditionEntry } from '../../utils/conditions';
 import { findAttribute } from '../../utils/findAttribute';
 import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
@@ -54,14 +54,22 @@ import { TextareaEnum } from '../TextareaEnum';
 
 import { ConditionForm } from './attributes/ConditionForm';
 import { forms } from './forms/forms';
-import { actions, initialState, type State as FormModalState } from './reducer';
+import {
+  actions,
+  initialState,
+  type ComponentToCreateData,
+  type FormModalData,
+  type State as FormModalState,
+} from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 
-import type { ContentType } from '../../types';
-import type { Internal } from '@strapi/types';
+import type { AnyAttribute, ContentType } from '../../types';
+import type { FormAPI } from '../../utils/formAPI';
+import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
+import type { Internal, Struct } from '@strapi/types';
 
 const FormComponent = styled.form`
   overflow: auto;
@@ -69,6 +77,35 @@ const FormComponent = styled.form`
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_formModal'] || initialState) as FormModalState;
+
+type PendingSubmit = {
+  e: React.SyntheticEvent;
+  shouldContinue: boolean;
+};
+
+const toStringValue = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+const toOptionalStringValue = (value: unknown): string | undefined => {
+  if (typeof value !== 'string' || value === '') {
+    return undefined;
+  }
+
+  return value;
+};
+
+const toBooleanValue = (value: unknown): boolean => (typeof value === 'boolean' ? value : false);
+
+const toContentTypeKind = (value: unknown): Struct.ContentTypeKind =>
+  value === 'singleType' ? 'singleType' : 'collectionType';
+
+const toRecordValue = (value: unknown): Record<string, unknown> =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+
+const toComponentDraft = (value?: ComponentToCreateData) => ({
+  category: toStringValue(value?.category),
+  displayName: toStringValue(value?.displayName),
+  icon: toOptionalStringValue(value?.icon),
+});
 
 export const FormModal = () => {
   const {
@@ -104,7 +141,7 @@ export const FormModal = () => {
   const { trackUsage } = useCTBTracking();
   const { formatMessage } = useIntl();
   const ctbPlugin = getPlugin(pluginId);
-  const ctbFormsAPI: any = ctbPlugin?.apis.forms;
+  const ctbFormsAPI = ctbPlugin?.apis.forms as FormAPI;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const dispatchGuidedTour = useGuidedTour('FormModal', (s) => s.dispatch);
@@ -138,12 +175,15 @@ export const FormModal = () => {
     modifiedData,
   } = reducerState;
 
-  const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+  const type =
+    forTarget === 'component'
+      ? components[targetUid as Internal.UID.Component]
+      : contentTypes[targetUid as Internal.UID.ContentType];
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<any>(null);
+  const [pendingSubmit, setPendingSubmit] = useState<PendingSubmit | null>(null);
 
-  const checkFieldNameChanges = () => {
+  const checkFieldNameChanges = (): AnyAttribute[] | false => {
     // Only check when editing an attribute
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
@@ -154,27 +194,28 @@ export const FormModal = () => {
     const newEnum = modifiedData.enum;
 
     // Get all attributes from the content type schema
-    const contentTypeAttributes = type?.attributes || [];
+    const contentTypeAttributes: AnyAttribute[] = type?.attributes ?? [];
 
     // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr: any) => {
-      if (!attr.conditions) return false;
+    const referencedFields = contentTypeAttributes.filter((attr) => {
+      const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
+      if (conditionEntry === null) {
+        return false;
+      }
 
-      const condition = attr.conditions.visible;
-      if (!condition) return false;
-
-      const [[, conditions]] = Object.entries(condition);
-      const [fieldVar, value] = conditions as [{ var: string }, any];
+      const { fieldVar, value } = conditionEntry;
 
       // Check if this condition references our field
-      if (fieldVar.var !== oldName) return false;
+      if (fieldVar.var !== oldName) {
+        return false;
+      }
 
       // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum && newEnum) {
+      if (oldEnum !== undefined && newEnum !== undefined) {
         const deletedOrChangedValues = oldEnum.filter(
           (oldValue: string) => !newEnum.includes(oldValue)
         );
-        return deletedOrChangedValues.includes(value);
+        return typeof value === 'string' && deletedOrChangedValues.includes(value);
       }
 
       return true;
@@ -224,10 +265,10 @@ export const FormModal = () => {
             data: {
               displayName: type.info.displayName,
               draftAndPublish: type.options?.draftAndPublish,
-              kind: 'kind' in type && type.kind,
+              kind: type.modelType === 'contentType' ? type.kind : 'collectionType',
               pluginOptions: type.pluginOptions,
-              pluralName: 'pluralName' in type.info && type.info.pluralName,
-              singularName: 'singularName' in type.info && type.info.singularName,
+              pluralName: type.modelType === 'contentType' ? type.info.pluralName : '',
+              singularName: type.modelType === 'contentType' ? type.info.singularName : '',
             },
           })
         );
@@ -239,7 +280,7 @@ export const FormModal = () => {
           actions.setDataToEdit({
             data: {
               displayName: type.info.displayName,
-              category: 'category' in type && type.category,
+              category: type.modelType === 'component' ? type.category : '',
               icon: type.info.icon,
             },
           })
@@ -255,7 +296,7 @@ export const FormModal = () => {
           components: [],
           name: dynamicZoneTarget,
           createComponent: false,
-          componentToCreate: { type: 'component' },
+          componentToCreate: { type: 'component' as const },
         };
 
         dispatch(
@@ -289,16 +330,19 @@ export const FormModal = () => {
             dispatch(
               actions.setCustomFieldDataSchema({
                 isEditing: true,
-                modifiedDataToSetForEditing: attributeToEdit,
+                modifiedDataToSetForEditing: attributeToEdit as FormModalData,
                 uid: type.uid,
               })
             );
           } else {
             dispatch(
               actions.setCustomFieldDataSchema({
-                customField: pick(customField, ['type', 'options']),
+                customField: {
+                  type: customField?.type ?? '',
+                  options: customField?.options,
+                },
                 isEditing: false,
-                modifiedDataToSetForEditing: attributeToEdit,
+                modifiedDataToSetForEditing: attributeToEdit as FormModalData,
                 uid: type.uid,
               })
             );
@@ -310,7 +354,7 @@ export const FormModal = () => {
               nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
               targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
               isEditing: actionType === 'edit',
-              modifiedDataToSetForEditing: attributeToEdit,
+              modifiedDataToSetForEditing: attributeToEdit as FormModalData,
               step,
               uid: type.uid,
             })
@@ -361,11 +405,11 @@ export const FormModal = () => {
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
         Object.keys(components) as Internal.UID.Component[],
-        modifiedData.category || '',
+        toStringValue(modifiedData.category),
         reservedNames,
         actionType === 'edit',
         components,
-        modifiedData.displayName || '',
+        toStringValue(modifiedData.displayName),
         (type?.uid ?? null) as Internal.UID.Component
         // ctbFormsAPI
       );
@@ -386,28 +430,28 @@ export const FormModal = () => {
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
         Object.keys(components) as Internal.UID.Component[],
-        get(modifiedData, 'componentToCreate.category', ''),
+        toStringValue(get(modifiedData, 'componentToCreate.category', '')),
         reservedNames,
         actionType === 'edit',
         components,
-        modifiedData.componentToCreate.displayName || ''
+        toStringValue(modifiedData.componentToCreate?.displayName)
       );
 
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const computedAttrbiuteType = attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const computedAttributeType = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
-      let alreadyTakenTargetContentTypeAttributes: any[] = [];
+      let alreadyTakenTargetContentTypeAttributes: Array<{ name: string }> = [];
 
-      if (computedAttrbiuteType === 'relation') {
-        const targetContentTypeUID = get(modifiedData, ['target'], null);
+      if (computedAttributeType === 'relation') {
+        const targetContentTypeUID = toStringValue(get(modifiedData, ['target'], ''));
 
         const targetContentTypeAttributes = get(
           contentTypes,
-          [targetContentTypeUID, 'attributes'],
+          [targetContentTypeUID as Internal.UID.ContentType, 'attributes'],
           []
-        );
+        ) as Array<{ name: string }>;
 
         // Create an array with all the targetContentType attributes name
         // in order to prevent the user from creating a relation with a targetAttribute
@@ -426,7 +470,7 @@ export const FormModal = () => {
       }
       schema = forms.attribute.schema(
         type,
-        computedAttrbiuteType,
+        (computedAttributeType ?? 'string') as Parameters<typeof forms.attribute.schema>[1],
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
         { modifiedData, initialData },
@@ -439,11 +483,11 @@ export const FormModal = () => {
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components) as Internal.UID.Component[],
-          get(modifiedData, 'componentToCreate.category', ''),
+          toStringValue(get(modifiedData, 'componentToCreate.category', '')),
           reservedNames,
           actionType === 'edit',
           components,
-          modifiedData.componentToCreate.displayName || ''
+          toStringValue(modifiedData.componentToCreate?.displayName)
         );
       } else {
         // The form is valid
@@ -456,11 +500,7 @@ export const FormModal = () => {
   };
 
   const handleChange = React.useCallback(
-    ({
-      target: { name, value, type, ...rest },
-    }: {
-      target: { name: string; value: string | string[]; type: string };
-    }) => {
+    ({ target: { name, value } }: { target: { name: string; value?: unknown } }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -477,7 +517,7 @@ export const FormModal = () => {
         val = null;
       } else if (name === 'enum') {
         // For enum values, ensure we're working with an array
-        val = Array.isArray(value) ? value : [value];
+        val = Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
       } else {
         val = value;
       }
@@ -533,11 +573,11 @@ export const FormModal = () => {
           createSchema({
             data: {
               kind,
-              displayName: modifiedData.displayName,
-              draftAndPublish: modifiedData.draftAndPublish,
-              pluginOptions: modifiedData.pluginOptions,
-              singularName: modifiedData.singularName,
-              pluralName: modifiedData.pluralName,
+              displayName: toStringValue(modifiedData.displayName),
+              draftAndPublish: toBooleanValue(modifiedData.draftAndPublish),
+              pluginOptions: toRecordValue(modifiedData.pluginOptions),
+              singularName: toStringValue(modifiedData.singularName),
+              pluralName: toStringValue(modifiedData.pluralName),
             },
             uid,
           });
@@ -556,10 +596,10 @@ export const FormModal = () => {
             await updateSchema({
               uid: contentType.uid,
               data: {
-                displayName: modifiedData.displayName,
-                kind: modifiedData.kind,
-                draftAndPublish: modifiedData.draftAndPublish,
-                pluginOptions: modifiedData.pluginOptions,
+                displayName: toStringValue(modifiedData.displayName),
+                kind: toContentTypeKind(modifiedData.kind),
+                draftAndPublish: toBooleanValue(modifiedData.draftAndPublish),
+                pluginOptions: toRecordValue(modifiedData.pluginOptions),
               },
             });
           } else {
@@ -575,21 +615,22 @@ export const FormModal = () => {
       } else if (modalType === 'component') {
         if (isCreating) {
           // Create the component schema
-          const componentUid = createComponentUid(modifiedData.displayName, modifiedData.category);
-          const { category, ...rest } = modifiedData;
+          const componentCategory = toStringValue(modifiedData.category);
+          const componentDisplayName = toStringValue(modifiedData.displayName);
+          const componentUid = createComponentUid(componentDisplayName, componentCategory);
 
           createComponentSchema({
             data: {
-              displayName: rest.displayName,
-              icon: rest.icon,
+              displayName: componentDisplayName,
+              icon: toOptionalStringValue(modifiedData.icon),
             },
             uid: componentUid,
-            componentCategory: category,
+            componentCategory,
           });
 
           // Redirect the user to the created component
           navigate({
-            pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
+            pathname: `/plugins/${pluginId}/component-categories/${componentCategory}/${componentUid}`,
           });
 
           onCloseModal();
@@ -598,25 +639,25 @@ export const FormModal = () => {
         } else {
           updateComponentSchema({
             data: {
-              icon: modifiedData.icon,
-              displayName: modifiedData.displayName,
+              icon: toOptionalStringValue(modifiedData.icon),
+              displayName: toStringValue(modifiedData.displayName),
             },
-            componentUID: targetUid,
+            componentUID: targetUid as Internal.UID.Component,
           });
 
           if (type.status === 'NEW') {
             const componentUid = createComponentUid(
-              modifiedData.displayName,
-              modifiedData.category
+              toStringValue(modifiedData.displayName),
+              toStringValue(modifiedData.category)
             );
 
             updateComponentUid({
-              componentUID: targetUid,
+              componentUID: targetUid as Internal.UID.Component,
               newComponentUID: componentUid,
             });
 
             navigate({
-              pathname: `/plugins/${pluginId}/component-categories/${modifiedData.category}/${componentUid}`,
+              pathname: `/plugins/${pluginId}/component-categories/${toStringValue(modifiedData.category)}/${componentUid}`,
             });
           }
 
@@ -630,7 +671,7 @@ export const FormModal = () => {
           attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
-          name: initialData.name,
+          name: toStringValue(initialData.name),
         };
 
         if (actionType === 'edit') {
@@ -665,7 +706,7 @@ export const FormModal = () => {
               attributeToSet: modifiedData,
               forTarget,
               targetUid,
-              name: initialData.name,
+              name: toStringValue(initialData.name),
             });
           }
 
@@ -676,7 +717,7 @@ export const FormModal = () => {
             dispatch(actions.resetPropsAndSetTheFormForAddingACompoToADz());
 
             setActiveTab('basic');
-            onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
+            onNavigateToAddCompoToDZModal({ dynamicZoneTarget: toStringValue(modifiedData.name) });
           } else {
             onCloseModal();
           }
@@ -697,7 +738,7 @@ export const FormModal = () => {
               attributeToSet: modifiedData,
               forTarget,
               targetUid,
-              name: initialData.name,
+              name: toStringValue(initialData.name),
             });
           }
 
@@ -761,7 +802,7 @@ export const FormModal = () => {
             attributeToSet: attributeData,
             forTarget,
             targetUid,
-            name: initialData.name,
+            name: toStringValue(initialData.name),
           });
         }
 
@@ -805,19 +846,22 @@ export const FormModal = () => {
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
         }
         // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
-        const { category, ...rest } = componentToCreate;
+        const draftComponent = toComponentDraft(componentToCreate);
         // Create a the component temp UID
         // This could be refactored but I think it's more understandable to separate the logic
-        const componentUid = createComponentUid(componentToCreate.displayName, category);
+        const componentUid = createComponentUid(
+          draftComponent.displayName,
+          draftComponent.category
+        );
         // Create the component first and add it to the components data
         createComponentSchema({
           // Component data
           data: {
-            icon: rest.icon,
-            displayName: rest.displayName,
+            icon: draftComponent.icon,
+            displayName: draftComponent.displayName,
           },
           uid: componentUid,
-          componentCategory: category,
+          componentCategory: draftComponent.category,
         });
 
         // Add the field to the schema
@@ -841,16 +885,19 @@ export const FormModal = () => {
         // The modal is addComponentToDynamicZone
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
-            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const draftComponent = toComponentDraft(modifiedData.componentToCreate);
             const componentUid = createComponentUid(
-              modifiedData.componentToCreate.displayName,
-              category
+              draftComponent.displayName,
+              draftComponent.category
             );
             // Create the component first and add it to the components data
             createComponentSchema({
-              data: rest,
+              data: {
+                displayName: draftComponent.displayName,
+                icon: draftComponent.icon,
+              },
               uid: componentUid,
-              componentCategory: category,
+              componentCategory: draftComponent.category,
             });
             // Add the created component to the DZ
             // We don't want to remove the old ones
@@ -870,7 +917,7 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               dynamicZoneTarget,
-              newComponents: modifiedData.components,
+              newComponents: modifiedData.components ?? [],
             });
 
             onCloseModal();
@@ -1090,7 +1137,7 @@ export const FormModal = () => {
           <Dialog.Trigger />
           <ConfirmDialog
             onConfirm={() => {
-              if (pendingSubmit) {
+              if (pendingSubmit !== null) {
                 const { e, shouldContinue } = pendingSubmit;
                 setShowWarningDialog(false);
                 setPendingSubmit(null);
@@ -1104,14 +1151,14 @@ export const FormModal = () => {
           >
             {(() => {
               const referencedFields = checkFieldNameChanges();
-              if (!referencedFields) return null;
+              if (referencedFields === false) return null;
 
-              const fieldNames = referencedFields.map((field: any) => field.name).join(', ');
-              const isEnum = initialData.enum && modifiedData.enum;
+              const fieldNames = referencedFields.map((field) => field.name).join(', ');
+              const oldEnum = initialData.enum;
+              const newEnum = modifiedData.enum;
+              const isEnum = Array.isArray(oldEnum) && Array.isArray(newEnum);
 
-              if (isEnum) {
-                const oldEnum = initialData.enum;
-                const newEnum = modifiedData.enum;
+              if (isEnum === true) {
                 const deletedOrChangedValues = oldEnum.filter(
                   (value: string) => !newEnum.includes(value)
                 );
@@ -1185,7 +1232,7 @@ export const FormModal = () => {
                 variant="simple"
                 value={activeTab}
                 onValueChange={(value) => {
-                  setActiveTab(value);
+                  setActiveTab(value as Tab);
                   sendAdvancedTabEvent(value);
                 }}
                 hasError={
@@ -1197,7 +1244,7 @@ export const FormModal = () => {
                     actionType={actionType}
                     forTarget={forTarget}
                     kind={kind}
-                    step={step}
+                    step={step ?? undefined}
                     modalType={modalType}
                     attributeType={attributeType}
                     attributeName={attributeName}

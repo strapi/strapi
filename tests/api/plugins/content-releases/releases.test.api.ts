@@ -733,6 +733,69 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(categoryName).toBe('Tech');
     });
 
+    test('publishes a release when a self-relation target was modified between related sources', async () => {
+      const parentPage = await createEntry(pageUID, { title: 'Initial Parent Page' });
+      await strapi.documents(pageUID).publish({ documentId: parentPage.data.documentId });
+      const firstChildPage = await createEntry(pageUID, {
+        title: 'First child with modified relation target',
+        parent: { documentId: parentPage.data.documentId, locale: null },
+      });
+      const secondChildPage = await createEntry(pageUID, {
+        title: 'Second child with modified relation target',
+        parent: { documentId: parentPage.data.documentId, locale: null },
+      });
+
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      await createReleaseAction(release.id, {
+        contentType: pageUID,
+        entryDocumentId: firstChildPage.data.documentId,
+        type: 'publish',
+      });
+
+      await strapi.documents(pageUID).update({
+        documentId: parentPage.data.documentId,
+        data: { title: 'Updated Parent Page' },
+      });
+
+      await createReleaseAction(release.id, {
+        contentType: pageUID,
+        entryDocumentId: parentPage.data.documentId,
+        type: 'publish',
+      });
+
+      await createReleaseAction(release.id, {
+        contentType: pageUID,
+        entryDocumentId: secondChildPage.data.documentId,
+        type: 'publish',
+      });
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/publish`,
+      });
+
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body.data.status).toBe('done');
+
+      const firstPublishedChildRes = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/${pageUID}/${firstChildPage.data.documentId}`,
+        qs: { status: 'published' },
+      });
+      const secondPublishedChildRes = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/${pageUID}/${secondChildPage.data.documentId}`,
+        qs: { status: 'published' },
+      });
+
+      expect(firstPublishedChildRes.statusCode).toBe(200);
+      expect(firstPublishedChildRes.body.data.parent).toMatchObject({ count: 1 });
+      expect(secondPublishedChildRes.statusCode).toBe(200);
+      expect(secondPublishedChildRes.body.data.parent).toMatchObject({ count: 1 });
+    });
+
     test('publishes self-related parent and child in one release and preserves relation', async () => {
       const parentPage = await createEntry(pageUID, { title: 'Parent Page' });
       const childPage = await createEntry(pageUID, {

@@ -2,7 +2,7 @@ import { join } from 'path';
 import type { Readable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import type { IAsset, StageTotalsEstimate } from '../../../../types';
+import type { IAsset, StageTotalsEstimate } from '../../../types';
 
 import { getFileStatsForTransfer, signUploadFileForTransfer } from './assets';
 
