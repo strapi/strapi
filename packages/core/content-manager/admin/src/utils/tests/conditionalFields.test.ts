@@ -1,4 +1,5 @@
 import {
+  type JsonLogicCondition,
   CONDITIONAL_FIELD_MULTI_DEP_SEPARATOR,
   CONDITIONAL_FIELD_STATIC_SUBSCRIPTION,
   getConditionDependencyPaths,
@@ -35,19 +36,28 @@ describe('conditionalFields', () => {
         ],
       };
 
-      expect(getConditionDependencyPaths(condition as any)).toEqual(['author.name', 'title']);
+      expect(getConditionDependencyPaths(condition as JsonLogicCondition)).toEqual([
+        'author.name',
+        'title',
+      ]);
     });
 
     it('returns an empty array when no var dependencies exist', () => {
       const condition = { '==': [1, 1] };
 
-      expect(getConditionDependencyPaths(condition as any)).toEqual([]);
+      expect(getConditionDependencyPaths(condition as JsonLogicCondition)).toEqual([]);
     });
 
     it('returns null when a var operand cannot be safely resolved', () => {
-      expect(getConditionDependencyPaths({ '==': [{ var: '' }, true] } as any)).toBeNull();
-      expect(getConditionDependencyPaths({ '==': [{ var: [] }, true] } as any)).toBeNull();
-      expect(getConditionDependencyPaths({ '==': [{ var: {} }, true] } as any)).toBeNull();
+      expect(
+        getConditionDependencyPaths({ '==': [{ var: '' }, true] } as JsonLogicCondition)
+      ).toBeNull();
+      expect(
+        getConditionDependencyPaths({ '==': [{ var: [] }, true] } as JsonLogicCondition)
+      ).toBeNull();
+      expect(
+        getConditionDependencyPaths({ '==': [{ var: {} }, true] } as JsonLogicCondition)
+      ).toBeNull();
     });
   });
 

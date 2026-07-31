@@ -28,7 +28,7 @@ export interface SessionData {
 
   type?: 'refresh' | 'session';
   status?: 'active' | 'rotated' | 'revoked';
-  // Free-form, origin-defined metadata (e.g. ip, loginAt). The session manager only
+  // Free-form, origin-defined metadata (e.g. deviceName, loginAt). The session manager only
   // persists and returns this verbatim; it never interprets its contents.
   metadata?: Record<string, unknown> | null;
   expiresAt: Date;
@@ -146,10 +146,14 @@ export interface SessionManagerConfig {
 }
 
 class OriginSessionManager {
-  constructor(
-    private sessionManager: SessionManager,
-    private origin: string
-  ) {}
+  private sessionManager: SessionManager;
+
+  private origin: string;
+
+  constructor(sessionManager: SessionManager, origin: string) {
+    this.sessionManager = sessionManager;
+    this.origin = origin;
+  }
 
   async generateRefreshToken(
     userId: string,
@@ -657,7 +661,7 @@ class SessionManager {
         childId: null,
         type: tokenType,
         status: 'active',
-        // Preserve origin-defined metadata (e.g. ip, loginAt) across rotation so the
+        // Preserve origin-defined metadata (e.g. deviceName, loginAt) across rotation so the
         // active record always reflects the original session details.
         ...(current.metadata ? { metadata: current.metadata } : {}),
         expiresAt: childExpiresAt,

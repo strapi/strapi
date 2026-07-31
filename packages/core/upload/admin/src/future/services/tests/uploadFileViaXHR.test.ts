@@ -1,4 +1,13 @@
+import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+
 import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from '../uploadFileViaXHR';
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  attemptTokenRefresh: jest.fn(),
+}));
+
+const attemptTokenRefreshMock = jest.mocked(attemptTokenRefresh);
 
 interface ProgressLike {
   loaded: number;
@@ -67,6 +76,7 @@ describe('uploadFileViaXHR', () => {
 
   beforeEach(() => {
     MockXHR.instances = [];
+    attemptTokenRefreshMock.mockReset();
     OriginalXHR = global.XMLHttpRequest;
     // Stub the global so the function under test uses our controllable fake.
     global.XMLHttpRequest = MockXHR as unknown as typeof XMLHttpRequest;
@@ -100,6 +110,43 @@ describe('uploadFileViaXHR', () => {
       status: 400,
     });
     await expect(promise).rejects.toBeInstanceOf(UploadFileError);
+  });
+
+  it('refreshes the access token and retries once on a 401 response', async () => {
+    const controller = new AbortController();
+    const formData = new FormData();
+    attemptTokenRefreshMock.mockResolvedValue('refreshed-token');
+
+    const promise = uploadFileViaXHR(ENDPOINT, 'expired-token', formData, controller.signal);
+    lastXHR().respond(401, JSON.stringify({ error: { message: 'Unauthorized' } }));
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(attemptTokenRefreshMock).toHaveBeenCalledTimes(1);
+    expect(MockXHR.instances).toHaveLength(2);
+    expect(lastXHR().headers.Authorization).toBe('Bearer refreshed-token');
+    expect(lastXHR().sent).toBe(formData);
+
+    const file = { id: 1, name: 'photo.png', hash: 'abc' };
+    lastXHR().respond(201, JSON.stringify(file));
+
+    await expect(promise).resolves.toEqual(file);
+  });
+
+  it('returns the original 401 error when refreshing the access token fails', async () => {
+    const controller = new AbortController();
+    attemptTokenRefreshMock.mockRejectedValue(new Error('Refresh failed'));
+
+    const promise = uploadFileViaXHR(ENDPOINT, 'expired-token', new FormData(), controller.signal);
+    lastXHR().respond(401, JSON.stringify({ error: { message: 'Unauthorized' } }));
+
+    await expect(promise).rejects.toMatchObject({
+      name: 'UploadFileError',
+      message: 'Unauthorized',
+      status: 401,
+    });
+    expect(MockXHR.instances).toHaveLength(1);
   });
 
   it('rejects with an UploadAbortedError when the signal aborts mid-flight', async () => {

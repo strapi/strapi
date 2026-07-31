@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
+import { type AnyData, transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { type InputRendererProps } from '../../InputRenderer';
 
@@ -38,9 +38,10 @@ const ComponentInput = ({
   ...props
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
-  const field = useField(name);
+  const field = useField<AnyData | AnyData[] | null>(name);
 
-  const showResetComponent = !attribute.repeatable && field.value && !disabled;
+  const showResetComponent =
+    !attribute.repeatable && field.value !== undefined && field.value !== null && !disabled;
 
   const {
     currentDocument: { components },

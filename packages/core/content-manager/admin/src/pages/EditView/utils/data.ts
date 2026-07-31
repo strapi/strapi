@@ -19,9 +19,9 @@ type Predicate = <TAttribute extends Schema.Attribute.AnyAttribute>(
   value: Schema.Attribute.Value<TAttribute>
 ) => boolean;
 type Transform = <TAttribute extends Schema.Attribute.AnyAttribute>(
-  value: any,
+  value: Schema.Attribute.Value<TAttribute>,
   attribute: TAttribute
-) => any;
+) => unknown;
 type AnyData = Omit<Document, 'id'>;
 
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];

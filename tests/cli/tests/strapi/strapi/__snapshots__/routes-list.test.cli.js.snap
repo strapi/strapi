@@ -51,6 +51,16 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/products                                                                   │
 │ PUT                │ /api/products/:id                                                               │
 │ DELETE             │ /api/products/:id                                                               │
+│ HEAD|GET           │ /api/relation-labs                                                              │
+│ HEAD|GET           │ /api/relation-labs/:id                                                          │
+│ POST               │ /api/relation-labs                                                              │
+│ PUT                │ /api/relation-labs/:id                                                          │
+│ DELETE             │ /api/relation-labs/:id                                                          │
+│ HEAD|GET           │ /api/relation-targets                                                           │
+│ HEAD|GET           │ /api/relation-targets/:id                                                       │
+│ POST               │ /api/relation-targets                                                           │
+│ PUT                │ /api/relation-targets/:id                                                       │
+│ DELETE             │ /api/relation-targets/:id                                                       │
 │ HEAD|GET           │ /api/shop                                                                       │
 │ PUT                │ /api/shop                                                                       │
 │ DELETE             │ /api/shop                                                                       │
@@ -225,6 +235,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /content-manager/collection-types/:model/:id/actions/countDraftRelations        │
 │ HEAD|GET           │ /content-manager/collection-types/:model/actions/countManyEntriesDraftRelations │
 │ HEAD|GET           │ /content-manager/preview/url/:contentType                                       │
+│ HEAD|GET           │ /content-manager/preview/script                                                 │
 │ HEAD|GET           │ /content-manager/homepage/recent-documents                                      │
 │ HEAD|GET           │ /content-manager/homepage/count-documents                                       │
 │ HEAD|GET           │ /content-type-builder/reserved-names                                            │

@@ -11,7 +11,7 @@ test.describe('Login', () => {
     await page.goto('/admin');
   });
 
-  test.describe('Successful login', () => {
+  test.describe('Successful login', { tag: ['@critical'] }, () => {
     test('A user should be able to log in with or without making their authentication persistent', async ({
       page,
       context,

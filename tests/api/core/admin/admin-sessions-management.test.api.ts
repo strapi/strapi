@@ -22,12 +22,16 @@ describe('Admin Sessions Management (Active Devices)', () => {
   });
 
   afterAll(async () => {
-    await strapi.db.query(SESSION_UID).deleteMany({});
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query(SESSION_UID).deleteMany({});
+      await strapi.destroy();
+    }
   });
 
   afterEach(async () => {
-    await strapi.db.query(SESSION_UID).deleteMany({});
+    if (strapi) {
+      await strapi.db.query(SESSION_UID).deleteMany({});
+    }
   });
 
   const getCookie = (res: any, name: string): string | undefined => {
@@ -38,7 +42,7 @@ describe('Admin Sessions Management (Active Devices)', () => {
   const secret = () => strapi.config.get('admin.auth.secret');
 
   /**
-   * Logs in over HTTP (so metadata like ip/loginAt is captured), then exchanges the
+   * Logs in over HTTP (so metadata like loginAt/deviceName is captured), then exchanges the
    * refresh cookie for an access token. Returns the access token + the active sessionId.
    */
   const CHROME_UA =
@@ -106,11 +110,20 @@ describe('Admin Sessions Management (Active Devices)', () => {
       expect(typeof current.id).toBe('string');
       expect(current.deviceId).toBe(deviceA);
       expect(typeof current.loginAt).toBe('string');
-      expect(typeof current.ip).toBe('string');
       expect(typeof current.lastActiveAt).toBe('string');
       // Device name is derived from the User-Agent sent at login and carried through rotation.
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(other.deviceId).toBe(deviceB);
+
+      for (const session of res.body.data) {
+        expect(session).not.toHaveProperty('ip');
+      }
+
+      const [storedSession] = await strapi.db
+        .query(SESSION_UID)
+        .findMany({ where: { deviceId: deviceA, status: 'active' } });
+      expect(storedSession?.metadata).toBeDefined();
+      expect(storedSession.metadata).not.toHaveProperty('ip');
     });
   });
 

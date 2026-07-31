@@ -61,7 +61,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     if (data) {
       notifyStatus(
         formatMessage({
-          id: getTranslation('DynamicTable.relation-loaded'),
+          id: getTranslation('ListViewTable.relation-loaded'),
           defaultMessage: 'Relations have been loaded',
         })
       );

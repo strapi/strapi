@@ -127,8 +127,24 @@ export class AssetsPage {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
-      .getByRole('status');
+      .getByRole('status')
+      .first();
     await notification.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Wait for the bulk-move success toast after drag-and-drop.
+   * Scoped to the Notifications region so it does not match the a11y live region.
+   */
+  async waitForMoveSuccess() {
+    await this.getMoveSuccessNotification().waitFor({ state: 'visible' });
+  }
+
+  getMoveSuccessNotification() {
+    return this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .filter({ hasText: 'Elements have been moved successfully' });
   }
 
   async getSuccessMessage() {
@@ -159,12 +175,131 @@ export class AssetsPage {
     return this.page.getByRole('grid').getByRole('row').filter({ hasText: name }).first();
   }
 
+  /**
+   * An item's selection checkbox. Assets and folders share the same label, and
+   * so do rows and cards, so this works in both views.
+   */
+  getSelectionCheckbox(name: string) {
+    return this.page.getByRole('checkbox', { name: `Select ${name}` });
+  }
+
+  /**
+   * Toggle an asset's selection checkbox in table view (additive).
+   */
+  async selectAsset(name: string) {
+    await this.getSelectionCheckbox(name).click();
+  }
+
+  /**
+   * Toggle a folder's selection checkbox in table view (additive).
+   */
+  async selectFolder(name: string) {
+    await this.getSelectionCheckbox(name).click();
+  }
+
+  /**
+   * The floating bulk action bar (visible only when at least one asset is selected).
+   */
+  getBulkActionsBar() {
+    return this.page.getByRole('region', { name: 'Bulk actions' });
+  }
+
+  /**
+   * Delete the currently selected assets through the bulk action bar,
+   * confirming the dialog. Resolves once the success notification shows.
+   */
+  async bulkDeleteSelection() {
+    await this.getBulkActionsBar().getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Confirm' }).click();
+    const notification = this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .first();
+    await notification.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Move the currently selected items through the bulk action bar: open the
+   * "Move elements to" modal, pick the destination in the Location select and
+   * submit. Resolves once the success notification shows.
+   */
+  async bulkMoveSelectionTo(destinationName: string) {
+    await this.getBulkActionsBar().getByRole('button', { name: 'Move' }).click();
+    const dialog = this.page.getByRole('dialog', { name: 'Move elements to' });
+    await dialog.getByRole('combobox').click();
+    await this.page.getByRole('option', { name: destinationName }).click();
+    await dialog.getByRole('button', { name: 'Move' }).click();
+    const notification = this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .first();
+    await notification.waitFor({ state: 'visible' });
+  }
+
   async switchToGridView() {
     await this.gridViewButton.click();
   }
 
+  /**
+   * The toolbar "Sort: <active>" dropdown.
+   */
+  getSortMenuTrigger() {
+    return this.page.getByRole('button', { name: /^sort:/i });
+  }
+
+  /**
+   * Open the sort dropdown, pick one option, close the menu (it stays open on
+   * select so several facets can be tuned — Escape dismisses it).
+   */
+  async pickSortOption(optionName: string) {
+    await this.getSortMenuTrigger().click();
+    await this.page.getByRole('menuitemradio', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Names of the rendered table rows (folders and assets), header excluded.
+   */
+  async getTableRowNames() {
+    const rows = this.page.getByRole('grid').getByRole('row');
+    const texts = await rows.allInnerTexts();
+    return texts.slice(1).map((text) => text.split('\n').find(Boolean) ?? '');
+  }
+
   async switchToTableView() {
     await this.tableViewButton.click();
+  }
+
+  /**
+   * The toolbar "Filter" dropdown trigger (shows the applied-filter count).
+   */
+  getFilterMenuTrigger() {
+    return this.page.getByRole('button', { name: /^filter/i });
+  }
+
+  /**
+   * Open the Filter dropdown, hover a field submenu, pick one option.
+   * Type options keep the menu open (checkbox semantics) — Escape dismisses it.
+   */
+  async pickFilterOption(fieldName: string, optionName: string) {
+    await this.getFilterMenuTrigger().click();
+    await this.page.getByRole('menuitem', { name: fieldName, exact: true }).hover();
+    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * The applied-filter badges row under the toolbar.
+   */
+  getFilterBadges() {
+    return this.page.getByTestId('filter-badge');
+  }
+
+  /**
+   * Remove the badge whose field label matches (e.g. 'Type').
+   */
+  async removeFilterBadge(fieldLabel: string) {
+    await this.page.getByRole('button', { name: `Remove ${fieldLabel} filter` }).click();
   }
 
   async isGridViewActive() {
@@ -172,11 +307,20 @@ export class AssetsPage {
   }
 
   /**
+   * The grid container. Scoped via test id so card/folder locators don't
+   * collide with the sidebar FolderTree, which also renders folder names as
+   * list items inside the `main` landmark.
+   */
+  get assetsGrid() {
+    return this.page.getByTestId('assets-grid');
+  }
+
+  /**
    * Get an asset card in grid view by (partial) filename.
    * Asset cards use role="listitem" in the list.
    */
   getAssetCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -312,6 +456,30 @@ export class AssetsPage {
   }
 
   /**
+   * Open the fullscreen crop & focus editor from the preview. Returns once the
+   * editor footer (Apply) is visible. The editor renders in a Portal at body
+   * root, so query off `page`, not the drawer.
+   */
+  async openCropEditor() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Crop' }).click();
+    await expect(this.page.getByRole('button', { name: 'Apply' })).toBeVisible();
+  }
+
+  /**
+   * Click Apply in the crop editor (replace the original).
+   */
+  async applyCrop() {
+    await this.page.getByRole('button', { name: 'Apply' }).click();
+  }
+
+  /**
+   * Click "Save as copy" in the crop editor (new asset in the same folder).
+   */
+  async saveCropAsCopy() {
+    await this.page.getByRole('button', { name: 'Save as copy' }).click();
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
@@ -332,7 +500,7 @@ export class AssetsPage {
    * Get a folder card in grid view
    */
   getFolderCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -361,10 +529,202 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
-  async uploadFilesFromUrl(urls: string | string[]) {
-    await this.openImportFromUrlDialog();
-    const urlsArray = Array.isArray(urls) ? urls : [urls];
-    await this.urlTextarea.fill(urlsArray.join('\n'));
-    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  /**
+   * Drag a file or folder onto a folder target using pointer events (dnd-kit).
+   * Moves the pointer more than 8px before dropping to satisfy activation distance.
+   */
+  async dragItemToFolder(
+    itemName: string,
+    folderName: string,
+    view: 'grid' | 'table' = 'grid',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or target folder "${folderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Drag a folder row/card onto itself (invalid shallow drop).
+   */
+  async dragFolderToSelf(folderName: string, view: 'grid' | 'table' = 'table') {
+    const folder = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const box = await folder.boundingBox();
+    if (!box) {
+      throw new Error(`Could not resolve folder "${folderName}"`);
+    }
+
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Sidebar folder tree navigation (left rail).
+   */
+  get folderTreeNav() {
+    return this.page.getByRole('navigation', { name: /media library folders/i });
+  }
+
+  getTreeFolderRow(name: string) {
+    return this.folderTreeNav.getByRole('button', { name, exact: true });
+  }
+
+  getHomeTreeRow() {
+    return this.folderTreeNav.getByRole('button', { name: 'Home' });
+  }
+
+  /**
+   * Drag a file or folder from the main view onto a sidebar folder row.
+   */
+  async dragItemToTreeFolder(
+    itemName: string,
+    treeFolderName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getTreeFolderRow(treeFolderName);
+
+    await this.dragBetweenLocators(item, target);
+  }
+
+  /**
+   * Drag a file or folder from the main view onto the sidebar Home row.
+   */
+  async dragItemToHome(
+    itemName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getHomeTreeRow();
+
+    await this.dragBetweenLocators(item, target);
+  }
+
+  /**
+   * Hover a dragged item over a collapsed sidebar folder long enough to spring-load it open.
+   * Leaves the pointer over `treeFolderName` with the mouse button held down.
+   */
+  async springLoadFolder(
+    itemName: string,
+    treeFolderName: string,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file',
+    dwellMs = 650
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = this.getTreeFolderRow(treeFolderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or tree folder "${treeFolderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.waitForTimeout(dwellMs);
+  }
+
+  /**
+   * Complete a drag started by `springLoadFolder` by dropping on a locator.
+   */
+  async dropDraggedItemOn(locator: Locator) {
+    const targetBox = await locator.boundingBox();
+
+    if (!targetBox) {
+      throw new Error('Could not resolve drop target');
+    }
+
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(endX, endY, { steps: 8 });
+    await this.page.mouse.up();
+  }
+
+  private async dragBetweenLocators(item: Locator, target: Locator) {
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error('Could not resolve drag source or drop target');
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.mouse.up();
   }
 }
