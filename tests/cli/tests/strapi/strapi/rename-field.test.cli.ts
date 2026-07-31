@@ -33,7 +33,7 @@ describe('rename:field', () => {
 
     const before = new Set(await listMigrationFiles(migrationsDir));
 
-    const { stdout } = await coffee
+    const result = await coffee
       .spawn(
         'npm',
         ['run', '-s', 'strapi', '--', 'rename:field', 'api::dog.dog', 'age', 'ageInYears'],
@@ -41,8 +41,15 @@ describe('rename:field', () => {
           cwd: appPath,
         }
       )
-      .expect('code', 0)
       .end();
+
+    if (result.code !== 0) {
+      throw new Error(
+        `rename:field exited ${result.code}\nstdout:\n${result.stdout}\nstderr:\n${result.stderr}`
+      );
+    }
+
+    const { stdout } = result;
 
     // The attribute is renamed in the schema file.
     const schema = await readJson(schemaPath);

@@ -39,12 +39,19 @@ describe('rename:component', () => {
     const migrationsDir = path.join(appPath, MIGRATIONS_DIR);
     const before = new Set(await listRenameMigrations(migrationsDir));
 
-    const { stdout } = await coffee
+    const result = await coffee
       .spawn('npm', ['run', '-s', 'strapi', '--', 'rename:component', 'match.player', 'team'], {
         cwd: appPath,
       })
-      .expect('code', 0)
       .end();
+
+    if (result.code !== 0) {
+      throw new Error(
+        `rename:component exited ${result.code}\nstdout:\n${result.stdout}\nstderr:\n${result.stderr}`
+      );
+    }
+
+    const { stdout } = result;
 
     // The component file moves to the new category and the old uid is gone.
     expect(await exists(path.join(appPath, NEW_COMPONENT_FILE))).toBe(true);

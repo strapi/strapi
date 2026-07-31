@@ -92,7 +92,7 @@ describe('transformChatToCTB', () => {
 
   describe('rename migration compatibility', () => {
     const oldSchema: ContentType = {
-      uid: 'api::article.article' as any,
+      uid: 'api::article.article' as UID.ContentType,
       modelType: 'contentType',
       kind: 'collectionType',
       modelName: 'article',

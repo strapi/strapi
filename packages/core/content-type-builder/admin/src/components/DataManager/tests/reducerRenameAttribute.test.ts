@@ -1,24 +1,33 @@
-import { reducer, actions } from '../reducer';
+import { reducer, actions, type State } from '../reducer';
 
 import { initCT, init } from './utils';
 
-const editName = (uid: string, name: string, newName: string, extra: Record<string, any> = {}) =>
+import type { AnyAttribute, RenameHop } from '../../../types';
+import type { Internal } from '@strapi/types';
+
+const editName = (
+  uid: string,
+  name: string,
+  newName: string,
+  extra: Record<string, unknown> = {}
+) =>
   actions.editAttribute({
-    attributeToSet: { type: 'string', name: newName, ...extra } as any,
+    attributeToSet: { type: 'string', name: newName, ...extra } as AnyAttribute,
     forTarget: 'contentType',
-    targetUid: uid,
+    targetUid: uid as Internal.UID.ContentType,
     name,
   });
 
-const getRenames = (state: any, uid: string) => state.current.contentTypes[uid].renames;
+const getRenames = (state: State, uid: string): RenameHop[] | undefined =>
+  state.current.contentTypes[uid]?.renames;
 
-const getAttr = (state: any, uid: string, name: string) =>
-  state.current.contentTypes[uid].attributes.find((attr: any) => attr.name === name);
+const getAttr = (state: State, uid: string, name: string) =>
+  state.current.contentTypes[uid]?.attributes.find((attr) => attr.name === name);
 
 describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () => {
   const uid = 'api::article.article';
 
-  const buildState = (attributes: any[]) =>
+  const buildState = (attributes: AnyAttribute[]) =>
     init({ contentTypes: { [uid]: initCT('article', { attributes }) } });
 
   it('records an ordered rename hop when an existing attribute is renamed', () => {

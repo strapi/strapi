@@ -1,11 +1,11 @@
 import { stateToRequestData } from '../cleanData';
 
-import type { ContentTypes, RenameHop } from '../../../../types';
+import type { AnyAttribute, ContentTypes, RenameHop, Status } from '../../../../types';
 
 const buildContentTypes = (
-  attributes: any[],
+  attributes: AnyAttribute[],
   renames?: RenameHop[],
-  status: any = 'CHANGED'
+  status: Status = 'CHANGED'
 ): ContentTypes => ({
   'api::article.article': {
     uid: 'api::article.article',
@@ -19,11 +19,17 @@ const buildContentTypes = (
     info: { displayName: 'article', singularName: 'article', pluralName: 'articles' },
     attributes,
     ...(renames ? { renames } : {}),
-  } as any,
+  },
 });
 
+type RequestContentType = {
+  action?: string;
+  attributes: Array<{ properties?: Record<string, unknown> }>;
+  renames?: RenameHop[];
+};
+
 const firstContentType = (requestData: ReturnType<typeof stateToRequestData>['requestData']) => {
-  const [contentType] = requestData.contentTypes as Array<{ attributes: any[]; renames?: any[] }>;
+  const [contentType] = requestData.contentTypes as RequestContentType[];
   return contentType;
 };
 
@@ -90,7 +96,7 @@ describe('CleanData | rename serialization', () => {
     });
 
     const contentType = firstContentType(requestData);
-    expect((contentType as any).action).toBe('create');
+    expect(contentType.action).toBe('create');
     expect(contentType).not.toHaveProperty('renames');
   });
 });

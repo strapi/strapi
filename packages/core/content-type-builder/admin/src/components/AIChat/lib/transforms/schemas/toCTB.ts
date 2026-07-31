@@ -8,7 +8,7 @@ import type { Struct, UID } from '@strapi/types';
 
 const RENAME_METADATA_KEYS = ['previousName', 'renamedFrom', 'action'] as const;
 
-const attributePropertiesForRenameMatch = (attr: Record<string, any>) =>
+const attributePropertiesForRenameMatch = (attr: Record<string, unknown>) =>
   omit(attr, ['name', 'status', ...RENAME_METADATA_KEYS]);
 
 const collectExplicitAttributeRenames = (
@@ -90,8 +90,8 @@ const inferRenamesFromAttributeDiff = (
         !consumedRemoved.has(removedAttr.name) &&
         removedAttr.type === newAttr.type &&
         isEqual(
-          attributePropertiesForRenameMatch(newAttr),
-          attributePropertiesForRenameMatch(removedAttr)
+          attributePropertiesForRenameMatch(newAttr as Record<string, unknown>),
+          attributePropertiesForRenameMatch(removedAttr as Record<string, unknown>)
         )
     );
 

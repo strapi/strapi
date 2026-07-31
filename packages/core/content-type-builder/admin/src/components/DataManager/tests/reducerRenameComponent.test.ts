@@ -1,4 +1,4 @@
-import { reducer, actions } from '../reducer';
+import { reducer, actions, type State } from '../reducer';
 
 import { initCompo, init } from './utils';
 
@@ -9,7 +9,7 @@ const uid = 'default.hero' as Internal.UID.Component;
 const buildState = () =>
   init({ components: { [uid]: initCompo('hero', { status: 'UNCHANGED' }) } });
 
-const getComponent = (state: any) => state.current.components[uid];
+const getComponent = (state: State) => state.current.components[uid];
 
 const updateComponent = (data: { displayName: string; icon: string; category?: string }) =>
   actions.updateComponentSchema({ data, uid });

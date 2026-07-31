@@ -1,7 +1,9 @@
 import { applyRenameDecisions, collectPendingRenames } from '../RenameMigrationModal';
 
+type RequestData = Parameters<typeof collectPendingRenames>[0];
+
 describe('RenameMigrationModal helpers', () => {
-  const buildRequestData = () => ({
+  const buildRequestData = (): RequestData => ({
     contentTypes: [
       {
         action: 'update',
@@ -27,7 +29,7 @@ describe('RenameMigrationModal helpers', () => {
 
   describe('collectPendingRenames', () => {
     it('flattens ordered renames across content types and components, preserving order', () => {
-      const items = collectPendingRenames(buildRequestData() as any);
+      const items = collectPendingRenames(buildRequestData());
 
       expect(items).toEqual([
         {
@@ -64,7 +66,7 @@ describe('RenameMigrationModal helpers', () => {
           },
         ],
         components: [],
-      } as any);
+      });
 
       expect(items[0].typeName).toBe('api::article.article');
     });
@@ -74,7 +76,7 @@ describe('RenameMigrationModal helpers', () => {
         collectPendingRenames({
           contentTypes: [{ action: 'create', uid: 'api::x.x' }],
           components: [],
-        } as any)
+        })
       ).toEqual([]);
     });
   });
@@ -84,29 +86,27 @@ describe('RenameMigrationModal helpers', () => {
       const requestData = buildRequestData();
 
       // Accept only the second article hop; refuse the first and the component hop.
-      applyRenameDecisions(requestData as any, new Set(['api::article.article:1']));
+      applyRenameDecisions(requestData, new Set(['api::article.article:1']));
 
-      expect((requestData.contentTypes[0] as any).renames).toEqual([
-        { oldName: 'body', newName: 'content' },
-      ]);
+      expect(requestData.contentTypes[0].renames).toEqual([{ oldName: 'body', newName: 'content' }]);
       // Component had its only hop refused -> renames removed entirely.
       expect('renames' in requestData.components[0]).toBe(false);
     });
 
     it('keeps all hops when every key is accepted', () => {
       const requestData = buildRequestData();
-      const allKeys = new Set(collectPendingRenames(requestData as any).map((item) => item.key));
+      const allKeys = new Set(collectPendingRenames(requestData).map((item) => item.key));
 
-      applyRenameDecisions(requestData as any, allKeys);
+      applyRenameDecisions(requestData, allKeys);
 
-      expect((requestData.contentTypes[0] as any).renames).toHaveLength(2);
-      expect((requestData.components[0] as any).renames).toHaveLength(1);
+      expect(requestData.contentTypes[0].renames).toHaveLength(2);
+      expect(requestData.components[0].renames).toHaveLength(1);
     });
 
     it('removes all renames when nothing is accepted', () => {
       const requestData = buildRequestData();
 
-      applyRenameDecisions(requestData as any, new Set());
+      applyRenameDecisions(requestData, new Set());
 
       expect('renames' in requestData.contentTypes[0]).toBe(false);
       expect('renames' in requestData.components[0]).toBe(false);
