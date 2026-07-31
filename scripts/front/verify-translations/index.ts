@@ -1,18 +1,31 @@
 #!/usr/bin/env tsx
+import fs from 'node:fs';
+
 import { discoverBundles, readJsonRecord, repoRoot } from './bundles';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
 import { backfillMissingEnKeys } from './backfill-en';
 import { writeEnJsonForBundle } from './write-en';
 import { alignDefaultMessages } from './align-defaults';
+import { buildGapReport } from './report-gaps';
 
 const parseArgs = (): VerifyOptions => {
   const args = process.argv.slice(2);
+  const localesArg = args.find((arg) => arg.startsWith('--locale='))?.split('=')[1];
+  const outArg = args.find((arg) => arg.startsWith('--out='))?.split('=')[1];
 
   return {
     fix: args.includes('--fix'),
     writeEn: args.includes('--write-en'),
     syncExisting: args.includes('--sync-existing'),
+    reportGaps: args.includes('--report-gaps'),
+    reportGapsOut: outArg,
+    locales: localesArg
+      ? localesArg
+          .split(',')
+          .map((locale) => locale.trim())
+          .filter(Boolean)
+      : undefined,
     bundleFilter: args.find((arg) => arg.startsWith('--bundle='))?.split('=')[1],
   };
 };
@@ -36,6 +49,28 @@ const main = () => {
   }
 
   let adminEnJson = readJsonRecord(adminBundle.enJsonPath);
+
+  if (options.reportGaps) {
+    const report = buildGapReport(bundles, new Set(Object.keys(adminEnJson)), {
+      locales: options.locales,
+    });
+    const json = `${JSON.stringify(report, null, 2)}\n`;
+
+    if (options.reportGapsOut) {
+      fs.writeFileSync(options.reportGapsOut, json);
+      console.error(
+        `report-gaps: wrote ${options.reportGapsOut} (${report.summary.keysWithGaps} keys with gaps, ${report.summary.missingOccurrences} missing key×locale)`
+      );
+    } else {
+      process.stdout.write(json);
+      console.error(
+        `report-gaps: ${report.summary.keysWithGaps} keys with gaps, ${report.summary.missingOccurrences} missing key×locale across ${report.summary.bundleCount} bundle(s)`
+      );
+    }
+
+    process.exit(0);
+  }
+
   const allIssues: ValidationIssue[] = [];
   let fixedLocales = 0;
   let writtenEn = 0;

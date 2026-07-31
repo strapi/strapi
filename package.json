@@ -56,6 +56,7 @@
     "verify:translations": "tsx scripts/front/verify-translations/index.ts",
     "verify:translations:fix": "tsx scripts/front/verify-translations/index.ts --fix",
     "verify:translations:write-en": "tsx scripts/front/verify-translations/index.ts --write-en",
+    "verify:translations:report-gaps": "tsx scripts/front/verify-translations/index.ts --report-gaps",
     "verify:translations:test": "tsx --test scripts/front/verify-translations/__tests__/*.test.ts",
     "postinstall": "husky",
     "prepack": "pinst --disable",

@@ -16,6 +16,7 @@ import {
 import { fixLocaleFiles, validateBundle } from '../validate';
 import { backfillMissingEnKeys } from '../backfill-en';
 import { writeEnJsonForBundle } from '../write-en';
+import { buildGapReport } from '../report-gaps';
 import type { TranslationBundle } from '../types';
 
 describe('pluginPrefixFromPackageName', () => {
@@ -607,5 +608,93 @@ describe('validateBundle cross-package admin refs', () => {
 
     assert.equal(missing.length, 1);
     assert.match(missing[0].message, /global\.not-in-admin/);
+  });
+});
+
+describe('buildGapReport', () => {
+  it('reports keys missing from some locales with sibling values and call sites', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-gaps-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify(
+        { 'plugin.name': 'Upload', 'modal.save': 'Save', 'only.en': 'English only' },
+        null,
+        2
+      )}\n`
+    );
+    fs.writeFileSync(
+      path.join(dir, 'fr.json'),
+      `${JSON.stringify({ 'plugin.name': 'Téléversement', 'modal.save': 'Enregistrer' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(dir, 'de.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload-de' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `
+        formatMessage({ id: getTrad('modal.save'), defaultMessage: 'Save' });
+        formatMessage({ id: getTrad('only.en'), defaultMessage: 'English only' });
+      `
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const report = buildGapReport([bundle], new Set());
+    const gaps = report.bundles[0]!.gaps;
+    const byKey = Object.fromEntries(gaps.map((gap) => [gap.key, gap]));
+
+    assert.equal(byKey['plugin.name'], undefined);
+    assert.deepEqual(byKey['modal.save']!.missingLocales, ['de']);
+    assert.equal(byKey['modal.save']!.presentLocales.fr, 'Enregistrer');
+    assert.equal(byKey['modal.save']!.en, 'Save');
+    assert.equal(byKey['modal.save']!.usages.length, 1);
+    assert.match(byKey['modal.save']!.usages[0]!.file, /Widget\.tsx$/);
+
+    assert.deepEqual(byKey['only.en']!.missingLocales.sort(), ['de', 'fr']);
+    assert.deepEqual(byKey['only.en']!.presentLocales, {});
+    assert.equal(report.summary.keysWithGaps, 2);
+    assert.equal(report.summary.missingOccurrences, 3);
+  });
+
+  it('limits missingLocales when --locale filter is set but still includes sibling presentLocales', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-gaps-locale-'));
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'modal.save': 'Save' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(dir, 'fr.json'),
+      `${JSON.stringify({ 'modal.save': 'Enregistrer' }, null, 2)}\n`
+    );
+    fs.writeFileSync(path.join(dir, 'de.json'), `${JSON.stringify({}, null, 2)}\n`);
+    fs.writeFileSync(path.join(dir, 'ja.json'), `${JSON.stringify({}, null, 2)}\n`);
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [],
+    };
+
+    const report = buildGapReport([bundle], new Set(), { locales: ['de'] });
+    const gap = report.bundles[0]!.gaps[0]!;
+
+    assert.equal(gap.key, 'modal.save');
+    assert.deepEqual(gap.missingLocales, ['de']);
+    assert.equal(gap.presentLocales.fr, 'Enregistrer');
+    assert.equal('ja' in gap.presentLocales, false);
   });
 });
