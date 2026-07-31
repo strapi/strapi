@@ -12,7 +12,7 @@ const escapeForSingleQuotedString = (value: string) =>
 
 /**
  * Align in-code defaultMessage strings to the owning en.json catalog when they drift.
- * Used after --write-en so minority call sites match the synced English source of truth.
+ * Used after --write-en so minority call sites match the English catalog (en.json).
  */
 export const alignDefaultMessagesForBundle = (
   bundle: TranslationBundle,
