@@ -2,7 +2,7 @@
 # Localhost-only curl wrapper for AI issue reproduction.
 set -euo pipefail
 
-if [ "$#" -lt 1 ]; then
+if [[ "$#" -lt 1 ]]; then
   echo "Usage: repro-curl.sh <url> [curl args...]" >&2
   exit 1
 fi

@@ -144,7 +144,7 @@ jobs:
       - name: LLM triage
         id: triage_llm
         if: steps.deterministic.outputs.decision == 'approve'
-        uses: anthropics/claude-code-action@v1.0.132
+        uses: anthropics/claude-code-action@bbfaf8e1ffe3e688f7ab65ceee78de241e24a238 # v1.0.132
         env:
           CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
         with:
@@ -320,7 +320,7 @@ jobs:
           echo "Strapi is ready at http://localhost:1337"
 
       - name: AI reproduction
-        uses: anthropics/claude-code-action@v1.0.132
+        uses: anthropics/claude-code-action@bbfaf8e1ffe3e688f7ab65ceee78de241e24a238 # v1.0.132
         env:
           GH_TOKEN: ${{ github.token }}
           CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
