@@ -897,3 +897,31 @@ export const ensureCheckbox = async (locator: Locator, checked: boolean) => {
     await locator.click();
   }
 };
+
+/**
+ * Confirm the CTB "Preserve data for renamed fields?" modal that appears after Save
+ * when `renameMigrations` is `prompt` (the default).
+ *
+ * @param preserve - Keep the Preserve data checkbox(es) checked so a rename migration
+ *   is generated. Pass `false` to clear them (field dropped and recreated empty —
+ *   the pre-rename-migration behavior history tests still need).
+ */
+export const confirmRenameMigration = async (
+  page: Page,
+  { preserve = true }: { preserve?: boolean } = {}
+) => {
+  const dialog = page.getByRole('dialog').filter({
+    hasText: /Preserve data for renamed fields/i,
+  });
+  await expect(dialog).toBeVisible();
+
+  if (!preserve) {
+    const checkboxes = dialog.getByRole('checkbox', { name: /Preserve data/i });
+    const count = await checkboxes.count();
+    for (let i = 0; i < count; i++) {
+      await ensureCheckbox(checkboxes.nth(i), false);
+    }
+  }
+
+  await dialog.getByRole('button', { name: 'Save' }).click();
+};

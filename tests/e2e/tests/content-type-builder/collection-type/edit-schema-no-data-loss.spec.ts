@@ -2,7 +2,12 @@ import { test, expect } from '@playwright/test';
 import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import { addAttributesToContentType } from '../../../../utils/content-types';
-import { clickAndWait, navToHeader, findAndClose } from '../../../../utils/shared';
+import {
+  clickAndWait,
+  confirmRenameMigration,
+  navToHeader,
+  findAndClose,
+} from '../../../../utils/shared';
 import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () => {
@@ -22,16 +27,7 @@ test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () 
     await resetFiles();
   });
 
-  // KNOWN LIMITATION — not a test bug, skipped intentionally.
-  // Strapi does not preserve data when a field is renamed. The CTB writes the new attribute name
-  // to the schema; on restart the DB sync (packages/core/database/src/schema/diff.ts) matches
-  // columns by name, so the old column is treated as "removed" and dropped (builder.ts ~L355) while
-  // the new column is created empty. There is no renameColumn operation for user-initiated renames.
-  // Confirmed "expected, not a bug" by maintainers: https://github.com/strapi/strapi/issues/25076
-  // (see also #19075, #12626, #12597). Tracked as a feature request:
-  // https://feedback.strapi.io/developer-experience/p/gracefully-handle-renaming-of-content-types-and-fields-in-the-ctb
-  // Flip this back to a real `test(...)` if/when the CTB supports rename-with-migration.
-  test.fixme('Renaming a field preserves existing content data', async ({ page }) => {
+  test('Renaming a field preserves existing content data', async ({ page }) => {
     await addAttributesToContentType(page, 'Article', [{ type: 'text', name: 'bio' }]);
 
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
@@ -46,6 +42,7 @@ test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () 
     await page.getByLabel('Name', { exact: true }).fill('biography');
     await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
     await page.getByRole('button', { name: 'Save' }).click();
+    await confirmRenameMigration(page, { preserve: true });
     await waitForRestart(page);
 
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
