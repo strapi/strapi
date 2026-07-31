@@ -59,14 +59,6 @@ export const toggleSelection = (state: SelectionState, key: ItemKey): SelectionS
 };
 
 /**
- * Plain click — selects only this key, dropping any prior selection. Sets the anchor.
- */
-export const selectOnly = (_state: SelectionState, key: ItemKey): SelectionState => ({
-  selectedKeys: new Set<ItemKey>([key]),
-  anchorKey: key,
-});
-
-/**
  * Shift+click — selects the contiguous range between the current anchor and the
  * target in render order, replacing the current selection. The anchor stays put.
  *

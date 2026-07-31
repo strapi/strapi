@@ -22,6 +22,7 @@ import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
@@ -175,20 +176,21 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
-  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
-  // Click semantics: plain click selects one; cmd/ctrl toggles; shift selects a contiguous
-  // range (anchor → target), replacing the current selection.
+  // Plain click opens the asset details; pointer selection lives on the
+  // checkbox only. Modifier clicks keep the selection semantics: shift selects
+  // a range, cmd/ctrl toggles.
   const handleRowClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
       toggle(key);
     } else {
-      selectOnly(key);
+      onAssetItemClick(asset.id);
     }
   };
 
@@ -457,10 +459,20 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 interface AssetsTableProps {
   assets: File[];
   folders?: Folder[];
+  /**
+   * When set ("Folders: Mixed with files"), rows render in this interleaved
+   * order instead of folders-first. Range selection follows the same order.
+   */
+  mixedItems?: MixedItem[] | null;
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTableProps) => {
+export const AssetsTable = ({
+  assets,
+  folders = [],
+  mixedItems = null,
+  onAssetItemClick,
+}: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
@@ -476,11 +488,16 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
 
   const totalRows = folders.length + assets.length;
 
-  // Render order: folders first, then assets — range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  // Render order — folders first by default, or the interleaved mixed order.
+  // Range selection follows it.
+  const orderedItemKeys: ItemKey[] = mixedItems
+    ? mixedItems.map((item) =>
+        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
+      )
+    : [
+        ...folders.map((folder) => folderKey(folder.id)),
+        ...assets.map((asset) => assetKey(asset.id)),
+      ];
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {
@@ -498,7 +515,7 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
   }
 
   return (
-    <StyledTable colCount={colCount} rowCount={totalRows + 1}>
+    <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
       <StyledThead>
         <RawTr>
           {showCheckboxColumn && (
@@ -544,21 +561,39 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {folders.map((folder) => (
-          <FolderRow
-            key={`folder-${folder.id}`}
-            folder={folder}
-            orderedItemKeys={orderedItemKeys}
-          />
-        ))}
-        {assets.map((asset) => (
-          <AssetRow
-            key={asset.id}
-            asset={asset}
-            orderedItemKeys={orderedItemKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        ))}
+        {mixedItems?.map((item) =>
+          item.kind === 'folder' ? (
+            <FolderRow
+              key={`folder-${item.folder.id}`}
+              folder={item.folder}
+              orderedItemKeys={orderedItemKeys}
+            />
+          ) : (
+            <AssetRow
+              key={item.asset.id}
+              asset={item.asset}
+              orderedItemKeys={orderedItemKeys}
+              onAssetItemClick={onAssetItemClick}
+            />
+          )
+        )}
+        {!mixedItems &&
+          folders.map((folder) => (
+            <FolderRow
+              key={`folder-${folder.id}`}
+              folder={folder}
+              orderedItemKeys={orderedItemKeys}
+            />
+          ))}
+        {!mixedItems &&
+          assets.map((asset) => (
+            <AssetRow
+              key={asset.id}
+              asset={asset}
+              orderedItemKeys={orderedItemKeys}
+              onAssetItemClick={onAssetItemClick}
+            />
+          ))}
       </RawTbody>
     </StyledTable>
   );
