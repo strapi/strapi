@@ -3,7 +3,7 @@ import { PaginationError } from './errors';
 
 interface PaginationArgs {
   page: number;
-  pageSize: number;
+  pageSize: number | null;
   start: number;
   limit: number;
 }
@@ -101,16 +101,15 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 
   // Page / PageSize
   if (usePagePagination) {
-    const { page, pageSize } = merge(defaultValues.page, {
-      ...args,
-      // Only clamp a caller-provided pageSize to a minimum of 1; when pageSize
-      // is absent, let the configured default flow through instead of forcing 1.
-      ...(isNil(args.pageSize) ? {} : { pageSize: Math.max(1, args.pageSize) }),
-    });
+    const pageArgs = isNil(args.pageSize)
+      ? omit(['pageSize'], args)
+      : { ...args, pageSize: Math.max(1, args.pageSize) };
+    const { page, pageSize } = merge(defaultValues.page, pageArgs);
+    const pageLimit = ensureValidValues({ start: 0, limit: pageSize }).limit;
 
     Object.assign(pagination, {
-      start: (page - 1) * pageSize,
-      limit: pageSize,
+      start: (page - 1) * pageLimit,
+      limit: pageLimit,
     });
   }
 
