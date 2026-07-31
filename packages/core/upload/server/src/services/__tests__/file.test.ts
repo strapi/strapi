@@ -164,6 +164,7 @@ describe('file', () => {
 
       global.strapi = {
         fetch: jest.fn(),
+        log: { warn: jest.fn() },
       } as any;
     });
 
@@ -230,11 +231,26 @@ describe('file', () => {
       const onProgress = jest.fn();
       await expect(
         fileService.fetchUrlToInputFile(url, tmpWorkingDirectory, 1024 * 1024, onProgress)
-      ).rejects.toThrow('File too large: maximum allowed size is 1MB');
+      ).rejects.toThrow('File too large: maximum allowed size is 1 MB');
       expect(response.arrayBuffer).not.toHaveBeenCalled();
       // Rejected on the header fast-path, so no progress is ever announced
       expect(onProgress).not.toHaveBeenCalled();
       await expect(fse.readdir(tmpWorkingDirectory)).resolves.toEqual([]);
+    });
+
+    test('Reports small size limits in a readable unit rather than rounding them to 0MB', async () => {
+      const sizeLimit = 200 * 1000;
+      mockFetch(
+        createStreamingResponse({
+          chunks: [new Uint8Array(Buffer.alloc(sizeLimit + 1, 1))],
+        })
+      );
+
+      // A 200KB limit is well under 1MB: formatting it in whole megabytes would tell the user the
+      // maximum allowed size is "0MB".
+      await expect(
+        fileService.fetchUrlToInputFile(url, tmpWorkingDirectory, sizeLimit)
+      ).rejects.toThrow('File too large: maximum allowed size is 200 KB');
     });
 
     test('Removes the partial temp file when the stream errors mid-transfer', async () => {
@@ -280,13 +296,18 @@ describe('file', () => {
       expect(onProgress.mock.calls[1][0]).toEqual({ bytesWritten: 400, totalBytes: 1000 });
     });
 
-    test('Announces totalBytes as null in the initial report when Content-Length is absent', async () => {
+    test('Reports totalBytes as null throughout when Content-Length is absent', async () => {
       mockFetch(createStreamingResponse({ chunks: [new Uint8Array(Buffer.alloc(25, 3))] }));
 
       const onProgress = jest.fn();
       await fileService.fetchUrlToInputFile(url, tmpWorkingDirectory, undefined, onProgress);
 
-      expect(onProgress.mock.calls[0][0]).toEqual({ bytesWritten: 0, totalBytes: null });
+      // Null in the initial announcement, and still null once bytes flow — a consumer must not see
+      // a total materialise mid-stream
+      expect(onProgress.mock.calls.map(([progress]) => progress)).toEqual([
+        { bytesWritten: 0, totalBytes: null },
+        { bytesWritten: 25, totalBytes: null },
+      ]);
     });
 
     test('Reports every chunk without internal throttling', async () => {
@@ -306,13 +327,56 @@ describe('file', () => {
       ]);
     });
 
-    test('Reports totalBytes as null when Content-Length is absent', async () => {
-      mockFetch(createStreamingResponse({ chunks: [new Uint8Array(Buffer.alloc(10, 9))] }));
+    test('Ignores a throwing progress callback instead of failing the import', async () => {
+      const chunks = [
+        new Uint8Array(Buffer.from('still ')),
+        new Uint8Array(Buffer.from('written')),
+      ];
+      mockFetch(createStreamingResponse({ chunks }));
 
-      const onProgress = jest.fn();
-      await fileService.fetchUrlToInputFile(url, tmpWorkingDirectory, undefined, onProgress);
+      const onProgress = jest.fn(() => {
+        throw new Error('consumer bug');
+      });
 
-      expect(onProgress).toHaveBeenCalledWith({ bytesWritten: 10, totalBytes: null });
+      // Node surfaces a synchronous throw from `_transform` as a stream error, so an unguarded
+      // callback would reject the pipeline and abort a download that was otherwise fine
+      const { file } = await fileService.fetchUrlToInputFile(
+        url,
+        tmpWorkingDirectory,
+        undefined,
+        onProgress
+      );
+
+      expect(await fse.readFile(file.filepath, 'utf8')).toBe('still written');
+      expect(file.size).toBe(13);
+      // Every report still attempted — one failing call does not disable subsequent reporting
+      expect(onProgress).toHaveBeenCalledTimes(chunks.length + 1);
+      expect(global.strapi.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('progress callback threw')
+      );
+    });
+
+    test('Keeps the original error when removing the partial temp file fails', async () => {
+      const chunks = [new Uint8Array(Buffer.alloc(100, 5))];
+      mockFetch(createStreamingResponse({ chunks, errorAfterChunks: new Error('socket hang up') }));
+
+      // `fse.remove` is overloaded (promise + callback), so mock the implementation rather than
+      // using mockRejectedValue, which resolves against the callback signature
+      const removeSpy = jest.spyOn(fse, 'remove').mockImplementation(async () => {
+        throw new Error('EPERM: operation not permitted');
+      });
+
+      try {
+        // The cleanup failure must not mask the error the caller acts on
+        await expect(fileService.fetchUrlToInputFile(url, tmpWorkingDirectory)).rejects.toThrow(
+          'socket hang up'
+        );
+        expect(global.strapi.log.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Could not remove partial temp file')
+        );
+      } finally {
+        removeSpy.mockRestore();
+      }
     });
 
     test('Works without a progress callback', async () => {

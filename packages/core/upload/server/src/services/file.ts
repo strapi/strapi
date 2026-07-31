@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import fse from 'fs-extra';
 import { cloneDeep } from 'lodash/fp';
-import { async, errors } from '@strapi/utils';
+import { async, errors, file as fileUtils } from '@strapi/utils';
 
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -15,6 +15,7 @@ import { getService } from '../utils';
 import { Config, type File } from '../types';
 
 const { ApplicationError } = errors;
+const { bytesToHumanReadable } = fileUtils;
 
 const FETCH_TIMEOUT_MS = 60_000; // 60 seconds
 
@@ -108,6 +109,8 @@ const getFilenameFromUrl = (url: string, contentDisposition?: string | null): st
  *   64KB chunks yields ~8000 calls). Throttling here would bake one consumer's frame rate into a
  *   shared service, and a pre-throttled counter cannot be un-throttled by a caller that needs
  *   every byte.
+ * - If it throws, the error is logged and swallowed: reporting is observational, so a buggy
+ *   consumer never fails the import.
  */
 const fetchUrlToInputFile = async (
   url: string,
@@ -159,7 +162,7 @@ const fetchUrlToInputFile = async (
 
   const tooLargeError = () =>
     new ApplicationError(
-      `File too large: maximum allowed size is ${Math.round((sizeLimit ?? 0) / (1024 * 1024))}MB`
+      `File too large: maximum allowed size is ${bytesToHumanReadable(sizeLimit ?? 0)}`
     );
 
   const parsedContentLength = parseInt(response.headers.get('content-length') ?? '', 10);
@@ -170,11 +173,28 @@ const fetchUrlToInputFile = async (
     throw tooLargeError();
   }
 
+  // Progress reporting is a side-channel for UI: a consumer that throws should not fail the import
+  // it is merely observing. Node turns a synchronous throw inside `_transform` into a stream error,
+  // so an unguarded callback would reject the pipeline and abort a download that was fine.
+  const reportProgress = (progress: UrlFetchProgress) => {
+    if (!onProgress) return;
+
+    try {
+      onProgress(progress);
+    } catch (error) {
+      strapi?.log?.warn(
+        `URL fetch progress callback threw, ignoring: ${
+          error instanceof Error ? error.message : error
+        }`
+      );
+    }
+  };
+
   // Announce the total before any bytes are dispatched. Consumers that size a progress bar from
   // `totalBytes` need it up front: a consumer clamping bytes to a not-yet-known size would clamp
   // every early chunk to zero. Fires exactly once, even when `totalBytes` is null or the body is
   // empty, so the first call is always a size announcement.
-  onProgress?.({ bytesWritten: 0, totalBytes });
+  reportProgress({ bytesWritten: 0, totalBytes });
 
   // Get content type and filename
   const contentType =
@@ -203,7 +223,7 @@ const fetchUrlToInputFile = async (
           }
 
           // Raw, one call per chunk, no throttling — see `onProgress` on the signature above
-          onProgress?.({ bytesWritten, totalBytes });
+          reportProgress({ bytesWritten, totalBytes });
           callback(null, chunk);
         },
       });
@@ -216,8 +236,19 @@ const fetchUrlToInputFile = async (
     }
   } catch (error) {
     // Remove the partially written file — the caller only cleans up the temp directory once all
-    // URLs have been processed
-    await fse.remove(tmpFilePath);
+    // URLs have been processed. Cleanup failures must not replace the error the caller cares about
+    // ("File too large", "socket hang up") with an incidental filesystem one, so swallow and log:
+    // the request-level temp-directory cleanup is still the backstop for the leftover file.
+    try {
+      await fse.remove(tmpFilePath);
+    } catch (cleanupError) {
+      strapi?.log?.warn(
+        `Could not remove partial temp file ${tmpFilePath}: ${
+          cleanupError instanceof Error ? cleanupError.message : cleanupError
+        }`
+      );
+    }
+
     throw error;
   }
 
