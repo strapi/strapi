@@ -7,8 +7,12 @@ import { useDocumentContext } from './useDocumentContext';
  * Whether the Content Manager edit view is on the i18n default locale.
  *
  * Returns `true` when i18n is not enabled on the content type, when the active
- * locale cannot be determined yet, or when it matches `meta.availableLocales[0]`
- * (server sorts the default locale first).
+ * or default locale cannot be determined yet, or when they match.
+ *
+ * Uses `meta.defaultLocale` from the document metadata response — NOT
+ * `availableLocales[0]`. That list excludes the currently viewed locale, so
+ * when editing the default locale `[0]` is a sibling and would incorrectly
+ * report "not default" and lock shared fields.
  */
 const useIsEditingDefaultLocale = (): boolean => {
   const [{ query }] = useQueryParams<{
@@ -26,8 +30,8 @@ const useIsEditingDefaultLocale = (): boolean => {
 
   const currentLocale = query?.plugins?.i18n?.locale ?? currentDocument.document?.locale;
   const defaultLocale = (
-    currentDocument.meta?.availableLocales?.[0] as { locale?: string } | undefined
-  )?.locale;
+    currentDocument.meta as { defaultLocale?: string | null } | undefined
+  )?.defaultLocale;
 
   if (!currentLocale || !defaultLocale) {
     return true;
