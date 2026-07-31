@@ -571,8 +571,10 @@ class Strapi extends Container implements Core.Strapi {
 
     process.removeAllListeners();
 
-    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
-    delete global.strapi;
+    // Clear for re-instantiation. Prefer assignment over `delete` — Node 26
+    // throws TypeError: Cannot delete property 'strapi' of [object Object].
+    // @ts-expect-error global.strapi is not typed as optional
+    global.strapi = undefined;
 
     this.log.info('Strapi has been shut down');
   }
