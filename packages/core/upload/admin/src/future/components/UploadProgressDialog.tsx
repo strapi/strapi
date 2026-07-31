@@ -211,7 +211,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   // Same pool size as the original run — the config echo; missing settings
   // fall back to sequential.
   const { data: settings } = useGetSettingsQuery();
-  const concurrency = settings?.data?.concurrentUploadSize ?? 1;
+  const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
 
   // The batch is complete once every file has reached a terminal state. Byte-weighted
   // progress can't be used here because errored/cancelled rows never reach 100%.

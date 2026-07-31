@@ -386,11 +386,11 @@ export const AssetsPage = () => {
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
-  // `concurrentUploadSize` echoes the app config. Missing settings (still
+  // `concurrentUploadRequests` echoes the app config. Missing settings (still
   // loading, no permission) fall back to sequential — never faster than the
   // server asked for.
   const { data: settings } = useGetSettingsQuery();
-  const concurrency = settings?.data?.concurrentUploadSize ?? 1;
+  const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;

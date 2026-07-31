@@ -35,11 +35,12 @@ export default {
 
     const data = await getService('upload').getSettings();
 
-    // Read-only echo of the app config so the admin knows how many parallel
-    // upload requests it may fire. Hosting platforms that need to cap this
-    // (e.g. Strapi Cloud) override the config itself.
-    const { concurrentUploadSize = 1 } = strapi.config.get<Config>('plugin::upload');
+    // Read-only echo of the app config so the admin knows how many upload
+    // requests it may fire in parallel. Distinct from `concurrentUploadSize`,
+    // which is the server-side per-request processing ceiling. Deployments that
+    // need to bound this override the config.
+    const { concurrentUploadRequests = 1 } = strapi.config.get<Config>('plugin::upload');
 
-    ctx.body = { data: { ...data, concurrentUploadSize } };
+    ctx.body = { data: { ...data, concurrentUploadRequests } };
   },
 };

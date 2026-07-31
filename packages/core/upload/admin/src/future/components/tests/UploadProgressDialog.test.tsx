@@ -20,7 +20,7 @@ jest.mock('../../services/api', () => ({
 // Mocked because the api module above is fully mocked — the real settings
 // service would call `uploadApi.injectEndpoints` on the mock's undefined.
 jest.mock('../../services/settings', () => ({
-  useGetSettingsQuery: () => ({ data: { data: { concurrentUploadSize: 1 } } }),
+  useGetSettingsQuery: () => ({ data: { data: { concurrentUploadRequests: 1 } } }),
 }));
 
 const { useTypedSelector } = jest.requireMock('../../store/hooks');

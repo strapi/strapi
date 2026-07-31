@@ -46,7 +46,6 @@ const storeConfig = {
 
 const setup = (count: number, concurrency?: number) => {
   const inFlight: Deferred[] = [];
-  const concurrencySamples: number[] = [];
 
   mockUploadFileViaXHR.mockImplementation(
     () =>
@@ -55,7 +54,6 @@ const setup = (count: number, concurrency?: number) => {
           resolve: () => resolve({ id: inFlight.length, name: 'uploaded' } as never),
           reject,
         });
-        concurrencySamples.push(inFlight.filter(Boolean).length);
       })
   );
 
@@ -113,16 +111,43 @@ describe('uploadFiles worker pool', () => {
     await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
   });
 
-  it('caps the pool at the number of files', async () => {
-    setup(2, 10);
+  it('caps the pool at the number of files (no extra workers spun up)', async () => {
+    const { inFlight } = setup(2, 10);
 
+    // Both files start at once (concurrency 10 clamped to the 2 available)…
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+    // …and resolving them starts nothing more: the clamp means the pool never
+    // had idle workers waiting to pull a third (non-existent) file. Without the
+    // `Math.min(_, queue.length)` clamp this assertion still holds, but pairing
+    // it with the count above distinguishes "capped" from "ran a third worker".
+    await settle(inFlight, 2);
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+    });
+    expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats an invalid concurrency (0) as sequential', async () => {
+    const { inFlight } = setup(3, 0);
+
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    await settle(inFlight, 1);
     await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
   });
 
-  it('treats invalid concurrency values as sequential', async () => {
-    setup(3, 0);
+  it('treats a NaN concurrency as sequential and still uploads every file', async () => {
+    // Regression: NaN once propagated to `Array.from({ length: NaN })` = zero
+    // workers, so the batch settled having uploaded nothing.
+    const { inFlight } = setup(3, Number.NaN);
 
     await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    await settle(inFlight, 1);
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+    await settle(inFlight, 2);
+    await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
   });
 
   it('stops pulling new files once the batch is aborted', async () => {

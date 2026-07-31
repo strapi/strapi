@@ -23,7 +23,7 @@ const buildContext = (): Partial<Context> => ({
   forbidden: jest.fn(),
 });
 
-describe('Admin Settings Controller - getSettings concurrentUploadSize echo', () => {
+describe('Admin Settings Controller - getSettings concurrentUploadRequests echo', () => {
   let configuredConcurrency: number | undefined;
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('Admin Settings Controller - getSettings concurrentUploadSize echo', ()
 
     global.strapi = {
       config: {
-        get: jest.fn(() => ({ concurrentUploadSize: configuredConcurrency })),
+        get: jest.fn(() => ({ concurrentUploadRequests: configuredConcurrency })),
       },
     } as never;
   });
@@ -48,7 +48,7 @@ describe('Admin Settings Controller - getSettings concurrentUploadSize echo', ()
     await adminSettingsController.getSettings(ctx as Context);
 
     expect(ctx.body).toEqual({
-      data: { ...STORED_SETTINGS, concurrentUploadSize: 5 },
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 5 },
     });
   });
 
@@ -58,7 +58,7 @@ describe('Admin Settings Controller - getSettings concurrentUploadSize echo', ()
     await adminSettingsController.getSettings(ctx as Context);
 
     expect(ctx.body).toEqual({
-      data: { ...STORED_SETTINGS, concurrentUploadSize: 1 },
+      data: { ...STORED_SETTINGS, concurrentUploadRequests: 1 },
     });
   });
 });

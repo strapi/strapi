@@ -26,7 +26,7 @@ interface UploadFilesArgs {
   formData: FormData;
   totalFiles: number;
   /**
-   * How many files to upload in parallel — the server's `concurrentUploadSize`
+   * How many files to upload in parallel — the `concurrentUploadRequests`
    * settings value. Defaults to 1 (sequential).
    */
   concurrency?: number;
@@ -199,7 +199,11 @@ const runUploadPool = async ({
     }
   };
 
-  const workerCount = Math.min(Math.max(1, Math.floor(concurrency)), queue.length);
+  // Guard non-finite/invalid values (NaN, Infinity, <1): `Math.floor(NaN)`
+  // would propagate through Math.max to `Array.from({ length: NaN })` = zero
+  // workers, silently uploading nothing. Anything invalid falls back to 1.
+  const requested = Number.isFinite(concurrency) ? Math.floor(concurrency) : 1;
+  const workerCount = Math.min(Math.max(1, requested), queue.length);
 
   const worker = async () => {
     while (queue.length > 0) {

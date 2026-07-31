@@ -14,12 +14,12 @@ export interface Settings {
     videoPreview?: boolean;
     aiMetadata?: boolean;
     /**
-     * Read-only echo of the `plugin::upload.concurrentUploadSize` app config —
-     * how many files the admin may upload in parallel. Not part of the stored
-     * settings; the server appends it to GET responses and ignores it on
-     * updates.
+     * Read-only echo of the `plugin::upload.concurrentUploadRequests` app
+     * config — how many upload requests the admin may fire in parallel. Not
+     * part of the stored settings; the server appends it to GET responses and
+     * ignores it on updates.
      */
-    concurrentUploadSize?: number;
+    concurrentUploadRequests?: number;
   };
 }
 
