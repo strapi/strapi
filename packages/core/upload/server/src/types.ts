@@ -70,6 +70,10 @@ export interface Config {
     concurrency?: number;
   };
   concurrentUploadSize?: number;
+  security?: {
+    allowedTypes?: string[];
+    deniedTypes?: string[];
+  };
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {

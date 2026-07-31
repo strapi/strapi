@@ -13,7 +13,9 @@ const config = {
     'dist/',
     'bin/',
     'templates/',
+    'jest.config.js',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
   ],
 };
 

@@ -89,6 +89,24 @@ describe('AssetDetails (asset details drawer body)', () => {
     expect(screen.getByDisplayValue('A photo')).toBeInTheDocument();
   });
 
+  it('opens the fullscreen crop editor from the preview and closes on cancel', async () => {
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Crop' }));
+
+    expect(await screen.findByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save as copy' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    );
+  });
+
   it('enables save when a field is edited and submits the new fileInfo to the update endpoint', async () => {
     const updateRequest = captureUpdateRequest({ ...baseAsset, name: 'updated.png' });
 

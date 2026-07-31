@@ -2,13 +2,13 @@ import { Field, MultiSelectNested } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
-import { IntlLabel } from '../types';
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface AllowedTypesSelectProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
-  value?: any;
+  onChange: FormChangeHandler<string[] | null, 'allowed-types-select'>;
+  value?: string[] | null;
 }
 
 const options = [
@@ -51,7 +51,7 @@ export const AllowedTypesSelect = ({
       <Field.Label>{label}</Field.Label>
       <MultiSelectNested
         customizeContent={() => displayedValue}
-        onChange={(values: any[]) => {
+        onChange={(values: string[]) => {
           if (values.length > 0) {
             onChange({ target: { name, value: values, type: 'allowed-types-select' } });
           } else {

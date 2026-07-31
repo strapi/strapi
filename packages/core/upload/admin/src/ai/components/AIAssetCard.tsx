@@ -29,7 +29,7 @@ import { styled } from 'styled-components';
 import { AudioPreview } from '../../components/AssetCard/AudioPreview';
 import { VideoPreview } from '../../components/AssetCard/VideoPreview';
 import { type Asset, EditAssetContent } from '../../components/EditAssetDialog/EditAssetContent';
-import { AssetType, DocType } from '../../enums';
+import { AssetType, ASSET_TYPES, DocType, DOC_TYPES } from '../../enums';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 import {
@@ -222,9 +222,21 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
   const formattedDuration = duration ? formatDuration(duration) : undefined;
 
   switch (assetType) {
-    case AssetType.Image:
-      return <CardAsset src={thumbnailUrl} size="S" alt={asset.alternativeText || asset.name} />;
-    case AssetType.Video:
+    case ASSET_TYPES.Image:
+      return (
+        <CardAsset
+          src={thumbnailUrl}
+          size="S"
+          alt={asset.alternativeText || asset.name}
+          // AI assets are always remote; only gate crossOrigin on whether the
+          // URL is signed. A signed URL is loaded without a cache-buster, so it
+          // can collide with the preview in the browser cache and both must opt
+          // into CORS. Unsigned (public) URLs must render without a bucket CORS
+          // rule. See #26581.
+          crossOrigin={asset.isUrlSigned ? 'anonymous' : undefined}
+        />
+      );
+    case ASSET_TYPES.Video:
       return (
         <CardAsset size="S">
           <VideoPreviewWrapper>
@@ -238,7 +250,7 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
           </VideoPreviewWrapper>
         </CardAsset>
       );
-    case AssetType.Audio:
+    case ASSET_TYPES.Audio:
       return (
         <CardAsset size="S">
           <AudioPreviewWrapper>
@@ -271,19 +283,19 @@ const StyledCard = styled(Card)`
 
 const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
   switch (assetType) {
-    case AssetType.Image:
+    case ASSET_TYPES.Image:
       return { id: getTrad('settings.section.image.label'), defaultMessage: 'IMAGE' };
-    case AssetType.Video:
+    case ASSET_TYPES.Video:
       return { id: getTrad('settings.section.video.label'), defaultMessage: 'VIDEO' };
-    case AssetType.Audio:
+    case ASSET_TYPES.Audio:
       return { id: getTrad('settings.section.audio.label'), defaultMessage: 'AUDIO' };
-    case DocType.Pdf:
+    case DOC_TYPES.Pdf:
       return { id: getTrad('settings.section.pdf.label'), defaultMessage: 'PDF' };
-    case DocType.Csv:
+    case DOC_TYPES.Csv:
       return { id: getTrad('settings.section.csv.label'), defaultMessage: 'CSV' };
-    case DocType.Xls:
+    case DOC_TYPES.Xls:
       return { id: getTrad('settings.section.xls.label'), defaultMessage: 'XLS' };
-    case DocType.Zip:
+    case DOC_TYPES.Zip:
       return { id: getTrad('settings.section.zip.label'), defaultMessage: 'ZIP' };
     default:
       return { id: getTrad('settings.section.doc.label'), defaultMessage: 'DOC' };
