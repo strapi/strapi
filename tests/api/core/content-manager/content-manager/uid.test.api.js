@@ -120,7 +120,7 @@ describe('Content Manager single types', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'otherField must be a `uid` attribute or an attribute with a unique index',
+          message: 'otherField must be a valid `uid` attribute',
           details: {},
         },
       });
