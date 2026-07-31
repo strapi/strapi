@@ -10,7 +10,9 @@ export const isAttributeIndexingFutureEnabled = () => {
     return false;
   }
 
-  const strapiGlobal = (window as any).strapi;
+  const strapiGlobal = (
+    window as Window & { strapi?: { future?: { isEnabled?: (key: string) => boolean } } }
+  ).strapi;
   return strapiGlobal?.future?.isEnabled?.('unstableContentTypeBuilderIndexing') === true;
 };
 

@@ -42,6 +42,7 @@ describe('useDocumentLayout', () => {
                 type: 'string',
               },
               disabled: false,
+              hasUniqueIndex: false,
               hint: '',
               label: 'name',
               mainField: undefined,
@@ -78,6 +79,7 @@ describe('useDocumentLayout', () => {
               type: 'dynamiczone',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'dz',
             mainField: {
@@ -99,6 +101,7 @@ describe('useDocumentLayout', () => {
           {
             attribute: { type: 'uid' },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'slug',
             mainField: undefined,
@@ -113,6 +116,7 @@ describe('useDocumentLayout', () => {
           {
             attribute: { type: 'string' },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'name',
             mainField: undefined,
@@ -137,6 +141,7 @@ describe('useDocumentLayout', () => {
               type: 'component',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'notrepeat_req',
             mainField: {
@@ -162,6 +167,7 @@ describe('useDocumentLayout', () => {
               type: 'component',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'repeat_req',
             mainField: {
@@ -188,6 +194,7 @@ describe('useDocumentLayout', () => {
               type: 'component',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'repeat_req_min',
             mainField: {
@@ -214,6 +221,7 @@ describe('useDocumentLayout', () => {
               type: 'relation',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'categories',
             mainField: {
@@ -239,6 +247,7 @@ describe('useDocumentLayout', () => {
               type: 'media',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'cover',
             mainField: undefined,
@@ -259,6 +268,7 @@ describe('useDocumentLayout', () => {
               type: 'media',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'images',
             mainField: undefined,
@@ -280,6 +290,7 @@ describe('useDocumentLayout', () => {
               type: 'string',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'city',
             mainField: undefined,
@@ -299,6 +310,7 @@ describe('useDocumentLayout', () => {
               type: 'json',
             },
             disabled: false,
+            hasUniqueIndex: false,
             hint: '',
             label: 'json',
             mainField: undefined,
