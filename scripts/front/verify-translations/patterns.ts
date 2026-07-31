@@ -225,6 +225,13 @@ export const resolveMessageId = (
   const jsonKey = toJsonKey(rawId, pluginPrefix);
 
   if (fromHelper) {
+    // Some plugins store keys already prefixed in en.json (e.g. color-picker.description)
+    // while getTrad(id) still adds the plugin prefix at runtime. Prefer the raw helper
+    // argument when it exists in en.json so jsonKey lookup stays correct after one strip.
+    if (pluginPrefix && pluginEnKeys.has(rawId)) {
+      return { messageId: `${pluginPrefix}.${rawId}`, targetBundle: 'self' };
+    }
+
     if (pluginEnKeys.has(jsonKey)) {
       return { messageId: toMessageId(jsonKey, pluginPrefix), targetBundle: 'self' };
     }
@@ -233,8 +240,8 @@ export const resolveMessageId = (
       return { messageId: jsonKey, targetBundle: 'self' };
     }
 
-    if (adminEnKeys.has(jsonKey)) {
-      return { messageId: jsonKey, targetBundle: 'core/admin' };
+    if (adminEnKeys.has(jsonKey) || adminEnKeys.has(rawId)) {
+      return { messageId: adminEnKeys.has(rawId) ? rawId : jsonKey, targetBundle: 'core/admin' };
     }
 
     return { messageId: toMessageId(jsonKey, pluginPrefix), targetBundle: 'self' };

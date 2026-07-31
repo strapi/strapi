@@ -193,6 +193,54 @@ describe('backfillMissingEnKeys', () => {
     assert.equal(readJsonRecord(adminBundle.enJsonPath)['global.move'], 'Move');
     assert.equal(readJsonRecord(adminBundle.enJsonPath)['global.save'], 'Save');
   });
+  it('backfills keys from getTrad descriptors that carry a sibling defaultMessage', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-sibling-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'en.json'), `${JSON.stringify({}, null, 2)}\n`);
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `
+        const label = {
+          id: getTrad('settings.section.pdf.label'),
+          defaultMessage: 'PDF',
+        };
+        formatMessage(
+          editing
+            ? { id: getTrad('modal.edit'), defaultMessage: 'Save' }
+            : { id: getTrad('modal.create'), defaultMessage: 'Create' }
+        );
+      `
+    );
+
+    const adminDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-admin3-'));
+    fs.writeFileSync(path.join(adminDir, 'en.json'), `${JSON.stringify({}, null, 2)}\n`);
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const adminBundle: TranslationBundle = {
+      packagePath: adminDir,
+      packageName: 'core/admin',
+      enJsonPath: path.join(adminDir, 'en.json'),
+      translationsDir: adminDir,
+      pluginPrefix: null,
+      sourceDirs: [],
+    };
+
+    backfillMissingEnKeys([bundle], adminBundle);
+
+    const en = readJsonRecord(bundle.enJsonPath);
+    assert.equal(en['settings.section.pdf.label'], 'PDF');
+    assert.equal(en['modal.edit'], 'Save');
+    assert.equal(en['modal.create'], 'Create');
+  });
 });
 
 describe('validateBundle admin self-checks', () => {

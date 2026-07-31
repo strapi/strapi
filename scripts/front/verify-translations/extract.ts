@@ -43,7 +43,71 @@ const getStringLiteralValue = (node: ts.Expression | undefined): string | null =
     return getStringLiteralValue(node.expression);
   }
 
+  // Prefer the first branch when defaultMessage is a ternary of string literals.
+  if (ts.isConditionalExpression(node)) {
+    return getStringLiteralValue(node.whenTrue) ?? getStringLiteralValue(node.whenFalse);
+  }
+
   return null;
+};
+
+/** When `getTrad('…')` is the `id` of a message descriptor, reuse sibling defaultMessage. */
+const defaultMessageFromEnclosingDescriptor = (call: ts.CallExpression): string | null => {
+  const parent = call.parent;
+
+  if (!parent || !ts.isPropertyAssignment(parent) || getPropertyName(parent.name) !== 'id') {
+    return null;
+  }
+
+  const objectLiteral = parent.parent;
+
+  if (!objectLiteral || !ts.isObjectLiteralExpression(objectLiteral)) {
+    return null;
+  }
+
+  for (const prop of objectLiteral.properties) {
+    if (!ts.isPropertyAssignment(prop) || getPropertyName(prop.name) !== 'defaultMessage') {
+      continue;
+    }
+
+    return getStringLiteralValue(prop.initializer);
+  }
+
+  return null;
+};
+
+const pushDescriptorExtraction = (
+  sourceFile: ts.SourceFile,
+  node: ts.Node,
+  descriptor: ts.ObjectLiteralExpression,
+  bundle: TranslationBundle,
+  enKeys: string[],
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  constants: Record<string, string>,
+  results: MessageExtraction[]
+) => {
+  const { messageId, targetBundle, defaultMessage, propertyName } = readObjectDescriptor(
+    descriptor,
+    bundle,
+    pluginEnKeys,
+    adminEnKeys,
+    constants
+  );
+  const extraction = buildExtraction(
+    sourceFile,
+    node,
+    bundle,
+    enKeys,
+    messageId,
+    targetBundle,
+    defaultMessage,
+    propertyName
+  );
+
+  if (extraction) {
+    results.push(extraction);
+  }
 };
 
 const getPropertyName = (name: ts.PropertyName): string | null => {
@@ -187,9 +251,14 @@ export const resolveIdExpression = (
     );
 
     if (whenTrue.messageId && whenFalse.messageId) {
+      const targetBundle =
+        whenTrue.targetBundle === 'core/admin' || whenFalse.targetBundle === 'core/admin'
+          ? 'core/admin'
+          : 'self';
+
       return {
         messageId: `${whenTrue.messageId}|${whenFalse.messageId}`,
-        targetBundle: 'core/admin',
+        targetBundle,
       };
     }
   }
@@ -361,29 +430,34 @@ const visitNode = (
 
     if (isFormatMessage) {
       const arg = node.arguments[0];
+      const descriptors: ts.ObjectLiteralExpression[] = [];
 
       if (arg && ts.isObjectLiteralExpression(arg)) {
-        const { messageId, targetBundle, defaultMessage, propertyName } = readObjectDescriptor(
-          arg,
-          bundle,
-          pluginEnKeys,
-          adminEnKeys,
-          constants
-        );
-        const extraction = buildExtraction(
+        descriptors.push(arg);
+      }
+
+      if (arg && ts.isConditionalExpression(arg)) {
+        if (ts.isObjectLiteralExpression(arg.whenTrue)) {
+          descriptors.push(arg.whenTrue);
+        }
+
+        if (ts.isObjectLiteralExpression(arg.whenFalse)) {
+          descriptors.push(arg.whenFalse);
+        }
+      }
+
+      for (const descriptor of descriptors) {
+        pushDescriptorExtraction(
           sourceFile,
           node,
+          descriptor,
           bundle,
           enKeys,
-          messageId,
-          targetBundle,
-          defaultMessage,
-          propertyName
+          pluginEnKeys,
+          adminEnKeys,
+          constants,
+          results
         );
-
-        if (extraction) {
-          results.push(extraction);
-        }
       }
     }
 
@@ -405,7 +479,7 @@ const visitNode = (
           enKeys,
           resolved.messageId,
           resolved.targetBundle,
-          null
+          defaultMessageFromEnclosingDescriptor(node)
         );
 
         if (extraction) {
