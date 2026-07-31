@@ -259,13 +259,35 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const hasDnP = contentTypes.hasDraftAndPublish(model);
     const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
 
+    // Resolve once for all return paths — admin lock logic needs this even when
+    // the current locale is excluded from `availableLocales`.
+    let defaultLocale: string | null = null;
+    if (isLocalized) {
+      try {
+        defaultLocale =
+          (await strapi.plugin('i18n')?.service('locales')?.getDefaultLocale()) ?? null;
+      } catch {
+        defaultLocale = null;
+      }
+    }
+
     if (!availableLocales && !availableStatus) {
       // Nothing to compute.
-      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+      return {
+        availableLocales: [],
+        availableStatus: [],
+        defaultLocale,
+        versions: [] as DocumentVersion[],
+      };
     }
     if (!isLocalized && !hasDnP) {
       // If there are no locales and no draft/publish, there's only ever 1 version of any document.
-      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+      return {
+        availableLocales: [],
+        availableStatus: [],
+        defaultLocale,
+        versions: [] as DocumentVersion[],
+      };
     }
 
     const onlyStatusIsRelevant = hasDnP && (!isLocalized || !availableLocales);
@@ -284,6 +306,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return {
         availableLocales: [],
         availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        defaultLocale,
         versions: [] as DocumentVersion[],
       };
     }
@@ -374,6 +397,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       availableLocales: availableLocalesResult,
       availableStatus: availableStatusResult ? [availableStatusResult] : [],
+      defaultLocale,
       versions,
     };
   },
@@ -394,6 +418,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         meta: {
           availableLocales: [],
           availableStatus: [],
+          defaultLocale: null,
         },
       };
     }

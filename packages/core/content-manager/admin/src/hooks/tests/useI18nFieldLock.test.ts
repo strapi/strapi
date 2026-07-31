@@ -22,7 +22,7 @@ describe('useI18nFieldLock', () => {
       currentDocument: {
         schema: { pluginOptions: { i18n: { localized: true } } },
         document: { locale: 'en' },
-        meta: { availableLocales: [{ locale: 'en' }] },
+        meta: { availableLocales: [{ locale: 'es' }], defaultLocale: 'en' },
       },
     });
   });
@@ -41,13 +41,29 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(true);
     });
 
+    it('returns true when editing the default locale even if it is absent from availableLocales', () => {
+      // availableLocales excludes the current locale — when viewing `en` (default),
+      // the list only contains siblings. Lock must still treat `en` as default.
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'en' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'en' },
+          meta: { availableLocales: [{ locale: 'es' }], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() => useIsEditingDefaultLocale());
+      expect(result.current).toBe(true);
+    });
+
     it('returns false when the active locale is not the default', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
           schema: { pluginOptions: { i18n: { localized: true } } },
           document: { locale: 'fr' },
-          meta: { availableLocales: [{ locale: 'en' }, { locale: 'fr' }] },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
         },
       });
 
@@ -63,7 +79,7 @@ describe('useI18nFieldLock', () => {
         currentDocument: {
           schema: { pluginOptions: { i18n: { localized: true } } },
           document: { locale: 'fr' },
-          meta: { availableLocales: [{ locale: 'en' }] },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
         },
       });
 
@@ -77,13 +93,34 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(true);
     });
 
+    it('does not lock non-localized fields on the default locale', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'en' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'en' },
+          // Sibling-only list — regresses if we incorrectly use availableLocales[0]
+          meta: { availableLocales: [{ locale: 'es' }], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(false);
+    });
+
     it('does not lock localized fields', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
           schema: { pluginOptions: { i18n: { localized: true } } },
           document: { locale: 'fr' },
-          meta: { availableLocales: [{ locale: 'en' }] },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
         },
       });
 
@@ -103,7 +140,7 @@ describe('useI18nFieldLock', () => {
         currentDocument: {
           schema: { pluginOptions: { i18n: { localized: true } } },
           document: { locale: 'fr' },
-          meta: { availableLocales: [{ locale: 'en' }] },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
         },
       });
 
@@ -123,7 +160,7 @@ describe('useI18nFieldLock', () => {
         currentDocument: {
           schema: { pluginOptions: { i18n: { localized: true } } },
           document: { locale: 'fr' },
-          meta: { availableLocales: [{ locale: 'en' }] },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
         },
       });
 
