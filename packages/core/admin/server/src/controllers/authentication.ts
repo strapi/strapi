@@ -2,15 +2,17 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
-import { errors, buildSessionMetadata } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  buildSessionMetadataFromContext,
   getSessionManager,
   extractDeviceParams,
   generateDeviceId,
   getRefreshCookieOptions,
+  resolveLogoutDeviceId,
 } from '../../../shared/utils/session-auth';
 
 import {
@@ -31,12 +33,6 @@ import type {
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
-
-const buildSessionMetadataFromContext = (ctx: Context) =>
-  buildSessionMetadata({
-    ip: ctx.request.ip,
-    userAgent: ctx.request.headers['user-agent'],
-  });
 
 const { ApplicationError, ValidationError } = errors;
 
@@ -345,9 +341,6 @@ export default {
     const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
 
-    const bodyDeviceId = ctx.request.body?.deviceId as string | undefined;
-    const deviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
-
     // Clear cookie regardless of token validity
     ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
       ...getRefreshCookieOptions(ctx.request.secure),
@@ -358,7 +351,15 @@ export default {
       const sessionManager = getSessionManager();
       if (sessionManager) {
         const userId = String(ctx.state.user.id);
-        await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
+        const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
+        const sessionId = (ctx.state.session as { id?: string } | undefined)?.id;
+
+        if (typeof bodyDeviceId === 'string' && bodyDeviceId.length > 0) {
+          const deviceId = await resolveLogoutDeviceId(userId, sessionId, bodyDeviceId);
+          await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
+        } else {
+          await sessionManager('admin').invalidateRefreshToken(userId);
+        }
       }
     } catch (err) {
       strapi.log.error('Failed to revoke admin sessions during logout', err as any);

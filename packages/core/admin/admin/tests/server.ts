@@ -126,7 +126,6 @@ export const server: SetupServer = setupServer(
             current: true,
             loginAt: '2026-06-12T08:00:00.000Z',
             lastActiveAt: '2026-06-12T10:00:00.000Z',
-            ip: '127.0.0.1',
           },
           {
             id: 'session-other',
@@ -134,7 +133,6 @@ export const server: SetupServer = setupServer(
             current: false,
             loginAt: '2026-06-10T08:00:00.000Z',
             lastActiveAt: '2026-06-11T09:00:00.000Z',
-            ip: '10.0.0.2',
           },
         ],
       })
@@ -610,6 +608,20 @@ export const server: SetupServer = setupServer(
     /**
      * Audit Logs
      */
+    http.get('/admin/audit-logs/users', () => {
+      return HttpResponse.json({
+        results: [
+          { id: 1, email: 'john@testing.com', displayName: 'John Doe' },
+          { id: 2, email: 'kai@testing.com', displayName: 'Kai Doe' },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 2,
+        },
+      });
+    }),
     http.get('/admin/audit-logs', () => {
       return HttpResponse.json({
         results: [

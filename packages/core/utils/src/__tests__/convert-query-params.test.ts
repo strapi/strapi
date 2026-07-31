@@ -1,4 +1,5 @@
 import { createTransformer, type Params } from '../convert-query-params';
+import { ValidationError } from '../errors';
 import { Model } from '../types';
 
 const models = {
@@ -86,7 +87,65 @@ describe('convert-query-params', () => {
     test.todo('partial filtering works');
   });
 
-  test.todo('convertSortQueryParams');
+  describe('convertSortQueryParams', () => {
+    test.each<[string, unknown, object]>([
+      ['single field string', 'title:asc', [{ title: 'asc' }]],
+      ['defaults to asc when order is omitted', 'title', [{ title: 'asc' }]],
+      ['is case insensitive on order', 'title:DESC', [{ title: 'DESC' }]],
+      [
+        'array of field strings',
+        ['title:asc', 'createdAt:desc'],
+        [{ title: 'asc' }, { createdAt: 'desc' }],
+      ],
+      [
+        'comma-separated field string',
+        'title:asc,createdAt:desc',
+        [{ title: 'asc' }, { createdAt: 'desc' }],
+      ],
+      ['nested sort object', { title: 'asc' }, { title: 'asc' }],
+    ])('accepts: %s', (key, input, expectedOutput) => {
+      const res = transformer.private_convertSortQueryParams(input as never);
+      expect(res).toEqual(expectedOutput);
+    });
+
+    test.each<[string, unknown]>([
+      ['invalid order suffix', 'title:asc$'],
+      ['unsupported order value', 'title:ascending'],
+      ['unsupported order value on a nested sort object', { title: 'ascending' }],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        'Invalid order. order can only be one of asc|desc|ASC|DESC'
+      );
+    });
+
+    test.each<[string, unknown, string]>([
+      [
+        'invalid nested sort value type',
+        { title: 123 },
+        'Invalid sort type expected object or string got number',
+      ],
+    ])('rejects with a ValidationError: %s', (key, input, message) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(message);
+    });
+
+    test.each<[string, unknown]>([
+      ['a number', 1234],
+      ['null', null],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+      );
+    });
+  });
 
   describe('convertStartQueryParams', () => {
     it('accepts valid non-negative integers', () => {
@@ -175,6 +234,21 @@ describe('convert-query-params', () => {
   });
 
   describe('convertPopulateQueryParams', () => {
+    test.each<[string, unknown]>([
+      ['a number', 1234],
+      ['null', null],
+      ['an array with a non-string entry', ['title', 1234]],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() =>
+        transformer.private_convertPopulateQueryParams(input as never, models['api::dog.dog'])
+      ).toThrow(ValidationError);
+      expect(() =>
+        transformer.private_convertPopulateQueryParams(input as never, models['api::dog.dog'])
+      ).toThrow(
+        'Invalid populate parameter. Expected a string, an array of strings, a populate object'
+      );
+    });
+
     describe('Fields selection', () => {
       test('should not select documentId when selecting fields for components', () => {
         const populate = {

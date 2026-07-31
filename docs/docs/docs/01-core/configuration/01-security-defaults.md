@@ -22,11 +22,30 @@ module.exports = {
   },
   documents: {
     strictParams: true,
+    strictRelations: true,
   },
 };
 ```
 
 See also: [strictParams and custom Content API parameters](https://docs.strapi.io/cms/backend-customization/routes#custom-content-api-parameters).
+
+## Strict required relations
+
+Enforce `required` on media and relation fields at the document-service level. Without this flag a `required` media or relation can be left empty on published content, so entries that are missing mandatory associations still get created or published. With `documents.strictRelations: true`, a write that leaves a required media/relation empty is rejected.
+
+`config/api.js` / `config/api.ts` (shown in the snippet above):
+
+```js
+module.exports = {
+  documents: {
+    strictRelations: true,
+  },
+};
+```
+
+- Enforced only on **published** (non-draft) writes — drafts stay lenient so you can save work in progress with associations still missing.
+- Applies to required media and relations, including those nested inside components and dynamic zones.
+- On by default in newly scaffolded apps only; existing projects keep the legacy (lenient) behaviour until they opt in, so enabling it will start rejecting previously-accepted writes that omit a required association.
 
 ## Content API authentication (refresh tokens)
 

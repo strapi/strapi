@@ -1,3 +1,4 @@
+import { DndContext } from '@dnd-kit/core';
 import { fireEvent, render, screen } from '@tests/utils';
 
 import { FolderTree } from '../FolderTree';
@@ -32,7 +33,11 @@ const renderTree = (overrides: Partial<React.ComponentProps<typeof FolderTree>> 
     onSelectFolder: jest.fn(),
   };
 
-  return render(<FolderTree {...defaultProps} {...overrides} />);
+  return render(
+    <DndContext>
+      <FolderTree {...defaultProps} {...overrides} />
+    </DndContext>
+  );
 };
 
 describe('FolderTree', () => {
@@ -219,5 +224,128 @@ describe('FolderTree', () => {
     fireEvent.click(screen.getByRole('button', { name: /expand top a/i }));
 
     expect(onSelectFolder).not.toHaveBeenCalled();
+  });
+
+  describe('showActiveFolder', () => {
+    it('removes aria-current from every row when false', () => {
+      renderTree({ currentFolderId: 3, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Home' })).not.toHaveAttribute('aria-current');
+      expect(screen.getByRole('button', { name: 'Top A' })).not.toHaveAttribute('aria-current');
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).not.toHaveAttribute('aria-current');
+    });
+
+    it('removes aria-current from Home when false at the root', () => {
+      renderTree({ currentFolderId: null, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Home' })).not.toHaveAttribute('aria-current');
+    });
+
+    it('still expands the ancestor chain so the tree does not collapse', () => {
+      renderTree({ currentFolderId: 3, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).toBeInTheDocument();
+    });
+  });
+
+  describe('folder filter', () => {
+    const filterFolders = (query: string) => {
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search folders' }), {
+        target: { value: query },
+      });
+    };
+
+    it('prunes the rendered rows to matches', () => {
+      renderTree();
+
+      filterFolders('Top B');
+
+      expect(screen.getByRole('button', { name: 'Top B' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Top A' })).not.toBeInTheDocument();
+    });
+
+    it('reveals a deep match together with its ancestors', () => {
+      renderTree();
+
+      filterFolders('Leaf A1a');
+
+      expect(screen.getByRole('button', { name: 'Top A' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Inner A2' })).not.toBeInTheDocument();
+    });
+
+    it('matches case- and accent-insensitively', () => {
+      renderTree();
+
+      filterFolders('top b');
+
+      expect(screen.getByRole('button', { name: 'Top B' })).toBeInTheDocument();
+    });
+
+    it('keeps Home visible even when nothing matches', () => {
+      renderTree();
+
+      filterFolders('nothing matches this');
+
+      expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument();
+    });
+
+    it('shows a no-results message distinct from the empty state', () => {
+      renderTree();
+
+      filterFolders('nothing matches this');
+
+      expect(screen.getByText('No folders match "nothing matches this"')).toBeInTheDocument();
+      expect(screen.queryByText('No folders yet')).not.toBeInTheDocument();
+    });
+
+    it('restores the full tree and the prior expansion when cleared', () => {
+      renderTree();
+
+      // The user opens Top A themselves, and leaves Top B closed.
+      fireEvent.click(screen.getByRole('button', { name: /expand top a/i }));
+      expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
+
+      filterFolders('Top B');
+      expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
+
+      filterFolders('');
+
+      expect(screen.getByRole('button', { name: 'Top B' })).toBeInTheDocument();
+      // Their own expansion survived; the filter's force-expansion did not leak.
+      expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Leaf A1a' })).not.toBeInTheDocument();
+    });
+
+    it('does not persist the filter expansion after clearing', () => {
+      renderTree();
+
+      filterFolders('Leaf A1a');
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).toBeInTheDocument();
+
+      filterFolders('');
+
+      expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
+    });
+
+    it('does not navigate while filtering', () => {
+      const onSelectFolder = jest.fn();
+      renderTree({ onSelectFolder });
+
+      filterFolders('Top B');
+
+      expect(onSelectFolder).not.toHaveBeenCalled();
+    });
+
+    it('ignores surrounding whitespace', () => {
+      renderTree();
+
+      filterFolders('   Top B   ');
+
+      expect(screen.getByRole('button', { name: 'Top B' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Top A' })).not.toBeInTheDocument();
+    });
   });
 });

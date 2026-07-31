@@ -1,17 +1,19 @@
-import { Component, ContentType, AnyAttribute } from '../../../types';
+import type { AnyAttribute } from '../../../types';
 
-export const formatSchema = <TType extends Component | ContentType>(
-  schema: Record<string, any>
-): TType => {
+type AttributeInput = Omit<AnyAttribute, 'name'>;
+
+export const formatSchema = <TSchema extends { attributes: Record<string, AttributeInput> }>(
+  schema: TSchema
+) => {
   return {
     ...schema,
     attributes: toAttributesArray(schema.attributes),
-  } as TType;
+  };
 };
 
-export const toAttributesArray = (attributes: Record<string, any>) => {
-  return Object.keys(attributes).reduce((acc, current: any) => {
-    acc.push({ ...attributes[current], name: current });
+export const toAttributesArray = (attributes: Record<string, AttributeInput>): AnyAttribute[] => {
+  return Object.entries(attributes).reduce((acc, [name, attribute]) => {
+    acc.push({ ...attribute, name } as AnyAttribute);
 
     return acc;
   }, [] as AnyAttribute[]);

@@ -1,4 +1,4 @@
-import { isEmpty, isNil, isObject, isPlainObject, trim } from 'lodash/fp';
+import { isEmpty, isNil, isObject, trim } from 'lodash/fp';
 
 import { pipe as pipeAsync } from '../async';
 import {
@@ -398,11 +398,8 @@ const validateMorphLikeNestedPopulate = (
   populateValue: unknown,
   { path }: { path: string | null }
 ) => {
-  if (typeof populateValue === 'string' && populateValue !== '*' && !isNil(populateValue)) {
-    throwInvalidKey({ key: 'populate', path });
-  }
-
-  if (isPlainObject(populateValue) && !isEmpty(populateValue) && !isNil(populateValue)) {
+  // Keep in sync with convert-query-params polymorphic nested populate handling.
+  if (!isNil(populateValue) && populateValue !== '*') {
     throwInvalidKey({ key: 'populate', path });
   }
 };

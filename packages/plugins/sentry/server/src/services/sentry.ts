@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/strapi';
-import type { Config } from 'src/config';
 import * as Sentry from '@sentry/node';
+import type { Config } from '../config';
 
 const createSentryService = (strapi: Core.Strapi) => {
   let isReady = false;

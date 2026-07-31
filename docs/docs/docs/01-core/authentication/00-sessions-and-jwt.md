@@ -55,7 +55,7 @@ Endpoints (admin server):
 - `POST /admin/reset-password`
 - `POST /admin/access-token` — rotates the refresh cookie and returns `{ data: { token } }`
 - `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device family
-- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, IP, signed-in time, last used)
+- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, signed-in time, last used)
 - `DELETE /admin/users/me/sessions/:sessionId` — revokes a single session owned by the current user
 - `DELETE /admin/users/me/sessions` — revokes all sessions; query `?keepCurrent=true` preserves the session backing the current request ("log out of other devices")
 
@@ -80,10 +80,11 @@ Configuration:
 **Deprecated:**
 
 - `admin.auth.options.*` — Use `admin.auth.sessions.options.*` instead
-- Cookie options (applied to `strapi_admin_refresh`):
-  - `admin.auth.cookie.domain` (or `admin.auth.domain`)
-  - `admin.auth.cookie.path` (default `/admin`)
-  - `admin.auth.cookie.sameSite` (default `lax`)
+- Cookie options:
+  - `admin.auth.cookie.name` (default `jwtToken`) — name of the non-httpOnly access-token cookie used for session logins (when `rememberMe` is false) and EE SSO handoff. Rename to avoid collisions with another app on a shared parent domain that sets a `jwtToken` cookie. Requires an admin rebuild after change (value is inlined into the admin bundle at build time).
+  - `admin.auth.cookie.domain` (or `admin.auth.domain`) — applied to `strapi_admin_refresh` and to the non-httpOnly access-token cookie written by the admin client (and EE SSO). Defaults to a host-only cookie when unset. Requires an admin rebuild after change (value is inlined into the admin bundle at build time). Set a parent domain to share the admin session across subdomains; leave unset to keep each host isolated.
+  - `admin.auth.cookie.path` (default `/admin`) — applied to `strapi_admin_refresh` and to the non-httpOnly access-token cookie written by the admin client (and EE SSO). Requires an admin rebuild after change (value is inlined into the admin bundle at build time). Use a distinct path per instance when hosting multiple Strapis under the same parent domain.
+  - `admin.auth.cookie.sameSite` (default `lax`) — applied to `strapi_admin_refresh`
 
 Key files:
 
@@ -121,10 +122,10 @@ Configuration keys:
 
 Key files:
 
-- Plugin bootstrap/config: `packages/plugins/users-permissions/server/bootstrap/index.js`, `packages/plugins/users-permissions/server/config.js`
-- Controller: `packages/plugins/users-permissions/server/controllers/auth.js`
-- Routes: `packages/plugins/users-permissions/server/routes/content-api/auth.js`
-- JWT service: `packages/plugins/users-permissions/server/services/jwt.js`
+- Plugin bootstrap/config: `packages/plugins/users-permissions/server/src/bootstrap/index.js`, `packages/plugins/users-permissions/server/src/config.js`
+- Controller: `packages/plugins/users-permissions/server/src/controllers/auth.js`
+- Routes: `packages/plugins/users-permissions/server/src/routes/content-api/auth.js`
+- JWT service: `packages/plugins/users-permissions/server/src/services/jwt.js`
 
 ## Session Revocation on Credential Changes
 

@@ -1,15 +1,17 @@
 import { Box, Checkbox, Field, Flex, NumberInput, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { IntlLabel } from '../types';
+import { parseNumberInputValue } from '../utils/parseNumberInputValue';
+
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface CheckboxWithNumberFieldProps {
   error?: string;
   intlLabel: IntlLabel;
-  modifiedData: Record<string, any>;
+  modifiedData: { type?: string };
   name: string;
-  onChange: (value: any) => void;
-  value?: any;
+  onChange: FormChangeHandler<string | number | null>;
+  value?: string | number | null;
 }
 
 export const CheckboxWithNumberField = ({
@@ -66,10 +68,12 @@ export const CheckboxWithNumberField = ({
               <NumberInput
                 aria-label={label}
                 disabled={disabled}
-                onValueChange={(value: any) => {
-                  onChange({ target: { name, value: value ?? 0, type } });
+                onValueChange={(value: string | number | undefined) => {
+                  onChange({
+                    target: { name, value: parseNumberInputValue(value), type },
+                  });
                 }}
-                value={value || 0}
+                value={parseNumberInputValue(value)}
               />
               <Field.Error />
             </Field.Root>

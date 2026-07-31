@@ -1,7 +1,7 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 import type { Data, UID } from '@strapi/types';
-import type { JoinTable } from '@strapi/database';
+import type { Database, JoinTable } from '@strapi/database';
 
 interface VersionEntry {
   id: Data.ID;
@@ -11,7 +11,76 @@ interface VersionEntry {
 interface RelationData {
   joinTable: JoinTable;
   relations: Record<string, unknown>[];
+  remap?: {
+    source: boolean;
+    target: boolean;
+  };
 }
+
+type TargetStatus = 'draft' | 'published';
+type DatabaseQueryBuilder = ReturnType<Database['getConnection']>;
+type DatabaseTransaction = Parameters<DatabaseQueryBuilder['transacting']>[0];
+
+const entryKey = (entry: { document_id: unknown; locale: unknown }) =>
+  `${String(entry.document_id)}:${String(entry.locale)}`;
+
+const getCounterparts = async (
+  trx: DatabaseTransaction,
+  tableName: string,
+  idsToResolve: unknown[],
+  status: TargetStatus
+): Promise<Record<string, Data.ID>> => {
+  const ids = [...new Set(idsToResolve.map((id) => String(id)))];
+
+  if (ids.length === 0) {
+    return {};
+  }
+
+  const drafts = await strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereIn('id', ids)
+    .transacting(trx);
+
+  if (drafts.length === 0) {
+    return {};
+  }
+
+  const documentIds = [
+    ...new Set(drafts.map((entry: { document_id: Data.ID }) => entry.document_id)),
+  ];
+
+  const counterpartsQuery = strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereIn('document_id', documentIds)
+    .transacting(trx);
+
+  const counterparts =
+    status === 'published'
+      ? await counterpartsQuery.whereNotNull('published_at')
+      : await counterpartsQuery.whereNull('published_at');
+
+  const counterpartByDocument = keyBy(entryKey, counterparts);
+
+  return drafts.reduce(
+    (
+      acc: Record<string, Data.ID>,
+      draft: { id: Data.ID; document_id: unknown; locale: unknown }
+    ) => {
+      const counterpart = counterpartByDocument[entryKey(draft)];
+
+      if (counterpart) {
+        acc[String(draft.id)] = counterpart.id;
+      }
+
+      return acc;
+    },
+    {}
+  );
+};
 
 /**
  * Preserves self-referential relations during publish/discard operations.
@@ -35,7 +104,8 @@ interface RelationData {
  */
 const load = async (
   uid: UID.ContentType,
-  sourceEntries: VersionEntry[]
+  sourceEntries: VersionEntry[],
+  targetStatus: TargetStatus
 ): Promise<RelationData[]> => {
   const updates: RelationData[] = [];
   const dbModel = strapi.db.metadata.get(uid);
@@ -74,8 +144,96 @@ const load = async (
         .transacting(trx);
 
       if (selfRelations.length > 0) {
-        updates.push({ joinTable, relations: selfRelations });
+        updates.push({
+          joinTable,
+          relations: selfRelations,
+          remap: { source: true, target: true },
+        });
       }
+
+      // Use rows from the state being copied as the source of truth for one-sided
+      // self-relations. Publishing maps untouched targets to published counterparts and drops
+      // draft-only targets; discarding maps untouched targets to draft counterparts. This avoids
+      // restoring stale old rows that were removed from the copied state.
+      const [sourceDraftRelations, targetDraftRelations] = await Promise.all([
+        strapi.db
+          .getConnection()
+          .select('*')
+          .from(joinTable.name)
+          .whereIn(sourceColumnName, sourceIds)
+          .whereNotIn(targetColumnName, sourceIds)
+          .transacting(trx),
+        strapi.db
+          .getConnection()
+          .select('*')
+          .from(joinTable.name)
+          .whereIn(targetColumnName, sourceIds)
+          .whereNotIn(sourceColumnName, sourceIds)
+          .transacting(trx),
+      ]);
+
+      const [targetCounterparts, sourceCounterparts] = await Promise.all([
+        getCounterparts(
+          trx,
+          dbModel.tableName,
+          sourceDraftRelations.map((relation) => relation[targetColumnName]),
+          targetStatus
+        ),
+        getCounterparts(
+          trx,
+          dbModel.tableName,
+          targetDraftRelations.map((relation) => relation[sourceColumnName]),
+          targetStatus
+        ),
+      ]);
+
+      if (sourceDraftRelations.length > 0) {
+        const relations = sourceDraftRelations
+          .map((relation) => {
+            const targetCounterpart = targetCounterparts[String(relation[targetColumnName])];
+
+            if (targetCounterpart == null) {
+              return null;
+            }
+
+            return { ...relation, [targetColumnName]: targetCounterpart };
+          })
+          .filter(Boolean) as Record<string, unknown>[];
+
+        if (relations.length > 0) {
+          updates.push({
+            joinTable,
+            relations,
+            remap: { source: true, target: false },
+          });
+        }
+      }
+
+      if (targetDraftRelations.length > 0) {
+        const relations = targetDraftRelations
+          .map((relation) => {
+            const sourceCounterpart = sourceCounterparts[String(relation[sourceColumnName])];
+
+            if (sourceCounterpart == null) {
+              return null;
+            }
+
+            return { ...relation, [sourceColumnName]: sourceCounterpart };
+          })
+          .filter(Boolean) as Record<string, unknown>[];
+
+        if (relations.length > 0) {
+          updates.push({
+            joinTable,
+            relations,
+            remap: { source: false, target: true },
+          });
+        }
+      }
+
+      // One-sided rows from the replaced state are intentionally not restored here. The rows
+      // captured above represent the current logical relation set; restoring stale old rows can
+      // resurrect relations that were removed before publishing or discarding.
     }
   });
 
@@ -109,7 +267,7 @@ const sync = async (
   const batchSize = strapi.db.dialect.getBatchInsertSize();
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const { joinTable, relations } of relationData) {
+    for (const { joinTable, relations, remap = { source: true, target: true } } of relationData) {
       const sourceColumn = joinTable.joinColumn.name;
       const targetColumn = joinTable.inverseJoinColumn.name;
 
@@ -117,11 +275,11 @@ const sync = async (
         .map((relation) => {
           const oldSourceId = String(relation[sourceColumn]);
           const oldTargetId = String(relation[targetColumn]);
-          const newSourceId = idMapping[oldSourceId];
-          const newTargetId = idMapping[oldTargetId];
+          const newSourceId = remap.source ? idMapping[oldSourceId] : relation[sourceColumn];
+          const newTargetId = remap.target ? idMapping[oldTargetId] : relation[targetColumn];
 
-          // Both sides must map to new entries
-          if (!newSourceId || !newTargetId) return null;
+          // Any side being remapped must resolve to a new entry.
+          if (newSourceId == null || newTargetId == null) return null;
 
           return {
             ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
@@ -143,13 +301,37 @@ const sync = async (
 
       if (deduped.length === 0) continue;
 
+      // Relation writes may have already recreated the remapped pair. In that case restore
+      // the saved join-row metadata (notably order columns) instead of inserting a duplicate.
       const newSourceIds = [...new Set(deduped.map((r) => String(r[sourceColumn])))];
       const existingRows = await trx(joinTable.name)
         .whereIn(sourceColumn, newSourceIds)
         .select(sourceColumn, targetColumn);
 
       const existingSet = new Set(existingRows.map((r: Record<string, unknown>) => pairKey(r)));
+      const toUpdate = deduped.filter((r) => existingSet.has(pairKey(r)));
       const toInsert = deduped.filter((r) => !existingSet.has(pairKey(r)));
+
+      await Promise.all(
+        toUpdate.map((relation) => {
+          const sourceId = relation[sourceColumn];
+          const targetId = relation[targetColumn];
+          const dataToRestore = Object.fromEntries(
+            [joinTable.orderColumnName, joinTable.inverseOrderColumnName]
+              .filter((columnName): columnName is string => columnName != null)
+              .filter((columnName) => columnName in relation)
+              .map((columnName) => [columnName, relation[columnName]])
+          );
+
+          if (Object.keys(dataToRestore).length === 0) {
+            return Promise.resolve();
+          }
+
+          return trx(joinTable.name)
+            .where({ [sourceColumn]: sourceId, [targetColumn]: targetId })
+            .update(dataToRestore);
+        })
+      );
 
       if (toInsert.length > 0) {
         await trx.batchInsert(joinTable.name, toInsert as any[], batchSize);

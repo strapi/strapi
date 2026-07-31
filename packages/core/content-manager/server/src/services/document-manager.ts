@@ -254,7 +254,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       }
 
-      return sumDraftCounts(document, uid);
+      return sumDraftCounts(strapi, document, uid);
     },
 
     async countManyEntriesDraftRelations(
@@ -268,28 +268,22 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      let localeFilter = {};
-      if (locale) {
-        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
-      }
-
-      const entities = await strapi.db.query(uid).findMany({
+      const entities = await strapi.documents(uid).findMany({
         populate,
-        where: {
-          documentId: { $in: documentIds },
-          ...localeFilter,
-        },
+        filters: { documentId: { $in: documentIds } } as any,
+        locale,
+        status: 'draft',
       });
 
-      const totalNumberDraftRelations: number = entities!.reduce(
-        (count: number, entity: Document) => {
-          const { unpublishedRelations } = sumDraftCounts(entity, uid);
-          return count + unpublishedRelations;
-        },
-        0
+      const counts = await Promise.all(
+        entities.map((entity: Document) => sumDraftCounts(strapi, entity, uid))
       );
 
-      return totalNumberDraftRelations;
+      return counts.reduce(
+        (total, entityCounts) =>
+          total + entityCounts.unpublishedRelations + entityCounts.draftM2mLinks,
+        0
+      );
     },
   };
 };

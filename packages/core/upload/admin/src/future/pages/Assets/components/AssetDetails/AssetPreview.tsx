@@ -48,7 +48,7 @@ const StyledImage = styled.img`
 `;
 
 /**
- * Top-right overlay slot for image actions (crop / rotate). Sits above the
+ * Top-right overlay slot for image actions (crop). Sits above the
  * image (z-index 3 > AssetContainer 2) so the buttons stay clickable.
  */
 const ActionsOverlay = styled(Flex)`
@@ -116,11 +116,13 @@ interface AssetPreviewProps {
 
 export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
-  const { alternativeText, ext, mime, url, updatedAt } = asset;
+  const { alternativeText, ext, mime, url, updatedAt, isUrlSigned, isLocal } = asset;
   // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
   // file (often served at the same URL) shows the new content instead of the
-  // browser-cached old version.
-  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : undefined;
+  // browser-cached old version. Signed URLs are excluded: their query string
+  // is part of the SigV4 signature, so appending a param invalidates the
+  // signature and the request fails with 403. See #26581.
+  const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
   const appendCacheBuster = (raw: string | undefined) => {
     if (!raw || cacheKey === undefined) return raw;
     return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
@@ -132,6 +134,26 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
     setIsMediaLoaded(false);
   }, [mediaUrl]);
 
+  const imageRef = React.useRef<HTMLImageElement>(null);
+  React.useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    const recompute = () => {
+      const parent = image.parentElement;
+      if (!parent) return;
+      const c = parent.getBoundingClientRect();
+      // offsetWidth/Height = pre-transform layout box (transforms ignored).
+      const w = image.offsetWidth;
+      const h = image.offsetHeight;
+      if (!w || !h || !c.width || !c.height) return;
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(image);
+    if (image.parentElement) ro.observe(image.parentElement);
+    return () => ro.disconnect();
+  }, [isMediaLoaded]);
+
   if (mime?.includes(ASSET_TYPES.Image)) {
     const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
@@ -142,8 +164,10 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
           {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
+              ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
+              crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />

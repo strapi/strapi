@@ -277,7 +277,7 @@ export const UploadFigmaModal = () => {
 
   const { addAttachments } = useAttachments();
   const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
-  const { input, setInput, setMessages, sendMessage, openChat } = useStrapiChat();
+  const { input, setInput, sendMessage, openChat } = useStrapiChat();
   const { processFigmaUrl, isLoading, error } = useFigmaUpload({
     onSuccess: (images) => {
       setFigmaImages(images);
