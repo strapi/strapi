@@ -1,6 +1,5 @@
 #!/usr/bin/env tsx
 import { discoverBundles, repoRoot } from './bundles';
-import { writeTypesForBundle } from './generate-types';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
 import { readJsonRecord } from './bundles';
@@ -10,7 +9,6 @@ const parseArgs = (): VerifyOptions => {
 
   return {
     fix: args.includes('--fix'),
-    writeTypes: args.includes('--write-types'),
     bundleFilter: args.find((arg) => arg.startsWith('--bundle='))?.split('=')[1],
   };
 };
@@ -36,7 +34,6 @@ const main = () => {
   const adminEnJson = readJsonRecord(adminBundle.enJsonPath);
   const allIssues: ValidationIssue[] = [];
   let fixedLocales = 0;
-  let writtenTypes = 0;
 
   if (options.fix) {
     for (const bundle of bundles) {
@@ -46,16 +43,6 @@ const main = () => {
     if (fixedLocales > 0) {
       console.log(`Fixed ${fixedLocales} locale file(s). Re-run without --fix to verify.`);
     }
-  }
-
-  if (options.writeTypes) {
-    for (const bundle of bundles) {
-      if (writeTypesForBundle(bundle)) {
-        writtenTypes += 1;
-      }
-    }
-
-    console.log(`Wrote ${writtenTypes} keys.generated.d.ts file(s).`);
   }
 
   for (const bundle of bundles) {

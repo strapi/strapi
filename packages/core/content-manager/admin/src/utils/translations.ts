@@ -1,8 +1,3 @@
-import type {
-  ContentManagerTradKey,
-  ContentManagerMessageId,
-} from '../translations/keys.generated';
-
 type TradOptions = Record<string, string>;
 
 const prefixPluginTranslations = (trad: TradOptions, pluginId: string): TradOptions => {
@@ -15,10 +10,6 @@ const prefixPluginTranslations = (trad: TradOptions, pluginId: string): TradOpti
   }, {} as TradOptions);
 };
 
-function getTranslation(id: ContentManagerTradKey): ContentManagerMessageId;
-function getTranslation(id: string): string;
-function getTranslation(id: string) {
-  return `content-manager.${id}`;
-}
+const getTranslation = (id: string) => `content-manager.${id}`;
 
 export { getTranslation, prefixPluginTranslations };

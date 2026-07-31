@@ -7,7 +7,6 @@ import ts from 'typescript';
 
 import { readJsonRecord } from '../bundles';
 import { resolveIdExpression } from '../extract';
-import { shouldGenerateTypesForBundle, writeTypesForBundle } from '../generate-types';
 import { expandTemplateToJsonKeys, isAdminMessageId, resolveMessageId } from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
 import type { TranslationBundle } from '../types';
@@ -90,39 +89,6 @@ describe('fixLocaleFiles', () => {
     assert.deepEqual(Object.keys(fixed), ['b.key', 'a.key']);
     assert.deepEqual(fixed, { 'b.key': 'B-fr', 'a.key': 'A-fr' });
     assert.equal('missing.key' in fixed, false);
-  });
-});
-
-describe('writeTypesForBundle', () => {
-  const makeBundle = (packageName: string, pluginPrefix: string): TranslationBundle => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-types-'));
-
-    return {
-      packagePath: dir,
-      packageName,
-      enJsonPath: path.join(dir, 'en.json'),
-      translationsDir: dir,
-      pluginPrefix,
-      sourceDirs: [],
-    };
-  };
-
-  it('writes and updates types only for bundles with a typed consumer', () => {
-    const contentManager = makeBundle('core/content-manager', 'content-manager');
-    const upload = makeBundle('core/upload', 'upload');
-
-    assert.equal(shouldGenerateTypesForBundle(contentManager), true);
-    assert.equal(shouldGenerateTypesForBundle(upload), false);
-
-    assert.equal(writeTypesForBundle(contentManager), true);
-    assert.equal(writeTypesForBundle(contentManager), false);
-    assert.equal(writeTypesForBundle(upload), false);
-
-    assert.equal(
-      fs.existsSync(path.join(contentManager.translationsDir, 'keys.generated.d.ts')),
-      true
-    );
-    assert.equal(fs.existsSync(path.join(upload.translationsDir, 'keys.generated.d.ts')), false);
   });
 });
 

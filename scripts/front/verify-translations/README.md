@@ -11,9 +11,6 @@ yarn verify:translations
 # Reorder existing locale keys and prune keys absent from en.json
 yarn verify:translations --fix
 
-# Regenerate types for bundles with typed consumers (currently content-manager)
-yarn verify:translations --write-types
-
 # Scope to one package
 yarn verify:translations --bundle=core/content-manager
 ```
@@ -37,9 +34,6 @@ Extractions are classified automatically:
 - **schema-driven** — `content-manager.content-types.${uid}.${field}` etc.; require `defaultMessage`, not `en.json`
 - **error-passthrough** — `formatMessage({ id: error })` from Yup; keys collected from schema literals
 - **registry** — small set of documented patterns (bulk locale titles, etc.)
-
-Plugin authors are unaffected: typed helpers retain a `string` fallback, so custom plugin keys
-still typecheck.
 
 ## Legacy scripts
 
