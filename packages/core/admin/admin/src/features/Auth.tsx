@@ -160,11 +160,14 @@ const AuthProvider = ({
   /**
    * Prompt before discarding unsaved edits, then run `logoutFn`.
    *
-   * - Voluntary (explicit logout): Cancel leaves the user fully logged in.
-   * - Forced (idle / session-dead): the session is already unusable — Cancel
-   *   (or dismiss) still runs `logoutFn` so the client cannot keep a stale token.
-   *   While the dialog is open, a later forced request upgrades the pending action
-   *   (e.g. local idle → global session-dead).
+   * - Voluntary (explicit logout, idle access-token expiry): Cancel leaves the
+   *   user logged in. Idle expiry is speculative — the refresh token is still
+   *   valid, so the next request refreshes the access token and re-arms the
+   *   idle timer.
+   * - Forced (server-confirmed dead session): the session is already unusable —
+   *   Cancel (or dismiss) still runs `logoutFn` so the client cannot keep a
+   *   stale token. While the dialog is open, a later forced request upgrades the
+   *   pending action (e.g. local idle → global session-dead).
    */
   const runLogoutWithGuard = React.useCallback(
     (logoutFn: () => void, { forced = false }: { forced?: boolean } = {}) => {
@@ -225,9 +228,13 @@ const AuthProvider = ({
    * down a session that another tab is still actively using. A genuine logout
    * (user-initiated, or a server-confirmed 401 via `setOnSessionExpired`) still
    * goes through `clearStateAndLogout` and broadcasts to all tabs.
+   *
+   * The unsaved-changes prompt is cancelable here: the refresh token outlives
+   * the access token, so cancelling keeps the user on their form and the next
+   * request refreshes the session.
    */
   const clearLocalSessionAndRedirect = React.useCallback(() => {
-    runLogoutWithGuard(performLocalLogout, { forced: true });
+    runLogoutWithGuard(performLocalLogout);
   }, [performLocalLogout, runLogoutWithGuard]);
 
   const handleConfirmSessionLogout = React.useCallback(() => {
