@@ -142,14 +142,21 @@ const withWholesaleReplaceHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.Zod
  * still tell required attributes apart from optional ones on updates and drafts (all
  * fields are optional, but only the required ones carry the hint).
  *
- * - required + gate dropped (draft target or update) → optional, with the required hint.
+ * - required + draft gate dropped → optional and nullable, with the required hint.
+ * - required + update gate dropped → optional, with the required hint.
  * - required + gate kept (non-D&P create) → returned as-is (hard-gated).
  * - not required → optional.
  */
 const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode): z.ZodTypeAny => {
   if (required === true) {
     if (relaxesRequired(mode) === true) {
-      return withRequiredHint(s, mode).optional();
+      const hintedSchema = withRequiredHint(s, mode);
+      return targetsDraft(mode) === true
+        ? hintedSchema
+            .nullable()
+            .describe(hintedSchema.description ?? requiredHint(mode))
+            .optional()
+        : hintedSchema.optional();
     }
     return s;
   }

@@ -74,6 +74,56 @@ describe('buildDataSchema | advertised tool contract and hints', () => {
     }
   });
 
+  it('D&P create and update tools accept null for draft-relaxed required fields', () => {
+    const model = baseModel({
+      options: { draftAndPublish: true },
+      attributes: {
+        title: { type: 'string', required: true },
+        seo: {
+          type: 'component',
+          component: 'shared.seo',
+          required: true,
+        },
+      } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const createTool = tools.find((t) => t.name === 'create_article')!;
+    const updateTool = tools.find((t) => t.name === 'update_article')!;
+
+    expect(
+      createTool.resolveInputSchema(mockContext).safeParse({
+        data: { title: null, seo: null },
+      }).success
+    ).toBe(true);
+    expect(
+      updateTool.resolveInputSchema(mockContext).safeParse({
+        documentId: 'abc',
+        data: { title: null, seo: null },
+      }).success
+    ).toBe(true);
+  });
+
+  it('non-D&P partial update keeps required fields non-nullable', () => {
+    const model = baseModel({
+      options: { draftAndPublish: false },
+      attributes: {
+        title: { type: 'string', required: true },
+        seo: {
+          type: 'component',
+          component: 'shared.seo',
+          required: true,
+        },
+      } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const updateTool = tools.find((t) => t.name === 'update_article')!;
+    const inputSchema = updateTool.resolveInputSchema(mockContext);
+
+    expect(inputSchema.safeParse({ documentId: 'abc', data: {} }).success).toBe(true);
+    expect(inputSchema.safeParse({ documentId: 'abc', data: { title: null } }).success).toBe(false);
+    expect(inputSchema.safeParse({ documentId: 'abc', data: { seo: null } }).success).toBe(false);
+  });
+
   it('Layer B: single-type write tool accepts empty/partial data', () => {
     const uid = 'api::global.global';
     const model = baseModel({
