@@ -9,8 +9,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
-import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
+import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
 import {
   getStoredToken,
   login as loginAction,
@@ -110,18 +110,22 @@ const STORAGE_KEYS = {
 };
 
 /**
- * Why the session is ending. `idle` only means the short-lived access token
- * expired while the user was away — the refresh token is still valid, so the
- * session can be resumed. `session-dead` is server-confirmed and final.
+ * Why the session is ending.
+ * - `voluntary`: explicit user logout — cancelable when there are unsaved edits.
+ * - `session-dead`: server rejected the refresh (idle/max session window elapsed)
+ *   — forced; Cancel / dismiss still clears client state.
+ *
+ * Short-lived access-token expiry is NOT a logout reason: idle tabs leave the
+ * stale token in place and the next request refreshes (or hits session-dead).
  */
-type LogoutReason = 'voluntary' | 'idle' | 'session-dead';
+type LogoutReason = 'voluntary' | 'session-dead';
 
 const isForcedLogout = (reason: LogoutReason) => reason === 'session-dead';
 
 /**
- * Copy for the unsaved-changes prompt. Session expiry needs to say *why* the
- * dialog appeared, otherwise it reads as the usual navigation blocker and users
- * confirm straight through it.
+ * Copy for the unsaved-changes prompt. A server-confirmed dead session needs to
+ * say *why* the dialog appeared, otherwise it reads as the usual navigation
+ * blocker and users confirm straight through it.
  */
 const LOGOUT_PROMPTS = {
   voluntary: {
@@ -129,17 +133,6 @@ const LOGOUT_PROMPTS = {
     body: {
       id: 'global.prompt.unsaved',
       defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-    },
-  },
-  idle: {
-    title: {
-      id: 'app.session.expired.title',
-      defaultMessage: 'Session expired',
-    },
-    body: {
-      id: 'app.session.expired.unsaved',
-      defaultMessage:
-        'Your session expired after a period of inactivity and you have unsaved changes. Confirm to log out, or cancel to stay on this page — your session resumes with your next action.',
     },
   },
   'session-dead': {
@@ -206,13 +199,10 @@ const AuthProvider = ({
   /**
    * Prompt before discarding unsaved edits, then run `logoutFn`.
    *
-   * - `voluntary` / `idle`: Cancel leaves the user logged in. Idle expiry is
-   *   speculative — the refresh token is still valid, so the next request
-   *   refreshes the access token and re-arms the idle timer.
+   * - `voluntary`: Cancel leaves the user logged in (server session intact).
    * - `session-dead`: the session is already unusable — Cancel (or dismiss)
    *   still runs `logoutFn` so the client cannot keep a stale token. While the
-   *   dialog is open, a later `session-dead` request upgrades the pending action
-   *   (e.g. local idle → global session-dead).
+   *   dialog is open, a later `session-dead` request upgrades the pending action.
    */
   const runLogoutWithGuard = React.useCallback(
     (logoutFn: () => void, reason: LogoutReason = 'voluntary') => {
@@ -254,33 +244,9 @@ const AuthProvider = ({
     navigate('/auth/login');
   }, [dispatch, navigate]);
 
-  const performLocalLogout = React.useCallback(() => {
-    dispatch(adminApi.util.resetApiState());
-    dispatch(setToken(null));
-    navigate('/auth/login');
-  }, [dispatch, navigate]);
-
   const clearStateAndLogout = React.useCallback(() => {
     runLogoutWithGuard(performGlobalLogout, 'session-dead');
   }, [performGlobalLogout, runLogoutWithGuard]);
-
-  /**
-   * Clear *only this tab's* session and redirect to login, without removing the
-   * shared `isLoggedIn`/`jwtToken` storage keys. Unlike `clearStateAndLogout`,
-   * this does not dispatch `logoutAction`, so it does not fire the cross-tab
-   * `storage` event that logs every tab out. Used by the speculative idle timer,
-   * which fires per-tab at the access token's `exp`: an idle tab must never tear
-   * down a session that another tab is still actively using. A genuine logout
-   * (user-initiated, or a server-confirmed 401 via `setOnSessionExpired`) still
-   * goes through `clearStateAndLogout` and broadcasts to all tabs.
-   *
-   * The unsaved-changes prompt is cancelable here: the refresh token outlives
-   * the access token, so cancelling keeps the user on their form and the next
-   * request refreshes the session.
-   */
-  const clearLocalSessionAndRedirect = React.useCallback(() => {
-    runLogoutWithGuard(performLocalLogout, 'idle');
-  }, [performLocalLogout, runLogoutWithGuard]);
 
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;
@@ -324,10 +290,11 @@ const AuthProvider = ({
 
   /**
    * Track the timestamp of the user's last interaction. This is the activity
-   * signal `useIdleSessionLogout` uses to tell an active user (silently renew
-   * their session) apart from a genuinely idle one (log out). Successful API
-   * calls don't refresh the short-lived access token on their own, so without
-   * this an actively-working user is logged out the moment the token expires.
+   * signal `useSessionKeepalive` uses to tell an active user (silently renew
+   * their session) apart from a genuinely idle one (leave the stale access
+   * token alone until the next request). Successful API calls don't refresh
+   * the short-lived access token on their own, so without this an
+   * actively-working user would hit a 401 the moment the token expires.
    */
   const lastActivityRef = React.useRef(Date.now());
   React.useEffect(() => {
@@ -347,7 +314,7 @@ const AuthProvider = ({
 
   /**
    * Silently rotate the refresh token and mint a new access token. Returns
-   * `true` on success (the resulting `setToken` re-arms the idle timer) and
+   * `true` on success (the resulting `setToken` re-arms the renew timer) and
    * `false` when the server rejects it (session genuinely over).
    */
   const renewSession = React.useCallback(async () => {
@@ -398,16 +365,16 @@ const AuthProvider = ({
   }, [clearStateAndLogout]);
 
   /**
-   * Session lifecycle at access-token expiry. The timer fires per-tab; the hook
-   * then either (1) re-syncs from a token another tab refreshed, (2) silently
-   * renews when the user has been active, or (3) logs out. Idle logout is local
-   * so an idle tab can't force-logout an actively-used one; a server-confirmed
-   * dead session (renewal rejected) broadcasts globally. See
-   * `useIdleSessionLogout` for the full rationale.
+   * Session keepalive around access-token expiry. The timer fires per-tab; the
+   * hook then either (1) re-syncs from a token another tab refreshed, (2)
+   * silently renews when the user has been active, or (3) does nothing when
+   * idle — leaving the stale access token in place so unsaved form state
+   * survives until the next request refreshes it. A server-confirmed dead
+   * session (renewal rejected) broadcasts globally via `onSessionDead`. See
+   * `useSessionKeepalive` for the full rationale.
    */
-  useIdleSessionLogout({
+  useSessionKeepalive({
     token,
-    onExpired: clearLocalSessionAndRedirect,
     onSessionDead: clearStateAndLogout,
     getStoredToken,
     onResync: resyncToken,

@@ -858,7 +858,13 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   const registrationId = React.useId();
   const hasUnsavedEdits = modified && !isSubmitting;
 
-  useRegisterUnsavedChanges(registrationId, hasUnsavedEdits);
+  /**
+   * Deliberately `modified` rather than `hasUnsavedEdits`: the navigation
+   * guards below ignore an in-flight submit because it is about to reset the
+   * form, but a session that dies mid-save leaves the edits unsaved — that is
+   * exactly when the user needs the warning.
+   */
+  useRegisterUnsavedChanges(registrationId, modified);
 
   // this is trigering a native browser prompt on page unload
   // We aren't able to use our Dialog component in that scenario
