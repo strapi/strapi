@@ -426,7 +426,7 @@ export const SettingsPage = () => {
                     <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: getTrad('settings.blockTitle'),
-                        defaultMessage: 'Asset management',
+                        defaultMessage: 'Asset Management',
                       })}
                     </Typography>
                   </Flex>

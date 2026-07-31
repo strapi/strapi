@@ -12,6 +12,7 @@ const parseArgs = (): VerifyOptions => {
   return {
     fix: args.includes('--fix'),
     writeEn: args.includes('--write-en'),
+    syncExisting: args.includes('--sync-existing'),
     bundleFilter: args.find((arg) => arg.startsWith('--bundle='))?.split('=')[1],
   };
 };
@@ -43,7 +44,9 @@ const main = () => {
     const adminEnKeys = new Set(Object.keys(adminEnJson));
 
     for (const bundle of bundles) {
-      const result = writeEnJsonForBundle(bundle, adminEnKeys);
+      const result = writeEnJsonForBundle(bundle, adminEnKeys, {
+        syncExisting: options.syncExisting,
+      });
       allIssues.push(...result.conflicts);
 
       if (result.changed) {

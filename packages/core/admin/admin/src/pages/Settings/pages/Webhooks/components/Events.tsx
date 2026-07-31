@@ -113,7 +113,8 @@ const EventsHeaders = ({ getHeaders = getCEHeaders }: EventsHeadersProps) => {
                 key={header.id}
                 title={formatMessage({
                   id: 'Settings.webhooks.event.publish-tooltip',
-                  defaultMessage: 'This event only exists for content with draft & publish enabled',
+                  defaultMessage:
+                    'This event only exists for contents with Draft/Publish system enabled',
                 })}
               >
                 <Typography variant="sigma" textColor="neutral600">

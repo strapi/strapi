@@ -134,7 +134,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
           message: formatMessage(
             {
               id: getTrad('input.notification.not-supported'),
-              defaultMessage: `You can't upload this type of file.`,
+              defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,
             },
             {
               fileTypes: (allowedTypes ?? []).join(','),

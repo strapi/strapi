@@ -25,7 +25,7 @@ const SettingsPage = () => {
           type: 'success',
           message: formatMessage({
             id: getTrad('notification.update.success'),
-            defaultMessage: 'Successfully updated settings',
+            defaultMessage: 'Settings updated successfully',
           }),
         });
       })

@@ -808,7 +808,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         error?.data?.message ??
         formatMessage({
           id: getTranslationKey('asset-details.delete.error'),
-          defaultMessage: 'Failed to delete the asset.',
+          defaultMessage: 'Failed to delete the file.',
         });
       notify({ type: 'danger', message });
       return;

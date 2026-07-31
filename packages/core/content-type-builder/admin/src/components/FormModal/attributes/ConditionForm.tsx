@@ -306,7 +306,7 @@ export const ConditionForm = ({
                   onChange={handleFieldChange}
                   placeholder={formatMessage({
                     id: getTrad('form.attribute.condition.field'),
-                    defaultMessage: 'field',
+                    defaultMessage: 'Field',
                   })}
                 >
                   {conditionFields.map((field) => (
@@ -328,7 +328,7 @@ export const ConditionForm = ({
                   disabled={!localValue.dependsOn}
                   placeholder={formatMessage({
                     id: getTrad('form.attribute.condition.operator'),
-                    defaultMessage: 'condition',
+                    defaultMessage: 'Operator',
                   })}
                 >
                   <SingleSelectOption value="is">
@@ -355,7 +355,7 @@ export const ConditionForm = ({
                   disabled={!localValue.dependsOn}
                   placeholder={formatMessage({
                     id: getTrad('form.attribute.condition.value'),
-                    defaultMessage: 'value',
+                    defaultMessage: 'Value',
                   })}
                 >
                   {isEnumField && selectedField?.enum ? (
@@ -395,7 +395,7 @@ export const ConditionForm = ({
             >
               {formatMessage({
                 id: getTrad('form.attribute.condition.then'),
-                defaultMessage: 'THEN',
+                defaultMessage: 'Then',
               })}
             </Typography>
           </Box>
@@ -406,7 +406,7 @@ export const ConditionForm = ({
                 onChange={handleActionChange}
                 placeholder={formatMessage({
                   id: getTrad('form.attribute.condition.action'),
-                  defaultMessage: 'action',
+                  defaultMessage: 'Action',
                 })}
               >
                 <SingleSelectOption value="show">

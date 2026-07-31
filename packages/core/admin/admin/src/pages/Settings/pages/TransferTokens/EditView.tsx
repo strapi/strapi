@@ -226,7 +226,7 @@ const EditView = () => {
     <Page.Main>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Transfer Tokens',
           }

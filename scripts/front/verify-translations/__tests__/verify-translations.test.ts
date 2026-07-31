@@ -471,7 +471,7 @@ describe('validateLocaleFile order vs orphans', () => {
 });
 
 describe('writeEnJsonForBundle', () => {
-  it('updates en.json from defaultMessage and prefers existing en on conflicts', () => {
+  it('adds missing keys and preserves existing en.json by default', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-write-en-'));
     const srcDir = path.join(dir, 'admin', 'src');
     fs.mkdirSync(srcDir, { recursive: true });
@@ -483,7 +483,7 @@ describe('writeEnJsonForBundle', () => {
       path.join(srcDir, 'Widget.tsx'),
       `
         formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
-        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Upload' });
+        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
         formatMessage({ id: getTrad('new.key'), defaultMessage: 'New' });
       `
     );
@@ -504,6 +504,34 @@ describe('writeEnJsonForBundle', () => {
       'plugin.name': 'Upload',
       'new.key': 'New',
     });
+  });
+
+  it('overwrites existing en.json when syncExisting is set', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-write-en-sync-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });`
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const result = writeEnJsonForBundle(bundle, new Set(), { syncExisting: true });
+
+    assert.equal(result.changed, true);
+    assert.equal(readJsonRecord(bundle.enJsonPath)['plugin.name'], 'Media Library');
   });
 });
 

@@ -119,7 +119,7 @@ const Login = ({ children }: LoginProps) => {
                   name: 'email',
                   placeholder: formatMessage({
                     id: 'Auth.form.email.placeholder',
-                    defaultMessage: 'kai@doe.com',
+                    defaultMessage: 'e.g. kai@doe.com',
                   }),
                   required: true,
                   type: 'email' as const,

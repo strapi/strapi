@@ -133,7 +133,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
         <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({
             id: 'containers.list.displayedFields',
-            defaultMessage: 'Displayed fields',
+            defaultMessage: 'Displayed Fields',
           })}
         </Typography>
 

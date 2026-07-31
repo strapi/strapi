@@ -109,14 +109,19 @@ const collectSelfDefaultMessages = (
 };
 
 /**
- * Sync this bundle's en.json from in-code defaultMessage (code is canonical English).
- * Adds missing keys and overwrites drifted values. Does not delete unused keys.
+ * Sync this bundle's en.json from in-code defaultMessage.
+ * - Always adds missing keys.
+ * - When `syncExisting` is true, overwrites drifted en.json values (code → catalog).
+ * - When false (default), existing en.json values are preserved — use that for migrations
+ *   that should not change user-facing English; follow with alignDefaultMessages so code matches.
  * When call sites disagree, prefers a value already matching en.json, else majority.
  */
 export const writeEnJsonForBundle = (
   bundle: TranslationBundle,
-  adminEnKeys: Set<string>
+  adminEnKeys: Set<string>,
+  options: { syncExisting?: boolean } = {}
 ): WriteEnResult => {
+  const syncExisting = options.syncExisting ?? false;
   const enJson = readJsonRecord(bundle.enJsonPath);
   const extractions = extractMessages(bundle, adminEnKeys);
   const { values, conflicts } = collectSelfDefaultMessages(bundle, extractions, enJson);
@@ -131,7 +136,7 @@ export const writeEnJsonForBundle = (
       continue;
     }
 
-    if (normalizeMessage(enJson[key]) !== normalizeMessage(value)) {
+    if (syncExisting && normalizeMessage(enJson[key]) !== normalizeMessage(value)) {
       enJson[key] = value;
       updatedKeys.push(key);
     }

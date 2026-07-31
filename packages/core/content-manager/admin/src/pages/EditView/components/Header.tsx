@@ -736,7 +736,8 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
           <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.delete.dialog.body',
-              defaultMessage: 'Are you sure?',
+              defaultMessage:
+                'Are you sure you want to delete this document? This action is irreversible.',
             })}
           </Typography>
         </Flex>

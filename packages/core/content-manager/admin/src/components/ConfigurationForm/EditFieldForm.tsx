@@ -164,7 +164,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 name: 'editable',
                 label: formatMessage({
                   id: getTranslation('containers.edit-settings.modal-form.editable'),
-                  defaultMessage: 'Editable',
+                  defaultMessage: 'Editable field',
                 }),
                 size: 6,
                 type: 'boolean' as const,

@@ -349,7 +349,7 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
       value={field.value}
       aria-label={formatMessage({
         id: 'content-manager.components.Filters.usersSelect.label',
-        defaultMessage: 'Search and select a user to filter',
+        defaultMessage: 'Search and select a user to filter by',
       })}
       onOpenChange={handleOpenChange}
       onChange={(value) => field.onChange(name, value)}

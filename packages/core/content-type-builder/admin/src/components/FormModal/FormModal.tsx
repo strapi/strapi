@@ -1169,7 +1169,7 @@ export const FormModal = () => {
                       {formatMessage({
                         id: 'form.attribute.condition.enum-change-warning',
                         defaultMessage:
-                          'The following fields have conditions that depend on this field: ',
+                          'The following fields have conditions that depend on this field: {fieldNames}. Changing or removing the enum values {values} will break these conditions. Do you want to proceed?',
                       })}
                       <Typography fontWeight="bold">{fieldNames}</Typography>
                       {formatMessage({
@@ -1192,7 +1192,7 @@ export const FormModal = () => {
                     {formatMessage({
                       id: 'form.attribute.condition.field-change-warning',
                       defaultMessage:
-                        'The following fields have conditions that depend on this field: ',
+                        'The following fields have conditions that depend on this field: {fieldNames}. Renaming it will break these conditions. Do you want to proceed?',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({

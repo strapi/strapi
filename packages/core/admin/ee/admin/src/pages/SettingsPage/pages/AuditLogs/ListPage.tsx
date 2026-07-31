@@ -107,7 +107,7 @@ const ListPage = () => {
     <Page.Main aria-busy={isLoading}>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: formatMessage({
               id: 'global.auditLogs',

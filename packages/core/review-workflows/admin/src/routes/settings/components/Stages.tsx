@@ -293,7 +293,7 @@ const Stage = ({
                           {canUpdate && (
                             <Menu.Item onClick={handleCloneClick}>
                               {formatMessage({
-                                id: 'Settings.review-workflows.stage.delete',
+                                id: 'Settings.review-workflows.stage.duplicate',
                                 defaultMessage: 'Duplicate stage',
                               })}
                             </Menu.Item>
@@ -306,7 +306,7 @@ const Stage = ({
                             >
                               {formatMessage({
                                 id: 'Settings.review-workflows.stage.delete',
-                                defaultMessage: 'Duplicate stage',
+                                defaultMessage: 'Delete',
                               })}
                             </Menu.Item>
                           )}

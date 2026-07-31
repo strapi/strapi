@@ -138,7 +138,7 @@ export const ListView = () => {
       )}
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           { name: 'API Tokens' }
         )}
       </Page.Title>

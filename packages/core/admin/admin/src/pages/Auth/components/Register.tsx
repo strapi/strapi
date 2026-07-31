@@ -570,7 +570,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                         <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
                           {formatMessage({
                             id: 'Auth.privacy-policy-agreement.policy',
-                            defaultMessage: 'policy',
+                            defaultMessage: 'privacy policy',
                           })}
                         </A>
                       ),

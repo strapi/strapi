@@ -41,7 +41,7 @@ export const BulkActions = ({ selected = [], onSuccess, currentFolder }: BulkAct
           {
             id: getTrad('list.assets.selected'),
             defaultMessage:
-              '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}} selected',
+              '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
           },
           {
             numberFolders: selected?.filter(({ type }) => type === 'folder').length,

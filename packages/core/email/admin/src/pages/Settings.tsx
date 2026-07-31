@@ -342,7 +342,7 @@ const SettingsPage = () => {
     <Page.Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: formatMessage({
               id: 'email.Settings.email.plugin.title',
@@ -444,7 +444,7 @@ const SettingsPage = () => {
                               <TextInput
                                 placeholder={formatMessage({
                                   id: 'email.Settings.email.plugin.placeholder.defaultFrom',
-                                  defaultMessage: 'ex: no-reply@strapi.io',
+                                  defaultMessage: 'ex: Strapi No-Reply <no-reply@strapi.io>',
                                 })}
                                 disabled
                                 readOnly
@@ -481,7 +481,7 @@ const SettingsPage = () => {
                               <TextInput
                                 placeholder={formatMessage({
                                   id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
-                                  defaultMessage: 'ex: support@strapi.io',
+                                  defaultMessage: 'ex: Strapi <example@strapi.io>',
                                 })}
                                 disabled
                                 readOnly

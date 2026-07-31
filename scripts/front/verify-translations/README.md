@@ -8,8 +8,12 @@ Validates Strapi admin `react-intl` message descriptors against `en.json` and lo
 # Full validation (exit 1 on errors)
 yarn verify:translations
 
-# Sync en.json from defaultMessage (and align minority call-site defaults)
+# Sync en.json gaps from defaultMessage, then align call-site defaults to en.json
+# (existing catalog English is preserved; use --sync-existing to overwrite from code)
 yarn verify:translations --write-en
+
+# Overwrite existing en.json values from defaultMessage (code → catalog)
+yarn verify:translations --write-en --sync-existing
 
 # Backfill any remaining en.json gaps, then reorder/prune locale orphans
 yarn verify:translations --fix

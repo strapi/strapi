@@ -126,7 +126,7 @@ const PreviewTabs = () => {
       <Tabs.List
         aria-label={formatMessage({
           id: 'preview.tabs.label',
-          defaultMessage: 'Document status',
+          defaultMessage: 'Preview status',
         })}
       >
         <StatusTab value="draft">

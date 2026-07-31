@@ -41,5 +41,7 @@ export interface ValidationIssue {
 export interface VerifyOptions {
   fix: boolean;
   writeEn: boolean;
+  /** With --write-en: overwrite existing en.json values from defaultMessage (code → catalog). */
+  syncExisting: boolean;
   bundleFilter?: string;
 }
