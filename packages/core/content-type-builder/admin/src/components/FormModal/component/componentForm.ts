@@ -11,7 +11,7 @@ export const componentForm = {
             type: 'text',
             intlLabel: {
               id: getTrad('contentType.displayName.label'),
-              defaultMessage: 'Display Name',
+              defaultMessage: 'Display name',
             },
           },
           {

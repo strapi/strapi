@@ -128,7 +128,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
           type: 'danger',
           message: formatMessage({
             id: 'notification.error',
-            defaultMessage: 'An error occurred.',
+            defaultMessage: 'An error occurred',
           }),
         });
       }

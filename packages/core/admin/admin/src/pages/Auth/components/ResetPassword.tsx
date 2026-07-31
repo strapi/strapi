@@ -170,7 +170,7 @@ const ResetPassword = () => {
                   hint: formatMessage({
                     id: 'Auth.form.password.hint',
                     defaultMessage:
-                      'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                      'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
                   }),
                   label: formatMessage({
                     id: 'global.password',

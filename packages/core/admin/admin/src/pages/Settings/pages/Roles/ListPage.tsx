@@ -142,7 +142,7 @@ const ListPage = () => {
         }
         title={formatMessage({
           id: 'global.roles',
-          defaultMessage: 'roles',
+          defaultMessage: 'Roles',
         })}
         subtitle={formatMessage({
           id: 'Settings.roles.list.description',
@@ -158,7 +158,7 @@ const ListPage = () => {
                 {
                   target: formatMessage({
                     id: 'global.roles',
-                    defaultMessage: 'roles',
+                    defaultMessage: 'Roles',
                   }),
                 }
               )}

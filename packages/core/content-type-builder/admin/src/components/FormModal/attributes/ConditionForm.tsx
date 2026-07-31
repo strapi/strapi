@@ -266,7 +266,7 @@ export const ConditionForm = ({
             {formatMessage(
               {
                 id: getTrad('form.attribute.condition.title'),
-                defaultMessage: 'Condition for {name}',
+                defaultMessage: 'Condition',
               },
               {
                 name: <strong>{attributeName}</strong>,

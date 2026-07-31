@@ -87,7 +87,7 @@ const ListPageCE = () => {
         type: 'danger',
         message: formatMessage({
           id: 'global.error',
-          defaultMessage: 'An error occurred',
+          defaultMessage: 'Something went wrong',
         }),
       });
     }

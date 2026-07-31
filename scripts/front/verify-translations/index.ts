@@ -3,12 +3,15 @@ import { discoverBundles, readJsonRecord, repoRoot } from './bundles';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
 import { backfillMissingEnKeys } from './backfill-en';
+import { writeEnJsonForBundle } from './write-en';
+import { alignDefaultMessages } from './align-defaults';
 
 const parseArgs = (): VerifyOptions => {
   const args = process.argv.slice(2);
 
   return {
     fix: args.includes('--fix'),
+    writeEn: args.includes('--write-en'),
     bundleFilter: args.find((arg) => arg.startsWith('--bundle='))?.split('=')[1],
   };
 };
@@ -31,11 +34,40 @@ const main = () => {
     process.exit(1);
   }
 
+  let adminEnJson = readJsonRecord(adminBundle.enJsonPath);
   const allIssues: ValidationIssue[] = [];
   let fixedLocales = 0;
+  let writtenEn = 0;
+
+  if (options.writeEn) {
+    const adminEnKeys = new Set(Object.keys(adminEnJson));
+
+    for (const bundle of bundles) {
+      const result = writeEnJsonForBundle(bundle, adminEnKeys);
+      allIssues.push(...result.conflicts);
+
+      if (result.changed) {
+        writtenEn += 1;
+        console.log(
+          `Wrote ${bundle.packageName} en.json (+${result.addedKeys.length} / ~${result.updatedKeys.length})`
+        );
+      }
+    }
+
+    adminEnJson = readJsonRecord(adminBundle.enJsonPath);
+
+    const alignedFiles = alignDefaultMessages(bundles, adminBundle);
+    if (alignedFiles > 0) {
+      console.log(`Aligned defaultMessage in ${alignedFiles} source file(s) to en.json.`);
+    }
+
+    if (writtenEn > 0) {
+      console.log(`Synced ${writtenEn} en.json file(s) from defaultMessage.`);
+    }
+  }
 
   if (options.fix) {
-    // Close en.json gaps before pruning locales so translators' strings for live keys survive.
+    // Close remaining en.json gaps before pruning locales (no-op if --write-en already synced).
     const backfill = backfillMissingEnKeys(allBundles, adminBundle);
 
     if (backfill.addedKeys.length > 0) {
@@ -43,6 +75,8 @@ const main = () => {
         `Backfilled ${backfill.addedKeys.length} missing key(s) into ${backfill.changedBundles} en.json file(s).`
       );
     }
+
+    adminEnJson = readJsonRecord(adminBundle.enJsonPath);
 
     for (const bundle of bundles) {
       fixedLocales += fixLocaleFiles(bundle);
@@ -52,8 +86,6 @@ const main = () => {
       console.log(`Fixed ${fixedLocales} locale file(s). Re-run without --fix to verify.`);
     }
   }
-
-  const adminEnJson = readJsonRecord(adminBundle.enJsonPath);
 
   for (const bundle of bundles) {
     allIssues.push(...validateBundle(bundle, adminEnJson));

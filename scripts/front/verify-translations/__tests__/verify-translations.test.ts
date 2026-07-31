@@ -15,6 +15,7 @@ import {
 } from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
 import { backfillMissingEnKeys } from '../backfill-en';
+import { writeEnJsonForBundle } from '../write-en';
 import type { TranslationBundle } from '../types';
 
 describe('pluginPrefixFromPackageName', () => {
@@ -466,6 +467,43 @@ describe('validateLocaleFile order vs orphans', () => {
 
     assert.ok(codes.includes('extra-locale-key'));
     assert.ok(codes.includes('locale-key-order'));
+  });
+});
+
+describe('writeEnJsonForBundle', () => {
+  it('updates en.json from defaultMessage and prefers existing en on conflicts', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-write-en-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `
+        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
+        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Upload' });
+        formatMessage({ id: getTrad('new.key'), defaultMessage: 'New' });
+      `
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const result = writeEnJsonForBundle(bundle, new Set());
+
+    assert.equal(result.changed, true);
+    assert.deepEqual(readJsonRecord(bundle.enJsonPath), {
+      'plugin.name': 'Upload',
+      'new.key': 'New',
+    });
   });
 });
 

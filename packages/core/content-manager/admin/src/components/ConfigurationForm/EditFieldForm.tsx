@@ -122,7 +122,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             <Modal.Title>
               {formatMessage(
                 {
-                  id: 'content-manager.containers.edit-settings.modal-form.label',
+                  id: getTranslation('containers.edit-settings.modal-form.title'),
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: capitalise(value.name) }

@@ -84,7 +84,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
               error={error?.message || formatValidationError(errors.urls)}
             >
               <Field.Label>
-                {formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
+                {formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL(s)' })}
               </Field.Label>
               <Textarea name="urls" onChange={handleChange} value={values.urls} />
               <Field.Hint />
@@ -94,7 +94,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
 
           <Modal.Footer>
             <Button onClick={onClose} variant="tertiary">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Button type="submit" loading={loading}>
               {formatMessage({

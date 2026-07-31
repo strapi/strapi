@@ -233,7 +233,7 @@ const EditPage = () => {
                       <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
-                          defaultMessage: 'Details',
+                          defaultMessage: 'User details',
                         })}
                       </Typography>
                       <Grid.Root gap={5}>
@@ -277,7 +277,7 @@ const EditPage = () => {
                       <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'global.roles',
-                          defaultMessage: "User's role",
+                          defaultMessage: 'Roles',
                         })}
                       </Typography>
                       <Grid.Root gap={5}>

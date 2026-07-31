@@ -125,7 +125,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'An error occurred, please try again',
+          defaultMessage: 'An error occurred',
         }),
       });
     }
@@ -149,7 +149,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
               {formatMessage(
                 {
                   id: getTranslation('Settings.list.actions.edit'),
-                  defaultMessage: 'Edit a locale',
+                  defaultMessage: 'Edit {name} locale',
                 },
                 {
                   name,

@@ -17,7 +17,7 @@ const admin: Plugin.Config.AdminInput = {
       {
         intlLabel: {
           id: 'email.Settings.email.plugin.title',
-          defaultMessage: 'Settings',
+          defaultMessage: 'Configuration',
         },
         id: 'settings',
         to: 'email',

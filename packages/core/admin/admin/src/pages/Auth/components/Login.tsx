@@ -77,7 +77,7 @@ const Login = ({ children }: LoginProps) => {
               <Typography variant="alpha" tag="h1" textAlign="center">
                 {formatMessage({
                   id: 'Auth.form.welcome.title',
-                  defaultMessage: 'Welcome!',
+                  defaultMessage: 'Welcome to Strapi!',
                 })}
               </Typography>
             </Box>

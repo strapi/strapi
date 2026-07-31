@@ -77,7 +77,7 @@ const InstalledPlugins = () => {
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
                       id: 'global.description',
-                      defaultMessage: 'description',
+                      defaultMessage: 'Description',
                     })}
                   </Typography>
                 </Th>

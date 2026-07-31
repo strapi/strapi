@@ -132,13 +132,13 @@ const PreviewTabs = () => {
         <StatusTab value="draft">
           {formatMessage({
             id: 'content-manager.containers.List.draft',
-            defaultMessage: 'draft',
+            defaultMessage: 'Draft',
           })}
         </StatusTab>
         <StatusTab value="published" disabled={documentStatus === 'draft'}>
           {formatMessage({
             id: 'content-manager.containers.List.published',
-            defaultMessage: 'published',
+            defaultMessage: 'Published',
           })}
         </StatusTab>
       </Tabs.List>

@@ -132,7 +132,7 @@ export const ListView = () => {
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'Something went wrong',
+          defaultMessage: 'An error occurred',
         }),
       });
     }

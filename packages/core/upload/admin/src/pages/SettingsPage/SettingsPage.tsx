@@ -450,11 +450,11 @@ export const SettingsPage = () => {
                           checked={modifiedData?.responsiveDimensions}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
-                            defaultMessage: 'Off',
+                            defaultMessage: 'False',
                           })}
                           onLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.on-label',
-                            defaultMessage: 'On',
+                            defaultMessage: 'True',
                           })}
                           onChange={(e) => {
                             handleChange({
@@ -484,11 +484,11 @@ export const SettingsPage = () => {
                           checked={modifiedData?.sizeOptimization}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
-                            defaultMessage: 'Off',
+                            defaultMessage: 'False',
                           })}
                           onLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.on-label',
-                            defaultMessage: 'On',
+                            defaultMessage: 'True',
                           })}
                           onChange={(e) => {
                             handleChange({
@@ -518,11 +518,11 @@ export const SettingsPage = () => {
                           checked={modifiedData?.autoOrientation}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
-                            defaultMessage: 'Off',
+                            defaultMessage: 'False',
                           })}
                           onLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.on-label',
-                            defaultMessage: 'On',
+                            defaultMessage: 'True',
                           })}
                           onChange={(e) => {
                             handleChange({

@@ -8,7 +8,10 @@ Validates Strapi admin `react-intl` message descriptors against `en.json` and lo
 # Full validation (exit 1 on errors)
 yarn verify:translations
 
-# Backfill missing en.json keys from defaultMessage, then reorder/prune locale orphans
+# Sync en.json from defaultMessage (and align minority call-site defaults)
+yarn verify:translations --write-en
+
+# Backfill any remaining en.json gaps, then reorder/prune locale orphans
 yarn verify:translations --fix
 
 # Scope to one package
@@ -26,7 +29,7 @@ from that catalog removed. That keeps translator work for live message ids.
 | Static / finite-enum keys used in code exist in the correct `en.json`            | error    |
 | Cross-package `core/admin` keys referenced from plugins                          | error    |
 | Locale keys exist in `en.json` and follow its relative order                     | error    |
-| `defaultMessage` matches `en.json` (whitespace-normalized)                       | warning  |
+| `defaultMessage` matches `en.json` (whitespace-normalized)                       | error    |
 | Yup/schema `error.*` / `validation.*` string literals exist in package `en.json` | error    |
 | `notification.*` validation strings exist in `core/admin` `en.json`              | error    |
 
@@ -45,7 +48,8 @@ Admin message namespaces (`global.`, `Settings.`, …) are derived from `core/ad
 - `reorder-admin-translation-files.js` — replaced by `yarn verify:translations --fix`
 - `add-missing-keys-to-other-language.js` — kept for explicit translator workflows
 
-## Follow-ups
+## Notes
 
-- Optional: overwrite/sync existing `en.json` values from `defaultMessage` and align call sites (`--write-en`)
-- Optional: promote remaining `default-message-drift` warnings to errors once catalogs are aligned
+- `--write-en` fills gaps and, by default, **preserves existing `en.json`** values; pass `--sync-existing` to overwrite catalogs from code.
+- After `--write-en`, minority call-site `defaultMessage`s are aligned to the catalog.
+- CI runs `yarn verify:translations` (no write flags).

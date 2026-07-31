@@ -39,7 +39,7 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
         <IconButton
           label={formatMessage({
             id: 'components.ViewSettings.tooltip',
-            defaultMessage: 'View Settings',
+            defaultMessage: 'View settings',
           })}
         >
           <Cog />

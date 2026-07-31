@@ -498,7 +498,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 {
                   label: formatMessage({
                     id: 'Auth.form.firstname.label',
-                    defaultMessage: 'Firstname',
+                    defaultMessage: 'First name',
                   }),
                   name: 'firstname',
                   required: true,
@@ -508,7 +508,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 {
                   label: formatMessage({
                     id: 'Auth.form.lastname.label',
-                    defaultMessage: 'Lastname',
+                    defaultMessage: 'Last name',
                   }),
                   name: 'lastname',
                   size: 6,

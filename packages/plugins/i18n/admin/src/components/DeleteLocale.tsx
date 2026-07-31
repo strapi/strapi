@@ -48,7 +48,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'An error occurred, please try again',
+          defaultMessage: 'An error occurred',
         }),
       });
     }

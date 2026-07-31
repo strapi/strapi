@@ -85,7 +85,7 @@ export const TableList = ({
             <Checkbox
               aria-label={formatMessage({
                 id: getTrad('bulk.select.label'),
-                defaultMessage: 'Select all folders & assets',
+                defaultMessage: 'Select all assets',
               })}
               disabled={shouldDisableBulkSelect}
               onCheckedChange={(checked) => onSelectAll(checked, rows)}

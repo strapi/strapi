@@ -306,7 +306,7 @@ const Stage = ({
                             >
                               {formatMessage({
                                 id: 'Settings.review-workflows.stage.delete',
-                                defaultMessage: 'Delete',
+                                defaultMessage: 'Duplicate stage',
                               })}
                             </Menu.Item>
                           )}
