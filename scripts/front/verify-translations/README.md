@@ -47,6 +47,6 @@ Plugin authors are unaffected: `getTrad(id: string)` remains valid. Generated ty
 
 ## Follow-ups
 
-- CI gate (`yarn verify:translations` in `.github/workflows/tests.yml`)
+- Locale hygiene (`yarn verify:translations --fix`) and burn-down of remaining validation debt
+- CI gate (`yarn verify:translations` in `.github/workflows/tests.yml`) once debt is burned down
 - Optional: generate `en.json` from `defaultMessage` in source (Alternative A)
-- Burn down remaining `missing-en-key` debt (legacy id / `en.json` mismatches, especially review-workflows)
