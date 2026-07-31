@@ -29,7 +29,8 @@ type CustomFieldUID = Utils.String.Suffix<
 export interface CustomFieldOptionInputRegistry {}
 
 /**
- * Augment with custom option field names (typically `options.*` paths).
+ * Augment with custom option field names. Keys must be `options.*` paths so they
+ * nest under the attribute `options` object (root-level names stay on the built-in allowlist).
  *
  * @example
  * ```ts
@@ -74,7 +75,7 @@ export type CustomFieldOptionInput =
 
 export type CustomFieldOptionName =
   | BuiltInCustomFieldOptionName
-  | (keyof CustomFieldOptionNameRegistry & string);
+  | (keyof CustomFieldOptionNameRegistry & `options.${string}`);
 
 export interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
@@ -243,7 +244,8 @@ const optionsValidationReducer = (
   } else {
     acc.push({
       isValidOptionPath:
-        option.name.startsWith('options') || ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name),
+        option.name.startsWith('options') ||
+        ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name as BuiltInCustomFieldOptionName),
       errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
   }
