@@ -88,7 +88,9 @@ describe('RenameMigrationModal helpers', () => {
       // Accept only the second article hop; refuse the first and the component hop.
       applyRenameDecisions(requestData, new Set(['api::article.article:1']));
 
-      expect(requestData.contentTypes[0].renames).toEqual([{ oldName: 'body', newName: 'content' }]);
+      expect(requestData.contentTypes[0].renames).toEqual([
+        { oldName: 'body', newName: 'content' },
+      ]);
       // Component had its only hop refused -> renames removed entirely.
       expect('renames' in requestData.components[0]).toBe(false);
     });
