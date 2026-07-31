@@ -47,9 +47,7 @@ const FOLDERS_LABELS: Record<FoldersPosition, MessageDescriptor> = {
 
 // Stretch to the toolbar row height so the trigger matches the view toggle
 // (the parent Flex uses alignItems="stretch").
-const SortTrigger = styled(Menu.Trigger)`
-  height: auto;
-`;
+const SortTrigger = styled(Menu.Trigger)``;
 
 // Full-width section band, like the design mock (sits inside the Menu.Content
 // padding, so the band stops short of the panel edges).
@@ -99,7 +97,7 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
 
   return (
     <Menu.Root>
-      <SortTrigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
+      <SortTrigger variant="ghost" endIcon={<ChevronDown aria-hidden />}>
         {triggerLabel}
       </SortTrigger>
       {/* The DS default maxHeight (15rem) folds everything after the first

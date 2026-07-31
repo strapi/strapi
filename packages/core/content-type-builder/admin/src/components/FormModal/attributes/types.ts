@@ -161,7 +161,12 @@ export const attributeTypes = {
       enum: yup
         .array()
         .of(yup.string())
-        .min(1, errorsTrads.min.id)
+        /**
+         * CTB renders field errors as `formatMessage({ id: error })` with no values, so the
+         * message must not interpolate anything — the generic `errorsTrads.min` id would leak
+         * its `{min}` placeholder. See strapi/strapi#19030.
+         */
+        .min(1, getTrad('error.validation.enum-empty'))
         .test({
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
