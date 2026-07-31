@@ -57,8 +57,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.0",
-    "@strapi/icons": "2.2.0",
+    "@strapi/design-system": "2.2.3",
+    "@strapi/icons": "2.2.3",
     "ioredis": "5.4.2"
   },
   "devDependencies": {
@@ -68,9 +68,9 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.1.8",
+    "styled-components": "6.4.1",
     "tsconfig": "5.51.1",
-    "typescript": "5.4.4"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

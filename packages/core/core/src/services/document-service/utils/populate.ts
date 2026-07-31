@@ -15,7 +15,7 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}): Record<str
   const cacheKey = `${uid}::${JSON.stringify(opts)}`;
   const cached = memoryCacheSync.get(INTERNAL_CACHE_NS.DOCUMENT_DEEP_POPULATE, cacheKey);
   if (cached?.value !== undefined && cached.value !== null) {
-    return cached.value;
+    return cached.value as Record<string, unknown>;
   }
 
   const model = strapi.getModel(uid);
