@@ -181,7 +181,9 @@ const StringWithAvailabilityInput = React.forwardRef<
           </Flex>
         }
         onChange={field.onChange}
-        value={field.value ?? ''}
+        value={
+          typeof field.value === 'string' || typeof field.value === 'number' ? field.value : ''
+        }
         {...props}
         type="text"
       />

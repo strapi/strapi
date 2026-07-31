@@ -22,17 +22,17 @@ const generateUIDInputSchema = z.object({
   data: z.looseObject({}),
 });
 
-const createCheckUIDAvailabilityInputSchema = (regex?: string, options?: { skipRegex?: boolean }) => {
+const createCheckUIDAvailabilityInputSchema = (
+  regex?: string,
+  options?: { skipRegex?: boolean }
+) => {
   const pattern = regex ? new RegExp(regex) : /^[A-Za-z0-9-_.~]*$/;
   return z.object({
     contentTypeUID: z.string(),
     field: z.string(),
-    value: z.string().refine(
-      (value) => options?.skipRegex || value === '' || pattern.test(value),
-      {
-        error: `Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"`,
-      }
-    ),
+    value: z.string().refine((value) => options?.skipRegex || value === '' || pattern.test(value), {
+      error: `Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"`,
+    }),
     documentId: z.string().optional(),
   });
 };

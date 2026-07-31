@@ -37,6 +37,7 @@ export type FormModalData = Record<string, unknown> & {
   draftAndPublish?: boolean;
   enum?: string[];
   icon?: string;
+  indexed?: boolean;
   kind?: Struct.ContentTypeKind;
   multiple?: boolean;
   name?: string;
@@ -428,7 +429,7 @@ const slice = createSlice({
         dataToSet = { ...options, type: attributeType, default: null, indexed: false };
       }
 
-      state.modifiedData = dataToSet;
+      state.modifiedData = dataToSet as FormModalData;
     },
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
       const { payload } = action;

@@ -194,7 +194,7 @@ export const FormModal = () => {
   const syncContentTypeIndexesForAttribute = React.useCallback(
     (newAttributeName: string, oldAttributeName: string | undefined, indexed: boolean) => {
       if (!isIndexingEnabled || forTarget !== 'contentType') return;
-      const contentType = contentTypes[targetUid];
+      const contentType = contentTypes[targetUid as Internal.UID.ContentType];
       if (!contentType) return;
       const next = buildIndexesWithAttributeIndex(
         contentType.indexes as { type?: string; attributes?: string[] }[] | undefined,
@@ -335,8 +335,8 @@ export const FormModal = () => {
         const attributeToEditNotFormatted = findAttribute(
           get(type, ['attributes'], []),
           attributeName
-        ) as Record<string, any>;
-        const attributeToEdit: Record<string, any> = {
+        ) as Record<string, unknown>;
+        const attributeToEdit: Record<string, unknown> = {
           ...attributeToEditNotFormatted,
           name: attributeName,
         };
@@ -348,10 +348,9 @@ export const FormModal = () => {
           attributeToEdit?.name
         ) {
           attributeToEdit.indexed = resolveIndexed(
-            (contentTypes[targetUid] as ContentType)?.indexes as
-              | { attributes?: string[]; type?: string }[]
-              | undefined,
-            attributeToEdit.name
+            (contentTypes[targetUid as Internal.UID.ContentType] as ContentType | undefined)
+              ?.indexes as { attributes?: string[]; type?: string }[] | undefined,
+            String(attributeToEdit.name)
           );
         }
 
