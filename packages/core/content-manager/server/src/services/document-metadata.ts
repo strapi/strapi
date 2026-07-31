@@ -95,7 +95,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * The result is sorted with the default locale (as defined by the i18n plugin)
    * at index 0 when present. This is the canonical-source invariant relied on by
    * `useDocument.getInitialFormValues` in the admin: when creating a new locale
-   * draft, non-localized scalar/media values are inherited from
+   * draft, non-localized scalar/media/component values are inherited from
    * `availableLocales[0]`. Putting the default locale first means inheritance
    * stays predictable when sibling locales have drifted on non-localized fields
    * (which can happen because the server only syncs non-localized fields at
@@ -292,9 +292,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
 
-    // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
+    // Include non-translatable fields in availableLocales for i18n prefilling
+    // (scalars + media + components; relations/DZ stay server-filled on create).
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
+    let nonLocalizedComponentFields: string[] = [];
     try {
       const i18nPlugin = strapi.plugin('i18n');
       if (i18nPlugin) {
@@ -313,6 +315,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
             nonLocalizedMediaFields = allNonLocalized.filter(
               (field: string) => field in model.attributes && mediaAttrs.includes(field)
             );
+            nonLocalizedComponentFields = allNonLocalized.filter(
+              (field: string) =>
+                field in model.attributes && model.attributes[field]?.type === 'component'
+            );
           }
         }
       }
@@ -320,7 +326,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       // i18n plugin might not be enabled or might error, ignore silently
     }
 
-    // Build populate object for non-localized media fields
+    // Build populate object for non-localized media + component fields
     const mediaPopulate = nonLocalizedMediaFields.reduce(
       (acc, field) => {
         acc[field] = {
@@ -330,12 +336,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         };
         return acc;
       },
-      {} as Record<string, { populate: { folder: boolean } }>
+      {} as Record<string, { populate: { folder: boolean } } | true>
+    );
+
+    const componentPopulate = nonLocalizedComponentFields.reduce(
+      (acc, field) => {
+        acc[field] = true;
+        return acc;
+      },
+      {} as Record<string, true>
     );
 
     const params = {
       populate: {
         ...mediaPopulate,
+        ...componentPopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
       fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
