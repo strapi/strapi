@@ -1,14 +1,19 @@
 /* eslint-disable check-file/filename-naming-convention */
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
-import { Earth } from '@strapi/icons';
+import { Earth, Lock } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
+import type { I18nBaseQuery } from '../types';
+
 interface MutateEditViewArgs {
   layout: EditLayout;
+  query?: unknown;
 }
 
 type I18nLayoutOptions = EditLayout['options'] & {
@@ -20,7 +25,7 @@ type I18nLayoutOptions = EditLayout['options'] & {
 const hasI18nLayoutOptions = (options: EditLayout['options']): options is I18nLayoutOptions =>
   'i18n' in options && typeof options.i18n === 'object' && options.i18n !== null;
 
-const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs => {
+const mutateEditViewHook = ({ layout, query }: MutateEditViewArgs): MutateEditViewArgs => {
   // If i18n isn't explicitly enabled on the content type, then no field can be localized
   if (
     !('i18n' in layout.options) ||
@@ -29,7 +34,7 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
       'localized' in layout.options.i18n &&
       !layout.options.i18n.localized)
   ) {
-    return { layout };
+    return { layout, query };
   }
 
   const decorateField = (field: EditFieldLayout) => addLabelActionToField(field, layout);
@@ -53,7 +58,8 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
       components,
       layout: layout.layout.map((panel) => panel.map((row) => row.map(decorateField))),
     },
-  } satisfies Pick<MutateEditViewArgs, 'layout'>;
+    query,
+  } satisfies MutateEditViewArgs;
 };
 
 const isFieldLocalized = (attribute: EditFieldLayout['attribute'], layout: EditLayout) => {
@@ -75,18 +81,21 @@ const isFieldLocalized = (attribute: EditFieldLayout['attribute'], layout: EditL
 const addLabelActionToField = (field: EditFieldLayout, layout: EditLayout) => {
   const localized = isFieldLocalized(field.attribute, layout);
 
-  if (!localized) {
-    return field;
-  }
+  if (localized) {
+    const title: MessageDescriptor = {
+      id: getTranslation('Field.localized'),
+      defaultMessage: 'This value is unique for the selected locale',
+    };
 
-  const title: MessageDescriptor = {
-    id: getTranslation('Field.localized'),
-    defaultMessage: 'This value is unique for the selected locale',
-  };
+    return {
+      ...field,
+      labelAction: <LabelAction title={title} icon="earth" />,
+    };
+  }
 
   return {
     ...field,
-    labelAction: <LabelAction title={title} />,
+    labelAction: <NonLocalizedLabelAction />,
   };
 };
 
@@ -96,19 +105,44 @@ const addLabelActionToField = (field: EditFieldLayout, layout: EditLayout) => {
 
 interface LabelActionProps {
   title: MessageDescriptor;
+  icon?: 'earth' | 'lock';
 }
 
-const LabelAction = ({ title }: LabelActionProps) => {
+const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   const { formatMessage } = useIntl();
+  const Icon = icon === 'lock' ? Lock : Earth;
 
   return (
     <Span tag="span" title={title}>
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       <Tooltip label={formatMessage(title)}>
-        <Earth aria-hidden focusable={false} />
+        <Icon aria-hidden focusable={false} />
       </Tooltip>
     </Span>
   );
+};
+
+const NonLocalizedLabelAction = () => {
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { data: locales = [] } = useGetLocalesQuery();
+
+  const currentLocale = query?.plugins?.i18n?.locale;
+  const defaultLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.isDefault)?.code
+    : undefined;
+  const locked = Boolean(currentLocale && defaultLocale && currentLocale !== defaultLocale);
+
+  const title: MessageDescriptor = locked
+    ? {
+        id: getTranslation('Field.not-localized-locked'),
+        defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
+      }
+    : {
+        id: getTranslation('Field.not-localized'),
+        defaultMessage: 'This value is common to all locales',
+      };
+
+  return <LabelAction title={title} icon={locked ? 'lock' : 'earth'} />;
 };
 
 const Span = styled(Flex)`
@@ -124,4 +158,4 @@ const Span = styled(Flex)`
   }
 `;
 
-export { mutateEditViewHook };
+export { mutateEditViewHook, LabelAction };

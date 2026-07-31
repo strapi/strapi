@@ -147,7 +147,12 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
   for (const [field, value] of Object.entries(relatedEntryCopy)) {
-    if (isNil(entry[field])) {
+    // Empty arrays are the admin create-locale default for required repeatable
+    // components — treat them as unset so sibling data is inherited (#27182).
+    const isUnset =
+      isNil(entry[field]) || (Array.isArray(entry[field]) && entry[field].length === 0);
+
+    if (isUnset) {
       entry[field] = value;
     }
   }

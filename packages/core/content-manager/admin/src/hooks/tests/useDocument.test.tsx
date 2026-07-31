@@ -597,7 +597,7 @@ describe('useDocument · getInitialFormValues · i18n non-localized inheritance'
     expect(result.current.getInitialFormValues(true)).toEqual({});
   });
 
-  it('does not inherit non-localized component, dynamiczone, or relation fields (these are outside server availableLocales scope)', async () => {
+  it('inherits non-localized component fields from availableLocales (relations and dynamiczones stay excluded)', async () => {
     mockSchema({
       slug: { type: 'string', ...nonLocalized },
       cta: {
@@ -637,9 +637,12 @@ describe('useDocument · getInitialFormValues · i18n non-localized inheritance'
 
     const initial = result.current.getInitialFormValues(true) ?? {};
 
-    // Only non-localized scalar fields should be inherited. Component, dynamiczone,
-    // and relation values are not included, since they are not populated by the server in meta.availableLocales.
-    expect(initial).toEqual({ slug: 'inherited-slug' });
+    // Scalars and components are inherited from availableLocales. Dynamiczone and
+    // relation values are not included in that payload.
+    expect(initial).toEqual({
+      slug: 'inherited-slug',
+      cta: { label: 'Click me' },
+    });
   });
 });
 

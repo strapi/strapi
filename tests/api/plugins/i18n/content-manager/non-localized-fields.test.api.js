@@ -551,5 +551,84 @@ describe('i18n', () => {
         });
       });
     });
+
+    /**
+     * Regression for https://github.com/strapi/strapi/issues/27182
+     *
+     * Admin create-locale forms initialize required repeatable non-localized
+     * components as `[]` (see createDefaultForm) and do not inherit sibling
+     * component values into availableLocales / getInitialFormValues.
+     * useDocument comments claim the server fills those at save via
+     * copyNonLocalizedFields — but fillNonLocalizedAttributes only copies when
+     * the incoming value is nil, and `[]` is not nil. Saving the empty array
+     * then syncs it to every locale and wipes the default locale's data.
+     */
+    describe('Creating a locale with empty non-localized repeatable component (GH#27182)', () => {
+      test('preserves default-locale component data when the new locale is saved with an empty array', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'GH27182 default',
+          nonLocalizedRepeatableCompo: [{ name: 'keep-me' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        // Simulate the admin EditView payload when opening a missing locale:
+        // required repeatable non-localized components default to [].
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'GH27182 french',
+          nonLocalizedRepeatableCompo: [],
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: {
+            documentId: docId,
+            publishedAt: null,
+            locale: 'en',
+          },
+          populate: ['nonLocalizedRepeatableCompo'],
+        });
+
+        expect(enEntry.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'keep-me' }),
+        ]);
+      });
+
+      test('copies sibling component data when the new-locale payload omits the non-localized component', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'GH27182 omit default',
+          nonLocalizedRepeatableCompo: [{ name: 'from-sibling' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'GH27182 omit french',
+          // intentionally omit nonLocalizedRepeatableCompo
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        expect(frRes.body.data.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'from-sibling' }),
+        ]);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: {
+            documentId: docId,
+            publishedAt: null,
+            locale: 'en',
+          },
+          populate: ['nonLocalizedRepeatableCompo'],
+        });
+
+        expect(enEntry.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'from-sibling' }),
+        ]);
+      });
+    });
   });
 });

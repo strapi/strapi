@@ -405,6 +405,44 @@ describe('content-types service', () => {
         le: {},
       });
     });
+
+    it('fills empty arrays from the related entry (admin create-locale defaults)', () => {
+      const entry = {
+        name: 'fr',
+        variants: [],
+      };
+      const relatedEntry = {
+        name: 'en',
+        variants: [{ name: 'keep-me' }],
+      };
+      const componentModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          name: { pluginOptions: { i18n: { localized: true } } },
+          variants: {
+            type: 'component',
+            component: 'default.variant',
+            repeatable: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      const getModel = jest.fn(() => modelDef);
+      global.strapi = {
+        getModel,
+        components: { 'default.variant': componentModel },
+      } as any;
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.variants).toEqual([{ name: 'keep-me' }]);
+      expect(entry.name).toBe('fr');
+    });
   });
 
   describe('getNestedPopulateOfNonLocalizedAttributes', () => {

@@ -1,0 +1,120 @@
+import { renderHook } from '@testing-library/react';
+
+import { useIsEditingDefaultLocale, useShouldLockNonLocalizedField } from '../useI18nFieldLock';
+
+const mockUseQueryParams = jest.fn(() => [{ query: {} }]);
+const mockUseDocumentContext = jest.fn();
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useQueryParams: () => mockUseQueryParams(),
+}));
+
+jest.mock('../useDocumentContext', () => ({
+  useDocumentContext: () => mockUseDocumentContext(),
+}));
+
+describe('useI18nFieldLock', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseQueryParams.mockReturnValue([{ query: {} }]);
+    mockUseDocumentContext.mockReturnValue({
+      currentDocument: {
+        schema: { pluginOptions: { i18n: { localized: true } } },
+        document: { locale: 'en' },
+        meta: { availableLocales: [{ locale: 'en' }] },
+      },
+    });
+  });
+
+  describe('useIsEditingDefaultLocale', () => {
+    it('returns true when the content type is not localized', () => {
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: {} },
+          document: {},
+          meta: {},
+        },
+      });
+
+      const { result } = renderHook(() => useIsEditingDefaultLocale());
+      expect(result.current).toBe(true);
+    });
+
+    it('returns false when the active locale is not the default', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }, { locale: 'fr' }] },
+        },
+      });
+
+      const { result } = renderHook(() => useIsEditingDefaultLocale());
+      expect(result.current).toBe(false);
+    });
+  });
+
+  describe('useShouldLockNonLocalizedField', () => {
+    it('locks a non-localized root field on a secondary locale', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'component',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(true);
+    });
+
+    it('does not lock localized fields', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'string',
+          pluginOptions: { i18n: { localized: true } },
+        })
+      );
+
+      expect(result.current).toBe(false);
+    });
+
+    it('does not lock nested component fields (parent handles disable)', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField(
+          { type: 'string', pluginOptions: { i18n: { localized: false } } },
+          { isInsideComponent: true }
+        )
+      );
+
+      expect(result.current).toBe(false);
+    });
+  });
+});
