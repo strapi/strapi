@@ -45,7 +45,7 @@ describe('Settings', () => {
           responsiveDimensions: true,
           aiMetadata: true,
           // Read-only echo of the app config, defaulting to 1 (sequential).
-          concurrentUploadSize: 1,
+          concurrentUploadRequests: 1,
         },
       });
     });
@@ -78,7 +78,7 @@ describe('Settings', () => {
           sizeOptimization: true,
           responsiveDimensions: true,
           // Read-only echo of the app config, appended to every GET response.
-          concurrentUploadSize: 1,
+          concurrentUploadRequests: 1,
         },
       });
     });
