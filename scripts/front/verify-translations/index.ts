@@ -3,7 +3,7 @@ import { discoverBundles, repoRoot } from './bundles';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
 import { readJsonRecord } from './bundles';
-import { backfillMissingEnKeys } from './write-en';
+import { backfillMissingEnKeys } from './backfill-en';
 
 const parseArgs = (): VerifyOptions => {
   const args = process.argv.slice(2);

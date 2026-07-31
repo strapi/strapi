@@ -69,7 +69,7 @@ const writeAddedKeys = (
 /**
  * Close en.json gaps that `--fix` would otherwise prune from locales: add keys used in
  * code (with a defaultMessage) that are missing from the owning en.json. Does not update
- * existing values — full sync / drift fix belongs to `--write-en`.
+ * existing values (add-only).
  */
 export const backfillMissingEnKeys = (
   bundles: TranslationBundle[],

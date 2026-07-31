@@ -46,6 +46,6 @@ Extractions are classified automatically:
 
 ## Follow-ups
 
-- Locale hygiene (`yarn verify:translations --fix`) and burn-down of remaining validation debt
-- CI gate (`yarn verify:translations` in `.github/workflows/tests.yml`) once debt is burned down
-- Optional: full `en.json` sync from `defaultMessage` / align call-site drift (`--write-en`)
+- Run locale hygiene repo-wide and burn down remaining validation debt
+- Wire `yarn verify:translations` into CI once debt is burned down
+- Optional later: overwrite/sync existing `en.json` values from `defaultMessage` and align call sites

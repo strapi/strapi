@@ -9,7 +9,7 @@ import { readJsonRecord } from '../bundles';
 import { resolveIdExpression } from '../extract';
 import { expandTemplateToJsonKeys, isAdminMessageId, resolveMessageId } from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
-import { backfillMissingEnKeys } from '../write-en';
+import { backfillMissingEnKeys } from '../backfill-en';
 import type { TranslationBundle } from '../types';
 
 describe('patterns', () => {
