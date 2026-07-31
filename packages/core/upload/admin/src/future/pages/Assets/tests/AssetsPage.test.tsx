@@ -440,4 +440,33 @@ describe('AssetsPage search', () => {
       expect(screen.queryByText(/Search results for/)).not.toBeInTheDocument();
     });
   });
+
+  describe('bulk move from a global search', () => {
+    it('validates the destinations against the hit\u2019s real parent, not the open folder', async () => {
+      // "B" lives under "A", but the search ran from the root. Deriving the
+      // location from `?folder=` would hide Media Library (reported as already
+      // at root) and offer A, which is the one no-op destination.
+      respondWithAssets([]);
+      server.use(
+        http.get('*/upload/folders', () =>
+          HttpResponse.json({ data: [{ ...createFolder(3, 'B'), parent: { id: 4, name: 'A' } }] })
+        ),
+        http.get('*/upload/folder-structure', () =>
+          HttpResponse.json({
+            data: [{ id: 4, name: 'A', children: [{ id: 3, name: 'B', children: [] }] }],
+          })
+        )
+      );
+
+      const { user } = renderPage('?_q=B');
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select B' }));
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      await user.click(await screen.findByRole('combobox'));
+
+      expect(await screen.findByRole('option', { name: 'Media Library' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
+    });
+  });
 });

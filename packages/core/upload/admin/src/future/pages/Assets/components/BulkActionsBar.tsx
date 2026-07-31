@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
+import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -49,7 +50,16 @@ const VerticalDivider = styled(Box)`
   margin-left: ${({ theme }) => theme.spaces[1]};
 `;
 
-export const BulkActionsBar = () => {
+interface BulkActionsBarProps {
+  /**
+   * Real location of every loaded row, so the move dialog validates each
+   * selected item against its own parent. Defaults to a lookup that misses
+   * everything, which falls back to the folder currently open.
+   */
+  locations?: ItemLocations;
+}
+
+export const BulkActionsBar = ({ locations = emptyItemLocations }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
@@ -63,12 +73,10 @@ export const BulkActionsBar = () => {
 
   const count = selectedIds.size + selectedFolderIds.size;
 
-  // The selection is page-scoped, so every selected item lives in the folder
-  // currently open. Stable identity: the move dialog memoizes its destination
-  // walk on it.
+  // Stable identity: the move dialog memoizes its destination walk on it.
   const moveItems = useMemo(
-    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, currentFolderId),
-    [selectedIds, selectedFolderIds, currentFolderId]
+    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, locations, currentFolderId),
+    [selectedIds, selectedFolderIds, locations, currentFolderId]
   );
 
   const showStubNotification = (translationKey: string, defaultMessage: string) => {

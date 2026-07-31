@@ -24,6 +24,7 @@ import { styled } from 'styled-components';
 
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
+import { buildItemLocations } from '../../utils/itemLocations';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -377,6 +378,11 @@ export const AssetsPage = () => {
     [builtFilters.showFolders, fetchedFolders]
   );
 
+  // Both move affordances (drag and the bulk bar) resolve each item's parent
+  // from the rows on screen — while searching, results are global and the
+  // folder currently open says nothing about where an item lives.
+  const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
+
   const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
 
   const searchResultsTitle = formatMessage(
@@ -624,7 +630,7 @@ export const AssetsPage = () => {
                 </Layouts.Content>
               </Layouts.Root>
             </Box>
-            <BulkActionsBar />
+            <BulkActionsBar locations={itemLocations} />
           </AssetsDndProvider>
         </AssetSelectionProvider>
       </UploadDropZoneProvider>
