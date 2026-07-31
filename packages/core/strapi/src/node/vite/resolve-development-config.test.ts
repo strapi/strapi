@@ -19,6 +19,9 @@ jest.mock('@vitejs/plugin-react-swc', () => ({
 }));
 
 jest.mock('../core/resolve-module', () => ({
+  ...jest.requireActual('../core/resolve-module'),
+  // Override only getModulePath so path-browserify aliases stay deterministic (#26541).
+  // Keep getModulePathFrom real so CodeMirror singleton resolve/include stays in lockstep.
   getModulePath: jest.fn((mod: string) => `/mock/${mod}`),
 }));
 
@@ -30,7 +33,10 @@ jest.mock('../core/monorepo', () => ({
   loadStrapiMonorepo: jest.fn(async () => undefined),
 }));
 
-const createCtx = (httpServer = http.createServer(), options: Record<string, unknown> = { open: false }) =>
+const createCtx = (
+  httpServer = http.createServer(),
+  options: Record<string, unknown> = { open: false }
+) =>
   ({
     cwd: process.cwd(),
     target: ['last 3 major versions'],
