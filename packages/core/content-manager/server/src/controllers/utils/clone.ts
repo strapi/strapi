@@ -1,4 +1,4 @@
-import { set } from 'lodash/fp';
+import { get, set } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import { ProhibitedCloningField } from '../../../../shared/contracts/collection-types';
 
@@ -104,10 +104,20 @@ const excludeNotCreatableFields =
         }
         // Go deeper into the component
         case 'component': {
-          return excludeNotCreatableFields(attribute.component, permissionChecker)(body, [
-            ...path,
-            attributeName,
-          ] as any);
+          const componentPath = [...path, attributeName];
+
+          // Only descend when the component is actually present in the payload.
+          // Otherwise `set` below would synthesize an empty component object
+          // (e.g. `{ metadata: { label: null } }`) and overwrite the source
+          // entry with null values on clone (GH#26998).
+          if (get(componentPath, body) == null) {
+            return body;
+          }
+
+          return excludeNotCreatableFields(attribute.component, permissionChecker)(
+            body,
+            componentPath as any
+          );
         }
         // Attribute should be null if the user can't create it
         default: {
