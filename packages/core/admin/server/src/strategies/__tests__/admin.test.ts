@@ -166,6 +166,7 @@ describe('Admin Auth Strategy', () => {
         }),
         expect.objectContaining({ provider: 'database', expiresAt: expect.any(Date) })
       );
+      expect(ctx.state.session).toEqual({ id: 'session-123' });
       expect(response).toStrictEqual({
         authenticated: true,
         credentials: user,

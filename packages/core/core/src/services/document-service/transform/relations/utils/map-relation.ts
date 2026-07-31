@@ -140,6 +140,11 @@ const traverseEntityRelations = async (
         return;
       }
 
+      // morphToOne uses morphColumn (inline columns on the entity), handled directly in processData
+      if (attribute.relation === 'morphToOne') {
+        return;
+      }
+
       return visitor(options, utils);
     },
     options,

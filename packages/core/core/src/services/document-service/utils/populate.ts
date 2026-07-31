@@ -11,7 +11,7 @@ interface Options {
 }
 
 // We want to build a populate object based on the schema
-export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
+export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}): Record<string, unknown> => {
   const cacheKey = `${uid}::${JSON.stringify(opts)}`;
   const cached = memoryCacheSync.get(INTERNAL_CACHE_NS.DOCUMENT_DEEP_POPULATE, cacheKey);
   if (cached?.value !== undefined && cached.value !== null) {
@@ -24,19 +24,12 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
   const result = attributes.reduce((acc: any, [attributeName, attribute]) => {
     switch (attribute.type) {
       case 'relation': {
-        // TODO: Support polymorphic relations
-        const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
-        if (isMorphRelation) {
-          break;
-        }
-
         if ('unstable_virtual' in attribute && attribute.unstable_virtual) {
           // skip relations not managed by the DB layer
           break;
         }
 
-        // Include all non-morph relations (including visible: false) so publish / discardDraft /
-        // clone preserve links—same idea as content-manager getPopulateForRelation for invisible attrs.
+        // Include all relations except the onces not managed by the DB layer.
         acc[attributeName] = { select: opts.relationalFields };
 
         break;

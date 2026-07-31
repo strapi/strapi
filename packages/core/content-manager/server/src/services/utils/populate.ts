@@ -7,10 +7,14 @@ const {
   isVisibleAttribute,
   isScalarAttribute,
   getDoesAttributeRequireValidation,
+  isPrivateAttribute,
   hasDraftAndPublish,
 } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
+
+const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
+  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
 
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
@@ -83,7 +87,7 @@ function getPopulateForDZ(
   attribute: Schema.Attribute.DynamicZone,
   options: PopulateOptions,
   level: number
-) {
+): { on: { [key: string]: { populate: { [key: string]: boolean | object } } } } {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
     (acc: any, componentUID: UID.Component) => ({
@@ -161,7 +165,7 @@ const getDeepPopulate = (
     maxLevel = Infinity,
   }: PopulateOptions = {},
   level = 1
-) => {
+): { [key: string]: boolean | object } => {
   if (level > maxLevel) {
     return {};
   }
@@ -214,7 +218,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
     (populateAcc: any, [attributeName, attribute]) => {
       if (isScalarAttribute(attribute)) {
         // If the scalar attribute requires validation, add it to the fields array
-        if (getDoesAttributeRequireValidation(attribute)) {
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
           populateAcc.fields = populateAcc.fields || [];
           populateAcc.fields.push(attributeName);
         }
@@ -222,7 +229,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
       }
 
       if (isMedia(attribute)) {
-        if (getDoesAttributeRequireValidation(attribute)) {
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
           populateAcc.populate = populateAcc.populate || {};
           populateAcc.populate[attributeName] = {
             populate: {
@@ -291,7 +301,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  * @returns result.populate
  * @returns result.hasRelations
  */
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
   const cached = strapi.memoryCacheSync.get(INTERNAL_CACHE_NS.CM_DRAFT_COUNT_POPULATE, uid);
   if (cached?.value !== undefined && cached.value !== null) {
     return cached.value as { populate: any; hasRelations: boolean };
@@ -325,9 +335,21 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           break;
         }
 
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
+          // Draft entries link to draft rows of related documents. Populate documentId/locale
+          // so we can distinguish truly unpublished targets from published documents that
+          // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
+          const fields: string[] = ['documentId'];
+          if (isLocalizedContentType(targetModel)) {
+            fields.push('locale');
+          }
           populateAcc[attributeName] = {
-            count: true,
+            fields,
             filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
           };
           hasRelations = true;

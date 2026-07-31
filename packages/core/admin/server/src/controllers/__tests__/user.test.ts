@@ -322,6 +322,33 @@ describe('User Controller', () => {
       expect(sanitizeUser).toHaveBeenCalled();
       expect(ctx.body).toStrictEqual({ data: { ...user, ...body } });
     });
+
+    test('Lowercases email before uniqueness check and update', async () => {
+      const updateById = jest.fn((_, input) => ({ ...user, ...input }));
+      const exists = jest.fn(() => Promise.resolve(false));
+      const sanitizeUser = jest.fn((user) => user);
+      const body = { email: 'UPPER@EXAMPLE.COM' };
+      const ctx = createContext({ params: { id: user.id }, body }) as any;
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { exists, updateById, sanitizeUser },
+          },
+        },
+      } as any;
+
+      await userController.update(ctx);
+
+      expect(exists).toHaveBeenCalledWith({
+        id: { $ne: user.id },
+        email: 'upper@example.com',
+      });
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        email: 'upper@example.com',
+      });
+      expect(ctx.body).toStrictEqual({ data: { ...user, email: 'upper@example.com' } });
+    });
   });
 
   describe('Delete user', () => {

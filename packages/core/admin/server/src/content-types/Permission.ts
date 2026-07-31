@@ -57,6 +57,15 @@ export default {
       relation: 'manyToOne',
       inversedBy: 'permissions',
       target: 'admin::role',
+      required: false,
+    },
+    apiToken: {
+      configurable: false,
+      type: 'relation',
+      relation: 'manyToOne',
+      inversedBy: 'adminPermissions',
+      target: 'admin::api-token',
+      required: false,
     },
   },
 };

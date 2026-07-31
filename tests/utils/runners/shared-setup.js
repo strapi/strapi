@@ -45,6 +45,8 @@ const publishYalc = async (cwd) => {
 /**
  * Setup test apps - clean and generate
  */
+const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+
 const setupTestApps = async ({
   testAppDirectory,
   testAppPaths,
@@ -52,6 +54,8 @@ const setupTestApps = async ({
   setup,
   currentTestApps,
   setupTestEnvironment,
+  // When true (e2e), create one git commit per generated app as the `resetFiles` save point.
+  commitE2eBaseline = false,
 }) => {
   /**
    * If we don't have enough test apps, we make enough.
@@ -103,6 +107,27 @@ const setupTestApps = async ({
         }
       })
     );
+
+    if (commitE2eBaseline) {
+      for (const appPath of testAppPaths) {
+        await execa('git', [...gitUser, 'init'], {
+          stdio: 'inherit',
+          cwd: appPath,
+        });
+        await execa('git', [...gitUser, 'add', '-A', '.'], {
+          stdio: 'inherit',
+          cwd: appPath,
+        });
+        await execa(
+          'git',
+          [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'e2e test app baseline'],
+          {
+            stdio: 'inherit',
+            cwd: appPath,
+          }
+        );
+      }
+    }
 
     return true;
   }

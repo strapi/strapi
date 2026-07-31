@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import type { Core } from '@strapi/types';
+import { registerOpenAPIRoute } from './openapi';
 
 const createRouteScopeGenerator = (namespace: string) => (route: Core.RouteInput) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
@@ -22,6 +23,7 @@ export default (strapi: Core.Strapi) => {
   registerAdminRoutes(strapi);
   registerAPIRoutes(strapi);
   registerPluginRoutes(strapi);
+  registerOpenAPIRoute(strapi);
 };
 
 /**

@@ -25,10 +25,7 @@
   "Settings.locales.modal.advanced.setAsDefault.hint": "Se requiere una configuración regional predeterminada, cámbiela seleccionando otra",
   "Settings.locales.modal.advanced.settings": "Ajustes",
   "Settings.locales.modal.base": "Configuraciones base",
-  "Settings.locales.modal.create.alreadyExist": "Esta configuración regional ya existe",
-  "Settings.locales.modal.create.defaultLocales.loading": "Cargando las configuraciones regionales disponibles ...",
   "Settings.locales.modal.create.success": "Configuración regional agregada correctamente",
-  "Settings.locales.modal.create.tab.label": "Navegación entre la configuración básica de I18N y la configuración avanzada",
   "Settings.locales.modal.delete.confirm": "Si, borrar",
   "Settings.locales.modal.delete.message": "Eliminar esta configuración regional eliminará todo el contenido asociado. Si desea conservar algún contenido, asegúrese de reasignarlo primero a otra configuración regional.",
   "Settings.locales.modal.delete.secondMessage": "¿Quieres eliminar esta configuración regional?",
@@ -38,10 +35,7 @@
   "Settings.locales.modal.edit.success": "Configuración regional editada correctamente",
   "Settings.locales.modal.edit.tab.label": "Navegación entre la configuración básica de I18N y la configuración avanzada",
   "Settings.locales.modal.create.name.label": "Nombre para la configuración regional",
-  "Settings.locales.modal.create.name.label.description": "La configuración regional se mostrará con este nombre en el panel de administración.",
-  "Settings.locales.modal.create.name.label.error": "El nombre de la configuración regional debe tener menos de 50 caracteres.",
   "Settings.locales.modal.locales.label": "Configuraciones regionales",
-  "Settings.locales.modal.locales.loaded": "Las configuraciones regionales se han cargado correctamente.",
   "Settings.locales.modal.title": "Configuraciones",
   "Settings.locales.row.default-locale": "Configuración regional predeterminada",
   "Settings.locales.row.displayName": "Nombre",
@@ -79,5 +73,6 @@
   "Settings.locales.modal.create.code.error": "Por favor selecciona una localización",
   "Settings.locales.modal.create.name.description": "La localización se mostrará con ese nombre en el panel de administración",
   "Settings.locales.modal.create.name.error.min": "El nombre de la localización sólo puede tener menos de 50 caracteres.",
-  "Settings.locales.modal.create.name.error.required": "Asigna un nombre a la localización"
+  "Settings.locales.modal.create.name.error.required": "Asigna un nombre a la localización",
+  "list-view.table.header.label": "Disponible en"
 }

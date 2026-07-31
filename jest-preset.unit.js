@@ -11,7 +11,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '.testdata.{js,ts}',
     '.test.utils.{js,ts}',
-    '.d.ts',
+    '\\.d\\.ts$',
     '__tests__/resources',
     'tests/resources',
     // Prevent Jest from running Vitest test files

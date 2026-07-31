@@ -18,7 +18,7 @@ const createTestTransferToken = async (strapi) => {
       name: 'TestToken',
       description: 'Transfer token used to seed the e2e database',
       lifespan: null,
-      permissions: ['push'],
+      permissions: ['push', 'pull'],
       accessKey: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
     });
   }

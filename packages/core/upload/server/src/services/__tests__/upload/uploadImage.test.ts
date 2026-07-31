@@ -1,3 +1,4 @@
+// _uploadImage with real sharp; responsive sequencing is in responsive-parallelism.test.ts.
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';

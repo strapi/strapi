@@ -61,6 +61,7 @@ const setCachedAdminAuth = async (sessionId: string, permissions: unknown, user:
   );
 };
 
+
 const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
   const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
 
@@ -107,6 +108,7 @@ export const authenticate = async (ctx: Context) => {
   if (cachedAuth) {
     ctx.state.userAbility = cachedAuth.ability;
     ctx.state.user = cachedAuth.user;
+    ctx.state.session = { id: result.payload.sessionId };
 
     return {
       authenticated: true,
@@ -139,7 +141,10 @@ export const authenticate = async (ctx: Context) => {
   ctx.state.userAbility = userAbility;
   ctx.state.user = user;
 
+
   await setCachedAdminAuth(result.payload.sessionId, permissions, user as AdminUser);
+  // Expose the session backing this request so endpoints can flag the "current" session.
+  ctx.state.session = { id: result.payload.sessionId };
 
   return {
     authenticated: true,

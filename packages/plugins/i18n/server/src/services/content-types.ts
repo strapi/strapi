@@ -72,9 +72,9 @@ const removeId = (value: any) => {
 
 const removeIds = (model: any) => (entry: any) => removeIdsMut(model, cloneDeep(entry));
 
-const removeIdsMut = (model: any, entry: any) => {
+const removeIdsMut = (model: any, entry: any): Record<string, any> => {
   if (isNil(entry)) {
-    return entry;
+    return entry as unknown as Record<string, any>;
   }
 
   removeId(entry);
@@ -150,7 +150,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
  * build the populate param to
  * @param {String} modelUID uid of the model, could be of a content-type or a component
  */
-const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
+const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
   const nonLocalizedAttributes = getNonLocalizedAttributes(schema);

@@ -20,7 +20,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return isContentTypeVisible(contentType);
     });
 
-    const countApiTokens = await getService('api-token').count();
+    const countApiTokens = await getService('api-token-admin').countAll();
     const countAdmins = await getService('user').count();
     const countLocales = (await strapi.plugin('i18n')?.service('locales')?.count()) ?? null;
     const countsAssets = await strapi.db.query('plugin::upload.file').count();

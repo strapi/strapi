@@ -6,7 +6,6 @@ import {
   useQueryParams,
   Table,
   useAPIErrorHandler,
-  FormErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
@@ -47,7 +46,7 @@ import { useGetSettingsQuery } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
-import { BulkLocaleActionModal } from './BulkLocaleActionModal';
+import { BulkLocaleActionModal, type LocaleValidationErrors } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
@@ -161,7 +160,6 @@ const LocalePickerAction = ({
   });
   const { data: settings } = useGetSettingsQuery();
   const isAiAvailable = useAIAvailability();
-  const setValues = useForm('LocalePickerAction', (state) => state.setValues);
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -181,56 +179,9 @@ const LocalePickerAction = ({
     [query.plugins, setQuery]
   );
 
-  const nonTranslatedFields = React.useMemo(() => {
-    if (!schema?.attributes) return [];
-    return Object.keys(schema.attributes).filter((field) => {
-      const attribute = schema.attributes[field] as Record<string, unknown>;
-      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
-    });
-  }, [schema?.attributes]);
-
-  const sourceLocaleData = React.useMemo(() => {
-    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
-
-    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
-    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
-
-    const sourceLocaleCode =
-      defaultLocale &&
-      existingLocales.includes(defaultLocale.code) &&
-      defaultLocale.code !== currentDesiredLocale
-        ? defaultLocale.code
-        : existingLocales.find((locale) => locale !== currentDesiredLocale);
-
-    if (!sourceLocaleCode) return null;
-
-    // Find the document data from availableLocales (now includes non-translatable fields)
-    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
-
-    return sourceLocaleDoc
-      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
-      : null;
-  }, [locales, meta?.availableLocales, currentDesiredLocale]);
-
-  /**
-   * Prefilling form with non-translatable fields from already existing locale
-   */
-  React.useEffect(() => {
-    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
-    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
-      const dataToSet = nonTranslatedFields.reduce(
-        (acc: Record<string, unknown>, field: string) => {
-          acc[field] = sourceLocaleData.data[field];
-          return acc;
-        },
-        {}
-      );
-
-      if (Object.keys(dataToSet).length > 0) {
-        setValues(dataToSet);
-      }
-    }
-  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
+  // Non-localized prefill is handled in `useDocument.getInitialFormValues`
+  // so inherited values persist in initial form state, even after form resets or re-initialization.
+  // Doing this here with setValues would not persist if the cache is reused.
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
@@ -796,7 +747,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
+  const [selectedRows, setSelectedRows] = React.useState<Array<LocaleStatus & { id: string }>>([]);
   const [isDraftRelationConfirmationOpen, setIsDraftRelationConfirmationOpen] =
     React.useState<boolean>(false);
 
@@ -846,7 +797,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
 
   // Extract the rows for the bulk locale publish modal and any validation
   // errors per locale
-  const [rows, validationErrors] = React.useMemo(() => {
+  const [rows, validationErrors] = React.useMemo<[LocaleStatus[], LocaleValidationErrors]>(() => {
     if (!document) {
       return [[], {}];
     }
@@ -907,7 +858,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     // Validate the current document locale only. Other locales have minimal
     // data populated for performance reasons and will be validated server-side
     // during the actual bulk publish operation.
-    const errors: FormErrors = {};
+    const errors: LocaleValidationErrors = {};
     if (document.locale) {
       const validation = validate(document as Modules.Documents.AnyDocument);
       if (validation !== null) {

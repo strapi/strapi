@@ -37,7 +37,7 @@ describe('Given I have some relations in the database', () => {
       orderer.connect([{ id: 4, position: { start: true } }]);
 
       expect(orderer.get()).toMatchObject([
-        { id: 4, order: 0.5 },
+        { id: 4, order: 3.5 },
         { id: 2, order: 4 },
         { id: 3, order: 10 },
       ]);
@@ -62,8 +62,8 @@ describe('Given I have some relations in the database', () => {
 
       expect(orderer.get()).toMatchObject([
         { id: 2, order: 4 },
-        { id: 5, order: 9.5 },
-        { id: 4, order: 9.5 },
+        { id: 5, order: 7 },
+        { id: 4, order: 7 },
         { id: 3, order: 10 },
       ]);
     });
@@ -89,7 +89,7 @@ describe('Given I have some relations in the database', () => {
 
       expect(orderer.get()).toMatchObject([
         { id: 5, order: 0.5 },
-        { id: 1, order: 1.5 },
+        { id: 1, order: 1.25 },
         { id: 3, order: 3 },
         { id: 2, order: 3.5 },
       ]);
@@ -138,6 +138,70 @@ describe('Given I have some relations in the database', () => {
         { id: 4, order: 0.5 },
         { id: 3, order: 1 },
         { id: 5, order: 1.5 },
+      ]);
+    });
+  });
+
+  describe('When the list starts at order 0', () => {
+    test('Then order 0 is preserved and a start connect is placed before it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 0 },
+          { id: 2, order: 5 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 3, position: { start: true } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 3, order: -0.5 },
+        { id: 1, order: 0 },
+        { id: 2, order: 5 },
+      ]);
+    });
+  });
+
+  describe('When I reorder an item to the top of a list whose minimum order is fractional', () => {
+    test('Then it is persisted with an order strictly below the current minimum', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 0.5 },
+          { id: 2, order: 2 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 3, position: { start: true } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 3, order: 0 },
+        { id: 1, order: 0.5 },
+        { id: 2, order: 2 },
+      ]);
+      expect(orderer.getOrderMap()[3]).toBeLessThan(0.5);
+    });
+  });
+
+  describe('When you connect a relation after one whose neighbour shares its order', () => {
+    test('Then it is placed strictly after the target', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 2, order: null },
+          { id: 3, order: null },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { after: 2 } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 2, order: 1 },
+        { id: 4, order: 1.5 },
+        { id: 3, order: 1 },
       ]);
     });
   });

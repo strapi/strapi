@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { PermissionMap } from './types/permissions';
-import { getCookieValue, setCookie, deleteCookie } from './utils/cookies';
+import { AUTH_COOKIE_NAME, getCookieValue, setCookie, deleteCookie } from './utils/cookies';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
@@ -34,7 +34,7 @@ export const getStoredToken = (): string | null => {
     return JSON.parse(fromLocalStorage);
   }
 
-  const fromCookie = getCookieValue(STORAGE_KEYS.TOKEN);
+  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
   return fromCookie ?? null;
 };
 
@@ -75,7 +75,7 @@ const adminSlice = createSlice({
       const { token, persist } = action.payload;
 
       if (!persist) {
-        setCookie(STORAGE_KEYS.TOKEN, token);
+        setCookie(AUTH_COOKIE_NAME, token);
       } else {
         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       }
@@ -84,7 +84,7 @@ const adminSlice = createSlice({
     },
     logout(state) {
       state.token = null;
-      deleteCookie(STORAGE_KEYS.TOKEN);
+      deleteCookie(AUTH_COOKIE_NAME);
       window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
       window.localStorage.removeItem(STORAGE_KEYS.STATUS);
     },

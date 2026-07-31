@@ -1,5 +1,6 @@
 import { Form } from '@strapi/admin/strapi-admin';
-import { render as renderRTL, waitFor, act, screen } from '@tests/utils';
+import { render as renderRTL, waitFor, act, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { UIDInput, UIDInputProps } from '../UID';
@@ -35,6 +36,12 @@ const render = ({
   });
 
 describe('UIDInput', () => {
+  // If a previous test throws before `jest.useRealTimers()`, fake timers leak into
+  // the next test and break msw v2's interceptor.
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('renders', async () => {
     render({
       hint: 'hint',
@@ -72,7 +79,11 @@ describe('UIDInput', () => {
   });
 
   test('Regenerates the value based on the target field', async () => {
-    jest.useFakeTimers();
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
     const { user } = render({ initialValues: { name: 'foo' } });
     await waitForInput();
 
@@ -121,7 +132,11 @@ describe('UIDInput', () => {
     expect(screen.queryByText('Available')).not.toBeInTheDocument();
     expect(screen.queryByText('Unvailable')).not.toBeInTheDocument();
 
-    jest.useFakeTimers();
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'not-taken');
@@ -140,6 +155,45 @@ describe('UIDInput', () => {
       jest.advanceTimersByTime(4000);
     });
     expect(await screen.findByText(/^Unavailable$/)).toBeInTheDocument();
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test('Does not check availability when a changed value is cleared', async () => {
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    let availabilityChecks = 0;
+    server.use(
+      http.post('/content-manager/uid/check-availability', () => {
+        availabilityChecks += 1;
+
+        return HttpResponse.json({ isAvailable: false });
+      })
+    );
+
+    const { user } = render({
+      required: true,
+      initialValues: {
+        name: 'init',
+      },
+    });
+    await waitForInput();
+
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+    await Promise.resolve();
+
+    expect(availabilityChecks).toBe(0);
+    expect(screen.queryByText('Available')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
 
     jest.runOnlyPendingTimers();
     jest.useRealTimers();

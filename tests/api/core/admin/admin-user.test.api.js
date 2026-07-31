@@ -29,6 +29,7 @@ const omitRegistrationToken = omit(['registrationToken']);
  * 14. Updates a user (not found)
  * 15. Finds a user (not found)
  * 16. Finds a list of users (missing user)
+ * —   Concurrent role updates (join order gaps, regression #26131)
  */
 
 describe('Admin User CRUD (api)', () => {
@@ -395,5 +396,151 @@ describe('Admin User CRUD (api)', () => {
       results: expect.any(Array),
     });
     expect(res.body.data.results).toHaveLength(0);
+  });
+
+  describe('Concurrent admin user role updates (regression #26131)', () => {
+    const concurrencyData = {
+      users: [],
+      roles: [],
+      sharedRole: undefined,
+      keepRole: undefined,
+    };
+
+    const createAdminUser = async ({ email, roles }) => {
+      const res = await rq({
+        url: '/admin/users',
+        method: 'POST',
+        body: {
+          email,
+          firstname: 'concurrency',
+          lastname: 'test',
+          roles,
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      return res.body.data;
+    };
+
+    const updateAdminUserRoles = async (id, roles) => {
+      return rq({
+        url: `/admin/users/${id}`,
+        method: 'PUT',
+        body: { roles },
+      });
+    };
+
+    const getUserRolesJoinTable = () => {
+      return strapi.db.metadata.get('admin::user').attributes.roles.joinTable;
+    };
+
+    const forceGapInSharedRoleOrder = async () => {
+      const joinTable = getUserRolesJoinTable();
+      const { name, inverseJoinColumn, inverseOrderColumnName } = joinTable;
+
+      const rows = await strapi.db
+        .getConnection()
+        .from(name)
+        .select(['id', inverseOrderColumnName])
+        .where(inverseJoinColumn.name, concurrencyData.sharedRole.id)
+        .orderBy(inverseOrderColumnName, 'asc');
+
+      expect(rows).toHaveLength(2);
+
+      const firstOrder = Number(rows[0][inverseOrderColumnName]);
+      const secondOrder = Number(rows[1][inverseOrderColumnName]);
+
+      if (secondOrder !== firstOrder + 2) {
+        await strapi.db
+          .getConnection()
+          .from(name)
+          .where('id', rows[1].id)
+          .update({ [inverseOrderColumnName]: firstOrder + 2 });
+      }
+
+      const updatedRows = await strapi.db
+        .getConnection()
+        .from(name)
+        .select([inverseOrderColumnName])
+        .where(inverseJoinColumn.name, concurrencyData.sharedRole.id)
+        .orderBy(inverseOrderColumnName, 'asc');
+
+      const updatedOrders = updatedRows.map((row) => Number(row[inverseOrderColumnName]));
+      expect(updatedOrders).toEqual([firstOrder, firstOrder + 2]);
+    };
+
+    beforeAll(async () => {
+      const timestamp = Date.now();
+      concurrencyData.sharedRole = await utils.createRole({
+        name: `concurrency-shared-role-${timestamp}`,
+        description: 'Role shared by users in concurrent update test',
+      });
+      concurrencyData.keepRole = await utils.createRole({
+        name: `concurrency-keep-role-${timestamp}`,
+        description: 'Role that keeps users assigned while shared role is removed',
+      });
+      concurrencyData.roles.push(concurrencyData.sharedRole, concurrencyData.keepRole);
+
+      const userA = await createAdminUser({
+        email: `concurrency-user-a-${timestamp}@strapi.io`,
+        roles: [concurrencyData.sharedRole.id, concurrencyData.keepRole.id],
+      });
+      const userB = await createAdminUser({
+        email: `concurrency-user-b-${timestamp}@strapi.io`,
+        roles: [concurrencyData.sharedRole.id, concurrencyData.keepRole.id],
+      });
+
+      concurrencyData.users.push(userA, userB);
+    });
+
+    afterAll(async () => {
+      if (concurrencyData.users.length > 0) {
+        await utils.deleteUsersById(concurrencyData.users.map((user) => user.id));
+      }
+
+      if (concurrencyData.roles.length > 0) {
+        await utils.deleteRolesById(concurrencyData.roles.map((role) => role.id));
+      }
+    });
+
+    test('concurrent role removals succeed when join order has gaps', async () => {
+      const [userA, userB] = concurrencyData.users;
+
+      const removeSharedRes = await updateAdminUserRoles(userB.id, [concurrencyData.keepRole.id]);
+      expect(removeSharedRes.statusCode).toBe(200);
+
+      const addSharedBackRes = await updateAdminUserRoles(userB.id, [
+        concurrencyData.sharedRole.id,
+        concurrencyData.keepRole.id,
+      ]);
+      expect(addSharedBackRes.statusCode).toBe(200);
+      await forceGapInSharedRoleOrder();
+
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const [removeARes, removeBRes] = await Promise.all([
+          updateAdminUserRoles(userA.id, [concurrencyData.keepRole.id]),
+          updateAdminUserRoles(userB.id, [concurrencyData.keepRole.id]),
+        ]);
+
+        expect(removeARes.statusCode).toBe(200);
+        expect(removeBRes.statusCode).toBe(200);
+
+        const [addARes, addBRes] = await Promise.all([
+          updateAdminUserRoles(userA.id, [
+            concurrencyData.sharedRole.id,
+            concurrencyData.keepRole.id,
+          ]),
+          updateAdminUserRoles(userB.id, [
+            concurrencyData.sharedRole.id,
+            concurrencyData.keepRole.id,
+          ]),
+        ]);
+
+        expect(addARes.statusCode).toBe(200);
+        expect(addBRes.statusCode).toBe(200);
+
+        await forceGapInSharedRoleOrder();
+      }
+    });
   });
 });

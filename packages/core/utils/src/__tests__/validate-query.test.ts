@@ -64,4 +64,29 @@ describe('validateQuery', () => {
       );
     });
   });
+
+  describe('publicationFilter (core query param)', () => {
+    it('throws ValidationError with details when publicationFilter is invalid', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'not-a-valid-mode' };
+
+      try {
+        await validators.query(query, schema, { strictParams: false });
+        expect.fail('expected throw');
+      } catch (e: any) {
+        expect(e).toBeInstanceOf(ValidationError);
+        expect(e.details?.source).toBe('query');
+        expect(e.details?.param).toBe('publicationFilter');
+      }
+    });
+
+    it('does not throw when publicationFilter is a valid mode', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'never-published' };
+      await expect(validators.query(query, schema, { strictParams: false })).resolves.not.toThrow();
+    });
+
+    it('does not throw when publicationFilter is omitted', async () => {
+      const query = { filters: { id: 1 } };
+      await expect(validators.query(query, schema, { strictParams: false })).resolves.not.toThrow();
+    });
+  });
 });

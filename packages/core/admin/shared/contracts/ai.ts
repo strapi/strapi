@@ -46,7 +46,7 @@ export declare namespace GetAiUsage {
 /**
  * GET /ai-feature-config - Get AI feature config
  */
-export declare namespace GetAIFeatureConfig {
+export declare namespace GetAiFeatureConfig {
   export interface Request {
     query: {};
     body: {};
@@ -54,8 +54,8 @@ export declare namespace GetAIFeatureConfig {
 
   export interface Response {
     data: {
-      isAIi18nConfigured: boolean;
-      isAIMediaLibraryConfigured: boolean;
+      isAiI18nConfigured: boolean;
+      isAiMediaLibraryConfigured: boolean;
     };
     error?: errors.ApplicationError;
   }

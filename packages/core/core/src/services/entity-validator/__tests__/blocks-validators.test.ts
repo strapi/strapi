@@ -192,7 +192,7 @@ const validLists = [
 const validCodeBlock = [
   {
     type: 'code',
-    syntax: 'javascript',
+    language: 'javascript',
     children: [{ type: 'text', text: 'const test = "whatever"' }],
   },
 ];
@@ -425,7 +425,7 @@ describe('Blocks validator', () => {
         validator([
           {
             type: 'code',
-            syntax: 'javascript',
+            language: 'javascript',
             children: [{ type: 'link', text: 'const test = "whatever"' }],
           },
         ])

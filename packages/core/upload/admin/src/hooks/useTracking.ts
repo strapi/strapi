@@ -14,7 +14,7 @@ export const useTracking = () => {
   ) => {
     return trackStrapiUsage(event, {
       ...properties,
-      ...(isAiAvailable ? { isAIMediaLibraryConfigured: Boolean(data?.aiMetadata) } : {}),
+      ...(isAiAvailable ? { isAiMediaLibraryConfigured: Boolean(data?.aiMetadata) } : {}),
     } as TEvent['properties']);
   };
 

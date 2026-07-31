@@ -82,7 +82,7 @@ const getProhibitedCloningFields = (
  * remove the fields that the user can't create.
  */
 const excludeNotCreatableFields =
-  (uid: any, permissionChecker: any) =>
+  (uid: any, permissionChecker: any): ((body: any, path?: any[]) => any) =>
   (body: any, path = []): any => {
     const model = strapi.getModel(uid);
     const canCreate = (path: any) => permissionChecker.can.create(null, path);

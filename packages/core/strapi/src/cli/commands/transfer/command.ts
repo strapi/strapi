@@ -5,8 +5,12 @@ import { exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
 import {
   excludeOption,
   onlyOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
+  normalizeTransferFilterOptionsHook,
 } from '../../utils/data-transfer';
 
 import action from './action';
@@ -36,12 +40,22 @@ const command = () => {
       .addOption(
         new Option('--to-token <token>', `Transfer token for the remote Strapi destination`)
       )
+      .addOption(
+        new Option(
+          '--no-checksums',
+          'Disable end-to-end asset checksum verification for assets transfer'
+        )
+      )
       .addOption(new Option('--verbose', 'Enable verbose logs'))
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)
+      .addOption(excludeContentTypesOption)
+      .addOption(onlyContentTypesOption)
       .addOption(throttleOption)
+      .hook('preAction', normalizeTransferFilterOptionsHook)
       .hook('preAction', validateExcludeOnly)
+      .hook('preAction', validateContentTypeTransferOptions)
       .hook(
         'preAction',
         ifOptions(

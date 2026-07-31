@@ -14,5 +14,8 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  modulePathIgnorePatterns: ['(?:^|[\\\\/])\\.cache(?:[\\\\/]|$)'],
+  modulePathIgnorePatterns: [
+    '(?:^|[\\/])\\.cache(?:[\\/]|$)',
+    '(?:^|[\\/])dist(?:[\\/]|$)',
+  ],
 };

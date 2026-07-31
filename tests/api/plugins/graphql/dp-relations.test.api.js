@@ -432,5 +432,100 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
         )
       ).toBe(false);
     });
+
+    // Regression test: combined root queries with different status args must not
+    // cross-contaminate each other's nested relations. Previously a single
+    // `context.rootQueryArgs` was overwritten by the last root field's args, so
+    // the draft branch would inherit `PUBLISHED` and yield empty/null relations.
+    test('Aliased draft + published root queries keep status isolated per branch', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            draft: labels_connection(status: DRAFT) {
+              data {
+                documentId
+                attributes {
+                  publishedAt
+                  articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            published: labels_connection(status: PUBLISHED) {
+              data {
+                documentId
+                attributes {
+                  publishedAt
+                  articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+      expect(res.statusCode).toBe(200);
+
+      const draftLabels = body.data.draft.data;
+      const publishedLabels = body.data.published.data;
+
+      expect(draftLabels.length).toBeGreaterThan(0);
+      expect(publishedLabels.length).toBeGreaterThan(0);
+
+      // Parent rows themselves carry the status from their own args, so they
+      // remain correct even with the bug — we still assert it as a sanity check.
+      expect(draftLabels.every((l) => l.attributes.publishedAt === null)).toBe(true);
+      expect(publishedLabels.every((l) => l.attributes.publishedAt !== null)).toBe(true);
+
+      const flatten = (labels, key) => labels.flatMap((l) => l.attributes[key].data);
+
+      const draftM2M = flatten(draftLabels, 'articles_connection');
+      const draftO2M = flatten(draftLabels, 'one_to_many_articles_connection');
+      const publishedM2M = flatten(publishedLabels, 'articles_connection');
+      const publishedO2M = flatten(publishedLabels, 'one_to_many_articles_connection');
+
+      // Sanity: relations actually populated, otherwise `every` would pass vacuously.
+      expect(draftM2M.length).toBeGreaterThan(0);
+      expect(draftO2M.length).toBeGreaterThan(0);
+      expect(publishedM2M.length).toBeGreaterThan(0);
+      expect(publishedO2M.length).toBeGreaterThan(0);
+
+      // The actual regression assertion: nested relations must not pick up the
+      // sibling root's status.
+      expect(draftM2M.every((a) => a.attributes.publishedAt === null)).toBe(true);
+      expect(draftO2M.every((a) => a.attributes.publishedAt === null)).toBe(true);
+      expect(publishedM2M.every((a) => a.attributes.publishedAt !== null)).toBe(true);
+      expect(publishedO2M.every((a) => a.attributes.publishedAt !== null)).toBe(true);
+    });
   });
 });

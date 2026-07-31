@@ -44,29 +44,6 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
       orderBy: { createdAt: 'desc' },
     });
   },
-
-  async registerCron() {
-    strapi.cron.add({
-      aiMetadataJobsCleanup: {
-        async task() {
-          try {
-            const result = await strapi.db.query(AI_METADATA_JOB_UID).deleteMany({
-              where: {
-                status: { $ne: 'processing' },
-              },
-            });
-
-            if (result.count > 0) {
-              strapi.log.info(`Cleaned up ${result.count} old AI metadata jobs`);
-            }
-          } catch (error) {
-            strapi.log.error('Failed to cleanup AI metadata jobs:', error);
-          }
-        },
-        options: '0 0 * * *', // Run once a day at midnight
-      },
-    });
-  },
 });
 
 export type { AIMetadataJob };

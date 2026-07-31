@@ -181,12 +181,14 @@ export const updateSchema = async (schema: CTBSchema) => {
         }, {})
       );
 
-      await getService('content-types').generateAPI({
-        displayName: contentType!.displayName,
-        singularName: contentType!.singularName,
-        pluralName: contentType!.pluralName,
-        kind: contentType!.kind,
-      });
+      if (!contentType.plugin) {
+        await getService('content-types').generateAPI({
+          displayName: contentType!.displayName,
+          singularName: contentType!.singularName,
+          pluralName: contentType!.pluralName,
+          kind: contentType!.kind,
+        });
+      }
     }
 
     if (action === 'update') {

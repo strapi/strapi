@@ -49,9 +49,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 1,
+                value: '1',
               },
               entity: null,
             },
@@ -59,7 +60,7 @@ describe('BigInteger validator', () => {
           )
         );
 
-        expect(await validator(1)).toBe(1);
+        expect(await validator('1')).toBe('1');
       });
     });
 
@@ -74,9 +75,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger' },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 1,
+                value: '1',
               },
               entity: null,
             },
@@ -84,7 +86,7 @@ describe('BigInteger validator', () => {
           )
         );
 
-        await validator(1);
+        await validator('1');
 
         expect(fakeFindOne).not.toHaveBeenCalled();
       });
@@ -97,9 +99,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: null,
+                value: null as any,
               },
               entity: null,
             },
@@ -112,6 +115,30 @@ describe('BigInteger validator', () => {
         expect(fakeFindOne).not.toHaveBeenCalled();
       });
 
+      test('it rejects invalid numeric string input before querying the database', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.biginteger(
+            {
+              attr: { type: 'biginteger', unique: true },
+              model: fakeModel,
+              data: {},
+              updatedAttribute: {
+                name: 'attrBigIntegerUnique',
+                value: '900260056-1',
+              },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        await expect(validator('900260056-1')).rejects.toBeInstanceOf(errors.YupValidationError);
+
+        expect(fakeFindOne).not.toHaveBeenCalled();
+      });
+
       test('it validates the unique constraint if there is no other record in the database', async () => {
         fakeFindOne.mockResolvedValueOnce(null);
 
@@ -120,9 +147,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 1,
+                value: '1',
               },
               entity: null,
             },
@@ -130,7 +158,7 @@ describe('BigInteger validator', () => {
           )
         );
 
-        expect(await validator(1)).toBe(1);
+        expect(await validator('1')).toBe('1');
       });
 
       test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
@@ -142,9 +170,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 2,
+                value: '2',
               },
               entity: null,
             },
@@ -153,7 +182,7 @@ describe('BigInteger validator', () => {
         );
 
         try {
-          await validator(2);
+          await validator('2');
         } catch (err) {
           expect(err).toBeInstanceOf(errors.YupValidationError);
         }
@@ -167,17 +196,18 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 3,
+                value: '3',
               },
-              entity: { id: 1, attrBigIntegerUnique: 3 },
+              entity: { id: 1, attrBigIntegerUnique: '3' },
             },
             mockOptions
           )
         );
 
-        expect(await validator(3)).toBe(3);
+        expect(await validator('3')).toBe('3');
       });
 
       test('it checks the database for records with the same value for the checked attribute', async () => {
@@ -188,9 +218,10 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 4,
+                value: '4',
               },
               entity: null,
             },
@@ -198,13 +229,13 @@ describe('BigInteger validator', () => {
           )
         );
 
-        await validator(4);
+        await validator('4');
 
         expect(fakeFindOne).toHaveBeenCalledWith({
           where: {
             publishedAt: { $notNull: true },
             locale: 'en',
-            attrBigIntegerUnique: 4,
+            attrBigIntegerUnique: '4',
           },
           select: ['id'],
         });
@@ -218,21 +249,22 @@ describe('BigInteger validator', () => {
             {
               attr: { type: 'biginteger', unique: true },
               model: fakeModel,
+              data: {},
               updatedAttribute: {
                 name: 'attrBigIntegerUnique',
-                value: 5,
+                value: '5',
               },
-              entity: { id: 1, attrBigIntegerUnique: 42 },
+              entity: { id: 1, attrBigIntegerUnique: '42' },
             },
             options
           )
         );
 
-        await validator(5);
+        await validator('5');
 
         expect(fakeFindOne).toHaveBeenCalledWith({
           where: {
-            attrBigIntegerUnique: 5,
+            attrBigIntegerUnique: '5',
             id: {
               $ne: 1,
             },

@@ -2,9 +2,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { adminApi, NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 import { Provider } from 'react-redux';
@@ -27,7 +27,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   },
   adminApi: {
     reducerPath: 'adminApi',
-    reducer: (state = {}, action: AnyAction) => state,
+    reducer: (state = {}, _action: AnyAction) => state,
     middleware: (() => (next) => (action) => next(action)) as Middleware,
     util: {
       invalidateTags: jest.fn((tags) => ({
@@ -76,7 +76,9 @@ const ComponentFixture = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-function setup(...args: Parameters<typeof useRemoveAsset>) {
+function setup(
+  ...args: Parameters<typeof useRemoveAsset>
+): Promise<RenderHookResult<ReturnType<typeof useRemoveAsset>, Parameters<typeof useRemoveAsset>>> {
   return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useRemoveAsset(...args), { wrapper: ComponentFixture }));
@@ -93,13 +95,12 @@ describe('useRemoveAsset', () => {
     const { toggleNotification } = useNotification();
     const {
       result: { current },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } = (await setup(jest.fn)) as { result: { current: any } };
+    } = await setup(jest.fn);
     const { removeAsset } = current;
 
     try {
       await waitFor(async () => {
-        await removeAsset(ASSET_FIXTURE);
+        await removeAsset(ASSET_FIXTURE.id);
       });
     } catch (err) {
       // ...
@@ -114,12 +115,11 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } = (await setup(jest.fn)) as { result: { current: any } };
+    } = await setup(jest.fn);
     const { removeAsset } = current;
 
     await waitFor(async () => {
-      await removeAsset(ASSET_FIXTURE);
+      await removeAsset(ASSET_FIXTURE.id);
     });
 
     await waitFor(() =>
@@ -131,8 +131,8 @@ describe('useRemoveAsset', () => {
 
   test('calls toggleNotification in case of an error', async () => {
     server.use(
-      rest.delete('/upload/:type/:id', (req, res, ctx) => {
-        return res(ctx.status(500));
+      http.delete('/upload/:type/:id', () => {
+        return new HttpResponse(null, { status: 500 });
       })
     );
     const originalConsoleError = console.error;
@@ -142,13 +142,12 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       // @ts-expect-error We are checking the error case
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } = (await setup()) as { result: { current: any } };
+    } = await setup();
     const { removeAsset } = current;
 
     try {
       await waitFor(async () => {
-        await removeAsset(ASSET_FIXTURE);
+        await removeAsset(ASSET_FIXTURE.id);
       });
     } catch (err) {
       // ...

@@ -1,6 +1,6 @@
 import { within } from '@testing-library/react';
 import { render, screen, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { ListPage } from '../ListPage';
 
@@ -41,18 +41,16 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
 
   it('should have pagination when theres enough data', async () => {
     server.use(
-      rest.get('/admin/audit-logs', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            results: [],
-            pagination: {
-              page: 1,
-              pageSize: 10,
-              pageCount: 5,
-              total: 50,
-            },
-          })
-        );
+      http.get('/admin/audit-logs', () => {
+        return HttpResponse.json({
+          results: [],
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            pageCount: 5,
+            total: 50,
+          },
+        });
       })
     );
 
@@ -109,5 +107,44 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
       screen.getByRole('combobox', { name: 'Search and select an option to filter' })
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add filter' })).toBeInTheDocument();
+  });
+
+  it('should show the User filter option even when the user cannot read admin users', async () => {
+    const { user } = render(<ListPage />, {
+      providerOptions: {
+        permissions: (defaultPermissions) =>
+          defaultPermissions.filter((permission) => permission.action !== 'admin::users.read'),
+      },
+    });
+
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+
+    expect(await screen.findByRole('option', { name: 'User' })).toBeInTheDocument();
+  });
+
+  it('should show the User filter option when the user can read admin users', async () => {
+    const { user } = render(<ListPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+
+    expect(await screen.findByRole('option', { name: 'Action' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Date' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'User' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'User' }));
+    await user.click(
+      screen.getByRole('combobox', { name: 'Search and select an option to filter' })
+    );
+
+    expect(await screen.findByRole('option', { name: 'John Doe' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Kai Doe' })).toBeInTheDocument();
   });
 });
