@@ -8,6 +8,7 @@ import { createAssetsStream, getFileStatsForTransfer } from '../assets';
 
 const REMOTE_FILE_URL = 'https://cdn.example.com/file.pdf';
 const REMOTE_FILE_CHUNKS = ['compressed response ', 'contents'];
+const COMPRESSED_CONTENT_LENGTH = '12';
 
 describe('getFileStatsForTransfer', () => {
   test('uses the response body size when a remote response has no content-length header', async () => {
@@ -31,6 +32,23 @@ describe('getFileStatsForTransfer', () => {
       size: Buffer.byteLength(REMOTE_FILE_CHUNKS.join('')),
     });
     expect(arrayBufferSpy).not.toHaveBeenCalled();
+  });
+
+  test('uses the decoded body size when content-length describes compressed bytes', async () => {
+    const body = REMOTE_FILE_CHUNKS.join('');
+    const response = new Response(body, {
+      headers: {
+        'content-encoding': 'gzip',
+        'content-length': COMPRESSED_CONTENT_LENGTH,
+      },
+    });
+    const strapi = {
+      fetch: jest.fn().mockResolvedValue(response),
+    } as unknown as Core.Strapi;
+
+    await expect(getFileStatsForTransfer(REMOTE_FILE_URL, strapi)).resolves.toEqual({
+      size: Buffer.byteLength(body),
+    });
   });
 });
 

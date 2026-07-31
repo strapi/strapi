@@ -8,6 +8,8 @@ import type { IAsset, IFile } from '../../../types';
 
 const HTTP_OK_STATUS = 200;
 const DECIMAL_RADIX = 10;
+const CONTENT_LENGTH_HEADER = 'content-length';
+const CONTENT_ENCODING_HEADER = 'content-encoding';
 
 function getFileStream(
   filepath: string,
@@ -58,8 +60,9 @@ export async function getFileStatsForTransfer(
     throw new Error(`Request failed with status code ${response.status}`);
   }
 
-  const contentLength = response.headers.get('content-length');
-  if (contentLength) {
+  const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
+  const contentEncoding = response.headers.get(CONTENT_ENCODING_HEADER);
+  if (contentLength && !contentEncoding) {
     return { size: parseInt(contentLength, DECIMAL_RADIX) };
   }
 
