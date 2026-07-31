@@ -70,6 +70,16 @@ const isFieldLocalized = (attribute: EditFieldLayout['attribute'], layout: EditL
     return false;
   }
 
+  // Match server `isLocalizedAttribute`: relations and uids are always locale-specific.
+  if (
+    attribute &&
+    typeof attribute === 'object' &&
+    'type' in attribute &&
+    (attribute.type === 'relation' || attribute.type === 'uid')
+  ) {
+    return true;
+  }
+
   const pluginOptions =
     attribute && typeof attribute === 'object' && 'pluginOptions' in (attribute as object)
       ? (attribute as { pluginOptions?: { i18n?: { localized?: boolean } } }).pluginOptions

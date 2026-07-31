@@ -116,5 +116,26 @@ describe('useI18nFieldLock', () => {
 
       expect(result.current).toBe(false);
     });
+
+    it('does not lock relations or uids (always locale-specific on the server)', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+
+      const { result: relationResult } = renderHook(() =>
+        useShouldLockNonLocalizedField({ type: 'relation' })
+      );
+      const { result: uidResult } = renderHook(() =>
+        useShouldLockNonLocalizedField({ type: 'uid' })
+      );
+
+      expect(relationResult.current).toBe(false);
+      expect(uidResult.current).toBe(false);
+    });
   });
 });
