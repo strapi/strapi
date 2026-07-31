@@ -44,19 +44,17 @@ const LocalePicker = () => {
     /**
      * Handle the case where the current locale query param doesn't exist
      * in the list of available locales, so we redirect to the default locale
-     * when the user has access to it, or the first locale they can access.
+     * when the user can read it, or the first locale they can read: the list
+     * cannot be displayed for the other locales.
      */
     const currentDesiredLocale = query.plugins?.i18n?.locale;
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
-    const accessibleLocales = locales.filter(
-      (locale) => canCreate.includes(locale.code) || canRead.includes(locale.code)
-    );
-    const targetLocale =
-      accessibleLocales.find((locale) => locale.isDefault) ?? accessibleLocales[0];
+    const readableLocales = locales.filter((locale) => canRead.includes(locale.code));
+    const targetLocale = readableLocales.find((locale) => locale.isDefault) ?? readableLocales[0];
     if (!doesLocaleExist && targetLocale?.code) {
       handleChange(targetLocale.code, true);
     }
-  }, [hasI18n, handleChange, locales, query.plugins?.i18n?.locale, canCreate, canRead]);
+  }, [hasI18n, handleChange, locales, query.plugins?.i18n?.locale, canRead]);
 
   const sortedLocaleOptions = React.useMemo(() => {
     const displayedLocales = Array.isArray(locales)

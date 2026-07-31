@@ -180,6 +180,45 @@ describe('Content Manager | Layout', () => {
     expect(screen.queryByText('No permissions page')).not.toBeInTheDocument();
   });
 
+  it('does not redirect to a locale the user can only update, since it cannot be displayed', async () => {
+    jest.mocked(useContentManagerInitData).mockImplementation(() => {
+      const { search } = useLocation();
+      const isBlockedLocale = search.includes('fr');
+
+      return {
+        isLoading: false,
+        collectionTypeLinks: isBlockedLocale ? [] : [ARTICLE_LINK],
+        singleTypeLinks: [],
+        components: [],
+        fieldSizes: {},
+        models: [ARTICLE_MODEL],
+      };
+    });
+
+    renderLayout(
+      '/content-manager/collection-types/api::article.article/1?plugins[i18n][locale]=fr',
+      [
+        EN_ONLY_READ_PERMISSION,
+        // An update-only locale is not displayable: requesting it must redirect
+        // to a readable locale instead of rendering an error page.
+        {
+          ...EN_ONLY_READ_PERMISSION,
+          id: 1002,
+          action: 'plugin::content-manager.explorer.update',
+          properties: { locales: ['fr'] },
+        },
+      ]
+    );
+
+    expect(await screen.findByText('Edit page')).toBeInTheDocument();
+    expect(screen.getByTestId('search')).toHaveTextContent('plugins[i18n][locale]=en');
+    expect(
+      screen.getByText(
+        "You don't have the permissions to access this content for the requested locale"
+      )
+    ).toBeInTheDocument();
+  });
+
   it('renders the route instead of redirecting when the requested locale is accessible but the links are stale', async () => {
     // The links are authorized asynchronously against the previous URL: an
     // accessible locale with no authorised links means they are out of date.

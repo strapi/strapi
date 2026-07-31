@@ -73,7 +73,7 @@ const Layout = () => {
     const requestedLocale = query.plugins?.i18n?.locale;
     const localeScopedPermissions = permissions.filter(
       (permission) =>
-        permission.action.startsWith('plugin::content-manager.explorer.') &&
+        permission.action === 'plugin::content-manager.explorer.read' &&
         Array.isArray(permission.properties?.locales)
     );
     const contentTypePermissions = localeScopedPermissions.filter(
