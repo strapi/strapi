@@ -4,7 +4,6 @@ import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 

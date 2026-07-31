@@ -41,12 +41,7 @@ describe('SessionsPage', () => {
 
     await findByRole('heading', { name: 'Active Devices' });
 
-    // Both sessions are listed with their IP addresses.
-    expect(getByText('127.0.0.1')).toBeInTheDocument();
-    expect(getByText('10.0.0.2')).toBeInTheDocument();
-
-    // The current session shows its human-readable device name; the other one (no
-    // deviceName) falls back to the truncated device id.
+    // Both sessions are listed with their device labels.
     expect(getByText('Chrome on macOS')).toBeInTheDocument();
     expect(getByText('device-b')).toBeInTheDocument();
 

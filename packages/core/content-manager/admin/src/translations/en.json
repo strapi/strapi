@@ -9,6 +9,7 @@
   "actions.discard.dialog.body": "Are you sure you want to discard the changes? This action is irreversible.",
   "actions.edit.error": "An error occurred while trying to edit the document.",
   "actions.edit.label": "Edit",
+  "actions.open-in-new-tab.label": "Open in new tab",
   "actions.copy-documentId.label": "Copy document ID",
   "actions.copy-documentId.success": "Document ID copied to clipboard",
   "actions.unpublish.error": "An error occurred while trying to unpublish the document.",

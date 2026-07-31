@@ -48,9 +48,13 @@ const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, buil
   });
 };
 
+let documentServiceSetupBarrier = Promise.resolve();
+
 export const createTestSetup = async (
   resources: BuilderResources
 ): Promise<BuilderHelperReturn> => {
+  await documentServiceSetupBarrier;
+
   const builder = createTestBuilder();
   bootstrapBuilder(resources, builder);
   await builder.build();
@@ -71,6 +75,9 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  await strapi.destroy();
-  await builder.cleanup();
+  documentServiceSetupBarrier = documentServiceSetupBarrier.then(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+  await documentServiceSetupBarrier;
 };

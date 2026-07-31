@@ -191,6 +191,27 @@ describe('draftRelationCounts', () => {
       });
     });
 
+    it('ignores published bidirectional M2M connects', () => {
+      const counts = countLocalDraftRelations(
+        {
+          tags: {
+            connect: [
+              { id: 1, status: 'published' },
+              { id: 2, status: 'published' },
+            ],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
+      });
+    });
+
     it('counts draft relations inside components and dynamic zones', () => {
       const counts = countLocalDraftRelations(
         {
@@ -263,6 +284,60 @@ describe('draftRelationCounts', () => {
         draftM2mLinks: 0,
       });
     });
+
+    it('subtracts disconnected draft xToOne relations from local counts', () => {
+      const counts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: -1,
+        draftM2mLinks: 0,
+      });
+    });
+
+    it('subtracts disconnected draft bidirectional M2M relations from local counts', () => {
+      const counts = countLocalDraftRelations(
+        {
+          tags: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: -1,
+      });
+    });
+
+    it('ignores disconnects of published relations', () => {
+      const counts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'published' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
+      });
+    });
   });
 
   describe('resolveDraftRelationCounts', () => {
@@ -288,15 +363,58 @@ describe('draftRelationCounts', () => {
       ).toEqual({ unpublishedRelations: 3, draftM2mLinks: 2 });
     });
 
-    it('uses server counts for saved unmodified documents', () => {
+    it('merges local draft connects when the form is not marked modified yet', () => {
       expect(
         resolveDraftRelationCounts(
           'doc-1',
           false,
           { unpublishedRelations: 1, draftM2mLinks: 0 },
+          { unpublishedRelations: 0, draftM2mLinks: 0 }
+        )
+      ).toEqual({ unpublishedRelations: 1, draftM2mLinks: 0 });
+    });
+
+    it('uses server counts for saved unmodified documents', () => {
+      expect(
+        resolveDraftRelationCounts(
+          'doc-1',
+          false,
+          { unpublishedRelations: 0, draftM2mLinks: 0 },
           { unpublishedRelations: 0, draftM2mLinks: 2 }
         )
       ).toEqual({ unpublishedRelations: 0, draftM2mLinks: 2 });
+    });
+
+    it('nets disconnected draft relations against stale server counts when modified', () => {
+      const localCounts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      const counts = resolveDraftRelationCounts('doc-1', true, localCounts, {
+        unpublishedRelations: 1,
+        draftM2mLinks: 0,
+      });
+
+      expect(counts).toEqual({ unpublishedRelations: 0, draftM2mLinks: 0 });
+      expect(getDraftRelationsPublishState(counts).hasDraftRelations).toBe(false);
+    });
+
+    it('does not warn when server reports no draft relations for published M2M targets', () => {
+      const counts = resolveDraftRelationCounts(
+        'doc-1',
+        false,
+        { unpublishedRelations: 0, draftM2mLinks: 0 },
+        { unpublishedRelations: 0, draftM2mLinks: 0 }
+      );
+
+      expect(getDraftRelationsPublishState(counts).hasDraftRelations).toBe(false);
     });
   });
 

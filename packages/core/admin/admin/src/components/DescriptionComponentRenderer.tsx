@@ -15,13 +15,14 @@ import { cancelIdleCallback, requestIdleCallback } from '../utils/shims';
 
 interface DescriptionComponent<Props, Description> {
   (props: Props): Description | null;
+  displayName?: string;
 }
 
 /* -------------------------------------------------------------------------------------------------
  * DescriptionComponentRenderer
  * -----------------------------------------------------------------------------------------------*/
 
-interface DescriptionComponentRendererProps<Props = any, Description = any> {
+interface DescriptionComponentRendererProps<Props = unknown, Description = unknown> {
   children: (descriptions: Array<Description & { id: string }>) => React.ReactNode;
   descriptions: DescriptionComponent<Props, Description>[];
   props: Props;
@@ -102,7 +103,13 @@ const DescriptionComponentRenderer = <Props, Description>({
       {descriptions.map((description) => {
         const key = getCompId(description);
         return (
-          <Description key={key} id={key} description={description} props={props} update={update} />
+          <MemoizedDescription
+            key={key}
+            id={key}
+            description={description}
+            props={props}
+            update={update}
+          />
         );
       })}
       {children(states)}
@@ -127,39 +134,48 @@ interface DescriptionProps<Props, Description> {
  * within a component, however because they return an object of data we can't add that
  * to the react tree, instead we push it back out to the parent.
  */
-const Description = React.memo(
-  ({ description, id, props, update }: DescriptionProps<any, any>) => {
-    const comp = description(props);
+const Description = <Props, Description>({
+  description,
+  id,
+  props,
+  update,
+}: DescriptionProps<Props, Description>) => {
+  const comp = description(props);
 
-    useShallowCompareEffect(() => {
-      update(id, comp);
+  useShallowCompareEffect(() => {
+    update(id, comp);
 
-      return () => {
-        update(id, null);
-      };
-    }, comp);
+    return () => {
+      update(id, null);
+    };
+  }, comp);
 
-    return null;
-  },
-  (prev, next) => isEqual(prev.props, next.props)
-);
+  return null;
+};
+
+const MemoizedDescription = React.memo(Description, (prev, next) =>
+  isEqual(prev.props, next.props)
+) as typeof Description;
 
 /* -------------------------------------------------------------------------------------------------
  * Helpers
  * -----------------------------------------------------------------------------------------------*/
 
-const ids = new WeakMap<DescriptionComponent<any, any>, string>();
+type CachedDescriptionComponent = DescriptionComponent<unknown, unknown>;
+
+const ids = new WeakMap<CachedDescriptionComponent, string>();
 
 let counter = 0;
 
 function getCompId<T, K>(comp: DescriptionComponent<T, K>): string {
-  const cachedId = ids.get(comp);
+  const cachedComponent = comp as CachedDescriptionComponent;
+  const cachedId = ids.get(cachedComponent);
 
   if (cachedId) return cachedId;
 
-  const id = `${comp.name || (comp as any).displayName || '<anonymous>'}-${counter++}`;
+  const id = `${comp.name || comp.displayName || '<anonymous>'}-${counter++}`;
 
-  ids.set(comp, id);
+  ids.set(cachedComponent, id);
 
   return id;
 }
