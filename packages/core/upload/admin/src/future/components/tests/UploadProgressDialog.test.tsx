@@ -399,7 +399,33 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('Generating metadata with AI (50%)')).toBeInTheDocument();
     });
 
-    it('hides the subtitle once every metadata row is terminal', () => {
+    it('replaces the in-flight subtitle with the outcome once every row is terminal', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generated' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.getByText('Metadata successfully generated on 2 files')).toBeInTheDocument();
+    });
+
+    it('singularises the outcome message for a single generated file', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [{ ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' }],
+        })
+      );
+
+      expect(screen.getByText('Metadata successfully generated on 1 file')).toBeInTheDocument();
+    });
+
+    it('reports the failure count alongside the generated count', () => {
       setup(
         createMockState({
           totalFiles: 2,
@@ -411,6 +437,39 @@ describe('UploadProgressDialog', () => {
       );
 
       expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.getByText('1 generated, 1 failed')).toBeInTheDocument();
+    });
+
+    it('stays silent when nothing was generated', () => {
+      // An all-skipped batch of non-images: "generated on 0 files" would be worse than
+      // saying nothing, and the per-row sublines already report the skips.
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.pdf', 'complete'), metadataStatus: 'skipped' },
+            { ...createMockFile(1, 'b.pdf', 'complete'), metadataStatus: 'skipped' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Metadata successfully generated/)).not.toBeInTheDocument();
+    });
+
+    it('counts only generated rows, ignoring skipped ones', () => {
+      setup(
+        createMockState({
+          totalFiles: 3,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(2, 'c.pdf', 'complete'), metadataStatus: 'skipped' },
+          ],
+        })
+      );
+
+      expect(screen.getByText('Metadata successfully generated on 2 files')).toBeInTheDocument();
     });
 
     it('keeps the subtitle up between files while later rows are still uploading', () => {

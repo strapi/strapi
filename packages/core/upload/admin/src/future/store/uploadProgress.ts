@@ -297,6 +297,39 @@ export const selectIsGeneratingMetadata = createSelector(
   }
 );
 
+/**
+ * How many rows reached each terminal metadata outcome, for the header's completion
+ * message. `null` while the phase is unfinished — or was never entered at all — so the
+ * caller has a single check for "there is no settled outcome to report yet".
+ *
+ * Counts are reported separately rather than collapsed into one total because they are
+ * not interchangeable: only `generated` rows actually had metadata written, so only that
+ * count can be claimed as a success. A batch of non-images settles entirely on `skipped`,
+ * where "generated on 0 files" would be worse than saying nothing.
+ */
+export const selectMetadataOutcome = createSelector(
+  (state: RootState) => state.uploadProgress.files,
+  (files): { generated: number; skipped: number; failed: number } | null => {
+    const started = files.filter((f) => f.metadataStatus !== undefined);
+
+    if (started.length === 0) return null;
+
+    // Mirrors `selectIsGeneratingMetadata`: the phase isn't over while a row is
+    // generating, nor while a row is still uploading and has yet to enter it.
+    const isOngoing =
+      started.some((f) => f.metadataStatus === 'generating') ||
+      files.some((f) => f.status === 'pending' || f.status === 'uploading');
+
+    if (isOngoing) return null;
+
+    return {
+      generated: started.filter((f) => f.metadataStatus === 'generated').length,
+      skipped: started.filter((f) => f.metadataStatus === 'skipped').length,
+      failed: started.filter((f) => f.metadataStatus === 'failed').length,
+    };
+  }
+);
+
 export const {
   openUploadProgress,
   setFileUploading,

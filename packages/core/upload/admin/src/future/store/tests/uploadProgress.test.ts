@@ -13,6 +13,7 @@ import {
   selectAggregateProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
+  selectMetadataOutcome,
   type FileProgress,
   type FileProgressStatus,
   type UploadProgressState,
@@ -48,6 +49,9 @@ const metadataProgress = (state: UploadProgressState) =>
 
 const isGenerating = (state: UploadProgressState) =>
   selectIsGeneratingMetadata({ uploadProgress: state });
+
+const metadataOutcome = (state: UploadProgressState) =>
+  selectMetadataOutcome({ uploadProgress: state });
 
 describe('uploadProgress slice', () => {
   describe('openUploadProgress', () => {
@@ -422,6 +426,68 @@ describe('uploadProgress slice', () => {
     });
   });
 
+  describe('selectMetadataOutcome', () => {
+    it('returns null when no row entered the metadata phase', () => {
+      const state = makeState([
+        makeFile(0, 'complete', 100, 100),
+        makeFile(1, 'complete', 100, 100),
+      ]);
+
+      expect(metadataOutcome(state)).toBeNull();
+    });
+
+    it('returns null while a row is still generating', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'generating' as const },
+      ]);
+
+      expect(metadataOutcome(state)).toBeNull();
+    });
+
+    it('returns null while rows are still uploading and have yet to enter the phase', () => {
+      // Same gap-bridging as `selectIsGeneratingMetadata`: reporting a final count here
+      // would announce a total that is about to grow.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        makeFile(1, 'uploading', 100, 40),
+      ]);
+
+      expect(metadataOutcome(state)).toBeNull();
+    });
+
+    it('breaks the settled batch down per outcome', () => {
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(1, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        { ...makeFile(2, 'complete', 100, 100), metadataStatus: 'skipped' as const },
+        { ...makeFile(3, 'complete', 100, 100), metadataStatus: 'failed' as const },
+      ]);
+
+      expect(metadataOutcome(state)).toStrictEqual({ generated: 2, skipped: 1, failed: 1 });
+    });
+
+    it('reports zero generated for an all-skipped batch', () => {
+      // The header uses this to stay silent rather than claim success on 0 files.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'skipped' as const },
+      ]);
+
+      expect(metadataOutcome(state)).toStrictEqual({ generated: 0, skipped: 1, failed: 0 });
+    });
+
+    it('settles even when some rows errored or were cancelled', () => {
+      // Those rows never enter the phase, so they must not hold the outcome open.
+      const state = makeState([
+        { ...makeFile(0, 'complete', 100, 100), metadataStatus: 'generated' as const },
+        makeFile(1, 'error', 100),
+        makeFile(2, 'cancelled', 100),
+      ]);
+
+      expect(metadataOutcome(state)).toStrictEqual({ generated: 1, skipped: 0, failed: 0 });
+    });
+  });
+
   describe('metadata phase over a whole sequential batch', () => {
     it('reports one continuous, monotonically climbing phase', () => {
       // End-to-end guard for the original bug: the subtitle appeared and disappeared on
@@ -457,6 +523,40 @@ describe('uploadProgress slice', () => {
 
       // Visible throughout, hidden only on the final settle — exactly one transition.
       expect(observed.map((o) => o.visible)).toStrictEqual([true, true, true, true, true, false]);
+
+      // The in-flight subtitle doesn't just vanish at that transition: the terminal
+      // outcome becomes available in the same step, so the header swaps one line for the
+      // other rather than losing the message.
+      expect(metadataOutcome(state)).toStrictEqual({ generated: 3, skipped: 0, failed: 0 });
+    });
+
+    it('has no settled outcome to report until the final row lands', () => {
+      // Guards the ordering the header depends on: the outcome must stay null for every
+      // intermediate step, or a partial count would flash before the batch is done.
+      let state = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 2, fileNames: ['a', 'b'], fileSizes: [10, 10] })
+      );
+
+      const outcomes: Array<ReturnType<typeof metadataOutcome>> = [];
+
+      for (let index = 0; index < 2; index += 1) {
+        state = uploadProgressReducer(state, setFileUploading({ name: 'x', index, size: 10 }));
+        state = uploadProgressReducer(
+          state,
+          setFileComplete({ index, file: { id: index } as never })
+        );
+        state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
+        outcomes.push(metadataOutcome(state));
+        state = uploadProgressReducer(
+          state,
+          setFileMetadataResult({ index, uploadId: 1, status: 'generated' })
+        );
+        outcomes.push(metadataOutcome(state));
+      }
+
+      expect(outcomes.slice(0, -1).every((o) => o === null)).toBe(true);
+      expect(outcomes.at(-1)).toStrictEqual({ generated: 2, skipped: 0, failed: 0 });
     });
   });
 });

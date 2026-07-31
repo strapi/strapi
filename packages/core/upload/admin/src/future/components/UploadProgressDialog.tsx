@@ -26,6 +26,7 @@ import {
   selectAggregateProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
+  selectMetadataOutcome,
 } from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
 
@@ -93,6 +94,11 @@ type HeaderStatusProps = {
   metadataProgress: number | null;
   /** Whether any row is still generating — drives whether the subtitle shows at all. */
   isGeneratingMetadata: boolean;
+  /**
+   * Terminal per-outcome counts, or `null` while the phase is unfinished or was never
+   * entered. Replaces the in-flight subtitle once generation settles.
+   */
+  metadataOutcome: { generated: number; skipped: number; failed: number } | null;
 };
 
 const HeaderStatus = ({
@@ -103,6 +109,7 @@ const HeaderStatus = ({
   errorCount,
   metadataProgress,
   isGeneratingMetadata,
+  metadataOutcome,
 }: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
 
@@ -112,16 +119,51 @@ const HeaderStatus = ({
   // Gated on work actually being in flight rather than on `progress < 100`: in a
   // sequential batch the percentage touches 100% between files, which would blink the
   // subtitle out and back in on every upload.
-  const metadataSubtitle =
-    metadataProgress !== null && isGeneratingMetadata
-      ? formatMessage(
-          {
-            id: getTranslationKey('upload.progress.generatingMetadata.withCount'),
-            defaultMessage: 'Generating metadata with AI ({percentage}%)',
-          },
-          { percentage: metadataProgress }
-        )
-      : undefined;
+  //
+  // Once the phase settles the line is not dropped but replaced with the outcome, so the
+  // header keeps confirming what happened instead of silently losing the message.
+  const metadataSubtitle = (() => {
+    if (metadataProgress !== null && isGeneratingMetadata) {
+      return formatMessage(
+        {
+          id: getTranslationKey('upload.progress.generatingMetadata.withCount'),
+          defaultMessage: 'Generating metadata with AI ({percentage}%)',
+        },
+        { percentage: metadataProgress }
+      );
+    }
+
+    if (metadataOutcome === null) {
+      return undefined;
+    }
+
+    // Only `generated` rows had metadata written, so only they can be reported as a
+    // success. With none, there is nothing to confirm — an all-skipped batch of
+    // non-images would otherwise read as "generated on 0 files". Per-row sublines
+    // already spell out skipped and failed outcomes.
+    if (metadataOutcome.generated === 0) {
+      return undefined;
+    }
+
+    if (metadataOutcome.failed > 0) {
+      return formatMessage(
+        {
+          id: getTranslationKey('upload.progress.metadataGenerated.withFailures'),
+          defaultMessage: '{generatedCount} generated, {failedCount} failed',
+        },
+        { generatedCount: metadataOutcome.generated, failedCount: metadataOutcome.failed }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: getTranslationKey('upload.progress.metadataGenerated.withCount'),
+        defaultMessage:
+          '{count, plural, one {Metadata successfully generated on # file} other {Metadata successfully generated on # files}}',
+      },
+      { count: metadataOutcome.generated }
+    );
+  })();
 
   if (status === 'error') {
     return (
@@ -193,6 +235,7 @@ const HeaderStatus = ({
             id: getTranslationKey('upload.progress.canceled.subtitle'),
             defaultMessage: 'Some files were not uploaded',
           })}
+          metadataSubtitle={metadataSubtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -254,6 +297,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const progress = useTypedSelector(selectAggregateProgress);
   const metadataProgress = useTypedSelector(selectMetadataProgress);
   const isGeneratingMetadata = useTypedSelector(selectIsGeneratingMetadata);
+  const metadataOutcome = useTypedSelector(selectMetadataOutcome);
   const dispatch = useTypedDispatch();
   const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
@@ -309,6 +353,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
         errorCount={errorCount}
         metadataProgress={metadataProgress}
         isGeneratingMetadata={isGeneratingMetadata}
+        metadataOutcome={metadataOutcome}
       />
       <Flex gap={1}>
         {!isAllUploaded && (
