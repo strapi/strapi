@@ -67,7 +67,18 @@ const validateExtractions = (
           file: extraction.file,
           line: extraction.line,
         });
-      } else if (extraction.defaultMessage != null) {
+        continue;
+      }
+
+      // Finite-enum / multi-key expansions share one template defaultMessage — not per-key English.
+      if (
+        extraction.kind === 'finite-enum' ||
+        (extraction.expandedJsonKeys?.length && extraction.expandedJsonKeys.length > 1)
+      ) {
+        continue;
+      }
+
+      if (extraction.defaultMessage != null) {
         const enValue = enJson[jsonKey];
         const normalizedDefault = normalizeMessage(extraction.defaultMessage);
         const normalizedEn = normalizeMessage(enValue);
