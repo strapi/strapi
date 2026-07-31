@@ -4917,60 +4917,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@microsoft/api-extractor-model@npm:7.33.4":
-  version: 7.33.4
-  resolution: "@microsoft/api-extractor-model@npm:7.33.4"
-  dependencies:
-    "@microsoft/tsdoc": "npm:~0.16.0"
-    "@microsoft/tsdoc-config": "npm:~0.18.1"
-    "@rushstack/node-core-library": "npm:5.20.3"
-  checksum: 10c0/c71569e59a5f876c600f38240ed8d12c1e4c908a2a6af9cd75f3b22334d7c950b54f367622205930253fc03474c0aa7d017adfce571feff3011780f2502c0391
-  languageName: node
-  linkType: hard
-
-"@microsoft/api-extractor@npm:^7.50.1":
-  version: 7.57.7
-  resolution: "@microsoft/api-extractor@npm:7.57.7"
-  dependencies:
-    "@microsoft/api-extractor-model": "npm:7.33.4"
-    "@microsoft/tsdoc": "npm:~0.16.0"
-    "@microsoft/tsdoc-config": "npm:~0.18.1"
-    "@rushstack/node-core-library": "npm:5.20.3"
-    "@rushstack/rig-package": "npm:0.7.2"
-    "@rushstack/terminal": "npm:0.22.3"
-    "@rushstack/ts-command-line": "npm:5.3.3"
-    diff: "npm:~8.0.2"
-    lodash: "npm:~4.17.23"
-    minimatch: "npm:10.2.3"
-    resolve: "npm:~1.22.1"
-    semver: "npm:~7.5.4"
-    source-map: "npm:~0.6.1"
-    typescript: "npm:5.8.2"
-  bin:
-    api-extractor: bin/api-extractor
-  checksum: 10c0/3a03fa82c3ca57cabd3350339ccfc1910b78b091cc3dbe4c413654b139a2aefef5b0fb634b5602ee6b13512545e218b07efad584098d0f2d55ed8bb69c659ba3
-  languageName: node
-  linkType: hard
-
-"@microsoft/tsdoc-config@npm:~0.18.1":
-  version: 0.18.1
-  resolution: "@microsoft/tsdoc-config@npm:0.18.1"
-  dependencies:
-    "@microsoft/tsdoc": "npm:0.16.0"
-    ajv: "npm:~8.18.0"
-    jju: "npm:~1.4.0"
-    resolve: "npm:~1.22.2"
-  checksum: 10c0/06507f7ced4fadf3e68368c60810c1e057403581f720e6cf96b4d6b6bc7a927232510da40425ffd67d5d918ec7cfba8baec56406687330f233f67eb11b9d8d65
-  languageName: node
-  linkType: hard
-
-"@microsoft/tsdoc@npm:0.16.0, @microsoft/tsdoc@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@microsoft/tsdoc@npm:0.16.0"
-  checksum: 10c0/8883bb0ed22753af7360e9222687fda4eb448f0a574ea34b4596c11e320148b3ae0d24e00f8923df8ba7bc62a46a6f53b9343243a348640d923dfd55d52cd6bb
-  languageName: node
-  linkType: hard
-
 "@modelcontextprotocol/sdk@npm:1.29.0":
   version: 1.29.0
   resolution: "@modelcontextprotocol/sdk@npm:1.29.0"
@@ -10552,20 +10498,20 @@ __metadata:
   linkType: hard
 
 "@swc/types@npm:^0.1.24":
-  version: 0.1.25
-  resolution: "@swc/types@npm:0.1.25"
-  dependencies:
-    "@swc/counter": "npm:^0.1.3"
-  checksum: 10c0/847a5b20b131281f89d640a7ed4887fb65724807d53d334b230e84b98c21097aa10cd28a074f9ed287a6ce109e443dd4bafbe7dcfb62333d7806c4ea3e7f8aca
-  languageName: node
-  linkType: hard
-
-"@swc/types@npm:^0.1.24, @swc/types@npm:^0.1.26":
   version: 0.1.26
   resolution: "@swc/types@npm:0.1.26"
   dependencies:
     "@swc/counter": "npm:^0.1.3"
-  checksum: 10c0/25f1bfa0ac34e9ac60aa7de91778f70906cd77a7abb3eb68c5da8d38d5202286b293300d4bb2792b3bb8840a7f5d5c4627c4ec34d2fae6533bfb3e14a70fd8fb
+  checksum: 10c0/8449341e8bbff81c14e9918c25421143cf605dff20f70f048847e1f7cede396f8dd73903cbef331a809b4a8e15d0db374a5f6809003e7b440f93df1dd4934d28
+  languageName: node
+  linkType: hard
+
+"@swc/types@npm:^0.1.27":
+  version: 0.1.28
+  resolution: "@swc/types@npm:0.1.28"
+  dependencies:
+    "@swc/counter": "npm:^0.1.3"
+  checksum: 10c0/7f2e959a7ee000ec4216acc6b7634e2d2fbe404b6ad3adf72bb91970a67359d7d429f60556342784dbe66912c7c987426683159e749332581a87e04de0524357
   languageName: node
   linkType: hard
 
@@ -23722,29 +23668,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimalistic-assert@npm:^1.0.0, minimalistic-assert@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "minimalistic-assert@npm:1.0.1"
-  checksum: 10c0/96730e5601cd31457f81a296f521eb56036e6f69133c0b18c13fe941109d53ad23a4204d946a0d638d7f3099482a0cec8c9bb6d642604612ce43ee536be3dddd
-  languageName: node
-  linkType: hard
-
-"minimalistic-crypto-utils@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "minimalistic-crypto-utils@npm:1.0.1"
-  checksum: 10c0/790ecec8c5c73973a4fbf2c663d911033e8494d5fb0960a4500634766ab05d6107d20af896ca2132e7031741f19888154d44b2408ada0852446705441383e9f8
-  languageName: node
-  linkType: hard
-
-"minimatch@npm:10.2.3":
-  version: 10.2.3
-  resolution: "minimatch@npm:10.2.3"
-  dependencies:
-    brace-expansion: "npm:^5.0.2"
-  checksum: 10c0/d9ae5f355e8bb77a42dd8c20b950141cec8773ef8716a2bb6df7a6840cc44a00ed828883884e4f1c7b5cb505fa06a17e3ea9ca2edb18fd1dec865ea7f9fcf0e5
-  languageName: node
-  linkType: hard
-
 "minimatch@npm:10.2.5, minimatch@npm:^10.2.2, minimatch@npm:^10.2.5":
   version: 10.2.5
   resolution: "minimatch@npm:10.2.5"
@@ -24005,23 +23928,6 @@ __metadata:
   bin:
     msw: cli/index.js
   checksum: 10c0/f0f07366ee94549d32236c3762e57fe946333d6c77c2f4ff4ff0a36a8b5455b59ff86e0e78ef9d6ad80c84fbe29742c0c7edeeaa8f176fe9ffbce598fa97c882
-  languageName: node
-  linkType: hard
-
-"multistream@npm:^4.0.1":
-  version: 4.1.0
-  resolution: "multistream@npm:4.1.0"
-  dependencies:
-    once: "npm:^1.4.0"
-    readable-stream: "npm:^3.6.0"
-  checksum: 10c0/84224c1268960f056e63fd8bd290231f5227da78e313aa6a2ac23bc90667491afde759622b205eff8f1593337e81af7a47ec7d4862b68800e8a3fdd2a5dacfd3
-  languageName: node
-  linkType: hard
-
-"muggle-string@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "muggle-string@npm:0.4.1"
-  checksum: 10c0/e914b63e24cd23f97e18376ec47e4ba3aa24365e4776212b666add2e47bb158003212980d732c49abf3719568900af7861873844a6e2d3a7ca7e86952c0e99e9
   languageName: node
   linkType: hard
 
