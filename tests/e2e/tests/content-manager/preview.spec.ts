@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
@@ -10,6 +10,29 @@ import {
 import { resetFiles } from '../../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+/**
+ * Opens the preview page from the currently open edit view — deterministically.
+ *
+ * "Open preview" triggers a client-side navigation, and the side panel
+ * re-renders while the document queries settle: a click can land on a link
+ * node that is replaced before the event dispatches, silently doing nothing
+ * (observed on Firefox in CI). The old follow-up assertions ("Draft" text and
+ * the document heading) did not catch this because the edit view displays the
+ * same texts, so the tests only failed later on a preview-only element.
+ *
+ * Retry the click until the preview route is actually reached, then let the
+ * page settle.
+ */
+const openPreview = async (page: Page) => {
+  await expect(async () => {
+    if (!/\/preview($|\?)/.test(page.url())) {
+      await page.getByRole('link', { name: /open preview/i }).click();
+    }
+    await page.waitForURL(/\/preview($|\?)/, { timeout: 5_000 });
+  }).toPass({ timeout: 30_000 });
+  await page.waitForLoadState('networkidle');
+};
 
 test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
@@ -27,7 +50,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await page.getByRole('link', { name: /open preview/i }).click();
+    await openPreview(page);
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
@@ -74,7 +97,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
@@ -97,7 +120,7 @@ test.describe('Preview', () => {
     await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
 
     // Check if the iframe is present
     const iframe = page.getByTitle('Preview');
@@ -125,7 +148,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Open the preview page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
 
     // Try to publish - should work without conditional field validation errors
     const publishButton = page.getByRole('button', { name: /publish/i });
@@ -161,7 +184,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Open the preview page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await openPreview(page);
 
     const titleBox = page.getByRole('textbox', { name: 'title' });
     const saveButton = page.getByRole('button', { name: /save/i });

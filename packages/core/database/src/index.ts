@@ -18,6 +18,7 @@ import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
+export { isDatabaseClientKind } from './connection';
 
 interface Settings {
   forceMigration?: boolean;

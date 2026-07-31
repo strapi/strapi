@@ -608,6 +608,20 @@ export const server: SetupServer = setupServer(
     /**
      * Audit Logs
      */
+    http.get('/admin/audit-logs/users', () => {
+      return HttpResponse.json({
+        results: [
+          { id: 1, email: 'john@testing.com', displayName: 'John Doe' },
+          { id: 2, email: 'kai@testing.com', displayName: 'Kai Doe' },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 2,
+        },
+      });
+    }),
     http.get('/admin/audit-logs', () => {
       return HttpResponse.json({
         results: [
