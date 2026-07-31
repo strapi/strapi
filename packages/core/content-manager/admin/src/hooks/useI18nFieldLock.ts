@@ -29,9 +29,8 @@ const useIsEditingDefaultLocale = (): boolean => {
   }
 
   const currentLocale = query?.plugins?.i18n?.locale ?? currentDocument.document?.locale;
-  const defaultLocale = (
-    currentDocument.meta as { defaultLocale?: string | null } | undefined
-  )?.defaultLocale;
+  const defaultLocale = (currentDocument.meta as { defaultLocale?: string | null } | undefined)
+    ?.defaultLocale;
 
   if (!currentLocale || !defaultLocale) {
     return true;
