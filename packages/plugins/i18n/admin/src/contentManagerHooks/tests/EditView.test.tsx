@@ -183,4 +183,27 @@ describe('mutateEditViewHook – label action injection and localization', () =>
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
     ).toBeInTheDocument();
   });
+
+  it('treats relations without i18n pluginOptions as localized (server parity)', () => {
+    const relationField = makeEditField({
+      attribute: { type: 'relation' },
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[relationField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+    expect(screen.queryByText(/This value is common to all locales/i)).not.toBeInTheDocument();
+  });
 });

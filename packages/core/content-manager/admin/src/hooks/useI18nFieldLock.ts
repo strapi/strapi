@@ -56,9 +56,15 @@ const useShouldLockNonLocalizedField = (
     return false;
   }
 
+  // Match server `isLocalizedAttribute`: relations and uids are always locale-specific
+  // even when they omit `pluginOptions.i18n.localized` (CTB never offers that checkbox).
+  if (attribute.type === 'relation' || attribute.type === 'uid') {
+    return false;
+  }
+
   const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
 
-  // Matches server/admin i18n semantics: only explicit `localized: true` is localizable.
+  // Only explicit `localized: true` is localizable for other attribute types.
   return i18nOptions?.i18n?.localized !== true;
 };
 
