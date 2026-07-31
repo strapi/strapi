@@ -4,15 +4,21 @@ import chalk from 'chalk';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
+import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
 
 const omitInvalidCreationAttributes = omit(['id']);
 
 const restoreCoreStore = async <T extends { value: unknown }>(strapi: Core.Strapi, values: T) => {
   const data = omitInvalidCreationAttributes(values);
+  const row = await restoreProjectSettingsRow(
+    strapi,
+    data as unknown as { key: string; value: unknown }
+  );
+
   return strapi.db.query('strapi::core-store').create({
     data: {
-      ...data,
-      value: JSON.stringify(data.value),
+      ...row,
+      value: JSON.stringify(row.value),
     },
   });
 };

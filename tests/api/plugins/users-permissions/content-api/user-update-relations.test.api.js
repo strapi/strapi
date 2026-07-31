@@ -53,6 +53,26 @@ const articleModel = {
   collectionName: '',
 };
 
+const optInModel = {
+  attributes: {
+    caption: {
+      type: 'string',
+    },
+    user: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'plugin::users-permissions.user',
+      targetAttribute: 'optIns',
+    },
+  },
+  draftAndPublish: true,
+  displayName: 'OptIn',
+  singularName: 'opt-in',
+  pluralName: 'opt-ins',
+  description: '',
+  collectionName: '',
+};
+
 let userSeq = 0;
 const createUser = async (overrides = {}) => {
   userSeq += 1;
@@ -71,10 +91,32 @@ const createUser = async (overrides = {}) => {
 const createArticle = (title = 'Article') =>
   strapi.db.query('api::article.article').create({ data: { title } });
 
+const createPublishedOptIn = async () => {
+  const optIn = await strapi.documents('api::opt-in.opt-in').create({
+    data: { caption: 'Drafted Opt-In' },
+  });
+
+  await strapi.documents('api::opt-in.opt-in').publish({ documentId: optIn.documentId });
+
+  // Keep the draft row different from the published row so tests can prove the populated
+  // relation selected the published version rather than the later draft.
+  await strapi.documents('api::opt-in.opt-in').update({
+    documentId: optIn.documentId,
+    data: { caption: 'Drafted Opt-In Modified' },
+  });
+
+  const publishedOptIn = await strapi.documents('api::opt-in.opt-in').findFirst({
+    status: 'published',
+    filters: { documentId: optIn.documentId },
+  });
+
+  return publishedOptIn;
+};
+
 const readUser = (id) =>
   strapi.db.query('plugin::users-permissions.user').findOne({
     where: { id },
-    populate: ['favoriteArticles', 'favoriteArticle', 'role'],
+    populate: ['favoriteArticles', 'favoriteArticle', 'role', 'optIns'],
   });
 
 const putUser = (id, body) => rq({ method: 'PUT', url: `/users/${id}`, body });
@@ -82,7 +124,7 @@ const putUser = (id, body) => rq({ method: 'PUT', url: `/users/${id}`, body });
 describe('U&P users REST relation handling (issue 26606)', () => {
   beforeAll(async () => {
     builder = createTestBuilder();
-    await builder.addContentType(articleModel).build();
+    await builder.addContentTypes([articleModel, optInModel]).build();
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
@@ -328,6 +370,158 @@ describe('U&P users REST relation handling (issue 26606)', () => {
       const after = await readUser(user.id);
       expect(after.favoriteArticle).not.toBeNull();
       expect(after.favoriteArticle.documentId).toBe(article.documentId);
+    });
+
+    test('Document Service connects a users-permissions user to a published DP target', async () => {
+      const user = await createUser();
+      const optIn = await createPublishedOptIn();
+
+      const updatedUser = await strapi.documents('plugin::users-permissions.user').update({
+        documentId: user.documentId,
+        data: {
+          optIns: {
+            connect: {
+              documentId: optIn.documentId,
+              status: 'published',
+            },
+          },
+        },
+        populate: 'optIns',
+      });
+
+      expect(updatedUser.optIns).toHaveLength(1);
+      expect(updatedUser.optIns[0]).toMatchObject({
+        id: optIn.id,
+        documentId: optIn.documentId,
+        caption: 'Drafted Opt-In',
+        publishedAt: expect.any(String),
+      });
+    });
+
+    test('PUT connects a users-permissions user to a published DP target', async () => {
+      const user = await createUser();
+      const optIn = await createPublishedOptIn();
+
+      const res = await putUser(user.id, {
+        optIns: {
+          connect: {
+            documentId: optIn.documentId,
+            status: 'published',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const after = await readUser(user.id);
+      expect(after.optIns).toHaveLength(1);
+      expect(after.optIns[0]).toMatchObject({
+        id: optIn.id,
+        documentId: optIn.documentId,
+        caption: 'Drafted Opt-In',
+        publishedAt: expect.any(String),
+      });
+    });
+  });
+
+  // Follow-up to https://github.com/strapi/strapi/issues/24343 — the `role`
+  // relation carried its own numeric-only validation gate, so unlike every other
+  // relation it could not be referenced by `documentId` (nor via the longhand
+  // connect/disconnect object) at the REST boundary. These lock in full parity.
+  describe('role relation by documentId + longhand', () => {
+    const postUser = (body) => rq({ method: 'POST', url: '/users', body });
+    let roleSeq = 0;
+    const uniqueUser = () => {
+      roleSeq += 1;
+      return {
+        username: `roleuser${roleSeq}`,
+        email: `roleuser${roleSeq}@strapi.io`,
+        password: 'password123',
+      };
+    };
+
+    test('POST /users sets the role by documentId shorthand', async () => {
+      const res = await postUser({ ...uniqueUser(), role: authenticatedRole.documentId });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.role.id).toBe(authenticatedRole.id);
+    });
+
+    test('POST /users sets the role via longhand connect by documentId', async () => {
+      const res = await postUser({
+        ...uniqueUser(),
+        role: { connect: [{ documentId: publicRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role by documentId shorthand', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, { role: publicRole.documentId });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role via longhand connect by documentId', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, {
+        role: { connect: [{ documentId: publicRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role via longhand connect by numeric id', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, { role: { connect: [{ id: publicRole.id }] } });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT rejects disconnecting the last role (must keep a role)', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, {
+        role: { connect: [], disconnect: [{ documentId: authenticatedRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    describe('invalid role relation input', () => {
+      test('POST /users rejects an empty role object', async () => {
+        const res = await postUser({ ...uniqueUser(), role: {} });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('POST /users rejects a connect entry with neither id nor documentId', async () => {
+        const res = await postUser({
+          ...uniqueUser(),
+          role: { connect: [{}] },
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('PUT rejects a connect entry with neither id nor documentId', async () => {
+        const user = await createUser();
+
+        const res = await putUser(user.id, { role: { connect: [{}] } });
+
+        expect(res.statusCode).toBe(400);
+      });
     });
   });
 });

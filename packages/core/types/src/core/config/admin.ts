@@ -15,6 +15,7 @@ export interface AuthSessions {
 }
 
 export interface AuthCookie {
+  name?: string;
   secure?: boolean;
   domain?: string;
   path?: string;
@@ -64,6 +65,11 @@ export interface ForgotPassword {
   emailTemplate?: string;
   from?: string;
   replyTo?: string;
+  /**
+   * Lifetime of the reset-password token. Accepts a number of seconds or a
+   * shorthand string such as `'15m'` / `'1h'`. Defaults to `'1h'`.
+   */
+  expiresIn?: string | number;
 }
 
 export interface RateLimit {
@@ -72,7 +78,7 @@ export interface RateLimit {
   max?: number;
   delayAfter?: number;
   timeWait?: number;
-  prefixKey?: number;
+  prefixKey?: string;
   whitelist?: string;
   store?: string;
 }
@@ -82,7 +88,18 @@ export interface Transfer {
 }
 
 export interface FirstPublisedAtField {
+  /**
+   * @deprecated Use `features.future.experimental_firstPublishedAt` in `config/features.ts` instead.
+   */
   enabled: boolean;
+}
+
+export interface AdminLayoutModel {
+  actions?: Record<string, string>;
+}
+
+export interface AdminLayout {
+  [modelName: string]: AdminLayoutModel | undefined;
 }
 
 export interface Flags {
@@ -120,8 +137,22 @@ export interface Admin {
   apiToken: ApiToken;
   auth: Auth;
 
-  // optional - server configuration
+  // optional - admin panel URL and legacy dev-server settings
+  /**
+   * Legacy option from when the admin panel ran on a separate webpack dev server
+   * (pre–v5 admin build pipeline). Not read by Strapi v5.
+   *
+   * For split deployment, use `admin.url` with `server.url` and `serveAdminPanel: false`.
+   * For the API listen address, use `server.host` / `server.port` in `config/server.ts`.
+   */
   host?: string;
+  /**
+   * Legacy option from when the admin panel ran on a separate webpack dev server
+   * (pre–v5 admin build pipeline). Not read by Strapi v5.
+   *
+   * For split deployment, use `admin.url` with `server.url` and `serveAdminPanel: false`.
+   * For the API listen address, use `server.host` / `server.port` in `config/server.ts`.
+   */
   port?: number;
   serveAdminPanel?: boolean;
   autoOpen?: boolean;
@@ -138,7 +169,16 @@ export interface Admin {
   ai?: Ai;
   forgotPassword?: ForgotPassword;
   rateLimit?: RateLimit;
+  /**
+   * @deprecated Use `features.future.experimental_firstPublishedAt` in `config/features.ts` instead.
+   */
   firstPublishedAtField?: FirstPublisedAtField;
   flags?: Flags;
   transfer?: Transfer;
+  /**
+   * Override content-manager edit-view actions per model.
+   *
+   * Keys are content-type model names. Values map action names to `controller.action` handlers.
+   */
+  layout?: AdminLayout;
 }

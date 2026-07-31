@@ -1,29 +1,33 @@
-export enum ErrorKind {
+export const ERROR_KINDS = {
   // Generic
-  Unknown = 0,
+  Unknown: 'unknown',
   // Chunk transfer
-  DiscardChunk = 1,
-  InvalidChunkFormat = 2,
-}
+  DiscardChunk: 'discard-chunk',
+  InvalidChunkFormat: 'invalid-chunk-format',
+} as const;
+
+export type ErrorKind = (typeof ERROR_KINDS)[keyof typeof ERROR_KINDS];
 
 export class ServerError extends Error {
-  constructor(
-    public code: ErrorKind,
-    public message: string,
-    public details?: Record<string, unknown> | null
-  ) {
+  public code: ErrorKind;
+
+  public details?: Record<string, unknown> | null;
+
+  constructor(code: ErrorKind, message: string, details?: Record<string, unknown> | null) {
     super(message);
+    this.code = code;
+    this.details = details;
   }
 }
 
 export class UnknownError extends ServerError {
   constructor(message: string, details?: Record<string, unknown> | null) {
-    super(ErrorKind.Unknown, message, details);
+    super(ERROR_KINDS.Unknown, message, details);
   }
 }
 
 export class DiscardChunkError extends ServerError {
   constructor(message: string, details?: Record<string, unknown> | null) {
-    super(ErrorKind.DiscardChunk, message, details);
+    super(ERROR_KINDS.DiscardChunk, message, details);
   }
 }

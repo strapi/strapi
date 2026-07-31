@@ -79,7 +79,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
           .test(
             'isValidDefaultUID',
             'cannot define a default UID if the targetField is set',
-            function (value) {
+            function isValidDefaultUID(value) {
               const { targetField } = this.parent;
               return !!(_.isNil(targetField) || _.isNil(value));
             }
@@ -87,7 +87,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
           .test(
             'isValidDefaultRegexUID',
             `\${path} must match the custom regex or the default one "${UID_REGEX}"`,
-            function (value) {
+            function isValidDefaultRegexUID(value) {
               const { regex } = this.parent;
 
               if (regex) {
@@ -250,7 +250,12 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
         components: yup
           .array()
           .of(yup.string().required())
-          .test('isArray', '${path} must be an array', (value) => Array.isArray(value))
+          .test(
+            'isArray',
+            // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
+            '${path} must be an array',
+            (value) => Array.isArray(value)
+          )
           .min(1),
         min: yup.number(),
         max: yup.number(),

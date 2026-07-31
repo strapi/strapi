@@ -9,6 +9,7 @@ const config = {
     '.eslintrc.cjs',
     'build',
     '**/node_modules/**',
+    'lint-staged.config.mjs',
   ],
   env: {
     commonjs: true,

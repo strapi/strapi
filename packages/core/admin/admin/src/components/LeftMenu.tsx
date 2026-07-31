@@ -62,10 +62,10 @@ const MenuDetails = styled(Flex)`
 `;
 
 const LeftMenu = ({
-  generalSectionLinks,
-  pluginsSectionLinks,
-  topMobileNavigation,
-  burgerMobileNavigation,
+  generalSectionLinks = [],
+  pluginsSectionLinks = [],
+  topMobileNavigation = [],
+  burgerMobileNavigation = [],
 }: LeftMenuProps) => {
   const [isBurgerMenuShown, setIsBurgerMenuShown] = React.useState(false);
   const { trackUsage } = useTracking();

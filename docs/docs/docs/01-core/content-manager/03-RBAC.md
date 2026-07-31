@@ -28,7 +28,7 @@ Each document's permission's object will contain `properties.fields` which is an
 }
 ```
 
-The above permissions relate to what fields the user can create on the article content-type. The list of fields are their names in the schema, not their labels (which can be overridden in the EditViewSettings), components are dot separated paths where the component name will be the first part of said path, repeatable compoenents **will not** have indexes in the path and finally, in dynamic zones all fields are always allowed.
+The above permissions relate to what fields the user can create on the article content-type. The list of fields are their names in the schema, not their labels (which can be overridden in the EditViewSettings), components are dot separated paths where the component name will be the first part of said path, repeatable components **will not** have indexes in the path and finally, in dynamic zones all fields are always allowed.
 
 ## DocumentRBAC Component
 

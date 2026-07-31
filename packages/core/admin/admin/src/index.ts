@@ -17,6 +17,7 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export { LazyOutlet, type LazyOutletProps } from './components/LazyOutlet';
 export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';

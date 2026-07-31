@@ -4,13 +4,16 @@ import { deriveDisplayedContentTypeMcpToolDefinitions } from './derive-content-t
 import { getService } from '../utils';
 
 /**
- * Registers derived content-type MCP tools during plugin bootstrap, before the MCP HTTP server starts.
+ * Registers derived content-type MCP tools via strapi.ai.mcp.registerTool().
+ * Must be called from the plugin register phase, before the MCP HTTP server starts.
  */
 export const registerContentManagerMcpTools = async ({
   strapi,
 }: {
   strapi: Core.Strapi;
 }): Promise<void> => {
+  // Performance only: registerTool() is safe when MCP is disabled (definitions are stored but
+  // never exposed). Skip the expensive derivation below when the MCP server will not start.
   if (strapi.ai.mcp.isEnabled() !== true) {
     return;
   }

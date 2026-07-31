@@ -6,9 +6,14 @@ import type { Core } from '@strapi/types';
 import Strapi, { type StrapiOptions } from './Strapi';
 import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from './utils';
 import type { AppDefinition } from './app-definition';
+import type {
+  ContextDelegatedResponseErrorMethods,
+  ContextDelegatedResponseSuccessMethods,
+} from './services/server/koa-methods';
 
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
+export * as ai from './ai';
 
 export {
   defineApp,
@@ -152,4 +157,8 @@ declare module 'koa' {
     get query(): ParsedQuery;
     set query(obj: any);
   }
+
+  interface DefaultContextDelegatedResponse
+    extends ContextDelegatedResponseErrorMethods,
+      ContextDelegatedResponseSuccessMethods {}
 }

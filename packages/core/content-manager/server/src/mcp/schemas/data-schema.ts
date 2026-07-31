@@ -68,9 +68,6 @@ export function buildComponentInputSchema(
  * here to avoid a cross-package import from @strapi/content-manager into
  * @strapi/core (which is not a listed dependency).
  *
- * TODO — custom fields call `strapi.get('custom-fields')` at schema-build
- * time; confirm with an integration test that the registry is populated when MCP
- * tools are registered (post-bootstrap).
  */
 export const attributeToInputSchema = (
   strapi: Core.Strapi,
