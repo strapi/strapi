@@ -344,6 +344,10 @@ export default (context: Context) => {
             t.nonNull.id('id');
           }
 
+          if (modelType === 'component' && isNotDisabled(contentType)('componentKey')) {
+            t.nonNull.id('componentKey');
+          }
+
           if (modelType !== 'component' && isNotDisabled(contentType)('documentId')) {
             t.nonNull.id('documentId');
           }
@@ -381,6 +385,8 @@ export default (context: Context) => {
             .filter(isNotPrivate(contentType))
             // Ignore disabled fields (from extension service)
             .filter(isNotDisabled(contentType))
+            // componentKey is registered explicitly above (ID scalar); skip the string attribute pass
+            .filter((attributeName) => attributeName !== 'componentKey')
             // Add each attribute to the type definition
             .forEach((attributeName) => {
               const attribute = attributes[attributeName];
