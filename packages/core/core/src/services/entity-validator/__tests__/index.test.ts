@@ -503,6 +503,70 @@ describe('Entity validator', () => {
         ).resolves.toMatchObject({ links: [], sections: [] });
       });
 
+      test('Accepts omitted required repeatable component and dynamic zone on update, but rejects explicit null', async () => {
+        // The update counterpart of the creation case above, and the reason the MCP schema can
+        // relax required aggregates on `update` while keeping them on `create`. Here
+        // `addRequiredValidation` applies `notNull()` rather than `notNil()`, and `addDefault`
+        // uses `default(undefined)`, so an absent key is a no-op patch — but an explicit `null`
+        // still fails. Pinning both halves means a future switch to `notNil()` breaks this test
+        // instead of silently invalidating the advertised MCP contract.
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            links: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: true,
+              required: true,
+            },
+            sections: {
+              type: 'dynamiczone',
+              components: ['default.seo'],
+              required: true,
+            },
+          },
+        };
+
+        // Omitting both aggregate keys is a valid partial update, unlike on creation.
+        await expect(
+          entityValidator.validateEntityUpdate(model, {}, { isDraft: true })
+        ).resolves.toEqual({});
+
+        // Omitting either one individually is equally fine.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { links: [] }, { isDraft: true })
+        ).resolves.toMatchObject({ links: [] });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { sections: [] }, { isDraft: true })
+        ).resolves.toMatchObject({ sections: [] });
+
+        // Explicit null is not an omission — `notNull()` rejects it on both aggregates.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { links: null }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { sections: null }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+      });
+
       it('Supports custom field types', async () => {
         const model: Schema.ContentType = {
           ...modelBase,

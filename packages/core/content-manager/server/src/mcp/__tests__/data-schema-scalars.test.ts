@@ -290,6 +290,11 @@ describe('buildDataSchema | scalars, required/min projection, permissions', () =
   it('required aggregates relax on update (absent key is accepted server-side)', () => {
     // On update `addRequiredValidation` uses `notNull()` rather than `notNil()`, so an
     // absent key genuinely is accepted — the partial-update relaxation is safe here.
+    //
+    // Schema projection only; the server-side branch this depends on is pinned by "Accepts
+    // omitted required repeatable component and dynamic zone on update" in
+    // packages/core/core/src/services/entity-validator/__tests__/index.test.ts, which also
+    // covers explicit `null` still being rejected.
     const attrs = {
       links: { type: 'component', component: 'shared.seo', repeatable: true, required: true },
       sections: { type: 'dynamiczone', components: ['shared.seo'], required: true },
