@@ -8,7 +8,8 @@ import ts from 'typescript';
 import { readJsonRecord } from '../bundles';
 import { resolveIdExpression } from '../extract';
 import { expandTemplateToJsonKeys, isAdminMessageId, resolveMessageId } from '../patterns';
-import { fixLocaleFiles } from '../validate';
+import { fixLocaleFiles, validateBundle } from '../validate';
+import type { TranslationBundle } from '../types';
 
 describe('patterns', () => {
   it('detects admin message ids', () => {
@@ -87,5 +88,80 @@ describe('fixLocaleFiles', () => {
     const fixed = readJsonRecord(path.join(dir, 'fr.json'));
     assert.deepEqual(Object.keys(fixed), ['b.key', 'a.key']);
     assert.deepEqual(fixed, { 'b.key': 'B-fr', 'a.key': 'A-fr' });
+  });
+});
+
+describe('validateBundle admin self-checks', () => {
+  const makeAdminFixture = (source: string, en: Record<string, string>) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-admin-trad-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'en.json'), `${JSON.stringify(en, null, 2)}\n`);
+    fs.writeFileSync(path.join(srcDir, 'Widget.tsx'), source);
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/admin',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: null,
+      sourceDirs: [srcDir],
+    };
+
+    return { bundle, adminEn: en };
+  };
+
+  it('reports missing-en-key for core/admin formatMessage ids absent from en.json', () => {
+    const { bundle, adminEn } = makeAdminFixture(
+      `formatMessage({ id: 'global.missing-from-en', defaultMessage: 'Nope' });`,
+      { 'global.save': 'Save' }
+    );
+
+    const issues = validateBundle(bundle, adminEn);
+    const missing = issues.filter((issue) => issue.code === 'missing-en-key');
+
+    assert.equal(missing.length, 1);
+    assert.match(missing[0].message, /global\.missing-from-en/);
+  });
+
+  it('does not flag known core/admin keys as missing', () => {
+    const { bundle, adminEn } = makeAdminFixture(
+      `formatMessage({ id: 'global.save', defaultMessage: 'Save' });`,
+      { 'global.save': 'Save' }
+    );
+
+    const issues = validateBundle(bundle, adminEn);
+    assert.equal(issues.filter((issue) => issue.code === 'missing-en-key').length, 0);
+  });
+});
+
+describe('validateBundle cross-package admin refs', () => {
+  it('reports missing-admin-key when a plugin references an absent admin id', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-plugin-trad-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `formatMessage({ id: 'global.not-in-admin', defaultMessage: 'Nope' });`
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'plugins/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const issues = validateBundle(bundle, { 'global.save': 'Save' });
+    const missing = issues.filter((issue) => issue.code === 'missing-admin-key');
+
+    assert.equal(missing.length, 1);
+    assert.match(missing[0].message, /global\.not-in-admin/);
   });
 });

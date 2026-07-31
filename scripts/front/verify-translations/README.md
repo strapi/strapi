@@ -11,7 +11,7 @@ yarn verify:translations
 # Reorder locale files, prune extra keys, backfill missing keys from en.json
 yarn verify:translations --fix
 
-# Regenerate `keys.generated.ts` in each bundle (TypeScript key unions)
+# Regenerate `keys.generated.d.ts` in each bundle (TypeScript key unions)
 yarn verify:translations --write-types
 
 # Scope to one package

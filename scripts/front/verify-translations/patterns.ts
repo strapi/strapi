@@ -90,9 +90,14 @@ export const resolveTargetBundle = (
   pluginEnKeys: Set<string>,
   adminEnKeys: Set<string>
 ): 'core/admin' | 'self' => {
+  // core/admin: local en.json is the admin catalog (cross-package 'core/admin' is plugins-only).
+  if (!pluginPrefix) {
+    return 'self';
+  }
+
   const jsonKey = toJsonKey(rawId, pluginPrefix);
 
-  if (pluginPrefix && pluginEnKeys.has(jsonKey)) {
+  if (pluginEnKeys.has(jsonKey)) {
     return 'self';
   }
 
@@ -222,6 +227,10 @@ export const resolveMessageId = (
   if (fromHelper) {
     if (pluginEnKeys.has(jsonKey)) {
       return { messageId: toMessageId(jsonKey, pluginPrefix), targetBundle: 'self' };
+    }
+
+    if (!pluginPrefix) {
+      return { messageId: jsonKey, targetBundle: 'self' };
     }
 
     if (adminEnKeys.has(jsonKey)) {

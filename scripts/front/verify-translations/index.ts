@@ -54,7 +54,7 @@ const main = () => {
       }
     }
 
-    console.log(`Wrote ${writtenTypes} keys.generated.ts file(s).`);
+    console.log(`Wrote ${writtenTypes} keys.generated.d.ts file(s).`);
   }
 
   for (const bundle of bundles) {

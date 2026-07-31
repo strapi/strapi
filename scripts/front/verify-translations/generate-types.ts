@@ -51,26 +51,3 @@ export const writeTypesForBundle = (bundle: TranslationBundle): boolean => {
   fs.writeFileSync(outputPath, content);
   return true;
 };
-
-export const generateHelperOverload = (bundle: TranslationBundle): string | null => {
-  if (!bundle.pluginPrefix) {
-    return null;
-  }
-
-  const typeBase = toTypeName(bundle.packageName);
-  const helperName =
-    bundle.packageName === 'core/content-manager' || bundle.packageName === 'plugins/i18n'
-      ? 'getTranslation'
-      : 'getTrad';
-
-  return `import type { ${typeBase}TradKey, ${typeBase}MessageId } from '../translations/keys.generated';
-
-type AnyString = string & {};
-
-export function ${helperName}(id: ${typeBase}TradKey): ${typeBase}MessageId;
-export function ${helperName}(id: AnyString): string;
-export function ${helperName}(id: string): string {
-  return \`${bundle.pluginPrefix}.\${id}\`;
-}
-`;
-};

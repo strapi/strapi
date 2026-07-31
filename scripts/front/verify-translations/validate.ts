@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 
-import { isAdminMessageId } from './patterns';
 import { listLocaleFiles, readJsonRecord } from './bundles';
 import { extractMessages, extractValidationErrorKeys } from './extract';
 import type { MessageExtraction, TranslationBundle, ValidationIssue } from './types';
@@ -130,22 +129,6 @@ const validateCrossPackageAdminKeys = (
           }
         }
       }
-    }
-
-    if (
-      extraction.messageId &&
-      extraction.targetBundle === 'core/admin' &&
-      !extraction.messageId.includes('|') &&
-      !adminKeys.has(extraction.messageId)
-    ) {
-      issues.push({
-        severity: 'error',
-        bundle: bundle.packageName,
-        code: 'missing-admin-key',
-        message: `Cross-package admin message id "${extraction.messageId}" is missing from core/admin en.json`,
-        file: extraction.file,
-        line: extraction.line,
-      });
     }
   }
 

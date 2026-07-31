@@ -263,7 +263,7 @@ const buildExtraction = (
       messageId: null,
       defaultMessage,
       note: classification.note,
-      targetBundle: bundle.packageName,
+      targetBundle: 'self',
     };
   }
 
@@ -303,7 +303,7 @@ const buildExtraction = (
         messageId: null,
         defaultMessage,
         note,
-        targetBundle: bundle.packageName,
+        targetBundle: 'self',
       };
     }
 
@@ -339,7 +339,7 @@ const buildExtraction = (
     defaultMessage,
     expandedJsonKeys: keys.length > 1 ? keys : undefined,
     note,
-    targetBundle: bundle.packageName,
+    targetBundle: 'self',
   };
 };
 
