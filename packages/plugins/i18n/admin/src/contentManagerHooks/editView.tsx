@@ -8,8 +8,8 @@ import { styled } from 'styled-components';
 import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
-import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
 import type { I18nBaseQuery } from '../types';
+import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
 
 interface MutateEditViewArgs {
   layout: EditLayout;
