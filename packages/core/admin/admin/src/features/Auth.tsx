@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Dialog } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
@@ -109,6 +109,52 @@ const STORAGE_KEYS = {
   STATUS: 'isLoggedIn',
 };
 
+/**
+ * Why the session is ending. `idle` only means the short-lived access token
+ * expired while the user was away — the refresh token is still valid, so the
+ * session can be resumed. `session-dead` is server-confirmed and final.
+ */
+type LogoutReason = 'voluntary' | 'idle' | 'session-dead';
+
+const isForcedLogout = (reason: LogoutReason) => reason === 'session-dead';
+
+/**
+ * Copy for the unsaved-changes prompt. Session expiry needs to say *why* the
+ * dialog appeared, otherwise it reads as the usual navigation blocker and users
+ * confirm straight through it.
+ */
+const LOGOUT_PROMPTS = {
+  voluntary: {
+    title: undefined,
+    body: {
+      id: 'global.prompt.unsaved',
+      defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+    },
+  },
+  idle: {
+    title: {
+      id: 'app.session.expired.title',
+      defaultMessage: 'Session expired',
+    },
+    body: {
+      id: 'app.session.expired.unsaved',
+      defaultMessage:
+        'Your session expired after a period of inactivity and you have unsaved changes. Confirm to log out, or cancel to stay on this page — your session resumes with your next action.',
+    },
+  },
+  'session-dead': {
+    title: {
+      id: 'app.session.ended.title',
+      defaultMessage: 'Session ended',
+    },
+    body: {
+      id: 'app.session.ended.unsaved',
+      defaultMessage:
+        "Your session has ended and can't be resumed. Your unsaved changes will be lost when you log out.",
+    },
+  },
+} satisfies Record<LogoutReason, { title?: MessageDescriptor; body: MessageDescriptor }>;
+
 const AuthProvider = ({
   children,
   _defaultPermissions = [],
@@ -153,29 +199,28 @@ const AuthProvider = ({
 
   const pendingLogoutRef = React.useRef<(() => void) | null>(null);
   const logoutGuardOpenRef = React.useRef(false);
-  const logoutGuardForcedRef = React.useRef(false);
+  const logoutGuardReasonRef = React.useRef<LogoutReason>('voluntary');
   const [isSessionLogoutDialogOpen, setIsSessionLogoutDialogOpen] = React.useState(false);
-  const [isSessionLogoutForced, setIsSessionLogoutForced] = React.useState(false);
+  const [sessionLogoutReason, setSessionLogoutReason] = React.useState<LogoutReason>('voluntary');
 
   /**
    * Prompt before discarding unsaved edits, then run `logoutFn`.
    *
-   * - Voluntary (explicit logout, idle access-token expiry): Cancel leaves the
-   *   user logged in. Idle expiry is speculative — the refresh token is still
-   *   valid, so the next request refreshes the access token and re-arms the
-   *   idle timer.
-   * - Forced (server-confirmed dead session): the session is already unusable —
-   *   Cancel (or dismiss) still runs `logoutFn` so the client cannot keep a
-   *   stale token. While the dialog is open, a later forced request upgrades the
-   *   pending action (e.g. local idle → global session-dead).
+   * - `voluntary` / `idle`: Cancel leaves the user logged in. Idle expiry is
+   *   speculative — the refresh token is still valid, so the next request
+   *   refreshes the access token and re-arms the idle timer.
+   * - `session-dead`: the session is already unusable — Cancel (or dismiss)
+   *   still runs `logoutFn` so the client cannot keep a stale token. While the
+   *   dialog is open, a later `session-dead` request upgrades the pending action
+   *   (e.g. local idle → global session-dead).
    */
   const runLogoutWithGuard = React.useCallback(
-    (logoutFn: () => void, { forced = false }: { forced?: boolean } = {}) => {
+    (logoutFn: () => void, reason: LogoutReason = 'voluntary') => {
       if (logoutGuardOpenRef.current) {
         pendingLogoutRef.current = logoutFn;
-        if (forced) {
-          logoutGuardForcedRef.current = true;
-          setIsSessionLogoutForced(true);
+        if (isForcedLogout(reason)) {
+          logoutGuardReasonRef.current = reason;
+          setSessionLogoutReason(reason);
         }
         return;
       }
@@ -186,9 +231,9 @@ const AuthProvider = ({
       }
 
       logoutGuardOpenRef.current = true;
-      logoutGuardForcedRef.current = forced;
+      logoutGuardReasonRef.current = reason;
       pendingLogoutRef.current = logoutFn;
-      setIsSessionLogoutForced(forced);
+      setSessionLogoutReason(reason);
       setIsSessionLogoutDialogOpen(true);
     },
     []
@@ -216,7 +261,7 @@ const AuthProvider = ({
   }, [dispatch, navigate]);
 
   const clearStateAndLogout = React.useCallback(() => {
-    runLogoutWithGuard(performGlobalLogout, { forced: true });
+    runLogoutWithGuard(performGlobalLogout, 'session-dead');
   }, [performGlobalLogout, runLogoutWithGuard]);
 
   /**
@@ -234,27 +279,27 @@ const AuthProvider = ({
    * request refreshes the session.
    */
   const clearLocalSessionAndRedirect = React.useCallback(() => {
-    runLogoutWithGuard(performLocalLogout);
+    runLogoutWithGuard(performLocalLogout, 'idle');
   }, [performLocalLogout, runLogoutWithGuard]);
 
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;
-    logoutGuardForcedRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
     setIsSessionLogoutDialogOpen(false);
-    setIsSessionLogoutForced(false);
+    setSessionLogoutReason('voluntary');
     const logoutFn = pendingLogoutRef.current;
     pendingLogoutRef.current = null;
     logoutFn?.();
   }, []);
 
   const handleCancelSessionLogout = React.useCallback(() => {
-    const forced = logoutGuardForcedRef.current;
+    const forced = isForcedLogout(logoutGuardReasonRef.current);
     const logoutFn = pendingLogoutRef.current;
     logoutGuardOpenRef.current = false;
-    logoutGuardForcedRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
     pendingLogoutRef.current = null;
     setIsSessionLogoutDialogOpen(false);
-    setIsSessionLogoutForced(false);
+    setSessionLogoutReason('voluntary');
     // Forced paths: session is already dead — dismiss must still clear client state.
     if (forced) {
       logoutFn?.();
@@ -534,13 +579,15 @@ const AuthProvider = ({
         <ConfirmDialog
           onConfirm={handleConfirmSessionLogout}
           onCancel={handleCancelSessionLogout}
+          title={
+            LOGOUT_PROMPTS[sessionLogoutReason].title
+              ? formatMessage(LOGOUT_PROMPTS[sessionLogoutReason].title)
+              : undefined
+          }
           // Forced session-dead: no Cancel that pretends the session is still valid.
-          startAction={isSessionLogoutForced ? <></> : undefined}
+          startAction={isForcedLogout(sessionLogoutReason) ? <></> : undefined}
         >
-          {formatMessage({
-            id: 'global.prompt.unsaved',
-            defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-          })}
+          {formatMessage(LOGOUT_PROMPTS[sessionLogoutReason].body)}
         </ConfirmDialog>
       </Dialog.Root>
     </>

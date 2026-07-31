@@ -51,7 +51,9 @@ describe('AuthProvider', () => {
         getIdleSessionOptions().onExpired();
       });
 
-      expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+      const dialog = await screen.findByRole('alertdialog');
+
+      expect(dialog).toHaveTextContent(/session expired after a period of inactivity/i);
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
 
@@ -68,7 +70,9 @@ describe('AuthProvider', () => {
         getIdleSessionOptions().onSessionDead?.();
       });
 
-      expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+      const dialog = await screen.findByRole('alertdialog');
+
+      expect(dialog).toHaveTextContent(/session has ended and can't be resumed/i);
       expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
     });
 
