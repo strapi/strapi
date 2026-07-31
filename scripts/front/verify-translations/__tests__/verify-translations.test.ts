@@ -9,6 +9,7 @@ import { readJsonRecord } from '../bundles';
 import { resolveIdExpression } from '../extract';
 import { expandTemplateToJsonKeys, isAdminMessageId, resolveMessageId } from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
+import { backfillMissingEnKeys } from '../write-en';
 import type { TranslationBundle } from '../types';
 
 describe('patterns', () => {
@@ -89,6 +90,108 @@ describe('fixLocaleFiles', () => {
     assert.deepEqual(Object.keys(fixed), ['b.key', 'a.key']);
     assert.deepEqual(fixed, { 'b.key': 'B-fr', 'a.key': 'A-fr' });
     assert.equal('missing.key' in fixed, false);
+  });
+});
+
+describe('backfillMissingEnKeys', () => {
+  it('adds missing en.json keys from defaultMessage before locale prune keeps translations', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-backfill-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(dir, 'fr.json'),
+      `${JSON.stringify(
+        { 'plugin.name': 'Upload-fr', 'used.key': 'Utilisée', 'orphan.key': 'Orpheline' },
+        null,
+        2
+      )}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `formatMessage({ id: getTrad('used.key'), defaultMessage: 'Used' });`
+    );
+
+    const adminDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-admin-'));
+    fs.writeFileSync(path.join(adminDir, 'en.json'), `${JSON.stringify({}, null, 2)}\n`);
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const adminBundle: TranslationBundle = {
+      packagePath: adminDir,
+      packageName: 'core/admin',
+      enJsonPath: path.join(adminDir, 'en.json'),
+      translationsDir: adminDir,
+      pluginPrefix: null,
+      sourceDirs: [],
+    };
+
+    const result = backfillMissingEnKeys([bundle], adminBundle);
+    assert.equal(
+      result.addedKeys.some((entry) => entry.key === 'used.key'),
+      true
+    );
+    assert.equal(readJsonRecord(bundle.enJsonPath)['used.key'], 'Used');
+
+    fixLocaleFiles(bundle);
+
+    const fixed = readJsonRecord(path.join(dir, 'fr.json'));
+    assert.deepEqual(fixed, { 'plugin.name': 'Upload-fr', 'used.key': 'Utilisée' });
+  });
+
+  it('backfills cross-package admin keys referenced from plugins', () => {
+    const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-plugin-'));
+    const pluginSrc = path.join(pluginDir, 'admin', 'src');
+    fs.mkdirSync(pluginSrc, { recursive: true });
+    fs.writeFileSync(
+      path.join(pluginDir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(pluginSrc, 'Widget.tsx'),
+      `formatMessage({ id: 'global.move', defaultMessage: 'Move' });`
+    );
+
+    const adminDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-admin2-'));
+    const adminSrc = path.join(adminDir, 'admin', 'src');
+    fs.mkdirSync(adminSrc, { recursive: true });
+    fs.writeFileSync(
+      path.join(adminDir, 'en.json'),
+      `${JSON.stringify({ 'global.save': 'Save' }, null, 2)}\n`
+    );
+
+    const pluginBundle: TranslationBundle = {
+      packagePath: pluginDir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(pluginDir, 'en.json'),
+      translationsDir: pluginDir,
+      pluginPrefix: 'upload',
+      sourceDirs: [pluginSrc],
+    };
+
+    const adminBundle: TranslationBundle = {
+      packagePath: adminDir,
+      packageName: 'core/admin',
+      enJsonPath: path.join(adminDir, 'en.json'),
+      translationsDir: adminDir,
+      pluginPrefix: null,
+      sourceDirs: [adminSrc],
+    };
+
+    backfillMissingEnKeys([adminBundle, pluginBundle], adminBundle);
+
+    assert.equal(readJsonRecord(adminBundle.enJsonPath)['global.move'], 'Move');
+    assert.equal(readJsonRecord(adminBundle.enJsonPath)['global.save'], 'Save');
   });
 });
 

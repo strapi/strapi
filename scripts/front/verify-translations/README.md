@@ -8,12 +8,16 @@ Validates Strapi admin `react-intl` message descriptors against `en.json` and lo
 # Full validation (exit 1 on errors)
 yarn verify:translations
 
-# Reorder existing locale keys and prune keys absent from en.json
+# Backfill missing en.json keys from defaultMessage, then reorder/prune locale orphans
 yarn verify:translations --fix
 
 # Scope to one package
 yarn verify:translations --bundle=core/content-manager
 ```
+
+`--fix` always closes `en.json` gaps **before** pruning locales. A key used in code with a
+`defaultMessage` but missing from `en.json` is added first; only then are locale keys absent
+from that catalog removed. That keeps translator work for live message ids.
 
 ## What it checks
 
@@ -44,4 +48,4 @@ Extractions are classified automatically:
 
 - Locale hygiene (`yarn verify:translations --fix`) and burn-down of remaining validation debt
 - CI gate (`yarn verify:translations` in `.github/workflows/tests.yml`) once debt is burned down
-- Optional: generate `en.json` from `defaultMessage` in source (Alternative A)
+- Optional: full `en.json` sync from `defaultMessage` / align call-site drift (`--write-en`)

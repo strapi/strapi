@@ -3,6 +3,7 @@ import { discoverBundles, repoRoot } from './bundles';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
 import { readJsonRecord } from './bundles';
+import { backfillMissingEnKeys } from './write-en';
 
 const parseArgs = (): VerifyOptions => {
   const args = process.argv.slice(2);
@@ -31,11 +32,19 @@ const main = () => {
     process.exit(1);
   }
 
-  const adminEnJson = readJsonRecord(adminBundle.enJsonPath);
   const allIssues: ValidationIssue[] = [];
   let fixedLocales = 0;
 
   if (options.fix) {
+    // Close en.json gaps before pruning locales so translators' strings for live keys survive.
+    const backfill = backfillMissingEnKeys(allBundles, adminBundle);
+
+    if (backfill.addedKeys.length > 0) {
+      console.log(
+        `Backfilled ${backfill.addedKeys.length} missing key(s) into ${backfill.changedBundles} en.json file(s).`
+      );
+    }
+
     for (const bundle of bundles) {
       fixedLocales += fixLocaleFiles(bundle);
     }
@@ -44,6 +53,8 @@ const main = () => {
       console.log(`Fixed ${fixedLocales} locale file(s). Re-run without --fix to verify.`);
     }
   }
+
+  const adminEnJson = readJsonRecord(adminBundle.enJsonPath);
 
   for (const bundle of bundles) {
     allIssues.push(...validateBundle(bundle, adminEnJson));
