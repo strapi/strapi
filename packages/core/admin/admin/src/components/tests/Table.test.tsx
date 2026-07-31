@@ -2,6 +2,9 @@ import { render, screen } from '@tests/utils';
 
 import { Table } from '../Table';
 
+type MockRow = { id: number; short_text: string };
+type MockHeader = Table.Header<MockRow, object>;
+
 const mockHeaders = [
   {
     name: 'id',
@@ -13,9 +16,9 @@ const mockHeaders = [
     label: 'short_text',
     sortable: true,
   },
-] as const satisfies Table.Header<any, any>[];
+] as const satisfies MockHeader[];
 
-const mockRows = [
+const mockRows: MockRow[] = [
   { id: 1, short_text: 'hello' },
   { id: 2, short_text: 'there' },
 ];

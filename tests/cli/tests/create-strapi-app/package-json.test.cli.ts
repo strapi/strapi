@@ -27,6 +27,7 @@ function makeScope(rootPath: string, overrides: Partial<Scope> = {}): Scope {
     dependencies: {
       'better-sqlite3': '11.0.0',
     },
+    pnpmVersion: '11.8.0',
     ...overrides,
   };
 }
@@ -43,7 +44,24 @@ describe('createPackageJSON', () => {
     }
   });
 
-  it('replaces onlyBuiltDependencies instead of merging arrays by index', async () => {
+  it('writes pnpm-workspace.yaml allowBuilds for pnpm 11 instead of package.json pnpm config', async () => {
+    const projectDir = mkProjectDir();
+
+    try {
+      fs.writeFileSync(
+        path.join(projectDir, 'package.json'),
+        JSON.stringify({ scripts: { develop: 'strapi develop' } })
+      );
+
+      await createPackageJSON(makeScope(projectDir, { pnpmVersion: '11.8.0' }));
+
+      expect(readPkg(projectDir).pnpm).toBeUndefined();
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('replaces onlyBuiltDependencies for pnpm 10 instead of merging arrays by index', async () => {
     const projectDir = mkProjectDir();
 
     try {
@@ -57,10 +75,12 @@ describe('createPackageJSON', () => {
         })
       );
 
-      await createPackageJSON(makeScope(projectDir));
+      await createPackageJSON(makeScope(projectDir, { pnpmVersion: '10.25.0' }));
 
       expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual([
+        '@swc/core',
         'better-sqlite3',
+        'core-js-pure',
         'esbuild',
         'sharp',
       ]);
@@ -69,7 +89,7 @@ describe('createPackageJSON', () => {
     }
   });
 
-  it('filters non-string onlyBuiltDependencies entries from existing package.json', async () => {
+  it('filters non-string onlyBuiltDependencies entries from existing package.json on pnpm 10', async () => {
     const projectDir = mkProjectDir();
 
     try {
@@ -83,10 +103,40 @@ describe('createPackageJSON', () => {
         })
       );
 
-      await createPackageJSON(makeScope(projectDir));
+      await createPackageJSON(makeScope(projectDir, { pnpmVersion: '10.25.0' }));
 
       expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual([
+        '@swc/core',
         'better-sqlite3',
+        'core-js-pure',
+        'esbuild',
+        'sharp',
+      ]);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('omits better-sqlite3 from pnpm 10 onlyBuiltDependencies for non-sqlite databases', async () => {
+    const projectDir = mkProjectDir();
+
+    try {
+      fs.writeFileSync(
+        path.join(projectDir, 'package.json'),
+        JSON.stringify({ scripts: { develop: 'strapi develop' } })
+      );
+
+      await createPackageJSON(
+        makeScope(projectDir, {
+          pnpmVersion: '10.25.0',
+          database: { client: 'postgres' },
+          dependencies: { '@strapi/strapi': '5.48.0' },
+        })
+      );
+
+      expect(readPkg(projectDir).pnpm.onlyBuiltDependencies).toEqual([
+        '@swc/core',
+        'core-js-pure',
         'esbuild',
         'sharp',
       ]);

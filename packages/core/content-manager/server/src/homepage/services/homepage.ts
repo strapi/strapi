@@ -21,6 +21,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
   const permissionService = strapi.admin.services.permission;
 
+  const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
+    const contentType = strapi.contentTypes[uid];
+
+    if (contentType === undefined) {
+      strapi.log.warn(
+        `Skipping homepage content type "${uid}" because it is no longer registered.`
+      );
+      return undefined;
+    }
+
+    return contentType;
+  };
+
   type ContentTypeConfiguration = {
     uid: RecentDocument['contentTypeUid'];
     settings: { mainField: string };
@@ -63,7 +76,18 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       ...new Set(
         readPermissions
           .map((permission) => permission.subject)
-          .filter(Boolean) as RecentDocument['contentTypeUid'][]
+          .filter((subject): subject is RecentDocument['contentTypeUid'] => {
+            if (!subject) {
+              return false;
+            }
+
+            const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
+            const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
+              | { visible?: boolean }
+              | undefined;
+
+            return contentTypeOptions?.visible !== false;
+          })
       ),
     ];
   };
@@ -87,9 +111,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): ContentTypeMeta[] => {
-    return allowedContentTypeUids.map((uid) => {
+    return allowedContentTypeUids.reduce<ContentTypeMeta[]>((acc, uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentType(uid);
+      const contentType = getRegisteredContentType(uid);
+
+      if (contentType === undefined) {
+        return acc;
+      }
+
       const mainField = resolveReadableMainField(
         contentType,
         configuration,
@@ -98,14 +127,29 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const fields = buildHomepageQueryFields(contentType, mainField);
       const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
 
-      return {
+      acc.push({
         fields,
         mainField,
         contentType,
         hasDraftAndPublish,
         uid,
-      };
-    });
+      });
+
+      return acc;
+    }, []);
+  };
+
+  /**
+   * Homepage widgets expect JSON-safe ISO strings. Returning `Date` objects can
+   * serialize as `{}` after spread/clone (see https://github.com/strapi/strapi/issues/27013).
+   */
+  const toIsoDateString = (value: unknown): string | null => {
+    if (value == null || value === '') {
+      return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(String(value));
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
   };
 
   const formatDocuments = (
@@ -125,14 +169,17 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
-        updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
-        publishedAt:
-          meta.hasDraftAndPublish && document.publishedAt ? new Date(document.publishedAt) : null,
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
         ...additionalFields,
+        // Keep dates last so populate cannot overwrite with non-JSON-safe values
+        updatedAt: toIsoDateString(document.updatedAt) ?? '',
+        publishedAt:
+          meta.hasDraftAndPublish && document.publishedAt
+            ? toIsoDateString(document.publishedAt)
+            : null,
       };
     });
   };
@@ -198,7 +245,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const permittedContentTypes = await getPermittedContentTypes();
       const allowedContentTypeUids = draftAndPublishOnly
         ? permittedContentTypes.filter((uid) => {
-            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+            const contentType = getRegisteredContentType(uid);
+
+            return contentType !== undefined && contentTypes.hasDraftAndPublish(contentType);
           })
         : permittedContentTypes;
       // Fetch the configuration for each content type in a single query
@@ -223,19 +272,26 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return recentDocuments
         .flat()
         .sort((a, b) => {
+          // ISO-8601 strings compare lexicographically in chronological order
+          const compareIso = (left: string, right: string, direction: 1 | -1) => {
+            if (left < right) return -1 * direction;
+            if (left > right) return 1 * direction;
+            return 0;
+          };
+
           switch (additionalQueryParams?.sort) {
             case 'publishedAt:desc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return b.publishedAt.valueOf() - a.publishedAt.valueOf();
+              return compareIso(a.publishedAt, b.publishedAt, -1);
             case 'publishedAt:asc':
               if (!a.publishedAt || !b.publishedAt) return 0;
-              return a.publishedAt.valueOf() - b.publishedAt.valueOf();
+              return compareIso(a.publishedAt, b.publishedAt, 1);
             case 'updatedAt:desc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return b.updatedAt.valueOf() - a.updatedAt.valueOf();
+              return compareIso(a.updatedAt, b.updatedAt, -1);
             case 'updatedAt:asc':
               if (!a.updatedAt || !b.updatedAt) return 0;
-              return a.updatedAt.valueOf() - b.updatedAt.valueOf();
+              return compareIso(a.updatedAt, b.updatedAt, 1);
             default:
               return 0;
           }

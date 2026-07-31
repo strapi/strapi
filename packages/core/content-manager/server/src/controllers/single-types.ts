@@ -343,10 +343,10 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await documentManager.countDraftRelations(document.documentId, model, locale);
+    const counts = await documentManager.countDraftRelations(document.documentId, model, locale);
 
     return {
-      data: number,
+      data: counts,
     };
   },
 };

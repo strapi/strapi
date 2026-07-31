@@ -1,4 +1,9 @@
-import type { Cipheriv, Decipheriv } from 'crypto';
+import type { createCipheriv, createDecipheriv } from 'crypto';
+
+// @types/node 20.x names these classes Cipher/Decipher; 24.x renames it to Cipheriv/Decipheriv.
+// Derive via ReturnType so signatures hold across both.
+type Cipheriv = ReturnType<typeof createCipheriv>;
+type Decipheriv = ReturnType<typeof createDecipheriv>;
 
 export type EncryptionStrategy = (key: string) => Cipheriv | Decipheriv;
 

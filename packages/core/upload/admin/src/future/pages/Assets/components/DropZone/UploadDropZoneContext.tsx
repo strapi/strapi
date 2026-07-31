@@ -84,11 +84,14 @@ export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps
     e.preventDefault();
     e.stopPropagation();
 
-    dragCounterRef.current += 1;
-
-    if (e.dataTransfer.types.includes('Files')) {
-      setIsDragging(true);
+    // Bidirectional guard with AssetsDndProvider — internal item drags must not
+    // activate the upload overlay. See AssetsDndProvider.tsx.
+    if (!e.dataTransfer.types.includes('Files')) {
+      return;
     }
+
+    dragCounterRef.current += 1;
+    setIsDragging(true);
   }, []);
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLElement>) => {
