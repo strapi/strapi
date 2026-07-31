@@ -36,6 +36,9 @@ const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
  *   components. Aggregates (repeatable components, dynamic zones) relax only on `update`,
  *   because the entity validator requires their key on create even for drafts.
  * - relax min       = `targetsDraft` — only draft writes skip `min`/`minLength`.
+ * - nullable        = `targetsDraft`, for scalars and non-repeatable components. Draft writes
+ *   accept an explicit `null` (the clear), which `.optional()` alone rejects; published writes
+ *   keep `notNull()`. Aggregates are excluded — see `applyAggregateRequired`.
  * - hint wording     — publish-oriented on D&P models, lifecycle-neutral otherwise (see
  *   `requiredHint`), because non-D&P writes have no publish step.
  *
@@ -78,6 +81,9 @@ const requiredHint = (mode: InputSchemaMode): string =>
  * Appends the required hint to a schema's description without clobbering an existing one.
  * Zod's `.describe()` replaces the description outright, so a required Blocks field would
  * otherwise lose its own "structured rich text content" description. Compose instead.
+ *
+ * Nullable-wrapped schemas are handled by `asNullable`, which lifts the inner description onto
+ * the wrapper before this runs — so a required nullable Blocks field still composes correctly.
  */
 const withRequiredHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny => {
   const hint = requiredHint(mode);
@@ -136,31 +142,70 @@ const withWholesaleReplaceHint = (s: z.ZodTypeAny, mode: InputSchemaMode): z.Zod
 };
 
 /**
+ * Wraps a schema in `.nullable()`, carrying any description onto the wrapper.
+ *
+ * `.optional()` only permits *omission*; it rejects an explicit `null`. Those are different
+ * writes on an update: omitting a key preserves the current value, while `null` clears it. So
+ * optional-without-nullable leaves an agent no way at all to clear a field.
+ *
+ * A `.nullable()` wrapper emits `anyOf: [<inner>, { type: 'null' }]` and does not expose the
+ * description of what it wraps, so the description is re-attached to the wrapper. Otherwise the
+ * component update union and Blocks — both of which carry agent-facing wording — would lose it,
+ * or bury it inside the first `anyOf` branch where a client reading
+ * `properties.<field>.description` no longer sees it.
+ */
+const asNullable = (s: z.ZodTypeAny): z.ZodTypeAny => {
+  const existing = s.description;
+  const nullable = s.nullable();
+  return existing !== undefined && existing !== '' ? nullable.describe(existing) : nullable;
+};
+
+/**
+ * Nullable only when the write targets a draft, for attributes that are declared required.
+ *
+ * Draft writes accept the clear server-side. `createScalarAttributeValidator` and the
+ * non-repeatable branch of `createComponentValidator` pass `required: !isDraft && attr.required`
+ * to `addRequiredValidation`, which collapses to `false` on a draft and takes its
+ * `.nullable()` else-branch (`entity-validator/index.ts`) — pinned by "Does not throws on
+ * required not respected" in the entity-validator suite, which persists `{ title: null }` on a
+ * draft create. Gating `null` here would therefore reject a write the server accepts, and the
+ * MCP SDK validates the input schema before the handler runs, so nothing downstream can
+ * recover it.
+ *
+ * Non-draft writes stay non-nullable. A published (non-D&P) update runs
+ * `addRequiredValidation` with the real `required: true`, which applies `notNull()` and rejects
+ * an explicit `null` — so accepting it here would advertise a write the server 400s on.
+ */
+const nullableForMode = (s: z.ZodTypeAny, mode: InputSchemaMode): z.ZodTypeAny =>
+  targetsDraft(mode) === true ? asNullable(s) : s;
+
+/**
  * Applies the required constraint to a leaf attribute schema according to `mode`.
  *
  * Required fields keep the explanatory hint whenever the gate is dropped, so agents can
  * still tell required attributes apart from optional ones on updates and drafts (all
  * fields are optional, but only the required ones carry the hint).
  *
- * - required + draft gate dropped → optional and nullable, with the required hint.
- * - required + update gate dropped → optional, with the required hint.
+ * - required + draft gate dropped → optional and nullable, with the required hint, so the
+ *   field can be explicitly cleared.
+ * - required + update gate dropped (non-D&P) → optional, with the required hint. Not nullable:
+ *   a published update keeps `notNull()`.
  * - required + gate kept (non-D&P create) → returned as-is (hard-gated).
- * - not required → optional.
+ * - not required → optional *and* nullable in every mode. `addRequiredValidation` applies its
+ *   `.nullable()` else-branch whenever `required` is falsy, unconditionally on `isDraft` and
+ *   `createOrUpdate`, so the server accepts a clear on an optional field even for a published
+ *   non-D&P write. Gating that on `targetsDraft` would leave an agent no way to clear it.
  */
 const applyRequired = (s: z.ZodTypeAny, required: boolean, mode: InputSchemaMode): z.ZodTypeAny => {
   if (required === true) {
     if (relaxesRequired(mode) === true) {
-      const hintedSchema = withRequiredHint(s, mode);
-      return targetsDraft(mode) === true
-        ? hintedSchema
-            .nullable()
-            .describe(hintedSchema.description ?? requiredHint(mode))
-            .optional()
-        : hintedSchema.optional();
+      // Wrap before describing, so the hint lands on the outer schema rather than inside the
+      // nullable `anyOf` where clients reading `properties.<field>.description` would miss it.
+      return withRequiredHint(nullableForMode(s, mode), mode).optional();
     }
     return s;
   }
-  return s.optional();
+  return asNullable(s).optional();
 };
 
 /**
@@ -200,6 +245,13 @@ const applyMin = <T extends z.ZodString | z.ZodNumber>(
  *
  * This is deliberately stricter than the scalar projection, and should be revisited if the
  * entity validator ever starts honouring `isDraft` for aggregates.
+ *
+ * Aggregates are also excluded from the draft nullability of `nullableForMode`, and use a bare
+ * `.optional()`. Because `required: true` is hard-coded, `addRequiredValidation` keeps
+ * `notNull()` on update even for a draft, so an explicit `null` is rejected server-side —
+ * pinned by "Accepts omitted required repeatable component and dynamic zone on update, but
+ * rejects explicit null" in the entity-validator suite. Clearing an aggregate is spelled `[]`,
+ * not `null`.
  */
 const applyAggregateRequired = (
   s: z.ZodTypeAny,
@@ -685,6 +737,12 @@ export type BuildDataSchemaOptions = {
  *   those are relaxed to match the admin panel. This covers scalar `min`/`minLength` as
  *   well as the aggregate `min` on repeatable components and dynamic zones — admin and
  *   entity validation skip all of them for drafts.
+ * - Draft writes additionally accept an explicit `null` on scalars and non-repeatable
+ *   components, not just omission. The two are not equivalent on update — omission keeps the
+ *   current value, `null` clears it — so an optional-only schema would leave no way to clear a
+ *   field. Published writes keep `notNull()`, and aggregates are cleared with `[]` rather than
+ *   `null`. Non-required attributes are nullable in every mode, since the server never applies
+ *   `notNull()` to them. See `nullableForMode` and `applyAggregateRequired`.
  * - Create on a non-D&P model keeps the hard gate on required scalars and on `min` (writes
  *   are published and the entity validator enforces them). A non-D&P update stays partial
  *   (required relaxed) but keeps `min`, since the write is published.

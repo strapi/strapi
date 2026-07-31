@@ -314,6 +314,87 @@ describe('buildDataSchema | scalars, required/min projection, permissions', () =
     }
   });
 
+  it('draft writes accept an explicit null on required scalars (the clear), not just omission', () => {
+    // `.optional()` permits omission but rejects `null`, and the two are different writes on an
+    // update: omission preserves the current value, `null` clears it. Drafts accept the clear
+    // server-side — `createScalarAttributeValidator` passes `required: !isDraft && required`, so
+    // `addRequiredValidation` takes its `.nullable()` else-branch. Pinned by "Does not throws on
+    // required not respected" in
+    // packages/core/core/src/services/entity-validator/__tests__/index.test.ts, which persists
+    // `{ title: null }` on a draft create. Gating it here would reject a write the server
+    // accepts, and the MCP SDK validates the input schema before the handler runs.
+    const attrs = {
+      title: { type: 'string', required: true },
+      score: { type: 'integer', required: true },
+      status: { type: 'enumeration', enum: ['a', 'b'], required: true },
+    } as TestAttrs;
+
+    for (const operation of ['create', 'update'] as const) {
+      const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs, null, { operation });
+      expect(schema.safeParse({ title: null }).success).toBe(true);
+      expect(schema.safeParse({ score: null }).success).toBe(true);
+      expect(schema.safeParse({ status: null }).success).toBe(true);
+      // Omission and a real value both still work.
+      expect(schema.safeParse({}).success).toBe(true);
+      expect(schema.safeParse({ title: 'hi', score: 1, status: 'a' }).success).toBe(true);
+      // Nullable is not a type escape hatch — a wrong type is still rejected.
+      expect(schema.safeParse({ score: 'not-a-number' }).success).toBe(false);
+      expect(schema.safeParse({ status: 'not-in-enum' }).success).toBe(false);
+    }
+  });
+
+  it('non-required scalars accept an explicit null in every mode, not only on drafts', () => {
+    // Broader than the draft rule: `addRequiredValidation` applies its `.nullable()`
+    // else-branch whenever `required` is falsy, with no dependence on `isDraft` or
+    // create/update. So a published non-D&P write also accepts the clear, and gating it on
+    // the draft target would leave an agent no way to clear an optional field.
+    const attrs = { subtitle: { type: 'string' } } as TestAttrs;
+
+    for (const model of [makeModel(attrs), makeDpModel(attrs)]) {
+      for (const operation of ['create', 'update'] as const) {
+        const schema = buildDataSchema(mockStrapi, model, attrs, null, { operation });
+        expect(schema.safeParse({ subtitle: null }).success).toBe(true);
+      }
+    }
+  });
+
+  it('published writes reject an explicit null on required scalars (notNull is kept)', () => {
+    // A non-D&P write is published: `addRequiredValidation` receives the real `required: true`
+    // and applies `notNull()` on update / `notNil()` on create, so `null` is a 400 server-side.
+    // Accepting it here would advertise a write that fails downstream.
+    const attrs = { title: { type: 'string', required: true } } as TestAttrs;
+
+    const create = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    expect(create.safeParse({ title: null }).success).toBe(false);
+
+    // The update relaxation is about *omission*, so it must not smuggle in nullability.
+    const update = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      operation: 'update',
+    });
+    expect(update.safeParse({}).success).toBe(true);
+    expect(update.safeParse({ title: null }).success).toBe(false);
+  });
+
+  it('required aggregates reject explicit null even on a draft (cleared with [], not null)', () => {
+    // Aggregates are excluded from draft nullability: `createComponentValidator` (repeatable)
+    // and `createDzValidator` hard-code `required: true`, so `notNull()` survives on update
+    // regardless of `isDraft`. Pinned by "Accepts omitted required repeatable component and
+    // dynamic zone on update, but rejects explicit null" in
+    // packages/core/core/src/services/entity-validator/__tests__/index.test.ts.
+    const attrs = {
+      links: { type: 'component', component: 'shared.seo', repeatable: true, required: true },
+      sections: { type: 'dynamiczone', components: ['shared.seo'], required: true },
+    } as TestAttrs;
+
+    const update = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs, null, {
+      operation: 'update',
+    });
+    expect(update.safeParse({ links: null }).success).toBe(false);
+    expect(update.safeParse({ sections: null }).success).toBe(false);
+    // The empty array is the supported clear.
+    expect(update.safeParse({ links: [], sections: [] }).success).toBe(true);
+  });
+
   it('D&P create: strict mode still rejects unknown keys after relaxation', () => {
     const attrs = { title: { type: 'string', required: true } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs);

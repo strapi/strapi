@@ -32,9 +32,23 @@ describe('buildDataSchema | components and dynamic zones', () => {
     const attrs = { seo: { type: 'component', component: 'shared.seo' } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
     const jsonSchema = z.toJSONSchema(schema) as {
-      properties?: { seo?: { properties?: { title?: { type?: string } } } };
+      properties?: {
+        seo?: {
+          anyOf?: {
+            type?: string;
+            properties?: { title?: { anyOf?: { type?: string }[] } };
+          }[];
+        };
+      };
     };
-    expect(jsonSchema.properties?.seo?.properties?.title?.type).toBe('string');
+    // Optional attributes are nullable (the server accepts a clear on any non-required field),
+    // so both the component and its leaves are an `anyOf` of the real shape and `null`. The
+    // object branch must still carry the component's attributes — the regression guarded here
+    // is an *empty* properties map, which the nullable wrapper must not reintroduce.
+    const seo = jsonSchema.properties?.seo;
+    expect(seo?.anyOf).toContainEqual({ type: 'null' });
+    const objectBranch = seo?.anyOf?.find((b) => b.properties !== undefined);
+    expect(objectBranch?.properties?.title?.anyOf).toEqual([{ type: 'string' }, { type: 'null' }]);
   });
 
   it('repeatable component maps to array of structured objects', () => {
@@ -136,27 +150,96 @@ describe('buildDataSchema | components and dynamic zones', () => {
       operation: 'update',
     });
     const jsonSchema = z.toJSONSchema(schema, { io: 'input' }) as {
-      properties?: Record<string, { description?: string; anyOf?: { required?: string[] }[] }>;
+      properties?: Record<
+        string,
+        {
+          description?: string;
+          anyOf?: { type?: string; required?: string[]; anyOf?: { required?: string[] }[] }[];
+        }
+      >;
     };
     const seo = jsonSchema.properties?.seo;
+    // Nullability nests rather than flattens: the property is `[<patch|create union>, null]`,
+    // with the patch/create union preserved intact as the first branch. The `null` branch comes
+    // from this component not being required — the server accepts a clear on any such field.
     expect(seo?.anyOf).toHaveLength(2);
+    expect(seo?.anyOf?.[1]).toEqual({ type: 'null' });
+    const union = seo?.anyOf?.[0]?.anyOf;
+    expect(union).toHaveLength(2);
     // Patch branch requires id; create branch requires the component's required scalar.
-    expect(seo?.anyOf?.[0]?.required).toContain('id');
-    expect(seo?.anyOf?.[1]?.required).toContain('title');
-    // The agent-facing explanation of the two branches is carried on the union.
+    expect(union?.[0]?.required).toContain('id');
+    expect(union?.[1]?.required).toContain('title');
+    // The agent-facing explanation of the two branches survives the nullable wrapper.
     expect(seo?.description).toContain('Include "id" to update an existing component in place');
     expect(seo?.description).toContain('Omit "id" to replace it');
   });
 
-  it('create: component is a single object with no id branch', () => {
+  it('create: component has no id branch (only the object and null shapes)', () => {
     const attrs = { seo: { type: 'component', component: 'shared.reqseo' } } as TestAttrs;
     const schema = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
     const jsonSchema = z.toJSONSchema(schema, { io: 'input' }) as {
-      properties?: Record<string, { anyOf?: unknown[]; properties?: Record<string, unknown> }>;
+      properties?: Record<
+        string,
+        { anyOf?: { type?: string; required?: string[] }[]; properties?: Record<string, unknown> }
+      >;
     };
-    expect(jsonSchema.properties?.seo?.anyOf).toBeUndefined();
+    // Create has no patch/create split — just the object shape and the `null` clear, so there
+    // is no `id`-bearing branch.
+    const branches = jsonSchema.properties?.seo?.anyOf;
+    expect(branches).toHaveLength(2);
+    expect(branches?.[1]).toEqual({ type: 'null' });
+    expect(branches?.[0]?.required).toContain('title');
     // No id is accepted on create — the row does not exist yet.
     expect(schema.safeParse({ seo: { id: 42, title: 't' } }).success).toBe(false);
+  });
+
+  it('draft writes accept an explicit null on a required non-repeatable component', () => {
+    // Non-repeatable components follow the scalar projection: `createComponentValidator`'s
+    // non-repeatable branch passes `required: !isDraft && attr.required`, which collapses to
+    // `false` on a draft, so `addRequiredValidation` takes its `.nullable()` else-branch and
+    // `{ seo: null }` is accepted server-side. `.optional()` alone would reject it, and on an
+    // update `null` is the only way to clear the component — omission keeps the current row.
+    const attrs = {
+      seo: { type: 'component', component: 'shared.reqseo', required: true },
+    } as TestAttrs;
+
+    for (const operation of ['create', 'update'] as const) {
+      const schema = buildDataSchema(mockStrapi, makeDpModel(attrs), attrs, null, { operation });
+      expect(schema.safeParse({ seo: null }).success).toBe(true);
+      // Omission still works, and a real object is still validated as before.
+      expect(schema.safeParse({}).success).toBe(true);
+      expect(schema.safeParse({ seo: { title: 't' } }).success).toBe(true);
+      expect(schema.safeParse({ seo: 'not-an-object' }).success).toBe(false);
+    }
+  });
+
+  it('non-required non-repeatable components accept null in every mode', () => {
+    const attrs = { seo: { type: 'component', component: 'shared.seo' } } as TestAttrs;
+
+    for (const model of [makeModel(attrs), makeDpModel(attrs)]) {
+      for (const operation of ['create', 'update'] as const) {
+        const schema = buildDataSchema(mockStrapi, model, attrs, null, { operation });
+        expect(schema.safeParse({ seo: null }).success).toBe(true);
+      }
+    }
+  });
+
+  it('published writes reject an explicit null on a required non-repeatable component', () => {
+    // A non-D&P write is published, so `addRequiredValidation` keeps the real `required: true`
+    // and the object schema is never made nullable — the server rejects `{ seo: null }` with
+    // "seo must be an `object` type". The update relaxation covers omission only.
+    const attrs = {
+      seo: { type: 'component', component: 'shared.reqseo', required: true },
+    } as TestAttrs;
+
+    const create = buildDataSchema(mockStrapi, makeModel(attrs), attrs);
+    expect(create.safeParse({ seo: null }).success).toBe(false);
+
+    const update = buildDataSchema(mockStrapi, makeModel(attrs), attrs, null, {
+      operation: 'update',
+    });
+    expect(update.safeParse({}).success).toBe(true);
+    expect(update.safeParse({ seo: null }).success).toBe(false);
   });
 
   it('non-D&P create: required scalar inside a component stays hard-gated (guard)', () => {

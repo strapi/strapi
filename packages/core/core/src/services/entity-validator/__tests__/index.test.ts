@@ -567,6 +567,65 @@ describe('Entity validator', () => {
         ).rejects.toMatchObject({ name: 'ValidationError' });
       });
 
+      test('Required non-repeatable component accepts explicit null on a draft, rejects it when published', async () => {
+        // The counterpart to the aggregate case above, and the reason the MCP schema makes
+        // draft-relaxed non-repeatable components nullable but keeps published ones non-nullable.
+        // The non-repeatable branch of `createComponentValidator` passes
+        // `required: !isDraft && attr.required`, which collapses to `false` on a draft — so
+        // `addRequiredValidation` takes its `.nullable()` else-branch and the clear is accepted.
+        // Without `isDraft` the real `required: true` survives and `notNull()` rejects it.
+        //
+        // Pinning both halves means a change to that projection breaks here rather than silently
+        // invalidating the advertised MCP contract, where an explicit `null` is the only way to
+        // clear a component on update (omission preserves the existing row).
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            seo: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: false,
+              required: true,
+            },
+          },
+        };
+
+        // Draft: the clear is accepted on both creation and update.
+        await expect(
+          entityValidator.validateEntityCreation(model, { seo: null }, { isDraft: true })
+        ).resolves.toMatchObject({ seo: null });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { seo: null }, { isDraft: true })
+        ).resolves.toMatchObject({ seo: null });
+
+        // Published: the required component is not nullable, so the same payload fails.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { seo: null }, { isDraft: false })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        // Omission remains a valid partial update either way.
+        await expect(
+          entityValidator.validateEntityUpdate(model, {}, { isDraft: false })
+        ).resolves.toEqual({});
+      });
+
       it('Supports custom field types', async () => {
         const model: Schema.ContentType = {
           ...modelBase,
