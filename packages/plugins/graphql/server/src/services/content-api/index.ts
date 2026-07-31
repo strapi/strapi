@@ -106,7 +106,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const queryType = prunedNexusSchema.getQueryType();
       const fields = queryType ? Object.keys(queryType.getFields() || {}) : [];
       builtInQueryFields = new Set(fields);
-    } catch (e) {
+    } catch {
       // ignore; leave set empty
     }
 

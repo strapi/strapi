@@ -4,7 +4,7 @@ import role from './role';
 import user from './user';
 import metrics from './metrics';
 import seatEnforcement from './seat-enforcement';
-import persistTables from './persist-tables';
+import persistTablesService from './persist-tables';
 
 export default {
   auth,
@@ -13,5 +13,5 @@ export default {
   user,
   metrics,
   'seat-enforcement': seatEnforcement,
-  'persist-tables': persistTables,
+  'persist-tables': persistTablesService,
 };
