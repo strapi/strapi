@@ -222,6 +222,11 @@ const AssetsView = ({
           </Loader>
         </Flex>
       )}
+      {/* Lives here rather than in `AssetsPage` so it can read the loaded
+          assets: the AI metadata action needs their mime types to know what
+          the provider can handle. `position: fixed` keeps it visually anchored
+          regardless of where it sits in the tree. */}
+      <BulkActionsBar assets={assets} />
     </>
   );
 };
@@ -624,7 +629,6 @@ export const AssetsPage = () => {
                 </Layouts.Content>
               </Layouts.Root>
             </Box>
-            <BulkActionsBar />
           </AssetsDndProvider>
         </AssetSelectionProvider>
       </UploadDropZoneProvider>
