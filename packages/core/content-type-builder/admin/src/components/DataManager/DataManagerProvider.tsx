@@ -49,6 +49,9 @@ type SchemaResponse = {
   data: {
     components: Components;
     contentTypes: ContentTypes;
+    settings?: {
+      renameMigrations?: 'prompt' | 'always' | 'never';
+    };
   };
 };
 
