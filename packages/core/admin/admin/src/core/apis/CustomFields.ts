@@ -211,7 +211,9 @@ const optionsValidationReducer = (
     acc.push({
       isValidOptionPath:
         option.name.startsWith('options') ||
-        (ALLOWED_ROOT_LEVEL_OPTIONS as readonly string[]).includes(option.name),
+        ALLOWED_ROOT_LEVEL_OPTIONS.includes(
+          option.name as Exclude<CustomFieldOptionName, `options.${string}`>
+        ),
       errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
   }
