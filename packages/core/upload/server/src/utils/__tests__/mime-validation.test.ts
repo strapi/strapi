@@ -301,6 +301,26 @@ describe('mime-validation', () => {
       ).toBe(true);
     });
 
+    it('should allow SVG when detection returns application/xml but extension is image/svg+xml and image/* is allowed', async () => {
+      mockFileRead('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>');
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'application/xml', ext: 'xml' });
+
+      const svgFile = {
+        name: 'logo.svg',
+        path: '/tmp/logo.svg',
+        size: 1000,
+        type: 'image/svg+xml',
+      };
+      const config: SecurityConfig = {
+        allowedTypes: ['image/*'],
+      };
+
+      const result = await validateFile(svgFile, config, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('image/svg+xml');
+    });
+
     it('should reject all files when allowedTypes is explicit empty array', async () => {
       mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });

@@ -130,8 +130,6 @@
   "Settings.application.customization.modal.upload.next": "İleri",
   "Settings.application.customization.size-details": "Maks boyut: {dimension}×{dimension}, Maks dosya boyutu: {size}KB",
   "Settings.application.description": "Yönetim panelinin tüm bilgileri",
-  "Settings.application.edition-title": "Mevcut sürüm",
-  "Settings.application.ee-or-ce": "{communityEdition, select, true {Topluluk Sürümü} other {Kurumsal Sürüm}}",
   "Settings.application.ee.admin-seats.add-seats": "Aboneliği yönet",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limitte: daha fazla kullanıcı davet etmek için koltuk ekleyin",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",

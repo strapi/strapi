@@ -1,0 +1,16 @@
+{
+  "Plugin.name": "デプロイ",
+  "Homepage.title": "Strapi Cloudで無料デプロイ！",
+  "Homepage.subTitle": "完全無料プランで始められます。クレジットカード不要、期間制限なし。",
+  "Homepage.deploy.title": "お好みのデプロイ方法を選択してください",
+  "Homepage.deploy.ariaLabel": "デプロイオプション",
+  "Homepage.deploy.git.badge": "推奨",
+  "Homepage.deploy.git.title": "Strapi Cloudにデプロイ",
+  "Homepage.deploy.git.subTitle": "GitHubまたはGitLabのプロジェクトをStrapi Cloud内で直接デプロイします",
+  "Homepage.deploy.git.button": "Strapi Cloudにデプロイ",
+  "Homepage.deploy.cli.title": "CLIでデプロイ",
+  "Homepage.deploy.cli.subTitle": "コマンドラインを使ってStrapiプロジェクトを直接デプロイします",
+  "Homepage.deploy.cli.ariaLabel": "パッケージマネージャー",
+  "Homepage.deploy.cli.copy": "コピー",
+  "Homepage.deploy.documentation": "お困りですか？ドキュメントをご確認ください"
+}

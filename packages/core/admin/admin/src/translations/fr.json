@@ -130,8 +130,6 @@
   "Settings.application.customization.modal.upload.next": "Suivant",
   "Settings.application.customization.size-details": "Dimensions maximales : {dimension}×{dimension}, poids maximal : {size}KB",
   "Settings.application.description": "Informations globales du panneau d'administration",
-  "Settings.application.edition-title": "édition actuel",
-  "Settings.application.ee-or-ce": "{communityEdition, select, true {Édition Communauté} other {Édition Entreprise}}",
   "Settings.application.ee.admin-seats.add-seats": "Gérer l'abonnement",
   "Settings.application.ee.admin-seats.support": "Contacter le service clients",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limite atteinte : ajouter des places pour inviter d'autres utilisateurs",

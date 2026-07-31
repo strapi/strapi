@@ -128,6 +128,14 @@ const traverseEntity = async (
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
+    // A dynamic zone array can contain a `null` entry (for example a relation
+    // created inline inside a dynamic zone component can leave a null item).
+    // Reading `__component` on it crashed traversal; pass nil entries through
+    // untouched, consistent with how `traverseEntity` ends recursion on nil. (#24303)
+    if (isNil(entry)) {
+      return entry;
+    }
+
     const targetSchema = getModel(entry.__component!);
     const traverseOptions: TraverseOptions = {
       schema: targetSchema,

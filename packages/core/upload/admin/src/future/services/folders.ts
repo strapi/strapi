@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -7,6 +9,7 @@ import type {
   GetFolder,
   GetFolders,
   GetFolderStructure,
+  BulkMoveFolders,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -16,23 +19,59 @@ export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
 
 interface GetFoldersParams {
   parentId?: number | null;
+  /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
+  sort?: string;
+  search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent/search scope. */
+  filters?: Record<string, unknown>[];
 }
+
+interface BulkMoveParams {
+  fileIds?: number[];
+  folderIds?: number[];
+  /** `null` moves the items to the root of the Media Library. */
+  destinationFolderId: number | null;
+}
+
+type DataEnvelope<T> = {
+  data: T;
+};
+
+const isDataEnvelope = <T>(response: T | DataEnvelope<T>): response is DataEnvelope<T> =>
+  typeof response === 'object' && response !== null && 'data' in response;
+
+const unwrapData = <T>(response: T | DataEnvelope<T>): T =>
+  isDataEnvelope(response) ? response.data : response;
 
 const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId } = params as GetFoldersParams;
+        const { parentId, sort, search, filters = [] } = params as GetFoldersParams;
 
-        const queryParams: Record<string, unknown> = {};
+        const queryParams: Record<string, unknown> = {
+          // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
+          sort: sort ?? 'name:ASC',
+        };
 
-        if (parentId != null) {
-          queryParams['filters'] = {
-            $and: [{ parent: { id: parentId } }],
-          };
+        // List filters (dates) apply in BOTH modes — search composes with them,
+        // only the parent scope is dropped while searching.
+        if (search) {
+          // Search is global: the parent filter is dropped so matching folders
+          // anywhere in the library surface. The endpoint is unpaginated — it
+          // returns every match — so callers can treat the array length as the
+          // true total. Bounding it is a separate decision.
+          queryParams['_q'] = encodeSearchQuery(search);
+
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
         } else {
+          const parentScope =
+            parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+
           queryParams['filters'] = {
-            $and: [{ parent: { id: { $null: true } } }],
+            $and: [parentScope, ...filters],
           };
         }
 
@@ -43,8 +82,7 @@ const foldersApi = uploadApi.injectEndpoints({
         };
       },
       transformResponse: (response: GetFolders.Response['data']) =>
-        // TODO dont want this cast
-        (response as any).data,
+        unwrapData<GetFolders.Response['data']>(response),
       providesTags: (results) => {
         if (results) {
           return [
@@ -99,7 +137,7 @@ const foldersApi = uploadApi.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: GetFolders.Response['data']) =>
-        ((response as any)?.data ?? response ?? []) as Folder[],
+        unwrapData<GetFolders.Response['data']>(response ?? []),
       providesTags: (results) => {
         if (results) {
           return [
@@ -132,6 +170,19 @@ const foldersApi = uploadApi.injectEndpoints({
         response.data as unknown as FolderWithCounts,
       providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
     }),
+    bulkMove: builder.mutation<BulkMoveFolders.Response['data'], BulkMoveParams>({
+      query: ({ fileIds = [], folderIds = [], destinationFolderId }) => ({
+        url: '/upload/actions/bulk-move',
+        method: 'POST',
+        data: { fileIds, folderIds, destinationFolderId },
+      }),
+      transformResponse: (response: BulkMoveFolders.Response) => response.data,
+      invalidatesTags: [
+        { type: 'Asset', id: 'LIST' },
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
   }),
 });
 
@@ -141,4 +192,5 @@ export const {
   useGetFolderQuery,
   useGetAllFoldersQuery,
   useGetFolderStructureQuery,
+  useBulkMoveMutation,
 } = foldersApi;

@@ -38,5 +38,4 @@ global:
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
   - 'yarn.lock'
-  - 'jest.config.js'
   - 'package.json'

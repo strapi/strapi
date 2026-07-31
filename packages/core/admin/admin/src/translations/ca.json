@@ -81,7 +81,6 @@
   "Settings.apiTokens.title": "Tokens d'API",
   "Settings.apiTokens.lastHour": "darrera hora",
   "Settings.application.description": "Informació global del panell d'administració",
-  "Settings.application.edition-title": "edició actual",
   "Settings.application.get-help": "Aconsegueix ajuda",
   "Settings.application.link-pricing": "Veure tots els plans",
   "Settings.application.link-upgrade": "Actualitza el panell d'administració",

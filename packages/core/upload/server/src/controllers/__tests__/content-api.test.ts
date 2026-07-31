@@ -2,10 +2,18 @@ import type { Context } from 'koa';
 
 import contentApiController from '../content-api';
 import { getService } from '../../utils';
+import { validateUploadBody } from '../validation/content-api/upload';
+import { prepareUploadRequest } from '../../utils/mime-validation';
 
 jest.mock('../../utils');
+jest.mock('../validation/content-api/upload');
+jest.mock('../../utils/mime-validation', () => ({
+  prepareUploadRequest: jest.fn(),
+}));
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
+const mockValidateUploadBody = validateUploadBody as jest.MockedFunction<typeof validateUploadBody>;
+const mockPrepareUploadRequest = jest.mocked(prepareUploadRequest);
 
 describe('Content API Controller - find / findPage', () => {
   let mockContext: Context;
@@ -26,6 +34,7 @@ describe('Content API Controller - find / findPage', () => {
       findAndCountPage: jest.fn(),
       findOne: jest.fn(),
       remove: jest.fn(),
+      replace: jest.fn(),
     };
 
     mockFileService = {
@@ -41,6 +50,12 @@ describe('Content API Controller - find / findPage', () => {
     mockValidateQuery = jest.fn().mockResolvedValue(undefined);
     mockSanitizeQuery = jest.fn((query) => Promise.resolve(query));
     mockSanitizeOutput = jest.fn((data) => Promise.resolve(data));
+    mockValidateUploadBody.mockResolvedValue({
+      fileInfo: {
+        name: 'replacement.pdf',
+        folder: null,
+      },
+    } as any);
 
     globalThis.strapi = {
       getModel: jest.fn().mockReturnValue({ uid: 'plugin::upload.file' }),
@@ -276,6 +291,87 @@ describe('Content API Controller - find / findPage', () => {
 
       expect(mockValidateQuery).toHaveBeenCalled();
       expect(mockSanitizeQuery).toHaveBeenCalled();
+    });
+  });
+
+  describe('replaceFile', () => {
+    it('accepts a single replacement file received as an array', async () => {
+      const replacementFile = {
+        filepath: '/tmp/replacement.pdf',
+        originalFilename: 'replacement.pdf',
+        mimetype: 'application/pdf',
+      };
+
+      mockContext.query = { id: '1' } as any;
+      mockContext.request = {
+        body: {
+          fileInfo: ['{"name":"replacement.pdf","folder":null}'],
+        },
+        files: {
+          files: [replacementFile],
+        },
+      } as any;
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [replacementFile],
+        filteredBody: {
+          fileInfo: {
+            name: 'replacement.pdf',
+            folder: null,
+          },
+        },
+        errors: [],
+      });
+
+      mockUploadService.replace.mockResolvedValue({
+        id: 1,
+        name: 'replacement.pdf',
+      });
+
+      await buildController().replaceFile(mockContext);
+
+      expect(mockPrepareUploadRequest).toHaveBeenCalledWith(
+        replacementFile,
+        mockContext.request!.body,
+        globalThis.strapi
+      );
+      expect(mockUploadService.replace).toHaveBeenCalledWith('1', {
+        data: {
+          fileInfo: {
+            name: 'replacement.pdf',
+            folder: null,
+          },
+        },
+        file: replacementFile,
+      });
+      expect(mockContext.body).toEqual({
+        id: 1,
+        name: 'replacement.pdf',
+      });
+    });
+
+    it('rejects multiple replacement files', async () => {
+      mockContext.query = { id: '1' } as any;
+      mockContext.request = {
+        body: {},
+        files: {
+          files: [
+            { filepath: '/tmp/first.jpg', originalFilename: 'first.jpg', mimetype: 'image/jpeg' },
+            {
+              filepath: '/tmp/second.jpg',
+              originalFilename: 'second.jpg',
+              mimetype: 'image/jpeg',
+            },
+          ],
+        },
+      } as any;
+
+      await expect(buildController().replaceFile(mockContext)).rejects.toThrow(
+        'Cannot replace a file with multiple ones'
+      );
+
+      expect(mockPrepareUploadRequest).not.toHaveBeenCalled();
+      expect(mockUploadService.replace).not.toHaveBeenCalled();
     });
   });
 });

@@ -132,8 +132,6 @@
   "Settings.application.customization.modal.upload.next": "Další",
   "Settings.application.customization.size-details": "Max. rozměr: {dimension}×{dimension}, max. velikost souboru: {size}KB",
   "Settings.application.description": "Globální informace administračního panelu",
-  "Settings.application.edition-title": "aktuální edice",
-  "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
   "Settings.application.ee.admin-seats.add-seats": "Spravovat předplatné",
   "Settings.application.ee.admin-seats.support": "Kontaktovat obchod",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Na limitu: přidejte místa pro pozvání dalších uživatelů",
