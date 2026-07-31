@@ -65,7 +65,8 @@ const action = async (uid: string, oldName: string, newName: string) => {
  * `$ strapi rename:field <uid> <oldName> <newName>`
  */
 const command: StrapiCommand = () => {
-  return createCommand('rename:field <uid> <oldName> <newName>')
+  return createCommand('rename:field')
+    .arguments('<uid> <oldName> <newName>')
     .description(
       'Rename a content-type or component attribute and generate a data-preserving migration'
     )

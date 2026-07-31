@@ -62,7 +62,8 @@ const action = async (uid: string, newCategory: string) => {
  * `$ strapi rename:component <uid> <newCategory>`
  */
 const command: StrapiCommand = () => {
-  return createCommand('rename:component <uid> <newCategory>')
+  return createCommand('rename:component')
+    .arguments('<uid> <newCategory>')
     .description(
       'Move a component to a new category (changing its uid) and generate a data-preserving migration'
     )
