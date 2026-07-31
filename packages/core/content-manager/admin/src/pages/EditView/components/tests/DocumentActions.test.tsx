@@ -1,6 +1,250 @@
-import { render, screen } from '@tests/utils';
+import * as React from 'react';
 
-import { DocumentActions, DocumentActionsMenu, openPublishConfirmDialog } from '../DocumentActions';
+import { render, screen, waitFor } from '@tests/utils';
+
+const mockCreate = jest.fn();
+const mockPublish = jest.fn();
+const mockUpdateParent = jest.fn();
+const mockDispatch = jest.fn();
+const mockCountDraftRelations = jest.fn();
+let parentInitialFormValues: Record<string, unknown> | undefined;
+let relationModalState = {
+  isModalOpen: true,
+  fieldToConnect: 'relation',
+  fieldToConnectUID: undefined as string | undefined,
+  getParentFormValues: undefined as (() => Record<string, unknown>) | undefined,
+  documentHistory: [
+    {
+      documentId: 'parent',
+      model: 'api::parent.parent',
+      collectionType: 'collection-types',
+      params: {},
+    },
+    {
+      documentId: undefined,
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      params: {},
+    },
+  ],
+};
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useForm: (_name: string, selector: (state: Record<string, unknown>) => unknown) =>
+    selector({
+      modified: true,
+      isSubmitting: false,
+      initialValues: {},
+      values: {},
+      getValues: () => ({}),
+      validate: async () => ({ errors: undefined }),
+      setSubmitting: jest.fn(),
+      setErrors: jest.fn(),
+      resetForm: jest.fn(),
+    }),
+  useQueryParams: () => [{ rawQuery: '', query: {} }],
+  useGuidedTour: () => jest.fn(),
+  useIsDesktop: () => true,
+}));
+jest.mock('../../../../hooks/useDocumentActions', () => ({
+  useDocumentActions: () => ({ create: mockCreate, publish: mockPublish, isLoading: false }),
+}));
+jest.mock('../../../../hooks/useDocument', () => ({
+  useDoc: () => ({
+    schema: { options: { draftAndPublish: true } },
+    getInitialFormValues: () => parentInitialFormValues,
+  }),
+  useDocument: () => ({
+    getInitialFormValues: () => parentInitialFormValues,
+    schema: undefined,
+    components: {},
+  }),
+}));
+jest.mock('../../../../hooks/useDocumentContext', () => ({
+  useDocumentContext: () => ({
+    currentDocument: { schema: { options: { draftAndPublish: true } }, components: {} },
+    currentDocumentMeta: {
+      documentId: undefined,
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      params: {},
+    },
+  }),
+}));
+jest.mock('../../../../features/DocumentRBAC', () => ({
+  useDocumentRBAC: () => ({ canPublish: true, canReadFields: [] }),
+}));
+jest.mock('../../../../preview/pages/Preview', () => ({ usePreviewContext: () => false }));
+jest.mock('../../../../services/documents', () => ({
+  useGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
+  useUpdateDocumentMutation: () => [mockUpdateParent],
+}));
+jest.mock('../FormInputs/Relations/RelationModal', () => ({
+  useRelationModal: (_name: string, selector: (state: Record<string, unknown>) => unknown) =>
+    selector({
+      dispatch: mockDispatch,
+      currentDocument: { schema: { options: { draftAndPublish: true } } },
+      rootDocumentMeta: {
+        documentId: 'parent',
+        model: 'api::parent.parent',
+        collectionType: 'collection-types',
+        params: {},
+      },
+      state: {
+        ...relationModalState,
+      },
+    }),
+}));
+
+import {
+  DocumentActions,
+  DocumentActionsMenu,
+  openPublishConfirmDialog,
+  PublishAction,
+  UpdateAction,
+} from '../DocumentActions';
+
+const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: string }) => {
+  const action = Action({
+    activeTab: 'draft',
+    documentId: undefined,
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: { documentId: 'child', id: 1, status: 'draft' },
+  });
+
+  if (!action) {
+    return null;
+  }
+
+  return <button onClick={() => action.onClick?.({} as React.SyntheticEvent)}>{label}</button>;
+};
+
+describe('relation parent updates', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    parentInitialFormValues = undefined;
+    relationModalState = {
+      isModalOpen: true,
+      fieldToConnect: 'relation',
+      fieldToConnectUID: undefined,
+      getParentFormValues: undefined,
+      documentHistory: [
+        {
+          documentId: 'parent',
+          model: 'api::parent.parent',
+          collectionType: 'collection-types',
+          params: {},
+        },
+        {
+          documentId: undefined,
+          model: 'api::child.child',
+          collectionType: 'collection-types',
+          params: {},
+        },
+      ],
+    };
+    mockCreate.mockResolvedValue({ data: { documentId: 'created', locale: 'en' } });
+    mockPublish.mockResolvedValue({ data: { documentId: 'published', locale: 'en' } });
+    mockUpdateParent.mockResolvedValue({ data: {} });
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+  });
+
+  it('completes UpdateAction child creation without a parent mutation when parent data is absent', async () => {
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'GO_TO_CREATED_RELATION' })
+      )
+    );
+    expect(mockUpdateParent).not.toHaveBeenCalled();
+  });
+
+  it('completes PublishAction child publication without a parent mutation when parent data is absent', async () => {
+    const { user } = render(<ActionHarness Action={PublishAction} label="Publish child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish child' }));
+
+    await waitFor(() => expect(mockPublish).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'GO_TO_CREATED_RELATION' })
+      )
+    );
+    expect(mockUpdateParent).not.toHaveBeenCalled();
+  });
+
+  it('connects a missing top-level relation without creating an empty field when no component UID exists', async () => {
+    relationModalState.getParentFormValues = () => ({});
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      relation: {
+        connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+        disconnect: [],
+      },
+    });
+    expect(data).not.toHaveProperty('');
+    expect(data).not.toHaveProperty('undefined');
+    expect(data).not.toHaveProperty('__component');
+  });
+
+  it('preserves existing component metadata when connecting a missing relation without a UID', async () => {
+    relationModalState = {
+      ...relationModalState,
+      fieldToConnect: 'component.relation',
+      getParentFormValues: () => ({ component: { __component: 'shared.component' } }),
+    };
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      component: {
+        __component: 'shared.component',
+        relation: {
+          connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+          disconnect: [],
+        },
+      },
+    });
+  });
+
+  it('uses the live parent values when creating a relation', async () => {
+    relationModalState.getParentFormValues = () => ({ title: 'Unsaved parent title' });
+    const { user } = render(<ActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() => expect(mockUpdateParent).toHaveBeenCalled());
+    const [{ data }] = mockUpdateParent.mock.calls[0];
+
+    expect(data).toEqual({
+      title: 'Unsaved parent title',
+      relation: {
+        connect: [{ id: 'created', documentId: 'created', locale: 'en' }],
+        disconnect: [],
+      },
+    });
+  });
+});
 
 describe('DocumentActions', () => {
   it('it should render a single button when there is only one action', () => {

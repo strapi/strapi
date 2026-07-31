@@ -15,7 +15,10 @@ export const DEFAULT_AUTH_COOKIE_NAME = 'jwtToken';
 // RFC 6265 cookie-name token characters.
 const VALID_COOKIE_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
-export const resolveAuthCookieName = (configuredName?: string): string => {
+export const resolveAuthCookieName = (
+  configuredName?: string,
+  warn: (message: string) => void = console.warn
+): string => {
   const cookieName = (configuredName || '').trim();
 
   if (!cookieName) {
@@ -23,7 +26,7 @@ export const resolveAuthCookieName = (configuredName?: string): string => {
   }
 
   if (!VALID_COOKIE_NAME.test(cookieName)) {
-    console.warn(
+    warn(
       `Ignoring invalid admin auth cookie name "${cookieName}" (must only contain RFC 6265 cookie-name characters); using "${DEFAULT_AUTH_COOKIE_NAME}" instead.`
     );
     return DEFAULT_AUTH_COOKIE_NAME;

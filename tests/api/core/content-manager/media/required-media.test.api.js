@@ -6,10 +6,11 @@
  * The `api.documents.strictRelations` flag controls enforcement of required media
  * (and required relations) on non-draft writes:
  *
- *   - Flag OFF / unset (legacy): required media is NOT enforced and an empty
- *     `multiple` media reads back as `null`. Existing projects must be untouched.
- *   - Flag ON (strict): publishing an entry with an empty required media returns 400;
- *     an empty non-required `multiple` media reads back as `[]`.
+ *   - Flag OFF / unset (legacy): required media is NOT enforced on publish.
+ *   - Flag ON (strict): publishing an entry with an empty required media returns 400.
+ *
+ * Empty `multiple` media always reads back as `[]` (aligned with other to-many
+ * relations), regardless of the flag — see the gallery read-back assertion below.
  *
  * Drafts stay lenient under both modes (mirrors scalar `required`), which also
  * side-steps the 2023 form-data-upload regression (#14670 → #16002): a create
@@ -109,7 +110,7 @@ describe('Required media field validation (issue #24927)', () => {
       expect(res.statusCode).toBe(200);
     });
 
-    test('empty required multiple media reads back as null (unchanged)', async () => {
+    test('empty required multiple media reads back as []', async () => {
       const creation = await createEntry(MULTIPLE_UID, {}, { populate: ['gallery'] });
       expect(creation.statusCode).toBe(201);
 
@@ -118,7 +119,7 @@ describe('Required media field validation (issue #24927)', () => {
         { qs: { populate: ['gallery'] } }
       );
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body.data.gallery).toBe(null);
+      expect(getRes.body.data.gallery).toEqual([]);
     });
   });
 
