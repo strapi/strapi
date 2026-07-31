@@ -52,7 +52,8 @@ export const createCacheManager = ({
 
     async set(namespace, key, value, options) {
       const name = resolveProviderName(options?.provider);
-      const { provider: _ignored, ...rest } = options ?? {};
+      const rest = { ...(options ?? {}) };
+      delete rest.provider;
       return getProvider(name).set(namespace, key, value, rest);
     },
 
