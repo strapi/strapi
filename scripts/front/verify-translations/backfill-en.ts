@@ -133,7 +133,7 @@ export const backfillMissingEnKeys = (
   }
 
   // Drop keys already present (pickDefaultMessage only skips within the map).
-  for (const key of [...adminAdditions.keys()]) {
+  for (const key of adminAdditions.keys()) {
     if (key in adminEnJson) {
       adminAdditions.delete(key);
     }

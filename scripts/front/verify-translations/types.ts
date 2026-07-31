@@ -18,8 +18,8 @@ export interface MessageExtraction {
   expandedJsonKeys?: string[];
   /** Human-readable note for skipped / dynamic patterns. */
   note?: string;
-  /** Owning en.json: `'self'` (this bundle) or `'core/admin'` (cross-package admin ref). */
-  targetBundle?: 'self' | 'core/admin' | string;
+  /** Owning en.json: `'self'`, `'core/admin'`, or another bundle name. */
+  targetBundle?: string;
 }
 
 export interface TranslationBundle {

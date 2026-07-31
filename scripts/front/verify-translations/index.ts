@@ -1,8 +1,7 @@
 #!/usr/bin/env tsx
-import { discoverBundles, repoRoot } from './bundles';
+import { discoverBundles, readJsonRecord, repoRoot } from './bundles';
 import type { VerifyOptions, ValidationIssue } from './types';
 import { fixLocaleFiles, validateBundle } from './validate';
-import { readJsonRecord } from './bundles';
 import { backfillMissingEnKeys } from './backfill-en';
 
 const parseArgs = (): VerifyOptions => {
