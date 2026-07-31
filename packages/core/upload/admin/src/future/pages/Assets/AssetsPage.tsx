@@ -451,7 +451,7 @@ export const AssetsPage = () => {
         totalFiles: files.length,
         generateAiMetadata: Boolean(isAiMetadataEnabled),
       }).unwrap();
-    } catch (error) {
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };
@@ -479,7 +479,7 @@ export const AssetsPage = () => {
         folderId: currentFolderId,
         generateAiMetadata: Boolean(isAiMetadataEnabled),
       }).unwrap();
-    } catch (error) {
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };
