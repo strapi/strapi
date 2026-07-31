@@ -16,7 +16,10 @@ import type { Core } from '@strapi/types';
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 
-// Local cleaner used for tests to have full control and avoid coupling to core internals
+// Local cleaner used for tests. Mirrors the parent-state-aware logic of the
+// production `cleanComponentJoinTable`: for each (source, target-document)
+// pair where both draft and published target rows exist, drop the row whose
+// target state disagrees with the source's own publication state.
 const testCleaner = async (
   db: any,
   joinTableName: string,
@@ -64,47 +67,76 @@ const testCleaner = async (
       bySource[key].push(r);
     }
 
-    // Resolve table names for our parents to detect D&P support
+    // Resolve cmps tables so we can find the owning entity for each component
+    // instance and read its publication state.
     const productMd = db.metadata.get(PRODUCT_UID);
     const boxMd = db.metadata.get(BOX_UID);
-    const productCmpsTable = productMd?.tableName ? `${productMd.tableName}_cmps` : undefined;
+    const articleMd = db.metadata.get(ARTICLE_UID);
+    const productTable = productMd?.tableName;
+    const productCmpsTable = productTable ? `${productTable}_cmps` : undefined;
     const boxCmpsTable = boxMd?.tableName ? `${boxMd.tableName}_cmps` : undefined;
+    const articleTable = articleMd?.tableName;
+
+    const isComponentSource =
+      !sourceModel.uid?.startsWith('api::') && !sourceModel.uid?.startsWith('plugin::');
 
     const toDelete: number[] = [];
 
     for (const [sourceId, entries] of Object.entries(bySource)) {
       if (entries.length <= 1) continue;
 
-      // Parent D&P check: find component row to get entity_id
-      let parentSupportsDP = true;
+      // Resolve source's effective publication state:
+      //   - component source: walk to owning entity, use its published_at
+      //   - direct content-type source: use the source row's published_at
+      //   - non-D&P parent / unknown: skip safely (do not delete)
+      let sourceState: 'draft' | 'published' | null = null;
       try {
-        // Prefer mapping tables to detect parent type reliably
-        let productParent = null;
-        let boxParent = null;
-        if (productCmpsTable) {
-          productParent = await db
-            .connection(productCmpsTable)
-            .select('entity_id')
-            .where('cmp_id', Number(sourceId))
+        if (isComponentSource) {
+          if (productCmpsTable) {
+            const productParent = await db
+              .connection(productCmpsTable)
+              .select('entity_id')
+              .where('cmp_id', Number(sourceId))
+              .first();
+            if (productParent) {
+              const parentRow = await db
+                .connection(productTable as string)
+                .select('published_at')
+                .where('id', productParent.entity_id)
+                .first();
+              sourceState = parentRow?.published_at === null ? 'draft' : 'published';
+            }
+          }
+          if (sourceState === null && boxCmpsTable) {
+            const boxParent = await db
+              .connection(boxCmpsTable)
+              .select('entity_id')
+              .where('cmp_id', Number(sourceId))
+              .first();
+            if (boxParent) {
+              // Box has no D&P; do not act on these.
+              sourceState = null;
+            }
+          }
+        } else if (sourceModel.uid === ARTICLE_UID && articleTable) {
+          const sourceRow = await db
+            .connection(articleTable)
+            .select('published_at')
+            .where('id', Number(sourceId))
             .first();
+          if (sourceRow) {
+            sourceState = sourceRow.published_at === null ? 'draft' : 'published';
+          }
         }
-        if (!productParent && boxCmpsTable) {
-          boxParent = await db
-            .connection(boxCmpsTable)
-            .select('entity_id')
-            .where('cmp_id', Number(sourceId))
-            .first();
-        }
-        if (boxParent) parentSupportsDP = false;
       } catch (e) {
-        // If any error, default to safe side: do not delete
-        parentSupportsDP = false;
+        sourceState = null;
       }
-      if (!parentSupportsDP) {
+
+      if (sourceState === null) {
         continue;
       }
 
-      // For each document, if both draft and published relations exist, delete the published one(s)
+      // Per-document mismatch rule
       const byDoc: Record<string, any[]> = {};
       for (const e of entries) {
         const key = String(e.target_document_id ?? '');
@@ -115,9 +147,10 @@ const testCleaner = async (
         if (!docId || docEntries.length <= 1) continue;
         const publishedEntries = docEntries.filter((e) => e.target_published_at !== null);
         const draftEntries = docEntries.filter((e) => e.target_published_at === null);
-        if (publishedEntries.length > 0 && draftEntries.length > 0) {
-          for (const pub of publishedEntries) toDelete.push(pub.join_id);
-        }
+        if (publishedEntries.length === 0 || draftEntries.length === 0) continue;
+
+        const ghostRows = sourceState === 'draft' ? publishedEntries : draftEntries;
+        for (const row of ghostRows) toDelete.push(row.join_id);
       }
     }
 
@@ -720,6 +753,126 @@ describe('Unidirectional join-table repair (components)', () => {
     expect(rows[0][targetColumn]).toBe(draftTag.id);
 
     // Cleanup article
+    await strapi.documents(ARTICLE_UID).delete({ documentId: article.documentId });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Regression coverage for the published-parent case: when the source is the
+  // PUBLISHED side, the row pointing to the DRAFT target is the ghost — not
+  // the other way round. The previous implementation always deleted the
+  // published-pointing row, which corrupted published parents.
+  // ---------------------------------------------------------------------------
+
+  it('Removes draft-target row when both exist under a PUBLISHED component parent', async () => {
+    const { joinTableName, sourceColumn, targetColumn } = getCompoTagsRelationInfo();
+
+    const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
+    const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
+    const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
+
+    // Create + publish a product so its component instance is the PUBLISHED-side one
+    const product = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'Published-parent-ghost',
+        rcompo: { rtags: [{ id: publishedTag.id }] },
+      },
+      status: 'draft',
+    });
+    await strapi.documents(PRODUCT_UID).publish({ documentId: product.documentId });
+
+    // Find the published parent's component-instance row in the join table by
+    // walking through the published product entry's _cmps row.
+    const productMd: any = (strapi as any).db.metadata.get(PRODUCT_UID);
+    const productCmpsTable = `${productMd.tableName}_cmps`;
+
+    const publishedProductRow = await strapi.db
+      .connection(productMd.tableName)
+      .select('id')
+      .where('document_id', product.documentId)
+      .whereNotNull('published_at')
+      .first();
+    expect(publishedProductRow).toBeDefined();
+
+    const publishedCmpsRow = await strapi.db
+      .connection(productCmpsTable)
+      .select('cmp_id')
+      .where('entity_id', publishedProductRow.id)
+      .first();
+    expect(publishedCmpsRow).toBeDefined();
+    const publishedSourceId = publishedCmpsRow.cmp_id;
+
+    // Confirm the published parent's component currently has exactly one row,
+    // pointing to the PUBLISHED tag (the legitimate state).
+    let rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(1);
+    expect(rows[0][targetColumn]).toBe(publishedTag.id);
+
+    // Inject the corrupt state: a stray draft-target row under the same
+    // published parent.
+    const ghost = { ...rows[0] } as any;
+    delete ghost.id;
+    ghost[targetColumn] = draftTag.id;
+    await strapi.db.connection(joinTableName).insert(ghost);
+
+    rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(2);
+
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    expect(removed).toBeGreaterThanOrEqual(1);
+
+    // The legitimate published-target row must remain; the draft-target row
+    // must be removed.
+    rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(1);
+    expect(rows[0][targetColumn]).toBe(publishedTag.id);
+
+    await strapi.documents(PRODUCT_UID).delete({ documentId: product.documentId });
+  });
+
+  it('Removes draft-target row when both exist under a PUBLISHED content-type source', async () => {
+    const { joinTableName, sourceColumn, targetColumn } = getArticleTagsRelationInfo();
+
+    const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
+    const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
+    const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
+
+    // Create + publish an article so we have a published-side source row
+    const article = await strapi.documents(ARTICLE_UID).create({
+      data: { title: 'Article-published', tags: [{ id: publishedTag.id }] },
+      status: 'draft',
+    });
+    await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
+
+    const articleMd: any = (strapi as any).db.metadata.get(ARTICLE_UID);
+    const publishedArticle = await strapi.db
+      .connection(articleMd.tableName)
+      .select('id')
+      .where('document_id', article.documentId)
+      .whereNotNull('published_at')
+      .first();
+    expect(publishedArticle).toBeDefined();
+
+    const publishedSourceId = publishedArticle.id;
+    let rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(1);
+    expect(rows[0][targetColumn]).toBe(publishedTag.id);
+
+    // Inject a draft-target ghost row under the published article
+    const ghost = { ...rows[0] } as any;
+    delete ghost.id;
+    ghost[targetColumn] = draftTag.id;
+    await strapi.db.connection(joinTableName).insert(ghost);
+
+    rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(2);
+
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    expect(removed).toBeGreaterThanOrEqual(1);
+
+    rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
+    expect(rows.length).toBe(1);
+    expect(rows[0][targetColumn]).toBe(publishedTag.id);
+
     await strapi.documents(ARTICLE_UID).delete({ documentId: article.documentId });
   });
 });
