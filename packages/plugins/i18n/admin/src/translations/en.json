@@ -83,5 +83,10 @@
   "plugin.schema.i18n.localized.description-field": "The field can have different values in each language",
   "plugin.schema.i18n.localized.label-content-type": "Internationalization",
   "plugin.schema.i18n.localized.label-field": "Enable localization for this field",
-  "list-view.table.header.label": "Available in"
+  "list-view.table.header.label": "Available in",
+  "CheckboxConfirmation.Modal.title": "Disable localization",
+  "Settings.locales.modal.locales.label": "Locales",
+  "actions.publish.dialog.title": "Confirmation",
+  "content-manager.bulk-publish.already-published": "Already Published",
+  "content-manager.bulk-unpublish.already-unpublished": "Already Unpublished"
 }

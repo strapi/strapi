@@ -38,5 +38,6 @@
   "plugin.name": "Documentation",
   "Input.error.contain.lowercase": "Password must contain at least one lowercase character",
   "Input.error.contain.number": "Password must contain at least one number",
-  "Input.error.contain.uppercase": "Password must contain at least one uppercase character"
+  "Input.error.contain.uppercase": "Password must contain at least one uppercase character",
+  "pages.SettingsPage.Button.save": "Save"
 }

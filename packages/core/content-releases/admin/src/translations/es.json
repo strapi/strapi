@@ -84,7 +84,6 @@
   "pages.ReleaseDetails.groupBy.option.actions": "Acciones",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Programado para el {date} a las {time} ({offset})",
   "pages.ReleaseDetails.entry-validation.fields": "Campos",
-  "pages.Settings.releases.title": "Lanzamientos",
   "pages.Settings.releases.description": "Crear y gestionar actualizaciones de contenidos",
   "pages.Settings.releases.timezone.label": "Zona horaria por defecto",
   "pages.Settings.releases.setting.default-timezone-notification-success": "Zona horaria por defecto actualizada.",

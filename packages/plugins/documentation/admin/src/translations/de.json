@@ -23,7 +23,6 @@
   "notification.delete.success": "Dokument wurde erfolgreich gelöscht",
   "notification.generate.success": "Dokument wurde erfolgreich generiert",
   "notification.update.success": "Einstellungen wurden erfolgreich aktualisiert",
-  "plugin.name": "Dokumentation",
   "pages.PluginPage.Button.open": "Dokumentation öffnen",
   "pages.PluginPage.header.description": "Dokumentations-Plugin konfigurieren",
   "pages.PluginPage.table.generated": "Zuletzt generiert",
@@ -36,6 +35,7 @@
   "pages.SettingsPage.toggle.label": "Beschränkter Zugriff",
   "plugin.description.long": "Erstelle ein OpenAPI-Dokument und visualisiere deine API mit SWAGGER UI.",
   "plugin.description.short": "Erstelle ein OpenAPI-Dokument und visualisiere deine API mit SWAGGER UI.",
+  "plugin.name": "Dokumentation",
   "Input.error.contain.lowercase": "Das Passwort muss mindestens einen Kleinbuchstaben enthalten",
   "Input.error.contain.number": "Das Passwort muss mindestens eine Zahl enthalten",
   "Input.error.contain.uppercase": "Das Passwort muss mindestens einen Großbuchstaben enthalten"

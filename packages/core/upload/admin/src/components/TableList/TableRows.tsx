@@ -75,7 +75,10 @@ export const TableRows = ({
               <Checkbox
                 aria-label={formatMessage(
                   {
-                    id: contentType === 'asset' ? 'list-assets-select' : 'list.folder.select',
+                    id:
+                      contentType === 'asset'
+                        ? getTrad('list-assets-select')
+                        : getTrad('list.folder.select'),
                     defaultMessage:
                       contentType === 'asset' ? 'Select {name} asset' : 'Select {name} folder',
                   },
