@@ -64,7 +64,6 @@
   "error.contentTypeName.reserved-name": "이 이름은 다른 기능을 손상시킬 수 있으므로 사용할 수 없습니다.",
   "error.category.format": "카테고리 이름은 문자로 시작해야 하며, 문자, 숫자, 대시(-), 밑줄(_)만 포함할 수 있습니다.",
   "error.validation.enum-duplicate": "중복된 값은 사용할 수 없습니다.",
-  "error.validation.enum-empty": "You must add at least one value",
   "error.validation.enum-empty-string": "빈 문자열은 사용할 수 없습니다.",
   "error.validation.enum-regex": "적어도 하나의 값이 유효하지 않습니다. 값은 숫자가 처음 나타나기 전에 적어도 하나의 알파벳 문자를 포함해야 합니다",
   "error.validation.minSupMax": "Can't be superior",

@@ -190,17 +190,6 @@ const validateLocaleFile = (
   const enKeyList = Object.keys(enJson);
   const localeKeys = Object.keys(localeJson);
 
-  for (const key of enKeyList) {
-    if (!(key in localeJson)) {
-      issues.push({
-        severity: 'error',
-        bundle: bundle.packageName,
-        code: 'missing-locale-key',
-        message: `Locale ${localeName} is missing key "${key}" from en.json`,
-      });
-    }
-  }
-
   for (const key of localeKeys) {
     if (!(key in enJson)) {
       issues.push({
@@ -212,7 +201,9 @@ const validateLocaleFile = (
     }
   }
 
-  if (enKeyList.join('\0') !== localeKeys.join('\0')) {
+  const expectedLocaleKeyOrder = enKeyList.filter((key) => key in localeJson);
+
+  if (expectedLocaleKeyOrder.join('\0') !== localeKeys.join('\0')) {
     issues.push({
       severity: 'error',
       bundle: bundle.packageName,
@@ -252,7 +243,9 @@ export const fixLocaleFiles = (bundle: TranslationBundle): number => {
     const reordered: Record<string, string> = {};
 
     for (const key of Object.keys(enJson)) {
-      reordered[key] = localeJson[key] ?? enJson[key];
+      if (key in localeJson) {
+        reordered[key] = localeJson[key];
+      }
     }
 
     const nextContent = `${JSON.stringify(reordered, null, 2)}\n`;

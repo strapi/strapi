@@ -58,7 +58,6 @@
   "Providers.status": "상태",
   "Roles.empty": "아직 역할이 없습니다.",
   "Roles.empty.search": "검색과 일치하는 역할이 없습니다.",
-  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "사용자 & 권한 플러그인",

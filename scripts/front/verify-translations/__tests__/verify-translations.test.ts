@@ -66,9 +66,9 @@ describe('extract.resolveIdExpression', () => {
 });
 
 describe('fixLocaleFiles', () => {
-  it('reorders locale keys to match en.json and removes extras', () => {
+  it('reorders existing locale keys, removes extras, and preserves missing-key fallback', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-'));
-    const en = { 'b.key': 'B', 'a.key': 'A' };
+    const en = { 'b.key': 'B', 'missing.key': 'English fallback', 'a.key': 'A' };
     const fr = { 'a.key': 'A-fr', 'b.key': 'B-fr', 'extra.key': 'remove-me' };
 
     fs.writeFileSync(path.join(dir, 'en.json'), `${JSON.stringify(en, null, 2)}\n`);
@@ -88,6 +88,7 @@ describe('fixLocaleFiles', () => {
     const fixed = readJsonRecord(path.join(dir, 'fr.json'));
     assert.deepEqual(Object.keys(fixed), ['b.key', 'a.key']);
     assert.deepEqual(fixed, { 'b.key': 'B-fr', 'a.key': 'A-fr' });
+    assert.equal('missing.key' in fixed, false);
   });
 });
 

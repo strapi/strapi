@@ -58,7 +58,6 @@
   "Providers.status": "Status",
   "Roles.empty": "Je hebt nog geen rollen.",
   "Roles.empty.search": "Geen rollen gevonden.",
-  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Rol verwijderd",
   "Settings.roles.edited": "Rol bewerkt",
   "Settings.section-label": "Users & Permissions plugin",

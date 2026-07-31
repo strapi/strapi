@@ -82,6 +82,5 @@
   "plugin.schema.i18n.localized.description-content-type": "Ermöglicht es Inhalte in verschiedenen Sprachen zu pflegen",
   "plugin.schema.i18n.localized.description-field": "Das Feld kann verschiedene Werte in jeder Sprache haben",
   "plugin.schema.i18n.localized.label-content-type": "Übersetzungen",
-  "plugin.schema.i18n.localized.label-field": "Übersetzungen für dieses Feld aktivieren",
-  "list-view.table.header.label": "Available in"
+  "plugin.schema.i18n.localized.label-field": "Übersetzungen für dieses Feld aktivieren"
 }

@@ -35,8 +35,5 @@
   "pages.SettingsPage.toggle.label": "Begrænset adgang",
   "plugin.description.long": "Opret et OpenAPI dokument og visualisér dit API med Swagger UI.",
   "plugin.description.short": "Opret et OpenAPI dokument og visualisér dit API med Swagger UI.",
-  "plugin.name": "Dokumentation",
-  "Input.error.contain.lowercase": "Password must contain at least one lowercase character",
-  "Input.error.contain.number": "Password must contain at least one number",
-  "Input.error.contain.uppercase": "Password must contain at least one uppercase character"
+  "plugin.name": "Dokumentation"
 }

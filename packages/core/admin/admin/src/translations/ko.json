@@ -152,7 +152,6 @@
   "Settings.application.link-pricing": "모든 가격 정책 보기",
   "Settings.application.link-upgrade": "어드민 패널 업그레이드",
   "Settings.application.node-version": "Node 버전",
-  "Settings.application.plan-title": "current plan",
   "Settings.application.strapi-version": "Strapi 버전",
   "Settings.application.strapiVersion": "Strapi 버전",
   "Settings.application.title": "어플리케이션",
