@@ -5,6 +5,7 @@ import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 
 const APPLICATION_ERROR_BRAND = Symbol.for('strapi.ApplicationError');
+const DETAILS_PROPERTY = 'details';
 
 /* ApplicationError */
 class ApplicationError<
@@ -32,7 +33,7 @@ class ApplicationError<
 
 type ApplicationErrorClass = {
   name: string;
-  prototype: ApplicationError;
+  prototype: Error;
 };
 
 const isErrorOfType = (
@@ -59,15 +60,20 @@ const isErrorOfType = (
 };
 
 const isApplicationError = (error: unknown): error is ApplicationError => {
-  if (typeof error === 'object' && error !== null) {
-    const candidate = error as Record<PropertyKey, unknown>;
-
-    if (candidate[APPLICATION_ERROR_BRAND] === true) {
-      return true;
-    }
+  if (!(error instanceof Error)) {
+    return false;
   }
 
-  return isErrorOfType(error, ApplicationError);
+  const candidate = error as unknown as Record<PropertyKey, unknown>;
+
+  if (candidate[APPLICATION_ERROR_BRAND] === true) {
+    return true;
+  }
+
+  return (
+    isErrorOfType(error, ApplicationError) &&
+    Object.prototype.hasOwnProperty.call(error, DETAILS_PROPERTY)
+  );
 };
 
 class ValidationError<
