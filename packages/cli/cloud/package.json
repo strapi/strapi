@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@strapi/utils": "5.51.1",
-    "axios": "1.18.1",
+    "axios": "1.19.0",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
