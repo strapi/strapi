@@ -1,7 +1,17 @@
-import * as dateFns from 'date-fns';
+import type * as dateFnsType from 'date-fns';
 
 import { parseDateTimeOrTimestamp } from './shared/parsers';
 import Field from './field';
+
+// Lazy: defer date-fns until a value is actually read from the DB.
+let lazyDateFns: typeof dateFnsType | undefined;
+const dateFns = (): typeof dateFnsType => {
+  if (!lazyDateFns) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyDateFns = require('date-fns');
+  }
+  return lazyDateFns as typeof dateFnsType;
+};
 
 export default class DatetimeField extends Field {
   toDB(value: unknown) {
@@ -10,6 +20,6 @@ export default class DatetimeField extends Field {
 
   fromDB(value: unknown) {
     const cast = new Date(value as any);
-    return dateFns.isValid(cast) ? cast.toISOString() : null;
+    return dateFns().isValid(cast) ? cast.toISOString() : null;
   }
 }
