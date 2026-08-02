@@ -9354,6 +9354,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa-compress": "npm:4.0.3"
+    "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
@@ -11481,6 +11482,15 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/47b6fdddee779ad44721557776bc0dc9fc3945e0a08cf838b441a357dfdf5fcc92c3029e906f5b0bf0ef20abbb5c3297a957b71e2d38398d7cdafc18892a7bab
+  languageName: node
+  linkType: hard
+
+"@types/koa-favicon@npm:2.1.5":
+  version: 2.1.5
+  resolution: "@types/koa-favicon@npm:2.1.5"
+  dependencies:
+    "@types/koa": "npm:*"
+  checksum: 10c0/5b1eeeeaa801b5a870b2d2b6d29bf17406fd82f7e2e94c8e0d5adcd55dde76d03851722867c1778727c388ea507b40f0503b90ad4c03c135c374250e762642d0
   languageName: node
   linkType: hard
 

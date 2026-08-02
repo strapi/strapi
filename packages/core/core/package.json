@@ -128,6 +128,7 @@
     "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.15.2",
     "@types/koa-compress": "4.0.3",
+    "@types/koa-favicon": "2.1.5",
     "@types/koa-static": "4.0.2",
     "@types/koa__router": "12.0.0",
     "@types/lodash": "^4.14.191",
