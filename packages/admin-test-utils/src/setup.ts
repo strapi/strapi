@@ -1,6 +1,6 @@
 import { format } from 'util';
 import { ResizeObserver } from '@juggle/resize-observer';
-import type { Admin } from '@strapi/types';
+import type { Admin } from '@strapi/types/_internal';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
@@ -113,6 +113,7 @@ const browserStrapi: Admin.BrowserStrapi = {
   backendURL: 'http://localhost:1337',
   isEE: false,
   isTrial: false,
+  isTrialLicense: false,
   ai: {
     enabled: false,
   },

@@ -211,9 +211,9 @@ Do not add per-render or high-frequency tracking without an explicit product nee
 
 ## `window.strapi` telemetry fields
 
-Set in `packages/core/admin/admin/src/render.ts`. A local `browserStrapi` object is
-built first (with defaults), enriched from `/admin/project-type`, then assigned to
-`window.strapi` once at the end:
+Built by `createBrowserStrapi` (`packages/core/admin/admin/src/utils/browserStrapi.ts`)
+with defaults, enriched from `/admin/project-type`, then assigned to `window.strapi` once
+by `render.ts`:
 
 ```typescript
 const browserStrapi: Admin.BrowserStrapi = {
@@ -222,15 +222,20 @@ const browserStrapi: Admin.BrowserStrapi = {
   // …other fields
 };
 
-// after fetching /admin/project-type
-browserStrapi.projectType = isEE ? 'Enterprise' : 'Community';
+// after fetching /admin/project-type → { isEE, isTrial, planPriceId, features, flags, ai }
+browserStrapi.projectType = getProjectType({ isEE, planPriceId });
 
 // assigned exactly once, before the app renders
 window.strapi = browserStrapi;
 ```
 
-Typed as `BrowserStrapi` in `packages/core/types/src/admin/browser-strapi.ts` (the
-`window.strapi` global is declared in `packages/core/types/src/globals-admin.ts`).
+`projectType` is never derived from `isEE` alone — always call `getProjectType`, which
+returns `Growth` when `planPriceId` contains `growth` and `Enterprise` for other licensed
+plans.
+
+Typed as `BrowserStrapi` in `packages/core/types/src/_internal/admin/browser-strapi.ts`
+(the global is declared in `packages/core/types/src/_internal/globals-admin.ts`).
+`_internal` is first-party plumbing, not plugin API.
 
 ---
 

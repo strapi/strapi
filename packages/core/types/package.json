@@ -38,11 +38,13 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./_internal": {
+      "types": "./dist/_internal/index.d.ts",
+      "source": "./src/_internal/index.ts"
+    },
     "./_internal/globals-admin": {
-      "types": "./dist/globals-admin.d.ts",
-      "source": "./src/globals-admin.ts",
-      "require": "./dist/globals-admin.js",
-      "default": "./dist/globals-admin.js"
+      "types": "./dist/_internal/globals-admin.d.ts",
+      "source": "./src/_internal/globals-admin.ts"
     },
     "./package.json": "./package.json",
     "./*": "./*"

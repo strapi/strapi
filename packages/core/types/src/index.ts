@@ -1,6 +1,5 @@
 import type { Strapi } from './core';
 
-export type * as Admin from './admin';
 export type * as Core from './core';
 export type * as Data from './data';
 export type * as Internal from './internal';

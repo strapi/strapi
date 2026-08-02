@@ -191,6 +191,11 @@ type FetchOptions = {
 
 type FetchConfig = {
   signal?: AbortSignal;
+  /**
+   * Overrides `window.strapi.backendURL`. Needed during bootstrap, before the
+   * global is assigned.
+   */
+  backendURL?: string;
 };
 
 interface ErrorResponse {
@@ -280,7 +285,7 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const backendURL = window.strapi.backendURL;
+  const backendURL = defaultOptions.backendURL ?? window.strapi.backendURL;
 
   /**
    * Create default headers with the current token.
