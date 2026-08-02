@@ -1,7 +1,9 @@
+// @ts-check
 'use strict';
 
 const path = require('path');
 
+/** @type {import('jest').Config['moduleNameMapper']} */
 const moduleNameMapper = {
   '.*\\.(css|less|styl|scss|sass)$': '@strapi/admin-test-utils/file-mock',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
@@ -17,10 +19,8 @@ const moduleNameMapper = {
   '^styled-components$': path.join(__dirname, 'node_modules/styled-components'),
 };
 
-/**
- * @type {import('jest').Config}
- */
-module.exports = {
+/** @type {import('jest').Config} */
+const config = {
   rootDir: __dirname,
   moduleNameMapper,
   /* Tells jest to ignore duplicated manual mock files, such as index.js */
@@ -91,8 +91,6 @@ module.exports = {
     // the package's `default` export so `msw/node` resolves correctly under Jest+jsdom.
     customExportConditions: [''],
   },
-  // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
-  // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 
   // NOTE: this doesn't work with projects due to a jest bug, so we also set it
@@ -131,3 +129,5 @@ module.exports = {
     '<rootDir>/static/',
   ],
 };
+
+module.exports = config;
