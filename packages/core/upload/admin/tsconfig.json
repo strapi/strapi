@@ -4,7 +4,12 @@
     "paths": {
       "@tests/*": ["./tests/*"]
     },
-    "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]
+    "types": [
+      "@testing-library/jest-dom",
+      "jest",
+      "vite/client",
+      "@strapi/types/_internal/globals-admin"
+    ]
   },
   "include": ["../package.json", "./src", "../shared", "./tests"]
 }

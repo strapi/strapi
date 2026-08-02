@@ -4,7 +4,7 @@
     "rootDir": "../",
     "outDir": "../dist",
     "noEmit": false,
-    "types": ["@testing-library/jest-dom", "vite/client", "@strapi/types/globals-admin"]
+    "types": ["@testing-library/jest-dom", "vite/client", "@strapi/types/_internal/globals-admin"]
   },
   "include": ["./src", "../shared", "../ee/admin", "../package.json", "./tests"],
   "exclude": [
