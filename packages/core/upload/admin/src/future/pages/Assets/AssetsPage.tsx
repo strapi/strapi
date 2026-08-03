@@ -22,6 +22,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useAIAvailability } from '../../../hooks/useAiAvailability';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
@@ -222,6 +223,11 @@ const AssetsView = ({
           </Loader>
         </Flex>
       )}
+      {/* Lives here rather than in `AssetsPage` so it can read the loaded
+          assets: the AI metadata action needs their mime types to know what
+          the provider can handle. `position: fixed` keeps it visually anchored
+          regardless of where it sits in the tree. */}
+      <BulkActionsBar assets={assets} />
     </>
   );
 };
@@ -419,6 +425,8 @@ export const AssetsPage = () => {
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
+  // Drives the post-upload AI metadata phase shown per row in the progress dialog.
+  const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
@@ -438,8 +446,12 @@ export const AssetsPage = () => {
 
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFiles({ formData, totalFiles: files.length }).unwrap();
-    } catch (error) {
+      await uploadFiles({
+        formData,
+        totalFiles: files.length,
+        generateAiMetadata: Boolean(isAiMetadataEnabled),
+      }).unwrap();
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };
@@ -462,8 +474,12 @@ export const AssetsPage = () => {
 
   const handleUrlUpload = async (urls: string[]) => {
     try {
-      await uploadFromUrls({ urls, folderId: currentFolderId }).unwrap();
-    } catch (error) {
+      await uploadFromUrls({
+        urls,
+        folderId: currentFolderId,
+        generateAiMetadata: Boolean(isAiMetadataEnabled),
+      }).unwrap();
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };
@@ -624,7 +640,6 @@ export const AssetsPage = () => {
                 </Layouts.Content>
               </Layouts.Root>
             </Box>
-            <BulkActionsBar />
           </AssetsDndProvider>
         </AssetSelectionProvider>
       </UploadDropZoneProvider>

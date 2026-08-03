@@ -481,7 +481,7 @@ const morphX = async (
         rootColumn: joinColumn.referencedColumn,
         rootTable: qb.alias,
         on: {
-          ...(joinTable.on || {}),
+          ...joinTable.on,
           field: attributeName,
         },
         orderBy: getJoinTableOrderBy(populateValue, joinTable),
@@ -528,7 +528,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
   const joinRowsRaw = await qb
     .where({
       [joinColumn.name]: referencedValues,
-      ...(joinTable.on || {}),
+      ...joinTable.on,
     })
     .orderBy([joinColumn.name, 'order'])
     .execute<Row[]>({ mapResults: false });

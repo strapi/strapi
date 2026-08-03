@@ -411,7 +411,7 @@ const useContentManagerContext = () => {
   const slug = model;
   const isCreatingEntry = id === 'create';
 
-  const {} = useContentTypeSchema();
+  useContentTypeSchema();
 
   const isLoading = isLoadingDoc || layout.isLoading;
   const error = layout.error;
