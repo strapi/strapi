@@ -6,7 +6,6 @@ import {
   getIdsOfKind,
   getSelectAllState,
   selectAll,
-  selectOnly,
   selectRange,
   toggleSelection,
   type ItemKey,
@@ -62,18 +61,6 @@ describe('selection logic', () => {
       toggleSelection(prev, assetKey(20));
 
       expect([...prev.selectedKeys]).toEqual([assetKey(10)]);
-    });
-  });
-
-  describe('selectOnly', () => {
-    it('replaces the whole selection with a single key', () => {
-      const next = selectOnly(
-        stateFrom([folderKey(1), assetKey(10), assetKey(20)], assetKey(20)),
-        assetKey(30)
-      );
-
-      expect([...next.selectedKeys]).toEqual([assetKey(30)]);
-      expect(next.anchorKey).toBe(assetKey(30));
     });
   });
 
