@@ -2,6 +2,8 @@ import { reducer, actions } from '../reducer';
 
 import { initCT, initCompo, init } from './utils';
 
+import type { AttributeConditions } from '../../../types';
+
 describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
@@ -979,7 +981,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
       });
     });
 
-    describe('Editing a relation and preserve plugin options', () => {
+    describe('Editing a relation and preserve relation metadata', () => {
       it('Should save pluginOptions if the relation is a one side relation (oneWay, manyWay)', () => {
         const contentTypeUID = 'api::category.category';
         const updatedTargetUID = 'api::address.address';
@@ -1176,6 +1178,82 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           ],
         });
+      });
+
+      it('Should preserve the inverse relation conditions when editing a bidirectional oneToMany relation', () => {
+        const articleConditions: AttributeConditions = {
+          visible: { '==': [{ var: 'status' }, 'published'] },
+        };
+        const updatedArticleConditions: AttributeConditions = {
+          visible: { '==': [{ var: 'status' }, 'draft'] },
+        };
+        const categoryConditions: AttributeConditions = {
+          visible: { '==': [{ var: 'status' }, 'enabled'] },
+        };
+
+        const article = initCT('article', {
+          attributes: [
+            { name: 'status', type: 'enumeration', enum: ['published', 'draft'] },
+            {
+              name: 'categories',
+              relation: 'oneToMany',
+              targetAttribute: 'articles',
+              target: 'api::category.category',
+              type: 'relation',
+              conditions: articleConditions,
+            },
+          ],
+        });
+        const category = initCT('category', {
+          attributes: [
+            { name: 'status', type: 'enumeration', enum: ['enabled', 'disabled'] },
+            {
+              name: 'articles',
+              relation: 'manyToOne',
+              targetAttribute: 'categories',
+              target: article.uid,
+              type: 'relation',
+              conditions: categoryConditions,
+            },
+          ],
+        });
+
+        const initializedState = init({
+          contentTypes: {
+            [article.uid]: article,
+            [category.uid]: category,
+          },
+        });
+
+        const state = reducer(
+          initializedState,
+          actions.editAttribute({
+            attributeToSet: {
+              name: 'categories',
+              relation: 'oneToMany',
+              targetAttribute: 'articles',
+              target: category.uid,
+              type: 'relation',
+              conditions: updatedArticleConditions,
+            },
+            forTarget: 'contentType',
+            targetUid: article.uid,
+            name: 'categories',
+          })
+        );
+
+        expect(state.current.contentTypes[article.uid].attributes).toContainEqual(
+          expect.objectContaining({
+            name: 'categories',
+            conditions: updatedArticleConditions,
+          })
+        );
+        expect(state.current.contentTypes[category.uid].attributes).toContainEqual(
+          expect.objectContaining({
+            name: 'articles',
+            conditions: categoryConditions,
+          })
+        );
       });
 
       it('Should save pluginOptions if the relation is nested inside a component', () => {
