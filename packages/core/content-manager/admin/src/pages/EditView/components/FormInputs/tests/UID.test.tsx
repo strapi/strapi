@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Form, useField } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, waitFor, act, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
@@ -31,11 +33,34 @@ const TargetFieldInput = () => {
   );
 };
 
+/**
+ * Stands in for `ConditionAwareInputRenderer`, which returns `null` when a visibility
+ * condition stops matching. The field is unmounted while the form keeps its value, so
+ * anything the input holds in local state is lost on the way back.
+ */
+const VisibilityToggle = ({ children }: { children: React.ReactNode }) => {
+  const [isVisible, setIsVisible] = React.useState(true);
+
+  return (
+    <>
+      <button type="button" onClick={() => setIsVisible((visible) => !visible)}>
+        Toggle visibility
+      </button>
+      {isVisible ? children : null}
+    </>
+  );
+};
+
 const render = ({
   initialValues = { name: 'test' },
   withTargetField = false,
+  withVisibilityToggle = false,
   ...props
-}: Partial<UIDInputProps> & { initialValues?: object; withTargetField?: boolean } = {}) =>
+}: Partial<UIDInputProps> & {
+  initialValues?: object;
+  withTargetField?: boolean;
+  withVisibilityToggle?: boolean;
+} = {}) =>
   renderRTL(<UIDInput label="Label" name="name" type="uid" {...props} />, {
     renderOptions: {
       wrapper: ({ children }) => (
@@ -45,7 +70,7 @@ const render = ({
             element={
               <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
                 {withTargetField ? <TargetFieldInput /> : null}
-                {children}
+                {withVisibilityToggle ? <VisibilityToggle>{children}</VisibilityToggle> : children}
               </Form>
             }
           />
@@ -239,6 +264,49 @@ describe('UIDInput', () => {
 
     await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
     expect(uidInput).toHaveValue('');
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test('Does not refill a cleared value after a visibility condition remounts the field', async () => {
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    const { user } = render({
+      initialValues: { target: 'My Title' },
+      attribute: { targetField: 'target' },
+      withTargetField: true,
+      withVisibilityToggle: true,
+    });
+    await waitForInput();
+
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('My Title')
+    );
+
+    await user.clear(screen.getByRole('textbox', { name: 'Label' }));
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('');
+
+    // Hide the field and bring it back, as a visibility condition flipping would.
+    const toggle = screen.getByRole('button', { name: 'Toggle visibility' });
+    await user.click(toggle);
+    expect(screen.queryByRole('textbox', { name: 'Label' })).not.toBeInTheDocument();
+    await user.click(toggle);
+    await waitForInput();
+
+    // Give a regeneration every chance to land: run the debounce timers and flush the
+    // promise chain a request would resolve through, so the assertion below is not just
+    // winning a race against it.
+    for (let i = 0; i < 3; i += 1) {
+      await act(async () => {
+        jest.advanceTimersByTime(4000);
+      });
+    }
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('');
 
     jest.runOnlyPendingTimers();
     jest.useRealTimers();

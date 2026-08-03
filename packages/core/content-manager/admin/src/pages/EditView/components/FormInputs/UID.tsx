@@ -80,6 +80,11 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     /**
      * Once the user types in the field it is theirs — including when they clear it,
      * which must not immediately refill from the target field.
+     *
+     * Note this is a secondary guard rather than the mechanism: `Form` normalises a
+     * cleared input to `null`, and `null` already falls outside the untouched values
+     * below. Ownership therefore survives this input being unmounted and remounted by
+     * a visibility condition on the attribute, which resets the ref.
      */
     const hasUserEditedRef = React.useRef(false);
 
