@@ -44,6 +44,7 @@ export const getRelationValidator = (
     type: yup.string().oneOf(['relation']).required(),
     relation: yup.string().test('isValidRelation', isValidRelation(allowedRelations)).required(),
     configurable: yup.boolean().nullable(),
+    required: yup.boolean(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
   };

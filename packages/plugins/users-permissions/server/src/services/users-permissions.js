@@ -250,7 +250,7 @@ module.exports = ({ strapi }) => ({
 
     try {
       return _.template(layout, { interpolate, evaluate: false, escape: false })(data);
-    } catch (e) {
+    } catch {
       throw new errors.ApplicationError('Invalid email template');
     }
   },

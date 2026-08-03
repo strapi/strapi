@@ -22,6 +22,8 @@ interface GetFoldersParams {
   /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
   sort?: string;
   search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent/search scope. */
+  filters?: Record<string, unknown>[];
 }
 
 interface BulkMoveParams {
@@ -45,26 +47,31 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId, sort, search } = params as GetFoldersParams;
+        const { parentId, sort, search, filters = [] } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
         };
 
+        // List filters (dates) apply in BOTH modes — search composes with them,
+        // only the parent scope is dropped while searching.
         if (search) {
           // Search is global: the parent filter is dropped so matching folders
           // anywhere in the library surface. The endpoint is unpaginated — it
           // returns every match — so callers can treat the array length as the
           // true total. Bounding it is a separate decision.
           queryParams['_q'] = encodeSearchQuery(search);
-        } else if (parentId != null) {
-          queryParams['filters'] = {
-            $and: [{ parent: { id: parentId } }],
-          };
+
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
         } else {
+          const parentScope =
+            parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+
           queryParams['filters'] = {
-            $and: [{ parent: { id: { $null: true } } }],
+            $and: [parentScope, ...filters],
           };
         }
 

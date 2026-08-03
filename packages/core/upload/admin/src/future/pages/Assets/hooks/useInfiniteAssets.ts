@@ -10,6 +10,10 @@ interface UseInfiniteAssetsOptions {
   folder?: number | null;
   sort?: string;
   search?: string;
+  /** Extra `filters[$and]` entries for the files query. */
+  filters?: Record<string, unknown>[];
+  /** Structural switch: an `is [folder]`-only type badge means no file can match. */
+  enabled?: boolean;
 }
 
 /**
@@ -60,16 +64,22 @@ const flattenPages = (pages: Record<number, File[]>): File[] => {
  * never appears, rows shift across the page boundary. The id dedupe above
  * keeps that from producing duplicate React keys or confusing
  * `useAssetSelection`, but the list only becomes consistent again on the next
- * folder/sort/search change.
+ * folder/sort/search/filter change.
  */
-const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOptions = {}) => {
+const useInfiniteAssets = ({
+  folder = null,
+  sort,
+  search,
+  filters,
+  enabled = true,
+}: UseInfiniteAssetsOptions = {}) => {
   // Derived from the request args themselves, so a new filter can't reach the
   // API without also invalidating what was accumulated under the old one.
-  const queryArgs = { folder, sort, search };
+  const queryArgs = { folder, sort, search, filters };
   const queryKey = JSON.stringify(queryArgs);
-  // Identifies the list being viewed, ignoring the search term — a search
-  // keeps the previous results on screen, a folder or sort change doesn't.
-  const listKey = JSON.stringify({ folder, sort });
+  // Identifies the list being viewed, ignoring the search term — a search keeps
+  // the previous results on screen, a folder, sort or filter change doesn't.
+  const listKey = JSON.stringify({ folder, sort, filters });
 
   const [pageState, setPageState] = useState<PageState>({ queryKey, page: 1 });
   const [accumulated, setAccumulated] = useState<Accumulated>({ queryKey, listKey, pages: {} });
@@ -83,11 +93,14 @@ const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOpt
     setPageState({ queryKey, page: 1 });
   }
 
-  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery({
-    ...queryArgs,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery(
+    {
+      ...queryArgs,
+      page,
+      pageSize: PAGE_SIZE,
+    },
+    { skip: !enabled }
+  );
 
   const isSameQuery = accumulated.queryKey === queryKey;
 
@@ -132,6 +145,18 @@ const useInfiniteAssets = ({ folder = null, sort, search }: UseInfiniteAssetsOpt
       page: (prev.queryKey === queryKey ? prev.page : 1) + 1,
     }));
   }, [queryKey]);
+
+  if (!enabled) {
+    return {
+      assets: [] as File[],
+      pagination: undefined,
+      isLoading: false,
+      isFetchingMore: false,
+      hasNextPage: false,
+      fetchNextPage,
+      error: undefined,
+    };
+  }
 
   return {
     assets,

@@ -298,7 +298,7 @@ export const UploadFigmaModal = () => {
     try {
       const urlObj = new URL(url);
       return urlObj.hostname === 'www.figma.com' || urlObj.hostname === 'figma.com';
-    } catch (e) {
+    } catch {
       return false;
     }
   };

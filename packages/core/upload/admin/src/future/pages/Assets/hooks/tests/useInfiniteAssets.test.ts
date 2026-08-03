@@ -161,7 +161,8 @@ describe('useInfiniteAssets', () => {
     renderHook(() => useInfiniteAssets());
 
     expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, pageSize: PAGE_SIZE })
+      expect.objectContaining({ page: 1, pageSize: PAGE_SIZE }),
+      expect.anything()
     );
   });
 
@@ -176,7 +177,8 @@ describe('useInfiniteAssets', () => {
     });
 
     expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 2, pageSize: PAGE_SIZE })
+      expect.objectContaining({ page: 2, pageSize: PAGE_SIZE }),
+      expect.anything()
     );
   });
 
@@ -248,7 +250,8 @@ describe('useInfiniteAssets', () => {
     renderHook(() => useInfiniteAssets({ sort: 'createdAt:DESC' }));
 
     expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: 'createdAt:DESC' })
+      expect.objectContaining({ sort: 'createdAt:DESC' }),
+      expect.anything()
     );
   });
 
@@ -274,7 +277,10 @@ describe('useInfiniteAssets', () => {
       hookResult.fetchNextPage();
     });
 
-    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
 
     // Change sort — triggers useEffect that resets page to 1
     act(() => {
@@ -283,7 +289,8 @@ describe('useInfiniteAssets', () => {
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 1, sort: 'name:ASC' })
+        expect.objectContaining({ page: 1, sort: 'name:ASC' }),
+        expect.anything()
       );
     });
   });
@@ -315,7 +322,8 @@ describe('useInfiniteAssets', () => {
     renderHook(() => useInfiniteAssets({ search: 'kitten' }));
 
     expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ search: 'kitten' })
+      expect.objectContaining({ search: 'kitten' }),
+      expect.anything()
     );
   });
 
@@ -339,7 +347,10 @@ describe('useInfiniteAssets', () => {
       hookResult.fetchNextPage();
     });
 
-    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
 
     act(() => {
       changeSearch();
@@ -347,7 +358,8 @@ describe('useInfiniteAssets', () => {
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 1, search: 'kitten' })
+        expect.objectContaining({ page: 1, search: 'kitten' }),
+        expect.anything()
       );
     });
   });
@@ -391,7 +403,8 @@ describe('useInfiniteAssets', () => {
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-        expect.objectContaining({ search: 'kitten' })
+        expect.objectContaining({ search: 'kitten' }),
+        expect.anything()
       );
     });
 
@@ -436,7 +449,8 @@ describe('useInfiniteAssets', () => {
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-        expect.objectContaining({ search: 'kitten' })
+        expect.objectContaining({ search: 'kitten' }),
+        expect.anything()
       );
     });
 
@@ -517,7 +531,10 @@ describe('useInfiniteAssets', () => {
       getResult().fetchNextPage();
     });
 
-    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
 
     changeFolder(26);
 
