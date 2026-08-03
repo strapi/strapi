@@ -1,5 +1,5 @@
 import * as qs from 'qs';
-import type { Core, Modules } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import Strapi, { type StrapiOptions } from './Strapi';
 import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from './utils';
@@ -40,11 +40,5 @@ declare module 'koa' {
 
     get query(): ParsedQuery;
     set query(obj: any);
-  }
-
-  // Documents the field's shape; Koa's DefaultState is `any`-based, so this is
-  // intent, not a compile-time guard. The union is enforced where it's read.
-  interface DefaultState {
-    auditSource?: Modules.AuditLogs.AuditSource;
   }
 }
