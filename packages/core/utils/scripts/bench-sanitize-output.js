@@ -166,7 +166,7 @@ const makePayload = (n) => Array.from({ length: n }, (_, i) => richEntity(i));
 
 /** The shipped pipeline. This is the number that matters. */
 const shipped = async (payload) => {
-  const out = new Array(payload.length);
+  const out = Array.from({ length: payload.length });
   for (let i = 0; i < payload.length; i += 1) {
     out[i] = await sanitizers.defaultSanitizeOutput({ schema: rootSchema, getModel }, payload[i]);
   }
@@ -191,7 +191,7 @@ const handWritten = (entity, schema) => {
 
   const attrs = schema.attributes;
   const stored = new Set(schema.options?.privateAttributes ?? []);
-  const out = isArr ? new Array(entity.length) : {};
+  const out = isArr ? Array.from({ length: entity.length }) : {};
 
   for (const key of Object.keys(entity)) {
     const attribute = attrs ? attrs[key] : undefined;
