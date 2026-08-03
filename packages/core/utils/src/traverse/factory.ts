@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
-import { isNil, pick } from 'lodash/fp';
-
 import {
   AnyAttribute,
   Attribute,
@@ -150,16 +148,55 @@ export default () => {
     let out = utils.transform(data);
     const keys = utils.keys(out);
 
+    // Built once per traversal rather than once per key. `state.handlers` is populated
+    // while the traversal is being defined and is fixed by the time it runs, so spreading
+    // both lists on every key allocated a fresh array to hold the same handlers. This
+    // loop runs for every key of every node of every query, which made it one of the
+    // hottest allocation sites in a request.
+    const handlers = [...state.handlers.common, ...state.handlers.attributes];
+
+    // Also hoisted: none of these close over `key` (each method takes it as an argument),
+    // so the previous code allocated three closures per key to no end. They still mutate
+    // the same `out` binding, so behaviour is unchanged.
+    const transformUtils: TransformUtils = {
+      remove(key) {
+        out = utils.remove(key, out);
+      },
+      set(key, value) {
+        out = utils.set(key, value, out);
+      },
+      recurse: traverse,
+    };
+
+    // Pre-picked instead of calling lodash `pick` per key, which allocated both the
+    // key-list array literal and a fresh result object every time.
+    const visitorUtils: Pick<TransformUtils, 'set' | 'remove'> = {
+      remove: transformUtils.remove,
+      set: transformUtils.set,
+    };
+    const handlerUtils: Pick<TransformUtils, 'set' | 'recurse'> = {
+      set: transformUtils.set,
+      recurse: transformUtils.recurse,
+    };
+
     for (const key of keys) {
       const attribute = schema?.attributes?.[key];
 
-      const newPath = { ...path };
-
-      newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
-
-      if (!isNil(attribute)) {
-        newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+      // The attribute segment only grows when the key maps to an attribute; otherwise the
+      // parent's value carries through unchanged.
+      let attributePath = path.attribute;
+      if (attribute != null) {
+        attributePath = path.attribute == null ? key : `${path.attribute}.${key}`;
       }
+
+      // A single literal rather than a spread followed by conditional assignment: the
+      // spread produced an object whose hidden class then transitioned on each write.
+      // `Path` is closed over `raw` and `attribute` and callers never supply their own,
+      // so nothing can be dropped by building it directly.
+      const newPath: Path = {
+        raw: path.raw == null ? key : `${path.raw}.${key}`,
+        attribute: attributePath,
+      };
 
       // visitors
       const visitorOptions: VisitorOptions = {
@@ -173,17 +210,14 @@ export default () => {
         parent,
       };
 
-      const transformUtils: TransformUtils = {
-        remove(key) {
-          out = utils.remove(key, out);
-        },
-        set(key, value) {
-          out = utils.set(key, value, out);
-        },
-        recurse: traverse,
-      };
+      // Awaited only when the visitor actually returns something thenable. Most visitors
+      // are synchronous for most keys, and `await` on a non-thenable still allocates a
+      // promise and defers the rest of the loop to a microtask.
+      const visited = visitor(visitorOptions, visitorUtils) as unknown;
 
-      await visitor(visitorOptions, pick(['remove', 'set'], transformUtils));
+      if (visited != null && typeof (visited as PromiseLike<void>).then === 'function') {
+        await visited;
+      }
 
       const value = utils.get(key, out);
 
@@ -208,14 +242,28 @@ export default () => {
       }
 
       // handlers
-      const handlers = [...state.handlers.common, ...state.handlers.attributes];
-
-      for await (const handler of handlers) {
+      //
+      // `for await` over a plain array awaits every element, allocating a promise per
+      // handler per key even though the elements are ordinary objects. A plain `for...of`
+      // with explicit thenable checks is equivalent for non-promise elements, and the
+      // predicates in practice are synchronous.
+      for (const handler of handlers) {
         const ctx = createContext();
-        const pass = await handler.predicate(ctx);
+
+        // A fresh context per handler is deliberate: a handler may call `set`, which
+        // reassigns `out`, and the next handler must observe the updated `data`.
+        const predicated = handler.predicate(ctx) as unknown;
+        const pass =
+          predicated != null && typeof (predicated as PromiseLike<boolean>).then === 'function'
+            ? await (predicated as PromiseLike<boolean>)
+            : predicated;
 
         if (pass) {
-          await handler.handler(ctx, pick(['recurse', 'set'], transformUtils));
+          const handled = handler.handler(ctx, handlerUtils) as unknown;
+
+          if (handled != null && typeof (handled as PromiseLike<void>).then === 'function') {
+            await handled;
+          }
         }
       }
     }
