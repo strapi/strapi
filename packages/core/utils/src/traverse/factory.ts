@@ -210,14 +210,22 @@ export default () => {
         parent,
       };
 
-      // Awaited only when the visitor actually returns something thenable. Most visitors
-      // are synchronous for most keys, and `await` on a non-thenable still allocates a
-      // promise and defers the rest of the loop to a microtask.
-      const visited = visitor(visitorOptions, visitorUtils) as unknown;
-
-      if (visited != null && typeof (visited as PromiseLike<void>).then === 'function') {
-        await visited;
-      }
+      // Deliberately awaited unconditionally, even though most visitors are synchronous
+      // and `await` on a non-thenable still costs a promise and a microtask hop.
+      //
+      // Skipping the await when the visitor returns nothing thenable is measurably faster
+      // but changes the order in which concurrently recursing branches run. The filters
+      // traversal recurses over array members with `Promise.all`, and at least one visitor
+      // depends on the resulting order: content-manager's `getQueryPopulate` accumulates
+      // into a shared object with `populateQuery = set(path, {}, populateQuery)`, where a
+      // shallow write such as `relation` replaces the whole subtree written by a deeper
+      // sibling like `relation.populate.component`. Dropping the await reordered those two
+      // writes and silently lost the deeper populate.
+      //
+      // That ordering dependency is a latent bug in the visitor rather than a contract this
+      // traversal should be guaranteeing, but it is not this change's job to fix it. Keep
+      // the await until such visitors are made order-independent.
+      await visitor(visitorOptions, visitorUtils);
 
       const value = utils.get(key, out);
 
