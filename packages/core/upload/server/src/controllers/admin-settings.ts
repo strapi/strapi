@@ -4,7 +4,13 @@ import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 
 import type { Config } from '../types';
-import validateSettings from './validation/admin/settings';
+import validateSettings, { settingsSchema } from './validation/admin/settings';
+
+// The stored settings' known keys. `GET /upload/settings` echoes read-only
+// config (e.g. `concurrentUploadRequests`) alongside them, and the legacy
+// Settings page PUTs the whole payload back — narrowing to these keys keeps
+// those echoes out of the store. Derived from the schema so it can't drift.
+const SETTINGS_KEYS = Object.keys(settingsSchema.fields);
 
 export default {
   async updateSettings(ctx: Context) {
@@ -17,7 +23,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateSettings(body);
+    const validated = await validateSettings(body);
+    const source = validated as Record<string, unknown>;
+    const data = Object.fromEntries(
+      SETTINGS_KEYS.filter((key) => key in source).map((key) => [key, source[key]])
+    ) as typeof validated;
 
     await getService('upload').setSettings(data);
 

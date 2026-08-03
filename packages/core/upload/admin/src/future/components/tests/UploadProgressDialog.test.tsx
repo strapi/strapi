@@ -20,7 +20,7 @@ jest.mock('../../services/api', () => ({
 // Mocked because the api module above is fully mocked — the real settings
 // service would call `uploadApi.injectEndpoints` on the mock's undefined.
 jest.mock('../../services/settings', () => ({
-  useGetSettingsQuery: () => ({ data: { data: { concurrentUploadRequests: 1 } } }),
+  useGetUploadSettingsQuery: () => ({ data: { data: { concurrentUploadRequests: 1 } } }),
 }));
 
 const { useTypedSelector } = jest.requireMock('../../store/hooks');
@@ -549,6 +549,28 @@ describe('UploadProgressDialog', () => {
       expect(fileNames[0]).toHaveTextContent('error-file.png');
       expect(fileNames[1]).toHaveTextContent('cancelled-file.png');
       expect(fileNames[2]).toHaveTextContent('complete-file.png');
+    });
+  });
+
+  describe('Concurrent uploads', () => {
+    it('renders a row for every file currently uploading, not just the first', () => {
+      // Concurrent uploads leave several files `uploading` at once; the dialog
+      // must show them all (regression: a `find` rendered only the first).
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            createMockFile(0, 'uploading-a.png', 'uploading'),
+            createMockFile(1, 'uploading-b.png', 'uploading'),
+            createMockFile(2, 'uploading-c.png', 'uploading'),
+            createMockFile(3, 'pending-d.png', 'pending'),
+          ],
+        })
+      );
+
+      expect(screen.getByText('uploading-a.png')).toBeInTheDocument();
+      expect(screen.getByText('uploading-b.png')).toBeInTheDocument();
+      expect(screen.getByText('uploading-c.png')).toBeInTheDocument();
     });
   });
 });

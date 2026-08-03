@@ -25,7 +25,7 @@ import { styled } from 'styled-components';
 import { useAIAvailability } from '../../../hooks/useAiAvailability';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
-import { useGetSettingsQuery } from '../../services/settings';
+import { useGetUploadSettingsQuery } from '../../services/settings';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -429,7 +429,7 @@ export const AssetsPage = () => {
   // `concurrentUploadRequests` echoes the app config. Missing settings (still
   // loading, no permission) fall back to sequential — never faster than the
   // server asked for.
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings } = useGetUploadSettingsQuery();
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   // Drives the post-upload AI metadata phase shown per row in the progress dialog.
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
