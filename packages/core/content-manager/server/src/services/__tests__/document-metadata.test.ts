@@ -190,4 +190,101 @@ describe('document-metadata service', () => {
       ]);
     });
   });
+
+  describe('getMetadata defaultLocale', () => {
+    it('includes defaultLocale even when availableLocales and availableStatus are skipped', async () => {
+      const service = createService();
+
+      const result = await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: false, availableStatus: false }
+      );
+
+      expect(result.defaultLocale).toBe('en');
+      expect(result.availableLocales).toEqual([]);
+      expect(result.availableStatus).toEqual([]);
+    });
+
+    it('sets defaultLocale to null when getDefaultLocale throws', async () => {
+      const service = createService({
+        plugin: () => ({
+          service: () => ({
+            async getDefaultLocale() {
+              throw new Error('boom');
+            },
+          }),
+        }),
+      });
+
+      const result = await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: false, availableStatus: false }
+      );
+
+      expect(result.defaultLocale).toBeNull();
+    });
+
+    it('populates non-localized component fields into availableLocales query params', async () => {
+      const findMany = jest.fn().mockResolvedValue([
+        { id: 2, documentId: 'doc-1', locale: 'en', publishedAt: null, variants: [{ name: 'a' }] },
+      ]);
+      const transform = jest.fn((uid, params) => params);
+      const getNonLocalizedAttributes = jest.fn().mockReturnValue(['sku', 'variants', 'images']);
+
+      const service = createService({
+        getModel: () => ({
+          uid: 'api::article.article',
+          options: { draftAndPublish: true },
+          pluginOptions: { i18n: { localized: true } },
+          attributes: {
+            sku: { type: 'string' },
+            variants: { type: 'component', component: 'product.variants', repeatable: true },
+            images: { type: 'media', multiple: true },
+            name: { type: 'string' },
+          },
+        }),
+        plugin: (name: string) => {
+          if (name === 'i18n') {
+            return {
+              service: (serviceName: string) => {
+                if (serviceName === 'locales') {
+                  return { getDefaultLocale: async () => 'en' };
+                }
+                if (serviceName === 'content-types') {
+                  return { getNonLocalizedAttributes };
+                }
+                return {};
+              },
+            };
+          }
+          return undefined;
+        },
+        get: (key: string) => {
+          if (key === 'query-params') {
+            return { transform };
+          }
+          return undefined;
+        },
+        db: {
+          query: () => ({ findMany }),
+        },
+      });
+
+      const result = await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+
+      expect(result.defaultLocale).toBe('en');
+      expect(transform).toHaveBeenCalled();
+      const [, params] = transform.mock.calls[0];
+      expect(params.populate.variants).toBe(true);
+      expect(params.populate.images).toEqual({ populate: { folder: true } });
+      expect(params.fields).toEqual(expect.arrayContaining(['sku']));
+      expect(findMany).toHaveBeenCalled();
+    });
+  });
 });
