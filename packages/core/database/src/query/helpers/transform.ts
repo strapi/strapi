@@ -18,7 +18,10 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
   const obj: Rec = {};
 
   for (const column in row) {
-    if (!_.has(column, meta.columnToAttribute)) {
+    // `_.has` from lodash/fp treats its first argument as a property *path*, so every
+    // column of every row was run through lodash's path parser before this simple
+    // membership test. Column names are literal keys, never paths.
+    if (!Object.prototype.hasOwnProperty.call(meta.columnToAttribute, column)) {
       continue;
     }
 

@@ -189,14 +189,17 @@ const LocalePickerAction = ({
     }
     /**
      * Handle the case where the current locale query param doesn't exist
-     * in the list of available locales, so we redirect to the default locale.
+     * in the list of available locales, so we redirect to the default locale
+     * when the user has access to it, or the first locale they can access.
      */
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
-    const defaultLocale = locales.find((locale) => locale.isDefault);
-    if (!doesLocaleExist && defaultLocale?.code) {
-      handleSelect(defaultLocale.code);
+    const accessibleLocales = locales.filter((locale) => canRead.includes(locale.code));
+    const targetLocale =
+      accessibleLocales.find((locale) => locale.isDefault) ?? accessibleLocales[0];
+    if (!doesLocaleExist && targetLocale?.code) {
+      handleSelect(targetLocale.code);
     }
-  }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
+  }, [handleSelect, hasI18n, locales, currentDesiredLocale, canRead]);
 
   const currentLocale = Array.isArray(locales)
     ? locales.find((locale) => locale.code === currentDesiredLocale)

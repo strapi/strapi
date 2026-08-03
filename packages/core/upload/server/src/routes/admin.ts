@@ -273,5 +273,21 @@ export const routes = {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    {
+      method: 'POST',
+      path: '/unstable/generate-ai-metadata',
+      handler: 'admin-file.unstable_generateAIMetadata',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
