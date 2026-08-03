@@ -50,7 +50,7 @@ import {
   useUpdateAssetMutation,
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
-import { useGetSettingsQuery } from '../../../../services/settings';
+import { useGetUploadSettingsQuery } from '../../../../services/settings';
 import { downloadFile } from '../../../../utils/downloadFile';
 import {
   formatBytes,
@@ -561,7 +561,7 @@ const ReplaceAssetButton = () => {
   const { replaceAsset, isReplacing } = useAssetOperation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings } = useGetUploadSettingsQuery();
   const aiEnabled = settings?.data?.aiMetadata ?? false;
 
   const handleTriggerClick = () => {
