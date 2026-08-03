@@ -441,3 +441,42 @@ describe('AssetsPage search', () => {
     });
   });
 });
+
+describe('AssetsPage RBAC gating', () => {
+  const withoutCreate = {
+    providerOptions: {
+      permissions: (defaults: Array<{ action: string }>) =>
+        defaults.filter((permission) => permission.action !== 'plugin::upload.assets.create'),
+    },
+  };
+
+  it('shows the New menu with the default permissions', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await findHeading();
+
+    expect(await screen.findByRole('button', { name: 'New' })).toBeInTheDocument();
+  });
+
+  it('hides the New menu without assets.create', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    render(<AssetsPage />, { initialEntries: ['/'], ...withoutCreate });
+    await findHeading();
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'New' })).not.toBeInTheDocument()
+    );
+  });
+
+  it('hides the empty-state Add assets action without assets.create', async () => {
+    respondWithAssets([]);
+    respondWithFolders([]);
+
+    render(<AssetsPage />, { initialEntries: ['/'], ...withoutCreate });
+
+    expect(await screen.findByText('No assets yet')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add assets' })).not.toBeInTheDocument();
+  });
+});
