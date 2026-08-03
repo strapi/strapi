@@ -45,6 +45,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
   // that asserting the audited actor is the token owner is discriminating.
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
   let tokenOwnerId: number;
+  let utils: ReturnType<typeof createUtils>;
   let mcp: ReturnType<typeof createMcpClient>;
   let tokenCount = 0;
 
@@ -90,7 +91,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
 
     // A second admin (super-admin role) owns the tokens, so the actor
     // assertion distinguishes the token owner from the default super admin.
-    const utils = createUtils(strapi);
+    utils = createUtils(strapi);
     const superAdminRole = await utils.getSuperAdminRole();
     const owner = await utils.createUser({ ...tokenOwner, roles: [superAdminRole.id] });
     tokenOwnerId = owner.id;
@@ -104,6 +105,8 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     await deleteAllDocuments();
     await deleteAllAdminTokens();
     await deleteAllAuditLogs();
+    // Remove the token owner so reruns don't accumulate duplicate admins.
+    await utils.deleteUserById(tokenOwnerId);
     await strapi.destroy();
     await builder.cleanup();
   });
