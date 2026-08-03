@@ -176,17 +176,25 @@ export class AssetsPage {
   }
 
   /**
+   * An item's selection checkbox. Assets and folders share the same label, and
+   * so do rows and cards, so this works in both views.
+   */
+  getSelectionCheckbox(name: string) {
+    return this.page.getByRole('checkbox', { name: `Select ${name}` });
+  }
+
+  /**
    * Toggle an asset's selection checkbox in table view (additive).
    */
   async selectAsset(name: string) {
-    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+    await this.getSelectionCheckbox(name).click();
   }
 
   /**
    * Toggle a folder's selection checkbox in table view (additive).
    */
   async selectFolder(name: string) {
-    await this.page.getByRole('checkbox', { name: `Select ${name}` }).click();
+    await this.getSelectionCheckbox(name).click();
   }
 
   /**
@@ -232,8 +240,66 @@ export class AssetsPage {
     await this.gridViewButton.click();
   }
 
+  /**
+   * The toolbar "Sort: <active>" dropdown.
+   */
+  getSortMenuTrigger() {
+    return this.page.getByRole('button', { name: /^sort:/i });
+  }
+
+  /**
+   * Open the sort dropdown, pick one option, close the menu (it stays open on
+   * select so several facets can be tuned — Escape dismisses it).
+   */
+  async pickSortOption(optionName: string) {
+    await this.getSortMenuTrigger().click();
+    await this.page.getByRole('menuitemradio', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Names of the rendered table rows (folders and assets), header excluded.
+   */
+  async getTableRowNames() {
+    const rows = this.page.getByRole('grid').getByRole('row');
+    const texts = await rows.allInnerTexts();
+    return texts.slice(1).map((text) => text.split('\n').find(Boolean) ?? '');
+  }
+
   async switchToTableView() {
     await this.tableViewButton.click();
+  }
+
+  /**
+   * The toolbar "Filter" dropdown trigger (shows the applied-filter count).
+   */
+  getFilterMenuTrigger() {
+    return this.page.getByRole('button', { name: /^filter/i });
+  }
+
+  /**
+   * Open the Filter dropdown, hover a field submenu, pick one option.
+   * Type options keep the menu open (checkbox semantics) — Escape dismisses it.
+   */
+  async pickFilterOption(fieldName: string, optionName: string) {
+    await this.getFilterMenuTrigger().click();
+    await this.page.getByRole('menuitem', { name: fieldName, exact: true }).hover();
+    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * The applied-filter badges row under the toolbar.
+   */
+  getFilterBadges() {
+    return this.page.getByTestId('filter-badge');
+  }
+
+  /**
+   * Remove the badge whose field label matches (e.g. 'Type').
+   */
+  async removeFilterBadge(fieldLabel: string) {
+    await this.page.getByRole('button', { name: `Remove ${fieldLabel} filter` }).click();
   }
 
   async isGridViewActive() {

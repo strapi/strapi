@@ -1,6 +1,8 @@
-import strapiUtils, { errors } from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { Validators } from '../validators';
+
+const { errors } = strapiUtils;
 
 describe('Enumeration validator', () => {
   const fakeModel: Schema.ContentType = {

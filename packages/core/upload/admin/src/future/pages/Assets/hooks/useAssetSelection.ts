@@ -13,7 +13,6 @@ import {
   createEmptySelection,
   getIdsOfKind,
   selectAll as selectAllState,
-  selectOnly as selectOnlyState,
   selectRange as selectRangeState,
   toggleSelection,
   type ItemKey,
@@ -22,7 +21,8 @@ import {
 
 /**
  * Ephemeral, view-state-only multi-select for the future Media Library. Selection
- * is page-scoped and reset on folder navigation / view switch.
+ * is page-scoped and reset on folder navigation or sort/filter changes (the
+ * table/grid toggle keeps it — same list, different presentation).
  *
  * The actual computation lives in `../utils/selection.ts` (pure + unit-tested);
  * this hook is a thin React wrapper. Assets and folders share one mechanism —
@@ -42,13 +42,11 @@ export interface AssetSelection {
   isSelected: (key: ItemKey) => boolean;
   /** Additive toggle (Cmd/Ctrl+click, item checkbox). */
   toggle: (key: ItemKey) => void;
-  /** Plain click — replaces the selection with a single item. */
-  selectOnly: (key: ItemKey) => void;
   /** Shift+click — selects the contiguous range from the anchor to the target. */
   selectRange: (orderedKeys: ItemKey[], targetKey: ItemKey) => void;
   /** Header checkbox — selects every rendered item (folders and assets). */
   selectAll: (orderedKeys: ItemKey[]) => void;
-  /** Close button / folder navigation / view switch. */
+  /** Close button / folder navigation / list-identity changes. */
   clear: () => void;
 }
 
@@ -56,32 +54,48 @@ const AssetSelectionContext = createContext<AssetSelection | null>(null);
 
 interface AssetSelectionProviderProps {
   children: ReactNode;
+  /**
+   * When true, selection is inert: every mutator is a no-op and nothing ever
+   * reads as selected. Every bulk action is gated on `assets.update`, so a user
+   * without it has nothing to select for — the views also hide the checkboxes,
+   * and this makes the remaining paths (click-to-select, Space key) do nothing.
+   */
+  disabled?: boolean;
 }
 
-export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps) => {
+export const AssetSelectionProvider = ({
+  children,
+  disabled = false,
+}: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
 
   const isSelected = useCallback(
-    (key: ItemKey) => state.selectedKeys.has(key),
-    [state.selectedKeys]
+    (key: ItemKey) => !disabled && state.selectedKeys.has(key),
+    [disabled, state.selectedKeys]
   );
 
-  const toggle = useCallback((key: ItemKey) => setState((prev) => toggleSelection(prev, key)), []);
-
-  const selectOnly = useCallback(
-    (key: ItemKey) => setState((prev) => selectOnlyState(prev, key)),
-    []
+  const toggle = useCallback(
+    (key: ItemKey) => {
+      if (disabled) return;
+      setState((prev) => toggleSelection(prev, key));
+    },
+    [disabled]
   );
 
   const selectRange = useCallback(
-    (orderedKeys: ItemKey[], targetKey: ItemKey) =>
-      setState((prev) => selectRangeState(prev, orderedKeys, targetKey)),
-    []
+    (orderedKeys: ItemKey[], targetKey: ItemKey) => {
+      if (disabled) return;
+      setState((prev) => selectRangeState(prev, orderedKeys, targetKey));
+    },
+    [disabled]
   );
 
   const selectAll = useCallback(
-    (orderedKeys: ItemKey[]) => setState(selectAllState(orderedKeys)),
-    []
+    (orderedKeys: ItemKey[]) => {
+      if (disabled) return;
+      setState(selectAllState(orderedKeys));
+    },
+    [disabled]
   );
 
   const clear = useCallback(() => setState(clearSelection()), []);
@@ -103,7 +117,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       anchorKey: state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,
@@ -115,7 +128,6 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
       state.anchorKey,
       isSelected,
       toggle,
-      selectOnly,
       selectRange,
       selectAll,
       clear,
