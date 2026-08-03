@@ -293,9 +293,10 @@ export const AssetCropEditor = ({
   // (mirrors AssetPreview).
   // Skipped for signed URLs: the asset URL is a presigned S3 URL and any extra
   // query param invalidates the signature (403 SignatureDoesNotMatch). Dropping
-  // the buster also makes this URL byte-identical to AssetPreview's, so both
-  // loads — each with crossOrigin="anonymous" below — share one CORS-consistent
-  // cache entry (see #26581). CMS-1548.
+  // the buster makes this URL byte-identical to AssetPreview's; for a signed
+  // remote asset AssetPreview also loads with crossOrigin="anonymous" (see the
+  // img below), so the two share one CORS-consistent cache entry rather than
+  // colliding (see #26581).
   const rawImageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
   const cacheKey =
     asset.updatedAt && !asset.isUrlSigned ? new Date(asset.updatedAt).getTime() : undefined;
@@ -510,6 +511,10 @@ export const AssetCropEditor = ({
                 ref={imgRef}
                 src={imageUrl}
                 alt={asset.name}
+                // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:
+                // the editor reads pixels via canvas (useCropImg -> toBlob), which
+                // taints on a cross-origin image loaded without CORS, so every
+                // remote image must be fetched CORS-clean.
                 crossOrigin="anonymous"
                 onLoad={handleImageLoad}
                 draggable={false}

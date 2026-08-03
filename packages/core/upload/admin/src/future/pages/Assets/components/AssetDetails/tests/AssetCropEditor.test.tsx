@@ -203,7 +203,7 @@ describe('AssetCropEditor save-as-copy gating', () => {
   });
 });
 
-describe('AssetCropEditor cache-buster on signed URLs (CMS-1548)', () => {
+describe('AssetCropEditor cache-buster on signed URLs', () => {
   const signedAsset = {
     ...asset,
     isUrlSigned: true,
