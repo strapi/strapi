@@ -31,7 +31,7 @@
     "@strapi/icons": "2.2.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-router-dom": "^6.30.3",
+    "react-router-dom": "^7.0.0",
     "styled-components": "6.4.1"
   },
   "devDependencies": {
