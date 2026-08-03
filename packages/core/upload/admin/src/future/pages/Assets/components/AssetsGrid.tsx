@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
@@ -34,8 +35,8 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 // Top-left selection checkbox overlaid on the asset preview, always visible.
 const CheckboxOverlay = styled(Flex)`
   position: absolute;
-  top: ${({ theme }) => theme.spaces[2]};
-  left: ${({ theme }) => theme.spaces[2]};
+  top: ${({ theme }) => theme.spaces[3]};
+  left: ${({ theme }) => theme.spaces[3]};
   z-index: 1;
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 `;
@@ -139,6 +140,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -176,6 +178,16 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
     }
   };
 
+  // Checkbox is the pointer path to selection; Shift extends the range.
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedItemKeys, key);
+    } else {
+      toggle(key);
+    }
+  };
+
   return (
     <StyledFolderCard
       ref={setNodeRef}
@@ -191,6 +203,21 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       role="listitem"
       tabIndex={0}
     >
+      {canUpdate && (
+        <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected(key)}
+            onClick={handleCheckboxClick}
+            aria-label={formatMessage(
+              {
+                id: getTranslationKey('list.table.row.select'),
+                defaultMessage: 'Select {name}',
+              },
+              { name: folder.name }
+            )}
+          />
+        </Flex>
+      )}
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
@@ -344,20 +371,22 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
-  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
-  // OS file-manager click semantics (same as the table view): shift selects a
-  // range, cmd/ctrl toggles, plain click selects only this card.
+  // Plain click opens the asset details; pointer selection lives on the
+  // checkbox only. Modifier clicks keep the selection semantics: shift selects
+  // a range, cmd/ctrl toggles.
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
       toggle(key);
     } else {
-      selectOnly(key);
+      onAssetItemClick(asset.id);
     }
   };
 
@@ -403,19 +432,21 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
-        <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onClick={handleCheckboxClick}
-            aria-label={formatMessage(
-              {
-                id: getTranslationKey('list.table.row.select'),
-                defaultMessage: 'Select {name}',
-              },
-              { name: asset.name }
-            )}
-          />
-        </CheckboxOverlay>
+        {canUpdate && (
+          <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+            <Checkbox
+              checked={selected}
+              onClick={handleCheckboxClick}
+              aria-label={formatMessage(
+                {
+                  id: getTranslationKey('list.table.row.select'),
+                  defaultMessage: 'Select {name}',
+                },
+                { name: asset.name }
+              )}
+            />
+          </CheckboxOverlay>
+        )}
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>
@@ -457,7 +488,8 @@ interface AssetsGridProps {
 export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
-  // Render order: folders first, then assets — range selection follows it.
+  // Render order: folders always on top in the grid (mixing is table-only) —
+  // range selection follows it.
   const orderedItemKeys: ItemKey[] = [
     ...folders.map((folder) => folderKey(folder.id)),
     ...assets.map((asset) => assetKey(asset.id)),

@@ -82,7 +82,8 @@ describe('useInfiniteAssets', () => {
     renderHook(() => useInfiniteAssets());
 
     expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, pageSize: PAGE_SIZE })
+      expect.objectContaining({ page: 1, pageSize: PAGE_SIZE }),
+      expect.anything()
     );
   });
 
@@ -97,7 +98,8 @@ describe('useInfiniteAssets', () => {
     });
 
     expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 2, pageSize: PAGE_SIZE })
+      expect.objectContaining({ page: 2, pageSize: PAGE_SIZE }),
+      expect.anything()
     );
   });
 
@@ -169,7 +171,8 @@ describe('useInfiniteAssets', () => {
     renderHook(() => useInfiniteAssets({ sort: 'createdAt:DESC' }));
 
     expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: 'createdAt:DESC' })
+      expect.objectContaining({ sort: 'createdAt:DESC' }),
+      expect.anything()
     );
   });
 
@@ -195,7 +198,10 @@ describe('useInfiniteAssets', () => {
       hookResult.fetchNextPage();
     });
 
-    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
 
     // Change sort — triggers useEffect that resets page to 1
     act(() => {
@@ -204,7 +210,8 @@ describe('useInfiniteAssets', () => {
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 1, sort: 'name:ASC' })
+        expect.objectContaining({ page: 1, sort: 'name:ASC' }),
+        expect.anything()
       );
     });
   });
@@ -222,6 +229,207 @@ describe('useInfiniteAssets', () => {
     const { result } = renderHook(() => useInfiniteAssets());
 
     expect(result.current.isFetchingMore).toBe(false);
+  });
+
+  it('passes search parameter to query', () => {
+    mockUseGetAssetsQuery.mockReturnValue({
+      data: undefined,
+      currentData: undefined,
+      isLoading: true,
+      isFetching: true,
+      error: undefined,
+    });
+
+    renderHook(() => useInfiniteAssets({ search: 'kitten' }));
+
+    expect(mockUseGetAssetsQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'kitten' }),
+      expect.anything()
+    );
+  });
+
+  it('resets to page 1 when the search term changes', async () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 3, 50));
+
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let changeSearch: () => void;
+
+    const SearchTestWrapper = () => {
+      const [search, setSearch] = useState<string | undefined>(undefined);
+      hookResult = useInfiniteAssets({ search });
+      changeSearch = () => setSearch('kitten');
+
+      return null;
+    };
+
+    render(createElement(SearchTestWrapper));
+
+    act(() => {
+      hookResult.fetchNextPage();
+    });
+
+    expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.anything()
+    );
+
+    act(() => {
+      changeSearch();
+    });
+
+    await waitFor(() => {
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 1, search: 'kitten' }),
+        expect.anything()
+      );
+    });
+  });
+
+  it('keeps the previous assets rendered while the new search query is in flight', async () => {
+    // RTK Query drops `currentData` during an arg change, so the hook has to
+    // fall back to the last results — otherwise the list blanks on every
+    // settled keystroke.
+    const page1 = createMockPage(1, 3, 50);
+
+    mockUseGetAssetsQuery.mockImplementation(({ search }: { search?: string }) =>
+      search
+        ? {
+            data: page1.data,
+            currentData: undefined,
+            isLoading: false,
+            isFetching: true,
+            error: undefined,
+          }
+        : page1
+    );
+
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let changeSearch: () => void;
+
+    const SearchTestWrapper = () => {
+      const [search, setSearch] = useState<string | undefined>(undefined);
+      hookResult = useInfiniteAssets({ search });
+      changeSearch = () => setSearch('kitten');
+
+      return null;
+    };
+
+    render(createElement(SearchTestWrapper));
+
+    expect(hookResult!.assets).toHaveLength(PAGE_SIZE);
+
+    act(() => {
+      changeSearch();
+    });
+
+    await waitFor(() => {
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'kitten' }),
+        expect.anything()
+      );
+    });
+
+    expect(hookResult!.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('keeps reporting the previous total while the new search query is in flight', async () => {
+    // The header renders this total, so dropping to undefined mid-transition
+    // would flash "0 items" on every settled keystroke.
+    const page1 = createMockPage(1, 3, 50);
+
+    mockUseGetAssetsQuery.mockImplementation(({ search }: { search?: string }) =>
+      search
+        ? {
+            data: page1.data,
+            currentData: undefined,
+            isLoading: false,
+            isFetching: true,
+            error: undefined,
+          }
+        : page1
+    );
+
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let changeSearch: () => void;
+
+    const SearchTestWrapper = () => {
+      const [search, setSearch] = useState<string | undefined>(undefined);
+      hookResult = useInfiniteAssets({ search });
+      changeSearch = () => setSearch('kitten');
+
+      return null;
+    };
+
+    render(createElement(SearchTestWrapper));
+
+    expect(hookResult!.pagination?.total).toBe(50);
+
+    act(() => {
+      changeSearch();
+    });
+
+    await waitFor(() => {
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'kitten' }),
+        expect.anything()
+      );
+    });
+
+    expect(hookResult!.pagination?.total).toBe(50);
+  });
+
+  it('replaces accumulated results when the new search page 1 arrives', async () => {
+    const unsearchedPage1 = createMockPage(1, 3, 50);
+    const unsearchedPage2 = createMockPage(2, 3, 50);
+    // Search results are a different, shorter set starting at a distinct id.
+    const searchResults = {
+      data: {
+        results: [createMockAsset(900), createMockAsset(901)],
+        pagination: { page: 1, pageSize: PAGE_SIZE, pageCount: 1, total: 2 },
+      },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+    };
+
+    mockUseGetAssetsQuery.mockImplementation(
+      ({ page: p, search }: { page: number; search?: string }) => {
+        if (search) {
+          return { ...searchResults, currentData: searchResults.data };
+        }
+
+        return p === 2 ? unsearchedPage2 : unsearchedPage1;
+      }
+    );
+
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let changeSearch: () => void;
+
+    const SearchTestWrapper = () => {
+      const [search, setSearch] = useState<string | undefined>(undefined);
+      hookResult = useInfiniteAssets({ search });
+      changeSearch = () => setSearch('kitten');
+
+      return null;
+    };
+
+    render(createElement(SearchTestWrapper));
+
+    act(() => {
+      hookResult.fetchNextPage();
+    });
+
+    expect(hookResult!.assets).toHaveLength(PAGE_SIZE * 2);
+
+    act(() => {
+      changeSearch();
+    });
+
+    await waitFor(() => {
+      expect(hookResult!.assets).toHaveLength(2);
+    });
+
+    expect(hookResult!.assets.map(({ id }) => id)).toEqual([900, 901]);
   });
 
   it('returns error from query', () => {

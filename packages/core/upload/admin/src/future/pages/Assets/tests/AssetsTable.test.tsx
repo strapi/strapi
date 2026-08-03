@@ -86,7 +86,7 @@ const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
   render(
     <>
       <AssetsTable assets={assets} folders={folders} onAssetItemClick={mockOnAssetItemClick} />
-      <BulkActionsBar />
+      <BulkActionsBar assets={assets} />
     </>,
     { renderOptions: { wrapper: AssetSelectionProvider } }
   );
@@ -260,18 +260,51 @@ describe('AssetsTable', () => {
   });
 
   describe('Selection', () => {
-    it('renders a selection checkbox on each asset row', () => {
+    it('hides all selection checkboxes and the select-all header without assets.update', async () => {
+      render(
+        <>
+          <AssetsTable
+            assets={mockAssets}
+            folders={[createMockFolder(1, 'Photos')]}
+            onAssetItemClick={mockOnAssetItemClick}
+          />
+          <BulkActionsBar />
+        </>,
+        {
+          renderOptions: { wrapper: AssetSelectionProvider },
+          providerOptions: {
+            permissions: (defaults: Array<{ action: string }>) =>
+              defaults.filter((permission) => permission.action !== 'plugin::upload.assets.update'),
+          },
+        }
+      );
+
+      // Rows still render; only the selection affordance is gone.
+      expect(await screen.findByText('image1.png')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByRole('checkbox', { name: 'Select all' })).not.toBeInTheDocument();
+    });
+
+    it('renders a selection checkbox on each asset row', async () => {
       setup();
 
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeInTheDocument();
+      expect(
+        await screen.findByRole('checkbox', { name: 'Select image1.png' })
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByRole('checkbox', { name: 'Select image2.png' })
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByRole('checkbox', { name: 'Select image3.png' })
+      ).toBeInTheDocument();
     });
 
     it('toggles folder selection via the folder checkbox and counts it in the bar', async () => {
       const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const folderCheckbox = screen.getByRole('checkbox', { name: 'Select Photos' });
+      const folderCheckbox = await screen.findByRole('checkbox', { name: 'Select Photos' });
       expect(folderCheckbox).toBeEnabled();
 
       await user.click(folderCheckbox);
@@ -283,15 +316,15 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
-    it('selects an asset when its row body is clicked', async () => {
+    it('opens the asset details when its row body is clicked (no selection)', async () => {
       const { user } = setup();
 
       // rows[0] is the header; rows[1] is the first asset row (image1.png).
       const firstAssetRow = screen.getAllByRole('row')[1];
       await user.click(firstAssetRow);
 
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
-      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
     });
 
     it('opens details (and does not select) when the filename is clicked', async () => {
@@ -300,36 +333,36 @@ describe('AssetsTable', () => {
       await user.click(screen.getByText('image1.png'));
 
       expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
     });
 
     it('toggles selection via the row checkbox without opening details', async () => {
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
 
-      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
       expect(mockOnAssetItemClick).not.toHaveBeenCalled();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
-      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
     });
 
     it('selects folders and assets via the header checkbox and shows indeterminate when partial', async () => {
       const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
+      const selectAll = await screen.findByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
 
-      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).toBeChecked();
       expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
       // Unchecking one item leaves the header checkbox in the indeterminate state.
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       expect(selectAll).toHaveAttribute('data-state', 'indeterminate');
     });
 
@@ -337,11 +370,11 @@ describe('AssetsTable', () => {
       const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
       // Selecting every asset but not the folder must not report "all selected".
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
-      await user.click(screen.getByRole('checkbox', { name: 'Select image3.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image3.png' }));
 
-      expect(screen.getByRole('checkbox', { name: 'Select all' })).toHaveAttribute(
+      expect(await screen.findByRole('checkbox', { name: 'Select all' })).toHaveAttribute(
         'data-state',
         'indeterminate'
       );
@@ -350,14 +383,14 @@ describe('AssetsTable', () => {
     it('clears the selection from the header checkbox when all are selected', async () => {
       const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
+      const selectAll = await screen.findByRole('checkbox', { name: 'Select all' });
 
       await user.click(selectAll);
       expect(screen.getByText('4 items selected')).toBeInTheDocument();
 
       await user.click(selectAll);
       expect(screen.queryByText(/items? selected/)).not.toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).not.toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select Photos' })).not.toBeChecked();
     });
 
     it('selects a contiguous range across folders and assets with Shift+click', async () => {
@@ -365,15 +398,15 @@ describe('AssetsTable', () => {
 
       // Anchor on the folder, then Shift+click the second asset: the folder and
       // the first two assets end up selected.
-      await user.click(screen.getByRole('checkbox', { name: 'Select Photos' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select Photos' }));
       await user.keyboard('{Shift>}');
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       await user.keyboard('{/Shift}');
 
-      expect(screen.getByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select Photos' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
       expect(screen.getByText('3 items selected')).toBeInTheDocument();
     });
   });
@@ -388,7 +421,7 @@ describe('AssetsTable', () => {
     it('shows the singular count and clears the selection on close', async () => {
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
 
       const bar = screen.getByRole('region', { name: 'Bulk actions' });
       expect(bar).toBeInTheDocument();
@@ -397,13 +430,13 @@ describe('AssetsTable', () => {
       await user.click(screen.getByRole('button', { name: 'Clear selection' }));
 
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
     });
 
-    it('renders stub action buttons when assets are selected', async () => {
+    it('renders the bulk action buttons when assets are selected', async () => {
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
 
       expect(screen.getByRole('button', { name: 'Create metadata' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
@@ -411,22 +444,188 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('button', { name: 'Clear selection' })).toBeInTheDocument();
     });
 
-    it('shows an info toast when Create metadata is clicked', async () => {
+    it('generates metadata for the selected assets, toasts, and clears the selection', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({
+              data: [
+                { id: 1, status: 'success' },
+                { id: 2, status: 'success' },
+              ],
+            });
+          },
+          { once: true }
+        )
+      );
+
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       await user.click(screen.getByRole('button', { name: 'Create metadata' }));
 
-      expect(mockToggleNotification).toHaveBeenCalledWith({
-        type: 'info',
-        message: "Generate metadata isn't available yet",
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: 'Metadata generated for 2 assets',
+        })
+      );
+      expect(requestBody).toEqual({ fileIds: [1, 2] });
+      // Selection cleared → bar gone.
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('summarises a partial metadata result in a warning toast', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json({
+              data: [
+                { id: 1, status: 'success' },
+                { id: 2, status: 'skipped' },
+                { id: 3, status: 'error', error: 'AI server unavailable' },
+              ],
+            }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image3.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'warning',
+          message: '1 generated, 1 skipped (unsupported file type), 1 failed',
+        })
+      );
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('disables the action when no selected asset is a supported image', async () => {
+      const { user } = setup({
+        assets: [createMockAsset(1, 'doc.pdf', 'application/pdf', '.pdf')],
       });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select doc.pdf' }));
+
+      // The server would only ever report this back as fully skipped, so the
+      // request is never worth sending.
+      expect(screen.getByRole('button', { name: 'Create metadata' })).toBeDisabled();
+    });
+
+    it('keeps the action enabled when the selection mixes supported and unsupported files', async () => {
+      const { user } = setup({
+        assets: [
+          createMockAsset(1, 'image1.png'),
+          createMockAsset(2, 'doc.pdf', 'application/pdf', '.pdf'),
+        ],
+      });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select doc.pdf' }));
+
+      expect(screen.getByRole('button', { name: 'Create metadata' })).toBeEnabled();
+    });
+
+    it('reports folders in the selection as ignored rather than silently dropping them', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () => HttpResponse.json({ data: [{ id: 1, status: 'success' }] }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select Photos' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      // Everything sent succeeded, but the folder was never eligible — warn
+      // rather than reporting a clean success the user did not get.
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'warning',
+          message: '1 generated, 0 skipped (unsupported file type), 0 failed, 1 folder ignored',
+        })
+      );
+    });
+
+    it('keeps the selection and shows an error toast when metadata generation fails', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json(
+              { error: { message: 'AI Metadata service is not enabled' } },
+              { status: 400 }
+            ),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while generating metadata.',
+        })
+      );
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+    });
+
+    it('keeps the selection and shows an error toast when every file fails server-side', async () => {
+      server.use(
+        http.post(
+          '*/upload/unstable/generate-ai-metadata',
+          () =>
+            HttpResponse.json({
+              data: [
+                { id: 1, status: 'error', error: 'AI server unavailable' },
+                { id: 2, status: 'error', error: 'AI server unavailable' },
+              ],
+            }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while generating metadata.',
+        })
+      );
+      // A 200 where nothing was written must not clear the selection.
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
     });
 
     it('opens the move dialog when Move is clicked and cancels without moving', async () => {
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
       expect(await screen.findByText('Move elements to')).toBeInTheDocument();
@@ -436,7 +635,7 @@ describe('AssetsTable', () => {
 
       expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
       // Selection untouched, nothing sent.
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
       expect(mockToggleNotification).not.toHaveBeenCalled();
     });
 
@@ -466,8 +665,8 @@ describe('AssetsTable', () => {
 
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
       // Pick the destination folder in the Location select (defaults to the root).
@@ -505,7 +704,7 @@ describe('AssetsTable', () => {
 
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Move' }));
 
       // Move to the root (default destination) — the request itself fails. The
@@ -528,13 +727,13 @@ describe('AssetsTable', () => {
 
       // Selection kept for retry.
       expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
     it('opens a confirm dialog when Delete is clicked and cancels without deleting', async () => {
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Delete' }));
 
       expect(await screen.findByText('Delete 1 item?')).toBeInTheDocument();
@@ -543,7 +742,7 @@ describe('AssetsTable', () => {
 
       expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
       // Selection untouched, nothing sent.
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
       expect(mockToggleNotification).not.toHaveBeenCalled();
     });
 
@@ -562,8 +761,8 @@ describe('AssetsTable', () => {
 
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
-      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       await user.click(screen.getByRole('button', { name: 'Delete' }));
       await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
@@ -589,7 +788,7 @@ describe('AssetsTable', () => {
 
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Delete' }));
       await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
@@ -608,7 +807,7 @@ describe('AssetsTable', () => {
 
       // Selection kept for retry.
       expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
     it('hides Create metadata when AI metadata is unavailable', async () => {
@@ -616,7 +815,7 @@ describe('AssetsTable', () => {
 
       const { user } = setup();
 
-      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
 
       expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();

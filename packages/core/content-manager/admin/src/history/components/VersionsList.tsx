@@ -48,7 +48,7 @@ const VersionAuthor = ({
         {
           distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
           author,
-          isAnonymous: !Boolean(version.createdBy),
+          isAnonymous: !version.createdBy,
           isCurrent,
           b: BlueText,
         }
