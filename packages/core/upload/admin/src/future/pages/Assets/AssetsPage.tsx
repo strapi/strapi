@@ -323,6 +323,7 @@ export const AssetsPage = () => {
 
   const {
     assets,
+    subscribers: assetPageSubscribers,
     pagination,
     isLoading: isLoadingAssets,
     isFetchingMore,
@@ -557,6 +558,9 @@ export const AssetsPage = () => {
                 </HeaderWrapper>
 
                 <Layouts.Content>
+                  {/* Renders nothing — keeps every loaded page's query subscribed
+                      so a rename/delete refreshes the whole list (CMS-1558). */}
+                  {assetPageSubscribers}
                   <DropZoneWithOverlay>
                     <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
                     <AssetsView

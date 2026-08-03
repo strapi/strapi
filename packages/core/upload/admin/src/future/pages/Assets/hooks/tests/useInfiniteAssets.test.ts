@@ -560,6 +560,60 @@ describe('useInfiniteAssets', () => {
     expect(result.current.assets[PAGE_SIZE].name).toMatch(/^refetched-/);
   });
 
+  it('refreshes an earlier page after a mutation refetch so a rename reaches the list (CMS-1558)', async () => {
+    // Page 1 is accumulated, then page 2 becomes the current page — so page 1 is
+    // no longer the subscribed query. A rename on a page-1 asset invalidates
+    // `{Asset, LIST}`; only the rendered `subscribers` keep page 1 subscribed so
+    // that refetch actually reaches the accumulated list.
+    const page1 = createMockPage(1, 2, 40);
+    const page2 = createMockPage(2, 2, 40);
+    const page1Refetched = asRefetch(page1);
+
+    let hasRenamed = false;
+
+    mockUseGetAssetsQuery.mockImplementation(({ page: p }: { page: number }) => {
+      if (p === 1) {
+        return hasRenamed ? page1Refetched : page1;
+      }
+
+      return page2;
+    });
+
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let bumpTick: () => void;
+
+    const SubscribedWrapper = () => {
+      const [, setTick] = useState(0);
+      hookResult = useInfiniteAssets();
+      bumpTick = () => setTick((tick) => tick + 1);
+
+      // Rendering the subscribers node is what keeps every loaded page
+      // subscribed — the fix under test.
+      return hookResult.subscribers;
+    };
+
+    render(createElement(SubscribedWrapper));
+
+    act(() => {
+      hookResult!.fetchNextPage();
+    });
+
+    expect(hookResult!.assets).toHaveLength(PAGE_SIZE * 2);
+    expect(hookResult!.assets[0].name).not.toMatch(/^refetched-/);
+
+    // The invalidation refetches the subscribed page-1 query with renamed data.
+    hasRenamed = true;
+    await act(async () => {
+      bumpTick();
+    });
+
+    await waitFor(() => {
+      expect(hookResult!.assets[0].name).toMatch(/^refetched-/);
+    });
+    // Page 2 (the current page) is untouched by the page-1 refresh.
+    expect(hookResult!.assets[PAGE_SIZE].name).not.toMatch(/^refetched-/);
+  });
+
   it('does not duplicate a short final page', () => {
     // 20 + 6: the accumulated length never reaches `page * PAGE_SIZE`, which is
     // what used to let a re-read append the final page a second time.
