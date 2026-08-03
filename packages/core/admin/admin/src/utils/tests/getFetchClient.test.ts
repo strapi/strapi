@@ -32,6 +32,49 @@ describe('getFetchClient', () => {
     jest.clearAllMocks();
   });
 
+  describe('backend URL resolution', () => {
+    const originalStrapi = window.strapi;
+
+    afterEach(() => {
+      window.strapi = originalStrapi;
+    });
+
+    it('throws when no backend URL can be resolved', () => {
+      // @ts-expect-error - reproducing a bootstrap where the global is not assigned
+      delete window.strapi;
+
+      expect(() => getFetchClient()).toThrow(/could not resolve a backend URL/);
+    });
+
+    it('throws rather than prefixing requests with "undefined"', () => {
+      // @ts-expect-error - a malformed global, e.g. the `#strapi` mount element
+      window.strapi = {};
+
+      expect(() => getFetchClient()).toThrow(/could not resolve a backend URL/);
+    });
+
+    const mockOkResponse = () =>
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+      );
+
+    it('accepts an empty backend URL, which makes requests relative', async () => {
+      mockOkResponse();
+
+      await getFetchClient({ backendURL: '' }).get('/admin/foo');
+
+      expect(window.fetch).toHaveBeenCalledWith('/admin/foo', expect.anything());
+    });
+
+    it('prefers an explicit backend URL over the global', async () => {
+      mockOkResponse();
+
+      await getFetchClient({ backendURL: 'http://example.test' }).get('/admin/foo');
+
+      expect(window.fetch).toHaveBeenCalledWith('http://example.test/admin/foo', expect.anything());
+    });
+  });
+
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
     const response = getFetchClient();
     expect(response).toHaveProperty('get');

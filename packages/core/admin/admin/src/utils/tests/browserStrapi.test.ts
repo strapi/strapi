@@ -25,7 +25,6 @@ const respondWith = (data: unknown) =>
 
 describe('createBrowserStrapi', () => {
   let requestedUrls: string[];
-  let mountNode: HTMLDivElement;
   const originalStrapi = window.strapi;
 
   beforeEach(() => {
@@ -33,19 +32,16 @@ describe('createBrowserStrapi', () => {
     server.events.on('request:start', ({ request }) => requestedUrls.push(request.url));
 
     /**
-     * Reproduce a real admin document: no `window.strapi` yet, but a `#strapi`
-     * mount node that browsers expose as a named window property.
+     * The shared test setup pre-seeds `window.strapi`; a real admin document has
+     * no such global when the bootstrap runs. Removing it means any code that
+     * reaches for the global throws instead of silently reading `undefined`.
      */
-    mountNode = document.createElement('div');
-    mountNode.id = 'strapi';
-    document.body.appendChild(mountNode);
     // @ts-expect-error - removing the global the shared test setup pre-seeds
     delete window.strapi;
   });
 
   afterEach(() => {
     server.events.removeAllListeners();
-    mountNode.remove();
     window.strapi = originalStrapi;
   });
 

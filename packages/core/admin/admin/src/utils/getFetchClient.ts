@@ -285,7 +285,19 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const backendURL = defaultOptions.backendURL ?? window.strapi.backendURL;
+  const backendURL = defaultOptions.backendURL ?? window.strapi?.backendURL;
+
+  /**
+   * An empty string is legitimate — it makes every request relative. A missing
+   * value is not: it would prefix every URL with the string "undefined" and turn
+   * a broken client into a stream of confusing 404s. Fail here, at the call
+   * site, rather than on the first request.
+   */
+  if (backendURL == null) {
+    throw new Error(
+      '[@strapi/admin]: getFetchClient() could not resolve a backend URL. Pass one explicitly if `window.strapi` is not assigned yet.'
+    );
+  }
 
   /**
    * Create default headers with the current token.
