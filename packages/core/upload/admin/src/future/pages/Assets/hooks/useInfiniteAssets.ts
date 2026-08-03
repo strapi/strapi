@@ -77,8 +77,12 @@ const useInfiniteAssets = ({
   // API without also invalidating what was accumulated under the old one.
   const queryArgs = { folder, sort, search, filters };
   const queryKey = JSON.stringify(queryArgs);
-  // Identifies the list being viewed, ignoring the search term — a search keeps
-  // the previous results on screen, a folder, sort or filter change doesn't.
+  // Identifies the list being viewed, ignoring the search term. Folder, sort
+  // and filter changes are single committed actions, so one clean reset per
+  // change is honest. Search is committed per keystroke on a 300ms debounce,
+  // and blanking the list on each one would strobe as the user types.
+  // The cost: through the search window the previous rows stay rendered and
+  // `hasNextPage` is false, so the list reads as complete until page 1 lands.
   const listKey = JSON.stringify({ folder, sort, filters });
 
   const [pageState, setPageState] = useState<PageState>({ queryKey, page: 1 });
