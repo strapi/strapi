@@ -9,7 +9,7 @@ import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
-import { Logger } from '../logger';
+import type { Logger } from '../logger';
 
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
 const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;

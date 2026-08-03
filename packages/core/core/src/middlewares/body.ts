@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import { defaultsDeep } from 'lodash/fp';
-import { koaBody, KoaBodyMiddlewareOptions } from 'koa-body';
+import { koaBody, type KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';

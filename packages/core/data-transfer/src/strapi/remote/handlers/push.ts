@@ -10,7 +10,7 @@ import { write } from '../../../utils/writable-async-write';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
-import { Handler } from './abstract';
+import type { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
 
 const VALID_TRANSFER_ACTIONS = [

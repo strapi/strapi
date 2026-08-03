@@ -3,7 +3,7 @@ import { async } from '@strapi/utils';
 
 import { getService } from '../../utils';
 
-import { DocumentVersion, GetMetadataOptions } from '../../services/document-metadata';
+import type { DocumentVersion, GetMetadataOptions } from '../../services/document-metadata';
 
 import type {
   AvailableLocaleDocument,

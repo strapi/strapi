@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import camelCase from 'lodash/camelCase';
 import { env } from '@strapi/utils';
-import { getModule, PackageJson } from './dependencies';
+import { getModule, type PackageJson } from './dependencies';
 import { convertModulePathToSystemPath, convertSystemPathToModulePath, loadFile } from './files';
 import type { BaseContext } from '../types';
 import { isError } from './errors';

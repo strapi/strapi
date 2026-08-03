@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { GetAiFeatureConfig, GetAiToken } from '../../../../shared/contracts/ai';
+import type { GetAiFeatureConfig, GetAiToken } from '../../../../shared/contracts/ai';
 
 export default {
   async getAiToken(ctx: Context) {

@@ -17,7 +17,7 @@ import {
   registerFiltersDefinition,
   registerDynamicZonesDefinition,
 } from './register-functions';
-import { TypeRegistry } from '../type-registry';
+import type { TypeRegistry } from '../type-registry';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires

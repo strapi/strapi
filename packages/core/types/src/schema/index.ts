@@ -4,7 +4,7 @@ import type { If, Object, Guard } from '../utils';
 
 import type * as Attribute from './attribute';
 
-export { Attribute };
+export type { Attribute };
 
 /**
  * Combines both content type and component schemas, effectively serving as a consolidated registry of all schemas.

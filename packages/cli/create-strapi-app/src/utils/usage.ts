@@ -1,7 +1,7 @@
 import os from 'os';
 import _ from 'lodash';
 
-import { Scope, StderrError } from '../types';
+import type { Scope, StderrError } from '../types';
 
 type TrackError = Error | string | StderrError;
 

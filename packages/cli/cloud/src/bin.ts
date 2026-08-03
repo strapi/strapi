@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { createLogger } from './services';
 import { getContext, setContext } from './services/context';
-import { CLIContext } from './types';
+import type { CLIContext } from './types';
 import { buildStrapiCloudCommands } from './index';
 
 function loadStrapiCloudCommand(argv = process.argv, command = new Command()) {

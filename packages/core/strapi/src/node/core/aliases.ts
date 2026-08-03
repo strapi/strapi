@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { StrapiMonorepo } from './monorepo';
+import type { StrapiMonorepo } from './monorepo';
 
 /**
  * The path mappings/aliases used by various tools in the monorepo to map imported modules to

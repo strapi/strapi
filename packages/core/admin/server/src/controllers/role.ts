@@ -19,7 +19,7 @@ import type {
   Delete,
   BatchDelete,
 } from '../../../shared/contracts/roles';
-import { AdminRole } from '../../../shared/contracts/shared';
+import type { AdminRole } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;

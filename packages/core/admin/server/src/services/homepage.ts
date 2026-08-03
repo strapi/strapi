@@ -1,9 +1,9 @@
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import {
-  HomepageLayout,
+  type HomepageLayout,
   HomepageLayoutSchema,
-  HomepageLayoutWrite,
+  type HomepageLayoutWrite,
   HomepageLayoutWriteSchema,
 } from '../controllers/validation/schema';
 

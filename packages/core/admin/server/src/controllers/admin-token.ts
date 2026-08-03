@@ -8,7 +8,7 @@ import {
   validateAdminTokenCreationInput,
   validateAdminTokenUpdateInput,
 } from '../validation/admin-tokens';
-import {
+import type {
   Create,
   List,
   Revoke,

@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { RawData, WebSocket } from 'ws';
+import { type RawData, WebSocket } from 'ws';
 
 import type { Client, Server } from '../../types/remote/protocol';
 
@@ -8,9 +8,9 @@ import {
   ProviderTransferError,
   ProviderInitializationError,
   ProviderValidationError,
-  ProviderErrorDetails,
+  type ProviderErrorDetails,
 } from '../../errors/providers';
-import { IDiagnosticReporter } from '../../utils/diagnostic';
+import type { IDiagnosticReporter } from '../../utils/diagnostic';
 import { stringifyTransferWebSocketPayload } from '../../utils/transfer-websocket-json';
 
 interface IDispatcherState {

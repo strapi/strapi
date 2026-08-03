@@ -1,4 +1,4 @@
-import { Severity } from './constants';
+import type { Severity } from './constants';
 
 class DataTransferError<T = unknown> extends Error {
   origin: string;

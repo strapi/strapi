@@ -2,12 +2,12 @@ import { curry } from 'lodash/fp';
 
 import type { UID } from '@strapi/types';
 import { relations } from '@strapi/utils';
-import { IdMap } from '../../id-map';
+import type { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
-import { LongHandDocument } from '../utils/types';
+import type { LongHandDocument } from '../utils/types';
 
 const { isPolymorphic } = relations;
 

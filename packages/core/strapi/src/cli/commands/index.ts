@@ -32,7 +32,7 @@ import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
 
-import { StrapiCommand } from '../types';
+import type { StrapiCommand } from '../types';
 
 export const commands: StrapiCommand[] = [
   createAdminUser,

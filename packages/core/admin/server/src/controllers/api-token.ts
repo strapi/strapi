@@ -8,7 +8,7 @@ import {
   validateApiTokenUpdateInput,
 } from '../validation/api-tokens';
 
-import { Create, List, Revoke, Get, Update } from '../../../shared/contracts/api-token';
+import type { Create, List, Revoke, Get, Update } from '../../../shared/contracts/api-token';
 
 const { ApplicationError } = errors;
 

@@ -32,7 +32,7 @@ import type {
   RegistrationInfo,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
-import { AdminUser } from '../../../shared/contracts/shared';
+import type { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 

@@ -5,8 +5,8 @@ import isEqual from 'lodash/isEqual';
 import { difference, keys } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { getDraftEntryValidStatus, getService } from '../utils';
-import { Release } from '../../../shared/contracts/releases';
-import { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type { Release } from '../../../shared/contracts/releases';
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;

@@ -7,7 +7,7 @@ import type * as Operator from './operators';
 import type * as AttributeUtils from '../attributes';
 import type * as Params from '..';
 
-export { Operator };
+export type { Operator };
 
 type IDKey = 'id';
 type DocumentIDKey = 'documentId';

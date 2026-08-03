@@ -1,9 +1,9 @@
 import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
 import {
   GraphQLObjectType,
-  GraphQLResolveInfo,
+  type GraphQLResolveInfo,
   GraphQLSchema,
-  GraphQLFieldResolver,
+  type GraphQLFieldResolver,
 } from 'graphql';
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';

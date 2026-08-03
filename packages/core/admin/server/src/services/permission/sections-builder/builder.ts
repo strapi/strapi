@@ -1,5 +1,5 @@
-import { Action } from '../../../domain/action';
-import createSection, { SectionOptions } from './section';
+import type { Action } from '../../../domain/action';
+import createSection, { type SectionOptions } from './section';
 
 /**
  * Create a new section builder with its own sections registry

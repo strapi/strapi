@@ -1,6 +1,6 @@
 import { set } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import { ProhibitedCloningField } from '../../../../shared/contracts/collection-types';
+import type { ProhibitedCloningField } from '../../../../shared/contracts/collection-types';
 
 const { isVisibleAttribute } = contentTypes;
 

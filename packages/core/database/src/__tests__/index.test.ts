@@ -1,5 +1,5 @@
 import knex from 'knex';
-import { Database, DatabaseConfig } from '../index';
+import { Database, type DatabaseConfig } from '../index';
 import createQueryBuilder from '../query/query-builder';
 import type { Model } from '../types';
 

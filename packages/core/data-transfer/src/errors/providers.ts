@@ -1,6 +1,6 @@
-import { ErrorCode } from '../types';
+import type { ErrorCode } from '../types';
 import { DataTransferError } from './base';
-import { Severity, SeverityKind } from './constants';
+import { type Severity, SeverityKind } from './constants';
 
 type ProviderStep = 'initialization' | 'validation' | 'transfer';
 

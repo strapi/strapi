@@ -1,5 +1,5 @@
 import type { errors } from '@strapi/utils';
-import { Release } from './releases';
+import type { Release } from './releases';
 
 // Export required to avoid "cannot be named" TS build error
 export declare namespace GetUpcomingReleases {

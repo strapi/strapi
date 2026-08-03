@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
-import { Component } from './components';
-import { ContentType } from './content-types';
+import type { Component } from './components';
+import type { ContentType } from './content-types';
 
 /**
  * GET /init

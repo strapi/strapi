@@ -15,7 +15,7 @@ import {
 } from 'lodash/fp';
 
 import traverseFactory, { type Parent } from './factory';
-import { Attribute } from '../types';
+import type { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
 import { ValidationError } from '../errors';
 

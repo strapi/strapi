@@ -5,7 +5,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
+import { type Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { loadStrapiMonorepo } from '../core/monorepo';

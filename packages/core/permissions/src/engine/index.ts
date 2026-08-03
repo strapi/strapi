@@ -12,7 +12,7 @@ import {
 import type { PermissionEngineHooks, HookName } from './hooks';
 
 import * as abilities from './abilities';
-import { Permission } from '../domain/permission';
+import type { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };

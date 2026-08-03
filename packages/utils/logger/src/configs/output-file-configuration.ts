@@ -1,4 +1,4 @@
-import { transports, LoggerOptions } from 'winston';
+import { transports, type LoggerOptions } from 'winston';
 
 import { LEVEL_LABEL, LEVELS } from '../constants';
 import { prettyPrint, excludeColors } from '../formats';

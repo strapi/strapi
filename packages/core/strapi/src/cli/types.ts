@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
-import { Logger } from './utils/logger';
-import { TsConfig } from './utils/tsconfig';
+import type { Logger } from './utils/logger';
+import type { TsConfig } from './utils/tsconfig';
 
 export interface CLIContext {
   cwd: string;

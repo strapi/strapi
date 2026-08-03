@@ -2,7 +2,7 @@ import { isFunction } from 'lodash/fp';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { Config, File, UploadableFile } from '../types';
+import type { Config, File, UploadableFile } from '../types';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async checkFileSize(file: UploadableFile) {

@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { yup, strings } from '@strapi/utils';
 import _ from 'lodash';
-import { TestConfig } from 'yup';
+import type { TestConfig } from 'yup';
 
 export const validators = {
   required: yup.boolean(),

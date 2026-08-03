@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import type { CLIContext } from '../types';
 import { local } from '../services';
-import { LocalSave } from '../services/strapi-info-save';
+import type { LocalSave } from '../services/strapi-info-save';
 
 async function getLocalConfig(ctx: CLIContext): Promise<LocalSave | null> {
   try {

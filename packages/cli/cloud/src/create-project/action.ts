@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import {
+import type {
   CLIContext,
   CloudApiService,
   CloudCliConfig,

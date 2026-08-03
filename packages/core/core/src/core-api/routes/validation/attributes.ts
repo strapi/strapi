@@ -5,7 +5,7 @@
  * of incoming data.
  */
 
-import { type Core, type Schema, UID } from '@strapi/types';
+import type { Core, Schema, UID } from '@strapi/types';
 
 import {
   relations,

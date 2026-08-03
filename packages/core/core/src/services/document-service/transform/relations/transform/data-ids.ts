@@ -3,8 +3,8 @@ import { curry } from 'lodash/fp';
 import type { UID } from '@strapi/types';
 import { errors, relations } from '@strapi/utils';
 
-import { ID, LongHandDocument } from '../utils/types';
-import { IdMap } from '../../id-map';
+import type { ID, LongHandDocument } from '../utils/types';
+import type { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';

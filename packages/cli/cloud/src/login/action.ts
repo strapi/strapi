@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { type AxiosResponse, AxiosError } from 'axios';
 import chalk from 'chalk';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';

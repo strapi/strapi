@@ -1,5 +1,5 @@
-import { CLIContext } from '../../types';
-import { PackageJson, loadPkg } from '../../utils/pkg';
+import type { CLIContext } from '../../types';
+import { type PackageJson, loadPkg } from '../../utils/pkg';
 
 export async function getProjectNameFromPackageJson(ctx: CLIContext): Promise<string> {
   try {

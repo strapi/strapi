@@ -1,4 +1,4 @@
-import { TransferKind } from '../client';
+import type { TransferKind } from '../client';
 import type { ServerError } from './error';
 import type { Diagnostic } from '../../../../utils/diagnostic';
 

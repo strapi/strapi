@@ -5,7 +5,7 @@ import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
-import {
+import type {
   DatabaseTransferToken,
   SanitizedTransferToken,
   TokenCreatePayload,

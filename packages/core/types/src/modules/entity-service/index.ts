@@ -1,4 +1,4 @@
-import { UID, Utils, Schema } from '../..';
+import type { UID, Utils, Schema } from '../..';
 import type * as Params from './params';
 
 import type { PartialEntity, Result, PaginatedResult } from './result';

@@ -7,7 +7,7 @@ import {
   hasInverseOrderColumn,
   isManyToAny,
 } from './relations';
-import { Metadata, Meta } from './metadata';
+import { Metadata, type Meta } from './metadata';
 import type { Model } from '../types';
 
 export type { Metadata, Meta };

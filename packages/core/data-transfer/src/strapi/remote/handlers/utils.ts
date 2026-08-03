@@ -7,8 +7,8 @@ import { WebSocket, WebSocketServer } from 'ws';
 import type { Handler, TransferState } from './abstract';
 import type { Protocol } from '../../../types';
 import { ProviderError, ProviderTransferError } from '../../../errors/providers';
-import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
-import { TransferMethod } from '../constants';
+import { VALID_TRANSFER_COMMANDS, type ValidTransferCommand } from './constants';
+import type { TransferMethod } from '../constants';
 import { createDiagnosticReporter } from '../../../utils/diagnostic';
 import { stringifyTransferWebSocketPayload } from '../../../utils/transfer-websocket-json';
 

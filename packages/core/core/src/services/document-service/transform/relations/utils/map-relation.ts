@@ -3,7 +3,7 @@ import { isObject, curry, isNil } from 'lodash/fp';
 
 import { traverseEntity, async } from '@strapi/utils';
 
-import { Relation } from './types';
+import type { Relation } from './types';
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case

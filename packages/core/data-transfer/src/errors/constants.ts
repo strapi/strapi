@@ -1,4 +1,4 @@
-import { ErrorDiagnosticSeverity } from '../utils/diagnostic';
+import type { ErrorDiagnosticSeverity } from '../utils/diagnostic';
 
 export const SeverityKind: Record<string, ErrorDiagnosticSeverity> = {
   FATAL: 'fatal',

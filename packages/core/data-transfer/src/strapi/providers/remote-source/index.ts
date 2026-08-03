@@ -21,7 +21,7 @@ import { ProviderTransferError, ProviderValidationError } from '../../../errors/
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { write } from '../../../utils/writable-async-write';
-import { ILocalStrapiSourceProviderOptions } from '../local-source';
+import type { ILocalStrapiSourceProviderOptions } from '../local-source';
 import {
   createDispatcher,
   connectToWebsocket,

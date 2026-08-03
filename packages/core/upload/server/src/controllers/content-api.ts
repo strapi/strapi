@@ -7,7 +7,7 @@ import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
-import { FileInfo } from '../types';
+import type { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
 const { ValidationError } = errors;

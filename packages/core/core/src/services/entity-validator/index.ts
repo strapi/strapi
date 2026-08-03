@@ -8,7 +8,7 @@ import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import jsonLogic from 'json-logic-js';
 import * as strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
-import { Validators, ValidatorMetas } from './validators';
+import { Validators, type ValidatorMetas } from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
 

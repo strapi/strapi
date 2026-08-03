@@ -1,4 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
+import type { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
 import type { z } from 'zod/v4';
 
@@ -18,7 +18,7 @@ import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 
-import { Model, Data } from '../types';
+import type { Model, Data } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 

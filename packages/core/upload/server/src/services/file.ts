@@ -12,7 +12,7 @@ import { async, errors, file as fileUtils } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 
-import { Config, type File } from '../types';
+import type { Config, File } from '../types';
 
 const { ApplicationError } = errors;
 const { bytesToHumanReadable } = fileUtils;

@@ -1,4 +1,4 @@
-import _, { PropertyName } from 'lodash';
+import _, { type PropertyName } from 'lodash';
 
 type Validator = unknown;
 

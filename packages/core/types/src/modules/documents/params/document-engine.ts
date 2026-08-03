@@ -1,7 +1,7 @@
 import type * as UID from '../../../uid';
 
-import { Pick } from '.';
-import { ID } from '..';
+import type { Pick } from '.';
+import type { ID } from '..';
 
 /**
  * Document Service specific method params

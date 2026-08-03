@@ -3,7 +3,7 @@ import { isNil } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
-import { LongHandDocument } from './types';
+import type { LongHandDocument } from './types';
 
 type Status = 'draft' | 'published';
 

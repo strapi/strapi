@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { Settings } from '../controllers/validation/admin/settings';
+import type { Settings } from '../controllers/validation/admin/settings';
 
 const getProviderName = () => strapi.config.get('plugin::upload.provider', 'local');
 const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate();
