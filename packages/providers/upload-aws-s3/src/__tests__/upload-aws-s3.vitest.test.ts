@@ -1,5 +1,4 @@
-import { Upload } from '@aws-sdk/lib-storage';
-import { afterEach, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import awsProvider, { File, ProviderConfig } from '../index';
 
@@ -336,7 +335,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ChecksumAlgorithm).toBe('CRC32');
     });
 
@@ -355,7 +354,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ChecksumAlgorithm).toBe('SHA256');
     });
 
@@ -374,7 +373,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ChecksumAlgorithm).toBe('CRC64NVME');
     });
 
@@ -390,7 +389,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ChecksumAlgorithm).toBeUndefined();
     });
   });
@@ -411,7 +410,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.IfNoneMatch).toBe('*');
     });
 
@@ -430,7 +429,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.IfNoneMatch).toBeUndefined();
     });
   });
@@ -451,7 +450,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.StorageClass).toBe('STANDARD');
     });
 
@@ -470,7 +469,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.StorageClass).toBe('INTELLIGENT_TIERING');
     });
 
@@ -489,7 +488,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.StorageClass).toBe('GLACIER');
     });
 
@@ -508,7 +507,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.StorageClass).toBe('DEEP_ARCHIVE');
     });
   });
@@ -531,7 +530,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ServerSideEncryption).toBe('AES256');
       expect(uploadCall.params.SSEKMSKeyId).toBeUndefined();
     });
@@ -554,7 +553,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ServerSideEncryption).toBe('aws:kms');
       expect(uploadCall.params.SSEKMSKeyId).toBe(
         'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
@@ -579,7 +578,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ServerSideEncryption).toBe('aws:kms:dsse');
       expect(uploadCall.params.SSEKMSKeyId).toBe('test-key-id');
     });
@@ -603,7 +602,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Tagging).toBe('project=test-project');
     });
 
@@ -626,7 +625,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Tagging).toContain('project=test-project');
       expect(uploadCall.params.Tagging).toContain('environment=production');
       expect(uploadCall.params.Tagging).toContain('team=backend');
@@ -649,7 +648,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Tagging).toBe('key%20with%20spaces=value%20with%20spaces');
     });
 
@@ -668,7 +667,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Tagging).toBeUndefined();
     });
   });
@@ -691,7 +690,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.partSize).toBe(10 * 1024 * 1024);
     });
 
@@ -712,7 +711,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.queueSize).toBe(8);
     });
 
@@ -733,7 +732,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.leavePartsOnError).toBe(true);
     });
 
@@ -756,7 +755,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.partSize).toBe(5 * 1024 * 1024);
       expect(uploadCall.queueSize).toBe(4);
       expect(uploadCall.leavePartsOnError).toBe(false);
@@ -776,7 +775,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.uploadIfMatch(file, 'expected-etag-123');
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.IfMatch).toBe('expected-etag-123');
     });
 
@@ -973,7 +972,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
 
       expect(uploadCall.params.Bucket).toBe('test-bucket');
       expect(uploadCall.params.ACL).toBe('private');
@@ -1003,7 +1002,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile({ path: '../../../etc/passwd' });
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Key).not.toContain('..');
       expect(uploadCall.params.Key).toBe('etc/passwd/test.json');
     });
@@ -1020,7 +1019,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile({ path: '', hash: '../../../malicious' });
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Key).not.toContain('..');
       expect(uploadCall.params.Key).toBe('malicious.json');
     });
@@ -1037,7 +1036,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile({ ext: '.json;rm -rf /' });
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Key).toBe('tmp/test.jsonrmrf');
     });
 
@@ -1053,7 +1052,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile({ path: 'foo///bar//baz' });
       await providerInstance.upload(file);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Key).toBe('foo/bar/baz/test.json');
     });
   });
@@ -1071,7 +1070,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file, { Bucket: 'malicious-bucket' } as any);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Bucket).toBe('secure-bucket');
     });
 
@@ -1087,7 +1086,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file, { Key: 'malicious-key' } as any);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Key).toBe('tmp/test.json');
     });
 
@@ -1104,7 +1103,7 @@ describe('AWS-S3 provider', () => {
       const maliciousBody = Buffer.from('malicious content');
       await providerInstance.upload(file, { Body: maliciousBody } as any);
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.Body).toEqual(Buffer.from('test content'));
     });
 
@@ -1120,7 +1119,7 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file, { ContentDisposition: 'attachment' });
 
-      const uploadCall = (Upload as Mock).mock.calls[0][0];
+      const uploadCall = UploadMock.mock.calls[0][0];
       expect(uploadCall.params.ContentDisposition).toBe('attachment');
     });
   });
