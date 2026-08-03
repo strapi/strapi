@@ -7,6 +7,8 @@ import {
   setFileProgress,
   setFileComplete,
   setFileError,
+  setFileMetadataGenerating,
+  setFileMetadataResult,
   setUploadFailed,
   retryCancelledFiles,
 } from '../store/uploadProgress';
@@ -19,8 +21,10 @@ import type {
   CreateFilesStream,
   CreateFilesStreamEvents,
   File as UploadedFile,
+  UnstableGenerateAIMetadata,
   UploadFileInfo,
 } from '../../../../shared/contracts/files';
+import type { FileMetadataResultStatus } from '../store/uploadProgress';
 
 interface UploadFilesArgs {
   formData: FormData;
@@ -30,16 +34,14 @@ interface UploadFilesArgs {
    * settings value. Defaults to 1 (sequential).
    */
   concurrency?: number;
-}
-
-interface RetryCancelledFilesArgs {
-  /** Same contract as {@link UploadFilesArgs.concurrency}. */
-  concurrency?: number;
+  /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
+  generateAiMetadata: boolean;
 }
 
 interface UploadFromUrlsArgs {
   urls: string[];
   folderId: number | null;
+  generateAiMetadata: boolean;
 }
 
 interface RootState {
@@ -69,15 +71,32 @@ interface UploadEntry {
 }
 
 /**
- * Stores the original upload entries for a batch (keyed by uploadId) to enable retry.
+ * Everything a batch needs to be replayed on retry: the original entries plus the
+ * flags it was started with (AI-metadata and upload concurrency). These live here
+ * rather than in Redux because `retryCancelledFiles` takes no args and the page
+ * that owns `useAIAvailability` / the settings value is not involved in the retry.
  */
-const uploadRegistry = new Map<number, UploadEntry[]>();
+interface UploadBatch {
+  entries: UploadEntry[];
+  generateAiMetadata: boolean;
+  concurrency: number;
+}
 
-const registerUploadEntries = (uploadId: number, entries: UploadEntry[]) => {
-  uploadRegistry.set(uploadId, entries);
+/**
+ * Stores the original upload batch (keyed by uploadId) to enable retry.
+ */
+const uploadRegistry = new Map<number, UploadBatch>();
+
+const registerUploadEntries = (
+  uploadId: number,
+  entries: UploadEntry[],
+  generateAiMetadata: boolean,
+  concurrency: number
+) => {
+  uploadRegistry.set(uploadId, { entries, generateAiMetadata, concurrency });
 };
 
-const getUploadEntries = (uploadId: number): UploadEntry[] | undefined => {
+const getUploadEntries = (uploadId: number): UploadBatch | undefined => {
   return uploadRegistry.get(uploadId);
 };
 
@@ -121,9 +140,82 @@ interface UploadError {
   status?: number;
 }
 
+/**
+ * The store's dispatch also accepts thunks, which is what RTK Query's
+ * `endpoint.initiate(...)` returns — the plain `Dispatch` action type can't express that.
+ */
+type AppDispatch = Dispatch &
+  (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
+
 type UploadPoolResult =
   | { data: UploadedFile[]; error?: undefined }
   | { error: UploadError; data?: undefined };
+
+/** Maps a server per-file outcome onto the row's terminal metadata status. */
+const METADATA_STATUS_BY_RESULT: Record<
+  UnstableGenerateAIMetadata.FileStatus,
+  FileMetadataResultStatus
+> = {
+  success: 'generated',
+  skipped: 'skipped',
+  error: 'failed',
+};
+
+/**
+ * Kicks off AI metadata generation for a freshly uploaded file.
+ *
+ * Deliberately fire-and-forget — the caller must NOT await it:
+ *  - generation for file N overlaps the upload of file N+1;
+ *  - a generation failure can never affect the upload result (the upload already
+ *    succeeded), which is why the promise is fully swallowed here.
+ *
+ * Every uploaded file is sent, including non-images: the server already classifies
+ * them (`ai-metadata.generateForFiles` returns `skipped` for anything whose mime
+ * isn't `image/*`) and duplicating that rule here would let the two drift apart.
+ * The upshot is that a non-image now reports "Metadata generation skipped" rather
+ * than silently showing no metadata state at all.
+ */
+export const maybeGenerateMetadata = ({
+  file,
+  index,
+  uploadId,
+  enabled,
+  dispatch,
+}: {
+  file: UploadedFile;
+  index: number;
+  uploadId: number;
+  enabled: boolean;
+  dispatch: Dispatch;
+}): void => {
+  if (!enabled || typeof file.id !== 'number') {
+    return;
+  }
+
+  dispatch(setFileMetadataGenerating({ index, uploadId }));
+
+  // `uploadApi` is declared below but only read at call time, long after the module
+  // has finished evaluating.
+  const promise = (dispatch as AppDispatch)(
+    uploadApi.endpoints.generateAiMetadata.initiate({ fileIds: [file.id] })
+  );
+
+  promise
+    .unwrap()
+    .then((results) => {
+      const result = results?.find((r) => r.id === file.id) ?? results?.[0];
+      dispatch(
+        setFileMetadataResult({
+          index,
+          uploadId,
+          status: result ? METADATA_STATUS_BY_RESULT[result.status] : 'failed',
+        })
+      );
+    })
+    .catch(() => {
+      dispatch(setFileMetadataResult({ index, uploadId, status: 'failed' }));
+    });
+};
 
 /**
  * Uploads the given entry indices one at a time through the single-file endpoint.
@@ -141,6 +233,7 @@ const runUploadPool = async ({
   abortController,
   dispatch,
   concurrency = 1,
+  generateAiMetadata,
 }: {
   entries: UploadEntry[];
   indices: number[];
@@ -150,6 +243,7 @@ const runUploadPool = async ({
   dispatch: Dispatch;
   /** Parallel workers pulling from the queue. 1 (the default) = sequential. */
   concurrency?: number;
+  generateAiMetadata: boolean;
 }): Promise<UploadPoolResult> => {
   const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
   const uploaded: UploadedFile[] = [];
@@ -185,6 +279,15 @@ const runUploadPool = async ({
       batcher.cancel();
       uploaded.push(file);
       dispatch(setFileComplete({ index, file }));
+
+      // Not awaited: overlaps with the next file's upload and can't fail the batch.
+      maybeGenerateMetadata({
+        file,
+        index,
+        uploadId,
+        enabled: generateAiMetadata,
+        dispatch,
+      });
     } catch (err) {
       batcher.cancel();
 
@@ -302,9 +405,13 @@ const fetchUrlUploadStream = async ({
 const processSSEStream = async ({
   response,
   dispatch,
+  uploadId,
+  generateAiMetadata,
 }: {
   response: Response;
   dispatch: Dispatch;
+  uploadId: number;
+  generateAiMetadata: boolean;
 }): Promise<CreateFilesStream.Response | null> => {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -351,6 +458,15 @@ const processSSEStream = async ({
         case 'file:complete': {
           const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
           dispatch(setFileComplete({ index, file: payload.file }));
+
+          // Same fire-and-forget semantics as the file flow.
+          maybeGenerateMetadata({
+            file: payload.file,
+            index,
+            uploadId,
+            enabled: generateAiMetadata,
+            dispatch,
+          });
           break;
         }
         case 'file:error': {
@@ -388,7 +504,10 @@ const uploadApi = adminApi
        * `XHR.upload.onprogress`.
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
-        queryFn: async ({ formData, totalFiles, concurrency }, { dispatch, getState }) => {
+        queryFn: async (
+          { formData, totalFiles, concurrency = 1, generateAiMetadata },
+          { dispatch, getState }
+        ) => {
           const token = (getState() as RootState).admin_app?.token;
 
           // Extract the original files and their per-file fileInfo from the combined FormData.
@@ -416,7 +535,7 @@ const uploadApi = adminApi
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
 
           // Store original entries for retry functionality
-          registerUploadEntries(uploadId, entries);
+          registerUploadEntries(uploadId, entries, generateAiMetadata, concurrency);
 
           // One AbortController per batch
           const abortController = new AbortController();
@@ -430,6 +549,7 @@ const uploadApi = adminApi
             abortController,
             dispatch,
             concurrency,
+            generateAiMetadata,
           });
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
@@ -473,8 +593,8 @@ const uploadApi = adminApi
        * Maps cancelled rows back to their original entries and re-runs only those
        * through the same upload pool with a fresh AbortController.
        */
-      retryCancelledFiles: builder.mutation<UploadedFile[], RetryCancelledFilesArgs | void>({
-        queryFn: async (args, { dispatch, getState }) => {
+      retryCancelledFiles: builder.mutation<UploadedFile[], void>({
+        queryFn: async (_arg, { dispatch, getState }) => {
           const { uploadId, files: stateFiles } = (getState() as RootState).uploadProgress;
           const token = (getState() as RootState).admin_app?.token;
 
@@ -486,8 +606,8 @@ const uploadApi = adminApi
             return { error: { name: 'UnknownError', message: 'No cancelled files to retry' } };
           }
 
-          const entries = getUploadEntries(uploadId);
-          if (!entries) {
+          const batch = getUploadEntries(uploadId);
+          if (!batch) {
             return { error: { name: 'UnknownError', message: 'Original files not found' } };
           }
 
@@ -499,13 +619,15 @@ const uploadApi = adminApi
           registerAbortController(uploadId, abortController);
 
           return runUploadPool({
-            entries,
+            entries: batch.entries,
             indices: cancelledIndices,
             token,
             uploadId,
             abortController,
             dispatch,
-            concurrency: args?.concurrency,
+            // Replay the retried rows with the flags the batch was started with.
+            concurrency: batch.concurrency,
+            generateAiMetadata: batch.generateAiMetadata,
           });
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
@@ -516,7 +638,7 @@ const uploadApi = adminApi
        * Sends URLs to the server which fetches and uploads them (SSE flow, unchanged).
        */
       uploadFromUrls: builder.mutation<CreateFilesStream.Response, UploadFromUrlsArgs>({
-        queryFn: async ({ urls, folderId }, { dispatch, getState }) => {
+        queryFn: async ({ urls, folderId, generateAiMetadata }, { dispatch, getState }) => {
           const token = (getState() as RootState).admin_app?.token;
 
           // Extract filenames from URLs for the progress dialog
@@ -576,6 +698,8 @@ const uploadApi = adminApi
             const streamResult = await processSSEStream({
               response,
               dispatch,
+              uploadId,
+              generateAiMetadata,
             });
 
             unregisterAbortController(uploadId);
@@ -605,6 +729,34 @@ const uploadApi = adminApi
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
       }),
+
+      /**
+       * Generate AI metadata (alt text + caption) for the given assets.
+       * Synchronous: resolves once every file has been processed and reports the
+       * outcome per file, so non-images and individual failures don't fail the
+       * whole batch. Existing alt text and captions are never overwritten.
+       *
+       * Lives here rather than in `assets.ts` because the upload flows dispatch it
+       * directly via `initiate()` after each file completes, and `assets.ts` already
+       * imports from this module — defining it there would be a circular import.
+       * Re-exported from `assets.ts` for the components that consume the hook.
+       */
+      generateAiMetadata: builder.mutation<
+        UnstableGenerateAIMetadata.Response['data'],
+        { fileIds: number[] }
+      >({
+        query: ({ fileIds }) => ({
+          url: '/upload/unstable/generate-ai-metadata',
+          method: 'POST',
+          data: { fileIds },
+        }),
+        transformResponse: (response: { data: UnstableGenerateAIMetadata.Response['data'] }) =>
+          response.data,
+        invalidatesTags: (_result, _error, { fileIds }) => [
+          ...fileIds.map((id) => ({ type: 'Asset' as const, id })),
+          { type: 'Asset' as const, id: 'LIST' },
+        ],
+      }),
     }),
   });
 
@@ -613,5 +765,6 @@ export const {
   useUploadFileSilentlyMutation,
   useRetryCancelledFilesMutation,
   useUploadFromUrlsMutation,
+  useGenerateAiMetadataMutation,
 } = uploadApi;
 export { uploadApi };

@@ -209,8 +209,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     };
 
     // If there is any locale to filter (if i18n is enabled)
-    if (locales.length) {
+    if (locales.length === documents.length) {
       where.locale = { $in: locales };
+    } else if (locales.length) {
+      /*
+       * The batch mixes localized and non-localized versions, which happens when a
+       * content type holds rows with a locale while others have none — for instance
+       * after i18n is disabled on it, or when a locale is sent to a non-localized
+       * content type through the API.
+       *
+       * `locales` only holds the locales that are actually set, so filtering on it
+       * alone would drop the counterparts of every version whose locale is null, and
+       * those versions would be reported as drafts even though they are published.
+       */
+      where.$or = [{ locale: { $in: locales } }, { locale: { $null: true } }];
     }
 
     return strapi.query(uid).findMany({

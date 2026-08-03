@@ -62,7 +62,12 @@ const setup = (count: number, concurrency?: number) => {
   });
 
   act(() => {
-    result.current[0]({ formData: buildFormData(count), totalFiles: count, concurrency });
+    result.current[0]({
+      formData: buildFormData(count),
+      totalFiles: count,
+      concurrency,
+      generateAiMetadata: false,
+    });
   });
 
   return { inFlight, result };

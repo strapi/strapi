@@ -181,3 +181,10 @@ export const {
   useDeleteAssetMutation,
   useBulkDeleteItemsMutation,
 } = assetsApi;
+
+/**
+ * `generateAiMetadata` is defined in `./api` (the upload flows dispatch it directly
+ * after each file completes, and this module imports from there) — re-exported here
+ * so asset components keep a single import site for asset-related hooks.
+ */
+export { useGenerateAiMetadataMutation } from './api';
