@@ -70,6 +70,20 @@ describe('useI18nFieldLock', () => {
       const { result } = renderHook(() => useIsEditingDefaultLocale());
       expect(result.current).toBe(false);
     });
+
+    it('returns true when defaultLocale is missing from document meta', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+
+      const { result } = renderHook(() => useIsEditingDefaultLocale());
+      expect(result.current).toBe(true);
+    });
   });
 
   describe('useShouldLockNonLocalizedField', () => {
@@ -173,6 +187,20 @@ describe('useI18nFieldLock', () => {
 
       expect(relationResult.current).toBe(false);
       expect(uidResult.current).toBe(false);
+    });
+
+    it('does not lock when the attribute is undefined', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() => useShouldLockNonLocalizedField(undefined));
+      expect(result.current).toBe(false);
     });
   });
 });
