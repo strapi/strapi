@@ -3,5 +3,6 @@
   "include": ["src", "vitest.config.ts"],
   "compilerOptions": {
     "types": ["node"]
-  }
+  },
+  "exclude": ["**/__tests__/**"]
 }
