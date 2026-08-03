@@ -465,7 +465,10 @@ const slice = createUndoRedoSlice(
           previousTarget,
           previousAttribute.targetAttribute ?? ''
         );
-        const previousTargetAttribute = previousTarget.attributes[previousTargetAttributeIndex];
+        const previousTargetAttribute =
+          previousTargetAttributeIndex !== -1
+            ? previousTarget.attributes[previousTargetAttributeIndex]
+            : undefined;
 
         // remove old targetAttribute
         if (previousAttribute.targetAttribute) {

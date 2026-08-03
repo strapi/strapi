@@ -1180,7 +1180,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
       });
 
-      it('Should preserve the inverse relation conditions when editing a bidirectional oneToMany relation', () => {
+      it('Should preserve the inverse relation conditions when renaming a bidirectional oneToMany inverse field', () => {
         const articleConditions: AttributeConditions = {
           visible: { '==': [{ var: 'status' }, 'published'] },
         };
@@ -1231,7 +1231,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             attributeToSet: {
               name: 'categories',
               relation: 'oneToMany',
-              targetAttribute: 'articles',
+              targetAttribute: 'categorizedArticles',
               target: category.uid,
               type: 'relation',
               conditions: updatedArticleConditions,
@@ -1250,10 +1250,113 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         );
         expect(state.current.contentTypes[category.uid].attributes).toContainEqual(
           expect.objectContaining({
-            name: 'articles',
+            name: 'categorizedArticles',
             conditions: categoryConditions,
           })
         );
+      });
+
+      it('Should not transfer inverse relation conditions when changing the target content type', () => {
+        const inverseConditions: AttributeConditions = {
+          visible: { '==': [{ var: 'status' }, 'enabled'] },
+        };
+        const article = initCT('article', {
+          attributes: [
+            {
+              name: 'categories',
+              relation: 'oneToMany',
+              targetAttribute: 'articles',
+              target: 'api::category.category',
+              type: 'relation',
+            },
+          ],
+        });
+        const category = initCT('category', {
+          attributes: [
+            {
+              name: 'articles',
+              relation: 'manyToOne',
+              targetAttribute: 'categories',
+              target: article.uid,
+              type: 'relation',
+              conditions: inverseConditions,
+            },
+          ],
+        });
+        const tag = initCT('tag', { attributes: [] });
+
+        const state = reducer(
+          init({
+            contentTypes: { [article.uid]: article, [category.uid]: category, [tag.uid]: tag },
+          }),
+          actions.editAttribute({
+            attributeToSet: {
+              name: 'categories',
+              relation: 'oneToMany',
+              targetAttribute: 'articles',
+              target: tag.uid,
+              type: 'relation',
+            },
+            forTarget: 'contentType',
+            targetUid: article.uid,
+            name: 'categories',
+          })
+        );
+
+        const newInverse = state.current.contentTypes[tag.uid].attributes.find(
+          (attribute) => attribute.name === 'articles'
+        );
+
+        expect(newInverse).toMatchObject({ name: 'articles', status: 'NEW' });
+        expect(newInverse).not.toHaveProperty('conditions');
+        expect(state.current.contentTypes[category.uid].attributes).toContainEqual(
+          expect.objectContaining({ name: 'articles', status: 'REMOVED' })
+        );
+      });
+
+      it('Should create a bidirectional inverse without conditions when none previously existed', () => {
+        const article = initCT('article', {
+          attributes: [
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              targetAttribute: null,
+              target: 'api::category.category',
+              type: 'relation',
+            },
+          ],
+        });
+        const category = initCT('category', { attributes: [] });
+
+        const state = reducer(
+          init({ contentTypes: { [article.uid]: article, [category.uid]: category } }),
+          actions.editAttribute({
+            attributeToSet: {
+              name: 'category',
+              relation: 'oneToOne',
+              targetAttribute: 'article',
+              target: category.uid,
+              type: 'relation',
+            },
+            forTarget: 'contentType',
+            targetUid: article.uid,
+            name: 'category',
+          })
+        );
+
+        const inverse = state.current.contentTypes[category.uid].attributes.find(
+          (attribute) => attribute.name === 'article'
+        );
+
+        expect(inverse).toMatchObject({
+          name: 'article',
+          relation: 'oneToOne',
+          targetAttribute: 'category',
+          target: article.uid,
+          type: 'relation',
+          status: 'NEW',
+        });
+        expect(inverse).not.toHaveProperty('conditions');
       });
 
       it('Should save pluginOptions if the relation is nested inside a component', () => {
