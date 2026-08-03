@@ -42,7 +42,7 @@ import type { Schema } from '@strapi/types';
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 interface UIDInputProps extends Omit<InputProps, 'type'> {
-  attribute?: Pick<Schema.Attribute.UIDProperties, 'regex'>;
+  attribute?: Pick<Schema.Attribute.UIDProperties, 'regex' | 'targetField'>;
   type: Schema.Attribute.TypeOf<Schema.Attribute.UID>;
 }
 
@@ -62,9 +62,66 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     const [{ query }] = useQueryParams();
     const params = React.useMemo(() => buildValidParams(query), [query]);
 
-    const { regex } = attribute;
+    const { regex, targetField } = attribute;
     const validationRegExp = regex ? new RegExp(regex) : UID_REGEX;
     const trimmedDebouncedValue = debouncedValue?.trim() ?? '';
+
+    /**
+     * The server resolves the target field against the root of the submitted data
+     * (see the `uid` service's `generateUIDField`), so we read it the same way.
+     */
+    const targetFieldValue = targetField
+      ? (allFormValues as Record<string, unknown>)[targetField]
+      : undefined;
+    const debouncedTargetFieldValue = useDebounce(targetFieldValue, 300);
+    const hasTargetFieldValue =
+      typeof debouncedTargetFieldValue === 'string' && debouncedTargetFieldValue.trim() !== '';
+
+    /**
+     * Once the user types in the field it is theirs — including when they clear it,
+     * which must not immediately refill from the target field.
+     */
+    const hasUserEditedRef = React.useRef(false);
+
+    /**
+     * The last value we generated ourselves. While the field still holds it (or is
+     * empty) the user hasn't taken ownership of the UID, so we're free to keep it in
+     * sync with the target field.
+     */
+    const generatedValueRef = React.useRef<string | undefined>(undefined);
+    const isUIDUntouched =
+      !hasUserEditedRef.current &&
+      (field.value === undefined ||
+        field.value === '' ||
+        field.value === generatedValueRef.current);
+
+    /**
+     * With a target field we generate as soon as it has a value, whether or not the UID
+     * itself is required — generating before then would only produce the fallback the
+     * server derives from the model name. Without one there is nothing to wait for, so
+     * we keep filling required fields on mount as before.
+     */
+    const shouldGenerateDefaultUID =
+      isUIDUntouched && (targetField ? hasTargetFieldValue : Boolean(required));
+
+    /**
+     * Snapshot of the form values, kept out of the query key on purpose: the request is
+     * keyed on the debounced target field alone, otherwise a keystroke in any field
+     * would change the args and fire another generate request.
+     */
+    const allFormValuesRef = React.useRef(allFormValues);
+    React.useEffect(() => {
+      allFormValuesRef.current = allFormValues;
+    }, [allFormValues]);
+
+    const defaultUIDRequestData = React.useMemo(
+      () => ({
+        id: currentDocumentMeta.documentId ?? '',
+        ...allFormValuesRef.current,
+        ...(targetField ? { [targetField]: debouncedTargetFieldValue } : {}),
+      }),
+      [currentDocumentMeta.documentId, targetField, debouncedTargetFieldValue]
+    );
 
     const {
       data: defaultGeneratedUID,
@@ -74,14 +131,11 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
       {
         contentTypeUID: currentDocumentMeta.model,
         field: name,
-        data: {
-          id: currentDocumentMeta.documentId ?? '',
-          ...allFormValues,
-        },
+        data: defaultUIDRequestData,
         params,
       },
       {
-        skip: (field.value !== undefined && field.value !== '') || !required,
+        skip: !shouldGenerateDefaultUID,
       }
     );
 
@@ -99,10 +153,16 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
      * but we also want to set it as the initialValue too.
      */
     React.useEffect(() => {
-      if (defaultGeneratedUID && field.value === undefined) {
+      if (defaultGeneratedUID && isUIDUntouched && field.value !== defaultGeneratedUID) {
+        generatedValueRef.current = defaultGeneratedUID;
         field.onChange(name, defaultGeneratedUID);
       }
-    }, [defaultGeneratedUID, field, name]);
+    }, [defaultGeneratedUID, field, isUIDUntouched, name]);
+
+    const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+      hasUserEditedRef.current = true;
+      field.onChange(event);
+    };
 
     const [generateUID, { isLoading: isGeneratingUID }] = useGenerateUIDMutation();
 
@@ -116,6 +176,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
         });
 
         if ('data' in res) {
+          generatedValueRef.current = res.data;
           field.onChange(name, res.data);
         } else {
           toggleNotification({
@@ -269,7 +330,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
               )}
             </Flex>
           }
-          onChange={field.onChange}
+          onChange={handleChange}
           value={field.value ?? ''}
           {...props}
           type="text"
