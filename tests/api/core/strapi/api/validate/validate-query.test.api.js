@@ -650,6 +650,9 @@ describe('Core API - Validate', () => {
             ],
             ['isActive $eq', { updatedBy: { isActive: true } }],
             ['blocked $eq', { updatedBy: { blocked: false } }],
+            // GHSA-9xg4-3qfm-9w8f: a column-qualified key must not slip past the private
+            // field check the way the plain attribute name does.
+            ['t1.password $startsWith', { updatedBy: { 't1.password': { $startsWith: '$2' } } }],
           ])('Returns 400 on updatedBy.%s filter (authenticated)', async (_label, filters) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
             expect(res.status).toEqual(400);
@@ -665,6 +668,9 @@ describe('Core API - Validate', () => {
             ],
             ['isActive $eq', { updatedBy: { isActive: true } }],
             ['blocked $eq', { updatedBy: { blocked: false } }],
+            // GHSA-9xg4-3qfm-9w8f: a column-qualified key must not slip past the private
+            // field check the way the plain attribute name does.
+            ['t1.password $startsWith', { updatedBy: { 't1.password': { $startsWith: '$2' } } }],
           ])('Returns 400 on updatedBy.%s filter (unauthenticated)', async (_label, filters) => {
             const res = await publicRq.get('/documents', { qs: { filters } });
             expect(res.status).toEqual(400);
@@ -716,6 +722,18 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
+            // GHSA-495j-h493-42q2: `lookup` is not a recognized query param, so it must be
+            // ignored outright rather than reaching the query layer as a filter.
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            // GHSA-rjg2-95x7-8qmx: same for `where`, which is the database layer's own
+            // filter key and must not be accepted from a request.
+            [
+              'where on a private relation field',
+              { where: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
           ])(
             'do not affect the response (authenticated) - %s',
             async (_label, unrecognizedParams) => {
@@ -736,6 +754,18 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
+            // GHSA-495j-h493-42q2: `lookup` is not a recognized query param, so it must be
+            // ignored outright rather than reaching the query layer as a filter.
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            // GHSA-rjg2-95x7-8qmx: same for `where`, which is the database layer's own
+            // filter key and must not be accepted from a request.
+            [
+              'where on a private relation field',
+              { where: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
           ])(
             'do not affect the response (unauthenticated) - %s',
             async (_label, unrecognizedParams) => {
