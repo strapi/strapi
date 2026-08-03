@@ -108,7 +108,7 @@ export default (strapi: Core.Strapi): Sender => {
       const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
       const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
-    } catch (err) {
+    } catch {
       return false;
     }
   };
