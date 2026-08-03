@@ -1,12 +1,7 @@
 {
   "extends": "tsconfig/client.json",
-  "include": [
-    "./src"
-  ],
+  "include": ["./src"],
   "compilerOptions": {
-    "types": [
-      "@testing-library/jest-dom",
-      "vite/client"
-    ]
+    "types": ["@testing-library/jest-dom", "vite/client"]
   }
 }
