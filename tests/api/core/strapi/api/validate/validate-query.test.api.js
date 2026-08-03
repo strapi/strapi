@@ -722,14 +722,9 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
-            // GHSA-495j-h493-42q2: `lookup` is not a recognized query param, so it must be
-            // ignored outright rather than reaching the query layer as a filter.
-            [
-              'lookup on a private relation field',
-              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
-            ],
-            // GHSA-rjg2-95x7-8qmx: same for `where`, which is the database layer's own
-            // filter key and must not be accepted from a request.
+            // GHSA-rjg2-95x7-8qmx: `where` is the database layer's own filter key and must
+            // not be accepted from a request. It is silently ignored rather than rejected,
+            // so the defence is that the response is identical to the baseline.
             [
               'where on a private relation field',
               { where: { updatedBy: { password: { $startsWith: '$2' } } } },
@@ -754,14 +749,9 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
-            // GHSA-495j-h493-42q2: `lookup` is not a recognized query param, so it must be
-            // ignored outright rather than reaching the query layer as a filter.
-            [
-              'lookup on a private relation field',
-              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
-            ],
-            // GHSA-rjg2-95x7-8qmx: same for `where`, which is the database layer's own
-            // filter key and must not be accepted from a request.
+            // GHSA-rjg2-95x7-8qmx: `where` is the database layer's own filter key and must
+            // not be accepted from a request. It is silently ignored rather than rejected,
+            // so the defence is that the response is identical to the baseline.
             [
               'where on a private relation field',
               { where: { updatedBy: { password: { $startsWith: '$2' } } } },
@@ -779,6 +769,35 @@ describe('Core API - Validate', () => {
               );
             }
           );
+        });
+
+        describe('Internal-only query params', () => {
+          // GHSA-495j-h493-42q2: `lookup` is used internally by the document service for
+          // draft/publish and i18n scoping. Accepting it from a request would let a caller
+          // reach fields the sanitizers never see, so the document service rejects any
+          // request carrying it outright, whatever the value. Asserted as a 400 rather than
+          // with the shape-equality pattern above, because rejection is the defence here.
+          it.each([
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            ['lookup on a public field', { lookup: { name: 'test' } }],
+          ])('Returns 400 on %s (authenticated)', async (_label, qs) => {
+            const res = await rq.get('/api/documents', { qs });
+            expect(res.status).toEqual(400);
+          });
+
+          it.each([
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            ['lookup on a public field', { lookup: { name: 'test' } }],
+          ])('Returns 400 on %s (unauthenticated)', async (_label, qs) => {
+            const res = await publicRq.get('/documents', { qs });
+            expect(res.status).toEqual(400);
+          });
         });
       });
     });
