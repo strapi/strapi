@@ -228,7 +228,13 @@ describe('document-metadata service', () => {
 
     it('populates non-localized component fields into availableLocales query params', async () => {
       const findMany = jest.fn().mockResolvedValue([
-        { id: 2, documentId: 'doc-1', locale: 'en', publishedAt: null, variants: [{ name: 'a' }] },
+        {
+          id: 2,
+          documentId: 'doc-1',
+          locale: 'en',
+          publishedAt: null,
+          variants: [{ name: 'a' }],
+        },
       ]);
       const transform = jest.fn((uid, params) => params);
       const getNonLocalizedAttributes = jest.fn().mockReturnValue(['sku', 'variants', 'images']);
