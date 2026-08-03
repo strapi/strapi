@@ -168,7 +168,15 @@ const foldersApi = uploadApi.injectEndpoints({
       }),
       transformResponse: (response: GetFolder.Response) =>
         response.data as unknown as FolderWithCounts,
-      providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
+      // Also carries the LIST tag so a mutation that changes a folder's file
+      // count (upload / delete into it) can refresh the header count by
+      // invalidating `{ Folder, LIST }`, without needing the folder id at the
+      // mutation site (it's buried in the upload FormData / not passed to the
+      // delete). See CMS-1563.
+      providesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
+        { type: 'Folder', id: 'LIST' },
+      ],
     }),
     bulkMove: builder.mutation<BulkMoveFolders.Response['data'], BulkMoveParams>({
       query: ({ fileIds = [], folderIds = [], destinationFolderId }) => ({

@@ -1,8 +1,9 @@
-import { renderHook, server, waitFor } from '@tests/utils';
+import { act, renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
-import { useGetFoldersQuery } from '../folders';
+import { useDeleteAssetMutation } from '../assets';
+import { useGetFoldersQuery, useGetFolderQuery } from '../folders';
 
 describe('future folders service - getFolders filter shape', () => {
   let lastRequestParams:
@@ -113,5 +114,43 @@ describe('future folders service - getFolders filter shape', () => {
       });
       expect(lastRequestParams).not.toHaveProperty('_q');
     });
+  });
+});
+
+describe('future folder header count invalidation (CMS-1563)', () => {
+  it('refetches the folder so the header count updates when an asset is deleted from it', async () => {
+    let folderRequests = 0;
+    let fileCount = 3;
+
+    server.use(
+      http.get('*/upload/folders/:id', () => {
+        folderRequests += 1;
+        return HttpResponse.json({
+          data: { id: 1, name: 'My folder', files: { count: fileCount }, children: { count: 0 } },
+        });
+      }),
+      http.delete('*/upload/files/:id', () => {
+        // The delete changed the folder's file count on the server.
+        fileCount = 2;
+        return HttpResponse.json({ data: {} });
+      })
+    );
+
+    const { result } = renderHook(() => ({
+      folder: useGetFolderQuery({ id: 1 }),
+      deleteAsset: useDeleteAssetMutation(),
+    }));
+
+    await waitFor(() => expect(result.current.folder.data?.files?.count).toBe(3));
+    expect(folderRequests).toBe(1);
+
+    await act(async () => {
+      await result.current.deleteAsset[0](99).unwrap();
+    });
+
+    // deleteAsset invalidates `{ Folder, LIST }`; getFolder now carries that tag,
+    // so the header count refetches to the new value without a page reload.
+    await waitFor(() => expect(result.current.folder.data?.files?.count).toBe(2));
+    expect(folderRequests).toBeGreaterThan(1);
   });
 });

@@ -148,6 +148,8 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Asset' as const, id },
         { type: 'Asset' as const, id: 'LIST' },
+        // Refresh the folder header count — deleting an asset changes it (CMS-1563).
+        { type: 'Folder' as const, id: 'LIST' },
       ],
     }),
     /**
