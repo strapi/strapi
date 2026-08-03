@@ -1,7 +1,7 @@
-import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
+import { useRef, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
+import { Layouts, usePersistentState } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -54,6 +54,7 @@ import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelec
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+import { useInfiniteScrollSentinel } from './hooks/useInfiniteScrollSentinel';
 import { useListFilters } from './hooks/useListFilters';
 import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { buildAssetFilters } from './utils/buildAssetFilters';
@@ -161,17 +162,12 @@ const AssetsView = ({
     [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
   );
 
-  const loadMoreRef = useElementOnScreen<HTMLDivElement>(
-    useCallback(
-      (isVisible) => {
-        if (isVisible && hasNextPage && !isFetchingMore) {
-          fetchNextPage();
-        }
-      },
-      [hasNextPage, isFetchingMore, fetchNextPage]
-    ),
-    INTERSECTION_OPTIONS
-  );
+  const loadMoreRef = useInfiniteScrollSentinel({
+    hasNextPage,
+    isFetchingMore,
+    onLoadMore: fetchNextPage,
+    options: INTERSECTION_OPTIONS,
+  });
 
   if (isLoading) {
     return (

@@ -10,18 +10,17 @@ import type { File } from '../../../../../../shared/contracts/files';
 /**
  * Infinite scroll is driven by an IntersectionObserver, which the shared test
  * setup stubs out with a no-op — the sentinel never reports itself visible.
- * Swapping the hook for a manual trigger is what lets a test reach page 2.
+ * Mocking the sentinel hook to expose its `onLoadMore` is what lets a test
+ * reach page 2.
  */
 let mockShowLoadMoreSentinel: () => void = () => {};
 
-jest.mock('@strapi/admin/strapi-admin', () => {
-  const actual = jest.requireActual('@strapi/admin/strapi-admin');
+jest.mock('../hooks/useInfiniteScrollSentinel', () => {
   const { useRef } = jest.requireActual('react');
 
   return {
-    ...actual,
-    useElementOnScreen: (onVisibilityChange: (isVisible: boolean) => void) => {
-      mockShowLoadMoreSentinel = () => onVisibilityChange(true);
+    useInfiniteScrollSentinel: ({ onLoadMore }: { onLoadMore: () => void }) => {
+      mockShowLoadMoreSentinel = () => onLoadMore();
 
       return useRef(null);
     },
