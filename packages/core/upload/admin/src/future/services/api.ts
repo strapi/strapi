@@ -553,7 +553,7 @@ const uploadApi = adminApi
           });
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
-        // files are added to it (CMS-1563).
+        // files are added to it.
         invalidatesTags: [
           { type: 'Asset', id: 'LIST' },
           { type: 'Folder', id: 'LIST' },
@@ -591,7 +591,7 @@ const uploadApi = adminApi
           }
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
-        // files are added to it (CMS-1563).
+        // files are added to it.
         invalidatesTags: [
           { type: 'Asset', id: 'LIST' },
           { type: 'Folder', id: 'LIST' },
@@ -641,7 +641,7 @@ const uploadApi = adminApi
           });
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
-        // files are added to it (CMS-1563).
+        // files are added to it.
         invalidatesTags: [
           { type: 'Asset', id: 'LIST' },
           { type: 'Folder', id: 'LIST' },
@@ -743,7 +743,7 @@ const uploadApi = adminApi
           }
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
-        // files are added to it (CMS-1563).
+        // files are added to it.
         invalidatesTags: [
           { type: 'Asset', id: 'LIST' },
           { type: 'Folder', id: 'LIST' },

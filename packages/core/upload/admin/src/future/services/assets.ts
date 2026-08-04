@@ -108,6 +108,9 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Asset' as const, id },
         { type: 'Asset' as const, id: 'LIST' },
+        // The Location select routes a folder move through this mutation, which
+        // changes both folders' counts — refresh the folder header count.
+        { type: 'Folder' as const, id: 'LIST' },
       ],
     }),
     /**
@@ -148,7 +151,7 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Asset' as const, id },
         { type: 'Asset' as const, id: 'LIST' },
-        // Refresh the folder header count — deleting an asset changes it (CMS-1563).
+        // Refresh the folder header count — deleting an asset changes it.
         { type: 'Folder' as const, id: 'LIST' },
       ],
     }),

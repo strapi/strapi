@@ -172,7 +172,7 @@ const foldersApi = uploadApi.injectEndpoints({
       // count (upload / delete into it) can refresh the header count by
       // invalidating `{ Folder, LIST }`, without needing the folder id at the
       // mutation site (it's buried in the upload FormData / not passed to the
-      // delete). See CMS-1563.
+      // delete).
       providesTags: (_result, _error, { id }) => [
         { type: 'Folder', id },
         { type: 'Folder', id: 'LIST' },
