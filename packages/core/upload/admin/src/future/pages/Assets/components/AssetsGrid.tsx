@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -152,6 +153,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
   const {
     dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
@@ -232,19 +234,21 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       role="listitem"
       tabIndex={0}
     >
-      <Flex onKeyDown={stopCardEvent}>
-        <Checkbox
-          checked={isSelected(key)}
-          onClick={handleCheckboxClick}
-          aria-label={formatMessage(
-            {
-              id: getTranslationKey('list.table.row.select'),
-              defaultMessage: 'Select {name}',
-            },
-            { name: folder.name }
-          )}
-        />
-      </Flex>
+      {canUpdate && (
+        <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected(key)}
+            onClick={handleCheckboxClick}
+            aria-label={formatMessage(
+              {
+                id: getTranslationKey('list.table.row.select'),
+                defaultMessage: 'Select {name}',
+              },
+              { name: folder.name }
+            )}
+          />
+        </Flex>
+      )}
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
@@ -392,6 +396,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -451,19 +456,21 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
-        <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onClick={handleCheckboxClick}
-            aria-label={formatMessage(
-              {
-                id: getTranslationKey('list.table.row.select'),
-                defaultMessage: 'Select {name}',
-              },
-              { name: asset.name }
-            )}
-          />
-        </CheckboxOverlay>
+        {canUpdate && (
+          <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+            <Checkbox
+              checked={selected}
+              onClick={handleCheckboxClick}
+              aria-label={formatMessage(
+                {
+                  id: getTranslationKey('list.table.row.select'),
+                  defaultMessage: 'Select {name}',
+                },
+                { name: asset.name }
+              )}
+            />
+          </CheckboxOverlay>
+        )}
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>

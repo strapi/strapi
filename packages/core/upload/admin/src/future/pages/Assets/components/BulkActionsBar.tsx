@@ -11,6 +11,7 @@ import {
   isAIMetadataSupportedMime,
 } from '../../../../../../shared/constants';
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
@@ -80,6 +81,9 @@ export const BulkActionsBar = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // Every bulk action (move, delete, metadata) is an `assets.update` mutation
+  // server-side — one flag gates the whole cluster.
+  const { canUpdate } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
@@ -92,7 +96,10 @@ export const BulkActionsBar = ({
   const count = selectedIds.size + selectedFolderIds.size;
   const isBusy = isDeleting || isGeneratingMetadata;
 
-  // Stable identity: the move dialog memoizes its destination walk on it.
+  // Stable identity: the move dialog memoizes its destination walk on it. Each
+  // item's real location comes from `locations`, so a selection made under a
+  // global search validates against each item's own parent rather than the
+  // folder currently open.
   const moveItems = useMemo(
     () => buildDragSetFromSelection(selectedIds, selectedFolderIds, locations, currentFolderId),
     [selectedIds, selectedFolderIds, locations, currentFolderId]
@@ -220,7 +227,11 @@ export const BulkActionsBar = ({
     clear();
   };
 
-  if (count === 0) {
+  // Every bulk action is behind `assets.update`; with nothing selected, or
+  // without the permission, the bar has nothing to offer — drop it entirely
+  // rather than show a count + "Clear selection" over no actions (mirrors the
+  // drawer footer, which hides when no permitted action survives).
+  if (count === 0 || !canUpdate) {
     return null;
   }
 
@@ -243,6 +254,8 @@ export const BulkActionsBar = ({
         )}
       </Typography>
 
+      {/* Past the early return the user always has `assets.update`, so the
+          individual actions no longer re-check it. */}
       <ActionCluster>
         {isAiMetadataEnabled && (
           <Tooltip label={metadataDisabledReason}>
