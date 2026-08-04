@@ -2,28 +2,12 @@ import { useMemo } from 'react';
 
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 
+import { getRelationId } from '../../../../utils/getRelationId';
+
 import { useAssetsDndOptional } from './AssetsDndProvider';
 import { toFileDraggableId, toFolderDraggableId, toFolderTargetId } from './dndIds';
 
 import type { DragFileData, DragFolderData, FolderTargetData } from '../../../../types/dnd';
-
-const getFileFolderId = (
-  folder: number | string | { id?: number } | null | undefined
-): number | null => {
-  if (folder == null) {
-    return null;
-  }
-
-  if (typeof folder === 'object') {
-    return folder.id ?? null;
-  }
-
-  if (typeof folder === 'number') {
-    return folder;
-  }
-
-  return Number(folder) || null;
-};
 
 export const useFileDraggable = (asset: {
   id: number;
@@ -37,7 +21,7 @@ export const useFileDraggable = (asset: {
       kind: 'file',
       id: asset.id,
       name: asset.name,
-      folderId: getFileFolderId(asset.folder),
+      folderId: getRelationId(asset.folder),
     }),
     [asset.folder, asset.id, asset.name]
   );
@@ -60,10 +44,7 @@ export const useFolderDraggableDroppable = (folder: {
   };
   const { active } = useDndContext();
 
-  const parentId =
-    typeof folder.parent === 'object' && folder.parent != null
-      ? (folder.parent.id ?? null)
-      : (folder.parent ?? null);
+  const parentId = getRelationId(folder.parent);
 
   const dragData = useMemo<DragFolderData>(
     () => ({

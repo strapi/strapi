@@ -6,7 +6,12 @@ import { useGetFoldersQuery } from '../folders';
 
 describe('future folders service - getFolders filter shape', () => {
   let lastRequestParams:
-    | { _q?: string; sort?: string; filters?: { $and?: Array<{ parent?: { id: unknown } }> } }
+    | {
+        _q?: string;
+        sort?: string;
+        populate?: Record<string, unknown>;
+        filters?: { $and?: Array<{ parent?: { id: unknown } }> };
+      }
     | undefined;
 
   beforeEach(() => {
@@ -37,6 +42,16 @@ describe('future folders service - getFolders filter shape', () => {
     expect(lastRequestParams).toMatchObject({
       filters: { $and: [{ parent: { id: { $null: 'true' } } }] },
     });
+  });
+
+  it('populates parent, which the server otherwise omits', async () => {
+    // Every row would report `parentId: null` without it, so the move dialog
+    // could neither offer the root nor prune the current parent.
+    const { result } = renderHook(() => useGetFoldersQuery({ parentId: 7 }));
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(lastRequestParams?.populate).toEqual({ parent: 'true' });
   });
 
   it('sends _q and drops the parent filter when searching', async () => {

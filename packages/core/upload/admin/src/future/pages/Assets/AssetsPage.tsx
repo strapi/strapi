@@ -27,6 +27,7 @@ import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissio
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { useGetUploadSettingsQuery } from '../../services/settings';
+import { buildItemLocations, type ItemLocations } from '../../utils/itemLocations';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -111,6 +112,7 @@ interface AssetsViewProps {
   hasNextPage: boolean;
   fetchNextPage: () => void;
   error: unknown;
+  locations: ItemLocations;
   searchQuery: string;
   assetsSort: string;
   foldersPosition: FoldersPosition;
@@ -132,6 +134,7 @@ const AssetsView = ({
   hasNextPage,
   fetchNextPage,
   error,
+  locations,
   searchQuery,
   assetsSort,
   foldersPosition,
@@ -232,7 +235,7 @@ const AssetsView = ({
           assets: the AI metadata action needs their mime types to know what
           the provider can handle. `position: fixed` keeps it visually anchored
           regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} />
+      <BulkActionsBar assets={assets} locations={locations} />
     </>
   );
 };
@@ -388,6 +391,11 @@ export const AssetsPage = () => {
     () => (builtFilters.showFolders ? fetchedFolders : []),
     [builtFilters.showFolders, fetchedFolders]
   );
+
+  // Both move affordances (drag and the bulk bar) resolve each item's parent
+  // from the rows on screen — while searching, results are global and the
+  // folder currently open says nothing about where an item lives.
+  const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
 
   const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
 
@@ -644,6 +652,7 @@ export const AssetsPage = () => {
                       hasNextPage={hasNextPage}
                       fetchNextPage={fetchNextPage}
                       error={assetsError}
+                      locations={itemLocations}
                       searchQuery={searchQuery}
                       assetsSort={listSort.assetsSort}
                       foldersPosition={listSort.foldersPosition}
