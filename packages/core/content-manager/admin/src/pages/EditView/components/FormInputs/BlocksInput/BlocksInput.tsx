@@ -18,13 +18,28 @@ interface BlocksInputProps extends Omit<InputProps, 'type'> {
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
-  ({ label, name, required = false, hint, labelAction, ...editorProps }, forwardedRef) => {
+  (
+    { label, name, required = false, hint, labelAction, livePreviewSync = false, ...editorProps },
+    forwardedRef
+  ) => {
     const id = React.useId();
     const field = useField<Schema.Attribute.BlocksValue>(name);
 
     return (
-      <Field.Root id={id} name={name} hint={hint} error={field.error} required={required}>
-        <Flex direction="column" alignItems="stretch" gap={1}>
+      <Field.Root
+        id={id}
+        name={name}
+        hint={hint}
+        error={field.error}
+        required={required}
+        minHeight={livePreviewSync ? 0 : undefined}
+      >
+        <Flex
+          direction="column"
+          alignItems="stretch"
+          gap={1}
+          minHeight={livePreviewSync ? 0 : undefined}
+        >
           <Field.Label action={labelAction}>{label}</Field.Label>
           <BlocksEditor
             name={name}
@@ -33,6 +48,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             value={field.value ?? []}
             onChange={field.onChange}
             ariaLabelId={id}
+            livePreviewSync={livePreviewSync}
             {...editorProps}
           />
           <Field.Hint />

@@ -439,6 +439,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               disabled={disabled}
               onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
+              livePreviewSync={livePreviewSync}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
