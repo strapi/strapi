@@ -227,11 +227,11 @@ describe('AssetCropEditor cache-buster on signed URLs', () => {
     expect(src).not.toContain('v=');
   });
 
-  it('appends ?v=<updatedAt> on an unsigned URL (cache busting still works after replace)', async () => {
+  it('busts an unsigned URL with a distinct `updatedAt` param (still refreshes after replace)', async () => {
     await renderEditor({ asset: unsignedAsset });
 
     const src = document.querySelector('img')?.getAttribute('src') ?? '';
-    expect(src).toContain(`v=${new Date(unsignedAsset.updatedAt as string).getTime()}`);
+    expect(src).toContain(`updatedAt=${new Date(unsignedAsset.updatedAt as string).getTime()}`);
   });
 
   it('produces the same URL and crossOrigin as AssetPreview for a signed asset (one CORS-consistent cache entry)', async () => {
@@ -252,6 +252,30 @@ describe('AssetCropEditor cache-buster on signed URLs', () => {
     expect(cropImg).toHaveAttribute('src', previewSrc as string);
     expect(cropImg).toHaveAttribute('crossorigin', previewCrossOrigin as string);
     expect(previewCrossOrigin).toBe('anonymous');
+  });
+
+  it('gives the crop image its own cache entry for an unsigned asset (distinct URL + anonymous)', async () => {
+    // The editor reads canvas pixels (useCropImg -> toBlob), so it must load
+    // CORS-clean (crossOrigin="anonymous"); AssetPreview only displays and leaves
+    // it unset. Same URL + different crossOrigin collide (#26581) — the anonymous
+    // crop request could reuse the thumbnail's non-CORS response and taint the
+    // canvas. So the crop URL must differ: it busts with `updatedAt`, the
+    // thumbnail with `v`.
+    const preview = render(<AssetPreview asset={unsignedAsset} />);
+    const previewImg = preview.getByAltText(String(unsignedAsset.alternativeText));
+    const previewSrc = previewImg.getAttribute('src') ?? '';
+    expect(previewImg).not.toHaveAttribute('crossorigin');
+    preview.unmount();
+
+    await renderEditor({ asset: unsignedAsset });
+    const cropImg = screen.getByAltText(unsignedAsset.name) as HTMLImageElement;
+    const cropSrc = cropImg.getAttribute('src') ?? '';
+
+    // Distinct cache entry: different URL, and the crop opts into CORS.
+    expect(cropSrc).not.toBe(previewSrc);
+    expect(cropSrc).toContain('updatedAt=');
+    expect(previewSrc).toContain('v=');
+    expect(cropImg).toHaveAttribute('crossorigin', 'anonymous');
   });
 });
 

@@ -288,21 +288,24 @@ export const AssetCropEditor = ({
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
 
-  // Append `updatedAt` as a cache-buster: a replaced asset is served at the same
-  // URL, so without this, reopening the editor shows the browser-cached old image
-  // (mirrors AssetPreview).
-  // Skipped for signed URLs: the asset URL is a presigned S3 URL and any extra
-  // query param invalidates the signature (403 SignatureDoesNotMatch). Dropping
-  // the buster makes this URL byte-identical to AssetPreview's; for a signed
-  // remote asset AssetPreview also loads with crossOrigin="anonymous" (see the
-  // img below), so the two share one CORS-consistent cache entry rather than
-  // colliding (see #26581).
+  // The crop editor reads pixels from a canvas (useCropImg -> toBlob), so its
+  // <img> must be CORS-clean and always sets crossOrigin="anonymous" (see the
+  // img below) — even for unsigned URLs, which AssetPreview leaves unset because
+  // it only displays. That difference is why the crop URL is kept DISTINCT from
+  // the thumbnail's: identical URL + different crossOrigin collide in the HTTP
+  // cache (#26581), and the crop's anonymous request could otherwise reuse the
+  // thumbnail's non-CORS cached response and taint the canvas. So the buster
+  // uses `updatedAt` where AssetPreview uses `v`, giving each its own entry
+  // (mirrors the legacy PreviewBox fix).
+  // Signed URLs get no param at all — a presigned S3 URL breaks if you add one,
+  // and on the signed side AssetPreview also loads anonymous, so the identical
+  // URL there shares one CORS-consistent entry, which is fine.
   const rawImageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
   const cacheKey =
     asset.updatedAt && !asset.isUrlSigned ? new Date(asset.updatedAt).getTime() : undefined;
   const imageUrl =
     cacheKey !== undefined
-      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}v=${cacheKey}`
+      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}updatedAt=${cacheKey}`
       : rawImageUrl;
 
   const handleImageLoad = () => {
