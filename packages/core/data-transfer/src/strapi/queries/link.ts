@@ -33,6 +33,12 @@ const loadExistingRefs = async (
   refs: Array<number | string>
 ): Promise<Set<string>> => {
   const existing = new Set<string>();
+
+  // Stale morph type UIDs (removed components/CTs) have no metadata — treat as orphaned.
+  if (!strapi.db.metadata.has(uid)) {
+    return existing;
+  }
+
   const uniqueRefs = [...new Set(refs)];
   const numericIds = uniqueRefs.filter((ref): ref is number => typeof ref === 'number');
   const documentIds = uniqueRefs.filter((ref): ref is string => typeof ref === 'string');
@@ -162,34 +168,31 @@ export const createLinkQuery = (
         const targetAlias = 'target';
         const ownerTable = addSchema(metadata.tableName);
         const targetTable = addSchema(getMetadataTableName(strapi, target));
-        const targetReferencedColumn = aliasColumn(targetAlias, referencedColumn);
 
-        // One LEFT JOIN classifies valid vs orphan rows (avoids a second full scan).
-        // When warnings are not requested, INNER JOIN skips orphans at the DB.
+        // Use EXISTS (not JOIN): joining on non-unique referencedColumn (e.g. i18n
+        // document_id) multiplies owner rows by matching target locales.
+        const targetExistsSubquery = () =>
+          connection
+            .queryBuilder()
+            .select(connection.raw('1'))
+            .from({ [targetAlias]: targetTable })
+            .whereRaw('??.?? = ??.??', [targetAlias, referencedColumn, ownerAlias, joinColumnName]);
+
         const qb = connection
           .queryBuilder()
           .select(
             `${ownerAlias}.id`,
             `${ownerAlias}.${joinColumnName} as ${joinColumnName}`,
-            ...(onOrphanedLink ? [{ [TARGET_EXISTS_ALIAS]: targetReferencedColumn }] : [])
+            ...(onOrphanedLink
+              ? [connection.raw('exists (?) as ??', [targetExistsSubquery(), TARGET_EXISTS_ALIAS])]
+              : [])
           )
-          .from({ [ownerAlias]: ownerTable });
+          .from({ [ownerAlias]: ownerTable })
+          .whereNotNull(aliasColumn(ownerAlias, joinColumnName));
 
-        if (onOrphanedLink) {
-          qb.leftJoin(
-            { [targetAlias]: targetTable },
-            aliasColumn(ownerAlias, joinColumnName),
-            targetReferencedColumn
-          );
-        } else {
-          qb.innerJoin(
-            { [targetAlias]: targetTable },
-            aliasColumn(ownerAlias, joinColumnName),
-            targetReferencedColumn
-          );
+        if (!onOrphanedLink) {
+          qb.whereExists(targetExistsSubquery());
         }
-
-        qb.whereNotNull(aliasColumn(ownerAlias, joinColumnName));
 
         if (trx) {
           qb.transacting(trx);
@@ -207,7 +210,7 @@ export const createLinkQuery = (
             right: { type: target, ref },
           };
 
-          if (onOrphanedLink && entry[TARGET_EXISTS_ALIAS] == null) {
+          if (onOrphanedLink && !entry[TARGET_EXISTS_ALIAS]) {
             onOrphanedLink(link);
           } else {
             yield link;
