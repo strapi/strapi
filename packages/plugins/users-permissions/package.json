@@ -32,7 +32,7 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./server/index.js",
+      "source": "./server/src/index.js",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
@@ -82,7 +82,7 @@
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.30.3",
+    "react-router-dom": "6.30.4",
     "styled-components": "6.4.1"
   },
   "peerDependencies": {

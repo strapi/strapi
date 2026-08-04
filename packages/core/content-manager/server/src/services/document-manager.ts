@@ -72,7 +72,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         maxLimit: 1000,
       });
 
-      const { populate, sort, ...countParams } = params;
+      const { populate: _populate, sort: _sort, ...countParams } = params;
       const [documents, total = 0] = await Promise.all([
         strapi.documents(uid).findMany(params),
         strapi.documents(uid).count(countParams),
