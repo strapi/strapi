@@ -50,9 +50,13 @@ function copyDir(name) {
 
 console.log(`Setting up pinned Strapi ${version} app at:\n  ${resolvedOut}\n`);
 
-for (const dir of ['src', 'config', 'public']) {
+// Schemas/content only — do not copy live config/*.ts (targets monorepo types/APIs).
+for (const dir of ['src', 'public']) {
   copyDir(dir);
 }
+
+const { writePinnedAppConfig } = require('./write-pinned-app-config');
+writePinnedAppConfig(resolvedOut);
 
 const tsconfigSrc = path.join(COMPLEX_DIR, 'tsconfig.json');
 if (fs.existsSync(tsconfigSrc)) {

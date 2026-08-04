@@ -418,7 +418,7 @@ async function seed() {
   console.log(`Counts: ${JSON.stringify(COUNTS)}\n`);
 
   try {
-    const appContext = await compileStrapi();
+    const appContext = await compileStrapi({ ignoreDiagnostics: true });
     strapi = await createStrapi(appContext).load();
     strapi.log.level = 'error';
 

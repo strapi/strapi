@@ -13,7 +13,8 @@ const req = Module.createRequire(pkgPath);
 async function main(): Promise<void> {
   process.chdir(appRoot);
   const { createStrapi, compileStrapi } = req('@strapi/strapi');
-  const appContext = await compileStrapi();
+  // Pinned npm releases can disagree with fixture TS on type-only edges; still emit JS.
+  const appContext = await compileStrapi({ ignoreDiagnostics: true });
   const strapi = await createStrapi(appContext).load();
   strapi.log.level = 'error';
   await strapi.destroy();
