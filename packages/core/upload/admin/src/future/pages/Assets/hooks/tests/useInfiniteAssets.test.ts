@@ -577,7 +577,7 @@ describe('useInfiniteAssets', () => {
     expect(result.current.assets[PAGE_SIZE].name).toMatch(/^refetched-/);
   });
 
-  it('refreshes an earlier page after a mutation refetch so a rename reaches the list (CMS-1558)', async () => {
+  it('refreshes an earlier page after a mutation refetch so a rename reaches the list', async () => {
     // Page 1 is accumulated, then page 2 becomes the current page — so page 1 is
     // no longer the subscribed query. A rename on a page-1 asset invalidates
     // `{Asset, LIST}`; only the rendered `subscribers` keep page 1 subscribed so

@@ -616,7 +616,7 @@ export const AssetsPage = () => {
 
                 <Layouts.Content>
                   {/* Renders nothing — keeps every loaded page's query subscribed
-                      so a rename/delete refreshes the whole list (CMS-1558). */}
+                      so a rename/delete refreshes the whole list. */}
                   {assetPageSubscribers}
                   <DropZoneWithOverlay>
                     <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />

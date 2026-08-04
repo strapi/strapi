@@ -279,7 +279,7 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
 
   if (mime?.includes(ASSET_TYPES.Image)) {
     // Replace keeps the same hash/URL, so without a cache-buster the browser
-    // serves the stale thumbnail after a Replace Media (CMS-1237). `updatedAt`
+    // serves the stale thumbnail after a Replace Media. `updatedAt`
     // changes on replace, so it re-fetches exactly once per replacement.
     // Skipped for signed URLs — an extra query param invalidates the signature.
     const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;

@@ -71,7 +71,7 @@ const flattenPages = (pages: Record<number, File[]>): File[] => {
  * The hook itself only subscribes the current (latest) page. Without these, a
  * mutation invalidating `{Asset, LIST}` refetches that page alone and earlier
  * pages stay frozen — a rename or delete on an earlier page never reaches the
- * list until a folder/sort/search change (CMS-1558). One subscriber per earlier
+ * list until a folder/sort/search change. One subscriber per earlier
  * page keeps them all subscribed so the invalidation refetches the whole list.
  * Renders nothing; it exists only for the subscription + `onRefreshed` report.
  */
@@ -104,7 +104,7 @@ const PageSubscriber = ({
  *
  * The caller MUST render the returned `subscribers` node — that is what keeps
  * every loaded page subscribed, so `{Asset, LIST}` invalidations keep the whole
- * list consistent rather than only the current page (CMS-1558).
+ * list consistent rather than only the current page.
  */
 const useInfiniteAssets = ({
   folder = null,
