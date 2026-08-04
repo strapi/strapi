@@ -24,14 +24,24 @@ export const discoverMigrationFiles = (dir: string): string[] => {
         return false;
       }
 
-      // Dirent#isFile() is false for symlinks; stat follows the target so we
-      // keep umzug/fast-glob followSymbolicLinks parity (include symlink→file,
-      // skip symlink→directory and broken links).
-      try {
-        return fse.statSync(path.join(dir, entry.name)).isFile();
-      } catch {
-        return false;
+      // Regular files: accept without stat so a TOCTOU race (file removed
+      // between readdir and stat) surfaces later instead of being swallowed.
+      if (entry.isFile()) {
+        return true;
       }
+
+      // Dirent#isFile() is false for symlinks; only then follow the target
+      // (umzug/fast-glob followSymbolicLinks: include symlink→file, skip
+      // symlink→directory and broken links).
+      if (entry.isSymbolicLink()) {
+        try {
+          return fse.statSync(path.join(dir, entry.name)).isFile();
+        } catch {
+          return false;
+        }
+      }
+
+      return false;
     })
     .map((entry) => path.resolve(dir, entry.name))
     .sort();
