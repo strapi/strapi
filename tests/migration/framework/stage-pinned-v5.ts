@@ -24,15 +24,23 @@ async function runPinnedStrapiStage(ctx: MigrationContext, stage: PinnedStage): 
   const pinnedRoot = path.join(ctx.MIGRATION_ROOT, 'pinned-v5', version);
 
   console.log(`\n📌 Pinned Strapi ${version}: preparing app at ${pinnedRoot}...`);
-  await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-pinned-v5-project.js')], {
-    cwd: ctx.REPO_ROOT,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      PINNED_STRAPI_VERSION: version,
-      PINNED_V5_OUT_DIR: pinnedRoot,
-    },
-  });
+  // Prefer `node --import tsx` over the tsx CLI (avoids listen EPERM on tsx IPC pipes).
+  await execa(
+    process.execPath,
+    ['--import', 'tsx', path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-pinned-v5-project.ts')],
+    {
+      cwd: ctx.REPO_ROOT,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        PINNED_STRAPI_VERSION: version,
+        PINNED_V5_OUT_DIR: pinnedRoot,
+        NODE_PATH: [path.join(ctx.REPO_ROOT, 'node_modules'), process.env.NODE_PATH]
+          .filter(Boolean)
+          .join(path.delimiter),
+      },
+    }
+  );
 
   const { nestedYarnInstallEnv } = require('./shared');
 
