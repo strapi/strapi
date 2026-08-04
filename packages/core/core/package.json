@@ -112,7 +112,7 @@
     "resolve.exports": "2.0.2",
     "semver": "7.7.4",
     "typescript": "5.9.3",
-    "undici": "6.28.0",
+    "undici": "7.29.0",
     "yup": "0.32.9",
     "zod": "3.25.76"
   },
