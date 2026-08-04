@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext, useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Popover } from '@strapi/design-system';
+import { Box, Flex, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type UseDocument } from '../../hooks/useDocument';
@@ -165,13 +165,20 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           </Popover.Trigger>
           <Popover.Content
             sideOffset={4}
-            style={{
-              zIndex: 5,
-              maxHeight: 'var(--radix-popover-content-available-height)',
-              overflow: 'hidden',
-            }}
+            collisionPadding={{ top: 8, bottom: 8, left: 4, right: 4 }}
+            style={{ zIndex: 5 }}
           >
-            <Box padding={4} width="400px">
+            <Flex
+              direction="column"
+              alignItems="stretch"
+              padding={4}
+              width="400px"
+              style={{
+                maxHeight: 'var(--radix-popover-content-available-height)',
+                overflow: 'hidden',
+                minHeight: 0,
+              }}
+            >
               {/* @ts-expect-error the types of `attribute` clash for some reason */}
               <InputRenderer
                 document={documentResponse}
@@ -182,7 +189,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
                 type={popoverField.attribute.type}
                 visible={true}
               />
-            </Box>
+            </Flex>
           </Popover.Content>
         </Popover.Root>
       </InputPopoverProvider>
