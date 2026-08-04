@@ -251,10 +251,10 @@ describe('document-metadata service', () => {
             name: { type: 'string' },
           },
         }),
-        plugin: (name: string) => {
+        plugin(name: string) {
           if (name === 'i18n') {
             return {
-              service: (serviceName: string) => {
+              service(serviceName: string) {
                 if (serviceName === 'locales') {
                   return { getDefaultLocale: async () => 'en' };
                 }
@@ -267,7 +267,7 @@ describe('document-metadata service', () => {
           }
           return undefined;
         },
-        get: (key: string) => {
+        get(key: string) {
           if (key === 'query-params') {
             return { transform };
           }
