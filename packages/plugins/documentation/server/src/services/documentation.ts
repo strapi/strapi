@@ -54,7 +54,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
             const generatedDate = doc.info['x-generation-date'];
 
             return { version, generatedDate, url: '' };
-          } catch (err) {
+          } catch {
             return null;
           }
         })

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { errors } from '@strapi/utils';
+import { contentTypes, errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 const { ApplicationError } = errors;
@@ -14,7 +14,7 @@ export const isRelation = (attribute: Schema.Attribute.AnyAttribute) =>
  * Formats a component's attributes
  */
 export const formatAttributes = (model: any) => {
-  const { getVisibleAttributes } = utils.contentTypes;
+  const { getVisibleAttributes } = contentTypes;
 
   // only get attributes that can be seen in the CTB
   return getVisibleAttributes(model).reduce((acc: any, key) => {

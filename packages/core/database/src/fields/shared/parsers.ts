@@ -28,7 +28,7 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
     }
 
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
+  } catch {
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   }
 };

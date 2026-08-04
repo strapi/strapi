@@ -497,6 +497,62 @@ describe('Upload SSE Streaming', () => {
           }
         );
       });
+
+      test('Rejects files exceeding sizeLimit when no Content-Length header is sent', async () => {
+        if (!authToken) {
+          return;
+        }
+
+        // Set a very small size limit (100 bytes)
+        strapi.config.set('plugin::upload.sizeLimit', 100);
+
+        // Streamed body of 1000 bytes with no Content-Length header: the limit can only be
+        // enforced on the bytes actually received.
+        const streamedUrl = 'https://example.com/streamed/no-content-length.bin';
+        await withMockedFetch(
+          (url) => {
+            if (url !== streamedUrl) {
+              return undefined;
+            }
+
+            const body = new ReadableStream({
+              start(controller) {
+                for (let i = 0; i < 10; i += 1) {
+                  controller.enqueue(new Uint8Array(100));
+                }
+                controller.close();
+              },
+            });
+
+            return new Response(body, {
+              status: 200,
+              headers: { 'Content-Type': 'application/octet-stream' },
+            });
+          },
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls: [streamedUrl] },
+            });
+
+            expect(res.statusCode).toBe(200);
+
+            const errorEvent = res.events.find((e) => e.event === 'file:error');
+            expect(errorEvent).toBeDefined();
+            // The fetch stage must be the one rejecting it (while streaming), not the downstream
+            // checkFileSize validation, which reports "<name> exceeds size limit of ...".
+            expect(errorEvent.data.message).toMatch(/^File too large: maximum allowed size is/);
+
+            // No file was created
+            expect(res.events.find((e) => e.event === 'file:complete')).toBeUndefined();
+          }
+        );
+      });
     });
   });
 });
