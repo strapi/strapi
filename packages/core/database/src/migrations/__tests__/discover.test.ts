@@ -58,4 +58,35 @@ describe('discoverMigrationFiles', () => {
 
     expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
   });
+
+  it('includes symlinks that resolve to regular .js/.sql files (fast-glob followSymbolicLinks parity)', async () => {
+    const outsideDir = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-migrations-outside-'));
+    try {
+      const targetJs = path.join(outsideDir, 'target.js');
+      const targetSql = path.join(outsideDir, 'target.sql');
+      await fse.writeFile(targetJs, 'module.exports = {}');
+      await fse.writeFile(targetSql, 'SELECT 1;');
+      await fse.writeFile(path.join(tempDir, '001-real.js'), 'module.exports = {}');
+
+      await fse.symlink(targetJs, path.join(tempDir, '002-linked.js'));
+      await fse.symlink(targetSql, path.join(tempDir, '003-linked.sql'));
+
+      expect(discoverMigrationFiles(tempDir)).toEqual([
+        path.resolve(tempDir, '001-real.js'),
+        path.resolve(tempDir, '002-linked.js'),
+        path.resolve(tempDir, '003-linked.sql'),
+      ]);
+    } finally {
+      await fse.remove(outsideDir);
+    }
+  });
+
+  it('ignores symlinks to directories and broken symlinks', async () => {
+    await fse.writeFile(path.join(tempDir, '001-real.js'), 'module.exports = {}');
+    await fse.ensureDir(path.join(tempDir, 'nested'));
+    await fse.symlink(path.join(tempDir, 'nested'), path.join(tempDir, '002-dir-link.js'));
+    await fse.symlink(path.join(tempDir, 'missing-target.js'), path.join(tempDir, '003-broken.js'));
+
+    expect(discoverMigrationFiles(tempDir)).toEqual([path.resolve(tempDir, '001-real.js')]);
+  });
 });
