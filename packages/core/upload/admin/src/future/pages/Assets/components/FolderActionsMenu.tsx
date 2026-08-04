@@ -29,10 +29,6 @@ interface FolderActionsMenuProps {
  * Any successful action clears the whole selection: a delete only invalidates
  * RTK tags, so without it a `folder:<id>` key for a folder that no longer exists
  * would linger in the selection.
- *
- * TODO: no permission gating — the whole future Media Library relies on the
- * server to reject unauthorised writes (see the matching TODO in
- * `utils/canDropItemOnFolder.ts`).
  */
 export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) => {
   const { formatMessage } = useIntl();

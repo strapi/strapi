@@ -121,13 +121,6 @@ export const DeleteItemsDialog = ({
                 'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
             })}
           </Typography>
-          <Typography>
-            {formatMessage({
-              id: getTranslationKey('list.bulk-actions.delete.confirm.description.cant-be-undone'),
-              defaultMessage:
-                'This action can’t be undone. Deleting a folder also removes everything inside it, and any linked content will break – media asset containers will appear empty.',
-            })}
-          </Typography>
         </Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
