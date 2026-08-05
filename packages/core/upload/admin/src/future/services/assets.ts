@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -13,6 +15,9 @@ interface GetAssetsParams {
   pageSize?: number;
   folder?: number | null;
   sort?: string;
+  search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the folder/search scope. */
+  filters?: Record<string, unknown>[];
 }
 
 interface GetAssetsResponse {
@@ -37,17 +42,27 @@ const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
       query: (params = {}) => {
-        const { folder, ...rest } = params as GetAssetsParams;
+        // `search` is destructured out so it never reaches the server as-is —
+        // it is re-added below as the `_q` the API actually understands.
+        const { folder, search, filters = [], ...rest } = params as GetAssetsParams;
 
         const queryParams: Record<string, unknown> = { ...rest };
 
-        if (folder != null) {
-          queryParams['filters'] = {
-            $and: [{ folder: { id: folder } }],
-          };
+        // List filters apply in BOTH modes: search composes with them (a
+        // filtered search), only the folder scope is dropped while searching.
+        if (search) {
+          // Search is global: folder scoping is intentionally dropped so results span the whole library.
+          queryParams['_q'] = encodeSearchQuery(search);
+
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
         } else {
+          const folderScope =
+            folder != null ? { folder: { id: folder } } : { folder: { id: { $null: true } } };
+
           queryParams['filters'] = {
-            $and: [{ folder: { id: { $null: true } } }],
+            $and: [folderScope, ...filters],
           };
         }
 
@@ -93,6 +108,9 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Asset' as const, id },
         { type: 'Asset' as const, id: 'LIST' },
+        // The Location select routes a folder move through this mutation, which
+        // changes both folders' counts — refresh the folder header count.
+        { type: 'Folder' as const, id: 'LIST' },
       ],
     }),
     /**
@@ -133,6 +151,8 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Asset' as const, id },
         { type: 'Asset' as const, id: 'LIST' },
+        // Refresh the folder header count — deleting an asset changes it.
+        { type: 'Folder' as const, id: 'LIST' },
       ],
     }),
     /**
@@ -166,3 +186,10 @@ export const {
   useDeleteAssetMutation,
   useBulkDeleteItemsMutation,
 } = assetsApi;
+
+/**
+ * `generateAiMetadata` is defined in `./api` (the upload flows dispatch it directly
+ * after each file completes, and this module imports from there) — re-exported here
+ * so asset components keep a single import site for asset-related hooks.
+ */
+export { useGenerateAiMetadataMutation } from './api';

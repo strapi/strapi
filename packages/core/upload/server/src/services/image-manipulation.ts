@@ -266,7 +266,7 @@ const isFaultyImage = async (file: UploadableFile) => {
   try {
     await sharp(file.filepath).stats();
     return false;
-  } catch (e) {
+  } catch {
     return true;
   }
 };
@@ -276,7 +276,7 @@ const isOptimizableImage = async (file: UploadableFile) => {
   try {
     const metadata = await getMetadata(file);
     format = metadata.format;
-  } catch (e) {
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
@@ -288,7 +288,7 @@ const isResizableImage = async (file: UploadableFile) => {
   try {
     const metadata = await getMetadata(file);
     format = metadata.format;
-  } catch (e) {
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
@@ -300,7 +300,7 @@ const isImage = async (file: UploadableFile) => {
   try {
     const metadata = await getMetadata(file);
     format = metadata.format;
-  } catch (e) {
+  } catch {
     // throw when the file is not a supported image
     return false;
   }
