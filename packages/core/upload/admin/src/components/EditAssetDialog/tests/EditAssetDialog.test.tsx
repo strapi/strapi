@@ -221,8 +221,10 @@ describe('<EditAssetDialog />', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: true });
 
       fireEvent.click(screen.getByRole('button', { name: 'Download' }));
+      // Cache-busted with updatedAt so a replaced/cropped file (same hash) is
+      // fetched fresh rather than from browser cache.
       expect(downloadFile).toHaveBeenCalledWith(
-        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?updatedAt=2021-10-04T09%3A42%3A31.670Z',
         'Screenshot 2.png'
       );
     });

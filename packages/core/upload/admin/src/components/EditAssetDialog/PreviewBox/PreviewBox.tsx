@@ -43,6 +43,26 @@ interface Asset extends Omit<FileDefinition, 'folder'> {
   folder?: FileDefinition['folder'] & { id: number };
 }
 
+/**
+ * Cache-busts a non-signed, non-local asset URL with the asset's `updatedAt`.
+ *
+ * Replace and crop intentionally preserve the file hash, so the URL path stays
+ * stable and the browser would serve the previously cached file — the
+ * `updatedAt` param forces a fresh request. Signed URLs are left untouched (an
+ * extra param invalidates the signature) and local (blob) URLs need no busting.
+ * Mirrors the list view's `ImageAssetCard`.
+ */
+const appendUpdatedAtToUrl = (
+  url: string | undefined,
+  asset: { isLocal?: boolean; isUrlSigned?: boolean; updatedAt?: string }
+) => {
+  if (!url || asset.isLocal || asset.isUrlSigned) {
+    return url;
+  }
+
+  return appendSearchParamsToUrl({ url, params: { updatedAt: asset.updatedAt } });
+};
+
 interface PreviewBoxProps {
   asset: Asset;
   canUpdate: boolean;
@@ -81,20 +101,17 @@ export const PreviewBox = ({
   const previewRef = React.useRef(null);
   const [isCropImageReady, setIsCropImageReady] = React.useState(false);
   const [hasCropIntent, setHasCropIntent] = React.useState<boolean | null>(null);
-  const [assetUrl, setAssetUrl] = React.useState(createAssetUrl(asset, false));
-  const [thumbnailUrl, setThumbnailUrl] = React.useState(createAssetUrl(asset, true));
-
-  // When loading a cross-origin image for cropping, append a cache-busting parameter
-  // so the browser makes a fresh request with CORS headers instead of serving a
-  // previously cached non-CORS response (which would taint the canvas and break
-  // cropping). Signed URLs are excluded because modifying them invalidates the signature.
-  const cropUrl = React.useMemo(() => {
-    if (!asset.isLocal && !asset.isUrlSigned && assetUrl) {
-      return appendSearchParamsToUrl({ url: assetUrl, params: { updatedAt: asset.updatedAt } });
-    }
-
-    return assetUrl;
-  }, [assetUrl, asset.isLocal, asset.isUrlSigned, asset.updatedAt]);
+  // Busted on init so re-opening the detail view after a replace/crop (which
+  // preserve the hash) fetches the new file instead of the cached one. The full
+  // `assetUrl` doubles as the cropping source: its `updatedAt` param also forces
+  // the fresh CORS request cropping needs (a cached non-CORS response would taint
+  // the canvas).
+  const [assetUrl, setAssetUrl] = React.useState(() =>
+    appendUpdatedAtToUrl(createAssetUrl(asset, false), asset)
+  );
+  const [thumbnailUrl, setThumbnailUrl] = React.useState(() =>
+    appendUpdatedAtToUrl(createAssetUrl(asset, true), asset)
+  );
 
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
@@ -161,8 +178,14 @@ export const PreviewBox = ({
       trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation! });
     } else {
       const updatedAsset = await editAsset(nextAsset, file);
-      optimizedCachingImage = createAssetUrl(updatedAsset, false);
-      optimizedCachingThumbnailImage = createAssetUrl(updatedAsset, true);
+      optimizedCachingImage = appendUpdatedAtToUrl(
+        createAssetUrl(updatedAsset, false),
+        updatedAsset
+      );
+      optimizedCachingThumbnailImage = appendUpdatedAtToUrl(
+        createAssetUrl(updatedAsset, true),
+        updatedAsset
+      );
 
       trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation! });
     }
@@ -330,7 +353,7 @@ export const PreviewBox = ({
               ref={previewRef}
               mime={asset.mime!}
               name={asset.name}
-              url={hasCropIntent ? cropUrl! : thumbnailUrl!}
+              url={hasCropIntent ? assetUrl! : thumbnailUrl!}
               onLoad={() => {
                 if (asset.isLocal || hasCropIntent) {
                   setIsCropImageReady(true);

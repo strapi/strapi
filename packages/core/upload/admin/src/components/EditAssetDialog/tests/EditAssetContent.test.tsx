@@ -114,7 +114,7 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
 });
 
-const renderCompo = () =>
+const renderCompo = (customAsset: Asset = asset) =>
   render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
@@ -123,7 +123,7 @@ const renderCompo = () =>
             <NotificationsProvider>
               <EditAssetDialog
                 open
-                asset={asset}
+                asset={customAsset}
                 onClose={jest.fn()}
                 canUpdate
                 canCopyLink
@@ -171,12 +171,45 @@ describe('<EditAssetDialog />', () => {
       await screen.findByText('Link copied into the clipboard');
     });
 
+    it('cache-busts the preview image URL for non-signed assets so a replace/crop is not served stale', () => {
+      renderCompo();
+
+      expect(screen.getByRole('img', { name: 'Screenshot 2.png' })).toHaveAttribute(
+        'src',
+        'http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png?updatedAt=2021-10-04T09%3A42%3A31.670Z'
+      );
+    });
+
+    it('does not append updatedAt to signed URLs (an extra param breaks the signature)', () => {
+      renderCompo({
+        ...asset,
+        isUrlSigned: true,
+        url: 'https://cdn.example.com/Screenshot_2_5d4a574d61.png?token=signed',
+        formats: {
+          ...asset.formats,
+          thumbnail: {
+            ...asset.formats!.thumbnail!,
+            url: 'https://cdn.example.com/thumbnail_Screenshot_2_5d4a574d61.png?token=signed',
+          },
+        },
+      });
+
+      const preview = screen.getByRole('img', { name: 'Screenshot 2.png' });
+      expect(preview).toHaveAttribute(
+        'src',
+        'https://cdn.example.com/thumbnail_Screenshot_2_5d4a574d61.png?token=signed'
+      );
+      expect(preview.getAttribute('src')).not.toContain('updatedAt');
+    });
+
     it('downloads the file when pressing "Download"', () => {
       renderCompo();
 
       fireEvent.click(screen.getByRole('button', { name: 'Download' }));
+      // The URL is cache-busted with updatedAt so a replaced/cropped file
+      // (which keeps the same hash) is fetched fresh rather than from cache.
       expect(downloadFile).toHaveBeenCalledWith(
-        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?updatedAt=2021-10-04T09%3A42%3A31.670Z',
         'Screenshot 2.png'
       );
     });
