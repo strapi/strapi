@@ -1,19 +1,13 @@
 import { getLanguage, highlight, highlightAuto } from 'highlight.js';
 import Markdown from 'markdown-it';
-// @ts-expect-error - library does not export types
 import abbr from 'markdown-it-abbr';
 import container from 'markdown-it-container';
-// @ts-expect-error - library does not export types
 import deflist from 'markdown-it-deflist';
 import emoji from 'markdown-it-emoji';
 import footnote from 'markdown-it-footnote';
-// @ts-expect-error - library does not export types
 import ins from 'markdown-it-ins';
-// @ts-expect-error - library does not export types
 import mark from 'markdown-it-mark';
-// @ts-expect-error - library does not export types
 import sub from 'markdown-it-sub';
-// @ts-expect-error - library does not export types
 import sup from 'markdown-it-sup';
 
 import 'highlight.js/styles/solarized-dark.css';
