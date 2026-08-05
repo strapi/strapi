@@ -130,42 +130,52 @@ interface BlockerProps {
 
 const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) => {
   const { formatMessage } = useIntl();
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-  // eslint-disable-next-line no-undef
-  return isOpen && globalThis?.document?.body
-    ? createPortal(
-        <Overlay id="autoReloadOverlayBlocker" direction="column" alignItems="center" gap={6}>
-          <Flex direction="column" alignItems="center" gap={2}>
-            <Typography tag="h1" variant="alpha">
-              {formatMessage(title)}
-            </Typography>
-            <Typography tag="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
-              {formatMessage(description)}
-            </Typography>
-          </Flex>
-          {displayedIcon === 'reload' && (
-            <IconBox padding={6} background="primary100" borderColor="primary200">
-              <LoaderReload width="4rem" height="4rem" />
-            </IconBox>
-          )}
-          {displayedIcon === 'time' && (
-            <IconBox padding={6} background="primary100" borderColor="primary200">
-              <Clock width="4rem" height="4rem" />
-            </IconBox>
-          )}
-          <Box marginTop={2}>
-            <Link href="https://docs.strapi.io" isExternal>
-              {formatMessage({
-                id: 'global.documentation',
-                defaultMessage: 'Read the documentation',
-              })}
-            </Link>
-          </Box>
-        </Overlay>,
-        // eslint-disable-next-line no-undef
-        globalThis.document.body
-      )
-    : null;
+  React.useEffect(() => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    containerRef.current = container;
+
+    return () => {
+      document.body.removeChild(container);
+      containerRef.current = null;
+    };
+  }, []);
+
+  if (isOpen === false || containerRef.current === null) return null;
+
+  return createPortal(
+    <Overlay id="autoReloadOverlayBlocker" direction="column" alignItems="center" gap={6}>
+      <Flex direction="column" alignItems="center" gap={2}>
+        <Typography tag="h1" variant="alpha">
+          {formatMessage(title)}
+        </Typography>
+        <Typography tag="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
+          {formatMessage(description)}
+        </Typography>
+      </Flex>
+      {displayedIcon === 'reload' && (
+        <IconBox padding={6} background="primary100" borderColor="primary200">
+          <LoaderReload width="4rem" height="4rem" />
+        </IconBox>
+      )}
+      {displayedIcon === 'time' && (
+        <IconBox padding={6} background="primary100" borderColor="primary200">
+          <Clock width="4rem" height="4rem" />
+        </IconBox>
+      )}
+      <Box marginTop={2}>
+        <Link href="https://docs.strapi.io" isExternal>
+          {formatMessage({
+            id: 'global.documentation',
+            defaultMessage: 'Read the documentation',
+          })}
+        </Link>
+      </Box>
+    </Overlay>,
+    containerRef.current
+  );
 };
 
 const rotation = keyframes`

@@ -9,6 +9,7 @@ import { Outlet } from 'react-router-dom';
 
 import { GlobalNotifications } from '../../ee/admin/src/components/GlobalNotifications';
 
+import { AdminErrorBoundary } from './components/AdminErrorBoundary';
 import { Page } from './components/PageHelpers';
 import { Providers } from './components/Providers';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './reducer';
@@ -43,12 +44,14 @@ const App = ({ strapi, store }: AppProps) => {
 
   return (
     <Providers strapi={strapi} store={store}>
-      <Suspense fallback={<Page.Loading />}>
-        <GlobalNotifications />
-        {window.strapi.future.isEnabled('unstableMediaLibrary') &&
-          globalComponents.map(({ name, Component }) => <Component key={name} />)}
-        <Outlet />
-      </Suspense>
+      <AdminErrorBoundary>
+        <Suspense fallback={<Page.Loading />}>
+          <GlobalNotifications />
+          {window.strapi.future.isEnabled('unstableMediaLibrary') &&
+            globalComponents.map(({ name, Component }) => <Component key={name} />)}
+          <Outlet />
+        </Suspense>
+      </AdminErrorBoundary>
     </Providers>
   );
 };
