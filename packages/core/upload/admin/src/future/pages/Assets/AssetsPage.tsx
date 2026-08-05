@@ -23,8 +23,11 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../hooks/useAiAvailability';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
+import { useGetUploadSettingsQuery } from '../../services/settings';
+import { buildItemLocations, type ItemLocations } from '../../utils/itemLocations';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -109,6 +112,7 @@ interface AssetsViewProps {
   hasNextPage: boolean;
   fetchNextPage: () => void;
   error: unknown;
+  locations: ItemLocations;
   searchQuery: string;
   assetsSort: string;
   foldersPosition: FoldersPosition;
@@ -116,6 +120,7 @@ interface AssetsViewProps {
   onClearFilters: () => void;
   onAssetItemClick: (assetId: number) => void;
   onAddAssets: () => void;
+  canAddAssets: boolean;
   onClearSearch: () => void;
 }
 
@@ -129,6 +134,7 @@ const AssetsView = ({
   hasNextPage,
   fetchNextPage,
   error,
+  locations,
   searchQuery,
   assetsSort,
   foldersPosition,
@@ -136,6 +142,7 @@ const AssetsView = ({
   onClearFilters,
   onAssetItemClick,
   onAddAssets,
+  canAddAssets,
   onClearSearch,
 }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
@@ -195,6 +202,7 @@ const AssetsView = ({
     ) : (
       <EmptyState
         onAddAssets={onAddAssets}
+        canAddAssets={canAddAssets}
         searchQuery={searchQuery}
         onClearSearch={onClearSearch}
       />
@@ -227,7 +235,7 @@ const AssetsView = ({
           assets: the AI metadata action needs their mime types to know what
           the provider can handle. `position: fixed` keeps it visually anchored
           regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} />
+      <BulkActionsBar assets={assets} locations={locations} />
     </>
   );
 };
@@ -320,6 +328,7 @@ const HeaderWrapper = styled(Box)`
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
   const { openDetails } = useAssetDetailsParam();
+  const { canCreate, canUpdate } = useMediaLibraryPermissions();
 
   const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
   // Deleted or missing folders (404) need a fetch — handled here, not in
@@ -350,6 +359,7 @@ export const AssetsPage = () => {
 
   const {
     assets,
+    subscribers: assetPageSubscribers,
     pagination,
     isLoading: isLoadingAssets,
     isFetchingMore,
@@ -364,7 +374,6 @@ export const AssetsPage = () => {
     search: searchQuery || undefined,
     sort: listSort.assetsSort,
     filters: builtFilters.fileClauses,
-    filtersKey: listFilters.serialized,
     enabled: builtFilters.showFiles,
   });
 
@@ -382,6 +391,11 @@ export const AssetsPage = () => {
     () => (builtFilters.showFolders ? fetchedFolders : []),
     [builtFilters.showFolders, fetchedFolders]
   );
+
+  // Both move affordances (drag and the bulk bar) resolve each item's parent
+  // from the rows on screen — while searching, results are global and the
+  // folder currently open says nothing about where an item lives.
+  const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
 
   const itemCountLabel = formatMessage(ITEM_COUNT_MESSAGE, { count: itemCount });
 
@@ -425,6 +439,11 @@ export const AssetsPage = () => {
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
+  // `concurrentUploadRequests` echoes the app config. Missing settings (still
+  // loading, no permission) fall back to sequential — never faster than the
+  // server asked for.
+  const { data: settings } = useGetUploadSettingsQuery();
+  const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   // Drives the post-upload AI metadata phase shown per row in the progress dialog.
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
 
@@ -449,6 +468,7 @@ export const AssetsPage = () => {
       await uploadFiles({
         formData,
         totalFiles: files.length,
+        concurrency,
         generateAiMetadata: Boolean(isAiMetadataEnabled),
       }).unwrap();
     } catch {
@@ -469,6 +489,9 @@ export const AssetsPage = () => {
   };
 
   const handleDrop = async (files: globalThis.File[]) => {
+    // Defence in depth: the provider is `disabled` without `assets.create`
+    // (so onDrop won't fire), but guard here too in case it's ever wired live.
+    if (!canCreate) return;
     await uploadFilesToFolder(files, currentFolderId);
   };
 
@@ -496,8 +519,8 @@ export const AssetsPage = () => {
 
   return (
     <>
-      <UploadDropZoneProvider onDrop={handleDrop}>
-        <AssetSelectionProvider>
+      <UploadDropZoneProvider onDrop={handleDrop} disabled={!canCreate}>
+        <AssetSelectionProvider disabled={!canUpdate}>
           <AssetsDndProvider>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Box ref={uploadDropZoneRef}>
@@ -520,37 +543,39 @@ export const AssetsPage = () => {
                   <Layouts.Header
                     title={pageHeaderTitle}
                     primaryAction={
-                      <SimpleMenu
-                        popoverPlacement="bottom-end"
-                        variant="default"
-                        endIcon={<ChevronDown />}
-                        label={formatMessage({
-                          id: getTranslationKey('new'),
-                          defaultMessage: 'New',
-                        })}
-                      >
-                        <MenuItem
-                          onSelect={() => setIsCreateFolderDialogOpen(true)}
-                          startIcon={<FolderIcon />}
+                      canCreate && (
+                        <SimpleMenu
+                          popoverPlacement="bottom-end"
+                          variant="default"
+                          endIcon={<ChevronDown />}
+                          label={formatMessage({
+                            id: getTranslationKey('new'),
+                            defaultMessage: 'New',
+                          })}
                         >
-                          {formatMessage({
-                            id: getTranslationKey('folder.create.title'),
-                            defaultMessage: 'New folder',
-                          })}
-                        </MenuItem>
-                        <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                          {formatMessage({
-                            id: getTranslationKey('import-files'),
-                            defaultMessage: 'Import files',
-                          })}
-                        </MenuItem>
-                        <MenuItem onSelect={() => setIsUrlDialogOpen(true)} startIcon={<Link />}>
-                          {formatMessage({
-                            id: getTranslationKey('import-from-url'),
-                            defaultMessage: 'Import from URL',
-                          })}
-                        </MenuItem>
-                      </SimpleMenu>
+                          <MenuItem
+                            onSelect={() => setIsCreateFolderDialogOpen(true)}
+                            startIcon={<FolderIcon />}
+                          >
+                            {formatMessage({
+                              id: getTranslationKey('folder.create.title'),
+                              defaultMessage: 'New folder',
+                            })}
+                          </MenuItem>
+                          <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                            {formatMessage({
+                              id: getTranslationKey('import-files'),
+                              defaultMessage: 'Import files',
+                            })}
+                          </MenuItem>
+                          <MenuItem onSelect={() => setIsUrlDialogOpen(true)} startIcon={<Link />}>
+                            {formatMessage({
+                              id: getTranslationKey('import-from-url'),
+                              defaultMessage: 'Import from URL',
+                            })}
+                          </MenuItem>
+                        </SimpleMenu>
+                      )
                     }
                     subtitle={
                       <>
@@ -615,6 +640,9 @@ export const AssetsPage = () => {
                 </HeaderWrapper>
 
                 <Layouts.Content>
+                  {/* Renders nothing — keeps every loaded page's query subscribed
+                      so a rename/delete refreshes the whole list. */}
+                  {assetPageSubscribers}
                   <DropZoneWithOverlay>
                     <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
                     <AssetsView
@@ -627,6 +655,7 @@ export const AssetsPage = () => {
                       hasNextPage={hasNextPage}
                       fetchNextPage={fetchNextPage}
                       error={assetsError}
+                      locations={itemLocations}
                       searchQuery={searchQuery}
                       assetsSort={listSort.assetsSort}
                       foldersPosition={listSort.foldersPosition}
@@ -634,6 +663,7 @@ export const AssetsPage = () => {
                       onClearFilters={listFilters.clearFilters}
                       onAssetItemClick={openDetails}
                       onAddAssets={handleFileSelect}
+                      canAddAssets={canCreate}
                       onClearSearch={clearSearch}
                     />
                   </DropZoneWithOverlay>
