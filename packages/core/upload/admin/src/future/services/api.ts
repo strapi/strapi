@@ -552,7 +552,12 @@ const uploadApi = adminApi
             generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -585,7 +590,12 @@ const uploadApi = adminApi
             return { error: { name: 'UnknownError', message } };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -630,7 +640,12 @@ const uploadApi = adminApi
             generateAiMetadata: batch.generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -727,7 +742,12 @@ const uploadApi = adminApi
             };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
