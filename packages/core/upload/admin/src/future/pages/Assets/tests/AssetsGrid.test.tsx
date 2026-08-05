@@ -200,6 +200,26 @@ describe('AssetsGrid', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
+      it('cache-busts the thumbnail with updatedAt so a replaced image refetches (CMS-1237)', () => {
+        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
+        asset.updatedAt = '2024-05-06T00:00:00.000Z';
+        setup({ assets: [asset] });
+
+        const src = screen.getByRole('img').getAttribute('src') ?? '';
+        expect(src).toContain(`v=${new Date(asset.updatedAt).getTime()}`);
+      });
+
+      it('omits the cache-buster on signed URLs (an extra param breaks the signature)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+          updatedAt: '2024-05-06T00:00:00.000Z',
+        };
+        setup({ assets: [asset] });
+
+        expect(screen.getByRole('img').getAttribute('src') ?? '').not.toContain('v=');
+      });
+
       it('loads signed remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
         const asset = {
           ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),

@@ -359,6 +359,7 @@ export const AssetsPage = () => {
 
   const {
     assets,
+    subscribers: assetPageSubscribers,
     pagination,
     isLoading: isLoadingAssets,
     isFetchingMore,
@@ -373,7 +374,6 @@ export const AssetsPage = () => {
     search: searchQuery || undefined,
     sort: listSort.assetsSort,
     filters: builtFilters.fileClauses,
-    filtersKey: listFilters.serialized,
     enabled: builtFilters.showFiles,
   });
 
@@ -640,6 +640,9 @@ export const AssetsPage = () => {
                 </HeaderWrapper>
 
                 <Layouts.Content>
+                  {/* Renders nothing — keeps every loaded page's query subscribed
+                      so a rename/delete refreshes the whole list. */}
+                  {assetPageSubscribers}
                   <DropZoneWithOverlay>
                     <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
                     <AssetsView
