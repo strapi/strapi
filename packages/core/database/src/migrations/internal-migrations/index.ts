@@ -6,6 +6,7 @@ import { createdPublishedAt } from './5.0.0-04-published-at';
 import { dropSlugFieldsIndex } from './5.0.0-05-drop-slug-unique-index';
 import { addDocumentIdIndexes } from './5.0.0-06-add-document-id-indexes';
 import { createdComponentKey } from './5.0.0-07-component-key';
+import { twinComponentKeysMigration } from './5.0.0-08-component-key-twinning';
 
 /**
  * List of all the internal migrations. The array order will be the order in which they are executed.
@@ -24,4 +25,5 @@ export const internalMigrations: Migration[] = [
   dropSlugFieldsIndex,
   addDocumentIdIndexes,
   createdComponentKey,
+  twinComponentKeysMigration,
 ];

@@ -68,7 +68,7 @@ Draft and published remain **separate rows** with separate field values. They ma
 
 1. Schema sync adds `component_key` (system attribute on component models).
 2. Internal migration backfills a unique key per existing row.
-3. Twins share keys after the **next publish** (key copied draft → published). Optional follow-up: twin existing pairs by parent + field + order without re-publish.
+3. Best-effort twinning migration (`5.0.0-08-component-key-twinning`) aligns draft/published pairs by parent `document_id` + locale + field + order + type (nested components included). Twins that cannot be matched still share a key after the **next publish**.
 
 ## Implementation sketch
 
@@ -82,10 +82,10 @@ Primary touchpoints:
 
 ## Follow-ups
 
-- [ ] GraphQL / OpenAPI surfacing
+- [x] GraphQL / OpenAPI surfacing (stacked PR)
 - [x] data-transfer `createComponent` parity
 - [x] Unskip Content API component-id tests; add REST `componentKey` cases
-- [ ] Best-effort twinning migration for existing draft/published pairs
+- [x] Best-effort twinning migration for existing draft/published pairs
 - [ ] Public docs: document round-trip; retire “not recommended” once shipped
 - [ ] Consider whether REST should de-emphasize numeric component `id` in examples
 
