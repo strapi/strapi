@@ -426,8 +426,7 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
         const populatePath = path.attribute.replace(/\./g, '.populate.');
-        // @ts-expect-error - lodash doesn't resolve the Populate type correctly
-        populateQuery = set(populatePath, {}, populateQuery);
+        populateQuery = merge(populateQuery, set(populatePath, {}, {}));
       }
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },
