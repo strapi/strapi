@@ -2,6 +2,7 @@ import { act, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { useDeleteAssetMutation } from '../../../services/assets';
 import { AssetsPage } from '../AssetsPage';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -386,6 +387,74 @@ describe('AssetsPage search', () => {
       expect(await screen.findByText('page-two.png')).toBeInTheDocument();
       expect(screen.getByText('page-one-0.png')).toBeInTheDocument();
       expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
+    });
+
+    it('refetches an earlier page after a mutation invalidation (the subscribers node is rendered)', async () => {
+      // Page-level guard for the "caller must render `subscribers`" contract: if
+      // AssetsPage drops that node, page 1 stops being subscribed, so the rename
+      // below never reaches the list and this test fails.
+      let hasRenamed = false;
+
+      server.use(
+        http.get('*/upload/files', ({ request }) => {
+          const isPageTwo = new URL(request.url).searchParams.get('page') === '2';
+
+          if (isPageTwo) {
+            return HttpResponse.json({
+              results: [createAsset(100, 'page-two.png')],
+              pagination: { page: 2, pageSize: 20, pageCount: 2, total: 21 },
+            });
+          }
+
+          const firstRow = hasRenamed
+            ? createAsset(1, 'renamed-0.png')
+            : createAsset(1, 'page-one-0.png');
+          const rest = Array.from({ length: 19 }, (_, index) =>
+            createAsset(index + 2, `page-one-${index + 1}.png`)
+          );
+
+          return HttpResponse.json({
+            results: [firstRow, ...rest],
+            pagination: { page: 1, pageSize: 20, pageCount: 2, total: 21 },
+          });
+        }),
+        http.delete('*/upload/files/:id', () => {
+          // Stand in for the server-side change; page 1's next fetch is renamed.
+          hasRenamed = true;
+          return HttpResponse.json({ data: {} });
+        })
+      );
+
+      // Triggers a `{ Asset, LIST }` invalidation from outside the list, the way
+      // a real delete/rename does, without wiring the drawer or bulk bar.
+      const DeleteProbe = () => {
+        const [deleteAsset] = useDeleteAssetMutation();
+        return (
+          <button type="button" onClick={() => deleteAsset(100)}>
+            delete-probe
+          </button>
+        );
+      };
+
+      const { user } = render(
+        <>
+          <AssetsPage />
+          <DeleteProbe />
+        </>,
+        { initialEntries: ['/?folder=1'] }
+      );
+
+      expect(await screen.findByText('page-one-0.png')).toBeInTheDocument();
+
+      await scrollToLoadMore();
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'delete-probe' }));
+
+      // Page 1 was refetched through its subscriber, so the rename shows without
+      // a reload. Fails if AssetsPage stops rendering the subscribers node.
+      expect(await screen.findByText('renamed-0.png')).toBeInTheDocument();
+      expect(screen.queryByText('page-one-0.png')).not.toBeInTheDocument();
     });
 
     it('keeps the folder assets rendered while a search started inside a folder is in flight', async () => {

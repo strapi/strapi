@@ -275,11 +275,24 @@ interface AssetPreviewProps {
 }
 
 const AssetPreview = ({ asset }: AssetPreviewProps) => {
-  const { alternativeText, ext, formats, mime, url, isLocal, isUrlSigned } = asset;
+  const { alternativeText, ext, formats, mime, url, updatedAt, isLocal, isUrlSigned } = asset;
 
   if (mime?.includes(ASSET_TYPES.Image)) {
-    const mediaURL =
+    // Replace keeps the same hash/URL, so without a cache-buster the browser
+    // serves the stale thumbnail after a Replace Media. `updatedAt`
+    // changes on replace, so it re-fetches exactly once per replacement.
+    // Skipped for signed URLs — an extra query param invalidates the signature.
+    const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
+    const appendCacheBuster = (raw: string) => {
+      if (cacheKey === undefined) {
+        return raw;
+      }
+      return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
+    };
+
+    const rawMediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
+    const mediaURL = rawMediaURL ? appendCacheBuster(rawMediaURL) : rawMediaURL;
 
     if (mediaURL) {
       return (
