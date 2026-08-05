@@ -1,5 +1,5 @@
-import { Struct, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import type { Struct, UID } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
 export interface Logo {
@@ -65,6 +65,37 @@ export declare namespace UpdateProjectSettings {
     menuLogo: Partial<Logo>;
     authLogo: Partial<Logo>;
     error?: errors.ApplicationError | errors.YupValidationError;
+  }
+}
+
+/**
+ * /project-type - the edition, license and flags the admin boots with.
+ *
+ * Served by the CE controller and overridden by the EE one; both must satisfy
+ * this shape, and the admin builds `window.strapi` from it.
+ */
+export declare namespace GetProjectType {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: {
+      isEE: boolean;
+      isTrial: boolean;
+      features: { name: string }[];
+      flags: {
+        promoteEE?: boolean;
+        nps?: boolean;
+        docLinks?: boolean;
+      };
+      ai: { enabled: boolean };
+      /** EE only — the license type. */
+      type?: string;
+      /** EE only — distinguishes the Growth plan from other Enterprise plans. */
+      planPriceId?: string;
+    };
+    error?: errors.ApplicationError;
   }
 }
 

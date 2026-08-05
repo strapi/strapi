@@ -1,3 +1,6 @@
+// TODO: This exposes the `global.strapi` to Admin side of `@strapi/admin`
+/// <reference types="@strapi/types/_internal/globals-server" />
+
 import crypto from 'crypto';
 import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';

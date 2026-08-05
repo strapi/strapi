@@ -1,5 +1,4 @@
 import type Koa from 'koa';
-import type {} from 'koa-session';
 
 import type { Config } from '../types';
 
