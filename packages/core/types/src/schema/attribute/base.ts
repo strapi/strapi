@@ -1,6 +1,6 @@
 import jsonLogic from 'json-logic-js';
 
-type JsonLogicCondition = jsonLogic.RulesLogic<jsonLogic.AdditionalOperation>;
+export type JsonLogicCondition = jsonLogic.RulesLogic<jsonLogic.AdditionalOperation>;
 
 /**
  * Enumerates all possible attribute types in Strapi.
