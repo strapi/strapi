@@ -2,7 +2,7 @@ import { isNil, isObject } from 'lodash/fp';
 
 import { relations } from '@strapi/utils';
 
-import { Relation } from './types';
+import type { Relation } from './types';
 
 const { isAnyToOne } = relations;
 

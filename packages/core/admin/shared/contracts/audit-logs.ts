@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { Entity, Pagination, SanitizedAdminUser } from './shared';
+import type { Entity, Pagination, SanitizedAdminUser } from './shared';
 
 // displayName seems to be used only for audit logs
 export interface SanitizedAdminUserForAuditLogs extends SanitizedAdminUser {
@@ -75,4 +75,4 @@ namespace GetUsers {
       };
 }
 
-export { AuditLog, GetAll, Get, GetUsers };
+export type { AuditLog, GetAll, Get, GetUsers };

@@ -1,6 +1,6 @@
 // This file will manage the CLI context state.
 
-import { CLIContext } from '../types';
+import type { CLIContext } from '../types';
 
 let ctx: CLIContext;
 

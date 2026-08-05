@@ -1,4 +1,4 @@
-import { CLIContext } from '../../../types';
+import type { CLIContext } from '../../../types';
 import { loadPkg } from '../../../utils/pkg';
 import { getProjectNameFromPackageJson } from '../get-project-name-from-pkg';
 

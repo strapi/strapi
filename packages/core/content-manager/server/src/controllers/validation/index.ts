@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Schema, UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { z, errors } from '@strapi/utils';
 import { validateZodAsync, strapiID } from '../../validation/zod';
 import createModelConfigurationSchema from './model-configuration';

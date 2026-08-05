@@ -4,7 +4,7 @@ import { commands as strapiCommands } from './commands';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig, type TsConfig } from './utils/tsconfig';
-import { CLIContext } from './types';
+import type { CLIContext } from './types';
 import { version } from '../../package.json';
 
 const createCLI = async (argv: string[], command = new Command()) => {

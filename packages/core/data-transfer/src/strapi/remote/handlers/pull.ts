@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import { randomUUID, createHash } from 'crypto';
 import type { Core } from '@strapi/types';
 
-import { Handler } from './abstract';
+import type { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
 import {
   createTransferAssetStreamChunk,
@@ -11,7 +11,7 @@ import {
 import {
   createLocalStrapiSourceProvider,
   estimateAssetTotals,
-  ILocalStrapiSourceProvider,
+  type ILocalStrapiSourceProvider,
 } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, StageTotalsEstimate, TransferStage, Protocol } from '../../../types';

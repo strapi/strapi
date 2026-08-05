@@ -8,8 +8,8 @@ import type { Core, Modules } from '@strapi/types';
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
-import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import { AppFile, loadUserAppFile } from './core/admin-customisations';
+import { type PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
+import { type AppFile, loadUserAppFile } from './core/admin-customisations';
 import type { BaseContext } from './types';
 
 interface BaseOptions {

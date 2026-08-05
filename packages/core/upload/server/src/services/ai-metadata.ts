@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import { z } from 'zod';
-import { InputFile, File } from '../types';
-import { Settings } from '../controllers/validation/admin/settings';
+import type { InputFile, File } from '../types';
+import type { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { buildFormDataFromFiles } from '../utils/images';
 import { AI_METADATA_CHUNK_SIZE, AI_METADATA_SUPPORTED_IMAGE_TYPES } from '../constants';

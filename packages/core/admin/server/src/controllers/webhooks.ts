@@ -6,7 +6,7 @@ import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Modules } from '@strapi/types';
 
-import {
+import type {
   CreateWebhook,
   DeleteWebhook,
   DeleteWebhooks,

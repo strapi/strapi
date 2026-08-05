@@ -1,5 +1,5 @@
 import type * as UID from '../../../uid';
-import { Extends, MatchAllIntersect } from '../../../utils';
+import type { Extends, MatchAllIntersect } from '../../../utils';
 
 import type { GetPluginParams } from '..';
 

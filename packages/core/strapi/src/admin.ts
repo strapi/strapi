@@ -1,4 +1,4 @@
-import { RenderAdminArgs, renderAdmin } from '@strapi/admin/strapi-admin';
+import { type RenderAdminArgs, renderAdmin } from '@strapi/admin/strapi-admin';
 import contentTypeBuilder from '@strapi/content-type-builder/strapi-admin';
 import contentManager from '@strapi/content-manager/strapi-admin';
 import email from '@strapi/email/strapi-admin';

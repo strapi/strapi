@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { InputFile } from '../types';
+import type { InputFile } from '../types';
 
 /**
  * Fetches an image from a URL and returns it as a Blob

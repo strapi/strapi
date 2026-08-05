@@ -6,7 +6,7 @@ import type { Schema, Internal } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
-import { CreateContentTypeInput } from '../../controllers/validation/content-type';
+import type { CreateContentTypeInput } from '../../controllers/validation/content-type';
 import type { InternalRelationAttribute, InternalAttribute } from './types';
 
 const { ApplicationError } = errors;

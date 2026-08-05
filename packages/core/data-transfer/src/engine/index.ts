@@ -41,8 +41,8 @@ import { compareSchemas, validateProvider } from './validation';
 import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
   createDiagnosticReporter,
-  IDiagnosticReporter,
-  ErrorDiagnosticSeverity,
+  type IDiagnosticReporter,
+  type ErrorDiagnosticSeverity,
 } from '../utils/diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';

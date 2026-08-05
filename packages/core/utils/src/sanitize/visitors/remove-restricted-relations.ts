@@ -1,7 +1,7 @@
 import { isArray, isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
-import { RelationOrderingOptions } from '../../types';
+import type { RelationOrderingOptions } from '../../types';
 import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];

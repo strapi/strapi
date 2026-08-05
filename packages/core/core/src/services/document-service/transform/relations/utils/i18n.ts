@@ -1,5 +1,5 @@
 import type { UID } from '@strapi/types';
-import { LongHandDocument } from './types';
+import type { LongHandDocument } from './types';
 
 export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);

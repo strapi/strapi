@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { Release } from '../../shared/contracts/releases';
+import type { Release } from '../../shared/contracts/releases';
 import { getService } from './utils';
 
 export const destroy = async ({ strapi }: { strapi: Core.Strapi }) => {

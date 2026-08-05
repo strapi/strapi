@@ -4,8 +4,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
-import execa, { CommonOptions, ExecaReturnValue } from 'execa';
-import readPkgUp, { PackageJson } from 'read-pkg-up';
+import execa, { type CommonOptions, type ExecaReturnValue } from 'execa';
+import readPkgUp, { type PackageJson } from 'read-pkg-up';
 
 import type { Logger } from '../../cli/utils/logger';
 import { getPackageManager } from './managers';

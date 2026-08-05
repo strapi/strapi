@@ -1,5 +1,5 @@
 import EventSource from 'eventsource';
-import { CLIContext, type CloudCliConfig } from '../types';
+import type { CLIContext, CloudCliConfig } from '../types';
 
 const buildLogsServiceFactory = ({ logger }: CLIContext) => {
   return async (url: string, token: string, cliConfig: CloudCliConfig) => {

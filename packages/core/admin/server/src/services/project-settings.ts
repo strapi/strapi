@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { pick } from 'lodash';
-import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import type { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 

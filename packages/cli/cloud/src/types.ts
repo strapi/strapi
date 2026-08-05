@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
 import type { DistinctQuestion } from 'inquirer';
-import { Logger } from './services/logger';
+import type { Logger } from './services/logger';
 
 export type ProjectAnswers = {
   name: string;

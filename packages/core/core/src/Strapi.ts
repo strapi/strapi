@@ -2,7 +2,7 @@ import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
-import { Logger, createLogger } from '@strapi/logger';
+import { type Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
@@ -30,7 +30,7 @@ import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
-import { FeaturesService, createFeaturesService } from './services/features';
+import { type FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
 

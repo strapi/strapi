@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 import { getService } from '../utils';
-import { HomepageLayout, HomepageLayoutWrite } from './validation/schema';
+import type { HomepageLayout, HomepageLayoutWrite } from './validation/schema';
 
 export default {
   async getKeyStatistics(): Promise<{

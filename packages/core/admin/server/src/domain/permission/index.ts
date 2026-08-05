@@ -15,8 +15,8 @@ import {
   curry,
   merge,
 } from 'lodash/fp';
-import { Permission } from '../../../../shared/contracts/shared';
-import { SanitizedPermission } from '../../../../shared/contracts/roles';
+import type { Permission } from '../../../../shared/contracts/shared';
+import type { SanitizedPermission } from '../../../../shared/contracts/roles';
 
 export type CreatePermissionPayload = Utils.Object.PartialBy<
   Permission,

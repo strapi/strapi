@@ -1,4 +1,4 @@
-import { Codemod } from '../codemod';
+import type { Codemod } from '../codemod';
 
 import type { Logger } from '../logger';
 import type { Version } from '../version';

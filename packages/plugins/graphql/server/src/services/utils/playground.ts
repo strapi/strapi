@@ -1,4 +1,4 @@
-import { Context } from '../types';
+import type { Context } from '../types';
 
 // TODO: deprecate and remove this because it is only used to determine if we need helmet security exceptions
 // stores the state of the Apollo landingPage (playground)

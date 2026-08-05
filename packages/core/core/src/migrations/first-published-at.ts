@@ -1,6 +1,6 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import _ from 'lodash';
-import { Input } from './draft-publish';
+import type { Input } from './draft-publish';
 
 interface ContentTypeData {
   id: number;

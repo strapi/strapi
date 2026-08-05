@@ -9,7 +9,7 @@ import {
 } from '../validation/user';
 import { getService } from '../utils';
 import { normalizeEmail } from '../utils/normalize-email';
-import {
+import type {
   Create,
   DeleteMany,
   DeleteOne,
@@ -17,7 +17,7 @@ import {
   FindOne,
   Update,
 } from '../../../shared/contracts/user';
-import { AdminUser } from '../../../shared/contracts/shared';
+import type { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 

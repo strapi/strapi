@@ -5,7 +5,7 @@ import { fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
 import type { Meta } from '../../../metadata';
-import { ID, RelationalAttribute, Relation } from '../../../types';
+import type { ID, RelationalAttribute, Relation } from '../../../types';
 
 // We must select the join column id, however whatever it is named will overwrite an attribute of the same name
 // Therefore, we will prefix with something unlikely to conflict with a user attribute

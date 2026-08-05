@@ -10,7 +10,7 @@
  */
 import _, { isInteger, partition, snakeCase, sumBy } from 'lodash/fp';
 import { createHash } from './hash';
-import {
+import type {
   IdentifiersOptions,
   NameInput,
   NameOptions,

@@ -4,7 +4,7 @@ import {
   validateKind,
   validateUpdateContentTypeInput,
   validateContentTypeInput,
-  CreateContentTypeInput,
+  type CreateContentTypeInput,
 } from '../content-type';
 
 describe('Content type validator', () => {

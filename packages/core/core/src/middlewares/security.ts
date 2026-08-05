@@ -1,5 +1,5 @@
 import { defaultsDeep, mergeWith } from 'lodash/fp';
-import helmet, { KoaHelmet } from 'koa-helmet';
+import helmet, { type KoaHelmet } from 'koa-helmet';
 import { CSP_DEFAULTS } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';

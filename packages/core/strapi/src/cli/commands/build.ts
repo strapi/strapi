@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import type { StrapiCommand } from '../types';
 
-import { build as nodeBuild, BuildOptions } from '../../node/build';
+import { build as nodeBuild, type BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type BuildCLIOptions = BuildOptions;

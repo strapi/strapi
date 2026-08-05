@@ -1,4 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
+import type { CurriedFunction1 } from 'lodash';
 import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
 import type { z } from 'zod/v4';
 

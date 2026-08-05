@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import cluster from 'node:cluster';
 import type { StrapiCommand } from '../types';
-import { develop as nodeDevelop, DevelopOptions } from '../../node/develop';
+import { develop as nodeDevelop, type DevelopOptions } from '../../node/develop';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type DevelopCLIOptions = DevelopOptions;

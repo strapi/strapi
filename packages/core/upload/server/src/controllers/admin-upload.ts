@@ -10,7 +10,7 @@ import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
-import { Config, FileInfo } from '../types';
+import type { Config, FileInfo } from '../types';
 import { prepareUploadRequest, type FileUploadError } from '../utils/mime-validation';
 import type { UploadFileInfo } from '../../../shared/contracts/files';
 

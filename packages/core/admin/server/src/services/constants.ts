@@ -1,4 +1,4 @@
-import { ContentApiApiToken } from '../../../shared/contracts/api-token';
+import type { ContentApiApiToken } from '../../../shared/contracts/api-token';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 

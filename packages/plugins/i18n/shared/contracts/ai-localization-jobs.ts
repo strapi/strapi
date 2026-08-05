@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { Entity } from './shared';
+import type { Entity } from './shared';
 
 export interface AILocalizationJobs extends Entity {
   contentType: string;

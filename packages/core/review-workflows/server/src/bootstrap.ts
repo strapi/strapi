@@ -1,4 +1,4 @@
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getAdminService, getService } from './utils';
 import actions from './config/actions';
 

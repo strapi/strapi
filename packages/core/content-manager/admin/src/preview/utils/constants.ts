@@ -1,5 +1,5 @@
-import { NotificationConfig } from '@strapi/admin/strapi-admin';
-import { MessageDescriptor } from 'react-intl';
+import type { NotificationConfig } from '@strapi/admin/strapi-admin';
+import type { MessageDescriptor } from 'react-intl';
 
 /**
  * These events are not part of the public API, changing them is not a breaking change.

@@ -1,4 +1,4 @@
-import { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import * as z from 'zod/v4';
 import type { DocumentContext } from '../types';
 import { stripJsonSchemaId, toComponentsPath } from '../utils/zod';

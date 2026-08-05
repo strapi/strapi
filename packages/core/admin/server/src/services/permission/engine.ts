@@ -3,7 +3,7 @@ import { engine } from '@strapi/permissions';
 import type { Ability } from '@casl/ability';
 import permissionDomain from '../../domain/permission';
 import { getService } from '../../utils';
-import { Action } from '../../domain/action';
+import type { Action } from '../../domain/action';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 
 export default (params: { providers: engine.EngineParams['providers'] }) => {

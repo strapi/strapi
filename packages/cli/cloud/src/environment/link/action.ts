@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import type { Answers } from 'inquirer';
-import { EnvironmentDetails, ProjectInput } from '../../services/cli-api';
+import type { EnvironmentDetails, ProjectInput } from '../../services/cli-api';
 import type { CLIContext, CloudApiService } from '../../types';
 import { cloudApiFactory, tokenServiceFactory, local } from '../../services';
 import { promptLogin } from '../../login/action';

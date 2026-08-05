@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
-import { BuildOptions } from './build';
+import type { BuildOptions } from './build';
 
 interface BaseContext {
   /**

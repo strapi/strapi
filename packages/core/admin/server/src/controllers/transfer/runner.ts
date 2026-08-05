@@ -1,4 +1,4 @@
-import { Context } from 'koa';
+import type { Context } from 'koa';
 
 import { strapi as dataTransferStrapi } from '@strapi/data-transfer';
 import { errors } from '@strapi/utils';
