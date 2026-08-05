@@ -38,6 +38,9 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
       await expect(name).toHaveValue('Mr. Fred Passo');
       await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
 
+      // Wait for publish + parent connect to finish (header flips to Edit) before closing.
+      await expect(page.getByRole('banner').getByText('Edit a relation')).toBeVisible();
+
       // Step 5. Close the relation modal to see the updated relation on the root document
       await page.getByRole('button', { name: 'Close modal' }).click();
       await expect(page.getByRole('button', { name: 'Mr. Fred Passo' })).toBeVisible();
@@ -86,6 +89,8 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
       })
     );
     expect(parentUpdateData.undefined).toBeUndefined();
+
+    await expect(page.getByRole('banner').getByText('Edit a relation')).toBeVisible();
 
     await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
     await expect(page.getByRole('button', { name: authorName })).toBeVisible();

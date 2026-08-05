@@ -1,8 +1,8 @@
-import { useMemo, useState, type MouseEvent } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Dialog, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
-import { ArrowRight, Cross, Sparkle, Trash, WarningCircle } from '@strapi/icons';
+import { Box, Button, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
+import { ArrowRight, Cross, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -11,14 +11,16 @@ import {
   isAIMetadataSupportedMime,
 } from '../../../../../../shared/constants';
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
-import {
-  useBulkDeleteItemsMutation,
-  useGenerateAiMetadataMutation,
-} from '../../../services/assets';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useGenerateAiMetadataMutation } from '../../../services/assets';
+import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
+import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
+import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
@@ -64,20 +66,44 @@ interface BulkActionsBarProps {
    * every selected asset id is guaranteed to appear here.
    */
   assets?: File[];
+  /**
+   * Real location of every loaded row, so the move dialog validates each
+   * selected item against its own parent. Defaults to a lookup that misses
+   * everything, which falls back to the folder currently open.
+   */
+  locations?: ItemLocations;
 }
 
-export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
+export const BulkActionsBar = ({
+  assets = [],
+  locations = emptyItemLocations,
+}: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // Every bulk action (move, delete, metadata) is an `assets.update` mutation
+  // server-side — one flag gates the whole cluster.
+  const { canUpdate } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
-  const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
+  const { currentFolderId } = useFolderNavigation();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
+  // The delete request lives in DeleteItemsDialog; the bar mirrors its pending
+  // state so the rest of the controls stay disabled for the duration.
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
   const isBusy = isDeleting || isGeneratingMetadata;
+
+  // Stable identity: the move dialog memoizes its destination walk on it. Each
+  // item's real location comes from `locations`, so a selection made under a
+  // global search validates against each item's own parent rather than the
+  // folder currently open.
+  const moveItems = useMemo(
+    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, locations, currentFolderId),
+    [selectedIds, selectedFolderIds, locations, currentFolderId]
+  );
 
   /**
    * The server processes the whole selection inside a single request and
@@ -201,51 +227,11 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
     clear();
   };
 
-  const handleConfirmDelete = async (e: MouseEvent) => {
-    // Radix AlertDialog.Action closes the dialog on click by default; prevent
-    // that so the dialog stays open showing the loader while the request runs
-    // (a bulk delete can take a while depending on the number of assets).
-    e.preventDefault();
-
-    // Guard re-entry while pending.
-    if (isDeleting) {
-      return;
-    }
-
-    const res = await bulkDeleteItems({
-      fileIds: Array.from(selectedIds),
-      folderIds: Array.from(selectedFolderIds),
-    });
-
-    if ('error' in res) {
-      // Keep the dialog open and the selection intact so the user can retry
-      // (Confirm again) or Cancel; only surface the error toast.
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('list.bulk-actions.delete.error'),
-          defaultMessage: 'An error occurred while deleting the items.',
-        }),
-      });
-      return;
-    }
-
-    setIsDeleteDialogOpen(false);
-    toggleNotification({
-      type: 'success',
-      message: formatMessage(
-        {
-          id: getTranslationKey('list.bulk-actions.delete.success'),
-          defaultMessage:
-            '{count, plural, =1 {# item has been deleted} other {# items have been deleted}}',
-        },
-        { count }
-      ),
-    });
-    clear();
-  };
-
-  if (count === 0) {
+  // Every bulk action is behind `assets.update`; with nothing selected, or
+  // without the permission, the bar has nothing to offer — drop it entirely
+  // rather than show a count + "Clear selection" over no actions (mirrors the
+  // drawer footer, which hides when no permitted action survives).
+  if (count === 0 || !canUpdate) {
     return null;
   }
 
@@ -268,6 +254,8 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
         )}
       </Typography>
 
+      {/* Past the early return the user always has `assets.update`, so the
+          individual actions no longer re-check it. */}
       <ActionCluster>
         {isAiMetadataEnabled && (
           <Tooltip label={metadataDisabledReason}>
@@ -303,85 +291,34 @@ export const BulkActionsBar = ({ assets = [] }: BulkActionsBarProps) => {
         >
           <ArrowRight />
         </IconButton>
-        <BulkMoveDialog open={isMoveDialogOpen} onClose={() => setIsMoveDialogOpen(false)} />
+        <BulkMoveDialog
+          open={isMoveDialogOpen}
+          onClose={() => setIsMoveDialogOpen(false)}
+          items={moveItems}
+          onSuccess={clear}
+        />
 
-        <Dialog.Root
-          open={isDeleteDialogOpen}
-          onOpenChange={(open: boolean) => {
-            // The dialog must stay open while the request runs — a bulk delete
-            // can't be aborted halfway, so the loader is the source of truth.
-            if (!isDeleting) {
-              setIsDeleteDialogOpen(open);
-            }
-          }}
+        <IconButton
+          variant="danger-light"
+          disabled={isBusy}
+          label={formatMessage({
+            id: getTranslationKey('list.bulk-actions.delete'),
+            defaultMessage: 'Delete',
+          })}
+          onClick={() => setIsDeleteDialogOpen(true)}
         >
-          <Dialog.Trigger>
-            <IconButton
-              variant="danger-light"
-              disabled={isBusy}
-              label={formatMessage({
-                id: getTranslationKey('list.bulk-actions.delete'),
-                defaultMessage: 'Delete',
-              })}
-            >
-              <Trash />
-            </IconButton>
-          </Dialog.Trigger>
-          <Dialog.Content>
-            <Dialog.Header>
-              {formatMessage(
-                {
-                  id: getTranslationKey('list.bulk-actions.delete.confirm.title'),
-                  defaultMessage: 'Delete {count, plural, =1 {# item} other {# items}}?',
-                },
-                { count }
-              )}
-            </Dialog.Header>
-            <Dialog.Body
-              icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
-              textAlign="center"
-            >
-              <Typography>
-                {formatMessage({
-                  id: getTranslationKey(
-                    'list.bulk-actions.delete.confirm.description.are-you-sure'
-                  ),
-                  defaultMessage:
-                    'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
-                })}
-              </Typography>
-              <Typography>
-                {formatMessage({
-                  id: getTranslationKey(
-                    'list.bulk-actions.delete.confirm.description.cant-be-undone'
-                  ),
-                  defaultMessage:
-                    'This action can’t be undone. Deleting a folder also removes everything inside it, and any linked content will break – media asset containers will appear empty.',
-                })}
-              </Typography>
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Dialog.Cancel>
-                <Button variant="tertiary" disabled={isDeleting} fullWidth>
-                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-                </Button>
-              </Dialog.Cancel>
-              <Dialog.Action>
-                <Button
-                  variant="danger-light"
-                  loading={isDeleting}
-                  onClick={handleConfirmDelete}
-                  fullWidth
-                >
-                  {formatMessage({
-                    id: 'app.components.Button.confirm',
-                    defaultMessage: 'Confirm',
-                  })}
-                </Button>
-              </Dialog.Action>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Root>
+          <Trash />
+        </IconButton>
+        <DeleteItemsDialog
+          open={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          target={{
+            fileIds: Array.from(selectedIds),
+            folderIds: Array.from(selectedFolderIds),
+          }}
+          onSuccess={clear}
+          onPendingChange={setIsDeleting}
+        />
       </ActionCluster>
 
       <VerticalDivider aria-hidden />

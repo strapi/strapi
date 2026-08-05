@@ -1,4 +1,5 @@
 import { buildDragSetFromSelection } from '../../../../../utils/buildDragSetFromSelection';
+import { type ItemLocations } from '../../../../../utils/itemLocations';
 import { computeValidDropTargets } from '../computeValidDropTargets';
 
 import type { FolderNode } from '../../../../../../../../shared/contracts/folders';
@@ -60,9 +61,24 @@ describe('computeValidDropTargets', () => {
   // buildDragSetFromSelection — it must exclude the current ("already-there")
   // folder and any moved folder's subtree, exactly like the drag highlight.
   describe('dialog-facing derivation (buildDragSetFromSelection)', () => {
-    it('excludes the current folder where the selection already lives', () => {
-      // A file selected inside Marketing (id 1) can't be "moved" back into it.
-      const items = buildDragSetFromSelection(new Set([10]), new Set(), 1);
+    /** Minimal stand-in for a loaded list: only the ids given are known. */
+    const locationsOf = (
+      files: Record<number, number | null>,
+      folders: Record<number, number | null>
+    ): ItemLocations => ({
+      fileFolderId: (id) => (id in files ? files[id] : undefined),
+      folderParentId: (id) => (id in folders ? folders[id] : undefined),
+    });
+
+    it('excludes the folder the selection already lives in', () => {
+      // A file whose loaded row puts it in Marketing (id 1) can't be "moved"
+      // back into it — even when the search that surfaced it ran from the root.
+      const items = buildDragSetFromSelection(
+        new Set([10]),
+        new Set(),
+        locationsOf({ 10: 1 }, {}),
+        null
+      );
 
       const valid = computeValidDropTargets(items, folderStructure);
 
@@ -73,8 +89,13 @@ describe('computeValidDropTargets', () => {
     });
 
     it('excludes a moved folder and its descendants', () => {
-      // Marketing (id 1) selected at root; it owns descendant 2.
-      const items = buildDragSetFromSelection(new Set(), new Set([1]), null);
+      // Marketing (id 1) lives at root; it owns descendant 2.
+      const items = buildDragSetFromSelection(
+        new Set(),
+        new Set([1]),
+        locationsOf({}, { 1: null }),
+        null
+      );
 
       const valid = computeValidDropTargets(items, folderStructure);
 
