@@ -1,8 +1,13 @@
+import { describe, test, expect } from 'vitest';
+import * as ts from 'typescript';
 import { generateSharedExtensionDefinition, emitDefinitions } from '../../generators/utils';
 
-const makeDefinition = (uid, name) => ({
+const makeDefinition = (
+  uid: string,
+  name: string
+): { uid: string; definition: ts.InterfaceDeclaration } => ({
   uid,
-  definition: { name: { escapedText: name } },
+  definition: { name: { escapedText: name } } as ts.InterfaceDeclaration,
 });
 
 describe('generateSharedExtensionDefinition', () => {
