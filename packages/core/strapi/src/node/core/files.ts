@@ -9,7 +9,7 @@ const pathExists = async (path: string) => {
   try {
     await access(path);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

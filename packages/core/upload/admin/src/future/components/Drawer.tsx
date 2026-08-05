@@ -82,7 +82,9 @@ const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   z-index: 200;
   overflow: hidden;
   width: ${({ width }) => width ?? '400px'};
-  max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};
+  /* dvh, not vh: anchored to the bottom, a 100vh cap on mobile (visual
+     viewport < 100vh under the URL bar) would push the drawer top off-screen. */
+  max-height: ${({ maxHeight }) => maxHeight ?? '100dvh'};
 
   &:focus {
     outline: none;

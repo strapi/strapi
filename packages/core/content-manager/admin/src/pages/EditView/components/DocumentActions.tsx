@@ -24,10 +24,6 @@ import {
   IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
-import mapValues from 'lodash/fp/mapValues';
-import get from 'lodash/get';
-import merge from 'lodash/merge';
-import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -45,6 +41,7 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { getIn, isObject, setIn } from '../../../utils/objects';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
 import {
@@ -149,47 +146,61 @@ interface DocumentActionsProps {
 }
 
 const connectRelationToParent = (
-  parentDataToUpdate: AnyData | undefined,
+  parentDataToUpdate: AnyData,
   fieldToConnect: string,
   data: Create.Response['data'] | Publish.Response['data'],
   fieldToConnectUID?: string
 ) => {
+  const relationToConnect = {
+    id: data.documentId,
+    documentId: data.documentId,
+    locale: data.locale,
+  };
   /*
    * Check if the fieldToConnect is already present in the parentDataToUpdate.
    * This happens in particular when in the parentDocument you have created
    * a new component without saving.
    */
-  const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
-  const fieldToConnectPath = isFieldPresent
-    ? fieldToConnect
-    : // Compute the path to the parent object
-      fieldToConnect.split('.').slice(0, -1).join('.');
-  const fieldToConnectValue = isFieldPresent
+  const fieldValue = getIn<unknown>(parentDataToUpdate, fieldToConnect);
+  const relationFieldValue = isObject(fieldValue) ? fieldValue : undefined;
+  const isFieldPresent = relationFieldValue !== undefined;
+  const fieldPath = fieldToConnect.split('.');
+  const fieldName = fieldPath.at(-1);
+
+  if (!fieldName) {
+    return parentDataToUpdate;
+  }
+
+  const parentPath = fieldPath.slice(0, -1).join('.');
+  const existingConnect: Array<typeof relationToConnect> = Array.isArray(
+    relationFieldValue?.connect
+  )
+    ? (relationFieldValue.connect as Array<typeof relationToConnect>)
+    : [];
+  // A relation is identified by documentId and locale; numeric ids are not stable across locales.
+  const connect = existingConnect.some(
+    (relation) =>
+      relation.documentId === relationToConnect.documentId &&
+      relation.locale === relationToConnect.locale
+  )
+    ? existingConnect
+    : [...existingConnect, relationToConnect];
+  const relationValue = isFieldPresent
     ? {
-        connect: [
-          {
-            id: data.documentId,
-            documentId: data.documentId,
-            locale: data.locale,
-          },
-        ],
+        ...relationFieldValue,
+        connect,
       }
     : {
-        [fieldToConnect.split('.').pop()!]: {
-          connect: [
-            {
-              id: data.documentId,
-              documentId: data.documentId,
-              locale: data.locale,
-            },
-          ],
-          disconnect: [],
-        },
-        // In case the object was not present you need to pass the componentUID of the parent document
-        __component: fieldToConnectUID,
+        connect,
+        disconnect: [],
       };
-  const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
-  return merge(parentDataToUpdate, objectToConnect);
+  const dataWithRelation = setIn(parentDataToUpdate, fieldToConnect, relationValue);
+
+  if (!isFieldPresent && fieldToConnectUID && parentPath) {
+    return setIn(dataWithRelation, `${parentPath}.__component`, fieldToConnectUID);
+  }
+
+  return dataWithRelation;
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
@@ -402,7 +413,7 @@ const DocumentActionsMenu = ({
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
+  const isDisabled = actions.every((action) => action.disabled);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
@@ -638,13 +649,35 @@ const transformData = (data: unknown): unknown => {
       return data.apiData;
     }
 
-    return mapValues((value) => transformData(value))(data as Record<string, unknown>);
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, transformData(value)])
+    );
   }
 
   return data;
 };
 
 const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
+
+const prepareParentDataForRelationUpdate = (
+  parentFormValues: AnyData | undefined,
+  fallbackParentFormValues: AnyData | undefined,
+  options: Parameters<typeof handleInvisibleAttributes>[1]
+) => {
+  const parentDataToUpdate = parentFormValues ?? fallbackParentFormValues;
+
+  if (!parentDataToUpdate) {
+    return parentDataToUpdate;
+  }
+
+  const { data } = handleInvisibleAttributes(transformDocumentData(parentDataToUpdate), {
+    ...options,
+    // The live snapshot can omit saved invisible fields, so retain the parent's saved initial values.
+    initialValues: fallbackParentFormValues,
+  });
+
+  return data;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
@@ -719,6 +752,11 @@ const PublishAction: DocumentActionComponent = ({
   const fieldToConnectUID = useRelationModal(
     'PublishAction',
     (state) => state.state.fieldToConnectUID,
+    false
+  );
+  const getParentFormValues = useRelationModal(
+    'PublishAction',
+    (state) => state.state.getParentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -927,45 +965,55 @@ const PublishAction: DocumentActionComponent = ({
             (parentDocumentMetaToUpdate.documentId ||
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
           ) {
-            const parentDataToUpdate =
+            const fallbackParentFormValues =
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                 ? getInitialFormValues()
                 : parentDocumentData.getInitialFormValues();
+            const parentDataToUpdate = prepareParentDataForRelationUpdate(
+              getParentFormValues?.(),
+              fallbackParentFormValues,
+              {
+                schema: parentDocumentData.schema,
+                components: parentDocumentData.components,
+              }
+            );
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            const dataToUpdate = connectRelationToParent(
-              parentDataToUpdate,
-              fieldToConnect,
-              res.data,
-              fieldToConnectUID
-            );
+            if (parentDataToUpdate) {
+              const dataToUpdate = connectRelationToParent(
+                parentDataToUpdate,
+                fieldToConnect,
+                res.data,
+                fieldToConnectUID
+              );
 
-            try {
-              const updateRes = await updateDocumentMutation({
-                collectionType: metaDocumentToUpdate.collectionType,
-                model: metaDocumentToUpdate.model,
-                documentId:
-                  metaDocumentToUpdate.collectionType !== SINGLE_TYPES
-                    ? metaDocumentToUpdate.documentId
-                    : undefined,
-                params: metaDocumentToUpdate.params,
-                data: dataToUpdate,
-              });
+              try {
+                const updateRes = await updateDocumentMutation({
+                  collectionType: metaDocumentToUpdate.collectionType,
+                  model: metaDocumentToUpdate.model,
+                  documentId:
+                    metaDocumentToUpdate.collectionType !== SINGLE_TYPES
+                      ? metaDocumentToUpdate.documentId
+                      : undefined,
+                  params: metaDocumentToUpdate.params,
+                  data: dataToUpdate,
+                });
 
-              if ('error' in updateRes) {
-                toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                return;
+                if ('error' in updateRes) {
+                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
+                  return;
+                }
+              } catch (err) {
+                toggleNotification({
+                  type: 'danger',
+                  message: formatMessage({
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  }),
+                });
+
+                throw err;
               }
-            } catch (err) {
-              toggleNotification({
-                type: 'danger',
-                message: formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                }),
-              });
-
-              throw err;
             }
           }
 
@@ -1219,6 +1267,11 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnectUID,
     false
   );
+  const getParentFormValues = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.getParentFormValues,
+    false
+  );
   const documentHistory = useRelationModal(
     'UpdateAction',
     (state) => state.state.documentHistory,
@@ -1371,45 +1424,58 @@ const UpdateAction: DocumentActionComponent = ({
               (parentDocumentMetaToUpdate.documentId ||
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
             ) {
-              const parentDataToUpdate =
+              const fallbackParentFormValues =
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
-
-              const dataToUpdate = connectRelationToParent(
-                parentDataToUpdate,
-                fieldToConnect,
-                res.data,
-                fieldToConnectUID
+              const parentDataToUpdate = prepareParentDataForRelationUpdate(
+                getParentFormValues?.(),
+                fallbackParentFormValues,
+                {
+                  schema: parentDocumentData.schema,
+                  components: parentDocumentData.components,
+                }
               );
 
-              try {
-                const updateRes = await updateDocumentMutation({
-                  collectionType: parentDocumentMetaToUpdate.collectionType,
-                  model: parentDocumentMetaToUpdate.model,
-                  documentId:
-                    parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
-                      ? parentDocumentMetaToUpdate.documentId
-                      : undefined,
-                  params: parentDocumentMetaToUpdate.params,
-                  data: {
-                    ...dataToUpdate,
-                  },
-                });
-                if ('error' in updateRes) {
-                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                  return;
-                }
-              } catch (err) {
-                toggleNotification({
-                  type: 'danger',
-                  message: formatMessage({
-                    id: 'notification.error',
-                    defaultMessage: 'An error occurred',
-                  }),
-                });
+              if (parentDataToUpdate) {
+                const dataToUpdate = connectRelationToParent(
+                  parentDataToUpdate,
+                  fieldToConnect,
+                  res.data,
+                  fieldToConnectUID
+                );
 
-                throw err;
+                try {
+                  const updateRes = await updateDocumentMutation({
+                    collectionType: parentDocumentMetaToUpdate.collectionType,
+                    model: parentDocumentMetaToUpdate.model,
+                    documentId:
+                      parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
+                        ? parentDocumentMetaToUpdate.documentId
+                        : undefined,
+                    params: parentDocumentMetaToUpdate.params,
+                    data: {
+                      ...dataToUpdate,
+                    },
+                  });
+                  if ('error' in updateRes) {
+                    toggleNotification({
+                      type: 'danger',
+                      message: formatAPIError(updateRes.error),
+                    });
+                    return;
+                  }
+                } catch (err) {
+                  toggleNotification({
+                    type: 'danger',
+                    message: formatMessage({
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    }),
+                  });
+
+                  throw err;
+                }
               }
             }
 
@@ -1707,6 +1773,8 @@ export {
   DocumentActions,
   DocumentActionsMenu,
   DocumentActionButton,
+  PublishAction,
+  UpdateAction,
   DEFAULT_ACTIONS,
   openPublishConfirmDialog,
 };

@@ -4,7 +4,7 @@ async function isInGitRepository(rootDir: string) {
   try {
     await execa('git', ['rev-parse', '--is-inside-work-tree'], { stdio: 'ignore', cwd: rootDir });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -13,7 +13,7 @@ async function isInMercurialRepository(rootDir: string) {
   try {
     await execa('hg', ['-cwd', '.', 'root'], { stdio: 'ignore', cwd: rootDir });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }

@@ -57,7 +57,7 @@ export default class MysqlDialect extends Dialect {
       await this.db.connection
         .raw(`set session sql_require_primary_key = 0;`)
         .connection(nativeConnection);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
 
@@ -76,7 +76,7 @@ export default class MysqlDialect extends Dialect {
     try {
       await this.db.connection.raw(`set foreign_key_checks = 0;`);
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
   }
