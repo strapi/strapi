@@ -10,6 +10,7 @@ const {
   getScalarAttributes,
   getRelationalAttributes,
 } = contentTypeUtils;
+const { COMPONENT_KEY_ATTRIBUTE } = contentTypeUtils.constants;
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
@@ -64,9 +65,16 @@ const getNonLocalizedAttributes = (model: any) => {
   );
 };
 
-const removeId = (value: any) => {
+const removeIdentifiers = (value: any) => {
   if (typeof value === 'object' && has('id', value)) {
     delete value.id;
+  }
+
+  // componentKey identifies a single component row on a single entry. Copies made for
+  // another locale must get their own key, otherwise the document service resolves the
+  // copied key against the target entry's components and fails to find a match.
+  if (typeof value === 'object' && has(COMPONENT_KEY_ATTRIBUTE, value)) {
+    delete value[COMPONENT_KEY_ATTRIBUTE];
   }
 };
 
@@ -77,7 +85,7 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
     return entry as unknown as Record<string, any>;
   }
 
-  removeId(entry);
+  removeIdentifiers(entry);
 
   _.forEach(model.attributes, (attr, attrName) => {
     const value = entry[attrName];

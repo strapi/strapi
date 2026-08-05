@@ -9367,6 +9367,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
+    "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/database": "npm:5.51.1"
     "@strapi/logger": "npm:5.51.1"
     "@strapi/types": "npm:5.51.1"

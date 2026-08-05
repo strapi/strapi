@@ -262,7 +262,10 @@ const expectedModels = [
     uid: 'api::empty.empty',
     singularName: 'empty',
     tableName: 'empty',
-    attributes: { id: { type: 'increments' } },
+    attributes: {
+      id: { type: 'increments' },
+      componentKey: { type: 'string' },
+    },
     lifecycles: {},
   },
 ];
