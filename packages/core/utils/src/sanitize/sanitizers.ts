@@ -44,10 +44,12 @@ const defaultSanitizeOutput = async (ctx: Context, entity: Data) => {
     throw new Error('Missing schema in defaultSanitizeOutput');
   }
 
+  // Named parameters rather than a rest-spread: this runs once per key, per node, per
+  // entity, and `(...args)` allocated a fresh array on every call.
   return traverseEntity(
-    (...args) => {
-      removePassword(...args);
-      removePrivate(...args);
+    (visitorOptions, visitorUtils) => {
+      removePassword(visitorOptions, visitorUtils);
+      removePrivate(visitorOptions, visitorUtils);
     },
     ctx,
     entity
