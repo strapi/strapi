@@ -5,8 +5,14 @@ interface UseInfiniteScrollSentinelArgs {
   hasNextPage: boolean;
   /** Whether a subsequent page is already in flight. */
   isFetchingMore: boolean;
-  /** Called to request the next page. Must be stable across renders. */
+  /** Called to request the next page. Held in a ref, so it need not be stable. */
   onLoadMore: () => void;
+  /**
+   * Passed to the `IntersectionObserver`. Read once, when the sentinel node
+   * attaches — changing it afterwards does NOT rebuild the observer, so a
+   * later `threshold`/`rootMargin` is silently ignored. Pass a stable, ideally
+   * module-level, object.
+   */
   options?: IntersectionObserverInit;
 }
 
@@ -14,7 +20,7 @@ interface UseInfiniteScrollSentinelArgs {
  * Infinite-scroll trigger for the media library list.
  *
  * Returns a callback ref to place on a sentinel element rendered after the last
- * row. Two deliberate choices fix the "page 2 never loads" bug (CMS-1562):
+ * row. Two deliberate choices fix the "page 2 never loads" bug:
  *
  * 1. **Fetching is driven by state, not by the observer's events.** An
  *    `IntersectionObserver` only fires on a *transition*. Once the sentinel is
@@ -39,10 +45,14 @@ export const useInfiniteScrollSentinel = ({
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Read the latest options at attach time without making the ref callback
-  // depend on them (the caller passes a stable module-level object anyway).
+  // Both read through refs so the callback ref and the load effect stay stable:
+  // `options` is read once at attach time (see its JSDoc), and `onLoadMore` need
+  // not be stable — an inline arrow from the caller can't turn the effect into a
+  // fetch-per-render loop.
   const optionsRef = useRef(options);
   optionsRef.current = options;
+  const onLoadMoreRef = useRef(onLoadMore);
+  onLoadMoreRef.current = onLoadMore;
 
   const sentinelRef = useCallback((node: HTMLElement | null) => {
     observerRef.current?.disconnect();
@@ -64,9 +74,9 @@ export const useInfiniteScrollSentinel = ({
 
   useEffect(() => {
     if (isVisible && hasNextPage && !isFetchingMore) {
-      onLoadMore();
+      onLoadMoreRef.current();
     }
-  }, [isVisible, hasNextPage, isFetchingMore, onLoadMore]);
+  }, [isVisible, hasNextPage, isFetchingMore]);
 
   return sentinelRef;
 };

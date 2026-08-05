@@ -76,7 +76,7 @@ describe('useInfiniteScrollSentinel', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps requesting pages while the sentinel stays visible after each fetch settles (CMS-1562)', () => {
+  it('keeps requesting pages while the sentinel stays visible after each fetch settles', () => {
     // The core bug: the observer never re-fires because the sentinel never
     // transitions off screen. Fetching must instead resume when isFetchingMore
     // settles back to false.
@@ -149,5 +149,28 @@ describe('useInfiniteScrollSentinel', () => {
     attach(result);
     expect(latestObserver()).not.toBe(first);
     expect(latestObserver().observed).toHaveLength(1);
+  });
+
+  it('an unstable onLoadMore does not turn inert rerenders into extra fetches', () => {
+    const spy = jest.fn();
+    const { result, rerender } = renderHook(() =>
+      // A fresh arrow every render — onLoadMore's identity changes each time.
+      // The hook holds it in a ref and keeps it out of the load effect's deps,
+      // so this can't become a fetch-per-render loop.
+      useInfiniteScrollSentinel({
+        hasNextPage: true,
+        isFetchingMore: false,
+        onLoadMore: () => spy(),
+      })
+    );
+
+    attach(result);
+    latestObserver().emit(true); // visible → exactly one fetch
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // Inert rerenders (nothing changes but onLoadMore's identity) must not fetch.
+    rerender();
+    rerender();
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
