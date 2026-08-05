@@ -87,6 +87,64 @@ describe('BulkMoveDialog', () => {
     );
   });
 
+  it('omits the source when the selection spans folders', async () => {
+    // A selection built under a global search can hold items from anywhere.
+    // Naming one of their folders would tell the user the whole set came from
+    // there, so the wording drops the source instead.
+    useFolderStructure();
+    server.use(
+      http.get('*/upload/folders/1', () =>
+        HttpResponse.json({ data: { id: 1, name: 'Marketing team', pathId: 1, path: '/1' } })
+      ),
+      http.post('*/upload/actions/bulk-move', () =>
+        HttpResponse.json({ data: { files: [], folders: [] } })
+      )
+    );
+
+    const { user } = setup([
+      { kind: 'file', id: 11, name: 'a.png', folderId: 1 },
+      { kind: 'file', id: 12, name: 'b.png', folderId: 3 },
+    ]);
+
+    await user.click(await screen.findByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Tech' }));
+    await user.click(screen.getByRole('button', { name: 'Move' }));
+
+    await waitFor(() =>
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'success',
+        message: '2 elements have been moved to Tech',
+      })
+    );
+  });
+
+  it('still names the root when the whole selection sits at the root', async () => {
+    // Uniform source with a null id — a real, nameable location, not the
+    // "no single source" case above.
+    useFolderStructure();
+    server.use(
+      http.post('*/upload/actions/bulk-move', () =>
+        HttpResponse.json({ data: { files: [], folders: [] } })
+      )
+    );
+
+    const { user } = setup([
+      { kind: 'file', id: 11, name: 'a.png', folderId: null },
+      { kind: 'file', id: 12, name: 'b.png', folderId: null },
+    ]);
+
+    await user.click(await screen.findByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Tech' }));
+    await user.click(screen.getByRole('button', { name: 'Move' }));
+
+    await waitFor(() =>
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'success',
+        message: '2 elements have been moved from Media Library to Tech',
+      })
+    );
+  });
+
   it("prunes the moved folder's own subtree and its current parent from the destinations", async () => {
     useFolderStructure();
 

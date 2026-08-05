@@ -39,4 +39,28 @@ describe('formatMoveSuccessMessage', () => {
       })
     ).toBe('2 elements have been moved from Media Library to Logos');
   });
+
+  it('omits the source when the move spans several source folders', () => {
+    // A global-search selection can hold items from different folders. Naming
+    // one of them would tell the user the whole set came from there.
+    expect(
+      formatMoveSuccessMessage({
+        formatMessage,
+        count: 2,
+        source: null,
+        destination: 'Archive',
+      })
+    ).toBe('2 elements have been moved to Archive');
+  });
+
+  it('uses the singular source-less form for a single element', () => {
+    expect(
+      formatMoveSuccessMessage({
+        formatMessage,
+        count: 1,
+        source: null,
+        destination: 'Archive',
+      })
+    ).toBe('1 element has been moved to Archive');
+  });
 });

@@ -34,10 +34,14 @@ describe('buildDragSet', () => {
     expect(buildDragSet(active, undefined, emptyItemLocations, 99)).toEqual({
       items: [{ kind: 'file', id: 10, name: 'file-10.png', folderId: 5 }],
       fromSelection: false,
+      activeSourceFolderId: 5,
+      spansMultipleSources: false,
     });
     expect(buildDragSet(active, new Set(), emptyItemLocations, 99)).toEqual({
       items: [{ kind: 'file', id: 10, name: 'file-10.png', folderId: 5 }],
       fromSelection: false,
+      activeSourceFolderId: 5,
+      spansMultipleSources: false,
     });
   });
 
@@ -48,6 +52,8 @@ describe('buildDragSet', () => {
     expect(buildDragSet(active, selectedKeys, emptyItemLocations, 99)).toEqual({
       items: [{ kind: 'file', id: 10, name: 'file-10.png', folderId: 5 }],
       fromSelection: false,
+      activeSourceFolderId: 5,
+      spansMultipleSources: false,
     });
   });
 
@@ -59,6 +65,9 @@ describe('buildDragSet', () => {
     expect(buildDragSet(active, undefined, emptyItemLocations, null)).toEqual({
       items: [{ kind: 'folder', id: 3, name: 'folder-3', parentId: 4 }],
       fromSelection: false,
+      // The folder's parent, not its own id.
+      activeSourceFolderId: 4,
+      spansMultipleSources: false,
     });
   });
 
@@ -109,5 +118,71 @@ describe('buildDragSet', () => {
         { kind: 'file', id: 10, name: '', folderId: 2 },
       ])
     );
+  });
+
+  describe('naming the source of the move', () => {
+    it('names the grabbed row, not the first one clicked', () => {
+      // Search from the root, click asset 10 in folder 4 first, then asset 20 in
+      // folder 5, and drag 20. Selection order puts 10 first in `items`, so
+      // reading the source off `items[0]` would credit folder 4 — a folder the
+      // user never dragged from.
+      const selectedKeys = new Set([assetKey(10), assetKey(20)]);
+      const locations = locationsOf({ 10: 4, 20: 5 }, {});
+
+      const result = buildDragSet(file(20, 5), selectedKeys, locations, null);
+
+      expect(result.items[0]).toMatchObject({ id: 10, folderId: 4 });
+      expect(result.activeSourceFolderId).toBe(5);
+      expect(result.spansMultipleSources).toBe(true);
+    });
+
+    it('reports the same spanning set the same way whichever row is grabbed', () => {
+      const selectedKeys = new Set([assetKey(10), assetKey(20)]);
+      const locations = locationsOf({ 10: 4, 20: 5 }, {});
+
+      const result = buildDragSet(file(10, 4), selectedKeys, locations, null);
+
+      expect(result.activeSourceFolderId).toBe(4);
+      expect(result.spansMultipleSources).toBe(true);
+    });
+
+    it('does not flag a selection that all sits in one folder', () => {
+      const selectedKeys = new Set([assetKey(10), assetKey(20), folderKey(3)]);
+      // The folder's parent and the files' folder are all 4 — one true source.
+      const locations = locationsOf({ 10: 4, 20: 4 }, { 3: 4 });
+
+      const result = buildDragSet(file(10, 4), selectedKeys, locations, null);
+
+      expect(result.activeSourceFolderId).toBe(4);
+      expect(result.spansMultipleSources).toBe(false);
+    });
+
+    it('treats the root as a source distinct from any folder', () => {
+      const selectedKeys = new Set([assetKey(10), assetKey(20)]);
+      const locations = locationsOf({ 10: null, 20: 5 }, {});
+
+      const result = buildDragSet(file(20, 5), selectedKeys, locations, null);
+
+      expect(result.spansMultipleSources).toBe(true);
+    });
+
+    it('does not flag a selection that all sits at the root', () => {
+      const selectedKeys = new Set([assetKey(10), assetKey(20)]);
+      const locations = locationsOf({ 10: null, 20: null }, {});
+
+      const result = buildDragSet(file(10, null), selectedKeys, locations, 7);
+
+      expect(result.activeSourceFolderId).toBeNull();
+      expect(result.spansMultipleSources).toBe(false);
+    });
+
+    it('does not flag unloaded rows that the fallback lands on the grabbed folder', () => {
+      const selectedKeys = new Set([assetKey(10), assetKey(20)]);
+
+      const result = buildDragSet(file(10, 8), selectedKeys, emptyItemLocations, 8);
+
+      expect(result.activeSourceFolderId).toBe(8);
+      expect(result.spansMultipleSources).toBe(false);
+    });
   });
 });

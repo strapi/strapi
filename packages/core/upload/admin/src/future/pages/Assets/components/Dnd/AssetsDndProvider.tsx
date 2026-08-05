@@ -84,6 +84,10 @@ interface AssetsDndProviderProps {
 interface DragSession {
   items: DragItemData[];
   fromSelection: boolean;
+  /** Location of the grabbed row — names the source in the success toast. */
+  activeSourceFolderId: number | null;
+  /** True when the set spans several source folders, so none can be named. */
+  spansMultipleSources: boolean;
 }
 
 const resolveDestination = (
@@ -130,7 +134,12 @@ export const AssetsDndProvider = ({
   const [dragItems, setDragItems] = useState<DragItemData[]>([]);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
   // Sync session for drag-end — state alone can lag one render behind dragStart.
-  const dragSessionRef = useRef<DragSession>({ items: [], fromSelection: false });
+  const dragSessionRef = useRef<DragSession>({
+    items: [],
+    fromSelection: false,
+    activeSourceFolderId: null,
+    spansMultipleSources: false,
+  });
 
   const announceToLiveRegion = useCallback((message: string) => {
     setLiveAnnouncement('');
@@ -175,7 +184,12 @@ export const AssetsDndProvider = ({
   );
 
   const clearDragState = useCallback(() => {
-    dragSessionRef.current = { items: [], fromSelection: false };
+    dragSessionRef.current = {
+      items: [],
+      fromSelection: false,
+      activeSourceFolderId: null,
+      spansMultipleSources: false,
+    };
     setDragItems([]);
   }, []);
 
@@ -188,14 +202,9 @@ export const AssetsDndProvider = ({
         return;
       }
 
-      const { items, fromSelection } = buildDragSet(
-        data,
-        selection?.selectedKeys,
-        locations,
-        currentFolderId
-      );
-      dragSessionRef.current = { items, fromSelection };
-      setDragItems(items);
+      const dragSet = buildDragSet(data, selection?.selectedKeys, locations, currentFolderId);
+      dragSessionRef.current = dragSet;
+      setDragItems(dragSet.items);
     },
     [clearDragState, currentFolderId, locations, selection?.selectedKeys]
   );
@@ -203,7 +212,8 @@ export const AssetsDndProvider = ({
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
       const { over } = event;
-      const { items, fromSelection } = dragSessionRef.current;
+      const { items, fromSelection, activeSourceFolderId, spansMultipleSources } =
+        dragSessionRef.current;
       clearDragState();
 
       if (isMovePending || !over || items.length === 0) {
@@ -229,15 +239,19 @@ export const AssetsDndProvider = ({
       }
 
       const payload = buildBulkMovePayload(items);
-      // Source is the item's own location, not the folder currently open: a
-      // global search result can be dragged out of a folder the user isn't in.
-      // Destination is the drop target. Both use leaf names so the DnD toast
-      // reads identically to the dialog's.
-      const sourceFolderId = items[0].kind === 'folder' ? items[0].parentId : items[0].folderId;
+      // Source is the grabbed row's own location, not the folder currently open:
+      // a global search result can be dragged out of a folder the user isn't in.
+      // A search-built selection can also span folders, and then no single
+      // source is true for the whole set — `null` drops it from the wording
+      // instead of naming one item's folder for all of them. Destination is the
+      // drop target. Both use leaf names so the DnD toast reads identically to
+      // the dialog's.
       const successMessage = formatMoveSuccessMessage({
         formatMessage,
         count: items.length,
-        source: getFolderLabel(folderStructure, sourceFolderId, rootLabel),
+        source: spansMultipleSources
+          ? null
+          : getFolderLabel(folderStructure, activeSourceFolderId, rootLabel),
         destination: getFolderLabel(folderStructure, targetFolderId, rootLabel),
       });
       const errorFallback = formatMessage({
