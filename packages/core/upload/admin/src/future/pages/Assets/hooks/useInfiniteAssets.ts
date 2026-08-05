@@ -1,5 +1,8 @@
-import { createElement, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { createElement, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useDispatch, useStore } from 'react-redux';
+
+import { uploadApi } from '../../../services/api';
 import { useGetAssetsQuery } from '../../../services/assets';
 
 import type { File, Pagination } from '../../../../../../shared/contracts/files';
@@ -200,6 +203,54 @@ const useInfiniteAssets = ({
       })
     )
   );
+
+  // Drop the left folder's cached `getAssets` pages when the folder changes.
+  //
+  // RTK Query 1.9.7 leaves a query's store subscription in place when its last
+  // subscriber unmounts while a refetch is still in flight — e.g. a delete
+  // invalidates `{Asset, LIST}`, every loaded page starts refetching, and the
+  // user navigates away before those settle. Those stale subscriptions make the
+  // next `{Asset, LIST}` invalidation (an upload in the new folder) refetch the
+  // *previous* folder's pages: one bogus `/upload/files` request per loaded
+  // page. There is no public per-entry unsubscribe, so evict the left folder's
+  // entries outright — returning reloads from page 1, which the accumulator
+  // already does on a list change.
+  const dispatch = useDispatch();
+  const store = useStore();
+  const prevFolderRef = useRef(folder);
+  useEffect(() => {
+    const prevFolder = prevFolderRef.current;
+    prevFolderRef.current = folder;
+    if (prevFolder === folder) {
+      return;
+    }
+
+    const apiState = (store.getState() as Record<string, { queries?: Record<string, unknown> }>)[
+      uploadApi.reducerPath
+    ];
+    const removeQueryResult = (
+      uploadApi as unknown as {
+        internalActions: {
+          removeQueryResult: (payload: { queryCacheKey: string }) => { type: string };
+        };
+      }
+    ).internalActions.removeQueryResult;
+
+    Object.keys(apiState?.queries ?? {}).forEach((cacheKey) => {
+      if (!cacheKey.startsWith('getAssets(')) {
+        return;
+      }
+      let args: { folder?: number | null };
+      try {
+        args = JSON.parse(cacheKey.slice('getAssets('.length, -1));
+      } catch {
+        return;
+      }
+      if (args.folder === prevFolder) {
+        dispatch(removeQueryResult({ queryCacheKey: cacheKey }));
+      }
+    });
+  }, [folder, dispatch, store]);
 
   // Until the new list's first page lands the accumulator still holds the
   // previous folder. Reported as loading so the page shows a spinner instead
