@@ -183,6 +183,17 @@ const handlers: HttpHandler[] = [
     return HttpResponse.json(null);
   }),
 
+  // Unstable media library: per-file AI metadata generation, reported per file so a
+  // single failure never fails the batch. Fired after each upload completes — for
+  // every file, including non-images, which the server reports as `skipped`.
+  http.post('*/upload/unstable/generate-ai-metadata', async ({ request }) => {
+    const { fileIds } = (await request.json()) as { fileIds: number[] };
+
+    return HttpResponse.json({
+      data: fileIds.map((id) => ({ id, status: 'success' })),
+    });
+  }),
+
   http.get('/upload/folder-structure', () => {
     return HttpResponse.json({
       data: [

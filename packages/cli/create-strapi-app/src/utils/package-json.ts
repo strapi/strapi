@@ -36,7 +36,7 @@ const getPnpmPackageJsonConfig = (scope: Scope, existingPkg: PackageJson) => {
 
   return {
     pnpm: {
-      ...(existingPkg.pnpm ?? {}),
+      ...existingPkg.pnpm,
       onlyBuiltDependencies: getPnpmOnlyBuiltDependencies(scope, existingOnlyBuiltDependencies),
     },
   };
@@ -57,7 +57,7 @@ export async function createPackageJSON(scope: Scope) {
     devDependencies: scope.devDependencies ?? {},
     dependencies: scope.dependencies ?? {},
     strapi: {
-      ...(scope.packageJsonStrapi ?? {}),
+      ...scope.packageJsonStrapi,
       uuid: scope.uuid,
       installId: scope.installId,
     },
