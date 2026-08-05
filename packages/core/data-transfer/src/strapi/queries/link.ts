@@ -184,7 +184,10 @@ export const createLinkQuery = (
             `${ownerAlias}.id`,
             `${ownerAlias}.${joinColumnName} as ${joinColumnName}`,
             ...(onOrphanedLink
-              ? [connection.raw('exists (?) as ??', [targetExistsSubquery(), TARGET_EXISTS_ALIAS])]
+              ? // Knex wraps QueryBuilder bindings in parentheses, so `exists (?)`
+                // becomes `exists ((select ...))`, which SQLite rejects in a SELECT
+                // list. Wrap the EXISTS expression so the compiled SQL is valid.
+                [connection.raw('(exists ?) as ??', [targetExistsSubquery(), TARGET_EXISTS_ALIAS])]
               : [])
           )
           .from({ [ownerAlias]: ownerTable })
@@ -210,6 +213,7 @@ export const createLinkQuery = (
             right: { type: target, ref },
           };
 
+          // EXISTS yields 0/1 (or boolean); treat falsy as orphaned.
           if (onOrphanedLink && !entry[TARGET_EXISTS_ALIAS]) {
             onOrphanedLink(link);
           } else {

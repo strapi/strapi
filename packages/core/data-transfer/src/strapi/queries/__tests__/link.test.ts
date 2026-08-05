@@ -409,6 +409,12 @@ describe('createLinkQuery', () => {
     expect(links).toHaveLength(2);
     expect(links.map((link) => link.left.ref)).toEqual([1, 2]);
     expect(onOrphanedLink).not.toHaveBeenCalled();
+    // SQLite rejects `exists ((subquery))` in SELECT; the expression must be
+    // wrapped so Knex's QueryBuilder binding only adds one pair of parentheses.
+    expect(connection.raw).toHaveBeenCalledWith(
+      '(exists ?) as ??',
+      expect.arrayContaining([expect.anything(), '__target_exists'])
+    );
   });
 
   test('uses a single left-join query when reporting orphaned join-table links', async () => {
