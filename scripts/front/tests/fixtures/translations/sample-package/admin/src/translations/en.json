@@ -1,0 +1,5 @@
+{
+  "plugin.name": "Sample Plugin",
+  "sample.greeting": "Hello",
+  "sample.mismatch": "From en.json"
+}
