@@ -32,6 +32,7 @@
     },
     "stages": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "oneOf": [
           {
@@ -51,6 +52,7 @@
               "type": { "const": "workspace" },
               "validate": {
                 "type": "array",
+                "minItems": 1,
                 "items": { "type": "string" }
               }
             }

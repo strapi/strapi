@@ -189,11 +189,11 @@ Options:
 
 - `--initial <4.x semver>` — required without `--scenario`
 - `--scenario <path>` — JSON scenario (default: `tests/migration/scenarios/v4-to-head.json`)
-- `--initial-node` / `--workspace-node` — optional Node major checks per phase
+- `--initial-node` / `--workspace-node` — optional host Node major guard (single process; aliases must match)
 - `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb`
 - `--multiplier N`, `--build`, `--skip-build`
 
-Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** (CI passes `--initial-node 20`).
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** (CI passes `--initial-node 20`). Env defaults (`DATABASE_CLIENT`, `MIGRATION_MULTIPLIER` / `SEED_MULTIPLIER`) apply when the matching CLI flag is omitted.
 
 Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
 
