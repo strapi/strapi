@@ -22,7 +22,7 @@ const checkValidLink = (link: string) => {
   try {
     // eslint-disable-next-line no-new
     new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
-  } catch (error) {
+  } catch {
     return false;
   }
   return true;

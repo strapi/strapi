@@ -367,9 +367,15 @@ const slice = createSlice({
       const { data } = action.payload;
       state.modifiedData = data;
       state.initialData = data;
+      state.formErrors = {};
     },
     setAttributeDataSchema: (state, action: PayloadAction<SetAttributeDataSchemaPayload>) => {
       const { isEditing } = action.payload;
+
+      // The errors describe the data being replaced below, so they no longer apply. Leaving
+      // them behind surfaces the previous attempt's errors on a freshly picked, blank type.
+      // See https://github.com/strapi/strapi/issues/20947
+      state.formErrors = {};
 
       if (isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
@@ -433,6 +439,8 @@ const slice = createSlice({
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
       const { payload } = action;
 
+      state.formErrors = {};
+
       if (payload.isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
@@ -462,6 +470,7 @@ const slice = createSlice({
       const { attributeToEdit } = action.payload;
       state.modifiedData = attributeToEdit;
       state.initialData = attributeToEdit;
+      state.formErrors = {};
     },
     setErrors: (state, action: PayloadAction<SetErrorsPayload>) => {
       state.formErrors = action.payload.errors;
