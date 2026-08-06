@@ -64,7 +64,15 @@ import { mergeMixedList } from './utils/mergeMixedList';
 import type { File, UploadFileInfo } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
 
-const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
+// The negative bottom margin shrinks the trigger area by a pixel so the 1px
+// sentinel sitting exactly at the fold (when a page's rows happen to fill the
+// viewport) reads as "not visible" and doesn't pull an extra page. It still
+// triggers as soon as the sentinel scrolls a hair into view. Tune the bottom
+// value if the list over- or under-fetches near the fold.
+const INTERSECTION_OPTIONS: IntersectionObserverInit = {
+  threshold: 0,
+  rootMargin: '0px 0px -1px 0px',
+};
 
 const ITEM_COUNT_MESSAGE = {
   id: getTranslationKey('header.content.item-count'),

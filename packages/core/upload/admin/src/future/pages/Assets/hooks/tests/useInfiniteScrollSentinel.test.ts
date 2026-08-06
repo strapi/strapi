@@ -4,7 +4,11 @@ import { useInfiniteScrollSentinel } from '../useInfiniteScrollSentinel';
 
 /**
  * jsdom has no IntersectionObserver. This controllable stub lets a test drive
- * the sentinel's visibility by hand and records observe/disconnect calls.
+ * the sentinel's visibility by hand.
+ *
+ * `observe()` re-emits the last known intersection, mirroring the browser's
+ * initial notification for a freshly observed target — which is what the hook
+ * relies on when it re-observes after a page settles.
  */
 class MockIntersectionObserver {
   static instances: MockIntersectionObserver[] = [];
@@ -15,13 +19,27 @@ class MockIntersectionObserver {
 
   disconnected = false;
 
+  lastIsIntersecting = false;
+
   constructor(callback: IntersectionObserverCallback) {
     this.callback = callback;
     MockIntersectionObserver.instances.push(this);
   }
 
+  private fire(isIntersecting: boolean) {
+    act(() => {
+      this.callback(
+        [{ isIntersecting } as IntersectionObserverEntry],
+        this as unknown as IntersectionObserver
+      );
+    });
+  }
+
   observe(el: Element) {
     this.observed.push(el);
+    // A freshly observed target gets an initial notification with its current
+    // intersection — this is how re-observing on settle produces a fresh read.
+    this.fire(this.lastIsIntersecting);
   }
 
   disconnect() {
@@ -36,12 +54,8 @@ class MockIntersectionObserver {
 
   /** Simulate the observed element entering/leaving the viewport. */
   emit(isIntersecting: boolean) {
-    act(() => {
-      this.callback(
-        [{ isIntersecting } as IntersectionObserverEntry],
-        this as unknown as IntersectionObserver
-      );
-    });
+    this.lastIsIntersecting = isIntersecting;
+    this.fire(isIntersecting);
   }
 }
 
@@ -76,10 +90,10 @@ describe('useInfiniteScrollSentinel', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps requesting pages while the sentinel stays visible after each fetch settles', () => {
-    // The core bug: the observer never re-fires because the sentinel never
-    // transitions off screen. Fetching must instead resume when isFetchingMore
-    // settles back to false.
+  it('keeps requesting pages while the sentinel is still visible after each fetch settles', () => {
+    // The observer never re-fires on its own because the sentinel never
+    // transitions off screen. Re-observing on settle re-reads it and keeps
+    // loading a viewport a single page didn't fill.
     const onLoadMore = jest.fn();
     const { result, rerender } = renderHook(
       ({ isFetchingMore }: { isFetchingMore: boolean }) =>
@@ -95,9 +109,31 @@ describe('useInfiniteScrollSentinel', () => {
     rerender({ isFetchingMore: true });
     expect(onLoadMore).toHaveBeenCalledTimes(1);
 
-    // Page settled, sentinel STILL visible (no transition emitted) → next page.
+    // Page settled, a fresh read still reports visible → next page.
     rerender({ isFetchingMore: false });
     expect(onLoadMore).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not fetch an extra page when a settle finds the sentinel no longer visible', () => {
+    // The double-fetch: once a page fills the viewport the sentinel is no longer
+    // visible, so a settle must NOT pull another page. Loading is gated on the
+    // fresh read at settle time, never a stale one.
+    const onLoadMore = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ isFetchingMore }: { isFetchingMore: boolean }) =>
+        useInfiniteScrollSentinel({ hasNextPage: true, isFetchingMore, onLoadMore }),
+      { initialProps: { isFetchingMore: false } }
+    );
+
+    attach(result);
+    latestObserver().emit(true); // visible → first fetch
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+
+    rerender({ isFetchingMore: true });
+    latestObserver().emit(false); // the loaded page filled the viewport
+
+    rerender({ isFetchingMore: false }); // settle → re-observe → fresh read is "not visible"
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
   it('stops requesting once there is no next page', () => {
@@ -113,7 +149,7 @@ describe('useInfiniteScrollSentinel', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1);
 
     rerender({ hasNextPage: false });
-    // A settle after the last page must not fetch again.
+    latestObserver().emit(true); // still visible, but nothing more to load
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
@@ -155,8 +191,8 @@ describe('useInfiniteScrollSentinel', () => {
     const spy = jest.fn();
     const { result, rerender } = renderHook(() =>
       // A fresh arrow every render — onLoadMore's identity changes each time.
-      // The hook holds it in a ref and keeps it out of the load effect's deps,
-      // so this can't become a fetch-per-render loop.
+      // The hook holds it in a ref, and loading only fires from observer reads,
+      // so an inert rerender can't become a fetch.
       useInfiniteScrollSentinel({
         hasNextPage: true,
         isFetchingMore: false,
@@ -168,7 +204,6 @@ describe('useInfiniteScrollSentinel', () => {
     latestObserver().emit(true); // visible → exactly one fetch
     expect(spy).toHaveBeenCalledTimes(1);
 
-    // Inert rerenders (nothing changes but onLoadMore's identity) must not fetch.
     rerender();
     rerender();
     expect(spy).toHaveBeenCalledTimes(1);
