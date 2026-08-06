@@ -118,8 +118,8 @@ const newEngine = (params: EngineParams): Engine => {
 
     const resolveConditions = _.map(providers.condition.get);
 
-    const removeInvalidConditions = _.filter((condition: Condition) =>
-      _.isFunction(condition.handler)
+    const removeInvalidConditions = _.filter(
+      (condition: Condition) => condition != null && _.isFunction(condition.handler)
     );
 
     const evaluateConditions = (conditions: Condition[]) => {
