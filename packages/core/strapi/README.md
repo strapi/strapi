@@ -94,7 +94,8 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 | Strapi Version    | Recommended | Minimum |
 | ----------------- | ----------- | ------- |
-| 5.48.1 and up     | 24.x        | 22.x    |
+| 5.50.0 and up     | 24.x        | 22.12.x |
+| 5.48.1 to 5.49.x  | 24.x        | 22.x    |
 | 5.31.0 to v5.48.0 | 24.x        | 20.x    |
 | 5.0.0 to 5.30.1   | 20.x        | 18.x    |
 | 4.14.5 and up     | 20.x        | 18.x    |

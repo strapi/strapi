@@ -7,10 +7,12 @@ import {
   getResolvableSingletonModules,
 } from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
+import { getModulePath } from '../core/resolve-module';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
+import { browserCompatShimsPlugin } from './browser-compat-shims';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
@@ -47,6 +49,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       'process.env': JSON.stringify(ctx.env),
     },
     envPrefix: 'STRAPI_ADMIN_',
+    // Vite 8 unified CJS default-import interop (dev and build). Preserve pre-Vite-8
+    // behavior for custom admin code and plugin chunks until users can migrate imports.
+    // See packages/utils/upgrade/resources/codemods/5.50.0/BREAKING_CHANGES.md.
+    legacy: {
+      inconsistentCjsInterop: true,
+    },
     optimizeDeps: {
       // Contract (#26964, #26944, #27014):
       // - CJS packages imported by @strapi/admin MUST be in optimizeDeps.include (invariant, lodash, …).
@@ -156,9 +164,14 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       dedupe: [...ADMIN_VITE_DEDUPE_MODULES],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
-      alias: buildAdminViteResolveAliases(),
+      alias: {
+        ...buildAdminViteResolveAliases(),
+        // Vite 8 externalizes Node `path`; CTB and other admin chunks import path.sep (#26541).
+        path: getModulePath('path-browserify'),
+        'node:path': getModulePath('path-browserify'),
+      },
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [react(), browserCompatShimsPlugin(), buildFilesPlugin(ctx)],
   };
 };
 
@@ -178,7 +191,9 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       assetsDir: '',
       minify,
       sourcemap: sourcemaps,
-      rollupOptions: {
+      // Vite 8 bundles with Rolldown; `rollupOptions` is a deprecated alias kept
+      // only for back-compat. Use the non-deprecated key directly.
+      rolldownOptions: {
         input: {
           strapi: ctx.entry,
         },

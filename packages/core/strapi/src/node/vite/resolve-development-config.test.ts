@@ -4,36 +4,63 @@ import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
+jest.mock('./plugins', () => ({
+  buildFilesPlugin: jest.fn(() => ({})),
+}));
+
 jest.mock('browserslist-to-esbuild', () => ({
   __esModule: true,
   default: jest.fn(() => ['chrome100']),
 }));
 
+jest.mock('@vitejs/plugin-react-swc', () => ({
+  __esModule: true,
+  default: jest.fn(() => []),
+}));
+
+jest.mock('../core/resolve-module', () => ({
+  ...jest.requireActual('../core/resolve-module'),
+  // Override only getModulePath so path-browserify aliases stay deterministic (#26541).
+  // Keep getModulePathFrom real so CodeMirror singleton resolve/include stays in lockstep.
+  getModulePath: jest.fn((mod: string) => `/mock/${mod}`),
+}));
+
+jest.mock('../core/linked-packages', () => ({
+  isDesignSystemLinked: jest.fn(() => false),
+}));
+
+jest.mock('../core/monorepo', () => ({
+  loadStrapiMonorepo: jest.fn(async () => undefined),
+}));
+
+const createCtx = (
+  httpServer = http.createServer(),
+  options: Record<string, unknown> = { open: false }
+) =>
+  ({
+    cwd: process.cwd(),
+    target: ['last 3 major versions'],
+    basePath: '/admin',
+    adminPath: '/admin',
+    distDir: 'dist/build',
+    appDir: process.cwd(),
+    entry: '.strapi/client/app.js',
+    distPath: `${process.cwd()}/dist/build`,
+    env: {},
+    runtimeDir: `${process.cwd()}/.strapi/client`,
+    logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+    strapi: { internal_config: {}, server: { httpServer } },
+    bundler: 'vite' as const,
+    options,
+    plugins: [],
+    tsconfig: undefined,
+    customisations: undefined,
+    features: undefined,
+  }) as unknown as BuildContext;
+
 describe('Vite admin configuration', () => {
   it('does not copy public files into the admin build output', async () => {
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
-      bundler: 'vite' as const,
-      options: {
-        minify: true,
-        sourcemaps: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+    const ctx = createCtx(http.createServer(), { minify: true, sourcemaps: false });
 
     const config = await resolveProductionConfig(ctx);
 
@@ -42,31 +69,7 @@ describe('Vite admin configuration', () => {
 
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
-      // Mock that real source instead of injecting the server via options, so the test guards the
-      // strapi.server.httpServer -> config wiring that actually fixes #23491.
-      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+    const ctx = createCtx(mockHttpServer);
 
     const config = await resolveDevelopmentConfig(ctx);
 
@@ -104,28 +107,7 @@ describe('Vite admin configuration', () => {
 
   it('pre-bundles prismjs core but not language components (#26964 / blank-admin)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+    const ctx = createCtx(mockHttpServer);
 
     const config = await resolveDevelopmentConfig(ctx);
     const include = config.optimizeDeps?.include ?? [];
@@ -134,6 +116,35 @@ describe('Vite admin configuration', () => {
     // prebundle blanks the admin with TypeError setting 'comment'.
     expect(include).toEqual(expect.arrayContaining(['prismjs']));
     expect(include).not.toContain('prismjs/components/*.js');
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('aliases path and node:path for browser bundles (#26541)', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = createCtx(mockHttpServer);
+
+    const config = await resolveDevelopmentConfig(ctx);
+
+    expect(config.resolve?.alias).toMatchObject({
+      path: '/mock/path-browserify',
+      'node:path': '/mock/path-browserify',
+    });
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('preserves legacy CJS interop for custom admin bundles', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = createCtx(mockHttpServer);
+
+    const config = await resolveDevelopmentConfig(ctx);
+
+    expect(config.legacy).toEqual({ inconsistentCjsInterop: true });
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
