@@ -15,12 +15,12 @@ export const UnstableMediaLibrary = () => {
   });
 
   return (
-    <Page.Main>
+    <>
       <Page.Title>{title}</Page.Title>
 
       <Routes>
         <Route index element={<AssetsPage />} />
       </Routes>
-    </Page.Main>
+    </>
   );
 };

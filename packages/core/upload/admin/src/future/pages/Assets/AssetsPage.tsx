@@ -1,7 +1,7 @@
 import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
+import { Layouts, Page, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -64,6 +64,10 @@ import type { File, UploadFileInfo } from '../../../../../shared/contracts/files
 import type { Folder } from '../../../../../shared/contracts/folders';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
+
+// Shared horizontal padding for the header and the list (matches the admin's
+// RESPONSIVE_DEFAULT_SPACING) so the list lines up with the title/toolbar.
+const HORIZONTAL_PADDING = { initial: 4, medium: 6, large: 10 };
 
 const ITEM_COUNT_MESSAGE = {
   id: getTranslationKey('header.content.item-count'),
@@ -315,13 +319,78 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   }
 `;
 
-const HeaderWrapper = styled(Box)`
-  [data-strapi-header] {
-    background: ${({ theme }) => theme.colors.neutral0};
+// A single sticky header — same layout scrolled or not, so the toolbar
+// alignment can't reflow the way the shared sticky header did.
+const StickyHeader = styled(Box)`
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: ${({ theme }) => theme.colors.neutral0};
+`;
 
-    h1 {
-      font-size: 1.8rem;
-    }
+// New button aligns with the title, not the toolbar.
+const TitleRow = styled(Flex)`
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spaces[4]};
+
+  h1 {
+    font-size: 1.8rem;
+  }
+`;
+
+// Two groups in source order (Filter, Search / Sort, Toggle). Mobile: stacked —
+// Filter+Search on row 1, Sort+Toggle on row 2. Desktop (large+): one row,
+// Filter+Search on the left, Sort+Toggle pushed right.
+const Toolbar = styled(Flex)`
+  margin-top: ${({ theme }) => theme.spaces[5]};
+  flex-direction: column;
+  align-items: stretch;
+  gap: ${({ theme }) => theme.spaces[3]};
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+`;
+
+const ToolbarGroup = styled(Flex)`
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[3]};
+`;
+
+// Filter + Search. On mobile the group fills the row (search grows into it);
+// on desktop it keeps its intrinsic size and sits at the left edge.
+const FilterSearchGroup = styled(ToolbarGroup)``;
+
+// Sort + Toggle. Mobile: spread across the row (Sort left, Toggle right).
+// Desktop: sit together at the right edge (space-between on the toolbar leaves
+// the empty space between the search and here).
+const SortToggleGroup = styled(ToolbarGroup)`
+  justify-content: space-between;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    justify-content: flex-end;
+    flex: 0 0 auto;
+  }
+`;
+
+// Fills the row on mobile; intrinsic width on desktop.
+const SearchSlot = styled(Box)`
+  flex: 1;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex: 0 1 auto;
+  }
+`;
+
+// Toggle labels are hidden below desktop — icons only (buttons keep aria-label).
+const ToggleLabel = styled.span`
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: inline;
   }
 `;
 
@@ -523,27 +592,33 @@ export const AssetsPage = () => {
         <AssetSelectionProvider disabled={!canUpdate}>
           <AssetsDndProvider locations={itemLocations}>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
-            <Box ref={uploadDropZoneRef}>
-              <Layouts.Root
-                minHeight="100vh"
-                background="neutral0"
-                sideNav={
-                  <FolderTree
-                    currentFolderId={currentFolderId}
-                    showActiveFolder={!isSearching}
-                    onSelectFolder={navigateToFolderId}
-                  />
-                }
-              >
-                <VisuallyHidden>
-                  <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
-                </VisuallyHidden>
+            <Layouts.Root
+              background="neutral0"
+              sideNav={
+                <FolderTree
+                  currentFolderId={currentFolderId}
+                  showActiveFolder={!isSearching}
+                  onSelectFolder={navigateToFolderId}
+                />
+              }
+            >
+              <Page.Main>
+                <Box ref={uploadDropZoneRef}>
+                  <VisuallyHidden>
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
+                  </VisuallyHidden>
 
-                <HeaderWrapper>
-                  <Layouts.Header
-                    title={pageHeaderTitle}
-                    primaryAction={
-                      canCreate && (
+                  <StickyHeader
+                    paddingLeft={HORIZONTAL_PADDING}
+                    paddingRight={HORIZONTAL_PADDING}
+                    paddingTop={6}
+                    paddingBottom={4}
+                  >
+                    <TitleRow>
+                      <Typography variant="alpha" tag="h1">
+                        {pageHeaderTitle}
+                      </Typography>
+                      {canCreate && (
                         <SimpleMenu
                           popoverPlacement="bottom-end"
                           variant="default"
@@ -575,101 +650,103 @@ export const AssetsPage = () => {
                             })}
                           </MenuItem>
                         </SimpleMenu>
-                      )
-                    }
-                    subtitle={
-                      <>
-                        <Flex
-                          justifyContent="space-between"
-                          alignItems="center"
-                          gap={4}
-                          width="100%"
+                      )}
+                    </TitleRow>
+
+                    <Toolbar>
+                      <FilterSearchGroup>
+                        <Box>
+                          <FilterMenu listFilters={listFilters} />
+                        </Box>
+                        <SearchSlot>
+                          <AssetsSearchInput />
+                        </SearchSlot>
+                      </FilterSearchGroup>
+                      <SortToggleGroup>
+                        <Box>
+                          <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
+                        </Box>
+                        <StyledToggleGroup
+                          type="single"
+                          value={isGridView ? 'grid' : 'table'}
+                          onValueChange={(value) =>
+                            value &&
+                            setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
+                          }
+                          aria-label={formatMessage({
+                            id: getTranslationKey('view.switch.label'),
+                            defaultMessage: 'View options',
+                          })}
                         >
-                          <Flex gap={4} alignItems="center">
-                            <FilterMenu listFilters={listFilters} />
-                            <AssetsSearchInput />
-                          </Flex>
-
-                          <Flex gap={4} alignItems="center">
-                            <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-                            <StyledToggleGroup
-                              type="single"
-                              value={isGridView ? 'grid' : 'table'}
-                              onValueChange={(value) =>
-                                value &&
-                                setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                              }
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.switch.label'),
-                                defaultMessage: 'View options',
+                          <StyledToggleItem
+                            value="table"
+                            aria-label={formatMessage({
+                              id: getTranslationKey('view.table'),
+                              defaultMessage: 'Table view',
+                            })}
+                          >
+                            <List />
+                            <ToggleLabel>
+                              {formatMessage({
+                                id: getTranslationKey('view.table'),
+                                defaultMessage: 'Table view',
                               })}
-                            >
-                              <StyledToggleItem
-                                value="table"
-                                aria-label={formatMessage({
-                                  id: getTranslationKey('view.table'),
-                                  defaultMessage: 'Table view',
-                                })}
-                              >
-                                <List />
-                                {formatMessage({
-                                  id: getTranslationKey('view.table'),
-                                  defaultMessage: 'Table view',
-                                })}
-                              </StyledToggleItem>
-                              <StyledToggleItem
-                                value="grid"
-                                aria-label={formatMessage({
-                                  id: getTranslationKey('view.grid'),
-                                  defaultMessage: 'Grid view',
-                                })}
-                              >
-                                <GridIcon />
-                                {formatMessage({
-                                  id: getTranslationKey('view.grid'),
-                                  defaultMessage: 'Grid view',
-                                })}
-                              </StyledToggleItem>
-                            </StyledToggleGroup>
-                          </Flex>
-                        </Flex>
-                        <FilterBadges listFilters={listFilters} />
-                      </>
-                    }
-                  />
-                </HeaderWrapper>
+                            </ToggleLabel>
+                          </StyledToggleItem>
+                          <StyledToggleItem
+                            value="grid"
+                            aria-label={formatMessage({
+                              id: getTranslationKey('view.grid'),
+                              defaultMessage: 'Grid view',
+                            })}
+                          >
+                            <GridIcon />
+                            <ToggleLabel>
+                              {formatMessage({
+                                id: getTranslationKey('view.grid'),
+                                defaultMessage: 'Grid view',
+                              })}
+                            </ToggleLabel>
+                          </StyledToggleItem>
+                        </StyledToggleGroup>
+                      </SortToggleGroup>
+                    </Toolbar>
 
-                <Layouts.Content>
-                  {/* Renders nothing — keeps every loaded page's query subscribed
+                    <FilterBadges listFilters={listFilters} />
+                  </StickyHeader>
+
+                  <Layouts.Content>
+                    {/* Renders nothing — keeps every loaded page's query subscribed
                       so a rename/delete refreshes the whole list. */}
-                  {assetPageSubscribers}
-                  <DropZoneWithOverlay>
-                    <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
-                    <AssetsView
-                      view={view}
-                      folders={folders}
-                      isLoadingFolders={isLoadingFolders}
-                      assets={assets}
-                      isLoadingAssets={isLoadingAssets}
-                      isFetchingMore={isFetchingMore}
-                      hasNextPage={hasNextPage}
-                      fetchNextPage={fetchNextPage}
-                      error={assetsError}
-                      locations={itemLocations}
-                      searchQuery={searchQuery}
-                      assetsSort={listSort.assetsSort}
-                      foldersPosition={listSort.foldersPosition}
-                      hasActiveFilters={listFilters.filters.length > 0}
-                      onClearFilters={listFilters.clearFilters}
-                      onAssetItemClick={openDetails}
-                      onAddAssets={handleFileSelect}
-                      canAddAssets={canCreate}
-                      onClearSearch={clearSearch}
-                    />
-                  </DropZoneWithOverlay>
-                </Layouts.Content>
-              </Layouts.Root>
-            </Box>
+                    {assetPageSubscribers}
+                    <DropZoneWithOverlay>
+                      <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
+                      <AssetsView
+                        view={view}
+                        folders={folders}
+                        isLoadingFolders={isLoadingFolders}
+                        assets={assets}
+                        isLoadingAssets={isLoadingAssets}
+                        isFetchingMore={isFetchingMore}
+                        hasNextPage={hasNextPage}
+                        fetchNextPage={fetchNextPage}
+                        error={assetsError}
+                        locations={itemLocations}
+                        searchQuery={searchQuery}
+                        assetsSort={listSort.assetsSort}
+                        foldersPosition={listSort.foldersPosition}
+                        hasActiveFilters={listFilters.filters.length > 0}
+                        onClearFilters={listFilters.clearFilters}
+                        onAssetItemClick={openDetails}
+                        onAddAssets={handleFileSelect}
+                        canAddAssets={canCreate}
+                        onClearSearch={clearSearch}
+                      />
+                    </DropZoneWithOverlay>
+                  </Layouts.Content>
+                </Box>
+              </Page.Main>
+            </Layouts.Root>
           </AssetsDndProvider>
         </AssetSelectionProvider>
       </UploadDropZoneProvider>

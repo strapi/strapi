@@ -88,8 +88,8 @@ export const AssetsSearchInput = () => {
     </SearchForm>
   );
 
-  // TODO: (design question)The input stays visible at every breakpoint; on mobile it takes the full
-  // width of the toolbar instead of its intrinsic size.
+  // Mobile: fills the toolbar row (own line). Desktop: keeps its intrinsic size,
+  // with empty space between it and the right-aligned Sort/Toggle group.
   if (isMobile) {
     return <Box width="100%">{searchForm}</Box>;
   }

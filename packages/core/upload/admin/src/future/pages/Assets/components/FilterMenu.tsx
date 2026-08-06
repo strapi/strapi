@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-import { Badge, Checkbox, Flex, Menu } from '@strapi/design-system';
-import { Filter as FilterIcon } from '@strapi/icons';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { Badge, Box, Checkbox, Flex, Menu } from '@strapi/design-system';
+import { ChevronDown, Filter as FilterIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -63,6 +64,22 @@ const FieldSubTrigger = styled(Menu.SubTrigger)`
 
 /** Every panel of the filter tree shares this fixed width (design). */
 export const FILTER_PANEL_WIDTH = '24.2rem';
+
+// Mobile uses one flat panel (accordion), so it never needs room for a side
+// flyout — cap it to the viewport so it can't overflow a narrow screen.
+const MOBILE_PANEL_WIDTH = `min(${FILTER_PANEL_WIDTH}, calc(100dvw - 2rem))`;
+
+// Mobile accordion: the field row is a plain menu item that expands its options
+// inline below it (Radix sub-menus can only fly out sideways, off a phone).
+const FieldToggle = styled(Menu.Item)`
+  width: 100%;
+`;
+
+// Rotates the chevron when its section is open.
+const Chevron = styled(ChevronDown)<{ $open: boolean }>`
+  transition: transform 0.2s ease;
+  transform: rotate(${({ $open }) => ($open ? '180deg' : '0deg')});
+`;
 
 // Sub panels: fixed width, no 15rem clamp (the DS default folds the calendar),
 // and a negative top margin cancelling the parent panel's padding + border so
@@ -138,8 +155,62 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     setIsOpen(false);
   };
 
+  const isMobile = useIsMobile();
+  // Mobile accordion state: which field is expanded, and whether its date-range
+  // calendar is open. Both reset when the whole menu closes.
+  const [openField, setOpenField] = useState<'type' | 'createdAt' | 'updatedAt' | null>(null);
+  const [rangeOpen, setRangeOpen] = useState(false);
+
+  const handleOpenChange = (next: boolean) => {
+    setIsOpen(next);
+    if (!next) {
+      setOpenField(null);
+      setRangeOpen(false);
+    }
+  };
+
+  const toggleField = (field: 'type' | 'createdAt' | 'updatedAt') => {
+    setOpenField((current) => (current === field ? null : field));
+    setRangeOpen(false);
+  };
+
+  // Option lists, shared by the desktop flyouts and the mobile accordion.
+  // Multi-select semantics: menuitemcheckbox + aria-checked carry the state for
+  // assistive tech; the Checkbox is purely decorative (aria-hidden, unfocusable)
+  // — the Menu.Item is the control.
+  const typeItems = TYPE_VALUES.map((value) => (
+    <Menu.Item
+      key={value}
+      role="menuitemcheckbox"
+      aria-checked={checkedValues.includes(value)}
+      onSelect={(e: Event) => {
+        e.preventDefault();
+        toggleTypeValue(value);
+      }}
+      startIcon={<Checkbox checked={checkedValues.includes(value)} tabIndex={-1} aria-hidden />}
+    >
+      {formatMessage(TYPE_LABELS[value])}
+    </Menu.Item>
+  ));
+
+  const presetItems = (field: DateField) =>
+    DATE_PRESETS.map((preset) => (
+      <Menu.Item key={preset} onSelect={() => addPreset(field, preset)}>
+        {formatMessage(PRESET_LABELS[preset])}
+      </Menu.Item>
+    ));
+
+  const typeLabel = formatMessage({
+    id: getTranslationKey('list.filters.field.type'),
+    defaultMessage: 'Type',
+  });
+  const selectDateRangeLabel = formatMessage({
+    id: getTranslationKey('list.filters.select-date-range'),
+    defaultMessage: 'Select date range',
+  });
+
   return (
-    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
       {/* endIcon={null} drops the DS default chevron — the mock has none. */}
       <Menu.Trigger variant="tertiary" startIcon={<FilterIcon aria-hidden />} endIcon={null}>
         <Flex gap={2} alignItems="center" tag="span">
@@ -154,67 +225,95 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
         popoverPlacement="bottom-start"
         zIndex={2}
         maxHeight="70vh"
-        width={FILTER_PANEL_WIDTH}
+        width={isMobile ? MOBILE_PANEL_WIDTH : FILTER_PANEL_WIDTH}
       >
-        <Menu.SubRoot>
-          <FieldSubTrigger>
-            {formatMessage({
-              id: getTranslationKey('list.filters.field.type'),
-              defaultMessage: 'Type',
-            })}
-          </FieldSubTrigger>
-          <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
-            {/* Multi-select semantics: menuitemcheckbox + aria-checked carry the
-                state for assistive tech; the Checkbox is purely decorative
-                (aria-hidden, unfocusable) — the Menu.Item is the control. */}
-            {TYPE_VALUES.map((value) => (
-              <Menu.Item
-                key={value}
-                role="menuitemcheckbox"
-                aria-checked={checkedValues.includes(value)}
-                onSelect={(e: Event) => {
-                  e.preventDefault();
-                  toggleTypeValue(value);
-                }}
-                startIcon={
-                  <Checkbox checked={checkedValues.includes(value)} tabIndex={-1} aria-hidden />
-                }
-              >
-                {formatMessage(TYPE_LABELS[value])}
-              </Menu.Item>
-            ))}
-          </SubPanel>
-        </Menu.SubRoot>
+        {isMobile ? (
+          // Mobile: one flat panel. Each field expands its options inline below
+          // itself — Radix sub-menus can only fly out sideways, off a phone.
+          <>
+            <FieldToggle
+              aria-expanded={openField === 'type'}
+              onSelect={(e: Event) => {
+                e.preventDefault();
+                toggleField('type');
+              }}
+              endIcon={<Chevron $open={openField === 'type'} aria-hidden />}
+            >
+              {typeLabel}
+            </FieldToggle>
+            {openField === 'type' && <Box paddingLeft={2}>{typeItems}</Box>}
 
-        {(['createdAt', 'updatedAt'] as const).map((field) => (
-          <Menu.SubRoot key={field}>
-            <FieldSubTrigger>{formatMessage(DATE_FIELD_LABELS[field])}</FieldSubTrigger>
-            <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
-              {DATE_PRESETS.map((preset) => (
-                <Menu.Item key={preset} onSelect={() => addPreset(field, preset)}>
-                  {formatMessage(PRESET_LABELS[preset])}
-                </Menu.Item>
-              ))}
-              {/* Design constraint: only Creation date offers a range from the
-                  UI. The URL codec and the badges support ranges on both date
-                  fields (`updated:rangeis:…` works when hand-crafted) so this
-                  stays a one-line change if design extends it later. */}
-              {field === 'createdAt' && (
-                <Menu.SubRoot>
-                  <FieldSubTrigger>
-                    {formatMessage({
-                      id: getTranslationKey('list.filters.select-date-range'),
-                      defaultMessage: 'Select date range',
-                    })}
-                  </FieldSubTrigger>
-                  <SubPanel zIndex={2} maxHeight="none" width={FILTER_PANEL_WIDTH}>
-                    <DateRangeCalendar onSelect={addRange} />
-                  </SubPanel>
-                </Menu.SubRoot>
-              )}
-            </SubPanel>
-          </Menu.SubRoot>
-        ))}
+            {(['createdAt', 'updatedAt'] as const).map((field) => (
+              <Box key={field} width="100%">
+                <FieldToggle
+                  aria-expanded={openField === field}
+                  onSelect={(e: Event) => {
+                    e.preventDefault();
+                    toggleField(field);
+                  }}
+                  endIcon={<Chevron $open={openField === field} aria-hidden />}
+                >
+                  {formatMessage(DATE_FIELD_LABELS[field])}
+                </FieldToggle>
+                {openField === field && (
+                  <Box paddingLeft={2}>
+                    {presetItems(field)}
+                    {/* Only Creation date offers a range from the UI (design). */}
+                    {field === 'createdAt' && (
+                      <>
+                        <FieldToggle
+                          aria-expanded={rangeOpen}
+                          onSelect={(e: Event) => {
+                            e.preventDefault();
+                            setRangeOpen((open) => !open);
+                          }}
+                          endIcon={<Chevron $open={rangeOpen} aria-hidden />}
+                        >
+                          {selectDateRangeLabel}
+                        </FieldToggle>
+                        {rangeOpen && (
+                          <Box paddingLeft={2}>
+                            <DateRangeCalendar onSelect={addRange} />
+                          </Box>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </>
+        ) : (
+          <>
+            <Menu.SubRoot>
+              <FieldSubTrigger>{typeLabel}</FieldSubTrigger>
+              <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
+                {typeItems}
+              </SubPanel>
+            </Menu.SubRoot>
+
+            {(['createdAt', 'updatedAt'] as const).map((field) => (
+              <Menu.SubRoot key={field}>
+                <FieldSubTrigger>{formatMessage(DATE_FIELD_LABELS[field])}</FieldSubTrigger>
+                <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
+                  {presetItems(field)}
+                  {/* Design constraint: only Creation date offers a range from the
+                      UI. The URL codec and the badges support ranges on both date
+                      fields (`updated:rangeis:…` works when hand-crafted) so this
+                      stays a one-line change if design extends it later. */}
+                  {field === 'createdAt' && (
+                    <Menu.SubRoot>
+                      <FieldSubTrigger>{selectDateRangeLabel}</FieldSubTrigger>
+                      <SubPanel zIndex={2} maxHeight="none" width={FILTER_PANEL_WIDTH}>
+                        <DateRangeCalendar onSelect={addRange} />
+                      </SubPanel>
+                    </Menu.SubRoot>
+                  )}
+                </SubPanel>
+              </Menu.SubRoot>
+            ))}
+          </>
+        )}
       </Menu.Content>
     </Menu.Root>
   );

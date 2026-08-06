@@ -43,10 +43,13 @@ const Segment = styled.button<{ $interactive?: boolean }>`
   border: none;
   background: transparent;
   font: inherit;
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
   cursor: ${({ $interactive }) => ($interactive ? 'pointer' : 'default')};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  }
   ${({ $interactive, theme }) =>
     $interactive && `&:hover { background: ${theme.colors.primary100}; }`}
 
@@ -398,7 +401,7 @@ export const FilterBadges = ({ listFilters }: FilterBadgesProps) => {
   }
 
   return (
-    <Flex gap={2} wrap="wrap" paddingTop={2} data-testid="filter-badges">
+    <Flex gap={2} wrap="wrap" paddingTop={6} data-testid="filter-badges">
       {filters.map((filter, index) => (
         <FilterBadge
           // Position is identity: badges are edited/removed by index.
