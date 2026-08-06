@@ -4,7 +4,18 @@ import { useIntl } from 'react-intl';
 import { Filters } from '../../../../../../../../admin/src/components/Filters';
 import { useField } from '../../../../../../../../admin/src/components/Form';
 
-export const ComboboxFilter = (props: Filters.ValueInputProps) => {
+export interface ComboboxFilterProps extends Filters.ValueInputProps {
+  loading?: boolean;
+  hasMoreItems?: boolean;
+  onLoadMore?: () => void;
+}
+
+export const ComboboxFilter = ({
+  loading,
+  hasMoreItems,
+  onLoadMore,
+  ...props
+}: ComboboxFilterProps) => {
   const { formatMessage } = useIntl();
   const field = useField<string>(props.name);
   const ariaLabel = formatMessage({
@@ -17,7 +28,14 @@ export const ComboboxFilter = (props: Filters.ValueInputProps) => {
   };
 
   return (
-    <Combobox aria-label={ariaLabel} value={field.value} onChange={handleChange}>
+    <Combobox
+      aria-label={ariaLabel}
+      value={field.value}
+      onChange={handleChange}
+      loading={loading}
+      hasMoreItems={hasMoreItems}
+      onLoadMore={onLoadMore}
+    >
       {props.options?.map((opt) => {
         const value = typeof opt === 'string' ? opt : opt.value;
         const label = typeof opt === 'string' ? opt : opt.label;

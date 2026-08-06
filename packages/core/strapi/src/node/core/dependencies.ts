@@ -129,7 +129,9 @@ const getInstallCommandHint = (missing: AdminPeerDep[]) => {
     return `pnpm add --save-prod ${packages}`;
   }
 
-  return `npm install --legacy-peer-deps --save ${packages}`;
+  // Do not use --legacy-peer-deps: it rewrites package-lock in a mode that
+  // breaks plain `npm ci` (#27019). Fresh apps install cleanly without it.
+  return `npm install --save ${packages}`;
 };
 
 const reportMissingAdminPeerDeps = (logger: Logger, missing: AdminPeerDep[]) => {
@@ -165,7 +167,7 @@ const validateDeclaredAdminPeerDeps = async (cwd: string, logger: Logger) => {
 
     try {
       minDeclaredVersion = semver.minVersion(dep.declaredVersion);
-    } catch (err) {
+    } catch {
       // Intentional fall-through (variable will be left as null, throwing below)
     }
 
@@ -227,7 +229,7 @@ const installAdminPeerDeps = async (
   let result: ExecaReturnValue<string> | undefined;
 
   if (packageManager === 'npm') {
-    const npmArgs = ['install', '--legacy-peer-deps', '--save', ...packages];
+    const npmArgs = ['install', '--save', ...packages];
     logger.info(`Running 'npm ${npmArgs.join(' ')}'`);
     result = await execa('npm', npmArgs, execOptions);
   } else if (packageManager === 'yarn') {

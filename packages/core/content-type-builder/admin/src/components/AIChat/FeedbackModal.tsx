@@ -170,7 +170,7 @@ export const FeedbackModal: React.FC = () => {
       setFeedbackText('');
       setSelectedReasons([]);
       closeFeedbackModal();
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: t('chat.feedback.error', 'An error occurred while submitting your feedback'),

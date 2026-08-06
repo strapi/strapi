@@ -1,5 +1,6 @@
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
+
 import { getService } from '../utils';
 
 export default {
@@ -23,7 +24,7 @@ export default {
           },
         },
       };
-    } catch (err) {
+    } catch {
       return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },
