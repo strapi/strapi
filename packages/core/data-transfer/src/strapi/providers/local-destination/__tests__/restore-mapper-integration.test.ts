@@ -79,7 +79,9 @@ const schemas: Record<string, unknown> = {
 // `createTransaction` drives an attach() loop until `end()` is emitted; this
 // stub just runs that loop synchronously against a throwaway trx.
 const transaction = jest.fn(async (cb) => {
-  const trx = {};
+  const trx = {
+    raw: jest.fn().mockResolvedValue({ rows: [] }),
+  };
   const rollback = jest.fn();
   // eslint-disable-next-line node/no-callback-literal
   await cb({ trx, rollback });
@@ -89,6 +91,7 @@ const buildStrapi = () =>
   ({
     getModel: jest.fn((uid: string) => schemas[uid]),
     db: {
+      dialect: { client: 'postgres' },
       transaction,
       lifecycles: { enable: jest.fn(), disable: jest.fn() },
     },
@@ -211,6 +214,56 @@ describe('restore mapper integration (entities -> links)', () => {
     expect(onWarning).toHaveBeenCalledWith(
       expect.stringContaining('was not transferred during the entities stage')
     );
+
+    provider.transaction?.end();
+  });
+
+  test('continues restoring valid links after skipping a relation to an untransferred component', async () => {
+    const { provider, onWarning } = await bootstrapProvider();
+    await restoreSourceData(provider, { compSourceId: 7, compDestId: 21 });
+
+    const linksStream = await provider.createLinksWriteStream();
+
+    await writeChunk(linksStream, aComponentLink(999));
+    await writeChunk(linksStream, aComponentLink(7));
+
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        left: expect.objectContaining({ ref: 21 }),
+        right: expect.objectContaining({ ref: BAR_DEST_ID }),
+      })
+    );
+    expect(onWarning).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('was not transferred during the entities stage')
+    );
+
+    provider.transaction?.end();
+  });
+
+  test('continues restoring valid links after a foreign key failure on an earlier link', async () => {
+    const { provider, onWarning } = await bootstrapProvider();
+    await restoreSourceData(provider, { compSourceId: 7, compDestId: 21 });
+
+    const fkError = Object.assign(
+      new Error('insert into chapters_node_lnk violates foreign key constraint'),
+      {
+        code: '23503',
+      }
+    );
+    insert.mockRejectedValueOnce(fkError).mockResolvedValueOnce(undefined);
+
+    const linksStream = await provider.createLinksWriteStream();
+
+    // First link is mapped but violates a FK in the destination DB.
+    await writeChunk(linksStream, aComponentLink(7));
+    // Second link should still be attempted in the same transaction.
+    await writeChunk(linksStream, aComponentLink(7));
+
+    expect(insert).toHaveBeenCalledTimes(2);
+    expect(onWarning).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
 
     provider.transaction?.end();
   });

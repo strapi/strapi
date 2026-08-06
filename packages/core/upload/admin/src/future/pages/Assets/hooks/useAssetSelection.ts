@@ -54,27 +54,48 @@ const AssetSelectionContext = createContext<AssetSelection | null>(null);
 
 interface AssetSelectionProviderProps {
   children: ReactNode;
+  /**
+   * When true, selection is inert: every mutator is a no-op and nothing ever
+   * reads as selected. Every bulk action is gated on `assets.update`, so a user
+   * without it has nothing to select for — the views also hide the checkboxes,
+   * and this makes the remaining paths (click-to-select, Space key) do nothing.
+   */
+  disabled?: boolean;
 }
 
-export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps) => {
+export const AssetSelectionProvider = ({
+  children,
+  disabled = false,
+}: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
 
   const isSelected = useCallback(
-    (key: ItemKey) => state.selectedKeys.has(key),
-    [state.selectedKeys]
+    (key: ItemKey) => !disabled && state.selectedKeys.has(key),
+    [disabled, state.selectedKeys]
   );
 
-  const toggle = useCallback((key: ItemKey) => setState((prev) => toggleSelection(prev, key)), []);
+  const toggle = useCallback(
+    (key: ItemKey) => {
+      if (disabled) return;
+      setState((prev) => toggleSelection(prev, key));
+    },
+    [disabled]
+  );
 
   const selectRange = useCallback(
-    (orderedKeys: ItemKey[], targetKey: ItemKey) =>
-      setState((prev) => selectRangeState(prev, orderedKeys, targetKey)),
-    []
+    (orderedKeys: ItemKey[], targetKey: ItemKey) => {
+      if (disabled) return;
+      setState((prev) => selectRangeState(prev, orderedKeys, targetKey));
+    },
+    [disabled]
   );
 
   const selectAll = useCallback(
-    (orderedKeys: ItemKey[]) => setState(selectAllState(orderedKeys)),
-    []
+    (orderedKeys: ItemKey[]) => {
+      if (disabled) return;
+      setState(selectAllState(orderedKeys));
+    },
+    [disabled]
   );
 
   const clear = useCallback(() => setState(clearSelection()), []);

@@ -405,7 +405,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function create(opts = {} as any) {
-    const { documentId, ...params } = opts;
+    const { documentId: _documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
       validateParams,
@@ -543,7 +543,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
+    const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation

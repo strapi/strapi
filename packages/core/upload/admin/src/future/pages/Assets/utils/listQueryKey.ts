@@ -9,14 +9,13 @@
  *   same list, so the selection survives the toggle.
  * - Infinite scroll (load more) does NOT change any segment → selection persists.
  *
- * Search/filter use stable defaults until their header controls are wired;
- * follow-up PRs only pass real values — no selection logic changes needed.
+ * Filter uses a stable default until its header control is wired; that follow-up
+ * only passes a real value — no selection logic changes needed.
  */
 export interface ListQueryKeyInput {
   folderId: number | null;
-  /** Empty string until search UI ships. */
   search: string;
-  /** Null until sort UI ships. */
+  /** Composite of asset sort and folder position — both change the render order. */
   sort: string | null;
   /** Null until filter UI ships. */
   filter: string | null;

@@ -6,6 +6,7 @@ import type { Context } from 'koa';
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
+import { validateGenerateAIMetadataBody } from './validation/admin/ai-metadata';
 
 export default {
   async find(ctx: Context) {
@@ -181,6 +182,42 @@ export default {
 
       ctx.badRequest(cause ? `${message}: ${cause}` : message);
     }
+  },
+
+  /**
+   * Generate AI metadata for an explicit selection of files, synchronously.
+   *
+   * Unlike `generateAIMetadata`, no job is created: the request resolves once
+   * every file has been processed and reports the outcome per file, so a single
+   * bad id or a non-image in the selection never fails the whole batch.
+   *
+   * @experimental
+   */
+  async unstable_generateAIMetadata(ctx: Context) {
+    const { userAbility } = ctx.state;
+    const { body } = ctx.request;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.update,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const { fileIds } = await validateGenerateAIMetadataBody(body);
+
+    const aiMetadataService = getService('aiMetadata');
+
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    const results = await aiMetadataService.generateForFiles(fileIds, ctx.state.user);
+
+    ctx.body = { data: results };
   },
 
   async getLatestAIMetadataJob(ctx: Context) {
