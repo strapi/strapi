@@ -2,7 +2,6 @@ import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
-  IconButton,
   RawTable,
   RawTbody,
   RawTd,
@@ -12,7 +11,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Folder as FolderIcon, More } from '@strapi/icons';
+import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
@@ -27,6 +26,7 @@ import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
+import { AssetActionsMenu } from './AssetActionsMenu';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -184,7 +184,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
 
@@ -194,7 +194,15 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
   // a range, cmd/ctrl toggles.
+  //
+  // The containment guard on this and the handler below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // opening the details drawer or toggling the selection.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -206,6 +214,10 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
 
   // Desktop: Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
@@ -242,6 +254,11 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
       {/* No checkbox column on mobile (multi-select deferred) or without the
           update permission (nothing selectable can be acted on). */}
@@ -298,18 +315,11 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would open the details drawer). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
       </StyledTd>
     </StyledTr>

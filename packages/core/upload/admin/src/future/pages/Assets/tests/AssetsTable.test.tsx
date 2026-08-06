@@ -31,11 +31,12 @@ jest.mock('../hooks/useFolderNavigation', () => ({
 }));
 
 jest.mock('../components/Dnd/useAssetDnd', () => ({
-  useFileDraggable: () => ({
+  useFileDraggable: (asset: { id: number; name: string }) => ({
     attributes: {},
     listeners: {},
     setNodeRef: jest.fn(),
     isDragging: false,
+    dragData: { kind: 'file', id: asset.id, name: asset.name, folderId: null },
   }),
   useFolderDraggableDroppable: (folder: { id: number; name: string }) => ({
     dragData: { kind: 'folder', id: folder.id, name: folder.name, parentId: null },
@@ -278,6 +279,79 @@ describe('AssetsTable', () => {
       fireEvent.keyDown(screen.getByRole('button', { name: 'More actions' }), { key: 'Enter' });
 
       expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Asset actions menu', () => {
+    it('opens the asset actions menu without opening the details drawer', async () => {
+      const { user } = setup({ assets: [createMockAsset(1, 'photo.png')], folders: [] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('does not open the details drawer when Enter is pressed on the actions menu', () => {
+      setup({ assets: [createMockAsset(1, 'photo.png')], folders: [] });
+
+      // The row handles Enter as "open this asset", so the actions cell has to
+      // swallow the keydown as well as the click. Dispatched directly rather
+      // than through a real key press: the DS grid cell moves focus around on
+      // its own, which jsdom doesn't reproduce faithfully.
+      fireEvent.keyDown(screen.getByRole('button', { name: 'More actions' }), { key: 'Enter' });
+
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Asset actions menu dismissal', () => {
+    const setupAssetRow = () => setup({ assets: [createMockAsset(7, 'photo.png')], folders: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setup>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupAssetRow();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('does not open the details drawer when the open dialog is clicked', async () => {
+      const { user } = setupAssetRow();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
     });
   });
 
