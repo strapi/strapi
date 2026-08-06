@@ -13,4 +13,5 @@ runs:
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
         STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: true
+        BETA_MEDIA_LIBRARY: true
       shell: bash

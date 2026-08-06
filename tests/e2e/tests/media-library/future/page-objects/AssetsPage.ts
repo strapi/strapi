@@ -90,10 +90,15 @@ export class AssetsPage {
       return dt;
     }, files);
 
-    // dispatchEvent must fire dragenter first - that's what sets isDraggingOver and shows the overlay
-    await this.dropZone.dispatchEvent('dragenter', { dataTransfer });
-    await this.dropZone.dispatchEvent('dragover', { dataTransfer });
-    await expect(this.getDropZoneMessage()).toBeVisible();
+    // dispatchEvent must fire dragenter first - that's what sets isDraggingOver and shows the overlay.
+    // UploadDropZoneProvider remounts while the assets list is still settling after a
+    // navigation, which resets `isDragging` and silently swallows a single dragenter.
+    // Re-dispatch until the overlay actually shows rather than assuming the first one stuck.
+    await expect(async () => {
+      await this.dropZone.dispatchEvent('dragenter', { dataTransfer });
+      await this.dropZone.dispatchEvent('dragover', { dataTransfer });
+      await expect(this.getDropZoneMessage()).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15_000 });
 
     await this.dropZone.dispatchEvent('drop', { dataTransfer });
   }
@@ -529,6 +534,28 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
+  async uploadFilesFromUrl(urls: string | string[]) {
+    await this.openImportFromUrlDialog();
+    const urlsArray = Array.isArray(urls) ? urls : [urls];
+    await this.urlTextarea.fill(urlsArray.join('\n'));
+    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  }
+
+  /**
+   * Cancel the whole in-flight upload batch from the progress dialog header.
+   */
+  async cancelUpload() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Cancel all' }).click();
+  }
+
+  /**
+   * Retry whichever files were left in a cancelled state after `cancelUpload()`.
+   * Only visible once at least one file is cancelled.
+   */
+  async retryCancelledUploads() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Retry' }).click();
+  }
+
   /**
    * Drag a file or folder onto a folder target using pointer events (dnd-kit).
    * Moves the pointer more than 8px before dropping to satisfy activation distance.
