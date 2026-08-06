@@ -23,9 +23,10 @@ interface SubNavFolderProps {
 const FolderRow = styled(Flex)<{ $depth: number; $isDropTarget?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius};
 
-  padding-left: ${({ theme }) => theme.spaces[3]};
   padding-right: ${({ theme }) => theme.spaces[3]};
-  margin-left: ${({ theme, $depth }) => `calc(${$depth} * ${theme.spaces[6]}`});
+
+  padding-left: ${({ theme, $depth }) =>
+    `calc(${$depth} * ${theme.spaces[6]} + ${theme.spaces[3]})`};
 
   background-color: ${({ $isDropTarget, theme }) =>
     $isDropTarget ? theme.colors.primary100 : 'transparent'};
