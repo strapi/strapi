@@ -77,7 +77,15 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
             defaultMessage: 'More actions',
           })}
         />
-        <Menu.Content popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
+        {/* See AssetActionsMenu: the design system's 15rem default clamps the
+            menu against a hidden scrollbar, so items can be silently cut off
+            near the viewport edge. This one is shorter, but kept in sync. */}
+        <Menu.Content
+          popoverPlacement="bottom-end"
+          zIndex={2}
+          minWidth="22rem"
+          maxHeight="fit-content"
+        >
           <Menu.Item startIcon={<Link />} onSelect={handleCopyLink}>
             {formatMessage({
               id: getTranslationKey('list.folder.actions.copy-link'),

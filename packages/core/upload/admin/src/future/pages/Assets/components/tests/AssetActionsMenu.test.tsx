@@ -78,6 +78,17 @@ describe('AssetActionsMenu', () => {
     expect(screen.getByRole('separator')).toBeInTheDocument();
   });
 
+  // The design system caps Menu.Content at 15rem and hides the scrollbar. This
+  // menu is taller than the space under a last-row trigger, so with the default
+  // the popper clamped it and cut Delete off with nothing on screen to say so.
+  it('lets the menu size to its content instead of scrolling inside the DS cap', async () => {
+    const { user } = setup();
+
+    await openMenu(user);
+
+    expect(screen.getByRole('menu')).toHaveStyle({ maxHeight: 'fit-content' });
+  });
+
   describe('Copy link to media', () => {
     it('copies the asset URL and toasts', async () => {
       const { user } = setup();
