@@ -20,6 +20,7 @@ const MCP_PROTOCOL_VERSION = '2025-06-18';
 const TARGET_UID = 'api::mcp-shape-target.mcp-shape-target';
 const SOURCE_UID = 'api::mcp-shape-source.mcp-shape-source';
 const LOCALIZED_UID = 'api::mcp-shape-localized.mcp-shape-localized';
+const HERO_UID = 'mcp-shape-blocks.hero';
 
 const CM_READ_ACTION = 'plugin::content-manager.explorer.read';
 
@@ -32,6 +33,17 @@ const targetCt = {
   attributes: {
     name: { type: 'string' },
     secret: { type: 'string' },
+  },
+};
+
+// Dynamic-zone component carrying a relation, so nested `populate` under `on` (the
+// canonical dynamic-zone/morph fragment shape) has something real to inline against.
+const heroComponent = {
+  displayName: 'hero',
+  category: 'mcp-shape-blocks',
+  attributes: {
+    label: { type: 'string' },
+    author: { type: 'relation', relation: 'oneToOne', target: TARGET_UID },
   },
 };
 
@@ -49,6 +61,7 @@ const sourceCt = {
     // morphToMany is the runtime relation kind `relations.isAnyToMany` ignores — the
     // output schema used to declare a single object here while the runtime returns an array.
     morphTargets: { type: 'relation', relation: 'morphToMany' },
+    blocks: { type: 'dynamiczone', components: [HERO_UID] },
   },
 };
 
@@ -126,7 +139,10 @@ describe('MCP content-manager relation shaping (api)', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([targetCt, sourceCt, localizedCt]).build();
+    await builder
+      .addComponent(heroComponent)
+      .addContentTypes([targetCt, sourceCt, localizedCt])
+      .build();
 
     strapi = await createStrapiInstance({
       register({ strapi: instance }) {
@@ -488,5 +504,220 @@ describe('MCP content-manager relation shaping (api)', () => {
         { documentId: document.documentId, locale: 'it', status: 'published' },
       ])
     );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Explicit `populate` propagation (regression: populateFromQuery ignored the
+  // caller's `populate` and reduced it to {} before it ever reached the Document Service)
+  // ---------------------------------------------------------------------------
+
+  describe('explicit populate propagation', () => {
+    test('get tool inlines a relation named via an array populate spec', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: ['oneTarget'],
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      // Previously: populate reached the Document Service as `{}`, so oneTarget stayed an
+      // identity-only stub ({ documentId }) even though inlining was requested.
+      expect(data.oneTarget).toMatchObject({ documentId: target1.documentId, name: 'Target 1' });
+      // The token's TARGET_UID permission is restricted to ['name'] — secret must not leak.
+      expect(data.oneTarget).not.toHaveProperty('secret');
+    });
+
+    test('get tool inlines relations when populate is the "*" wildcard', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: '*',
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      expect(data.oneTarget).toMatchObject({ documentId: target1.documentId, name: 'Target 1' });
+    });
+
+    test('get tool honors a nested populate spec with per-relation fields', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: { oneTarget: { fields: ['name'] } },
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      expect(data.oneTarget).toMatchObject({ documentId: target1.documentId, name: 'Target 1' });
+    });
+
+    test('list tool inlines a relation named via an array populate spec', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'list_mcp-shape-source', {
+        populate: ['oneTarget'],
+      });
+
+      expectSuccessfulToolCall(response);
+      const results = response.result?.structuredContent?.results as Array<Record<string, unknown>>;
+      const found = results.find((entry) => entry.documentId === source.documentId);
+      expect(found?.oneTarget).toMatchObject({ documentId: target1.documentId, name: 'Target 1' });
+    });
+
+    test('get tool still returns identity-only stubs when populate is omitted (default unchanged)', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      expect(data.oneTarget).toEqual({ documentId: target1.documentId });
+    });
+
+    test('get tool falls back to an identity stub when the token has NO permission on the target type', async () => {
+      const { source, target1 } = await seedSourceWithRelations();
+
+      // Read is granted on the SOURCE type only — zero permission of any kind on TARGET_UID,
+      // as opposed to the field-restricted (['name']) token used elsewhere in this block.
+      const token = await createAdminToken([readPermission(SOURCE_UID, null)]);
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: ['oneTarget'],
+      });
+
+      // Inlining is opt-in via `populate`, but createInlineRelationResolver's type-level
+      // `cannot.read()` check on the target type still gates it — no permission at all on
+      // TARGET_UID must degrade to the identity-only stub, not an error and not a partial leak.
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      expect(data.oneTarget).toEqual({ documentId: target1.documentId });
+
+      const serialized = JSON.stringify(response.result?.structuredContent);
+      expect(serialized).not.toContain('Target 1');
+      expect(serialized).not.toContain('SECRET-');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Nested relation filters — scope-cut regression (relation-target field exposure)
+  // ---------------------------------------------------------------------------
+
+  describe('nested relation filters are rejected (scope cut)', () => {
+    test('filtering on a related entry field is rejected by input validation', async () => {
+      const { target1 } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'list_mcp-shape-source', {
+        filters: { oneTarget: { secret: { $eq: target1.secret } } },
+      });
+
+      // Previously: the schema accepted this and returned the matching source, exposing
+      // the target's `secret` value through result membership even though the token's
+      // TARGET_UID permission never granted read access to `secret`.
+      expect(response.result?.isError).toBe(true);
+    });
+
+    test('filtering on a top-level scalar field still works', async () => {
+      const { source } = await seedSourceWithRelations();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'list_mcp-shape-source', {
+        filters: { name: { $eq: 'Source' } },
+      });
+
+      expectSuccessfulToolCall(response);
+      const results = response.result?.structuredContent?.results as Array<Record<string, unknown>>;
+      expect(results.map((entry) => entry.documentId)).toContain(source.documentId);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Dynamic-zone / morph "on" fragments — regression for the inline-path matcher
+  // ---------------------------------------------------------------------------
+
+  describe('dynamic-zone "on" fragment inlining', () => {
+    const seedSourceWithDynamicZoneBlock = async () => {
+      const target = await strapi.documents(TARGET_UID as UID.CollectionType).create({
+        data: { name: 'Block Author', secret: 'SECRET-block-author' },
+      });
+
+      const source = await strapi.documents(SOURCE_UID as UID.CollectionType).create({
+        data: {
+          name: 'Source with block',
+          blocks: [{ __component: HERO_UID, label: 'Hero label', author: target.documentId }],
+        } as Record<string, unknown>,
+      });
+
+      return { source, target };
+    };
+
+    test('get tool inlines a relation nested under a dynamic-zone "on" fragment', async () => {
+      const { source, target } = await seedSourceWithDynamicZoneBlock();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: { blocks: { on: { [HERO_UID]: { populate: ['author'] } } } },
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      const blocks = data.blocks as Array<Record<string, unknown>>;
+      expect(blocks).toHaveLength(1);
+      // Previously: the inline-path matcher only followed a direct `populate` key, never
+      // descending into `on` fragments, so `author` stayed an identity-only stub here.
+      expect(blocks[0].author).toMatchObject({
+        documentId: target.documentId,
+        name: 'Block Author',
+      });
+      expect(blocks[0].author).not.toHaveProperty('secret');
+    });
+
+    test('get tool leaves the dynamic-zone relation as a stub when "on" is not opted into inlining', async () => {
+      const { source, target } = await seedSourceWithDynamicZoneBlock();
+
+      const token = await createSourceReadToken();
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
+        documentId: source.documentId,
+        populate: ['blocks'],
+      });
+
+      expectSuccessfulToolCall(response);
+      const data = response.result?.structuredContent?.data as Record<string, unknown>;
+      const blocks = data.blocks as Array<Record<string, unknown>>;
+      expect(blocks).toHaveLength(1);
+      expect(blocks[0].author).toEqual({ documentId: target.documentId });
+    });
   });
 });
