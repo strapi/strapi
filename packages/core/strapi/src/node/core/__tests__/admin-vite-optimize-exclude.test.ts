@@ -163,12 +163,12 @@ describe('admin vite optimize exclude heuristics', () => {
   });
 
   it('requires allowlist or opt-in on top of the UI-kit shape (#27136)', () => {
-    expect(isEligibleForOptimizeDepsExclude('strapi-design-extended', strapiDesignExtendedLike)).toBe(
-      true
-    );
-    expect(isEligibleForOptimizeDepsExclude('@_sh/strapi-plugin-ckeditor', ckeditorPluginLike)).toBe(
-      false
-    );
+    expect(
+      isEligibleForOptimizeDepsExclude('strapi-design-extended', strapiDesignExtendedLike)
+    ).toBe(true);
+    expect(
+      isEligibleForOptimizeDepsExclude('@_sh/strapi-plugin-ckeditor', ckeditorPluginLike)
+    ).toBe(false);
     expect(
       isEligibleForOptimizeDepsExclude(
         'my-thin-ui-kit',
@@ -178,15 +178,12 @@ describe('admin vite optimize exclude heuristics', () => {
       )
     ).toBe(true);
     expect(
-      isEligibleForOptimizeDepsExclude(
-        'opted-in-but-cjs',
-        {
-          name: 'opted-in-but-cjs',
-          main: 'index.js',
-          peerDependencies: { react: '^18.0.0' },
-          strapi: { admin: { vite: { optimizeDepsExclude: true } } },
-        } as PackageJsonLike
-      )
+      isEligibleForOptimizeDepsExclude('opted-in-but-cjs', {
+        name: 'opted-in-but-cjs',
+        main: 'index.js',
+        peerDependencies: { react: '^18.0.0' },
+        strapi: { admin: { vite: { optimizeDepsExclude: true } } },
+      } as PackageJsonLike)
     ).toBe(false);
   });
 });

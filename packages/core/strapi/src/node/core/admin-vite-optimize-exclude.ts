@@ -155,7 +155,9 @@ export const isEligibleForOptimizeDepsExclude = (name: string, pkg: PackageJson)
     return false;
   }
 
-  return ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST.has(name) || packageOptsIntoOptimizeDepsExclude(pkg);
+  return (
+    ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST.has(name) || packageOptsIntoOptimizeDepsExclude(pkg)
+  );
 };
 
 /**
