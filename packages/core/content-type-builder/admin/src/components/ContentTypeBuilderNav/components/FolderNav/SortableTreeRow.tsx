@@ -65,11 +65,11 @@ const Row = styled(Flex)<{ $depth: number; $dropTarget?: boolean; $dragging?: bo
   position: relative;
   border-radius: ${({ theme }) => theme.borderRadius};
 
-  margin-left: ${({ theme, $depth }) => `calc(${$depth} * ${theme.spaces[6]})`};
-
   padding-right: ${({ theme }) => theme.spaces[3]};
   padding-block: ${({ theme }) => theme.spaces[2]};
   padding-left: ${({ theme }) => theme.spaces[3]};
+  padding-left: ${({ theme, $depth }) =>
+    `calc(${$depth} * ${theme.spaces[6]} + ${theme.spaces[3]})`};
 
   background-color: ${({ $dropTarget, theme }) =>
     $dropTarget ? theme.colors.primary100 : 'transparent'};
