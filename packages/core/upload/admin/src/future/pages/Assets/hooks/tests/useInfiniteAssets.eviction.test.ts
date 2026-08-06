@@ -23,7 +23,7 @@ const queryResult = {
   error: undefined,
 };
 
-const mockUseGetAssetsQuery = jest.fn(() => queryResult);
+const mockUseGetAssetsQuery = jest.fn((..._args: unknown[]) => queryResult);
 jest.mock('../../../../services/assets', () => ({
   // The hook's query args are irrelevant here — the eviction path only reads the
   // store and dispatches — so the mock returns a fixed result regardless.
