@@ -310,6 +310,14 @@ describe('normalizeContentManagerLayout', () => {
   });
 
   it('keeps relation main fields when the relation target schema is unavailable', () => {
+    const editMetadata = {
+      label: 'Category',
+      description: '',
+      placeholder: '',
+      visible: true,
+      editable: true,
+      mainField: 'name',
+    };
     const normalized = normalizeContentManagerLayout(
       {
         ...data,
@@ -318,14 +326,7 @@ describe('normalizeContentManagerLayout', () => {
           metadatas: {
             ...data.contentType.metadatas,
             category: {
-              edit: {
-                label: 'Category',
-                description: '',
-                placeholder: '',
-                visible: true,
-                editable: true,
-                mainField: 'name',
-              } as object,
+              edit: editMetadata,
               list: { label: 'Category', mainField: 'name' },
             },
           },
@@ -338,9 +339,7 @@ describe('normalizeContentManagerLayout', () => {
       }
     );
 
-    expect(
-      (normalized.contentType.metadatas.category?.edit as { mainField?: string }).mainField
-    ).toBe('name');
+    expect(normalized.contentType.metadatas.category?.edit).toMatchObject({ mainField: 'name' });
     expect(normalized.contentType.metadatas.category?.list.mainField).toBe('name');
   });
 });

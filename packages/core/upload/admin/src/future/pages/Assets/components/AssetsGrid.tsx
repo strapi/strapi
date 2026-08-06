@@ -14,8 +14,10 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
+import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -23,6 +25,7 @@ import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
+import { FolderActionsMenu } from './FolderActionsMenu';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -30,6 +33,17 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 /* -------------------------------------------------------------------------------------------------
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
+
+// Cards own click, Enter and Space; the controls sitting on them (checkbox, "..."
+// menu) must not let those reach the card. Scoped to the wrapper's own DOM
+// subtree so the menu's portaled content — a React child of the wrapper, but
+// never a DOM descendant — still reaches `document`, where Radix listens in
+// order to dismiss its layers.
+const stopCardEvent = (e: React.SyntheticEvent) => {
+  if (isEventFromWithin(e)) {
+    e.stopPropagation();
+  }
+};
 
 // Top-left selection checkbox overlaid on the asset preview, always visible.
 const CheckboxOverlay = styled(Flex)`
@@ -139,7 +153,9 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
   const {
+    dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
     showValidDropHighlight,
@@ -156,7 +172,15 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   // Folders share the selection mechanism with assets (toggle, range,
   // select-all). Only the plain-click semantic differs: it navigates into the
   // folder instead of selecting it.
+  //
+  // The containment guard on this and the handlers below is what keeps the
+  // actions menu's portaled dialogs — React children of this card — from
+  // navigating into the folder or starting a drag.
   const handleClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -167,6 +191,10 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
@@ -198,38 +226,38 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       $isSelected={isSelected(key)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
       role="listitem"
       tabIndex={0}
     >
-      <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
-        <Checkbox
-          checked={isSelected(key)}
-          onClick={handleCheckboxClick}
-          aria-label={formatMessage(
-            {
-              id: getTranslationKey('list.table.row.select'),
-              defaultMessage: 'Select {name}',
-            },
-            { name: folder.name }
-          )}
-        />
-      </Flex>
+      {canUpdate && (
+        <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected(key)}
+            onClick={handleCheckboxClick}
+            aria-label={formatMessage(
+              {
+                id: getTranslationKey('list.table.row.select'),
+                defaultMessage: 'Select {name}',
+              },
+              { name: folder.name }
+            )}
+          />
+        </Flex>
+      )}
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
       <FolderName textColor="neutral800" ellipsis>
         {folder.name}
       </FolderName>
-      <IconButton
-        label={formatMessage({
-          id: getTranslationKey('control-card.more-actions'),
-          defaultMessage: 'More actions',
-        })}
-        variant="ghost"
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
-        <More />
-      </IconButton>
+      <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+        <FolderActionsMenu folder={folder} dragData={dragData} />
+      </Flex>
     </StyledFolderCard>
   );
 };
@@ -275,11 +303,24 @@ interface AssetPreviewProps {
 }
 
 const AssetPreview = ({ asset }: AssetPreviewProps) => {
-  const { alternativeText, ext, formats, mime, url, isLocal, isUrlSigned } = asset;
+  const { alternativeText, ext, formats, mime, url, updatedAt, isLocal, isUrlSigned } = asset;
 
   if (mime?.includes(ASSET_TYPES.Image)) {
-    const mediaURL =
+    // Replace keeps the same hash/URL, so without a cache-buster the browser
+    // serves the stale thumbnail after a Replace Media. `updatedAt`
+    // changes on replace, so it re-fetches exactly once per replacement.
+    // Skipped for signed URLs — an extra query param invalidates the signature.
+    const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
+    const appendCacheBuster = (raw: string) => {
+      if (cacheKey === undefined) {
+        return raw;
+      }
+      return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
+    };
+
+    const rawMediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
+    const mediaURL = rawMediaURL ? appendCacheBuster(rawMediaURL) : rawMediaURL;
 
     if (mediaURL) {
       return (
@@ -368,6 +409,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -427,19 +469,21 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
-        <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onClick={handleCheckboxClick}
-            aria-label={formatMessage(
-              {
-                id: getTranslationKey('list.table.row.select'),
-                defaultMessage: 'Select {name}',
-              },
-              { name: asset.name }
-            )}
-          />
-        </CheckboxOverlay>
+        {canUpdate && (
+          <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+            <Checkbox
+              checked={selected}
+              onClick={handleCheckboxClick}
+              aria-label={formatMessage(
+                {
+                  id: getTranslationKey('list.table.row.select'),
+                  defaultMessage: 'Select {name}',
+                },
+                { name: asset.name }
+              )}
+            />
+          </CheckboxOverlay>
+        )}
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>
