@@ -29,13 +29,13 @@ export const DeleteFolderDialog = ({
     if (mode === 'withContent') {
       return formatMessage({
         id: getTrad('nav.folder.delete-with-content.title'),
-        defaultMessage: 'Folder and content suppression',
+        defaultMessage: 'Delete folder and content',
       });
     }
 
     return formatMessage({
       id: getTrad('nav.folder.delete.title'),
-      defaultMessage: 'Folder suppression',
+      defaultMessage: 'Delete folder',
     });
   }, [formatMessage, mode]);
 
@@ -77,11 +77,7 @@ export const DeleteFolderDialog = ({
         }
         endAction={
           <Dialog.Action>
-            <Button
-              variant={mode === 'withContent' ? 'danger' : undefined}
-              onClick={onConfirm}
-              fullWidth
-            >
+            <Button variant={'danger'} onClick={onConfirm} fullWidth>
               {formatMessage({
                 id: getTrad('nav.folder.delete.confirm'),
                 defaultMessage: 'Yes, delete',
