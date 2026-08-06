@@ -22,7 +22,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useAIAvailability } from '../../../hooks/useAiAvailability';
+import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
@@ -444,8 +444,10 @@ export const AssetsPage = () => {
   // server asked for.
   const { data: settings } = useGetUploadSettingsQuery();
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
-  // Drives the post-upload AI metadata phase shown per row in the progress dialog.
-  const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // Drives the post-upload AI metadata phase shown per row in the progress
+  // dialog. No mime argument: the files are not known until they are picked,
+  // and the server filters the batch on the same allowlist anyway.
+  const isAiMetadataEnabled = useAIMetadataEnabled();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;

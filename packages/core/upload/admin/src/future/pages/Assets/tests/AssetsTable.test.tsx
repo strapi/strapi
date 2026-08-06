@@ -12,14 +12,15 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
-const mockUseAIAvailability = jest.fn(() => ({ status: 'success' as const, isEnabled: true }));
+const mockUseAIAvailability = jest.fn(() => true);
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
 
-jest.mock('../../../../hooks/useAiAvailability', () => ({
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useAIAvailability: () => mockUseAIAvailability(),
 }));
 
@@ -111,7 +112,7 @@ describe('AssetsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: true });
+    mockUseAIAvailability.mockReturnValue(true);
   });
 
   describe('Table rendering', () => {
@@ -982,8 +983,8 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
-    it('hides Create metadata when AI metadata is unavailable', async () => {
-      mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: false });
+    it('hides Create metadata when the license has no AI', async () => {
+      mockUseAIAvailability.mockReturnValue(false);
 
       const { user } = setup();
 
@@ -992,6 +993,25 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    });
+
+    // The other half of the gate: the license allows AI but the setting is off.
+    // Both conditions are required, so either one alone hides the action.
+    it('hides Create metadata when the aiMetadata setting is off', async () => {
+      server.use(
+        http.get('/upload/settings', () =>
+          HttpResponse.json({ data: { aiMetadata: false, concurrentUploadRequests: 1 } })
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument()
+      );
+      expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
     });
   });
 });
