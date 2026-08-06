@@ -28,8 +28,8 @@ const { extractCredentialsMock, uploadMock, mockSend, UploadMock, S3ClientMock }
   }
 );
 
-vi.mock('../utils', async () => {
-  const actual = await vi.importActual<typeof import('../utils')>('../utils');
+vi.mock(import('../utils'), async (importOriginal) => {
+  const actual = await importOriginal();
   return {
     ...actual,
     extractCredentials: extractCredentialsMock,
@@ -40,8 +40,8 @@ vi.mock('@aws-sdk/lib-storage', () => ({
   Upload: UploadMock,
 }));
 
-vi.mock('@aws-sdk/client-s3', async () => {
-  const actual = await vi.importActual<typeof import('@aws-sdk/client-s3')>('@aws-sdk/client-s3');
+vi.mock(import('@aws-sdk/client-s3'), async (importOriginal) => {
+  const actual = await importOriginal();
   return {
     ...actual,
     S3Client: S3ClientMock,
