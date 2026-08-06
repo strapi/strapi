@@ -23,7 +23,7 @@ const queryResult = {
   error: undefined,
 };
 
-const mockUseGetAssetsQuery = jest.fn(() => queryResult);
+const mockUseGetAssetsQuery = jest.fn((..._args: unknown[]) => queryResult);
 jest.mock('../../../../services/assets', () => ({
   useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
 }));
