@@ -16,6 +16,8 @@ const config = {
     'rollup.config.mjs',
     'lint-staged.config.mjs',
     'vitest.config.ts',
+    // Plain-JS tooling run by hand, outside the TS project.
+    'scripts/',
   ],
 };
 

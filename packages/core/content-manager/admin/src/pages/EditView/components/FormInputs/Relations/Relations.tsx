@@ -27,7 +27,6 @@ import {
 } from '@strapi/design-system';
 import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus, WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
-import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
@@ -53,6 +52,7 @@ import {
   RelationResult,
 } from '../../../../../services/relations';
 import { type MainField } from '../../../../../utils/attributes';
+import { setIn } from '../../../../../utils/objects';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -279,13 +279,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       /**
        * Tidy up our data.
        */
-      const transformations = pipe(
-        removeConnected(ctx),
-        removeDisconnected(ctx),
-        addLabelAndHref(ctx)
-      );
-
-      const transformedRels = transformations([...serverData]);
+      const withoutConnected = removeConnected(ctx)([...serverData]);
+      const withoutDisconnected = removeDisconnected(ctx)(withoutConnected);
+      const transformedRels = addLabelAndHref(ctx)(withoutDisconnected);
 
       /**
        * Connect items (e.g. from fill-from-locale) may lack href/label. Ensure they have them
@@ -702,6 +698,10 @@ const RelationModalWithContext = ({
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
+  const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
+  const getParentFormValuesWithCurrentRelation = () => {
+    return setIn(getParentFormValues(), name, fieldValue);
+  };
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -742,6 +742,7 @@ const RelationModalWithContext = ({
                   shouldBypassConfirmation: false,
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
+                  getParentFormValues: getParentFormValuesWithCurrentRelation,
                 },
               });
             }
@@ -937,7 +938,7 @@ const RelationsList = ({
                 ? { start: true }
                 : relationInFront
                   ? {
-                      before: relationInFront.documentId,
+                      before: relationInFront.documentId ?? relationInFront.apiData?.documentId,
                       locale: relationInFront.locale,
                       status:
                         'publishedAt' in relationInFront && relationInFront.publishedAt
@@ -948,14 +949,12 @@ const RelationsList = ({
 
             const relationWithPosition: Relation = {
               ...relation,
-              ...{
-                apiData: {
-                  id: relation.id,
-                  documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
-                  locale: relation.locale || relation.apiData?.locale,
-                  isTemporary: relation.apiData?.isTemporary,
-                  position,
-                },
+              apiData: {
+                id: relation.id,
+                documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
+                locale: relation.locale || relation.apiData?.locale,
+                isTemporary: relation.apiData?.isTemporary,
+                position,
               },
             };
 

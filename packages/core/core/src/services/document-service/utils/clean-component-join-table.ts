@@ -182,7 +182,7 @@ const findPublicationStateMismatches = async (
 
           // If we reach here, this component instance's parent DOES support D&P
           // Continue to process this component instance for ghost relations
-        } catch (error) {
+        } catch {
           // Skip this component instance on error
           // eslint-disable-next-line no-continue
           continue;
@@ -220,7 +220,7 @@ const findPublicationStateMismatches = async (
     }
 
     return ghostEntries;
-  } catch (error) {
+  } catch {
     return [];
   }
 };

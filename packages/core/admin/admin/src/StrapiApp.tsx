@@ -516,7 +516,7 @@ class StrapiApp {
       const normalizedKey = normalizeAdminLocale(key);
 
       acc[normalizedKey] = {
-        ...(acc[normalizedKey] || {}),
+        ...acc[normalizedKey],
         ...customTranslations[key],
       };
 
@@ -563,8 +563,8 @@ class StrapiApp {
     }>((acc, current) => {
       acc[current] = {
         ...adminTranslations[current],
-        ...(mergedTrads[current] || {}),
-        ...(normalizedCustomTranslations[current] ?? {}),
+        ...mergedTrads[current],
+        ...normalizedCustomTranslations[current],
       };
 
       return acc;
