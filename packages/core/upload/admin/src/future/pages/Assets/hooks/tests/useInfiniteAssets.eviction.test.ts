@@ -25,7 +25,7 @@ const queryResult = {
 
 const mockUseGetAssetsQuery = jest.fn(() => queryResult);
 jest.mock('../../../../services/assets', () => ({
-  useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
+  useGetAssetsQuery: mockUseGetAssetsQuery,
 }));
 
 const mockDispatch = jest.fn();
