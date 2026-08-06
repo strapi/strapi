@@ -115,7 +115,10 @@ function getDropTargetBetweenRows(
     maxDepth = Math.min(maxDepth, folderCeiling);
   }
 
-  const depth = clamp(projectedDepth, minDepth, Math.max(minDepth, maxDepth));
+  if (maxDepth < minDepth) {
+    return null;
+  }
+  const depth = clamp(projectedDepth, minDepth, maxDepth);
 
   const parentId = ((): string | null => {
     if (depth === 0 || !previous) {
