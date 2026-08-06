@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-cache-provider-redis",
-  "version": "5.51.1",
+  "version": "5.51.2",
   "description": "Redis cache provider for Strapi's pluggable cache manager.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -62,14 +62,14 @@
     "ioredis": "5.4.2"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.51.1",
-    "@strapi/types": "5.51.1",
-    "eslint-config-custom": "5.51.1",
+    "@strapi/strapi": "5.51.2",
+    "@strapi/types": "5.51.2",
+    "eslint-config-custom": "5.51.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.4",
     "styled-components": "6.4.1",
-    "tsconfig": "5.51.1",
+    "tsconfig": "5.51.2",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
