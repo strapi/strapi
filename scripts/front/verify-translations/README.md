@@ -57,3 +57,5 @@ Admin message namespaces (`global.`, `Settings.`, …) are derived from `core/ad
 - `--write-en` fills gaps and, by default, **preserves existing `en.json`** values; pass `--sync-existing` to overwrite catalogs from code.
 - After `--write-en`, minority call-site `defaultMessage`s are aligned to the catalog.
 - CI runs `yarn verify:translations` (no write flags).
+
+<!-- CI retrigger marker -->
