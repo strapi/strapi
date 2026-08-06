@@ -43,7 +43,7 @@ export const ReplaceMediaButton = ({
       <Button variant="secondary" onClick={handleClick} {...props}>
         {formatMessage({
           id: getTrad('control-card.replace-media'),
-          defaultMessage: 'Replace Media',
+          defaultMessage: 'Replace media',
         })}
       </Button>
       <VisuallyHidden>

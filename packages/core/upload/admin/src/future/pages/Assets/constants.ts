@@ -24,14 +24,14 @@ export const TABLE_HEADERS: TableHeader[] = [
     name: 'createdAt',
     label: {
       id: getTranslationKey('list.table.header.creationDate'),
-      defaultMessage: 'Creation Date',
+      defaultMessage: 'creation date',
     },
   },
   {
     name: 'updatedAt',
     label: {
       id: getTranslationKey('list.table.header.lastModified'),
-      defaultMessage: 'Last Modified',
+      defaultMessage: 'last modified',
     },
   },
   {

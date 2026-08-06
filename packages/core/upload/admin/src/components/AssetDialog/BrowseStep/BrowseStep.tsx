@@ -294,16 +294,16 @@ export const BrowseStep = ({
               isSearchingOrFiltering
                 ? formatMessage({
                     id: getTrad('list.assets-empty.title-withSearch'),
-                    defaultMessage: 'There are no elements with the applied filters',
+                    defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
                   ? formatMessage({
                       id: getTrad('list.assets.empty'),
-                      defaultMessage: 'Media Library is empty',
+                      defaultMessage: 'Upload your first assets...',
                     })
                   : formatMessage({
                       id: getTrad('list.assets.empty.no-permissions'),
-                      defaultMessage: 'No permissions to view',
+                      defaultMessage: 'The asset list is empty',
                     })
             }
           />

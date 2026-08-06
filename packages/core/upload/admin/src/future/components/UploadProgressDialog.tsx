@@ -199,7 +199,7 @@ const HeaderStatus = ({
             {
               id: getTranslationKey('upload.progress.success.subtitle'),
               defaultMessage:
-                '{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}',
+                '{count} files uploaded successfully',
             },
             { count: successfulCount }
           );
@@ -230,7 +230,7 @@ const HeaderStatus = ({
         <HeaderStatusMessage
           title={formatMessage({
             id: getTranslationKey('upload.progress.canceled'),
-            defaultMessage: 'Uploads canceled',
+            defaultMessage: 'Upload canceled',
           })}
           subtitle={formatMessage({
             id: getTranslationKey('upload.progress.canceled.subtitle'),

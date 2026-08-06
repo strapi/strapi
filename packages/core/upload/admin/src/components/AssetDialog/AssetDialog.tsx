@@ -272,7 +272,7 @@ export const AssetContent = ({
             <Tabs.Trigger value="browse">
               {formatMessage({
                 id: getTrad('modal.nav.browse'),
-                defaultMessage: 'browse',
+                defaultMessage: 'Browse',
               })}
             </Tabs.Trigger>
             <Tabs.Trigger value="selected">

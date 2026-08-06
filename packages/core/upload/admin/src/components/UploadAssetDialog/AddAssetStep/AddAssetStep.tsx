@@ -50,7 +50,7 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetS
             <Tabs.Trigger value="url">
               {formatMessage({
                 id: getTrad('modal.nav.url'),
-                defaultMessage: 'From url',
+                defaultMessage: 'From URL',
               })}
             </Tabs.Trigger>
           </Tabs.List>
