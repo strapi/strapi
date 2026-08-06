@@ -243,6 +243,52 @@ describe('backfillMissingEnKeys', () => {
   });
 });
 
+describe('validateLocaleFile order vs orphans', () => {
+  const makeLocaleFixture = (en: Record<string, string>, locale: Record<string, string>) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-locale-'));
+    fs.writeFileSync(path.join(dir, 'en.json'), `${JSON.stringify(en, null, 2)}\n`);
+    fs.writeFileSync(path.join(dir, 'fr.json'), `${JSON.stringify(locale, null, 2)}\n`);
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'tmp/pkg',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'tmp',
+      sourceDirs: [],
+    };
+
+    return bundle;
+  };
+
+  it('reports extra-locale-key without locale-key-order when shared keys match en order', () => {
+    // Shared keys a→b match en order; orphan between them must not force a false order error.
+    const bundle = makeLocaleFixture(
+      { 'a.key': 'A', 'b.key': 'B' },
+      { 'a.key': 'A-fr', 'orphan.key': 'X', 'b.key': 'B-fr' }
+    );
+
+    const issues = validateBundle(bundle, {});
+    const codes = issues.map((issue) => issue.code);
+
+    assert.ok(codes.includes('extra-locale-key'));
+    assert.equal(codes.includes('locale-key-order'), false);
+  });
+
+  it('still reports locale-key-order when shared keys are out of en order', () => {
+    const bundle = makeLocaleFixture(
+      { 'a.key': 'A', 'b.key': 'B' },
+      { 'b.key': 'B-fr', 'orphan.key': 'X', 'a.key': 'A-fr' }
+    );
+
+    const issues = validateBundle(bundle, {});
+    const codes = issues.map((issue) => issue.code);
+
+    assert.ok(codes.includes('extra-locale-key'));
+    assert.ok(codes.includes('locale-key-order'));
+  });
+});
+
 describe('validateBundle admin self-checks', () => {
   const makeAdminFixture = (source: string, en: Record<string, string>) => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-admin-trad-'));

@@ -201,9 +201,12 @@ const validateLocaleFile = (
     }
   }
 
+  // Compare order of shared keys only — orphans already report as extra-locale-key
+  // and must not produce a misleading locale-key-order error on top.
   const expectedLocaleKeyOrder = enKeyList.filter((key) => key in localeJson);
+  const localeKeysInEn = localeKeys.filter((key) => key in enJson);
 
-  if (expectedLocaleKeyOrder.join('\0') !== localeKeys.join('\0')) {
+  if (expectedLocaleKeyOrder.join('\0') !== localeKeysInEn.join('\0')) {
     issues.push({
       severity: 'error',
       bundle: bundle.packageName,
