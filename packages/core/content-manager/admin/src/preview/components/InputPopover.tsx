@@ -102,7 +102,8 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
             position: event.data.payload.position,
             attribute,
             blockIndex:
-              typeof event.data.payload.blockIndex === 'number'
+              typeof event.data.payload.blockIndex === 'number' &&
+              event.data.payload.blockIndex >= 0
                 ? event.data.payload.blockIndex
                 : null,
           });

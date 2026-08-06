@@ -606,8 +606,9 @@ function previewScript(config) {
       if (elements.length === 0) return null;
       let candidate = elements[0].parentElement;
       while (candidate && candidate !== document.documentElement) {
-        if (elements.every((el) => candidate === el || candidate.contains(el))) {
-          return candidate;
+        const current = candidate;
+        if (elements.every((el) => current === el || current.contains(el))) {
+          return current;
         }
         candidate = candidate.parentElement;
       }
