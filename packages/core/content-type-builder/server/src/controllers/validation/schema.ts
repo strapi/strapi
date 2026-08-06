@@ -422,7 +422,7 @@ const jsonSchema = basePropertiesSchema.extend({
         JSON.parse(value as string);
 
         return true;
-      } catch (err) {
+      } catch {
         return false;
       }
     }),

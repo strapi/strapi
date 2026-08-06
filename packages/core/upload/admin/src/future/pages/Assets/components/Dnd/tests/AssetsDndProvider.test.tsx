@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from '@tests/utils';
 
+import { emptyItemLocations, type ItemLocations } from '../../../../../utils/itemLocations';
 import { AssetSelectionProvider, useAssetSelection } from '../../../hooks/useAssetSelection';
 import { assetKey, folderKey } from '../../../utils/selection';
 import { AssetsDndProvider, useAssetsDnd } from '../AssetsDndProvider';
@@ -142,10 +143,23 @@ const fileDragStartEvent: DragStartEvent = {
   active: validDragEndEvent.active,
 };
 
-const setup = (ui?: React.ReactNode, options?: Parameters<typeof render>[1]) =>
+/** Minimal stand-in for a loaded list: only the ids given are known. */
+const locationsOf = (
+  files: Record<number, number | null>,
+  folders: Record<number, number | null>
+): ItemLocations => ({
+  fileFolderId: (id) => (id in files ? files[id] : undefined),
+  folderParentId: (id) => (id in folders ? folders[id] : undefined),
+});
+
+const setup = (
+  ui?: React.ReactNode,
+  options?: Parameters<typeof render>[1],
+  locations: ItemLocations = emptyItemLocations
+) =>
   render(
     <AssetSelectionProvider>
-      <AssetsDndProvider>
+      <AssetsDndProvider locations={locations}>
         <MovePendingProbe />
         <ValidityProbe targetId={2} />
         <RootValidityProbe />
@@ -224,12 +238,12 @@ describe('AssetsDndProvider', () => {
         triggerDragEnd?.(validDragEndEvent);
       });
 
-      // currentFolderId defaults to root → "Media Library"; destination folder 2
-      // resolves to its leaf name "2023".
+      // Source is the dragged file's own folder (5 → "Sibling"), not the folder
+      // currently open; destination folder 2 resolves to its leaf name "2023".
       await waitFor(() => {
         expect(mockToggleNotification).toHaveBeenCalledWith({
           type: 'success',
-          message: '1 element has been moved from Media Library to 2023',
+          message: '1 element has been moved from Sibling to 2023',
         });
       });
     });
@@ -275,6 +289,41 @@ describe('AssetsDndProvider', () => {
       await waitFor(() => {
         expect(screen.getByTestId('selection-size')).toHaveTextContent('0');
       });
+    });
+
+    it('locates the rest of the selection from the loaded rows, not the folder currently open', async () => {
+      // Selected from a root-level search, folder 3 really lives under folder 1
+      // — so dropping the selection onto folder 1 is a no-op for it. Deriving
+      // its parent from `?folder=` (root) would have let the move through.
+      const { user } = setup(
+        <SeedSelection keys={[assetKey(10), folderKey(3)]} />,
+        undefined,
+        locationsOf({ 10: 5 }, { 3: 1 })
+      );
+
+      await user.click(screen.getByTestId('seed-selection'));
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          over: {
+            id: 'folder-target:1',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 1,
+                name: 'Marketing',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
     });
 
     it('moves only the unselected item and preserves the unrelated selection', async () => {
@@ -520,9 +569,8 @@ describe('AssetsDndProvider', () => {
     });
 
     it('treats Home as a valid drop when dragging items out of a subfolder', async () => {
-      // currentFolderId = 2 (a subfolder). The dragged folder's own parentId is
-      // null (unpopulated by the folders query) but the drag set is stamped with
-      // the current folder, so Home (root) is a legitimate destination.
+      // The dragged folder's row carries its populated parent (2), so Home
+      // (root) is a legitimate destination.
       setup(undefined, { initialEntries: [{ search: '?folder=2' }] });
 
       await act(async () => {
@@ -535,7 +583,7 @@ describe('AssetsDndProvider', () => {
                 kind: 'folder',
                 id: 3,
                 name: 'Campaign',
-                parentId: null,
+                parentId: 2,
               },
             },
             rect: { current: { initial: null, translated: null } },
@@ -559,7 +607,7 @@ describe('AssetsDndProvider', () => {
                 kind: 'folder',
                 id: 3,
                 name: 'Campaign',
-                parentId: null,
+                parentId: 2,
               },
             },
           },
@@ -588,13 +636,14 @@ describe('AssetsDndProvider', () => {
     });
 
     it('rejects dropping a select-all set (with a folder active) back onto its current folder', async () => {
-      // Reproduces the reviewer's "tricky" case: select-all in folder 2, then
-      // grab a folder tile whose parentId is unpopulated (null). Without the
-      // current-folder stamp, the set would look like it lives at root and the
-      // no-op guard for folder 2 would never match.
-      const { user } = setup(<SeedSelection keys={[folderKey(3), assetKey(10)]} />, {
-        initialEntries: [{ search: '?folder=2' }],
-      });
+      // Select-all in folder 2, then grab a folder tile. Both the active row
+      // and the loaded lookup say the set already lives in folder 2, so the
+      // no-op guard must match.
+      const { user } = setup(
+        <SeedSelection keys={[folderKey(3), assetKey(10)]} />,
+        { initialEntries: [{ search: '?folder=2' }] },
+        locationsOf({ 10: 2 }, { 3: 2 })
+      );
 
       await user.click(screen.getByTestId('seed-selection'));
       expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
@@ -609,7 +658,7 @@ describe('AssetsDndProvider', () => {
                 kind: 'folder',
                 id: 3,
                 name: 'Campaign',
-                parentId: null,
+                parentId: 2,
               },
             },
             rect: { current: { initial: null, translated: null } },
@@ -625,7 +674,7 @@ describe('AssetsDndProvider', () => {
                 kind: 'folder',
                 id: 3,
                 name: 'Campaign',
-                parentId: null,
+                parentId: 2,
               },
             },
           },
