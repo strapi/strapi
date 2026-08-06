@@ -9578,7 +9578,6 @@ __metadata:
     "@strapi/typescript-utils": "npm:5.51.2"
     "@strapi/utils": "npm:5.51.2"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
     "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
@@ -9586,13 +9585,14 @@ __metadata:
     eslint-config-custom: "npm:5.51.2"
     fs-extra: "npm:11.3.4"
     handlebars: "npm:4.7.9"
-    jest: "npm:29.6.0"
     jscodeshift: "npm:17.3.0"
     lodash: "npm:4.18.1"
     outdent: "npm:^0.8.0"
     plop: "npm:4.0.5"
     pluralize: "npm:8.0.0"
     tsconfig: "npm:5.51.2"
+    vitest: "catalog:"
+    vitest-config: "npm:5.51.2"
   languageName: unknown
   linkType: soft
 
