@@ -23,9 +23,11 @@ const queryResult = {
   error: undefined,
 };
 
-const mockUseGetAssetsQuery = jest.fn(() => queryResult);
+const mockUseGetAssetsQuery = jest.fn();
 jest.mock('../../../../services/assets', () => ({
-  useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
+  // The hook's query args are irrelevant here — the eviction path only reads the
+  // store and dispatches — so the mock returns a fixed result regardless.
+  useGetAssetsQuery: () => mockUseGetAssetsQuery(),
 }));
 
 const mockDispatch = jest.fn();
@@ -46,6 +48,7 @@ const evictedKeys = () =>
 
 describe('useInfiniteAssets — cache eviction on folder change', () => {
   beforeEach(() => {
+    mockUseGetAssetsQuery.mockReturnValue(queryResult);
     mockDispatch.mockClear();
     mockState = {
       [uploadApi.reducerPath]: {
