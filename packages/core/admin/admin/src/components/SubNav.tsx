@@ -66,7 +66,7 @@ const StyledLink = styled(NavLink)<{ $depth?: number }>`
 
   color: ${({ theme }) => theme.colors.neutral800};
 
-  margin-left: ${({ theme, $depth = 0 }) => `calc(${$depth}px * ${theme.spaces[6]})`};
+  margin-left: ${({ theme, $depth = 0 }) => `calc(${$depth} * ${theme.spaces[6]})`};
 
   & > div {
     padding-left: ${({ theme }) => theme.spaces[3]};
