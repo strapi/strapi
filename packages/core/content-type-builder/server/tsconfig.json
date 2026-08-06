@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "tsconfig/server",
   "include": ["src"],
   "compilerOptions": {
     "types": ["node", "jest"]
