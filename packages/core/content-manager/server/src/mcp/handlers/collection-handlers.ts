@@ -14,13 +14,7 @@ import {
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
 import { buildInlinePathMatcher } from '../schemas/query-schema';
-import {
-  ok,
-  sanitizeFormatShape,
-  buildInlineOptions,
-  enforceResponseBudget,
-  getMaxResponseBytes,
-} from '../utils';
+import { ok, sanitizeFormatShape, buildInlineOptions, composePopulate } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -47,7 +41,6 @@ type CollectionListArgs = {
   filters?: unknown;
   fields?: unknown;
   populate?: unknown;
-  maxDepth?: number;
 };
 
 type DocumentLocaleArgs = {
@@ -59,7 +52,6 @@ type CollectionGetArgs = DocumentLocaleArgs & {
   status?: 'draft' | 'published';
   fields?: unknown;
   populate?: unknown;
-  maxDepth?: number;
 };
 
 type CollectionCreateArgs = {
@@ -88,17 +80,7 @@ export const createCollectionListHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({ args }: { args: CollectionListArgs }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
-    const {
-      locale,
-      status,
-      page,
-      pageSize,
-      sort,
-      filters,
-      fields,
-      populate: populateArg,
-      maxDepth,
-    } = args;
+    const { locale, status, page, pageSize, sort, filters, fields, populate: populateArg } = args;
 
     const documentMetadata = getService('document-metadata');
     const documentManager = getService('document-manager');
@@ -118,21 +100,23 @@ export const createCollectionListHandler =
     };
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    const sanitizedPopulate = (permissionQuery as { populate?: unknown }).populate;
+    const localizationsOverride = getPopulateForLocalizations(uid);
 
-    // When `populate` is explicit, honor it exactly (populateFromQuery). Otherwise keep the
-    // legacy auto-populate to depth 1 (overridable via `maxDepth`). Inlining is opt-in and
-    // driven off the sanitized populate so RBAC-denied relations are never inlined.
-    const populateBuilder = getService('populate-builder')(uid).populateFromQuery(permissionQuery);
-    if (populateArg === undefined) {
-      populateBuilder.populateDeep(maxDepth ?? 1);
-    }
-    const populate = await populateBuilder
-      .withPopulateOverride(getPopulateForLocalizations(uid))
-      .build();
+    // When `populate` is explicit, forward the sanitized shape as-is (composed only with the
+    // localizations override) so it reaches the Document Service unchanged. Otherwise keep the
+    // legacy auto-populate to depth 1. Inlining is opt-in and driven off the sanitized populate
+    // so RBAC-denied relations are never inlined.
+    const populate =
+      populateArg !== undefined
+        ? composePopulate(sanitizedPopulate, localizationsOverride)
+        : await getService('populate-builder')(uid)
+            .populateFromQuery(permissionQuery)
+            .populateDeep(1)
+            .withPopulateOverride(localizationsOverride)
+            .build();
 
-    const inlineMatcher = buildInlinePathMatcher(
-      (permissionQuery as { populate?: unknown }).populate ?? populateArg
-    );
+    const inlineMatcher = buildInlinePathMatcher(sanitizedPopulate ?? populateArg);
     const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const { locale: resolvedLocale, status: resolvedStatus } = await getDocumentLocaleAndStatus(
@@ -173,13 +157,7 @@ export const createCollectionListHandler =
       )
     );
 
-    const structuredContent = enforceResponseBudget(
-      { results, pagination },
-      getMaxResponseBytes(strapi),
-      (notice) => ({ results: [], pagination, truncated: true, notice })
-    );
-
-    return ok(structuredContent);
+    return ok({ results, pagination });
   };
 
 /**
@@ -188,21 +166,14 @@ export const createCollectionListHandler =
  */
 export const createCollectionGetHandler =
   (uid: UID.CollectionType) =>
-  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
-    const {
-      documentId,
-      locale,
-      status,
-      fields,
-      populate: populateArg,
-      maxDepth,
-    } = args as CollectionGetArgs;
+    const { documentId, locale, status, fields, populate: populateArg } = args as CollectionGetArgs;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model: uid });
@@ -217,20 +188,23 @@ export const createCollectionGetHandler =
       ...(fields !== undefined && { fields }),
       ...(populateArg !== undefined && { populate: populateArg }),
     });
+    const sanitizedFields = (permissionQuery as { fields?: unknown }).fields;
+    const sanitizedPopulate = (permissionQuery as { populate?: unknown }).populate;
+    const localizationsOverride = getPopulateForLocalizations(uid);
 
-    // Explicit populate → honor exactly. Otherwise keep legacy infinite-depth auto-populate
-    // (overridable via `maxDepth`). Inlining is opt-in, off the sanitized populate.
-    const populateBuilder = getService('populate-builder')(uid).populateFromQuery(permissionQuery);
-    if (populateArg === undefined) {
-      populateBuilder.populateDeep(maxDepth ?? Infinity);
-    }
-    const populate = await populateBuilder
-      .withPopulateOverride(getPopulateForLocalizations(uid))
-      .build();
+    // Explicit populate → forward the sanitized shape as-is (composed only with the
+    // localizations override). Otherwise keep the legacy infinite-depth auto-populate.
+    // Inlining is opt-in, off the sanitized populate.
+    const populate =
+      populateArg !== undefined
+        ? composePopulate(sanitizedPopulate, localizationsOverride)
+        : await getService('populate-builder')(uid)
+            .populateFromQuery(permissionQuery)
+            .populateDeep(Infinity)
+            .withPopulateOverride(localizationsOverride)
+            .build();
 
-    const inlineMatcher = buildInlinePathMatcher(
-      (permissionQuery as { populate?: unknown }).populate ?? populateArg
-    );
+    const inlineMatcher = buildInlinePathMatcher(sanitizedPopulate ?? populateArg);
     const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const { locale: resolvedLocale, status: resolvedStatus } = await getDocumentLocaleAndStatus(
@@ -239,10 +213,11 @@ export const createCollectionGetHandler =
     );
 
     const version = await documentManager.findOne(documentId, uid, {
+      ...(sanitizedFields !== undefined && { fields: sanitizedFields }),
       populate,
       locale: resolvedLocale,
       status: resolvedStatus,
-    });
+    } as Parameters<typeof documentManager.findOne>[2]);
 
     if (!version) {
       const exists = await documentManager.exists(uid, documentId);
@@ -274,13 +249,7 @@ export const createCollectionGetHandler =
       inlineOptions
     );
 
-    const structuredContent = enforceResponseBudget(
-      result,
-      getMaxResponseBytes(strapi),
-      (notice) => ({ data: null, meta: result.meta, truncated: true, notice })
-    );
-
-    return ok(structuredContent);
+    return ok(result as Record<string, unknown>);
   };
 
 /**

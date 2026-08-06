@@ -73,9 +73,6 @@ export const buildDocumentOutputSchema = (
           availableStatus: z.array(z.record(z.string(), z.unknown())).optional(),
         })
         .optional(),
-      // Set when the response exceeded the configured size budget (see enforceResponseBudget).
-      truncated: z.boolean().optional(),
-      notice: z.string().optional(),
     })
     .loose();
 
@@ -96,9 +93,6 @@ export const buildListOutputSchema = (
         pageCount: z.number(),
         total: z.number(),
       }),
-      // Set when the response exceeded the configured size budget (see enforceResponseBudget).
-      truncated: z.boolean().optional(),
-      notice: z.string().optional(),
     })
     .loose();
 

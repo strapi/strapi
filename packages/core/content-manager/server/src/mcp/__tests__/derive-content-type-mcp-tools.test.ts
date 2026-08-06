@@ -1665,10 +1665,14 @@ describe('buildFiltersSchema', () => {
       expect(schema.safeParse({ author: { name: { $eq: 'Ada' } } }).success).toBe(false);
     });
 
-    it('accepts a nested relation field filter', () => {
+    // Relation targets are intentionally NOT expanded into nested filters — see
+    // filters-schema.ts: filtering on a related entry's fields would let a caller probe
+    // fields/entries of the target type without that entry's own read permission being
+    // checked (the permission checker only sanitizes against the source type).
+    it('does NOT expand relation targets into nested filters, even with a getModel resolver', () => {
       const schema = buildFiltersSchema(nestedAttrs, null, getModel);
-      expect(schema.safeParse({ author: { name: { $contains: 'Ad' } } }).success).toBe(true);
-      expect(schema.safeParse({ author: { age: { $gt: 18 } } }).success).toBe(true);
+      expect(schema.safeParse({ author: { name: { $contains: 'Ad' } } }).success).toBe(false);
+      expect(schema.safeParse({ author: { age: { $gt: 18 } } }).success).toBe(false);
     });
 
     it('accepts a nested component field filter', () => {
@@ -1676,16 +1680,16 @@ describe('buildFiltersSchema', () => {
       expect(schema.safeParse({ seo: { metaTitle: { $eq: 'Home' } } }).success).toBe(true);
     });
 
-    it('rejects unknown nested fields on a relation', () => {
+    it('rejects unknown nested fields on a component', () => {
       const schema = buildFiltersSchema(nestedAttrs, null, getModel);
-      expect(schema.safeParse({ author: { unknownField: { $eq: 'x' } } }).success).toBe(false);
+      expect(schema.safeParse({ seo: { unknownField: { $eq: 'x' } } }).success).toBe(false);
     });
 
-    it('combines nested filters with logical operators', () => {
+    it('combines nested (component) filters with logical operators', () => {
       const schema = buildFiltersSchema(nestedAttrs, null, getModel);
       expect(
         schema.safeParse({
-          $and: [{ title: { $contains: 'foo' } }, { author: { name: { $eq: 'Ada' } } }],
+          $and: [{ title: { $contains: 'foo' } }, { seo: { metaTitle: { $eq: 'Home' } } }],
         }).success
       ).toBe(true);
     });
@@ -2911,7 +2915,7 @@ describe('relation identity: shapeRelationsForMcp called on every op', () => {
   });
 });
 
-describe('read tools: fields / populate / maxDepth wiring', () => {
+describe('read tools: fields / populate wiring', () => {
   const uid = 'api::article.article';
   const relationAttributes = {
     title: { type: 'string' },
@@ -2950,22 +2954,55 @@ describe('read tools: fields / populate / maxDepth wiring', () => {
     expect(getBuilder().populateDeep).not.toHaveBeenCalled();
   });
 
-  it('list_ auto-populates to maxDepth when populate is omitted', async () => {
+  it('list_ forwards the sanitized explicit populate shape unchanged to the Document Service', async () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
     const listTool = tools.find((t) => t.name === 'list_article')!;
     const handler = listTool.createHandler(strapiForTest, context);
-    await handler({ args: { maxDepth: 3 }, extra: mockExtra });
+    await handler({ args: { populate: ['author'] }, extra: mockExtra });
 
-    expect(getBuilder().populateDeep).toHaveBeenCalledWith(3);
+    // Previously getQueryPopulate (via populateFromQuery) ignored `populate` and produced {}.
+    expect(mockDocumentManager.findPage).toHaveBeenCalledWith(
+      expect.objectContaining({ populate: ['author'] }),
+      uid
+    );
   });
 
-  it('list_ defaults auto-populate depth to 1 when neither populate nor maxDepth given', async () => {
+  it('list_ auto-populates to depth 1 when populate is omitted', async () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
     const listTool = tools.find((t) => t.name === 'list_article')!;
     const handler = listTool.createHandler(strapiForTest, context);
     await handler({ args: {}, extra: mockExtra });
 
     expect(getBuilder().populateDeep).toHaveBeenCalledWith(1);
+  });
+
+  it('get_ forwards the sanitized fields shape into findOne', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1', fields: ['title'] }, extra: mockExtra });
+
+    // Previously `fields` was sanitized but never reached the findOne options.
+    expect(mockDocumentManager.findOne).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ fields: ['title'] })
+    );
+  });
+
+  it('get_ forwards the sanitized explicit populate shape unchanged to findOne', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1', populate: ['author'] }, extra: mockExtra });
+
+    expect(mockDocumentManager.findOne).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: ['author'] })
+    );
   });
 
   it('get_ passes inline options for a relation named in populate', async () => {
@@ -2991,54 +3028,5 @@ describe('read tools: fields / populate / maxDepth wiring', () => {
 
     const inlineOptions = mockShapeRelations.mock.calls.at(-1)?.[2];
     expect(inlineOptions).toBeUndefined();
-  });
-});
-
-describe('read tools: response-size guard', () => {
-  const uid = 'api::article.article';
-  const model = baseModel({ uid, attributes: { title: { type: 'string' } } as TestAttrs });
-  const context = { userAbility: makeUserAbility(), user: mockUser };
-
-  // strapi whose configured budget is tiny, so any real payload is over budget.
-  const strapiTinyBudget = makeMinimalGlobalStrapi();
-  (strapiTinyBudget.config.get as jest.Mock).mockImplementation(
-    (path: string, defaultValue?: unknown) =>
-      path === 'server.mcp.maxResponseBytes' ? 5 : defaultValue
-  );
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (strapiTinyBudget.config.get as jest.Mock).mockImplementation(
-      (path: string, defaultValue?: unknown) =>
-        path === 'server.mcp.maxResponseBytes' ? 5 : defaultValue
-    );
-  });
-
-  it('list_ returns a truncated result with a notice when over budget', async () => {
-    mockDocumentManager.findPage.mockResolvedValueOnce({
-      results: [{ documentId: 'doc-1', title: 'A very long title that blows the 5-byte budget' }],
-      pagination: { page: 1, pageSize: 25, pageCount: 1, total: 1 },
-    });
-    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
-    const listTool = tools.find((t) => t.name === 'list_article')!;
-    const handler = listTool.createHandler(strapiTinyBudget, context);
-    const result = await handler({ args: {}, extra: mockExtra });
-
-    expect(result.structuredContent).toMatchObject({ results: [], truncated: true });
-    expect(String(result.structuredContent?.notice)).toMatch(/truncated/i);
-  });
-
-  it('get_ returns a truncated result with a notice when over budget', async () => {
-    mockDocumentManager.findOne.mockResolvedValueOnce({
-      documentId: 'doc-1',
-      title: 'A very long title that blows the 5-byte budget',
-    });
-    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
-    const getTool = tools.find((t) => t.name === 'get_article')!;
-    const handler = getTool.createHandler(strapiTinyBudget, context);
-    const result = await handler({ args: { documentId: 'doc-1' }, extra: mockExtra });
-
-    expect(result.structuredContent).toMatchObject({ data: null, truncated: true });
-    expect(String(result.structuredContent?.notice)).toMatch(/truncated/i);
   });
 });

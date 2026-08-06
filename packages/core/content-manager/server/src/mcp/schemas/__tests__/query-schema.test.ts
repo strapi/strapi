@@ -1,14 +1,13 @@
 /**
- * Unit tests for query-schema.ts — the `fields`, `populate`, and `maxDepth` read-tool
- * input schemas plus the `extractInlineRelationKeys` helper that drives opt-in relation
- * inlining. Schemas are validated with `safeParse` against the model's real attribute set.
+ * Unit tests for query-schema.ts — the `fields` and `populate` read-tool input schemas
+ * plus the `buildInlinePathMatcher` helper that drives opt-in relation inlining. Schemas
+ * are validated with `safeParse` against the model's real attribute set.
  */
 import type { Struct } from '@strapi/types';
 
 import {
   buildFieldsSchema,
   buildPopulateSchema,
-  buildMaxDepthSchema,
   getPopulatableAttributeKeys,
   buildInlinePathMatcher,
 } from '../query-schema';
@@ -17,6 +16,8 @@ const attributes = {
   title: { type: 'string' },
   count: { type: 'integer' },
   secret: { type: 'string', private: true },
+  payload: { type: 'json' },
+  body: { type: 'blocks' },
   author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
   tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
   cover: { type: 'media' },
@@ -62,6 +63,11 @@ describe('buildFieldsSchema', () => {
     expect(schema.safeParse(['secret']).success).toBe(false);
   });
 
+  it('accepts json and blocks fields (valid projections, excluded from sort/filter)', () => {
+    expect(schema.safeParse(['payload']).success).toBe(true);
+    expect(schema.safeParse(['body']).success).toBe(true);
+  });
+
   it('is optional (absent value parses)', () => {
     expect(schema.safeParse(undefined).success).toBe(true);
   });
@@ -104,26 +110,6 @@ describe('buildPopulateSchema', () => {
     const s = buildPopulateSchema(scalarOnly);
     expect(s.safeParse(undefined).success).toBe(true);
     expect(s.safeParse(['title']).success).toBe(false);
-  });
-});
-
-describe('buildMaxDepthSchema', () => {
-  const schema = buildMaxDepthSchema();
-
-  it('accepts integers within [0, 10]', () => {
-    expect(schema.safeParse(0).success).toBe(true);
-    expect(schema.safeParse(3).success).toBe(true);
-    expect(schema.safeParse(10).success).toBe(true);
-  });
-
-  it('rejects out-of-range and non-integer values', () => {
-    expect(schema.safeParse(-1).success).toBe(false);
-    expect(schema.safeParse(11).success).toBe(false);
-    expect(schema.safeParse(1.5).success).toBe(false);
-  });
-
-  it('is optional', () => {
-    expect(schema.safeParse(undefined).success).toBe(true);
   });
 });
 
@@ -184,5 +170,27 @@ describe('buildInlinePathMatcher', () => {
     expect(m.shouldInline('')).toBe(false);
     expect(m.shouldInline(null)).toBe(false);
     expect(m.shouldInline(undefined)).toBe(false);
+  });
+
+  it('traverses dynamic-zone/morph "on" fragments against the parent path', () => {
+    const m = buildInlinePathMatcher({
+      blocks: { on: { 'shared.hero': { populate: ['author'] } } },
+    });
+    expect(m.shouldInline('blocks.author')).toBe(true);
+    // the component UID is never part of the runtime relation path
+    expect(m.shouldInline('blocks.on')).toBe(false);
+  });
+
+  it('supports multiple "on" fragments and wildcard populate within a fragment', () => {
+    const m = buildInlinePathMatcher({
+      blocks: {
+        on: {
+          'shared.hero': { populate: ['author'] },
+          'shared.quote': { populate: '*' },
+        },
+      },
+    });
+    expect(m.shouldInline('blocks.author')).toBe(true);
+    expect(m.shouldInline('blocks.speaker')).toBe(true);
   });
 });

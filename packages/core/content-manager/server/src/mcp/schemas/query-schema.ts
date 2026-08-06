@@ -1,7 +1,7 @@
 import { z } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 
-import { getScalarAttributeKeys } from './sort-schema';
+import { getProjectableAttributeKeys } from './sort-schema';
 
 /** Attribute types that can be populated (relations, components, dynamic zones, media). */
 export const POPULATABLE_ATTRIBUTE_TYPES = new Set([
@@ -37,34 +37,35 @@ export const getPopulatableAttributeKeys = (
 };
 
 /**
- * Builds the `fields` Zod schema constrained to the model's readable scalar attributes.
+ * Builds the `fields` Zod schema constrained to the model's readable projectable attributes.
  *
  * Accepts either:
- *   - `"*"`     — all scalar fields (Strapi wildcard notation),
- *   - `string[]`— an explicit subset of scalar field names.
+ *   - `"*"`     — all projectable fields (Strapi wildcard notation),
+ *   - `string[]`— an explicit subset of projectable field names.
  *
- * Mirrors Strapi's entityService/documents `fields` query parameter. Constraining the
- * enum to permitted scalar keys keeps RBAC field filtering intact. Returns `z.never()`
- * when the model exposes no readable scalar fields.
+ * Mirrors Strapi's entityService/documents `fields` query parameter, which includes `json`
+ * and `blocks` alongside plain scalars (unlike sort/filter eligibility). Constraining the
+ * enum to permitted keys keeps RBAC field filtering intact. Returns `z.never()` when the
+ * model exposes no readable projectable fields.
  */
 export const buildFieldsSchema = (
   attributes: Struct.SchemaAttributes,
   permittedFields?: Set<string> | null
 ): z.ZodTypeAny => {
-  const scalarKeys = getScalarAttributeKeys(attributes, permittedFields);
+  const projectableKeys = getProjectableAttributeKeys(attributes, permittedFields);
 
-  if (scalarKeys.length === 0) {
-    // No readable scalar fields — keep the param present but reject any value.
+  if (projectableKeys.length === 0) {
+    // No readable projectable fields — keep the param present but reject any value.
     return z.never().optional();
   }
 
   return z
-    .union([z.literal('*'), z.array(z.enum(scalarKeys as [string, ...string[]]))])
+    .union([z.literal('*'), z.array(z.enum(projectableKeys as [string, ...string[]]))])
     .optional()
     .describe(
-      `Scalar fields to return. "*" for all, or a subset: [${scalarKeys.join(', ')}]. ` +
+      `Scalar fields to return. "*" for all, or a subset: [${projectableKeys.join(', ')}]. ` +
         `Relations/components/media are controlled separately via "populate". ` +
-        `When omitted, all readable scalar fields are returned.`
+        `When omitted, all readable fields are returned.`
     );
 };
 
@@ -158,6 +159,9 @@ const parentPath = (path: string): string => {
  *   - `{ author: { populate: ["avatar"] }}`→ inline `author` AND `author.avatar`
  *   - `{ seo: { populate: "*" } }`         → inline any relation directly under `seo`
  *   - `"*"`                                → inline any relation one level under the root
+ *   - `{ blocks: { on: { 'shared.hero': { populate: ["author"] } } } }` → inline `blocks.author`
+ *     (dynamic-zone/morph fragments under `on` are collected against their parent's path,
+ *     since runtime relation paths never include the component UID segment)
  *
  * Matching is by dotted attribute path; whether a matched path is actually a relation (vs a
  * component/media) is decided at shaping time. Returns `hasAny: false` when `populate` is
@@ -189,8 +193,22 @@ export const buildInlinePathMatcher = (populate: unknown): InlinePathMatcher => 
         }
         const path = joinPath(prefix, key);
         exact.add(path);
-        if (typeof value === 'object' && !Array.isArray(value) && 'populate' in value) {
-          collect((value as { populate?: unknown }).populate, path);
+        if (typeof value === 'object' && !Array.isArray(value)) {
+          const nestedSpecValue = value as { populate?: unknown; on?: unknown };
+          if ('populate' in nestedSpecValue) {
+            collect(nestedSpecValue.populate, path);
+          }
+          // Dynamic-zone/morph fragments nest per-component-type under `on`. Their runtime
+          // populate paths never include the component UID segment (e.g.
+          // `blocks.on['shared.hero'].populate.author` matches runtime path `blocks.author`),
+          // so each fragment's `populate` is collected against the SAME path as its parent.
+          if (typeof nestedSpecValue.on === 'object' && nestedSpecValue.on !== null) {
+            for (const fragment of Object.values(nestedSpecValue.on as Record<string, unknown>)) {
+              if (typeof fragment === 'object' && fragment !== null && 'populate' in fragment) {
+                collect((fragment as { populate?: unknown }).populate, path);
+              }
+            }
+          }
         }
       }
     }
@@ -207,19 +225,3 @@ export const buildInlinePathMatcher = (populate: unknown): InlinePathMatcher => 
 
   return { shouldInline, hasAny: exact.size > 0 || wildcard.size > 0 };
 };
-
-/**
- * Guard for the response-size budget. Defaults to 1 MB; overridable via
- * `server.mcp.maxResponseBytes`. Values <= 0 disable the guard.
- */
-export const buildMaxDepthSchema = (): z.ZodTypeAny =>
-  z
-    .number()
-    .int()
-    .min(0)
-    .max(10)
-    .optional()
-    .describe(
-      'Max relation-population depth for auto-populate (when "populate" is omitted). ' +
-        'Lower values keep responses small. Ignored when "populate" is provided.'
-    );

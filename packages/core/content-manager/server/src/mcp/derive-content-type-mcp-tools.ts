@@ -16,7 +16,6 @@ import {
   buildFiltersSchema,
   buildFieldsSchema,
   buildPopulateSchema,
-  buildMaxDepthSchema,
   buildDocumentOutputSchema,
   buildListOutputSchema,
   buildDeleteOutputSchema,
@@ -104,7 +103,6 @@ const buildCollectionTools = (
       filters: buildFiltersSchema(attributes, readFields, resolveGetModel(strapi)),
       fields: buildFieldsSchema(attributes, readFields),
       populate: buildPopulateSchema(attributes, readFields),
-      maxDepth: buildMaxDepthSchema(),
     });
   };
 
@@ -125,7 +123,6 @@ const buildCollectionTools = (
       status: statusSchema,
       fields: buildFieldsSchema(attributes, readFields),
       populate: buildPopulateSchema(attributes, readFields),
-      maxDepth: buildMaxDepthSchema(),
     });
   };
 
@@ -368,7 +365,6 @@ const buildSingleTypeTools = (
       status: statusSchema,
       fields: buildFieldsSchema(attributes, readFields),
       populate: buildPopulateSchema(attributes, readFields),
-      maxDepth: buildMaxDepthSchema(),
     });
   };
 

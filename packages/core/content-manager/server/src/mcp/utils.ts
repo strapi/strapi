@@ -1,4 +1,4 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
@@ -135,41 +135,32 @@ export const buildInlineOptions = (
 };
 
 // ---------------------------------------------------------------------------
-// Response-size guard
+// Explicit populate composition
 // ---------------------------------------------------------------------------
 
-/** Default MCP read-tool response budget (1 MB). Overridable via `server.mcp.maxResponseBytes`. */
-export const MCP_DEFAULT_MAX_RESPONSE_BYTES = 1_000_000;
-
-/** Resolves the configured response budget in bytes. Values <= 0 disable the guard. */
-export const getMaxResponseBytes = (strapi: Core.Strapi): number =>
-  strapi.config.get('server.mcp.maxResponseBytes', MCP_DEFAULT_MAX_RESPONSE_BYTES);
-
 /**
- * Enforces the response-size budget. When `structuredContent` serializes within budget it
- * is returned unchanged; otherwise `buildTruncated(notice)` is invoked to produce a small,
- * schema-valid payload carrying a `truncated` flag and a clear notice — so deep fetches
- * degrade gracefully instead of crashing the MCP transport.
+ * Composes a sanitized, caller-provided `populate` value (querystring notation: `"*"`,
+ * `string[]`, or an object) with a fixed override (e.g. the localizations restriction),
+ * so explicit populate reaches the Document Service unchanged instead of being dropped.
+ * The override always wins for overlapping keys.
  */
-export const enforceResponseBudget = (
-  structuredContent: Record<string, unknown>,
-  maxBytes: number,
-  buildTruncated: (notice: string) => Record<string, unknown>
-): Record<string, unknown> => {
-  if (maxBytes <= 0) {
-    return structuredContent;
+export const composePopulate = (populate: unknown, override: Record<string, unknown>): unknown => {
+  if (Object.keys(override).length === 0) {
+    return populate;
   }
-
-  const size = Buffer.byteLength(JSON.stringify(structuredContent), 'utf8');
-  if (size <= maxBytes) {
-    return structuredContent;
+  if (populate === undefined) {
+    return override;
   }
-
-  const notice =
-    `Response (${size} bytes) exceeded the ${maxBytes}-byte MCP limit and was truncated. ` +
-    `Narrow "populate"/"fields", lower "maxDepth", or reduce "pageSize" to retrieve the data.`;
-
-  return buildTruncated(notice);
+  if (populate === '*') {
+    return { '*': true, ...override };
+  }
+  if (Array.isArray(populate)) {
+    return { ...Object.fromEntries(populate.map((key) => [key, true])), ...override };
+  }
+  if (typeof populate === 'object' && populate !== null) {
+    return { ...(populate as Record<string, unknown>), ...override };
+  }
+  return populate;
 };
 
 /** Wraps a plain object into the dual-representation MCP tool return value (text + structuredContent). */
@@ -194,15 +185,14 @@ export const describeTool = (params: {
     list:
       ' Relations are returned as { documentId } stubs by default; nested sub-fields inside' +
       ' components/relations may be omitted (absent, not null) at the shallow default depth.' +
-      ' Use "fields" to pick scalar fields, "populate" to inline related entries as deep as the' +
-      ' spec asks (each RBAC-checked against its related type), and "maxDepth" to control' +
-      ' auto-populate depth. "filters" supports logical/field operators and one-level-deep' +
-      ' relation/component fields.',
+      ' Use "fields" to pick scalar fields and "populate" to inline related entries as deep as' +
+      ' the spec asks (each RBAC-checked against its related type). "filters" supports' +
+      ' logical/field operators and one-level-deep component fields.',
     get:
       ' Relations are returned as { documentId } stubs by default. Use "populate" to inline' +
       ' related entries as deep as the spec asks (e.g. { author: { populate: ["avatar"] } }' +
-      ' inlines author and author.avatar; each RBAC-checked against its related type), "fields"' +
-      ' to pick scalar fields, and "maxDepth" to bound auto-populate depth on large nested documents.',
+      ' inlines author and author.avatar; each RBAC-checked against its related type) and' +
+      ' "fields" to pick scalar fields.',
     write:
       ' Creates or updates the single-type document. If no document exists, creates one; otherwise updates the existing draft.',
     publish:

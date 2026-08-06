@@ -1,8 +1,13 @@
 /**
  * Unit tests for the nested-filter capability added to buildFiltersSchema.
  * Top-level scalar filtering is covered via the derive-content-type test suite; here we
- * focus on relation/component nested field filters (gated behind the optional getModel)
- * and backward compatibility when no resolver is supplied.
+ * focus on component nested field filters (gated behind the optional getModel) and
+ * backward compatibility when no resolver is supplied.
+ *
+ * Relation targets are intentionally NOT expanded into nested filters: filtering on a
+ * related entry's fields would let a caller probe fields/entries of the target type
+ * that their own read permission on the source type does not grant (the permission
+ * checker only sanitizes against the source type's fields, not the target's).
  */
 import type { Struct } from '@strapi/types';
 
@@ -21,7 +26,6 @@ const models: Record<string, { attributes: Struct.SchemaAttributes }> = {
     attributes: {
       name: { type: 'string' },
       age: { type: 'integer' },
-      // relation-of-relation must NOT be expanded (bounded to one level)
       posts: { type: 'relation', relation: 'oneToMany', target: 'api::post.post' },
     } as unknown as Struct.SchemaAttributes,
   },
@@ -42,31 +46,23 @@ describe('buildFiltersSchema — nested filters (with getModel)', () => {
     expect(schema.safeParse({ count: { $gt: 3 } }).success).toBe(true);
   });
 
-  it('accepts a nested relation field filter one level deep', () => {
-    expect(schema.safeParse({ author: { name: { $contains: 'a' } } }).success).toBe(true);
-    expect(schema.safeParse({ author: { age: { $gte: 18 } } }).success).toBe(true);
-  });
-
   it('accepts a nested component field filter', () => {
     expect(schema.safeParse({ seo: { metaTitle: { $eq: 'Home' } } }).success).toBe(true);
   });
 
-  it('rejects unknown nested fields on a relation target', () => {
-    expect(schema.safeParse({ author: { unknownField: { $eq: 'x' } } }).success).toBe(false);
-  });
-
-  it('does not expand relation-of-relation (posts is not a filterable key on author)', () => {
-    expect(schema.safeParse({ author: { posts: { title: { $eq: 'x' } } } }).success).toBe(false);
+  it('does not expand relation targets into nested filters', () => {
+    expect(schema.safeParse({ author: { name: { $contains: 'a' } } }).success).toBe(false);
+    expect(schema.safeParse({ author: { age: { $gte: 18 } } }).success).toBe(false);
   });
 
   it('does not expose admin::user relation targets for nested filtering', () => {
     expect(schema.safeParse({ reviewer: { firstname: { $eq: 'x' } } }).success).toBe(false);
   });
 
-  it('still supports logical operators combining nested filters', () => {
+  it('still supports logical operators combining nested (component) filters', () => {
     expect(
       schema.safeParse({
-        $and: [{ title: { $eq: 'x' } }, { author: { name: { $contains: 'a' } } }],
+        $and: [{ title: { $eq: 'x' } }, { seo: { metaTitle: { $eq: 'Home' } } }],
       }).success
     ).toBe(true);
   });

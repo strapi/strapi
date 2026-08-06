@@ -1,18 +1,11 @@
 /**
- * Unit tests for the read-tool utilities added for populate/depth support:
- * the response-size guard (enforceResponseBudget / getMaxResponseBytes) and the
- * RBAC-safe relation-inlining resolver (createInlineRelationResolver / buildInlineOptions).
+ * Unit tests for the RBAC-safe relation-inlining resolver added for populate support:
+ * createInlineRelationResolver / buildInlineOptions.
  */
 import type { Ability } from '@casl/ability';
-import type { Core, Modules } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
-import {
-  enforceResponseBudget,
-  getMaxResponseBytes,
-  createInlineRelationResolver,
-  buildInlineOptions,
-  MCP_DEFAULT_MAX_RESPONSE_BYTES,
-} from '../utils';
+import { createInlineRelationResolver, buildInlineOptions } from '../utils';
 
 // permission-checker is resolved through getService('../../utils'). jest.mock is hoisted
 // above the imports above by babel-jest, so the mock is in place before '../utils' loads.
@@ -38,42 +31,6 @@ jest.mock('../../controllers/utils/metadata', () => ({
 
 const makeContext = (): Modules.MCP.McpHandlerContext =>
   ({ userAbility: {} as Ability, user: { id: 1 } }) as Modules.MCP.McpHandlerContext;
-
-describe('getMaxResponseBytes', () => {
-  it('reads server.mcp.maxResponseBytes with the 1 MB default', () => {
-    const get = jest.fn((_key: string, def?: unknown) => def);
-    const strapi = { config: { get } } as unknown as Core.Strapi;
-    expect(getMaxResponseBytes(strapi)).toBe(MCP_DEFAULT_MAX_RESPONSE_BYTES);
-    expect(get).toHaveBeenCalledWith('server.mcp.maxResponseBytes', MCP_DEFAULT_MAX_RESPONSE_BYTES);
-  });
-
-  it('returns a configured override', () => {
-    const strapi = { config: { get: jest.fn(() => 42) } } as unknown as Core.Strapi;
-    expect(getMaxResponseBytes(strapi)).toBe(42);
-  });
-});
-
-describe('enforceResponseBudget', () => {
-  const buildTruncated = (notice: string) => ({ results: [], truncated: true, notice });
-
-  it('returns the payload unchanged when within budget', () => {
-    const payload = { results: [{ a: 1 }] };
-    expect(enforceResponseBudget(payload, 1_000_000, buildTruncated)).toBe(payload);
-  });
-
-  it('returns a truncated payload with a clear notice when over budget', () => {
-    const payload = { results: [{ big: 'x'.repeat(500) }] };
-    const result = enforceResponseBudget(payload, 100, buildTruncated);
-    expect(result.truncated).toBe(true);
-    expect(String(result.notice)).toMatch(/exceeded the 100-byte MCP limit/);
-    expect(String(result.notice)).toMatch(/populate/);
-  });
-
-  it('disables the guard when maxBytes <= 0', () => {
-    const payload = { results: [{ big: 'x'.repeat(5000) }] };
-    expect(enforceResponseBudget(payload, 0, buildTruncated)).toBe(payload);
-  });
-});
 
 describe('createInlineRelationResolver', () => {
   beforeEach(() => jest.clearAllMocks());

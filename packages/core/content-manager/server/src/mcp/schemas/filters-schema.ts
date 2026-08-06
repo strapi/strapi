@@ -69,18 +69,17 @@ const buildScalarFieldFilter = (attr: Schema.Attribute.AnyAttribute): z.ZodTypeA
 };
 
 /**
- * Recursively builds a filter object for a nested target's scalar attributes.
- * Descends into component attributes (bounded by `visited` to break circular components)
- * and one level into relation attributes so callers can filter on related-entry fields
- * (e.g. `{ author: { name: { $contains: "a" } } }`). Deeper relation-of-relation nesting
- * is intentionally not expanded to keep the schema bounded; the permission layer still
- * sanitizes any filter path the caller supplies.
+ * Recursively builds a filter object for a nested component's scalar attributes.
+ * Descends into component attributes only (bounded by `visited` to break circular
+ * components). Relation targets are intentionally never expanded here — filtering on a
+ * related entry's fields would let a caller probe fields/entries of the target type that
+ * their own read permission on the *source* type does not grant, since the permission
+ * checker only sanitizes against the source type's fields, not the target's.
  */
 const buildNestedTargetFilter = (
   attributes: Struct.SchemaAttributes,
   getModel: GetModel,
-  visited: Set<string>,
-  allowRelations: boolean
+  visited: Set<string>
 ): z.ZodTypeAny | undefined => {
   const fieldShapes: Record<string, z.ZodTypeAny> = {};
 
@@ -107,29 +106,8 @@ const buildNestedTargetFilter = (
         const nested = buildNestedTargetFilter(
           component.attributes,
           getModel,
-          new Set([...visited, componentUid]),
-          allowRelations
+          new Set([...visited, componentUid])
         );
-        if (nested !== undefined) {
-          fieldShapes[key] = nested.optional();
-        }
-      }
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    if (
-      allowRelations === true &&
-      attr.type === 'relation' &&
-      (attr as { target?: string }).target !== undefined &&
-      (attr as { target?: string }).target !== 'admin::user'
-    ) {
-      const targetUid = (attr as { target: string }).target;
-      const target = getModel(targetUid);
-      if (target?.attributes !== undefined) {
-        // Only descend one relation level: pass allowRelations=false to prevent
-        // relation-of-relation blow-up while still expanding the target's components.
-        const nested = buildNestedTargetFilter(target.attributes, getModel, visited, false);
         if (nested !== undefined) {
           fieldShapes[key] = nested.optional();
         }
@@ -152,9 +130,12 @@ const buildNestedTargetFilter = (
  *   - Logical operator: $not accepts a single filter object.
  *   - Scalar field keys: accept either a direct value (implicit $eq) or an operator
  *     object { $eq, $contains, $gt, … }.
- *   - When `getModel` is provided, relation and component field keys accept a nested
- *     filter object targeting the related/embedded entry's scalar fields (one relation
- *     level deep). Without `getModel`, only top-level scalar fields are filterable.
+ *   - When `getModel` is provided, component field keys accept a nested filter object
+ *     targeting the embedded entry's scalar fields. Relation field keys are NOT expanded
+ *     into nested filters — doing so would let a caller filter on a related entry's
+ *     fields without that entry's own read permission being checked (the permission
+ *     checker only sanitizes against the source type). Without `getModel`, only
+ *     top-level scalar fields are filterable.
  *
  * If the model has no filterable fields, the schema is z.never() (filters not allowed).
  */
@@ -165,8 +146,8 @@ export const buildFiltersSchema = (
 ): z.ZodTypeAny => {
   const scalarKeys = getScalarAttributeKeys(attributes, permittedFields);
 
-  // Nested (relation/component) filter shapes are only built when a model resolver is
-  // supplied. Absent that, behavior is identical to the original top-level-scalar schema.
+  // Nested component filter shapes are only built when a model resolver is supplied.
+  // Absent that, behavior is identical to the original top-level-scalar schema.
   const nestedShapes: Record<string, z.ZodTypeAny> = {};
   if (getModel !== undefined) {
     for (const [key, attr] of Object.entries(attributes)) {
@@ -189,19 +170,8 @@ export const buildFiltersSchema = (
           const nested = buildNestedTargetFilter(
             component.attributes,
             getModel,
-            new Set([(attr as { component: string }).component]),
-            true
+            new Set([(attr as { component: string }).component])
           );
-          if (nested !== undefined) nestedShapes[key] = nested.optional();
-        }
-      } else if (
-        attr.type === 'relation' &&
-        (attr as { target?: string }).target !== undefined &&
-        (attr as { target?: string }).target !== 'admin::user'
-      ) {
-        const target = getModel((attr as { target: string }).target);
-        if (target?.attributes !== undefined) {
-          const nested = buildNestedTargetFilter(target.attributes, getModel, new Set(), false);
           if (nested !== undefined) nestedShapes[key] = nested.optional();
         }
       }
@@ -233,10 +203,7 @@ export const buildFiltersSchema = (
   });
 
   const fieldList = [...scalarKeys, ...nestedKeys].join(', ');
-  const nestedNote =
-    nestedKeys.length > 0
-      ? ' Relation/component fields accept nested filter objects (one relation level deep).'
-      : '';
+  const nestedNote = nestedKeys.length > 0 ? ' Component fields accept nested filter objects.' : '';
 
   return filtersSchema
     .optional()
