@@ -1,9 +1,4 @@
-export type ExtractionKind =
-  | 'static'
-  | 'finite-enum'
-  | 'schema-driven'
-  | 'error-passthrough'
-  | 'registry';
+export type ExtractionKind = 'static' | 'finite-enum' | 'schema-driven' | 'error-passthrough';
 
 export interface MessageExtraction {
   file: string;

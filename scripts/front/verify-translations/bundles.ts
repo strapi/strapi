@@ -7,25 +7,22 @@ import type { TranslationBundle } from './types';
 
 const EN_JSON_GLOB = 'packages/{core/*,plugins/*}/admin/src/translations/en.json';
 
-/** Plugin prefix per package path segment (after packages/). */
-const PLUGIN_PREFIX_BY_PACKAGE: Record<string, string | null> = {
-  'core/admin': null,
-  'core/content-manager': 'content-manager',
-  'core/content-releases': 'content-releases',
-  'core/content-type-builder': 'content-type-builder',
-  'core/email': 'email',
-  'core/review-workflows': 'review-workflows',
-  'core/upload': 'upload',
-  'plugins/cloud': 'cloud',
-  'plugins/color-picker': 'color-picker',
-  'plugins/documentation': 'documentation',
-  'plugins/graphql': 'graphql',
-  'plugins/i18n': 'i18n',
-  'plugins/sentry': 'sentry',
-  'plugins/users-permissions': 'users-permissions',
-};
-
 const repoRoot = path.resolve(__dirname, '../../..');
+
+/**
+ * Message-id prefix for a package under packages/.
+ * core/admin owns the shared catalog (no prefix); every other package uses its
+ * last path segment (plugins/i18n → i18n, core/upload → upload).
+ */
+export const pluginPrefixFromPackageName = (packageName: string): string | null => {
+  if (packageName === 'core/admin') {
+    return null;
+  }
+
+  const segment = packageName.split('/').pop();
+
+  return segment && segment.length > 0 ? segment : null;
+};
 
 const isExcludedSource = (filePath: string) =>
   /\/(__tests__|tests)\//.test(filePath) ||
@@ -45,7 +42,7 @@ export const discoverBundles = (bundleFilter?: string): TranslationBundle[] => {
         .split(path.sep)
         .join('/');
 
-      const pluginPrefix = PLUGIN_PREFIX_BY_PACKAGE[packageName] ?? null;
+      const pluginPrefix = pluginPrefixFromPackageName(packageName);
       const sourceDirs = [adminSrcDir];
       const eeAdminDir = path.join(packagePath, 'ee/admin/src');
 
@@ -103,4 +100,4 @@ export const listLocaleFiles = (bundle: TranslationBundle): string[] => {
     .map((file) => path.join(bundle.translationsDir, file));
 };
 
-export { repoRoot, PLUGIN_PREFIX_BY_PACKAGE };
+export { repoRoot };

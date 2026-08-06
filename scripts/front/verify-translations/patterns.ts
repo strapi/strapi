@@ -1,17 +1,5 @@
 import type { ExtractionKind } from './types';
 
-/** Message id namespaces that only exist in core/admin en.json. */
-export const ADMIN_MESSAGE_PREFIXES = [
-  'app.',
-  'global.',
-  'notification.',
-  'components.',
-  'Auth.',
-  'tours.',
-  'Usecase.',
-  'HomePage.',
-] as const;
-
 /** Open-ended ids: English comes from defaultMessage, not en.json. */
 const SCHEMA_DRIVEN_MESSAGE_ID_PATTERNS: RegExp[] = [
   /^content-manager\.content-types\./,
@@ -20,43 +8,40 @@ const SCHEMA_DRIVEN_MESSAGE_ID_PATTERNS: RegExp[] = [
 
 const SCHEMA_DRIVEN_JSON_KEY_PATTERNS: RegExp[] = [/\.no-override$/];
 
-const REGISTRY_MESSAGE_IDS: Record<string, string> = {
-  'content-manager.popUpwarning.warning.bulk-has-draft-relations.message':
-    'Static key wrapped in getTranslation template literal',
-  'content-manager.CMEditViewBulkLocale.publish-title': 'Bulk locale modal title ternary',
-  'content-manager.CMEditViewBulkLocale.unpublish-title': 'Bulk locale modal title ternary',
+const namespacesCache = new WeakMap<Set<string>, Set<string>>();
+
+/** Top-level `foo.` namespaces present in core/admin en.json (derived, not hand-listed). */
+export const adminNamespacesFromKeys = (adminEnKeys: Set<string>): Set<string> => {
+  const cached = namespacesCache.get(adminEnKeys);
+
+  if (cached) {
+    return cached;
+  }
+
+  const namespaces = new Set<string>();
+
+  for (const key of adminEnKeys) {
+    const dot = key.indexOf('.');
+
+    if (dot > 0) {
+      namespaces.add(key.slice(0, dot + 1));
+    }
+  }
+
+  namespacesCache.set(adminEnKeys, namespaces);
+
+  return namespaces;
 };
 
-const FINITE_ENUM_JSON_PREFIXES: Array<{
-  prefix: string;
-  excludeKeySuffixes?: string[];
-}> = [
-  { prefix: 'attribute.', excludeKeySuffixes: ['.description'] },
-  { prefix: 'relation.' },
-  { prefix: 'modalForm.sub-header.chooseAttribute.' },
-  { prefix: 'modalForm.sub-header.attribute.' },
-  { prefix: 'modalForm.component.header-' },
-  { prefix: 'modalForm.singleType.header-' },
-  { prefix: 'modalForm.collectionType.header-' },
-  { prefix: 'modalForm.header-' },
-  { prefix: 'popUpWarning.bodyMessage.' },
-  { prefix: 'containers.List.' },
-  { prefix: 'containers.list.autoCloneModal.error.' },
-  { prefix: 'Homepage.features.' },
-  { prefix: 'sort.' },
-  { prefix: 'apiError.' },
-  { prefix: 'settings.section.' },
-  { prefix: 'Settings.permissions.auditLogs.' },
-  { prefix: 'Settings.roles.form.permissions.' },
-  { prefix: 'components.FilterOptions.FILTER_TYPES.' },
-  { prefix: 'global.plugins.' },
-  { prefix: 'email.Settings.capabilities.feature.' },
-  { prefix: 'CMEditViewBulkLocale.' },
-  { prefix: 'form.button.add.field.to.' },
-];
+export const isAdminMessageId = (messageId: string, adminEnKeys: Set<string>) => {
+  const dot = messageId.indexOf('.');
 
-export const isAdminMessageId = (messageId: string) =>
-  ADMIN_MESSAGE_PREFIXES.some((prefix) => messageId.startsWith(prefix));
+  if (dot <= 0) {
+    return false;
+  }
+
+  return adminNamespacesFromKeys(adminEnKeys).has(messageId.slice(0, dot + 1));
+};
 
 export const toJsonKey = (rawId: string, pluginPrefix: string | null): string => {
   if (!pluginPrefix) {
@@ -72,8 +57,12 @@ export const toJsonKey = (rawId: string, pluginPrefix: string | null): string =>
   return rawId;
 };
 
-export const toMessageId = (jsonKey: string, pluginPrefix: string | null): string => {
-  if (!pluginPrefix || isAdminMessageId(jsonKey)) {
+export const toMessageId = (
+  jsonKey: string,
+  pluginPrefix: string | null,
+  adminEnKeys: Set<string>
+): string => {
+  if (!pluginPrefix || isAdminMessageId(jsonKey, adminEnKeys)) {
     return jsonKey;
   }
 
@@ -105,7 +94,7 @@ export const resolveTargetBundle = (
     return 'core/admin';
   }
 
-  if (isAdminMessageId(rawId) || isAdminMessageId(jsonKey)) {
+  if (isAdminMessageId(rawId, adminEnKeys) || isAdminMessageId(jsonKey, adminEnKeys)) {
     return 'core/admin';
   }
 
@@ -141,12 +130,6 @@ export const classifyDynamicPattern = (
     return { kind: 'schema-driven', note: 'Content-type display name' };
   }
 
-  const registryNote = REGISTRY_MESSAGE_IDS[messageIdPattern];
-
-  if (registryNote) {
-    return { kind: 'registry', note: registryNote };
-  }
-
   if (
     SCHEMA_DRIVEN_MESSAGE_ID_PATTERNS.some((pattern) => pattern.test(messageIdPattern)) ||
     SCHEMA_DRIVEN_JSON_KEY_PATTERNS.some((pattern) => pattern.test(jsonKeyPattern))
@@ -155,12 +138,19 @@ export const classifyDynamicPattern = (
   }
 
   if (jsonKeyPattern.includes('${') || messageIdPattern.includes('${')) {
-    return { kind: 'finite-enum', note: 'Template literal — expand from en.json prefix' };
+    return { kind: 'finite-enum', note: 'Template literal — expand from en.json via pattern' };
   }
 
   return { kind: 'static' };
 };
 
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Expand a template like `attribute.${type}` against en.json keys.
+ * Prefers one path-segment per hole; falls back to multi-segment if needed
+ * (e.g. `popUpWarning.bodyMessage.${type}` with dotted types).
+ */
 export const expandTemplateToJsonKeys = (
   template: string,
   enKeys: string[],
@@ -168,51 +158,20 @@ export const expandTemplateToJsonKeys = (
 ): string[] => {
   const jsonTemplate = toJsonKey(template, pluginPrefix);
 
-  if (isAdminMessageId(jsonTemplate)) {
-    return [];
-  }
-
   if (!jsonTemplate.includes('${')) {
     return [jsonTemplate];
   }
 
-  const staticPrefix = jsonTemplate.split(/\$\{[^}]+\}/)[0] ?? '';
+  const parts = jsonTemplate.split(/\$\{[^}]+\}/);
+  const build = (hole: string) => new RegExp(`^${parts.map(escapeRegExp).join(hole)}$`);
 
-  for (const { prefix, excludeKeySuffixes = [] } of FINITE_ENUM_JSON_PREFIXES) {
-    if (!staticPrefix.startsWith(prefix) && staticPrefix !== prefix) {
-      continue;
-    }
+  const oneSegmentMatches = enKeys.filter((key) => build('([^.]+)').test(key));
 
-    const matches = enKeys.filter((key) => {
-      if (!key.startsWith(prefix)) {
-        return false;
-      }
-
-      return !excludeKeySuffixes.some((suffix) => key.endsWith(suffix));
-    });
-
-    if (matches.length > 0) {
-      return matches;
-    }
+  if (oneSegmentMatches.length > 0) {
+    return oneSegmentMatches;
   }
 
-  if (staticPrefix) {
-    const fallback = enKeys.filter((key) => key.startsWith(staticPrefix));
-
-    if (fallback.length > 0) {
-      return fallback;
-    }
-  }
-
-  return [];
-};
-
-export const expandRegistryMessageIds = (messageId: string): string[] => {
-  if (messageId.includes('|')) {
-    return messageId.split('|');
-  }
-
-  return [messageId];
+  return enKeys.filter((key) => build('(.+)').test(key));
 };
 
 export const resolveMessageId = (
@@ -233,7 +192,7 @@ export const resolveMessageId = (
     }
 
     if (pluginEnKeys.has(jsonKey)) {
-      return { messageId: toMessageId(jsonKey, pluginPrefix), targetBundle: 'self' };
+      return { messageId: toMessageId(jsonKey, pluginPrefix, adminEnKeys), targetBundle: 'self' };
     }
 
     if (!pluginPrefix) {
@@ -244,7 +203,7 @@ export const resolveMessageId = (
       return { messageId: adminEnKeys.has(rawId) ? rawId : jsonKey, targetBundle: 'core/admin' };
     }
 
-    return { messageId: toMessageId(jsonKey, pluginPrefix), targetBundle: 'self' };
+    return { messageId: toMessageId(jsonKey, pluginPrefix, adminEnKeys), targetBundle: 'self' };
   }
 
   const targetBundle = resolveTargetBundle(rawId, pluginPrefix, pluginEnKeys, adminEnKeys);
@@ -254,7 +213,7 @@ export const resolveMessageId = (
   }
 
   return {
-    messageId: toMessageId(jsonKey, pluginPrefix),
+    messageId: toMessageId(jsonKey, pluginPrefix, adminEnKeys),
     targetBundle: 'self',
   };
 };

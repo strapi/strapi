@@ -34,10 +34,11 @@ from that catalog removed. That keeps translator work for live message ids.
 
 Extractions are classified automatically:
 
-- **finite-enum** — template literals like ``getTrad(`attribute.${type}`)``; expanded from `en.json` prefixes
+- **finite-enum** — template literals like ``getTrad(`attribute.${type}`)``; expanded by matching the template pattern against `en.json` keys
 - **schema-driven** — `content-manager.content-types.${uid}.${field}` etc.; require `defaultMessage`, not `en.json`
 - **error-passthrough** — `formatMessage({ id: error })` from Yup; keys collected from schema literals
-- **registry** — small set of documented patterns (bulk locale titles, etc.)
+
+Admin message namespaces (`global.`, `Settings.`, …) are derived from `core/admin` `en.json` — not a hand-maintained prefix list. Plugin message prefixes are derived from the package path (`plugins/i18n` → `i18n`; `core/admin` has none).
 
 ## Legacy scripts
 

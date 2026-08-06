@@ -2,7 +2,6 @@ import ts from 'typescript';
 
 import {
   classifyDynamicPattern,
-  expandRegistryMessageIds,
   expandTemplateToJsonKeys,
   resolveMessageId,
   toJsonKey,
@@ -94,6 +93,7 @@ const pushDescriptorExtraction = (
     node,
     bundle,
     enKeys,
+    adminEnKeys,
     messageId,
     targetBundle,
     defaultMessage,
@@ -159,35 +159,103 @@ const loadPluginIdConstants = (bundle: TranslationBundle): Record<string, string
   return constants;
 };
 
+const foldTemplateSpanExpression = (
+  expr: ts.Expression,
+  constants: Record<string, string>
+): string[] | null => {
+  if (ts.isIdentifier(expr) && constants[expr.text] != null && constants[expr.text] !== '') {
+    return [constants[expr.text]];
+  }
+
+  if (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) {
+    return [expr.text];
+  }
+
+  if (ts.isConditionalExpression(expr)) {
+    const whenTrue = foldTemplateSpanExpression(expr.whenTrue, constants);
+    const whenFalse = foldTemplateSpanExpression(expr.whenFalse, constants);
+
+    if (whenTrue && whenFalse) {
+      return [...whenTrue, ...whenFalse];
+    }
+  }
+
+  if (ts.isParenthesizedExpression(expr)) {
+    return foldTemplateSpanExpression(expr.expression, constants);
+  }
+
+  return null;
+};
+
 const foldTemplateExpression = (
   node: ts.TemplateExpression,
   constants: Record<string, string>
 ): string | null => {
-  const head = node.head.text;
-  const parts = [head];
+  let variants = [node.head.text];
 
   for (const span of node.templateSpans) {
-    const expr = span.expression;
+    const alts = foldTemplateSpanExpression(span.expression, constants);
+    const literal = span.literal.text;
 
-    if (ts.isIdentifier(expr) && constants[expr.text]) {
-      parts.push(constants[expr.text], span.literal.text);
+    if (!alts) {
+      variants = variants.map((variant) => `${variant}\${…}${literal}`);
       continue;
     }
 
-    parts.push('${…}', span.literal.text);
+    variants = variants.flatMap((variant) => alts.map((alt) => `${variant}${alt}${literal}`));
   }
 
-  return parts.join('');
+  return variants.join('|');
 };
 
-const resolveHelperCall = (node: ts.CallExpression): string | null => {
+const resolveHelperCall = (
+  node: ts.CallExpression,
+  constants: Record<string, string>
+): string | null => {
   const callee = node.expression;
 
   if (!ts.isIdentifier(callee) || !TRANSLATION_HELPERS.has(callee.text)) {
     return null;
   }
 
-  return getStringLiteralValue(node.arguments[0]);
+  const arg = node.arguments[0];
+
+  if (!arg) {
+    return null;
+  }
+
+  if (ts.isTemplateExpression(arg)) {
+    return foldTemplateExpression(arg, constants) ?? getStringLiteralValue(arg);
+  }
+
+  return getStringLiteralValue(arg);
+};
+
+const resolvePossiblyBranchedId = (
+  rawId: string,
+  bundle: TranslationBundle,
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  fromHelper: boolean
+): ResolvedId => {
+  if (!rawId.includes('|')) {
+    return resolveMessageId(rawId, bundle.pluginPrefix, pluginEnKeys, adminEnKeys, fromHelper);
+  }
+
+  const parts = rawId
+    .split('|')
+    .map((part) =>
+      resolveMessageId(part, bundle.pluginPrefix, pluginEnKeys, adminEnKeys, fromHelper)
+    );
+
+  if (parts.some((part) => !part.messageId)) {
+    return { messageId: null };
+  }
+
+  return {
+    messageId: parts.map((part) => part.messageId).join('|'),
+    targetBundle: parts.some((part) => part.targetBundle === 'core/admin') ? 'core/admin' : 'self',
+  };
 };
 
 export const resolveIdExpression = (
@@ -210,14 +278,14 @@ export const resolveIdExpression = (
       return { messageId: null };
     }
 
-    return resolveMessageId(folded, bundle.pluginPrefix, pluginEnKeys, adminEnKeys);
+    return resolvePossiblyBranchedId(folded, bundle, pluginEnKeys, adminEnKeys, false);
   }
 
   if (ts.isCallExpression(expr)) {
-    const resolved = resolveHelperCall(expr);
+    const resolved = resolveHelperCall(expr, constants);
 
     if (resolved) {
-      return resolveMessageId(resolved, bundle.pluginPrefix, pluginEnKeys, adminEnKeys, true);
+      return resolvePossiblyBranchedId(resolved, bundle, pluginEnKeys, adminEnKeys, true);
     }
   }
 
@@ -311,6 +379,7 @@ const buildExtraction = (
   node: ts.Node,
   bundle: TranslationBundle,
   enKeys: string[],
+  adminEnKeys: Set<string>,
   messageId: string | null,
   targetBundle: 'core/admin' | 'self' | undefined,
   defaultMessage: string | null,
@@ -371,14 +440,6 @@ const buildExtraction = (
       };
     }
 
-    if (classification.kind === 'registry') {
-      for (const registryId of expandRegistryMessageIds(branch)) {
-        expandedJsonKeys.add(toJsonKey(registryId, bundle.pluginPrefix));
-      }
-
-      continue;
-    }
-
     if (branch.includes('${')) {
       kind = 'finite-enum';
 
@@ -399,7 +460,7 @@ const buildExtraction = (
     line: getLine(sourceFile, node),
     kind: keys.length > 1 ? 'finite-enum' : kind,
     jsonKey: keys.length === 1 ? keys[0] : null,
-    messageId: keys.length === 1 ? toMessageId(keys[0], bundle.pluginPrefix) : null,
+    messageId: keys.length === 1 ? toMessageId(keys[0], bundle.pluginPrefix, adminEnKeys) : null,
     defaultMessage,
     expandedJsonKeys: keys.length > 1 ? keys : undefined,
     note,
@@ -457,21 +518,16 @@ const visitNode = (
     }
 
     if (ts.isIdentifier(callee) && TRANSLATION_HELPERS.has(callee.text)) {
-      const raw = resolveHelperCall(node);
+      const raw = resolveHelperCall(node, constants);
 
       if (raw) {
-        const resolved = resolveMessageId(
-          raw,
-          bundle.pluginPrefix,
-          pluginEnKeys,
-          adminEnKeys,
-          true
-        );
+        const resolved = resolvePossiblyBranchedId(raw, bundle, pluginEnKeys, adminEnKeys, true);
         const extraction = buildExtraction(
           sourceFile,
           node,
           bundle,
           enKeys,
+          adminEnKeys,
           resolved.messageId,
           resolved.targetBundle,
           defaultMessageFromEnclosingDescriptor(node)
@@ -536,6 +592,7 @@ const visitNode = (
         node,
         bundle,
         enKeys,
+        adminEnKeys,
         messageId,
         targetBundle,
         defaultMessage,
@@ -567,6 +624,7 @@ const visitNode = (
         node,
         bundle,
         enKeys,
+        adminEnKeys,
         messageId,
         targetBundle,
         defaultMessage

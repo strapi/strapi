@@ -5,17 +5,39 @@ import os from 'node:os';
 import path from 'node:path';
 import ts from 'typescript';
 
-import { readJsonRecord } from '../bundles';
-import { resolveIdExpression } from '../extract';
-import { expandTemplateToJsonKeys, isAdminMessageId, resolveMessageId } from '../patterns';
+import { pluginPrefixFromPackageName, readJsonRecord } from '../bundles';
+import { extractMessages, resolveIdExpression } from '../extract';
+import {
+  adminNamespacesFromKeys,
+  expandTemplateToJsonKeys,
+  isAdminMessageId,
+  resolveMessageId,
+} from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
 import { backfillMissingEnKeys } from '../backfill-en';
 import type { TranslationBundle } from '../types';
 
+describe('pluginPrefixFromPackageName', () => {
+  it('derives prefix from package path (core/admin is null)', () => {
+    assert.equal(pluginPrefixFromPackageName('core/admin'), null);
+    assert.equal(pluginPrefixFromPackageName('core/content-manager'), 'content-manager');
+    assert.equal(pluginPrefixFromPackageName('plugins/i18n'), 'i18n');
+    assert.equal(pluginPrefixFromPackageName('plugins/users-permissions'), 'users-permissions');
+  });
+});
+
 describe('patterns', () => {
-  it('detects admin message ids', () => {
-    assert.equal(isAdminMessageId('global.save'), true);
-    assert.equal(isAdminMessageId('upload.plugin.name'), false);
+  it('detects admin message ids from derived namespaces', () => {
+    const adminKeys = new Set(['global.save', 'Settings.foo', 'app.bar']);
+
+    assert.equal(isAdminMessageId('global.save', adminKeys), true);
+    assert.equal(isAdminMessageId('Settings.missing', adminKeys), true);
+    assert.equal(isAdminMessageId('upload.plugin.name', adminKeys), false);
+    assert.deepEqual([...adminNamespacesFromKeys(adminKeys)].sort(), [
+      'Settings.',
+      'app.',
+      'global.',
+    ]);
   });
 
   it('maps plugin json keys to message ids', () => {
@@ -28,13 +50,94 @@ describe('patterns', () => {
     );
   });
 
-  it('expands attribute template prefixes from en keys', () => {
+  it('routes missing Settings.* ids to core/admin via derived namespaces', () => {
+    const adminKeys = new Set(['Settings.roles.title']);
+    const resolved = resolveMessageId(
+      'Settings.roles.missing',
+      'upload',
+      new Set(['plugin.name']),
+      adminKeys
+    );
+
+    assert.equal(resolved.targetBundle, 'core/admin');
+    assert.equal(resolved.messageId, 'Settings.roles.missing');
+  });
+
+  it('expands attribute.${type} to one-segment keys only', () => {
     const enKeys = ['attribute.text', 'attribute.text.description', 'attribute.boolean'];
     const expanded = expandTemplateToJsonKeys('attribute.${type}', enKeys, 'content-type-builder');
 
-    assert.ok(expanded.includes('attribute.text'));
-    assert.ok(expanded.includes('attribute.boolean'));
-    assert.ok(!expanded.includes('attribute.text.description'));
+    assert.deepEqual(expanded.sort(), ['attribute.boolean', 'attribute.text']);
+  });
+
+  it('expands attribute.${type}.description correctly (not non-description keys)', () => {
+    const enKeys = [
+      'attribute.text',
+      'attribute.text.description',
+      'attribute.boolean',
+      'attribute.boolean.description',
+    ];
+    const expanded = expandTemplateToJsonKeys(
+      'attribute.${type}.description',
+      enKeys,
+      'content-type-builder'
+    );
+
+    assert.deepEqual(expanded.sort(), [
+      'attribute.boolean.description',
+      'attribute.text.description',
+    ]);
+  });
+
+  it('expands mid-hole templates like CMEditViewBulkLocale.${action}-title', () => {
+    const enKeys = [
+      'CMEditViewBulkLocale.publish-title',
+      'CMEditViewBulkLocale.unpublish-title',
+      'CMEditViewBulkLocale.status',
+    ];
+    const expanded = expandTemplateToJsonKeys(
+      'CMEditViewBulkLocale.${action}-title',
+      enKeys,
+      'i18n'
+    );
+
+    assert.deepEqual(expanded.sort(), [
+      'CMEditViewBulkLocale.publish-title',
+      'CMEditViewBulkLocale.unpublish-title',
+    ]);
+  });
+
+  it('falls back to multi-segment holes when one-segment matches nothing', () => {
+    const enKeys = [
+      'popUpWarning.bodyMessage.category.delete',
+      'popUpWarning.bodyMessage.contentType.delete',
+      'popUpWarning.bodyMessage.delete-condition',
+    ];
+    const expanded = expandTemplateToJsonKeys(
+      'popUpWarning.bodyMessage.${type}',
+      enKeys,
+      'content-type-builder'
+    );
+
+    // one-segment matches delete-condition; prefer that over multi-segment
+    assert.deepEqual(expanded, ['popUpWarning.bodyMessage.delete-condition']);
+  });
+
+  it('uses multi-segment expand when only dotted hole values exist', () => {
+    const enKeys = [
+      'popUpWarning.bodyMessage.category.delete',
+      'popUpWarning.bodyMessage.contentType.delete',
+    ];
+    const expanded = expandTemplateToJsonKeys(
+      'popUpWarning.bodyMessage.${type}',
+      enKeys,
+      'content-type-builder'
+    );
+
+    assert.deepEqual(expanded.sort(), [
+      'popUpWarning.bodyMessage.category.delete',
+      'popUpWarning.bodyMessage.contentType.delete',
+    ]);
   });
 });
 
@@ -63,6 +166,83 @@ describe('extract.resolveIdExpression', () => {
     });
 
     assert.equal(resolved.messageId, 'upload.plugin.name');
+  });
+
+  it('folds ternary branches inside getTrad template literals', () => {
+    const sourceFile = ts.createSourceFile(
+      'tmp.ts',
+      `const x = getTrad(\`CMEditViewBulkLocale.\${isBulkPublish ? 'publish' : 'unpublish'}-title\`);`,
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const call = (sourceFile.statements[0] as ts.VariableStatement).declarationList.declarations[0]
+      .initializer as ts.CallExpression;
+
+    const bundle = {
+      packagePath: '/tmp',
+      packageName: 'plugins/i18n',
+      enJsonPath: '/tmp/en.json',
+      translationsDir: '/tmp',
+      pluginPrefix: 'i18n',
+      sourceDirs: [],
+    };
+
+    const resolved = resolveIdExpression(
+      call,
+      bundle,
+      new Set(['CMEditViewBulkLocale.publish-title', 'CMEditViewBulkLocale.unpublish-title']),
+      new Set(),
+      { pluginId: 'i18n' }
+    );
+
+    assert.equal(
+      resolved.messageId,
+      'i18n.CMEditViewBulkLocale.publish-title|i18n.CMEditViewBulkLocale.unpublish-title'
+    );
+  });
+});
+
+describe('extractMessages finite-enum smoke', () => {
+  it('expands getTrad template against package en.json', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-enum-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify(
+        {
+          'attribute.text': 'Text',
+          'attribute.boolean': 'Boolean',
+          'attribute.text.description': 'Text desc',
+        },
+        null,
+        2
+      )}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `formatMessage({ id: getTrad(\`attribute.\${type}\`), defaultMessage: 'Field' });`
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/content-type-builder',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'content-type-builder',
+      sourceDirs: [srcDir],
+    };
+
+    const extractions = extractMessages(bundle, new Set());
+    const withExpanded = extractions.filter(
+      (e) => e.expandedJsonKeys && e.expandedJsonKeys.length > 1
+    );
+
+    assert.ok(withExpanded.length >= 1);
+    assert.deepEqual(withExpanded[0].expandedJsonKeys?.sort(), [
+      'attribute.boolean',
+      'attribute.text',
+    ]);
   });
 });
 
