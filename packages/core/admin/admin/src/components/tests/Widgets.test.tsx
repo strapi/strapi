@@ -1,7 +1,11 @@
 import { render, screen } from '@tests/utils';
 
-import { useGetKeyStatisticsQuery, useGetCountDocumentsQuery } from '../../services/homepage';
-import { KeyStatisticsWidget, ProfileWidget } from '../Widgets';
+import {
+  useGetKeyStatisticsQuery,
+  useGetCountDocumentsQuery,
+  useGetPerformanceHomeMetricsQuery,
+} from '../../services/homepage';
+import { KeyStatisticsWidget, PerformanceQuickStatsWidget, ProfileWidget } from '../Widgets';
 
 type MockAuthState = {
   user: {
@@ -15,6 +19,7 @@ type MockAuthState = {
 jest.mock('../../services/homepage', () => ({
   useGetCountDocumentsQuery: jest.fn(),
   useGetKeyStatisticsQuery: jest.fn(),
+  useGetPerformanceHomeMetricsQuery: jest.fn(),
 }));
 
 // Mock the useAuth hook
@@ -175,5 +180,31 @@ describe('Homepage Widget Key Statistics component', () => {
     });
     render(<KeyStatisticsWidget />);
     expect(screen.getByText(/couldn't load widget content/i)).toBeInTheDocument();
+  });
+});
+
+describe('Homepage Widget Performance quick stats', () => {
+  it('shows configuration hint when artifact mode is off', async () => {
+    const snapshot = {
+      isLoading: false,
+      isError: false,
+      data: {
+        source: 'none',
+        databasePerformanceEnabled: false,
+        requestTimelineEnabled: false,
+        hint: 'Enable database.performance.output (artifact or both) and set database.performance.artifactPath to record batches the widgets can read.',
+      },
+      refetch: jest.fn(),
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RTK Query hook return shape is large; widget only reads these fields.
+    jest.mocked(useGetPerformanceHomeMetricsQuery).mockReturnValue(snapshot as any);
+
+    render(<PerformanceQuickStatsWidget />);
+
+    expect(
+      await screen.findByText(
+        /Enable database\.performance\.output \(artifact or both\) and set database\.performance\.artifactPath/i
+      )
+    ).toBeInTheDocument();
   });
 });

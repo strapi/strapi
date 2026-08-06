@@ -50,11 +50,34 @@ module.exports = ({ env }) => {
     },
   };
 
-  return {
+  const base = {
     connection: {
       client,
       ...connections[client],
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
+    },
+  };
+
+  const perfArtifactPath = env('STRAPI_CI_PERF_ARTIFACT_PATH', '');
+  if (!perfArtifactPath) {
+    return base;
+  }
+
+  const sampleRate = Math.min(
+    1,
+    Math.max(0, Number.parseFloat(env('STRAPI_CI_PERF_SAMPLE_RATE', '1')) || 1)
+  );
+
+  return {
+    ...base,
+    performance: {
+      enabled: true,
+      output: 'artifact',
+      artifactPath: perfArtifactPath,
+      slowQueryMs: env.int('STRAPI_CI_PERF_SLOW_QUERY_MS', 5),
+      sampleRate,
+      flushIntervalMs: env.int('STRAPI_CI_PERF_FLUSH_MS', 2000),
+      maxEvents: env.int('STRAPI_CI_PERF_MAX_EVENTS', 10000),
     },
   };
 };

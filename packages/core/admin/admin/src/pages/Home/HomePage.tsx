@@ -22,6 +22,7 @@ import {
   useGetCountDocumentsQuery,
   useGetHomepageLayoutQuery,
   useGetKeyStatisticsQuery,
+  useGetPerformanceHomeMetricsQuery,
 } from '../../services/homepage';
 import {
   getWidgetElement,
@@ -119,6 +120,7 @@ const HomePageCE = () => {
   // Prefetch expensive widget data as soon as the homepage route is active.
   useGetCountDocumentsQuery();
   useGetKeyStatisticsQuery();
+  useGetPerformanceHomeMetricsQuery();
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [widgetPermissionStatus, setWidgetPermissionStatus] = React.useState<
     Record<string, WidgetPermissionStatus>

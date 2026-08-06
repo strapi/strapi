@@ -47,8 +47,14 @@ export {
 } from './sessions';
 
 export * from './primitives';
+export { arithmeticMean, percentileNearestSorted } from './primitives/stats';
 export * from './content-api-router';
 export * from './security';
+export {
+  withAdminPermissionsSpan,
+  setAdminPermissionsPhaseMetricsRecorder,
+  setRequestWorkTraceParentContextResolver,
+} from './observability/with-admin-permissions-span';
 export * from './publication-filter';
 export * from './has-published-version-param';
 export { hasSort } from './sort-query';

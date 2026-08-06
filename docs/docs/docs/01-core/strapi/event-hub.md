@@ -138,6 +138,10 @@ const removeListener = strapi.eventHub.once('some.event', () => {
 removeListener();
 ```
 
+## Performance events
+
+Versioned **`performance.*`** signals (DB slow/error queries, request summaries) are documented in [Performance hub events](./performance-events.md). Prefer **`strapi.performanceEvents.subscribe`** for those events so handler errors stay isolated.
+
 ## Tradeoffs
 
 - Potential breaking changes: a change to an event's name or payload may affect other features or plugins listening to the same event. Backwards compatibility is a concern when managing these events.

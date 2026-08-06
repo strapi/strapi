@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
@@ -44,7 +45,27 @@ const databases = {
 
 const jestCmd = 'jest --config jest.config.api.js --runInBand --forceExit'.split(' ');
 
-const runAllTests = async (args) => {
+const resolvePerfArtifactEnv = ({ perfArtifacts, perfArtifactSuffix }) => {
+  const enablePerf =
+    perfArtifacts === true ||
+    process.env.STRAPI_CI_PERF_ARTIFACTS === '1' ||
+    process.env.STRAPI_CI_PERF_ARTIFACTS === 'true';
+
+  if (!enablePerf) {
+    return {};
+  }
+
+  const repoRoot = path.resolve(__dirname, '../..');
+  const rawSuffix = perfArtifactSuffix || process.env.STRAPI_CI_PERF_ARTIFACT_SUFFIX || 'local';
+  const safeSuffix = String(rawSuffix).replace(/[^a-zA-Z0-9._-]+/g, '_');
+  const perfDir = path.join(repoRoot, 'artifacts', 'api-perf');
+  fs.mkdirSync(perfDir, { recursive: true });
+  const perfPath = path.join(perfDir, `${safeSuffix}.jsonl`);
+
+  return { STRAPI_CI_PERF_ARTIFACT_PATH: perfPath };
+};
+
+const runAllTests = async (args, perfOpts) => {
   // Required for Jest: code run under Jest (including app code loaded by tests) can execute in a context
   // where Node treats dynamic import() as VM-bound; supported Node versions require this flag.
   // ESM-only deps (e.g. file-type in upload) use dynamic import(); without the flag we get
@@ -53,6 +74,8 @@ const runAllTests = async (args) => {
   const nodeOptions = [process.env.NODE_OPTIONS, '--experimental-vm-modules']
     .filter(Boolean)
     .join(' ');
+
+  const perfEnv = resolvePerfArtifactEnv(perfOpts);
 
   return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
@@ -64,18 +87,19 @@ const runAllTests = async (args) => {
       JWT_SECRET: 'aSecret',
       STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE: 'true',
       NODE_OPTIONS: nodeOptions,
+      ...perfEnv,
     },
   });
 };
 
-const main = async ({ database, generateApp }, args) => {
+const main = async ({ database, generateApp, jestArgs, perfArtifacts, perfArtifactSuffix }) => {
   try {
     if (generateApp) {
       await cleanTestApp(appPath);
       await generateTestApp({ appPath, database });
     }
 
-    await runAllTests(args).catch(() => {
+    await runAllTests(jestArgs, { perfArtifacts, perfArtifactSuffix }).catch(() => {
       process.exit(1);
     });
   } catch (error) {
@@ -100,11 +124,31 @@ yargs
       });
 
       yarg.boolean('generate-app');
+
+      yarg.option('perf-artifacts', {
+        type: 'boolean',
+        default: false,
+        describe:
+          'Enable Strapi v1 JSON Lines perf batches (database.performance + request summaries); files go under artifacts/api-perf/',
+      });
+
+      yarg.option('perf-artifact-suffix', {
+        type: 'string',
+        default: '',
+        describe:
+          'Safe fragment for the output filename (default: local). CI should pass a unique suffix per matrix cell.',
+      });
     },
     (argv) => {
-      const { database, generateApp = true } = argv;
+      const { database, generateApp = true, perfArtifacts, perfArtifactSuffix } = argv;
 
-      main({ generateApp, database: databases[database] }, argv._);
+      main({
+        generateApp,
+        database: databases[database],
+        jestArgs: argv._,
+        perfArtifacts,
+        perfArtifactSuffix,
+      });
     }
   )
   .help()

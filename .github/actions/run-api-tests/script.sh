@@ -11,5 +11,13 @@ export JWT_SECRET="aSecret"
 opts=($DB_OPTIONS)
 jestOptions=($JEST_OPTIONS)
 
+perfArgs=()
+if [[ "${RUN_PERF_ARTIFACTS:-}" == "1" ]]; then
+  perfArgs+=(--perf-artifacts)
+  if [[ -n "${PERF_ARTIFACT_SUFFIX:-}" ]]; then
+    perfArgs+=(--perf-artifact-suffix "${PERF_ARTIFACT_SUFFIX}")
+  fi
+fi
+
 yarn run test:generate-app:no-build --appPath=test-apps/api "${opts[@]}"
-yarn run test:api --no-generate-app "${jestOptions[@]}"
+yarn run test:api --no-generate-app "${perfArgs[@]}" "${jestOptions[@]}"

@@ -15,6 +15,16 @@ export interface Strapi extends Container {
   log: Logger;
   fs: StrapiFS;
   eventHub: Modules.EventHub.EventHub;
+  /**
+   * Subscribe to documented `performance.*` hub events with handler error isolation.
+   * Prefer over raw `eventHub.on` for perf signals.
+   */
+  performanceEvents: Modules.PerformanceEvents.PerformanceEventsPublicApi;
+  /**
+   * Live, per-instance rolling performance metrics derived from `performance.*` hub events.
+   * In-memory only (no storage); reflects traffic served by this process within the rolling window.
+   */
+  performanceMetrics: Modules.PerformanceMetrics.PerformanceLiveMetrics;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
   store: Modules.CoreStore.CoreStore;
@@ -92,6 +102,11 @@ export interface Strapi extends Container {
   validators: Modules.Validators.ValidatorsRegistry;
   sessionManager: Modules.SessionManager.SessionManagerService;
   load(): Promise<Strapi>;
+  /**
+   * When tracing is enabled and `load()` ran before `start()`, runs `fn` as a child span of the
+   * open `strapi.startup` trace (for example `strapi develop` work between load and listen).
+   */
+  withStartupTraceChild<T>(spanName: string, fn: () => Promise<T>): Promise<T>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
