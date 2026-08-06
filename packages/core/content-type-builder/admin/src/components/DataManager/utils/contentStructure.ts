@@ -26,6 +26,8 @@ export type ContentStructureSection = {
 export const CONTENT_STRUCTURE_VERSION = 1;
 export const MAX_FOLDER_DEPTH = 3;
 
+export type FolderSelection = { targetGroupId: string | null } | { newFolderName: string };
+
 /**
  * Admin-side model of the content-structure (folder groups).
  *
@@ -121,4 +123,47 @@ export function hasContentStructureChanged(
 export function generateGroupId(): string {
   const body = crypto.randomUUID().replace(/-/g, '').slice(0, 24);
   return `grp_${body}`;
+}
+
+/**
+ * Find a sibling folder that already has a given `name`.
+ *
+ * `excludeId` skips a group by id (used when renaming, so a folder doesn't
+ * collide with itself).
+ *
+ * Returns `undefined` for an empty name or no match.
+ */
+export function findSiblingFolderByName<
+  TGroup extends Pick<ContentStructureGroup, 'id' | 'name' | 'parent'>,
+>(groups: TGroup[], parentId: string | null, name: string, excludeId?: string): TGroup | undefined {
+  const target = name.trim().toLowerCase();
+
+  if (target.length === 0) {
+    return undefined;
+  }
+
+  return groups.find((group) => {
+    if (group.parent !== parentId) {
+      return false;
+    }
+
+    if (group.id === excludeId) {
+      return false;
+    }
+
+    return group.name.trim().toLowerCase() === target;
+  });
+}
+
+/**
+ * Whether a folder name is already taken by a sibling. See
+ * {@link findSiblingFolderByName}.
+ */
+export function isFolderNameTakenBySibling(
+  groups: Pick<ContentStructureGroup, 'id' | 'name' | 'parent'>[],
+  parentId: string | null,
+  name: string,
+  excludeId?: string
+): boolean {
+  return findSiblingFolderByName(groups, parentId, name, excludeId) !== undefined;
 }
