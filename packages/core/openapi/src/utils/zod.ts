@@ -64,7 +64,7 @@ export const zodToOpenAPI = (
 
     // TODO: make sure it's compliant
     return stripJsonSchemaId(schemas[id] as OpenAPIV3_1.SchemaObject);
-  } catch (e) {
+  } catch {
     throw new Error("Couldn't transform the zod schema into an OpenAPI schema");
   }
 };

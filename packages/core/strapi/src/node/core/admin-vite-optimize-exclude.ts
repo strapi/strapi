@@ -22,6 +22,7 @@ const PINNED_OPTIMIZE_MODULES = new Set<string>([
   ...ADMIN_VITE_ALIAS_MODULES,
   ...ADMIN_VITE_SINGLETON_MODULES,
   '@strapi/strapi',
+  'react-colorful',
 ]);
 
 const isOfficialStrapiPackage = (name: string): boolean => name.startsWith('@strapi/');

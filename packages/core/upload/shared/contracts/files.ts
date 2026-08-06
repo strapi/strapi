@@ -385,6 +385,35 @@ export declare namespace GenerateAIMetadata {
   }
 }
 
+/**
+ * POST /upload/unstable/generate-ai-metadata - Generate AI metadata for selected files
+ *
+ * Synchronous (no job): generates and persists alt text / caption for the given
+ * files and reports the outcome per file. Non-images are `skipped`; ids that no
+ * longer exist and files whose generation failed are reported as `error` rather
+ * than failing the whole request.
+ */
+export declare namespace UnstableGenerateAIMetadata {
+  export type FileStatus = 'success' | 'skipped' | 'error';
+
+  export interface FileResult {
+    id: number;
+    status: FileStatus;
+    error?: string;
+  }
+
+  export interface Request {
+    body: {
+      fileIds: number[];
+    };
+  }
+
+  export interface Response {
+    data: FileResult[];
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
 /** User object returned when createdBy is populated (GET /upload/files/:id) */
 export interface PopulatedCreatedBy {
   id: number;
