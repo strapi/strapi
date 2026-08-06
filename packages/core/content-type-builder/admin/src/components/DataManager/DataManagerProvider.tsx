@@ -33,12 +33,29 @@ import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
 
 import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
+import type { FolderSelection } from './utils/contentStructure';
 import type { FormAPI } from '../../utils/formAPI';
 import type { Internal, Modules } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
 }
+
+/**
+ * Including the new folder state in the same payload as create/edit transactions ensures the
+ * folder assignment is subject to the same undo/redo operations as the content type mutation
+ */
+const toFolderAssignment = (folder?: FolderSelection) => {
+  if (!folder) {
+    return undefined;
+  }
+
+  if ('newFolderName' in folder) {
+    return { newFolderId: generateGroupId(), newFolderName: folder.newFolderName };
+  }
+
+  return { targetGroupId: folder.targetGroupId };
+};
 
 type SchemaResponse = {
   data: {
@@ -369,7 +386,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
     },
     createSchema(payload) {
-      dispatch(actions.createSchema(payload));
+      const { folder, ...rest } = payload;
+      dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
     createComponentSchema({ data, uid, componentCategory }) {
       dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
@@ -437,6 +455,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     deleteFolderAndSubtree(payload) {
       dispatch(actions.deleteFolderAndSubtree(payload));
     },
+    deleteFolderAndContent({ section, id, contentTypeUids }) {
+      contentTypeUids.forEach((uid) => {
+        dispatch(actions.deleteContentType(uid));
+      });
+
+      dispatch(actions.deleteFolderAndSubtree({ section, id }));
+    },
     assignContentTypeToFolder(payload) {
       dispatch(actions.assignContentTypeToFolder(payload));
     },
@@ -463,7 +488,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
 
     updateSchema(args) {
-      dispatch(actions.updateSchema(args));
+      const { folder, ...rest } = args;
+      dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
 
     moveAttribute(args) {

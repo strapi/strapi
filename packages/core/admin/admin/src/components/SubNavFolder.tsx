@@ -4,32 +4,38 @@ import { Box, Flex, Tooltip, Typography } from '@strapi/design-system';
 import { ChevronDown } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-export const BASE_INDENT = 12;
-export const INDENT_STEP = 24;
-
 const ANIMATION_DURATION = '0.5s';
 const COLLAPSE_EASING = 'cubic-bezier(0, 1, 0, 1)';
 
 interface SubNavFolderProps {
   label: string;
   depth?: number;
-  /** Controlled open state. When provided the folder keeps no internal state. */
   open?: boolean;
   defaultOpen?: boolean;
   onToggle?: (open: boolean) => void;
-  /** Trailing actions slot (e.g. a "…" menu), revealed on row hover/focus. */
   endAction?: React.ReactNode;
+  /** Ref attached to the row element used as a drag-and-drop drop target. */
+  rowRef?: React.Ref<HTMLDivElement>;
+  isDropTarget?: boolean;
   children?: React.ReactNode;
 }
 
-const FolderRow = styled(Flex)<{ $depth: number }>`
+const FolderRow = styled(Flex)<{ $depth: number; $isDropTarget?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius};
 
-  padding-left: ${({ $depth }) => `${BASE_INDENT + $depth * INDENT_STEP}px`};
+  padding-left: ${({ theme }) => theme.spaces[3]};
   padding-right: ${({ theme }) => theme.spaces[3]};
+  margin-left: ${({ theme, $depth }) => `calc(${$depth} * ${theme.spaces[6]}`});
+
+  background-color: ${({ $isDropTarget, theme }) =>
+    $isDropTarget ? theme.colors.primary100 : 'transparent'};
+  outline: ${({ $isDropTarget, theme }) =>
+    $isDropTarget ? `1px solid ${theme.colors.primary600}` : 'none'};
+  outline-offset: -1px;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.neutral100};
+    background-color: ${({ $isDropTarget, theme }) =>
+      $isDropTarget ? theme.colors.primary100 : theme.colors.neutral100};
   }
 `;
 
@@ -57,13 +63,11 @@ const ToggleButton = styled.button`
 
 const EndActionWrapper = styled(Flex)`
   flex-shrink: 0;
-
-  visibility: hidden;
   opacity: 0;
+  transition: opacity 0.1s ease-out;
 
   ${FolderRow}:hover &,
   ${FolderRow}:focus-within & {
-    visibility: visible;
     opacity: 1;
   }
 `;
@@ -81,9 +85,11 @@ const CollapsibleInner = styled.div`
 `;
 
 interface FolderViewProps {
+  rowRef?: React.Ref<HTMLDivElement>;
   endAction?: React.ReactNode;
   children?: React.ReactNode;
   onToggleClick: () => void;
+  isDropTarget?: boolean;
   label: string;
   depth: number;
   open: boolean;
@@ -91,8 +97,10 @@ interface FolderViewProps {
 
 const FolderView = ({
   onToggleClick,
+  isDropTarget,
   endAction,
   children,
+  rowRef,
   label,
   depth,
   open,
@@ -143,7 +151,7 @@ const FolderView = ({
 
   return (
     <Box>
-      <FolderRow $depth={depth} alignItems="center">
+      <FolderRow ref={rowRef} $depth={depth} $isDropTarget={isDropTarget} alignItems="center">
         <ToggleButton
           onClick={onToggleClick}
           aria-controls={listId}
@@ -177,9 +185,11 @@ const FolderView = ({
 const SubNavFolder = ({
   defaultOpen = false,
   open: openProp,
+  isDropTarget,
   endAction,
   children,
   onToggle,
+  rowRef,
   label,
   depth = 0,
 }: SubNavFolderProps) => {
@@ -201,7 +211,9 @@ const SubNavFolder = ({
   return (
     <FolderView
       onToggleClick={handleToggleClick}
+      isDropTarget={isDropTarget}
       endAction={endAction}
+      rowRef={rowRef}
       label={label}
       depth={depth}
       open={open}

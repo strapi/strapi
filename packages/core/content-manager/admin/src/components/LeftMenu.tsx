@@ -19,7 +19,7 @@ import { useTypedSelector } from '../modules/hooks';
 import {
   countTreeLinks,
   buildContentStructureSection,
-  flattenTreeLinks,
+  filterTreeLinks,
   type LinkTreeNode,
 } from '../utils/contentStructure';
 import { getTranslation } from '../utils/translations';
@@ -201,9 +201,18 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         <SubNav.Sections>
           {sections.map((section) => {
             const matches = trimmedSearch
-              ? flattenTreeLinks(section.tree)
-                  .filter(({ link }) => contains(formatLinkTitle(link), trimmedSearch))
-                  .sort((a, b) => compareLinks(a.link, b.link))
+              ? filterTreeLinks({
+                  nodes: section.tree,
+                  matchLink: (link) => {
+                    return (
+                      contains(formatLinkTitle(link), trimmedSearch) ||
+                      contains(link.uid, trimmedSearch)
+                    );
+                  },
+                  matchFolderName: (name) => {
+                    return contains(name, trimmedSearch);
+                  },
+                }).sort((a, b) => compareLinks(a.link, b.link))
               : null;
 
             const count = matches ? matches.length : countTreeLinks(section.tree);

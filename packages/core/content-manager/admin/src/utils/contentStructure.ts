@@ -14,7 +14,7 @@ export type LinkTreeNode = VisibleTreeNode<ContentManagerLink>;
  * Reconcile a resolved content-structure section (folder groups) with the set of links the user can
  * actually see with respect to their RBAC permissions.
  */
-const deriveVisibleTree = <TLink extends { uid: string }>(
+export const deriveVisibleTree = <TLink extends { uid: string }>(
   groups: ResolvedGroupNode[],
   links: TLink[],
   compareUngrouped?: (a: TLink, b: TLink) => number
@@ -78,6 +78,47 @@ export function flattenTreeLinks<TLink>(
 
 export function countTreeLinks<TLink>(nodes: VisibleTreeNode<TLink>[]): number {
   return flattenTreeLinks(nodes).length;
+}
+
+type FilterTreeLinksParams<TLink> = {
+  matchFolderName: (name: string) => boolean;
+  matchLink: (link: TLink) => boolean;
+  nodes: VisibleTreeNode<TLink>[];
+  parentPath?: string[];
+};
+
+/**
+ * Search the contentStructure tree, returning the matching links with their folder path.
+ *
+ * A **link** matches on whatever `matchLink` tests (display name and/or UID) and is returned with its ancestor folder path.
+ *
+ * A **folder** matches on its name and, when it does, surfaces *all* of its descendant content types (each with
+ * its own path).
+ */
+export function filterTreeLinks<TLink>({
+  matchFolderName,
+  matchLink,
+  nodes,
+  parentPath = [],
+}: FilterTreeLinksParams<TLink>): Array<{ link: TLink; path: string[] }> {
+  return nodes.flatMap((node) => {
+    if (node.type === 'link') {
+      return matchLink(node.link) ? [{ link: node.link, path: parentPath }] : [];
+    }
+
+    const path = [...parentPath, node.name];
+
+    if (matchFolderName(node.name)) {
+      return flattenTreeLinks(node.children, path);
+    }
+
+    return filterTreeLinks({
+      nodes: node.children,
+      matchFolderName,
+      matchLink,
+      parentPath: path,
+    });
+  });
 }
 
 type BuildContentStructureSectionParams = {

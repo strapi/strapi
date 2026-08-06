@@ -8,6 +8,8 @@ import { makeUnique } from '../../utils/makeUnique';
 import { createUndoRedoSlice } from './undoRedo';
 import {
   createEmptyContentStructure,
+  findSiblingFolderByName,
+  isFolderNameTakenBySibling,
   MAX_FOLDER_DEPTH,
   sectionKeyForKind,
 } from './utils/contentStructure';
@@ -23,6 +25,7 @@ import type {
 import type {
   ContentStructure,
   ContentStructureGroup,
+  ContentStructureSection,
   GroupStatus,
   SectionKey,
 } from './utils/contentStructure';
@@ -162,6 +165,10 @@ type CreateComponentSchemaPayload = {
   componentCategory: string;
 };
 
+type FolderAssignmentPayload =
+  | { targetGroupId: string | null }
+  | { newFolderId: string; newFolderName: string };
+
 type CreateSchemaPayload = {
   uid: string;
   data: {
@@ -172,6 +179,7 @@ type CreateSchemaPayload = {
     draftAndPublish: boolean;
     pluginOptions: PluginOptions;
   };
+  folder?: FolderAssignmentPayload;
 };
 
 type EditAttributePayload = {
@@ -222,6 +230,7 @@ type UpdateSchemaPayload = {
     pluginOptions: PluginOptions;
   };
   uid: string;
+  folder?: FolderAssignmentPayload;
 };
 
 type MoveAttributePayload = {
@@ -373,6 +382,61 @@ const removeContentTypeChild = (groups: ContentStructureGroup[], uid: string): b
 };
 
 /**
+ * Assign a content type to a folder within a single section, optionally creating
+ * a new root folder first.
+ *
+ * Detaches the content type from any current folder then files it under the target group.
+ * This is also used by the create/edit content-type modal's folder picker via
+ * createSchema/updateSchema.
+ */
+const applyFolderAssignment = (
+  section: ContentStructureSection,
+  uid: UID.ContentType,
+  folder: FolderAssignmentPayload
+): void => {
+  const { groups } = section;
+
+  removeContentTypeChild(groups, uid);
+
+  let targetGroupId: string | null;
+
+  if ('newFolderId' in folder) {
+    // Reuse an existing root folder of the same name instead of creating a
+    // duplicate. The modal picker can only ever makes root folders, so
+    // this makes the assumption that a same-named root folder means the
+    // user wants to insert into that folder.
+    const existing = findSiblingFolderByName(groups, null, folder.newFolderName);
+
+    if (existing) {
+      targetGroupId = existing.id;
+    } else {
+      groups.push({
+        name: folder.newFolderName,
+        id: folder.newFolderId,
+        parent: null,
+        children: [],
+        status: 'NEW',
+      });
+
+      targetGroupId = folder.newFolderId;
+    }
+  } else {
+    targetGroupId = folder.targetGroupId;
+  }
+
+  if (!targetGroupId) {
+    return;
+  }
+
+  const targetGroup = findGroup(groups, targetGroupId);
+
+  if (targetGroup) {
+    targetGroup.children.push({ type: 'contentType', uid });
+    setGroupStatus(targetGroup, 'CHANGED');
+  }
+};
+
+/**
  * Determines whether `potentialDescendantId` is nested somewhere inside `ancestorId`'s subtree
  */
 const isDescendantGroup = (
@@ -465,7 +529,7 @@ const slice = createUndoRedoSlice(
         state.components[uid as string] = newSchema;
       },
       createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
-        const { uid, data } = action.payload;
+        const { uid, data, folder } = action.payload;
 
         const { displayName, singularName, pluralName, kind, draftAndPublish, pluginOptions } =
           data;
@@ -492,6 +556,16 @@ const slice = createUndoRedoSlice(
         };
 
         state.contentTypes[uid] = newSchema;
+
+        // File the new content type into a folder in the same transaction it is created,
+        // so both are subject to the same undo/redo operatiion.
+        if (folder) {
+          applyFolderAssignment(
+            state.contentStructure.sections[sectionKeyForKind(kind)],
+            uid as UID.ContentType,
+            folder
+          );
+        }
       },
       addAttribute: (state, action: PayloadAction<AddAttributePayload>) => {
         const { attributeToSet, forTarget, targetUid } = action.payload;
@@ -786,7 +860,7 @@ const slice = createUndoRedoSlice(
         }
       },
       updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
-        const { data, uid } = action.payload;
+        const { data, uid, folder } = action.payload;
 
         const { displayName, kind, draftAndPublish, pluginOptions } = data;
 
@@ -811,6 +885,16 @@ const slice = createUndoRedoSlice(
         if (kind && kind !== previousKind) {
           const oldSection = state.contentStructure.sections[sectionKeyForKind(previousKind)];
           removeContentTypeChild(oldSection.groups, uid);
+        }
+
+        // Apply the folder picker's choice after any kind relocation, so the
+        // assignment lands in the content type's (possibly new) section.
+        if (folder) {
+          applyFolderAssignment(
+            state.contentStructure.sections[sectionKeyForKind(kind)],
+            uid as UID.ContentType,
+            folder
+          );
         }
       },
       deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
@@ -894,8 +978,11 @@ const slice = createUndoRedoSlice(
         const { section, id, name, parentId } = action.payload;
         const { groups } = state.contentStructure.sections[section];
 
-        // Refuse creation of a folder that would exceed the maximum allowed depth.
         if (parentId && getGroupDepth(groups, parentId) + 1 > MAX_FOLDER_DEPTH) {
+          return;
+        }
+
+        if (isFolderNameTakenBySibling(groups, parentId, name)) {
           return;
         }
 
@@ -913,8 +1000,17 @@ const slice = createUndoRedoSlice(
       renameFolder: (state, action: PayloadAction<RenameFolderPayload>) => {
         const { section, id, name } = action.payload;
 
-        const group = findGroup(state.contentStructure.sections[section].groups, id);
+        const { groups } = state.contentStructure.sections[section];
+        const group = findGroup(groups, id);
         if (!group) {
+          return;
+        }
+
+        if (group.name === name) {
+          return;
+        }
+
+        if (isFolderNameTakenBySibling(groups, group.parent, name, id)) {
           return;
         }
 
@@ -974,6 +1070,25 @@ const slice = createUndoRedoSlice(
             }
 
             setGroupStatus(newParent, 'CHANGED');
+          }
+        } else if (typeof index === 'number') {
+          // If a content type is dropped into the root:
+          // The root display order follows the array order of the
+          // section's root-level groups because there's no root level
+          // customization yet, so reposition the moved group among them.
+          const currentIndex = groups.findIndex((candidate) => candidate.id === id);
+
+          if (currentIndex !== -1) {
+            const [moved] = groups.splice(currentIndex, 1);
+            const rootIds = groups
+              .filter((candidate) => candidate.parent === null)
+              .map((candidate) => candidate.id);
+            const anchorId = rootIds[index];
+            const insertAt = anchorId
+              ? groups.findIndex((candidate) => candidate.id === anchorId)
+              : groups.length;
+
+            groups.splice(insertAt === -1 ? groups.length : insertAt, 0, moved);
           }
         }
       },
