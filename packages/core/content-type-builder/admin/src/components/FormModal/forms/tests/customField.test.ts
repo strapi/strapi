@@ -6,7 +6,7 @@ import { SchemaParams, forms } from '../forms';
 const mockBaseCustomField = {
   name: 'color',
   pluginId: 'color-picker',
-  type: 'string',
+  type: 'string' as const,
   icon: jest.fn(),
   intlLabel: {
     id: 'color-picker.label',
@@ -28,7 +28,7 @@ const mockNoSectionInput = [
       defaultMessage: 'Test',
     },
     name: 'regex',
-    type: 'text',
+    type: 'text' as const,
     description: {
       id: 'test',
       defaultMessage: 'test',
@@ -45,7 +45,7 @@ const mockNewSectionInput = [
     items: [
       {
         name: 'required',
-        type: 'checkbox',
+        type: 'checkbox' as const,
         intlLabel: {
           id: 'color-picker.options.advanced.requiredField',
           defaultMessage: 'Required field',
@@ -65,10 +65,6 @@ describe('customField forms', () => {
       const mockArgs: SchemaParams = {
         schemaAttributes: [
           {
-            type: 'string',
-            required: true,
-            unique: true,
-            configurable: true,
             name: 'type',
           },
         ],
@@ -95,7 +91,7 @@ describe('customField forms', () => {
       const modifiedData = mockArgs.schemaData.modifiedData;
       const result = await customFieldValidator.validateAt('options.test', modifiedData);
       // If valid, yup returns the value
-      expect(result).toBe(modifiedData.options.test);
+      expect(result).toBe('option');
     });
   });
   describe('base form', () => {
@@ -207,7 +203,7 @@ describe('customField forms', () => {
       };
       const result = forms.customField.form.advanced({
         customField: mockCustomField,
-        extensions: { getAdvancedForm: jest.fn() },
+        extensions: { ...ctbFormsAPI, getAdvancedForm: jest.fn() },
       });
 
       const expected = [
@@ -263,7 +259,7 @@ describe('customField forms', () => {
 
       const result = forms.customField.form.advanced({
         customField: mockCustomField,
-        extensions: { getAdvancedForm: jest.fn() },
+        extensions: { ...ctbFormsAPI, getAdvancedForm: jest.fn() },
       });
 
       const expected = [
@@ -328,6 +324,7 @@ describe('customField forms', () => {
       const result = forms.customField.form.advanced({
         customField: mockCustomField,
         extensions: {
+          ...ctbFormsAPI,
           getAdvancedForm: jest.fn(() => [
             {
               name: 'pluginOptions.i18n.localized',
@@ -335,7 +332,7 @@ describe('customField forms', () => {
                 id: 'i18n.plugin.schema.i18n.localized.description-field',
                 defaultMessage: 'The field can have different values in each locale',
               },
-              type: 'checkbox',
+              type: 'checkbox' as const,
               intlLabel: {
                 id: 'i18n.plugin.schema.i18n.localized.label-field',
                 defaultMessage: 'Enable localization for this field',

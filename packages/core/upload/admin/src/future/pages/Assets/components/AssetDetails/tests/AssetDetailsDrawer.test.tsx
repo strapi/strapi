@@ -89,12 +89,32 @@ describe('AssetDetails (asset details drawer body)', () => {
     expect(screen.getByDisplayValue('A photo')).toBeInTheDocument();
   });
 
+  it('opens the fullscreen crop editor from the preview and closes on cancel', async () => {
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
+
+    await user.click(await screen.findByRole('button', { name: 'Crop' }));
+
+    expect(await screen.findByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save as copy' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    );
+  });
+
   it('enables save when a field is edited and submits the new fileInfo to the update endpoint', async () => {
     const updateRequest = captureUpdateRequest({ ...baseAsset, name: 'updated.png' });
 
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const nameInput = await screen.findByDisplayValue('photo.png');
+    // The field starts disabled until the RBAC check resolves.
+    await waitFor(() => expect(nameInput).toBeEnabled());
     await user.clear(nameInput);
     await user.type(nameInput, 'updated.png');
 
@@ -180,7 +200,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Wait for folders query so the toast can resolve the folder name.
     await screen.findByRole('combobox');
 
-    const trashButton = screen.getByRole('button', { name: 'Delete this file' });
+    const trashButton = await screen.findByRole('button', { name: 'Delete this file' });
     await user.click(trashButton);
 
     // Dialog opens via Radix AlertDialog — match by the body copy.
@@ -189,6 +209,35 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     await waitFor(() => expect(deleteId).toBe('1'));
     await waitFor(() => expect(closeDetails).toHaveBeenCalledTimes(1));
+  });
+
+  it('deletes the asset currently shown after the drawer switches assets', async () => {
+    const firstAsset = { ...baseAsset, id: 1, name: 'first.png' };
+    const secondAsset = { ...baseAsset, id: 2, name: 'second.png' };
+    let deleteId: string | null = null;
+
+    server.use(
+      http.delete('/upload/files/:id', ({ params }) => {
+        deleteId = String(params.id);
+        return HttpResponse.json({ id: Number(params.id) });
+      })
+    );
+
+    const closeDetails = jest.fn();
+    const { user, rerender } = render(
+      <AssetDetails asset={firstAsset} closeDetails={closeDetails} />
+    );
+    await screen.findByRole('combobox');
+
+    rerender(<AssetDetails asset={secondAsset} closeDetails={closeDetails} />);
+    expect(await screen.findByDisplayValue('second.png')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Delete this file' }));
+    await screen.findByText(/This file cannot be recovered/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(deleteId).not.toBeNull());
+    expect(deleteId).toBe('2');
   });
 
   it('keeps the drawer open and surfaces the error message when the delete request fails', async () => {
@@ -202,7 +251,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={closeDetails} />);
 
     await screen.findByRole('combobox');
-    await user.click(screen.getByRole('button', { name: 'Delete this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
     await screen.findByText(/This file cannot be recovered/i);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
@@ -236,7 +285,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Confirm dialog must NOT be visible before the trigger is clicked.
     expect(screen.queryByText(/Replace this media file\?/i)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
 
     await screen.findByText(/Replace this media file\?/i);
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
@@ -259,14 +308,132 @@ describe('AssetDetails (asset details drawer body)', () => {
     await screen.findByText(/File replaced\./i);
   });
 
+  it('replaces the asset currently shown after the drawer switches assets', async () => {
+    const firstAsset = { ...baseAsset, id: 1, name: 'first.png' };
+    const secondAsset = { ...baseAsset, id: 2, name: 'second.png' };
+    let replaceId: string | null = null;
+
+    server.use(
+      http.post('/upload', async ({ request }) => {
+        const url = new URL(request.url, 'http://localhost:1337');
+        replaceId = url.searchParams.get('id');
+        return HttpResponse.json({ ...secondAsset, name: 'replacement.png' });
+      })
+    );
+
+    const closeDetails = jest.fn();
+    const { user, rerender } = render(
+      <AssetDetails asset={firstAsset} closeDetails={closeDetails} />
+    );
+    await screen.findByRole('combobox');
+
+    rerender(<AssetDetails asset={secondAsset} closeDetails={closeDetails} />);
+    expect(await screen.findByDisplayValue('second.png')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await screen.findByText(/Replace this media file\?/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['hello'], 'replacement.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => expect(replaceId).not.toBeNull());
+    expect(replaceId).toBe('2');
+  });
+
   it('shows the AI variant of the replace description when AI metadata is enabled in settings', async () => {
     server.use(buildSettingsHandler(true));
 
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
     await screen.findByRole('combobox');
 
-    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
 
     await screen.findByText(/AI will generate new metadata after upload/i);
+  });
+});
+
+describe('AssetDetails RBAC gating', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  const withoutAction = (action: string) => ({
+    providerOptions: {
+      permissions: (defaults: Array<{ action: string }>) =>
+        defaults.filter((permission) => permission.action !== action),
+    },
+  });
+
+  it('hides every mutating action and disables the fields without assets.update', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.update')
+    );
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeDisabled());
+    expect(screen.getByDisplayValue('A caption')).toBeDisabled();
+    expect(screen.getByDisplayValue('A photo')).toBeDisabled();
+
+    expect(screen.queryByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete this file' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Replace this file' })).not.toBeInTheDocument();
+
+    // Read-scoped actions survive.
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+  });
+
+  it('drops the footer bar entirely when no footer action is permitted', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />, {
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter(
+            (permission) =>
+              ![
+                'plugin::upload.assets.update',
+                'plugin::upload.assets.download',
+                'plugin::upload.assets.copy-link',
+              ].includes(permission.action)
+          ),
+      },
+    });
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeDisabled());
+
+    for (const name of ['Save changes', 'Delete this file', 'Copy link', 'Download']) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+  });
+
+  it('hides the download action without assets.download', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.download')
+    );
+
+    await screen.findByDisplayValue('photo.png');
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Download' })).not.toBeInTheDocument()
+    );
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete this file' })).toBeInTheDocument();
+  });
+
+  it('hides the copy link action without assets.copy-link', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.copy-link')
+    );
+
+    await screen.findByDisplayValue('photo.png');
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument()
+    );
+    expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
   });
 });

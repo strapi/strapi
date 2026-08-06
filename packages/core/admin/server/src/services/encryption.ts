@@ -65,7 +65,7 @@ const decrypt = (encryptedValue: string) => {
     decrypted += decipher.final('utf8');
 
     return decrypted;
-  } catch (err) {
+  } catch {
     strapi.log.warn(
       '[decrypt] Unable to decrypt value — encryption key may have changed or data is corrupted.'
     );

@@ -4,8 +4,10 @@ import { useMutation, useQueryClient } from 'react-query';
 import { CreateFolders, UpdateFolder } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
 
+type EditFolderRequestBody = UpdateFolder.Request['body'];
+
 interface EditFolderRequestParams {
-  attrs: CreateFolders.Request['body'] | UpdateFolder.Request['body'];
+  attrs: EditFolderRequestBody;
   id?: UpdateFolder.Request['params']['id'];
 }
 
@@ -14,10 +16,17 @@ const editFolderRequest = (
   post: FetchClient['post'],
   { attrs, id }: EditFolderRequestParams
 ): Promise<UpdateFolder.Response['data'] | CreateFolders.Response['data']> => {
-  const isEditing = !!id;
-  const method = isEditing ? put : post;
+  if (id !== undefined) {
+    return put<UpdateFolder.Response['data'], UpdateFolder.Request['body']>(
+      `/upload/folders/${id}`,
+      attrs
+    ).then((res) => res.data);
+  }
 
-  return method(`/upload/folders/${id ?? ''}`, attrs).then((res) => res.data);
+  return post<CreateFolders.Response['data'], EditFolderRequestBody>(
+    '/upload/folders/',
+    attrs
+  ).then((res) => res.data);
 };
 
 export const useEditFolder = () => {

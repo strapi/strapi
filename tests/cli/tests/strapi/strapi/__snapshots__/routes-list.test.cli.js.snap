@@ -277,6 +277,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /upload/actions/generate-ai-metadata                                            │
 │ HEAD|GET           │ /upload/actions/generate-ai-metadata/count                                      │
 │ HEAD|GET           │ /upload/actions/generate-ai-metadata/latest                                     │
+│ POST               │ /upload/unstable/generate-ai-metadata                                           │
 │ HEAD|GET           │ /upload/configuration                                                           │
 │ PUT                │ /upload/configuration                                                           │
 │ HEAD|GET           │ /i18n/iso-locales                                                               │

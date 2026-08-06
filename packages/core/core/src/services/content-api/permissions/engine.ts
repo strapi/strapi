@@ -1,5 +1,5 @@
-import permissions from '@strapi/permissions';
+import { engine } from '@strapi/permissions';
 
-type Options = Parameters<typeof permissions.engine.new>[0];
+type Options = Parameters<typeof engine.new>[0];
 
-export default ({ providers }: Options) => permissions.engine.new({ providers });
+export default ({ providers }: Options) => engine.new({ providers });

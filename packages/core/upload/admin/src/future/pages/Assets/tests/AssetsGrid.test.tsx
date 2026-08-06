@@ -1,7 +1,9 @@
 import { userEvent } from '@testing-library/user-event';
-import { render, screen } from '@tests/utils';
+import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { AssetsGrid } from '../components/AssetsGrid';
+import { BulkActionsBar } from '../components/BulkActionsBar';
+import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 const mockNavigateToFolder = jest.fn();
 
@@ -19,7 +21,8 @@ jest.mock('../components/Dnd/useAssetDnd', () => ({
     setNodeRef: jest.fn(),
     isDragging: false,
   }),
-  useFolderDraggableDroppable: () => ({
+  useFolderDraggableDroppable: (folder: { id: number; name: string }) => ({
+    dragData: { kind: 'folder', id: folder.id, name: folder.name, parentId: null },
     draggable: {
       attributes: {},
       listeners: {},
@@ -131,8 +134,16 @@ interface SetupProps {
   folders?: Folder[];
 }
 
+const mockOnAssetItemClick = jest.fn();
+
 const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
-  render(<AssetsGrid assets={assets} folders={folders} onAssetItemClick={jest.fn()} />);
+  render(
+    <>
+      <AssetsGrid assets={assets} folders={folders} onAssetItemClick={mockOnAssetItemClick} />
+      <BulkActionsBar />
+    </>,
+    { renderOptions: { wrapper: AssetSelectionProvider } }
+  );
 
 describe('AssetsGrid', () => {
   beforeEach(() => {
@@ -147,9 +158,9 @@ describe('AssetsGrid', () => {
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
 
-    it('renders empty state when no assets and no folders', () => {
+    it('renders nothing when no assets and no folders (empty state is owned by the page)', () => {
       setup({ assets: [], folders: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
+      expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
     });
   });
 
@@ -187,6 +198,56 @@ describe('AssetsGrid', () => {
         asset.formats = null;
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).toBeInTheDocument();
+      });
+
+      it('cache-busts the thumbnail with updatedAt so a replaced image refetches (CMS-1237)', () => {
+        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
+        asset.updatedAt = '2024-05-06T00:00:00.000Z';
+        setup({ assets: [asset] });
+
+        const src = screen.getByRole('img').getAttribute('src') ?? '';
+        expect(src).toContain(`v=${new Date(asset.updatedAt).getTime()}`);
+      });
+
+      it('omits the cache-buster on signed URLs (an extra param breaks the signature)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+          updatedAt: '2024-05-06T00:00:00.000Z',
+        };
+        setup({ assets: [asset] });
+
+        expect(screen.getByRole('img').getAttribute('src') ?? '').not.toContain('v=');
+      });
+
+      it('loads signed remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
+      });
+
+      it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+        // Public/unsigned remote thumbnails are cache-busted, so they must
+        // render without requiring a bucket CORS rule.
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: false,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
+      });
+
+      it('does not set crossOrigin for local assets', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isLocal: true,
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
       });
     });
 
@@ -295,17 +356,250 @@ describe('AssetsGrid', () => {
       expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
     });
 
-    it('shows empty state when there are no folders and no assets', () => {
-      setup({ folders: [], assets: [] });
-      expect(screen.getByText('No content found')).toBeInTheDocument();
-    });
-
     it('renders only folder items when there are no assets', () => {
       const folders = [createMockFolder(1, 'Photos')];
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
-      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
+    });
+
+    it('opens the folder actions menu without navigating into the folder', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Copy link to folder' })).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('opens the folder actions menu with Enter without navigating into the folder', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      // The card handles Enter as "open this folder", so the trigger has to
+      // swallow the keydown as well as the click.
+      screen.getByRole('button', { name: 'More actions' }).focus();
+      await user.keyboard('{Enter}');
+
+      expect(screen.getByRole('menuitem', { name: 'Copy link to folder' })).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  // The dialogs the actions menu opens are portaled to the body but are React
+  // children of the card, so the card's handlers see their events. The shield
+  // the menu's wrapper puts up must therefore be scoped to its own DOM subtree —
+  // `stopPropagation` would kill the native event before it reaches `document`,
+  // where Radix listens in order to dismiss its layers.
+  describe('Folder actions menu dismissal', () => {
+    // Folder 5 sits outside the default `/upload/folder-structure` fixture, so
+    // the move dialog has somewhere to offer moving it to.
+    const setupFolderCard = () => setup({ folders: [createMockFolder(5, 'Photos')], assets: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setupFolderCard>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    // `disableOutsidePointerEvents` puts `pointer-events: none` on the body, so
+    // user-event refuses to click there — the document element is where a real
+    // browser lands the click anyway. Radix attaches its document listener on a
+    // `setTimeout(…, 0)` once the layer mounts, so let that land first.
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      // A pointerdown inside the listbox used to leave Radix's "the pointer is
+      // inside my layer" flag stuck, so the next outside click was swallowed.
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('closes the Location select on Escape', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+      expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
+
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+    });
+
+    it('does not navigate into the folder when the open dialog is clicked', async () => {
+      const { user } = setupFolderCard();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Selection', () => {
+    it('hides all card checkboxes without assets.update', async () => {
+      render(
+        <>
+          <AssetsGrid
+            assets={mockAssets}
+            folders={[createMockFolder(1, 'Photos')]}
+            onAssetItemClick={mockOnAssetItemClick}
+          />
+          <BulkActionsBar />
+        </>,
+        {
+          renderOptions: { wrapper: AssetSelectionProvider },
+          providerOptions: {
+            permissions: (defaults: Array<{ action: string }>) =>
+              defaults.filter((permission) => permission.action !== 'plugin::upload.assets.update'),
+          },
+        }
+      );
+
+      expect(await screen.findByText('image1.png')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+      });
+    });
+
+    it('opens the asset details on plain card click (no selection)', async () => {
+      const { user } = setup();
+      const cards = screen.getAllByRole('listitem');
+
+      await user.click(cards[0]);
+
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('adds to the selection with Cmd/Ctrl+click', async () => {
+      const { user } = setup();
+      const cards = screen.getAllByRole('listitem');
+
+      await user.keyboard('{Meta>}');
+      await user.click(cards[0]);
+      await user.click(cards[1]);
+      await user.keyboard('{/Meta}');
+
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('selects a contiguous range with Shift+click from a checkbox anchor', async () => {
+      const { user } = setup();
+      const cards = screen.getAllByRole('listitem');
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.keyboard('{Shift>}');
+      await user.click(cards[2]);
+      await user.keyboard('{/Shift}');
+
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    });
+
+    it('toggles folder selection via the folder card checkbox', async () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      const { user } = setup({ folders, assets: mockAssets });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select Photos' }));
+
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select Photos' }));
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('opens details (and does not select) when the filename is clicked', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('button', { name: 'image1.png' }));
+
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('toggles selection additively via the corner checkbox', async () => {
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+
+      // Checkbox is additive (unlike plain card click, which replaces).
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+    });
+
+    it('extends the selection range with Shift+click on the corner checkbox', async () => {
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.keyboard('{Shift>}');
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image3.png' }));
+      await user.keyboard('{/Shift}');
+
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    });
+
+    it('toggles folder selection with Cmd/Ctrl+click without navigating', async () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      const { user } = setup({ folders, assets: mockAssets });
+
+      await user.keyboard('{Meta>}');
+      await user.click(screen.getByText('Photos'));
+      await user.keyboard('{/Meta}');
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+    });
+
+    it('selects a contiguous range from a folder anchor with Shift+click', async () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      const { user } = setup({ folders, assets: mockAssets });
+
+      // Anchor on the folder (Cmd+click), then Shift+click the second asset card:
+      // folder + first two assets are selected, without navigating.
+      await user.keyboard('{Meta>}');
+      await user.click(screen.getByText('Photos'));
+      await user.keyboard('{/Meta}');
+
+      const assetCards = screen
+        .getAllByRole('listitem')
+        .filter((item) => !item.textContent?.includes('Photos'));
+      await user.keyboard('{Shift>}');
+      await user.click(assetCards[1]);
+      await user.keyboard('{/Shift}');
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
     });
   });
 });

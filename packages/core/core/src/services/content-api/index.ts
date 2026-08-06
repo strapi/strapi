@@ -76,7 +76,7 @@ const mergeOneQueryParamIntoRoute = (
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
   if (matchRoute && !matchRoute(route)) return;
-  const query = { ...(route.request?.query ?? {}) };
+  const query = { ...route.request?.query };
   if (param in query) {
     throw new Error(
       `contentAPI.addQueryParams: param "${param}" already exists on route ${route.method} ${route.path}`

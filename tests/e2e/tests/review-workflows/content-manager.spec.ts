@@ -123,6 +123,36 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     await expect(page.getByRole('combobox', { name: 'Review stage' })).toHaveText('In progress');
   });
 
+  // Critical path #22 (workflows.review-stages): a full review lifecycle — assign a reviewer and
+  // move the document forward through every stage of the Default workflow, confirming each update
+  // persists and the list view reflects the final stage + assignee.
+  test(
+    'a reviewer can be assigned and the document moved through every review stage',
+    { tag: ['@release'] },
+    async ({ page }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
+
+      // Assign a reviewer.
+      await checkAssignee(page);
+
+      // Move through each subsequent stage of the Default workflow in order.
+      for (const stage of ['Ready to review', 'In progress', 'Reviewed']) {
+        await page.getByRole('combobox', { name: 'Review stage' }).click();
+        const stageUpdated = waitForStageUpdate(page);
+        await page.getByRole('option', { name: stage }).click();
+        await stageUpdated;
+        await findAndClose(page, 'Review stage updated');
+        await expect(page.getByRole('combobox', { name: 'Review stage' })).toHaveText(stage);
+      }
+
+      // The list view reflects the final stage and the assignee.
+      await goBackToArticleList(page);
+      await expect(page.getByRole('gridcell', { name: 'Reviewed' })).toBeVisible();
+      await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
+    }
+  );
+
   describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR === 'true')(
     'Unstable Preview',
     () => {

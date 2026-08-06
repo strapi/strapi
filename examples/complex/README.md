@@ -1,6 +1,8 @@
-# Complex Example Project
+# Migration test fixture (`examples/complex`)
 
-This project contains complex Strapi schemas for testing migrations between Strapi v4 and v5, plus a benchmark harness for measuring the performance of those migrations.
+**Canonical Strapi app for v4→v5 migration integration tests and benchmarks.** It ships rich schemas (relations, dynamic zones, i18n, draft/publish, stress cases), seed scripts, `validate-migration.ts`, and database tooling used by CI and local workflows.
+
+> **Location:** this directory stays at `examples/complex` (Yarn workspace name `complex`) for historical reasons. It is **test infrastructure**, not a casual demo like `getstarted`. Test orchestration lives in [`tests/migration/`](../../tests/migration/README.md). **Future:** we may relocate the app under `tests/migration/` (e.g. `tests/migration/fixture/`) so ownership and CI path filters are clearer; until then, treat changes here as changes to the migration-test contract.
 
 ## Content Types
 
@@ -32,7 +34,7 @@ Container runtime is auto-detected in this order: `podman compose` → `podman-c
 
 ## Migration Testing Workflow
 
-This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. The complex example ships its own `docker-compose.dev.yml` so the database containers are independent of the monorepo root.
+This fixture includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. It ships its own `docker-compose.dev.yml` so database containers are independent of the monorepo root.
 
 ### Setup
 
@@ -83,6 +85,19 @@ Snapshots live in `snapshots/` and are gitignored:
 - MySQL: `snapshots/mysql-<name>.sql`
 - MariaDB: `snapshots/mariadb-<name>.sql`
 - SQLite: `snapshots/sqlite-<name>.db` (raw file copy; fast)
+
+#### MariaDB (MySQL-compatible; Strapi uses `DATABASE_CLIENT=mysql`)
+
+Same UX as MySQL; Compose maps host **`MARIADB_PORT` → container 3306** (default host port **3307** so it can run beside MySQL on **3306**).
+
+```bash
+yarn db:start:mariadb
+yarn db:stop:mariadb
+yarn db:snapshot:mariadb <name>
+yarn db:restore:mariadb <name>
+yarn db:wipe:mariadb
+yarn db:check:mariadb
+```
 
 ### Typical Migration Testing Workflow
 
@@ -136,6 +151,8 @@ Snapshots live in `snapshots/` and are gitignored:
    yarn test:migration
    ```
 
+   This includes a **document_id backfill** check (internal migration `5.0.0-02-created-document-id`): every table with a `documentId` attribute, including upload **`files`**, must have no `NULL` `document_id` after migrations. The v4 seed always creates media files so the `files` table is populated before the v4→v5 upgrade.
+
 9. **Test and fix bugs** as needed
 
 10. **Restore snapshot** to reset database:
@@ -146,7 +163,47 @@ Snapshots live in `snapshots/` and are gitignored:
 
 11. **Repeat from step 7** to test fixes
 
-**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
+**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. Manual workflows use Compose project name `strapi_complex` so they do not collide with other containers (automated `yarn test:migrations` uses `strapi_migration_v5` by default).
+
+## Automated migration test (monorepo)
+
+From the **repository root** (quick smoke, ~1–2 min on a warm tree):
+
+```bash
+yarn test:migrations:smoke
+```
+
+Full flow after `yarn build` (or `--skip-build` when dist is current):
+
+```bash
+yarn test:migrations --initial legacy --database sqlite --skip-build
+```
+
+You must pass **`--initial <4.x semver>`** (or use **`--scenario tests/migration/scenarios/v4-to-head.json`**): v4 baseline npm version. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
+
+The orchestrator (`tests/migration/scripts/run-migration-scenario.ts`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.ts`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial legacy`.
+
+**CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
+
+Options:
+
+- `--initial <4.x semver>` — required without `--scenario`
+- `--scenario <path>` — JSON scenario (default: `tests/migration/scenarios/v4-to-head.json`)
+- `--initial-node` / `--workspace-node` — optional host Node major guard (single process; aliases must match)
+- `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb`
+- `--multiplier N`, `--build`, `--skip-build`
+
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** (CI passes `--initial-node 20`). Env defaults (`DATABASE_CLIENT`, `MIGRATION_MULTIPLIER` / `SEED_MULTIPLIER`) apply when the matching CLI flag is omitted.
+
+Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
+
+Examples:
+
+- `yarn test:migrations --initial legacy --database sqlite --skip-build`
+- `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
+- `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
+
+Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 
 ## Migration performance benchmark
 
@@ -182,7 +239,7 @@ Reports land in `results/`:
 ### Bench subcommands
 
 - **`yarn bench:seed --db <db> --multiplier <n>`** — wipe + boot v4 + seed + snapshot. One-time per (db, multiplier). Runtime scales with multiplier; at `m=100` expect ~8–10 min per DB depending on hardware.
-- **`yarn bench:run --db <db> --multiplier <n> --label <label>`** — restore snapshot + spawn Strapi v5 in migrate-then-exit mode + capture per-migration timings via a Node `--require` preload that subscribes to Umzug's native `migrating`/`migrated` events. Emits a result JSON to `results/<db>-<label>-<timestamp>.json`. Typically ~15s to several minutes depending on dataset size.
+- **`yarn bench:run --db <db> --multiplier <n> --label <label>`** — restore snapshot + spawn Strapi v5 in migrate-then-exit mode + capture per-migration timings via a Node `--require` preload that wraps the internal migration runner logger (`migrating`/`migrated` events). Emits a result JSON to `results/<db>-<label>-<timestamp>.json`. Typically ~15s to several minutes depending on dataset size.
 - **`yarn bench:compare --baseline <label> --candidate <label>`** — render a multiplier × database matrix plus per-cell per-migration breakdowns, to both markdown and self-contained HTML. Accepts partial data (missing cells render as `—`).
 - **`yarn bench:suite --multiplier <n> [--dbs postgres,mysql,mariadb,sqlite]`** — chained `bench:run` across DBs for a given multiplier. Runs under whatever Strapi version is currently checked out; label via `--label`.
 
@@ -199,7 +256,7 @@ Snapshots are reused across `bench:run` invocations — you only re-seed when th
 
 ### Benchmark-specific env vars
 
-- `STRAPI_BENCH_HOOK_OUTPUT=<path>` — enables the timing preload (set automatically by `bench.js`, exposed for debugging). The hook self-disables when this isn't set, so the `--require` can safely live in other dev configs.
+- `STRAPI_BENCH_HOOK_OUTPUT=<path>` — enables the timing preload (set automatically by `bench.ts`, exposed for debugging). The hook self-disables when this isn't set, so the `--require` can safely live in other dev configs.
 - `STRAPI_BENCH_HOOK_DEBUG=1` — verbose preload output (migration attach/record events to stderr).
 - `STRAPI_BENCH_RUNTIME=podman|docker` — override the auto-detected container runtime.
 - `SEED_CONCURRENCY=<n>` — how many entity-creation tasks run in parallel during `bench:seed` / `seed`. Default `5`, which stays under Strapi v4's default knex pool of `{min: 2, max: 10}`. Tune up only if you've also raised the pool max.
@@ -228,7 +285,7 @@ These commands:
 
 - PostgreSQL: `5432` (override with `POSTGRES_PORT`)
 - MySQL: `3306` (override with `MYSQL_PORT`)
-- MariaDB: `3307` (override with `MARIADB_PORT`)
+- MariaDB: host port `3307` by default (override with `MARIADB_PORT`; maps to container `3306`)
 
 Set the override env var if you have a local DB already bound to the default port:
 

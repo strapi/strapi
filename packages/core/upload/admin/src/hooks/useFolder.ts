@@ -19,7 +19,7 @@ export const useFolder = (id: number | null | undefined, { enabled = true } = {}
     async () => {
       const {
         data: { data },
-      } = await get(`/upload/folders/${id}`, {
+      } = await get<GetFolder.Response>(`/upload/folders/${id}`, {
         params: {
           populate: {
             parent: {

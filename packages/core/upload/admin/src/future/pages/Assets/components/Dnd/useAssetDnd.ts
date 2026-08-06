@@ -2,23 +2,17 @@ import { useMemo } from 'react';
 
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 
-import { useGetFolderStructureQuery } from '../../../../services/folders';
-import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
+import { getRelationId } from '../../../../utils/getRelationId';
 
 import { useAssetsDndOptional } from './AssetsDndProvider';
 import { toFileDraggableId, toFolderDraggableId, toFolderTargetId } from './dndIds';
 
-import type {
-  DragFileData,
-  DragFolderData,
-  DragItemData,
-  FolderTargetData,
-} from '../../../../types/dnd';
+import type { DragFileData, DragFolderData, FolderTargetData } from '../../../../types/dnd';
 
 export const useFileDraggable = (asset: {
   id: number;
   name: string;
-  folder?: number | string | null;
+  folder?: number | string | { id?: number } | null;
 }) => {
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
 
@@ -27,12 +21,7 @@ export const useFileDraggable = (asset: {
       kind: 'file',
       id: asset.id,
       name: asset.name,
-      folderId:
-        asset.folder == null
-          ? null
-          : typeof asset.folder === 'number'
-            ? asset.folder
-            : Number(asset.folder) || null,
+      folderId: getRelationId(asset.folder),
     }),
     [asset.folder, asset.id, asset.name]
   );
@@ -49,14 +38,13 @@ export const useFolderDraggableDroppable = (folder: {
   name: string;
   parent?: number | null | { id?: number };
 }) => {
-  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const { isMovePending, isValidDropTarget } = useAssetsDndOptional() ?? {
+    isMovePending: false,
+    isValidDropTarget: () => false,
+  };
   const { active } = useDndContext();
-  const { data: folderStructure = [] } = useGetFolderStructureQuery();
 
-  const parentId =
-    typeof folder.parent === 'object' && folder.parent != null
-      ? (folder.parent.id ?? null)
-      : (folder.parent ?? null);
+  const parentId = getRelationId(folder.parent);
 
   const dragData = useMemo<DragFolderData>(
     () => ({
@@ -89,24 +77,10 @@ export const useFolderDraggableDroppable = (folder: {
     disabled: isMovePending,
   });
 
-  const activeData = active?.data.current as DragItemData | undefined;
-  const activeItems = activeData ? [activeData] : [];
-
-  const isValidDropTarget = useMemo(() => {
-    if (!activeData || (activeData.id === folder.id && activeData.kind === 'folder')) {
-      return false;
-    }
-
-    return canDropItemOnFolder({
-      items: activeItems,
-      targetFolderId: folder.id,
-      folderStructure,
-    });
-  }, [activeData, activeItems, folder.id, folderStructure]);
-
+  const isValidTarget = isValidDropTarget(folder.id);
   const isOver = droppable.isOver;
-  const showValidDropHighlight = isOver && isValidDropTarget;
-  const showInvalidDropCursor = isOver && !isValidDropTarget && active != null;
+  const showValidDropHighlight = isOver && isValidTarget;
+  const showInvalidDropCursor = isOver && !isValidTarget && active != null;
 
   return {
     dragData,
