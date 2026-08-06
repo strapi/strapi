@@ -602,6 +602,55 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
     expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada' });
   });
 
+  // Regression: the Document Service sets `locale: null` on non-localized entries.
+  // Identity stubs already omit non-string locales (pickIdentity), so a fully inlined
+  // entry must match — otherwise `locale: null` fails the output schema, which declares
+  // `locale` as string-or-absent, not string-or-null.
+  it('strips a non-string locale from an inlined entry (Document Service sets locale: null)', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { author: { documentId: 'auth1', name: 'Ada', locale: null } },
+      { shouldInline: (p) => p === 'author', inlineRelation }
+    );
+
+    expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada' });
+    expect(result.author).not.toHaveProperty('locale');
+  });
+
+  it('preserves a real string locale on an inlined entry', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { author: { documentId: 'auth1', name: 'Ada', locale: 'fr' } },
+      { shouldInline: (p) => p === 'author', inlineRelation }
+    );
+
+    expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada', locale: 'fr' });
+  });
+
   it('falls back to an identity stub when the resolver returns null (not readable)', async () => {
     useModels({
       'api::article.article': {

@@ -139,9 +139,12 @@ describe('MCP content-manager relation shaping (api)', () => {
   };
 
   beforeAll(async () => {
+    // Dependency order matters: heroComponent.author targets TARGET_UID (must exist first),
+    // and sourceCt.blocks references the component UID (component must exist before sourceCt).
     await builder
+      .addContentType(targetCt)
       .addComponent(heroComponent)
-      .addContentTypes([targetCt, sourceCt, localizedCt])
+      .addContentTypes([sourceCt, localizedCt])
       .build();
 
     strapi = await createStrapiInstance({
@@ -702,12 +705,17 @@ describe('MCP content-manager relation shaping (api)', () => {
       expect(blocks[0].author).not.toHaveProperty('secret');
     });
 
-    test('get tool leaves the dynamic-zone relation as a stub when "on" is not opted into inlining', async () => {
-      const { source, target } = await seedSourceWithDynamicZoneBlock();
+    test('get tool never fetches the dynamic-zone relation when only "blocks" is populated', async () => {
+      const { source } = await seedSourceWithDynamicZoneBlock();
 
       const token = await createSourceReadToken();
       await initializeMcpSession(token.accessKey);
 
+      // `populate: ['blocks']` populates the dynamic zone container itself, but does not
+      // reach into a component's own relations — a dynamic zone only accepts nested
+      // populate wrapped in `on` (disambiguating by component type), which is exactly
+      // what the "on fragment" test above exercises. Without it, the Document Service
+      // never fetches `author` at all, so it is absent, not merely an un-inlined stub.
       const response = await callTool(token.accessKey, 'get_mcp-shape-source', {
         documentId: source.documentId,
         populate: ['blocks'],
@@ -717,7 +725,7 @@ describe('MCP content-manager relation shaping (api)', () => {
       const data = response.result?.structuredContent?.data as Record<string, unknown>;
       const blocks = data.blocks as Array<Record<string, unknown>>;
       expect(blocks).toHaveLength(1);
-      expect(blocks[0].author).toEqual({ documentId: target.documentId });
+      expect(blocks[0]).not.toHaveProperty('author');
     });
   });
 });

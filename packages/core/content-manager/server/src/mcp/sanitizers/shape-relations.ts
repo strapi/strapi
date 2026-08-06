@@ -173,7 +173,18 @@ const createShapeVisitor =
         }
         const sanitized = await options.inlineRelation(targetUid, record);
         // null/undefined → target not readable → fall back to identity stub
-        return sanitized ?? pickIdentity(record);
+        if (sanitized === null || sanitized === undefined) {
+          return pickIdentity(record);
+        }
+        // The Document Service sets `locale: null` on non-localized entries. Identity
+        // stubs already omit non-string locales (see pickIdentity); a fully inlined entry
+        // must match, since the output schema declares `locale` as string-or-absent, not
+        // string-or-null.
+        if ('locale' in sanitized && typeof sanitized.locale !== 'string') {
+          const { locale, ...rest } = sanitized;
+          return rest;
+        }
+        return sanitized;
       };
 
       if (isManyRelationForMcp(relAttr) === true) {
