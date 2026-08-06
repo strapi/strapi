@@ -106,7 +106,7 @@ const UseCasePage = () => {
         }),
       });
       navigate('/');
-    } catch (err) {
+    } catch {
       // Silent
     }
   };

@@ -1,4 +1,4 @@
-import { Menu, VisuallyHidden } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system';
 import { Check, ChevronDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -47,9 +47,7 @@ const FOLDERS_LABELS: Record<FoldersPosition, MessageDescriptor> = {
 
 // Stretch to the toolbar row height so the trigger matches the view toggle
 // (the parent Flex uses alignItems="stretch").
-const SortTrigger = styled(Menu.Trigger)`
-  height: auto;
-`;
+const SortTrigger = styled(Menu.Trigger)``;
 
 // Full-width section band, like the design mock (sits inside the Menu.Content
 // padding, so the band stops short of the panel edges).
@@ -76,6 +74,12 @@ interface SortMenuProps {
  * option keeps the menu open (`onSelect` preventDefault) so several facets can
  * be tuned in one visit; clicking a checked facet clears it (the hook
  * guarantees at least one sort rule stays active).
+ *
+ * Each section is single-select, so its items are radios: the checkmark icon is
+ * decorative, and `aria-checked` is what assistive tech reads. The DS `Menu`
+ * exposes no `RadioItem`, but `Menu.Item` forwards extra props onto the element
+ * it renders through Radix's `asChild`, where they take precedence over Radix's
+ * own `role="menuitem"`.
  */
 export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
   const { formatMessage } = useIntl();
@@ -91,25 +95,15 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
 
   const checkmark = <Check aria-hidden width="1.6rem" height="1.6rem" fill="primary600" />;
 
-  // The checkmark icon is aria-hidden, so the active option carries a
-  // visually-hidden suffix for screen readers instead (menuitem does not
-  // allow aria-checked).
-  const activeMark = (
-    <VisuallyHidden>
-      {' '}
-      {formatMessage({ id: getTranslationKey('list.sort.active'), defaultMessage: '(active)' })}
-    </VisuallyHidden>
-  );
-
   return (
     <Menu.Root>
-      <SortTrigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
+      <SortTrigger variant="ghost" endIcon={<ChevronDown aria-hidden />}>
         {triggerLabel}
       </SortTrigger>
       {/* The DS default maxHeight (15rem) folds everything after the first
           group behind an invisible scroll — all groups must be visible at
           once. 70vh keeps a scroll on very short viewports. */}
-      <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh" width="25rem">
+      <Menu.Content popoverPlacement="bottom-end" zIndex={2} maxHeight="70vh" minWidth="25rem">
         {/* One single-select "Sort" section: the two rule families were always
             mutually exclusive (one checkmark total), so they share a group. */}
         <GroupLabel>
@@ -118,6 +112,8 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
         {(Object.keys(SORT_BY_LABELS) as SortByKey[]).map((key) => (
           <Menu.Item
             key={key}
+            role="menuitemradio"
+            aria-checked={sort.sortBy === key}
             onSelect={(e: Event) => {
               e.preventDefault();
               sort.setSortBy(sort.sortBy === key ? null : key);
@@ -125,12 +121,13 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             endIcon={sort.sortBy === key ? checkmark : null}
           >
             {formatMessage(SORT_BY_LABELS[key])}
-            {sort.sortBy === key && activeMark}
           </Menu.Item>
         ))}
         {(Object.keys(SORT_DIRECTION_LABELS) as SortDirectionKey[]).map((key) => (
           <Menu.Item
             key={key}
+            role="menuitemradio"
+            aria-checked={sort.direction === key}
             onSelect={(e: Event) => {
               e.preventDefault();
               sort.setDirection(sort.direction === key ? null : key);
@@ -138,7 +135,6 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             endIcon={sort.direction === key ? checkmark : null}
           >
             {formatMessage(SORT_DIRECTION_LABELS[key])}
-            {sort.direction === key && activeMark}
           </Menu.Item>
         ))}
 
@@ -154,6 +150,8 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             {(Object.keys(FOLDERS_LABELS) as FoldersPosition[]).map((position) => (
               <Menu.Item
                 key={position}
+                role="menuitemradio"
+                aria-checked={sort.foldersPosition === position}
                 onSelect={(e: Event) => {
                   e.preventDefault();
                   sort.setFoldersPosition(position);
@@ -161,7 +159,6 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
                 endIcon={sort.foldersPosition === position ? checkmark : null}
               >
                 {formatMessage(FOLDERS_LABELS[position])}
-                {sort.foldersPosition === position && activeMark}
               </Menu.Item>
             ))}
           </>
