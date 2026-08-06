@@ -80,7 +80,7 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
      * Build an ability from an explicit permission list and user (e.g. DB-cached permissions).
      */
     async generateAbility(permissions: Permission[], user: AdminUser): Promise<Ability> {
-      return engine.generateAbility(permissions as any, user);
+      return engineInstance.generateAbility(permissions as any, user);
     },
 
     /**

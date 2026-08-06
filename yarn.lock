@@ -9688,7 +9688,7 @@ __metadata:
     ioredis: "npm:5.4.2"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.3"
+    react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.51.1"
     typescript: "npm:5.9.3"
