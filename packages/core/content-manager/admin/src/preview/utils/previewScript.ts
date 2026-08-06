@@ -1,12 +1,7 @@
 /**
  * Admin-side previewScript stub.
  *
- * This function is designed to be serialised with `.toString()` and `eval()`'d
- * inside a jsdom environment (Jest). All identifiers it uses must therefore be
- * self-contained — no free variables from module-level imports survive the
- * toString/eval round-trip.
- *
- * The function mirrors the blocks-forwarding behaviour of the server-side
+ * This function mirrors the blocks-forwarding behaviour of the server-side
  * previewScript: when it receives a `strapiFieldChange` message whose value
  * looks like a blocks AST, it re-dispatches the payload as a CustomEvent so
  * host-app components (e.g. BlocksRenderer) can subscribe and re-render

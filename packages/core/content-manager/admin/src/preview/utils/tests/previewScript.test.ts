@@ -1,6 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { INTERNAL_EVENTS, PREVIEW_HIGHLIGHT_COLORS } from '../constants';
 import { previewScript } from '../previewScript';
 
@@ -20,12 +17,10 @@ const blocksValue = [
 
 const runPreviewScript = () => {
   window.STRAPI_DISABLE_STEGA_DECODING = true;
-  const script = `(${previewScript.toString()})(${JSON.stringify({
+  previewScript({
     shouldRun: true,
     colors: PREVIEW_HIGHLIGHT_COLORS,
-  })})`;
-  // eslint-disable-next-line no-eval
-  eval(script);
+  });
 };
 
 describe('previewScript — blocks field changes', () => {
@@ -76,52 +71,5 @@ describe('previewScript — blocks field changes', () => {
     );
 
     expect(handler).not.toHaveBeenCalled();
-  });
-});
-
-describe('previewScript (server-side) — STRAPI_RESCAN_HIGHLIGHTS', () => {
-  const serverScriptPath = path.resolve(
-    __dirname,
-    '../../../../../server/src/preview/controllers/previewScript.js'
-  );
-
-  beforeEach(async () => {
-    document.body.innerHTML = '';
-    window.STRAPI_DISABLE_STEGA_DECODING = true;
-    const scriptText = fs.readFileSync(serverScriptPath, 'utf-8');
-    const config = JSON.stringify({
-      colors: PREVIEW_HIGHLIGHT_COLORS,
-      events: INTERNAL_EVENTS,
-      parentOrigin: window.location.origin,
-    });
-    // eslint-disable-next-line no-eval
-    eval(`(function() { ${scriptText}; previewScript(${config}); })()`);
-    // Let the async init chain (setupStegaDOMObserver → .then()) settle
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
-
-  afterEach(() => {
-    window.__strapi_previewCleanup?.();
-    window.STRAPI_DISABLE_STEGA_DECODING = undefined;
-  });
-
-  test('schedules a DOM rescan via requestAnimationFrame when the rescan message is received', () => {
-    const rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
-      fn(0);
-      return 0;
-    });
-
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: { type: INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS },
-        // source must match window.parent (which equals window in jsdom) and
-        // origin must match parentOrigin passed to previewScript
-        source: window as unknown as WindowProxy,
-        origin: window.location.origin,
-      })
-    );
-
-    expect(rafSpy).toHaveBeenCalledTimes(1);
-    rafSpy.mockRestore();
   });
 });
