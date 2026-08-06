@@ -13,10 +13,9 @@ import {
 import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { isAIMetadataSupportedMime } from '../../../../../../shared/constants';
+import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
-import { useGetUploadSettingsQuery } from '../../../services/settings';
 import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
@@ -61,13 +60,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
-  const { data: settings } = useGetUploadSettingsQuery();
-  // The replace flow only regenerates metadata for images the AI provider can
-  // actually read (`admin-upload.replaceFile` → `aiMetadata.processFiles`, which
-  // filters on this same allowlist). Promising it for a PDF — or for a GIF, which
-  // clears the server's looser `image/*` gate but is skipped by the provider —
-  // would describe something that never happens.
-  const aiEnabled = (settings?.data?.aiMetadata ?? false) && isAIMetadataSupportedMime(asset.mime);
+  const aiEnabled = useAIMetadataEnabled(asset.mime);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isReplaceOpen, setIsReplaceOpen] = useState(false);
@@ -197,7 +190,12 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           tabIndex={-1}
         />
       </VisuallyHidden>
-      <Menu.Root>
+      {/* Non-modal: Radix's default `modal` marks the rest of the document
+          `aria-hidden` and blocks pointer events while the menu is open, so
+          clicking a sibling row's trigger only dismissed this one — leaving
+          every menu you touched to be closed one click at a time. Non-modal
+          dismissal treats that click as both "close this" and "open that". */}
+      <Menu.Root modal={false}>
         <Menu.Trigger
           tag={IconButton}
           icon={<More />}
@@ -226,7 +224,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
               onSelect={() => setIsReplaceOpen(true)}
             >
               {formatMessage({
-                id: getTranslationKey('list.asset.actions.replace'),
+                id: getTranslationKey('list.assets.actions.replace'),
                 defaultMessage: 'Replace media',
               })}
             </Menu.Item>
@@ -234,7 +232,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           {canCopyLink && (
             <Menu.Item startIcon={<Link />} onSelect={handleCopyLink}>
               {formatMessage({
-                id: getTranslationKey('list.asset.actions.copy-link'),
+                id: getTranslationKey('list.assets.actions.copy-link'),
                 defaultMessage: 'Copy link to media',
               })}
             </Menu.Item>
@@ -242,7 +240,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           {canDownload && (
             <Menu.Item startIcon={<Download />} disabled={isDownloading} onSelect={handleDownload}>
               {formatMessage({
-                id: getTranslationKey('list.asset.actions.download'),
+                id: getTranslationKey('list.assets.actions.download'),
                 defaultMessage: 'Download media',
               })}
             </Menu.Item>
@@ -252,7 +250,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
             <>
               <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
                 {formatMessage({
-                  id: getTranslationKey('list.asset.actions.move'),
+                  id: getTranslationKey('list.assets.actions.move'),
                   defaultMessage: 'Move to folder',
                 })}
               </Menu.Item>
@@ -262,7 +260,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
                 onSelect={() => setIsDeleteOpen(true)}
               >
                 {formatMessage({
-                  id: getTranslationKey('list.asset.actions.delete'),
+                  id: getTranslationKey('list.assets.actions.delete'),
                   defaultMessage: 'Delete',
                 })}
               </Menu.Item>

@@ -10,6 +10,12 @@ const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
 const mockClear = jest.fn();
 const mockDownloadFile = jest.fn();
+const mockAIAvailability = jest.fn(() => true);
+
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useAIAvailability: () => mockAIAvailability(),
+}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -53,6 +59,41 @@ describe('AssetActionsMenu', () => {
     jest.clearAllMocks();
     mockCopy.mockResolvedValue(true);
     mockDownloadFile.mockResolvedValue(undefined);
+    mockAIAvailability.mockReturnValue(true);
+  });
+
+  // Radix's default `modal` menu marks the rest of the document `aria-hidden`
+  // and swallows pointer events, so a click on a sibling row's trigger only
+  // dismissed the open menu — every menu you touched then needed its own click
+  // to close. Non-modal makes that one click close this and open that.
+  it("closes an open menu when another row's menu is opened", async () => {
+    const otherAsset = { ...asset, id: 6, name: 'other.png' } as File;
+    const otherDragData: DragFileData = {
+      kind: 'file',
+      id: 6,
+      name: 'other.png',
+      folderId: null,
+    };
+
+    const { user } = render(
+      <>
+        <AssetActionsMenu asset={asset} dragData={dragData} />
+        <AssetActionsMenu asset={otherAsset} dragData={otherDragData} />
+      </>
+    );
+
+    const [firstTrigger, secondTrigger] = screen.getAllByRole('button', { name: 'More actions' });
+
+    await user.click(firstTrigger);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+
+    // The second trigger stays reachable: nothing outside the open menu is
+    // `aria-hidden`, which is what made this click a no-op before.
+    await user.click(secondTrigger);
+
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(1));
+    expect(secondTrigger).toHaveAttribute('aria-expanded', 'true');
+    expect(firstTrigger).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('renders a closed menu behind a "More actions" trigger', () => {
@@ -215,6 +256,22 @@ describe('AssetActionsMenu', () => {
 
       expect(await screen.findByText('Replace this media file?')).toBeInTheDocument();
       expect(screen.getByText('Current content will be permanently replaced.')).toBeInTheDocument();
+      expect(
+        screen.queryByText('AI will generate new metadata after upload.')
+      ).not.toBeInTheDocument();
+    });
+
+    // `GET /upload/settings` returns the stored `aiMetadata` toggle regardless
+    // of licensing, and it defaults to `true` — so without the EE availability
+    // gate the dialog promised AI metadata on plans that never generate it.
+    it('does not promise AI metadata when the license has no AI, despite the setting being on', async () => {
+      mockAIAvailability.mockReturnValue(false);
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+
+      expect(await screen.findByText('Replace this media file?')).toBeInTheDocument();
       expect(
         screen.queryByText('AI will generate new metadata after upload.')
       ).not.toBeInTheDocument();

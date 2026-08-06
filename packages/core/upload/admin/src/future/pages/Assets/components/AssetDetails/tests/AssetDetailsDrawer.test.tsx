@@ -5,6 +5,13 @@ import { AssetDetails } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
+const mockAIAvailability = jest.fn(() => true);
+
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useAIAvailability: () => mockAIAvailability(),
+}));
+
 const baseAsset = {
   id: 1,
   name: 'photo.png',
@@ -76,6 +83,7 @@ const buildSettingsHandler = (aiMetadata = false) =>
 
 describe('AssetDetails (asset details drawer body)', () => {
   beforeEach(() => {
+    mockAIAvailability.mockReturnValue(true);
     server.use(buildFoldersHandler(), buildSettingsHandler());
   });
 
@@ -288,6 +296,45 @@ describe('AssetDetails (asset details drawer body)', () => {
     await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
 
     await screen.findByText(/AI will generate new metadata after upload/i);
+  });
+
+  // The setting is stored (and defaults to on) regardless of licensing, so it
+  // has to be ANDed with EE AI availability — otherwise plans without AI were
+  // promised metadata that never gets generated.
+  it('hides the AI variant when the license has no AI, even with the setting on', async () => {
+    mockAIAvailability.mockReturnValue(false);
+    server.use(buildSettingsHandler(true));
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+
+    await screen.findByText(/Current content will be permanently replaced/i);
+    expect(
+      screen.queryByText(/AI will generate new metadata after upload/i)
+    ).not.toBeInTheDocument();
+  });
+
+  // A GIF passes the drawer's `image/*` check that renders this button, but the
+  // AI provider's allowlist skips it, so the promise would not be kept.
+  it('hides the AI variant for an image the AI provider cannot read', async () => {
+    server.use(buildSettingsHandler(true));
+
+    const { user } = render(
+      <AssetDetails
+        asset={{ ...baseAsset, mime: 'image/gif', ext: '.gif' } as AssetWithPopulatedCreatedBy}
+        closeDetails={jest.fn()}
+      />
+    );
+    await screen.findByRole('combobox');
+
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+
+    await screen.findByText(/Current content will be permanently replaced/i);
+    expect(
+      screen.queryByText(/AI will generate new metadata after upload/i)
+    ).not.toBeInTheDocument();
   });
 });
 

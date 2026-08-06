@@ -67,7 +67,9 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
 
   return (
     <>
-      <Menu.Root>
+      {/* See AssetActionsMenu: non-modal so clicking another row's trigger
+          closes this menu and opens that one in a single click. */}
+      <Menu.Root modal={false}>
         <Menu.Trigger
           tag={IconButton}
           icon={<More />}

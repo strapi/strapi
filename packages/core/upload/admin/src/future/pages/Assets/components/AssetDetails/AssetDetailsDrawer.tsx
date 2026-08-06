@@ -41,6 +41,7 @@ import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
+import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
@@ -50,7 +51,6 @@ import {
   useUpdateAssetMutation,
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
-import { useGetUploadSettingsQuery } from '../../../../services/settings';
 import { downloadFile } from '../../../../utils/downloadFile';
 import {
   formatBytes,
@@ -556,13 +556,17 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * ReplaceAssetButton
  * -----------------------------------------------------------------------------------------------*/
 
-const ReplaceAssetButton = () => {
+interface ReplaceAssetButtonProps {
+  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  mime?: string | null;
+}
+
+const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
   const { formatMessage } = useIntl();
   const { replaceAsset, isReplacing } = useAssetOperation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const { data: settings } = useGetUploadSettingsQuery();
-  const aiEnabled = settings?.data?.aiMetadata ?? false;
+  const aiEnabled = useAIMetadataEnabled(mime);
 
   const handleTriggerClick = () => {
     setIsDialogOpen(true);
@@ -661,11 +665,11 @@ const ReplaceAssetButton = () => {
  * AssetImageActions - crop and replace buttons overlaid on the image preview.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps {
+interface AssetImageActionsProps extends ReplaceAssetButtonProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
@@ -683,7 +687,7 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton />
+      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -950,7 +954,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       asset={asset}
                       actions={
                         isImage && canUpdate ? (
-                          <AssetImageActions onCrop={() => setIsCropOpen(true)} />
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
                         ) : null
                       }
                     />
