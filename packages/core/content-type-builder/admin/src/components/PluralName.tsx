@@ -40,7 +40,7 @@ export const PluralName = ({
 
       try {
         newValue = pluralize(baseValue, 2);
-      } catch (err) {
+      } catch {
         // If pluralize fails, use the base value
       }
 
