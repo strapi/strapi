@@ -108,6 +108,29 @@ describe('provider-owned drop validity', () => {
     mockIsValidDropTarget.mockReturnValue(true);
   });
 
+  it("reads parentId from the folder's populated parent relation", () => {
+    // This is the shape the folders list query returns (`populate: { parent: true }`);
+    // the move dialog needs the real parent to offer the root and prune the no-op.
+    const { result } = renderHook(() =>
+      useFolderDraggableDroppable({ id: 2, name: '2023', parent: { id: 1 } })
+    );
+
+    expect(result.current.dragData).toEqual({ kind: 'folder', id: 2, name: '2023', parentId: 1 });
+  });
+
+  it('reports a root-level folder as having no parent', () => {
+    const { result } = renderHook(() =>
+      useFolderDraggableDroppable({ id: 2, name: '2023', parent: null })
+    );
+
+    expect(result.current.dragData).toEqual({
+      kind: 'folder',
+      id: 2,
+      name: '2023',
+      parentId: null,
+    });
+  });
+
   it('uses centralized validity for in-view folder targets without fetching structure', () => {
     const { result } = renderHook(() =>
       useFolderDraggableDroppable({ id: 2, name: '2023', parent: 1 })

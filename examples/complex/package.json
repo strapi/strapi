@@ -39,6 +39,7 @@
     "setup:v4": "node --import tsx scripts/setup-v4-project.ts",
     "seed:v5": "node --import tsx scripts/seed-v5.ts",
     "test:migration": "node --import tsx scripts/validate-migration.ts",
+    "test:bench-hook": "node scripts/run-bench-hook-smoke.js",
     "bench:seed": "node --import tsx scripts/bench.ts seed",
     "bench:run": "node --import tsx scripts/bench.ts run",
     "bench:compare": "node --import tsx scripts/bench-compare.ts",
