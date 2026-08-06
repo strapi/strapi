@@ -45,6 +45,8 @@ const Overlay = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius};
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   background: ${({ theme }) => theme.colors.neutral0};
+  /* Focused programmatically on open (tabIndex -1) — no visible ring needed. */
+  outline: none;
 `;
 
 const HeaderBar = styled(Flex)`
@@ -56,6 +58,9 @@ const HeaderBar = styled(Flex)`
 `;
 
 // Fills the remaining space between header/footer; checkerboard pattern.
+// The horizontal padding keeps the image off the viewport edges — the corner
+// handles overhang the image by half their size, and on narrow (mobile)
+// screens an edge-to-edge image leaves nothing to grab.
 const Body = styled(Box)`
   width: 100%;
   position: relative;
@@ -65,6 +70,7 @@ const Body = styled(Box)`
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 0 ${({ theme }) => theme.spaces[4]};
   background: repeating-conic-gradient(
       ${({ theme }) => theme.colors.neutral100} 0% 25%,
       ${({ theme }) => theme.colors.neutral0} 0% 50%
@@ -97,6 +103,9 @@ const CropOverlay = styled.div`
   border: 1px dashed ${({ theme }) => theme.colors.primary600};
   box-shadow: 0 0 0 9999px rgba(33, 33, 52, 0.5);
   cursor: move;
+  /* Without this, touch browsers claim the gesture for scrolling and fire
+     pointercancel mid-drag — the crop drag dies while the finger is down. */
+  touch-action: none;
 `;
 
 const ResizeHandle = styled.button<{ $cursor: string }>`
@@ -109,6 +118,7 @@ const ResizeHandle = styled.button<{ $cursor: string }>`
   border-radius: 2px;
   background: ${({ theme }) => theme.colors.neutral0};
   cursor: ${({ $cursor }) => $cursor};
+  touch-action: none;
 `;
 
 const FocalPointHandle = styled.button`
@@ -121,6 +131,7 @@ const FocalPointHandle = styled.button`
   background: transparent;
   cursor: grab;
   padding: 0;
+  touch-action: none;
 
   &::before {
     content: '';
@@ -221,6 +232,12 @@ interface AssetCropEditorProps {
   onClose: () => void;
   onApply: (file: globalThis.File, focalPoint: FocalPoint) => void;
   onSaveAsCopy: (file: globalThis.File, focalPoint: FocalPoint) => void;
+  /**
+   * "Save as copy" creates a new asset (`assets.create`), a different permission
+   * from cropping in place (`assets.update`). Hidden when the user lacks it, so
+   * an update-only role can't trigger a 403.
+   */
+  canSaveAsCopy: boolean;
 }
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br';
@@ -231,6 +248,7 @@ export const AssetCropEditor = ({
   onClose,
   onApply,
   onSaveAsCopy,
+  canSaveAsCopy,
 }: AssetCropEditorProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -243,6 +261,15 @@ export const AssetCropEditor = ({
   const infoMutedColor = isDark ? 'neutral600' : 'neutral200';
   const imgRef = React.useRef<HTMLImageElement>(null);
   const cropAreaRef = React.useRef<HTMLDivElement>(null);
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
+  // FocusTrap's auto-focus lands on the first focusable element — the crop
+  // width NumberInput — which pops the keyboard on mobile the moment the
+  // editor opens. Focus the (tabIndex -1) overlay instead: keyboard users are
+  // one Tab away from the first control, Escape still reaches the trap.
+  React.useEffect(() => {
+    overlayRef.current?.focus();
+  }, []);
 
   const {
     init,
@@ -261,14 +288,24 @@ export const AssetCropEditor = ({
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
 
-  // Append `updatedAt` as a cache-buster: a replaced asset is served at the same
-  // URL, so without this, reopening the editor shows the browser-cached old image
-  // (mirrors AssetPreview).
+  // The crop editor reads pixels from a canvas (useCropImg -> toBlob), so its
+  // <img> must be CORS-clean and always sets crossOrigin="anonymous" (see the
+  // img below) — even for unsigned URLs, which AssetPreview leaves unset because
+  // it only displays. That difference is why the crop URL is kept DISTINCT from
+  // the thumbnail's: identical URL + different crossOrigin collide in the HTTP
+  // cache (#26581), and the crop's anonymous request could otherwise reuse the
+  // thumbnail's non-CORS cached response and taint the canvas. So the buster
+  // uses `updatedAt` where AssetPreview uses `v`, giving each its own entry
+  // (mirrors the legacy PreviewBox fix).
+  // Signed URLs get no param at all — a presigned S3 URL breaks if you add one,
+  // and on the signed side AssetPreview also loads anonymous, so the identical
+  // URL there shares one CORS-consistent entry, which is fine.
   const rawImageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
-  const cacheKey = asset.updatedAt ? new Date(asset.updatedAt).getTime() : undefined;
+  const cacheKey =
+    asset.updatedAt && !asset.isUrlSigned ? new Date(asset.updatedAt).getTime() : undefined;
   const imageUrl =
     cacheKey !== undefined
-      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}v=${cacheKey}`
+      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}updatedAt=${cacheKey}`
       : rawImageUrl;
 
   const handleImageLoad = () => {
@@ -289,39 +326,77 @@ export const AssetCropEditor = ({
     };
   };
 
-  // Drag the entire crop rectangle.
-  const handleMovePointerDown = (event: React.PointerEvent) => {
+  // Teardown for the drag currently in flight, so it can be run both on pointer
+  // release AND on unmount. Without the unmount path, closing the editor mid-drag
+  // (Escape, drawer close, a re-render dropping the overlay) would never fire a
+  // pointer event, leaking the window listeners and letting a stale `onMove`
+  // call `setCropPosition` on an unmounted component.
+  const activeDragCleanupRef = React.useRef<(() => void) | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      activeDragCleanupRef.current?.();
+    };
+  }, []);
+
+  // Track a pointer drag until the pointer is released or the browser cancels
+  // it. The pointer is captured so the drag follows the finger even once it
+  // leaves the (12px) handle it started on, and pointercancel is treated as
+  // release so an interrupted touch never leaves stale window listeners.
+  const trackPointerDrag = (event: React.PointerEvent, onMove: (e: PointerEvent) => void) => {
     event.preventDefault();
     event.stopPropagation();
+    const { pointerId } = event;
+    try {
+      event.currentTarget.setPointerCapture(pointerId);
+    } catch {
+      // Unsupported environment (jsdom) — window listeners still track the drag.
+    }
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      onMove(e);
+    };
+    const cleanup = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      activeDragCleanupRef.current = null;
+    };
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
+    };
+    // Only one drag is ever live at a time; tear down any previous one first.
+    activeDragCleanupRef.current?.();
+    activeDragCleanupRef.current = cleanup;
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+  };
+
+  // Drag the entire crop rectangle.
+  const handleMovePointerDown = (event: React.PointerEvent) => {
     const start = pointerToNatural(event);
     if (!start) return;
     const startCrop = { ...crop };
-    const move = (e: PointerEvent) => {
+    trackPointerDrag(event, (e) => {
       const next = pointerToNatural(e);
       if (!next) return;
       setCropPosition({
         x: startCrop.x + (next.x - start.x),
         y: startCrop.y + (next.y - start.y),
       });
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    });
   };
 
   // Resize from a corner; the opposite corner stays anchored.
   const handleResizePointerDown = (corner: Corner) => (event: React.PointerEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
     const startCrop = { ...crop };
     const anchorX =
       corner === 'tl' || corner === 'bl' ? startCrop.x + startCrop.width : startCrop.x;
     const anchorY =
       corner === 'tl' || corner === 'tr' ? startCrop.y + startCrop.height : startCrop.y;
-    const move = (e: PointerEvent) => {
+    trackPointerDrag(event, (e) => {
       const point = pointerToNatural(e);
       if (!point) return;
       const {
@@ -337,13 +412,7 @@ export const AssetCropEditor = ({
       });
       setCropPosition({ x, y });
       setCropSize({ width: w, height: h });
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    });
   };
 
   const toggleAspectLock = () => {
@@ -356,9 +425,7 @@ export const AssetCropEditor = ({
 
   // Drag the focal handle within the crop rectangle, clamped 0–100.
   const handleFocalPointerDown = (event: React.PointerEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const move = (e: PointerEvent) => {
+    trackPointerDrag(event, (e) => {
       const point = pointerToNatural(e);
       if (!point) return;
       // Convert pointer to a percentage of the current crop area.
@@ -368,13 +435,7 @@ export const AssetCropEditor = ({
         x: Math.round(Math.min(100, Math.max(0, px))),
         y: Math.round(Math.min(100, Math.max(0, py))),
       });
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    });
   };
 
   const focalPxX = Math.round((focal.x / 100) * width);
@@ -428,8 +489,8 @@ export const AssetCropEditor = ({
 
   return (
     <Portal>
-      <FocusTrap onEscape={onClose}>
-        <Overlay>
+      <FocusTrap onEscape={onClose} skipAutoFocus>
+        <Overlay ref={overlayRef} tabIndex={-1}>
           <HeaderBar alignItems="center">
             <Crop aria-hidden />
             <Typography variant="omega" fontWeight="bold">
@@ -453,6 +514,10 @@ export const AssetCropEditor = ({
                 ref={imgRef}
                 src={imageUrl}
                 alt={asset.name}
+                // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:
+                // the editor reads pixels via canvas (useCropImg -> toBlob), which
+                // taints on a cross-origin image loaded without CORS, so every
+                // remote image must be fetched CORS-clean.
                 crossOrigin="anonymous"
                 onLoad={handleImageLoad}
                 draggable={false}
@@ -640,17 +705,19 @@ export const AssetCropEditor = ({
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Flex gap={2}>
-              <Button
-                variant="secondary"
-                onClick={() => handleAction('copy')}
-                loading={isBusy}
-                disabled={!isReady}
-              >
-                {formatMessage({
-                  id: getTranslationKey('asset-details.crop.save-as-copy'),
-                  defaultMessage: 'Save as copy',
-                })}
-              </Button>
+              {canSaveAsCopy && (
+                <Button
+                  variant="secondary"
+                  onClick={() => handleAction('copy')}
+                  loading={isBusy}
+                  disabled={!isReady}
+                >
+                  {formatMessage({
+                    id: getTranslationKey('asset-details.crop.save-as-copy'),
+                    defaultMessage: 'Save as copy',
+                  })}
+                </Button>
+              )}
               <Button
                 variant="default"
                 onClick={() => handleAction('apply')}

@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -78,12 +78,16 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   const processEvent = (name: string, ...args: any) => {
     const requestState = strapi.requestContext.get()?.state;
 
-    // Ignore events with auth strategies different from admin
+    // Only audit admin-authenticated actions, plus MCP actions flagged via auditSource.
     const isUsingAdminAuth = requestState?.route.info.type === 'admin';
+    const auditSource = requestState?.auditSource;
+    const isMcpAdminAction = auditSource === 'mcp';
     const user = requestState?.user;
-    if (!isUsingAdminAuth || !user) {
+    if ((!isUsingAdminAuth && !isMcpAdminAction) || !user) {
       return null;
     }
+
+    const origin: Modules.AuditLogs.AuditSource = auditSource ?? 'admin';
 
     const getPayload = eventMap[name];
 
@@ -102,7 +106,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     return {
       action: name,
       date: new Date().toISOString(),
-      payload: getPayload(...args) || {},
+      payload: { ...(getPayload(...args) || {}), origin },
       userId: user.id,
     };
   };
@@ -158,7 +162,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
 
       strapi.cron.add({
         deleteExpiredAuditLogs: {
-          task: async () => {
+          async task() {
             const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
             await auditLogsService.deleteExpiredEvents(expirationDate);
           },
