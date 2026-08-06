@@ -9,11 +9,12 @@ import { getTrad } from '../../../../utils/getTrad';
 
 const Row = styled(Flex)<{ $depth: number }>`
   padding-right: ${({ theme }) => theme.spaces[3]};
-  padding-left: ${({ theme }) => theme.spaces[3]};
 
   padding-block: ${({ theme }) => theme.spaces[1]};
 
-  margin-left: ${({ theme, $depth }) => `calc(${$depth} * ${theme.spaces[6]})`};
+  padding-left: ${({ theme, $depth }) =>
+    `calc(${$depth} * ${theme.spaces[6]} + ${theme.spaces[3]})`};
+
   gap: ${({ theme }) => theme.spaces[2]};
 `;
 
