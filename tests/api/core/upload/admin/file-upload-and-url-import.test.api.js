@@ -92,7 +92,7 @@ const makeRawRequest = (strapi, options) => {
   });
 };
 
-describe('Upload SSE Streaming', () => {
+describe('File upload and URL import', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -102,12 +102,12 @@ describe('Upload SSE Streaming', () => {
     await strapi.destroy();
   });
 
-  describe('POST /upload/unstable/upload-file - Single file upload', () => {
+  describe('POST /upload/files - Single file upload', () => {
     describe('Authentication', () => {
       test('Rejects unauthenticated requests', async () => {
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/upload-file',
+          path: '/upload/files',
           headers: {},
           formData: true,
         });
@@ -120,7 +120,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when no files are provided', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {},
         });
 
@@ -132,7 +132,7 @@ describe('Upload SSE Streaming', () => {
       test('Uploads a single file and returns the created File', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
@@ -154,7 +154,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
             fileInfo: JSON.stringify(fileInfo),
@@ -178,7 +178,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
@@ -189,12 +189,12 @@ describe('Upload SSE Streaming', () => {
     });
   });
 
-  describe('POST /upload/unstable/stream-from-urls - URL import', () => {
+  describe('POST /upload/actions/upload-from-urls - URL import', () => {
     describe('Authentication', () => {
       test('Rejects unauthenticated requests', async () => {
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
+          path: '/upload/actions/upload-from-urls',
           headers: {},
           body: { urls: ['https://example.com/image.jpg'] },
         });
@@ -207,7 +207,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when no URLs are provided', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: {},
         });
 
@@ -217,7 +217,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when URLs is empty array', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls: [] },
         });
 
@@ -227,7 +227,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when URLs is not an array', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls: 'https://example.com/image.jpg' },
         });
 
@@ -239,7 +239,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls },
         });
 
@@ -273,7 +273,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
+          path: '/upload/actions/upload-from-urls',
           headers: {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -418,7 +418,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -481,7 +481,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -532,7 +532,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',

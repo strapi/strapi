@@ -43,16 +43,16 @@ export const routes = {
     },
     {
       method: 'POST',
-      path: '/unstable/upload-file',
-      handler: 'admin-upload.unstable_uploadFile',
+      path: '/actions/upload-from-urls',
+      handler: 'admin-upload.uploadFromUrls',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
       method: 'POST',
-      path: '/unstable/stream-from-urls',
-      handler: 'admin-upload.unstable_uploadFromUrls',
+      path: '/files',
+      handler: 'admin-upload.uploadFile',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
@@ -275,8 +275,8 @@ export const routes = {
     },
     {
       method: 'POST',
-      path: '/unstable/generate-ai-metadata',
-      handler: 'admin-file.unstable_generateAIMetadata',
+      path: '/actions/generate-ai-metadata-for-files',
+      handler: 'admin-file.generateAIMetadataForFiles',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

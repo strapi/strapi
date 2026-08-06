@@ -185,15 +185,15 @@ export default {
   },
 
   /**
+   * `POST /upload/actions/generate-ai-metadata-for-files`
+   *
    * Generate AI metadata for an explicit selection of files, synchronously.
    *
    * Unlike `generateAIMetadata`, no job is created: the request resolves once
    * every file has been processed and reports the outcome per file, so a single
    * bad id or a non-image in the selection never fails the whole batch.
-   *
-   * @experimental
    */
-  async unstable_generateAIMetadata(ctx: Context) {
+  async generateAIMetadataForFiles(ctx: Context) {
     const { userAbility } = ctx.state;
     const { body } = ctx.request;
 

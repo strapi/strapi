@@ -234,12 +234,12 @@ export declare namespace CreateFile {
 }
 
 /**
- * POST /upload/unstable/upload-file - Upload a single file
+ * POST /upload/files - Upload a single file
  *
  * Accepts one file per request (multipart `files` + `fileInfo`) and returns the
  * single created `File`. Does not run inline AI metadata generation.
  */
-export declare namespace UnstableCreateFile {
+export declare namespace UploadFile {
   export interface Request {
     body: FormData;
   }
@@ -250,7 +250,7 @@ export declare namespace UnstableCreateFile {
 }
 
 /**
- * POST /upload/unstable/stream-from-urls - Stream upload files with partial success support
+ * POST /upload/actions/upload-from-urls - Stream upload files with partial success support
  *
  * Still used by the URL upload flow (`uploadFromUrls`).
  */
@@ -269,7 +269,7 @@ export declare namespace CreateFilesStream {
 }
 
 /**
- * POST /upload/unstable/stream-from-urls - SSE streaming event types
+ * POST /upload/actions/upload-from-urls - SSE streaming event types
  *
  * The endpoint streams Server-Sent Events as each file is processed.
  * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
@@ -386,14 +386,14 @@ export declare namespace GenerateAIMetadata {
 }
 
 /**
- * POST /upload/unstable/generate-ai-metadata - Generate AI metadata for selected files
+ * POST /upload/actions/generate-ai-metadata-for-files - Generate AI metadata for selected files
  *
  * Synchronous (no job): generates and persists alt text / caption for the given
  * files and reports the outcome per file. Non-images are `skipped`; ids that no
  * longer exist and files whose generation failed are reported as `error` rather
  * than failing the whole request.
  */
-export declare namespace UnstableGenerateAIMetadata {
+export declare namespace GenerateAIMetadataForFiles {
   export type FileStatus = 'success' | 'skipped' | 'error';
 
   export interface FileResult {
