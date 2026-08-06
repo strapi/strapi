@@ -20,7 +20,9 @@ import {
 } from '../../../services/folders';
 import { canDropItemOnFolder } from '../../../utils/canDropItemOnFolder';
 import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
+import { formatMoveSuccessMessage } from '../../../utils/formatMoveSuccessMessage';
 import { getBulkMoveErrorMessage } from '../../../utils/getBulkMoveErrorMessage';
+import { hasUniformSource, uniformSourceFolderId } from '../../../utils/itemSource';
 import { getTranslationKey } from '../../../utils/translations';
 
 import type { DragItemData } from '../../../types/dnd';
@@ -71,11 +73,12 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
     [items]
   );
 
-  // Every item in a single invocation shares a parent — the selection is
-  // page-scoped and the folder menu passes one folder — so the first item is
-  // enough to name the source in the success toast.
-  const sourceFolderId =
-    items.length === 0 ? null : items[0].kind === 'folder' ? items[0].parentId : items[0].folderId;
+  // A selection made under a global search can span folders, so the source is
+  // nameable only when every item agrees on it — `null` otherwise, and the toast
+  // then omits the source rather than crediting one item's folder to all of them.
+  // The bar can also hand over an empty set, which is likewise unnameable.
+  const isSourceUniform = hasUniformSource(items);
+  const sourceFolderId = uniformSourceFolderId(items);
   const { data: sourceFolder } = useGetFolderQuery(
     { id: sourceFolderId! },
     { skip: sourceFolderId === null }
@@ -165,7 +168,13 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
       return;
     }
 
-    const sourceName = sourceFolderId === null ? rootLabel : (sourceFolder?.name ?? rootLabel);
+    // A uniform source with a `null` id is the Media Library root — a real name.
+    // Only a set that genuinely spans folders has no source to report.
+    const sourceName = !isSourceUniform
+      ? null
+      : sourceFolderId === null
+        ? rootLabel
+        : (sourceFolder?.name ?? rootLabel);
     const destinationName =
       destinationFolderId === null
         ? rootLabel
@@ -174,14 +183,12 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
 
     toggleNotification({
       type: 'success',
-      message: formatMessage(
-        {
-          id: getTranslationKey('list.bulk-actions.move.success'),
-          defaultMessage:
-            '{count, plural, =1 {# element has} other {# elements have}} been moved from {source} to {destination}',
-        },
-        { count, source: sourceName, destination: destinationName }
-      ),
+      message: formatMoveSuccessMessage({
+        formatMessage,
+        count,
+        source: sourceName,
+        destination: destinationName,
+      }),
     });
     onSuccess?.();
     onClose();

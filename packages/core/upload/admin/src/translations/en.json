@@ -338,6 +338,7 @@
   "list.bulk-actions.move.load-error": "Couldn't load the folder list. Please try again.",
   "list.bulk-actions.move.submit": "Move",
   "list.bulk-actions.move.success": "{count, plural, =1 {# element has} other {# elements have}} been moved from {source} to {destination}",
+  "list.bulk-actions.move.success-multiple-sources": "{count, plural, =1 {# element has} other {# elements have}} been moved to {destination}",
   "list.bulk-actions.move.error": "An error occurred while moving the items.",
   "list.bulk-actions.delete": "Delete",
   "list.bulk-actions.delete.confirm.title": "Delete {count, plural, =1 {# item} other {# items}}?",
