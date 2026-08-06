@@ -47,6 +47,8 @@ $RECYCLE.BIN/
 *.class
 *.dll
 *.exe
+# Deliberate e2e fixture for the upload MIME-denylist test (CMS-249) — not a build artifact.
+!tests/e2e/data/uploads/blocked-file.exe
 *.o
 *.seed
 *.so
