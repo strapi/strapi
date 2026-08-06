@@ -40,11 +40,31 @@ const singleTypeModel = {
   },
 };
 
+const nonDefaultLocaleSingleTypeUid = 'api::footer.footer';
+const nonDefaultLocaleSingleTypeModel = {
+  singularName: 'footer',
+  pluralName: 'footers',
+  displayName: 'Footer',
+  kind: 'singleType',
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    title: {
+      type: 'string',
+    },
+  },
+};
+
 describe('Preview', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;
   let singleTypeEntry;
+  let nonDefaultLocaleSingleTypeEntry;
 
   const updateEntry = async ({ uid, documentId, data, locale }) => {
     const type = documentId ? 'collection-types' : 'single-types';
@@ -69,10 +89,22 @@ describe('Preview', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([collectionTypeModel, singleTypeModel]).build();
+    await builder
+      .addContentTypes([collectionTypeModel, singleTypeModel, nonDefaultLocaleSingleTypeModel])
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    await rq({
+      method: 'POST',
+      url: '/i18n/locales',
+      body: {
+        code: 'da',
+        name: 'Danish (da)',
+        isDefault: false,
+      },
+    });
 
     // Update the single type to create an initial history version
     singleTypeEntry = await updateEntry({
@@ -81,6 +113,16 @@ describe('Preview', () => {
       locale: 'en',
       data: {
         title: 'Welcome',
+      },
+    });
+
+    // Only fill the non-default locale, leaving the default one empty
+    nonDefaultLocaleSingleTypeEntry = await updateEntry({
+      uid: nonDefaultLocaleSingleTypeUid,
+      documentId: undefined,
+      locale: 'da',
+      data: {
+        title: 'Sidefod',
       },
     });
 
@@ -123,6 +165,20 @@ describe('Preview', () => {
     expect(statusCode).toBe(200);
     expect(body.data.url).toEqual(
       `/preview/${singleTypeUid}/${singleTypeEntry.documentId}?locale=en&status=draft`
+    );
+  });
+
+  test('Get preview URL for single type that only exists in a non-default locale', async () => {
+    const { body, statusCode } = await getPreviewUrl({
+      uid: nonDefaultLocaleSingleTypeUid,
+      documentId: undefined,
+      locale: 'da',
+      status: 'draft',
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data.url).toEqual(
+      `/preview/${nonDefaultLocaleSingleTypeUid}/${nonDefaultLocaleSingleTypeEntry.documentId}?locale=da&status=draft`
     );
   });
 });
