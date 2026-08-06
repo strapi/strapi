@@ -285,6 +285,10 @@ export function resolveDropTarget(items: FlatItem[], dragState: DragState): Drop
     });
 
     if (zone === 'nest') {
+      if (overId === activeId) {
+        return null;
+      }
+
       const activeNode = items.find(({ id }) => id === activeId)?.node;
       const nestIsValid =
         activeNode == null ||
