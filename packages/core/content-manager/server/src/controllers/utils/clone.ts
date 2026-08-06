@@ -1,8 +1,8 @@
 import { set } from 'lodash/fp';
-import strapiUtils from '@strapi/utils';
+import { contentTypes } from '@strapi/utils';
 import { ProhibitedCloningField } from '../../../../shared/contracts/collection-types';
 
-const { isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute } = contentTypes;
 
 /**
  * Use an array of strings to represent the path to a field, so we can show breadcrumbs in the admin
