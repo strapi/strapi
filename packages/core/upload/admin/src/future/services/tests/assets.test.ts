@@ -2,7 +2,7 @@ import { renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
-import { useGetAssetsQuery } from '../assets';
+import { useGetAssetsQuery, useGenerateAiMetadataMutation } from '../assets';
 
 describe('future assets service - getAssets filter shape', () => {
   let lastRequestParams:
@@ -135,5 +135,39 @@ describe('future assets service - getAssets filter shape', () => {
       });
       expect(lastRequestParams).not.toHaveProperty('_q');
     });
+  });
+});
+
+describe('future assets service - generateAiMetadata', () => {
+  let lastRequestBody: { fileIds?: number[] } | undefined;
+
+  beforeEach(() => {
+    lastRequestBody = undefined;
+    server.use(
+      http.post('*/upload/unstable/generate-ai-metadata', async ({ request }) => {
+        lastRequestBody = (await request.json()) as { fileIds?: number[] };
+        return HttpResponse.json({
+          data: [
+            { id: 1, status: 'success' },
+            { id: 2, status: 'skipped' },
+          ],
+        });
+      })
+    );
+  });
+
+  it('posts the selected file ids and unwraps the per-file results', async () => {
+    const { result } = renderHook(() => useGenerateAiMetadataMutation());
+
+    const [generateAiMetadata] = result.current;
+    await generateAiMetadata({ fileIds: [1, 2] });
+
+    await waitFor(() => expect(result.current[1].isSuccess).toBe(true));
+
+    expect(lastRequestBody).toEqual({ fileIds: [1, 2] });
+    expect(result.current[1].data).toEqual([
+      { id: 1, status: 'success' },
+      { id: 2, status: 'skipped' },
+    ]);
   });
 });

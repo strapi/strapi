@@ -470,6 +470,10 @@ const slice = createUndoRedoSlice(
           previousTarget,
           previousAttribute.targetAttribute ?? ''
         );
+        const previousTargetAttribute =
+          previousTargetAttributeIndex !== -1
+            ? previousTarget.attributes[previousTargetAttributeIndex]
+            : undefined;
 
         // remove old targetAttribute
         if (previousAttribute.targetAttribute) {
@@ -492,6 +496,9 @@ const slice = createUndoRedoSlice(
             target: type.uid,
             private: previousAttribute.private ?? attributeToSet.private,
             pluginOptions: previousAttribute.pluginOptions ?? attributeToSet.pluginOptions,
+            ...(previousTarget.uid === newTarget.uid && previousTargetAttribute?.conditions
+              ? { conditions: previousTargetAttribute.conditions }
+              : {}),
             status: 'CHANGED',
           } as AnyAttribute;
 

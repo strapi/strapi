@@ -46,9 +46,20 @@ const DropZoneWrapper = styled(Box)`
 interface UploadDropZoneProps {
   children: ReactNode;
   onDrop?: DropHandler;
+  /**
+   * When true, the zone never enters the dragging state and never fires
+   * `onDrop` — no overlay, no "drop here" invitation. Used to hide the whole
+   * upload affordance from users without `assets.create`, so they don't drag a
+   * file onto an inviting target that then silently discards it.
+   */
+  disabled?: boolean;
 }
 
-export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps) => {
+export const UploadDropZoneProvider = ({
+  children,
+  onDrop,
+  disabled = false,
+}: UploadDropZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
 
@@ -80,19 +91,27 @@ export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps
     };
   }, []);
 
-  const handleDragEnter = useCallback((e: DragEvent<HTMLElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDragEnter = useCallback(
+    (e: DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Bidirectional guard with AssetsDndProvider — internal item drags must not
-    // activate the upload overlay. See AssetsDndProvider.tsx.
-    if (!e.dataTransfer.types.includes('Files')) {
-      return;
-    }
+      // No upload permission → never light up the drop target.
+      if (disabled) {
+        return;
+      }
 
-    dragCounterRef.current += 1;
-    setIsDragging(true);
-  }, []);
+      // Bidirectional guard with AssetsDndProvider — internal item drags must not
+      // activate the upload overlay. See AssetsDndProvider.tsx.
+      if (!e.dataTransfer.types.includes('Files')) {
+        return;
+      }
+
+      dragCounterRef.current += 1;
+      setIsDragging(true);
+    },
+    [disabled]
+  );
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLElement>) => {
     e.preventDefault();
@@ -121,12 +140,16 @@ export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps
       setIsDragging(false);
       dragCounterRef.current = 0;
 
+      if (disabled) {
+        return;
+      }
+
       const { files } = e.dataTransfer;
       if (files?.length && onDrop) {
         onDrop(Array.from(files));
       }
     },
-    [onDrop]
+    [onDrop, disabled]
   );
 
   return (

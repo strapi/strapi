@@ -348,7 +348,7 @@ class Strapi extends Container implements Core.Strapi {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
-      } catch (e) {
+      } catch {
         this.telemetry.send('didNotOpenTab');
       }
     }

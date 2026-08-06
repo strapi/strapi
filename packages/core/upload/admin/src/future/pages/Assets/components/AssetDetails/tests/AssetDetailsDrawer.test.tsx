@@ -95,7 +95,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Crop' }));
+    await user.click(await screen.findByRole('button', { name: 'Crop' }));
 
     expect(await screen.findByRole('button', { name: 'Apply' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save as copy' })).toBeInTheDocument();
@@ -113,6 +113,8 @@ describe('AssetDetails (asset details drawer body)', () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const nameInput = await screen.findByDisplayValue('photo.png');
+    // The field starts disabled until the RBAC check resolves.
+    await waitFor(() => expect(nameInput).toBeEnabled());
     await user.clear(nameInput);
     await user.type(nameInput, 'updated.png');
 
@@ -198,7 +200,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Wait for folders query so the toast can resolve the folder name.
     await screen.findByRole('combobox');
 
-    const trashButton = screen.getByRole('button', { name: 'Delete this file' });
+    const trashButton = await screen.findByRole('button', { name: 'Delete this file' });
     await user.click(trashButton);
 
     // Dialog opens via Radix AlertDialog — match by the body copy.
@@ -220,7 +222,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={closeDetails} />);
 
     await screen.findByRole('combobox');
-    await user.click(screen.getByRole('button', { name: 'Delete this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
     await screen.findByText(/This file cannot be recovered/i);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
@@ -254,7 +256,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Confirm dialog must NOT be visible before the trigger is clicked.
     expect(screen.queryByText(/Replace this media file\?/i)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
 
     await screen.findByText(/Replace this media file\?/i);
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
@@ -283,8 +285,92 @@ describe('AssetDetails (asset details drawer body)', () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
     await screen.findByRole('combobox');
 
-    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
 
     await screen.findByText(/AI will generate new metadata after upload/i);
+  });
+});
+
+describe('AssetDetails RBAC gating', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  const withoutAction = (action: string) => ({
+    providerOptions: {
+      permissions: (defaults: Array<{ action: string }>) =>
+        defaults.filter((permission) => permission.action !== action),
+    },
+  });
+
+  it('hides every mutating action and disables the fields without assets.update', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.update')
+    );
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeDisabled());
+    expect(screen.getByDisplayValue('A caption')).toBeDisabled();
+    expect(screen.getByDisplayValue('A photo')).toBeDisabled();
+
+    expect(screen.queryByRole('button', { name: 'Save changes' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete this file' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Replace this file' })).not.toBeInTheDocument();
+
+    // Read-scoped actions survive.
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+  });
+
+  it('drops the footer bar entirely when no footer action is permitted', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />, {
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter(
+            (permission) =>
+              ![
+                'plugin::upload.assets.update',
+                'plugin::upload.assets.download',
+                'plugin::upload.assets.copy-link',
+              ].includes(permission.action)
+          ),
+      },
+    });
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeDisabled());
+
+    for (const name of ['Save changes', 'Delete this file', 'Copy link', 'Download']) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+  });
+
+  it('hides the download action without assets.download', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.download')
+    );
+
+    await screen.findByDisplayValue('photo.png');
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Download' })).not.toBeInTheDocument()
+    );
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete this file' })).toBeInTheDocument();
+  });
+
+  it('hides the copy link action without assets.copy-link', async () => {
+    render(
+      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} />,
+      withoutAction('plugin::upload.assets.copy-link')
+    );
+
+    await screen.findByDisplayValue('photo.png');
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument()
+    );
+    expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
   });
 });

@@ -451,11 +451,11 @@ module.exports = ({ strapi }) => ({
         ctx.session = ctx.session || {};
         ctx.session.grant = ctx.session.grant || {};
         ctx.session.grant.dynamic = {
-          ...(ctx.session.grant.dynamic || {}),
+          ...ctx.session.grant.dynamic,
           callback: customCallback,
         };
         ctx.state.oauthConnect = { callback: customCallback };
-      } catch (e) {
+      } catch {
         throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
       }
     }
