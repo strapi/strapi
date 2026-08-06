@@ -39,7 +39,7 @@ const useQueryParams = <TQuery extends object = QueryParams>(initialParams?: TQu
         nextQuery = { ...query, ...nextParams };
       }
 
-      navigate({ search: stringify(nextQuery, { encode: false }) }, { replace });
+      navigate({ search: stringify(nextQuery, { encode: true }) }, { replace });
     },
     [navigate, query]
   );

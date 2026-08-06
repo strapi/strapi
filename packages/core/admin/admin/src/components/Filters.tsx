@@ -84,7 +84,7 @@ const isFilterMatch = (
   }
 
   const decoded =
-    typeof details.value === 'string' ? decodeURIComponent(details.value) : details.value;
+    details.value;
   return decoded === target.value;
 };
 
@@ -195,7 +195,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   const handleSubmit = (data: FilterFormData) => {
     const value = FILTERS_WITH_NO_VALUE.includes(data.filter)
       ? 'true'
-      : encodeURIComponent(data.value ?? '');
+      : (data.value ?? '');
 
     if (!value) {
       return;
@@ -475,7 +475,7 @@ const AttributeTag = ({
     setEditingFilter({
       name,
       filter: operator,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : value,
     });
     setOpen(true);
   };

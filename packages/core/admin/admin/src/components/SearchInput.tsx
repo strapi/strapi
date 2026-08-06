@@ -56,7 +56,7 @@ const SearchInput = ({
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
-      setQuery({ _q: encodeURIComponent(value), page: 1 });
+      setQuery({ _q: value, page: 1 });
     } else {
       handleToggle();
       setQuery({ _q: '' }, 'remove');
