@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 

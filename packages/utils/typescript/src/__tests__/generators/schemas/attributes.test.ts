@@ -1,3 +1,4 @@
+import { vi, describe, afterEach, expect, test } from 'vitest';
 import * as ts from 'typescript';
 
 import {
@@ -7,14 +8,14 @@ import {
 } from '../../../generators/common/models/attributes';
 import { addImport } from '../../../generators/common/imports';
 
-jest.mock('../../../generators/common/imports', () => ({ addImport: jest.fn() }));
+vi.mock(import('../../../generators/common/imports'), () => ({ addImport: vi.fn() }));
 
-const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation();
+const consoleWarnMock = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 // TODO: emit definition (to a string) & also check snapshots based on that. It would allow checking both the structure & the output.
 describe('Attributes', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Attribute to Property Signature', () => {
@@ -887,7 +888,7 @@ describe('Attributes', () => {
         });
 
         test('Default: <function>', () => {
-          const anyFunction = jest.fn();
+          const anyFunction = vi.fn();
           const attribute = { default: anyFunction };
 
           const modifiers = getAttributeModifiers(attribute);
