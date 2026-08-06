@@ -13,6 +13,7 @@ import {
 import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { isAIMetadataSupportedMime } from '../../../../../../shared/constants';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { useGetUploadSettingsQuery } from '../../../services/settings';
@@ -53,10 +54,20 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { clear } = useAssetSelection();
-  const { canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
+  const {
+    canUpdate,
+    canDownload,
+    canCopyLink,
+    isLoading: isLoadingPermissions,
+  } = useMediaLibraryPermissions();
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const { data: settings } = useGetUploadSettingsQuery();
-  const aiEnabled = settings?.data?.aiMetadata ?? false;
+  // The replace flow only regenerates metadata for images the AI provider can
+  // actually read (`admin-upload.replaceFile` → `aiMetadata.processFiles`, which
+  // filters on this same allowlist). Promising it for a PDF — or for a GIF, which
+  // clears the server's looser `image/*` gate but is skipped by the provider —
+  // would describe something that never happens.
+  const aiEnabled = (settings?.data?.aiMetadata ?? false) && isAIMetadataSupportedMime(asset.mime);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isReplaceOpen, setIsReplaceOpen] = useState(false);
@@ -159,9 +170,20 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
     }
   };
 
-  // Replace and the move/delete pair are the two permission-gated groups; the
-  // separator between them only earns its place when both survive the gate.
-  const showTopGroup = canUpdate || canCopyLink || canDownload;
+  // Two permission-gated groups: replace/copy-link/download above, move/delete
+  // below. The separator earns its place only when both survive the gate —
+  // `canUpdate` alone puts Replace in the top group, which is not enough.
+  const hasTopGroup = canUpdate || canCopyLink || canDownload;
+  const hasBottomGroup = canUpdate;
+  const showSeparator = (canCopyLink || canDownload) && hasBottomGroup;
+
+  // A role can read the library while holding none of these, and an empty
+  // popup is worse than no trigger at all. Every flag is `false` until the
+  // RBAC check settles, so wait for it — otherwise the trigger unmounts and
+  // remounts on first paint for everyone.
+  if (!isLoadingPermissions && !hasTopGroup && !hasBottomGroup) {
+    return null;
+  }
 
   return (
     <>
@@ -225,7 +247,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
               })}
             </Menu.Item>
           )}
-          {showTopGroup && canUpdate && <Menu.Separator />}
+          {showSeparator && <Menu.Separator />}
           {canUpdate && (
             <>
               <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>

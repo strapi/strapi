@@ -189,6 +189,37 @@ describe('AssetActionsMenu', () => {
       });
     });
 
+    // The default settings handler enables AI metadata, so the paragraph is
+    // gated purely on whether the provider can read this asset.
+    it('promises regenerated AI metadata for a supported image', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+
+      expect(
+        await screen.findByText('AI will generate new metadata after upload.')
+      ).toBeInTheDocument();
+    });
+
+    it.each([
+      ['a PDF', 'application/pdf', '.pdf'],
+      // A GIF clears the server's looser `image/*` replace gate but is not on
+      // the provider allowlist, so it would be skipped after upload.
+      ['a GIF', 'image/gif', '.gif'],
+    ])('does not promise AI metadata for %s', async (_label, mime, ext) => {
+      const { user } = setup({ asset: { ...asset, mime, ext } as File });
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+
+      expect(await screen.findByText('Replace this media file?')).toBeInTheDocument();
+      expect(screen.getByText('Current content will be permanently replaced.')).toBeInTheDocument();
+      expect(
+        screen.queryByText('AI will generate new metadata after upload.')
+      ).not.toBeInTheDocument();
+    });
+
     it('closes the warning on cancel without touching the file input', async () => {
       const { user } = setup();
 
@@ -362,6 +393,24 @@ describe('AssetActionsMenu', () => {
           'Delete',
         ])
       );
+      // Replace is the whole top group here, so a separator would fence it off
+      // from move/delete rather than divide the two groups.
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+    });
+
+    it('renders no trigger at all when every action is denied', async () => {
+      renderWithout(
+        'plugin::upload.assets.update',
+        'plugin::upload.assets.copy-link',
+        'plugin::upload.assets.download'
+      );
+
+      // `useRBAC` resolves asynchronously, so the trigger can only be assumed
+      // gone once the permission check has settled.
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument()
+      );
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     });
   });
 });
