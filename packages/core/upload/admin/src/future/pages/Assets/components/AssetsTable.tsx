@@ -19,6 +19,7 @@ import { styled, css } from 'styled-components';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
+import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
@@ -28,6 +29,7 @@ import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/s
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
+import { FolderActionsMenu } from './FolderActionsMenu';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -138,8 +140,14 @@ const NameButton = styled.button`
   }
 `;
 
+// Shields the row from its own controls (checkbox, "..." trigger) without
+// severing propagation for the menu's portaled content — those events are React
+// children of the cell but not DOM descendants, and Radix needs them to reach
+// `document` to dismiss its layers.
 const stopRowEvent = (e: React.SyntheticEvent) => {
-  e.stopPropagation();
+  if (isEventFromWithin(e)) {
+    e.stopPropagation();
+  }
 };
 
 interface AssetPreviewCellProps {
@@ -327,6 +335,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const { canUpdate } = useMediaLibraryPermissions();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
+    dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
     showValidDropHighlight,
@@ -337,7 +346,15 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 
   // Folders share the selection mechanism with assets. Only the plain-click
   // semantic differs: it navigates into the folder instead of selecting it.
+  //
+  // The containment guard on this and the handlers below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // navigating into the folder or starting a drag.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -349,6 +366,10 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 
   // Enter navigates into the folder, Space toggles selection (same as assets).
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
@@ -382,9 +403,18 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
-      onDragStart={(e) => e.preventDefault()}
+      onDragStart={(e: React.DragEvent) => {
+        if (isEventFromWithin(e)) {
+          e.preventDefault();
+        }
+      }}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
       {!isMobile && canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
@@ -442,18 +472,11 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would navigate into the folder). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <FolderActionsMenu folder={folder} dragData={dragData} />
         </Flex>
       </StyledTd>
     </FolderTr>
