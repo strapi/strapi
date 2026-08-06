@@ -555,4 +555,107 @@ describe('File upload and URL import', () => {
       });
     });
   });
+
+  describe('PUT /upload/files/:id - Update file info', () => {
+    let fileId;
+
+    beforeAll(async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+      fileId = res.body.id;
+    });
+
+    test('Updates the editable metadata of a file', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/files/${fileId}`,
+        formData: {
+          fileInfo: JSON.stringify({
+            name: 'renamed',
+            caption: 'Updated caption',
+            alternativeText: 'Updated alt text',
+          }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.id).toBe(fileId);
+      expect(res.body.caption).toBe('Updated caption');
+      expect(res.body.alternativeText).toBe('Updated alt text');
+    });
+
+    test('Returns 404 for an unknown file id', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/upload/files/999999',
+        formData: {
+          fileInfo: JSON.stringify({ caption: 'nope' }),
+        },
+      });
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('POST /upload/files/:id/replace - Replace file', () => {
+    let fileId;
+
+    beforeAll(async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+      fileId = res.body.id;
+    });
+
+    test('Replaces the binary content of a file, keeping its id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/upload/files/${fileId}/replace`,
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.id).toBe(fileId);
+      expect(res.body.name).toBe('strapi.jpg');
+    });
+
+    test('Rejects replacing with multiple files', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/upload/files/${fileId}/replace`,
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe('Cannot replace a file with multiple ones');
+    });
+
+    test('Returns 404 for an unknown file id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files/999999/replace',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
 });

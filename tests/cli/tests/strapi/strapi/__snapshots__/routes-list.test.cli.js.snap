@@ -261,10 +261,12 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /upload/settings                                                                │
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │
-│ POST               │ /upload/unstable/upload-file                                                    │
-│ POST               │ /upload/unstable/stream-from-urls                                               │
+│ POST               │ /upload/actions/upload-from-urls                                                │
+│ POST               │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files/:id                                                               │
+│ PUT                │ /upload/files/:id                                                               │
+│ POST               │ /upload/files/:id/replace                                                       │
 │ DELETE             │ /upload/files/:id                                                               │
 │ HEAD|GET           │ /upload/folders/:id                                                             │
 │ HEAD|GET           │ /upload/folders                                                                 │
@@ -277,7 +279,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /upload/actions/generate-ai-metadata                                            │
 │ HEAD|GET           │ /upload/actions/generate-ai-metadata/count                                      │
 │ HEAD|GET           │ /upload/actions/generate-ai-metadata/latest                                     │
-│ POST               │ /upload/unstable/generate-ai-metadata                                           │
+│ POST               │ /upload/actions/generate-ai-metadata-for-files                                  │
 │ HEAD|GET           │ /upload/configuration                                                           │
 │ PUT                │ /upload/configuration                                                           │
 │ HEAD|GET           │ /i18n/iso-locales                                                               │

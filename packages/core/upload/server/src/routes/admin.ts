@@ -90,6 +90,22 @@ export const routes = {
       },
     },
     {
+      method: 'PUT',
+      path: '/files/:id',
+      handler: 'admin-upload.updateFileInfo',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/files/:id/replace',
+      handler: 'admin-upload.replaceFile',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'DELETE',
       path: '/files/:id',
       handler: 'admin-file.destroy',
