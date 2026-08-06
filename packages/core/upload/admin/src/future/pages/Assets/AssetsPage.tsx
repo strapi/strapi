@@ -521,7 +521,7 @@ export const AssetsPage = () => {
     <>
       <UploadDropZoneProvider onDrop={handleDrop} disabled={!canCreate}>
         <AssetSelectionProvider disabled={!canUpdate}>
-          <AssetsDndProvider>
+          <AssetsDndProvider locations={itemLocations}>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Box ref={uploadDropZoneRef}>
               <Layouts.Root
