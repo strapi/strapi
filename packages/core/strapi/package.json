@@ -84,6 +84,20 @@
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
     },
+    "./attributes": {
+      "types": "./dist/attributes.d.ts",
+      "source": "./src/attributes.ts",
+      "import": "./dist/attributes.mjs",
+      "require": "./dist/attributes.js",
+      "default": "./dist/attributes.js"
+    },
+    "./plugins": {
+      "types": "./dist/plugins.d.ts",
+      "source": "./src/plugins.ts",
+      "import": "./dist/plugins.mjs",
+      "require": "./dist/plugins.js",
+      "default": "./dist/plugins.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",

@@ -11,6 +11,19 @@ const { ApplicationError } = errors;
 export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
+/**
+ * Programmatic content types (defined in code via `defineApp`) are tagged with
+ * an `origin: 'programmatic'` by the normalizer. They have no `schema.json` on
+ * disk for the Content-Type Builder to write back to, so the CTB treats them as
+ * **read-only**: they are listed/visible, but cannot be edited or deleted.
+ * File-based content types carry no such tag and stay editable.
+ */
+export const getContentTypeOrigin = (model: Struct.ContentTypeSchema): string | undefined =>
+  getOr(undefined, 'pluginOptions.content-type-builder.origin', model);
+
+export const isContentTypeEditable = (model: Struct.ContentTypeSchema) =>
+  getContentTypeOrigin(model) !== 'programmatic';
+
 export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) => {
   const { uid } = contentType;
   if (uid === coreUids.STRAPI_USER) {
@@ -50,6 +63,8 @@ export const formatContentType = (contentType: any) => {
       collectionName,
       attributes: formatAttributes(contentType),
       visible: isContentTypeVisible(contentType),
+      // Programmatic content types are read-only in the CTB (no schema.json).
+      editable: isContentTypeEditable(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
