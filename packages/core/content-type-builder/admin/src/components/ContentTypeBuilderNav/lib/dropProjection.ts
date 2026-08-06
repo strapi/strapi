@@ -219,9 +219,6 @@ function getDropTargetFolderSibling(
     index += 1;
   }
 
-  // Before → the folder's top edge. After → the bottom edge of its last visible
-  // descendant (its own bottom edge when nothing beneath it is showing, e.g. a
-  // collapsed folder), so the line sits below the whole subtree it drops past.
   const line: DropLine = (() => {
     if (side === 'before') {
       return { anchorId: folder.id, edge: 'top' };
