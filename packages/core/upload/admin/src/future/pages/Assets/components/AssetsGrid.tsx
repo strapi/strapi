@@ -19,10 +19,12 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
+import { BusyOverlay } from './BusyOverlay';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -57,15 +59,18 @@ const CheckboxOverlay = styled(Flex)`
 const StyledCard = styled(Card)<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isSelected?: boolean;
 }>`
   border: 1px solid
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
-  cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
+  cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  /* No opacity change while busy — the overlay does the dimming, and stacking
+     one on the other would wash the card out. */
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
   background: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary100 : undefined)};
   /* Shift+click range selection must not highlight card text. */
   user-select: none;
@@ -410,6 +415,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -473,6 +479,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="listitem"
@@ -502,6 +509,11 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
           </CheckboxOverlay>
         )}
         <AssetPreview asset={asset} />
+        {/* The header is the card's only positioned ancestor, and it's the part
+            worth covering — the footer keeps the name legible while the preview
+            is mid-replace. Below the checkbox overlay (z-index 1) would hide
+            the spinner, so it sits above it. */}
+        {busyMessage !== null ? <BusyOverlay zIndex={2}>{busyMessage}</BusyOverlay> : null}
       </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2}>

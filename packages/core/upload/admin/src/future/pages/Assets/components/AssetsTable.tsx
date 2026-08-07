@@ -2,6 +2,7 @@ import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
+  Loader,
   RawTable,
   RawTbody,
   RawTd,
@@ -22,6 +23,7 @@ import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
@@ -65,6 +67,7 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled.tr<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
   $isSelected?: boolean;
@@ -73,15 +76,15 @@ const StyledTr = styled.tr<{
   user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
-  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
-    if ($isMovePending) {
+  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget }) => {
+    if ($isMovePending || $isBusy) {
       return 'wait';
     }
 
     return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
   }};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  opacity: ${({ $isDragging, $isBusy }) => ($isDragging || $isBusy ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -187,6 +190,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -248,6 +252,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
@@ -281,7 +286,16 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       )}
       <StyledTd>
         <Flex gap={3} alignItems="center">
-          <AssetPreviewCell asset={asset} />
+          {/* The row is dimmed and inert while busy; the spinner in place of the
+              thumbnail is what says so positively. Its label carries the reason
+              to screen readers — the row itself has no other announcement. */}
+          {busyMessage !== null ? (
+            <Flex justifyContent="center" width="3.2rem" height="3.2rem">
+              <Loader small>{busyMessage}</Loader>
+            </Flex>
+          ) : (
+            <AssetPreviewCell asset={asset} />
+          )}
           <Flex direction="column" alignItems="flex-start" minWidth={0}>
             <NameButton type="button" onClick={handleNameClick}>
               <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>

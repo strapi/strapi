@@ -60,6 +60,7 @@ import {
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
+import { BusyOverlay } from '../BusyOverlay';
 
 import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
@@ -247,25 +248,14 @@ const DrawerToastSlot = styled(Box)`
 `;
 
 /**
- * Full-form overlay rendered during long-running drawer-scoped mutations
- * (e.g. replacing the binary). Sits above the toast slot (z-index 10) and
- * the in-drawer Alert so the user can't interact with the form mid-flight.
- */
-const DrawerBusyOverlay = styled(Flex)`
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  align-items: center;
-  justify-content: center;
-  background: ${({ theme }) => theme.colors.neutral0};
-  opacity: 0.7;
-`;
-
-/**
  * Map the drawer-scoped mutation flags to a single i18n message for the busy
  * overlay loader. Returns `null` when nothing is in flight.
+ *
+ * Exported for the unit test: the branch order only matters when two flags are
+ * true at once, which the UI makes hard to stage through the rendered drawer
+ * (each trigger disables itself while its own mutation runs).
  */
-const getBusyMessage = (state: {
+export const getBusyMessage = (state: {
   isDeleting: boolean;
   isReplacing: boolean;
   isCropCopying: boolean;
@@ -933,11 +923,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       canSaveAsCopy={canCreate}
                     />
                   ) : null}
-                  {busyMessage ? (
-                    <DrawerBusyOverlay>
-                      <Loader>{formatMessage(busyMessage)}</Loader>
-                    </DrawerBusyOverlay>
-                  ) : null}
+                  {busyMessage ? <BusyOverlay>{formatMessage(busyMessage)}</BusyOverlay> : null}
                   {drawerToast ? (
                     <DrawerToastSlot>
                       <Alert

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { AssetDetails } from '../AssetDetailsDrawer';
+import { AssetDetails, getBusyMessage } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
@@ -285,6 +285,123 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);
+  });
+
+  // The overlay covers the form while a mutation is in flight. It had no
+  // coverage at all, which meant the `z-index` it needs to clear the in-drawer
+  // toast slot, and the priority order of the messages, were both free to
+  // regress silently — including through the extraction of `BusyOverlay`, which
+  // this drawer now shares with the list's rows and cards.
+  describe('busy overlay', () => {
+    /**
+     * Holds a request open so the in-flight state can be asserted, and hands
+     * back the release. Without this the mutation settles inside the same
+     * `act()` and the overlay never appears in a queryable state.
+     */
+    const gateRequest = (method: 'post' | 'delete', path: string) => {
+      let release: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+
+      server.use(
+        http[method](path, async () => {
+          await gate;
+          return HttpResponse.json(baseAsset);
+        })
+      );
+
+      return () => release();
+    };
+
+    it('covers the form while a replace is in flight and clears it once settled', async () => {
+      const release = gateRequest('post', '/upload');
+
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      await screen.findByRole('combobox');
+
+      await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+      await screen.findByText(/Replace this media file\?/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      fireEvent.change(fileInput, {
+        target: { files: [new File(['hello'], 'replacement.png', { type: 'image/png' })] },
+      });
+
+      const overlayLabel = await screen.findByText('Replacing the file…');
+      expect(overlayLabel).toBeInTheDocument();
+
+      // The overlay has to clear the in-drawer toast slot (z-index 10) or the
+      // "File replaced." alert renders on top of it. Since `BusyOverlay` became
+      // shared, that value is a defaulted prop rather than a literal in this
+      // file, so it needs pinning here.
+      const overlay = overlayLabel.parentElement?.parentElement;
+      expect(overlay).toHaveStyle({ zIndex: '20', position: 'absolute' });
+
+      release();
+
+      await waitFor(() =>
+        expect(screen.queryByText('Replacing the file…')).not.toBeInTheDocument()
+      );
+    });
+
+    it('names the delete while a delete is in flight', async () => {
+      const release = gateRequest('delete', '/upload/files/:id');
+
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      await screen.findByRole('combobox');
+
+      await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
+      await screen.findByText(/This file cannot be recovered/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByText('Deleting the file…')).toBeInTheDocument();
+
+      release();
+    });
+
+    it('renders no overlay while the drawer is idle', async () => {
+      render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+      await screen.findByRole('combobox');
+
+      expect(screen.queryByText('Replacing the file…')).not.toBeInTheDocument();
+      expect(screen.queryByText('Deleting the file…')).not.toBeInTheDocument();
+      expect(screen.queryByText('Saving the cropped copy…')).not.toBeInTheDocument();
+    });
+
+    // Driven directly rather than through the drawer: the branch order only
+    // has an effect when two flags are true at once, and each trigger disables
+    // itself while its own mutation runs, so the rendered UI can't stage the
+    // overlap. Going through the component would pass whatever the order was.
+    describe('getBusyMessage priority', () => {
+      const idle = { isDeleting: false, isReplacing: false, isCropCopying: false };
+
+      it('returns null when nothing is in flight', () => {
+        expect(getBusyMessage(idle)).toBeNull();
+      });
+
+      it.each([
+        ['delete', { ...idle, isDeleting: true }, 'Deleting the file…'],
+        ['crop copy', { ...idle, isCropCopying: true }, 'Saving the cropped copy…'],
+        ['replace', { ...idle, isReplacing: true }, 'Replacing the file…'],
+      ])('names the %s when it is the only one running', (_label, state, expected) => {
+        expect(getBusyMessage(state)?.defaultMessage).toBe(expected);
+      });
+
+      it.each([
+        ['delete over crop copy', { ...idle, isDeleting: true, isCropCopying: true }],
+        ['delete over replace', { ...idle, isDeleting: true, isReplacing: true }],
+      ])('prefers %s', (_label, state) => {
+        expect(getBusyMessage(state)?.defaultMessage).toBe('Deleting the file…');
+      });
+
+      it('prefers crop copy over replace', () => {
+        expect(
+          getBusyMessage({ ...idle, isCropCopying: true, isReplacing: true })?.defaultMessage
+        ).toBe('Saving the cropped copy…');
+      });
+    });
   });
 
   it('shows the AI variant of the replace description when AI metadata is enabled in settings', async () => {

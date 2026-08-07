@@ -20,6 +20,7 @@ import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
@@ -54,6 +55,9 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { clear } = useAssetSelection();
+  // Absent in the asset picker and in unit tests: the replace still runs, it
+  // just renders no row-level overlay.
+  const markBusy = useBusyAssetsOptional()?.markBusy ?? (() => () => {});
   const {
     canUpdate,
     canDownload,
@@ -88,7 +92,24 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
       return;
     }
 
-    const res = await replaceAsset({ id: asset.id, file });
+    // The menu has closed by the time the picker returns, so `isReplacing` has
+    // nothing left to disable and the row would otherwise sit inert for the
+    // whole upload. Marking the asset busy puts the same overlay the drawer
+    // uses on the row/card, cleared when the mutation settles either way.
+    const releaseBusy = markBusy(
+      asset.id,
+      formatMessage({
+        id: getTranslationKey('asset-details.replace.loading'),
+        defaultMessage: 'Replacing the file…',
+      })
+    );
+
+    let res;
+    try {
+      res = await replaceAsset({ id: asset.id, file });
+    } finally {
+      releaseBusy();
+    }
 
     if ('error' in res) {
       // `fetchBaseQuery` already unwraps the API envelope, so a server-sent

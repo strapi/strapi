@@ -31,6 +31,19 @@ jest.mock('../../hooks/useAssetSelection', () => ({
   }),
 }));
 
+// `markBusy` returns the release function, so the spy has to hand back a second
+// spy rather than a bare mock — the component calls it in a `finally`.
+const releaseBusySpy = jest.fn();
+const busySpy = jest.fn((_id: number, _message: string) => releaseBusySpy);
+
+jest.mock('../../hooks/useBusyAssets', () => ({
+  useBusyAssetsOptional: () => ({
+    markBusy: (id: number, message: string) => busySpy(id, message),
+    isBusy: () => false,
+    getBusyMessage: () => null,
+  }),
+}));
+
 jest.mock('../../../../utils/downloadFile', () => ({
   downloadFile: (...args: unknown[]) => mockDownloadFile(...args),
 }));
@@ -244,6 +257,67 @@ describe('AssetActionsMenu', () => {
         type: 'success',
         message: 'File replaced.',
       });
+    });
+
+    // The menu is closed by the time the picker returns, so `disabled={isReplacing}`
+    // has nothing left to disable. The row-level feedback is driven from here
+    // via `BusyAssetsProvider` — the row/card render it, this only reports it.
+    it('marks the asset busy for the duration of the replace', async () => {
+      let releaseUpload: (() => void) | undefined;
+      server.use(
+        http.post(
+          '*/upload',
+          async () => {
+            await new Promise<void>((resolve) => {
+              releaseUpload = resolve;
+            });
+            return HttpResponse.json([{ id: 5, name: 'new.png' }]);
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+      await user.click(await screen.findByRole('button', { name: 'Continue' }));
+
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      await user.upload(input, new globalThis.File(['x'], 'new.png', { type: 'image/png' }));
+
+      // In flight: the message is published to the provider.
+      await waitFor(() => expect(busySpy).toHaveBeenCalledWith(5, 'Replacing the file…'));
+      expect(releaseBusySpy).not.toHaveBeenCalled();
+
+      releaseUpload?.();
+
+      // Settled: released, so the row goes back to its normal state.
+      await waitFor(() => expect(releaseBusySpy).toHaveBeenCalled());
+    });
+
+    // A failed replace must not strand the row dimmed and inert forever.
+    it('releases the busy flag when the replace fails', async () => {
+      server.use(
+        http.post(
+          '*/upload',
+          () => HttpResponse.json({ error: { message: 'Nope.' } }, { status: 500 }),
+          {
+            once: true,
+          }
+        )
+      );
+
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));
+      await user.click(await screen.findByRole('button', { name: 'Continue' }));
+
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      await user.upload(input, new globalThis.File(['x'], 'new.png', { type: 'image/png' }));
+
+      await waitFor(() => expect(releaseBusySpy).toHaveBeenCalled());
     });
 
     // The default settings handler enables AI metadata, so the paragraph is
