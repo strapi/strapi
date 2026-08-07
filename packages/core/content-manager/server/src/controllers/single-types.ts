@@ -5,6 +5,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { getPopulateForLocalizations } from '../services/utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -335,8 +336,19 @@ export default {
     }
 
     const document = await findDocument({}, model, { locale });
+
     if (!document) {
-      return { data: { unpublishedRelations: 0, draftM2mLinks: 0 } };
+      const documentInAnyLocale = await findDocument({}, model);
+
+      if (!documentInAnyLocale) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(documentInAnyLocale)) {
+        return ctx.forbidden();
+      }
+
+      return { data: EMPTY_DRAFT_RELATION_COUNTS };
     }
 
     if (permissionChecker.cannot.read(document)) {

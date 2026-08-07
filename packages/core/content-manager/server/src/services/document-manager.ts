@@ -4,6 +4,7 @@ import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
@@ -243,12 +244,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return { unpublishedRelations: 0, draftM2mLinks: 0 };
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
-        return { unpublishedRelations: 0, draftM2mLinks: 0 };
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       return sumDraftCounts(strapi, document, uid);

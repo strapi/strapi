@@ -17,6 +17,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -1022,11 +1023,17 @@ export default {
       });
 
       if (!entity) {
-        if (await documentManager.exists(model, id)) {
-          return { data: { unpublishedRelations: 0, draftM2mLinks: 0 } };
+        const entityInAnyLocale = await documentManager.findOne(id, model, { populate });
+
+        if (!entityInAnyLocale) {
+          return ctx.notFound();
         }
 
-        return ctx.notFound();
+        if (permissionChecker.cannot.read(entityInAnyLocale)) {
+          return ctx.forbidden();
+        }
+
+        return { data: EMPTY_DRAFT_RELATION_COUNTS };
       }
 
       if (permissionChecker.cannot.read(entity)) {

@@ -1,15 +1,14 @@
-'use strict';
-
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createTestBuilder } = require('api-tests/builder');
-const { createAuthRequest } = require('api-tests/request');
+import { createTestBuilder } from 'api-tests/builder';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
 
 const builder = createTestBuilder();
-let strapi;
-let rq;
+let strapi: any;
+let rq: any;
 
 const UID_PAGE = 'api::page.page';
 const UID_MENU = 'api::menu.menu';
+const UID_HOMEPAGE = 'api::homepage.homepage';
 
 const nonDefaultLocale = 'fr';
 
@@ -48,9 +47,28 @@ const menuModel = {
   },
 };
 
+// Homepage: single type, same shape as Menu (issue #26897)
+const homepageModel = {
+  kind: 'singleType',
+  displayName: 'Homepage',
+  singularName: 'homepage',
+  pluralName: 'homepages',
+  draftAndPublish: false,
+  pluginOptions: {
+    i18n: { localized: true },
+  },
+  attributes: {
+    page: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: UID_PAGE,
+    },
+  },
+};
+
 describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26897)', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([pageModel, menuModel]).build();
+    await builder.addContentTypes([pageModel, menuModel, homepageModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -72,7 +90,7 @@ describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26
     await builder.cleanup();
   });
 
-  test('does not error when counting draft relations in a non-default locale', async () => {
+  test('returns 200 with the draft relation count when counting in a non-default locale', async () => {
     // 1. Page in default locale (en)
     const {
       body: { data: pageEn },
@@ -108,7 +126,7 @@ describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26
     });
     expect(localizeRes.statusCode).toBe(200);
 
-    // 5. Count draft relations in the non-default locale -> must not 500
+    // 5. Count draft relations in the non-default locale -> the fr page is still a draft
     const countRes = await rq({
       method: 'GET',
       url: `/content-manager/collection-types/${UID_MENU}/${menuEn.documentId}/actions/countDraftRelations`,
@@ -116,9 +134,10 @@ describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26
     });
 
     expect(countRes.statusCode).toBe(200);
+    expect(countRes.body.data).toMatchObject({ unpublishedRelations: 1, draftM2mLinks: 0 });
   });
 
-  test('does not 500 when the requested locale has not been created yet', async () => {
+  test('returns 200 with zero counts when the requested locale does not exist yet', async () => {
     // Menu exists only in the default locale (en)
     const {
       body: { data: menuEn },
@@ -139,7 +158,26 @@ describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26
     expect(countRes.body.data).toMatchObject({ unpublishedRelations: 0, draftM2mLinks: 0 });
   });
 
-  test('still returns a 404 when the document does not exist at all', async () => {
+  test('returns 200 with zero counts for a single type whose requested locale does not exist yet', async () => {
+    // Homepage exists only in the default locale (en)
+    const createRes = await rq({
+      method: 'PUT',
+      url: `/content-manager/single-types/${UID_HOMEPAGE}`,
+      body: {},
+    });
+    expect(createRes.statusCode).toBe(200);
+
+    const countRes = await rq({
+      method: 'GET',
+      url: `/content-manager/single-types/${UID_HOMEPAGE}/actions/countDraftRelations`,
+      qs: { locale: nonDefaultLocale },
+    });
+
+    expect(countRes.statusCode).toBe(200);
+    expect(countRes.body.data).toMatchObject({ unpublishedRelations: 0, draftM2mLinks: 0 });
+  });
+
+  test('still returns 404 when the document does not exist in any locale', async () => {
     const countRes = await rq({
       method: 'GET',
       url: `/content-manager/collection-types/${UID_MENU}/does-not-exist/actions/countDraftRelations`,
