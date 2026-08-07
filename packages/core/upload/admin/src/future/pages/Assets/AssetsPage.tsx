@@ -22,6 +22,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { BetaNotice } from '../../components/BetaNotice';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
@@ -647,6 +648,7 @@ export const AssetsPage = () => {
                   </HeaderWrapper>
 
                   <Layouts.Content>
+                    <BetaNotice />
                     {/* Renders nothing — keeps every loaded page's query subscribed
                       so a rename/delete refreshes the whole list. */}
                     {assetPageSubscribers}
