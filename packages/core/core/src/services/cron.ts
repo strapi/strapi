@@ -1,20 +1,22 @@
-import type { Job, Spec } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
 import type { Core } from '@strapi/types';
+import type { Cron } from 'croner';
+
+export type CronSchedule = string | Date;
 
 // Lazy: only required when a cron task is actually scheduled
-let lazyNs: typeof import('node-schedule') | undefined;
-const ns = (): typeof import('node-schedule') => {
-  if (!lazyNs) {
+let lazyCroner: typeof import('croner') | undefined;
+const getCroner = (): typeof import('croner') => {
+  if (!lazyCroner) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyNs = require('node-schedule');
+    lazyCroner = require('croner');
   }
-  return lazyNs as typeof import('node-schedule');
+  return lazyCroner as typeof import('croner');
 };
 
 interface JobSpec {
-  job: Job;
-  options: Spec;
+  job: Cron;
+  options: CronSchedule;
   name: string | null;
 }
 
@@ -24,7 +26,7 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: Spec;
+      options: CronSchedule;
     };
 
 interface Tasks {
@@ -37,11 +39,13 @@ const createCronService = () => {
 
   return {
     add(tasks: Tasks = {}) {
+      const { Cron: CronJob } = getCroner();
+
       for (const taskExpression of Object.keys(tasks)) {
         const taskValue = tasks[taskExpression];
 
         let fn: TaskFn;
-        let options: Spec;
+        let options: CronSchedule;
         let taskName: string | null;
         if (isFunction(taskValue)) {
           // don't use task name if key is the rule
@@ -59,53 +63,65 @@ const createCronService = () => {
           );
         }
 
-        const fnWithStrapi = (...args: unknown[]) => fn({ strapi }, ...args);
+        const jobLabel = taskName ?? taskExpression;
+        const fnWithStrapi = async (): Promise<void> => {
+          await fn({ strapi });
+        };
 
-        // const job = new Job(null, fnWithStrapi);
-        const job: Job = new (ns().Job)(fnWithStrapi);
-        job.on('error', (error) => {
-          strapi.log.error(`Cron job "${taskName ?? taskExpression}" failed`, error);
-        });
+        const job: Cron = new CronJob(
+          options,
+          {
+            name: taskName ?? undefined,
+            paused: !running,
+            ...(options instanceof Date ? { maxRuns: 1 } : {}),
+            catch: (error) => {
+              strapi.log.error(`Cron job "${jobLabel}" failed`, error);
+            },
+          },
+          fnWithStrapi
+        );
+
         jobsSpecs.push({ job, options, name: taskName });
-
-        if (running) {
-          job.schedule(options);
-        }
       }
       return this;
     },
 
     remove(name: string) {
       if (!name) throw new Error('You must provide a name to remove a cron job.');
-      const matchingJobsSpecs = jobsSpecs.filter(({ name: jobSpecName }, index) => {
-        if (jobSpecName === name) {
-          jobsSpecs.splice(index, 1);
-          return true;
+      const remaining: JobSpec[] = [];
+      for (const jobSpec of jobsSpecs) {
+        if (jobSpec.name === name) {
+          jobSpec.job.stop();
+        } else {
+          remaining.push(jobSpec);
         }
-        return false;
-      });
-      matchingJobsSpecs.forEach(({ job }) => job.cancel());
+      }
+      jobsSpecs = remaining;
       return this;
     },
 
     start() {
-      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      jobsSpecs.forEach(({ job }) => job.resume());
       running = true;
       return this;
     },
 
     stop() {
-      jobsSpecs.forEach(({ job }) => job.cancel());
+      jobsSpecs.forEach(({ job }) => job.pause());
       running = false;
       return this;
     },
 
     destroy() {
       this.stop();
+      jobsSpecs.forEach(({ job }) => job.stop());
       jobsSpecs = [];
       return this;
     },
-    jobs: jobsSpecs,
+
+    get jobs() {
+      return jobsSpecs;
+    },
   };
 };
 

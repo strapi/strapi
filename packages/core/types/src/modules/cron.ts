@@ -1,10 +1,12 @@
-import type { Job, Spec } from 'node-schedule';
-
 import type { Strapi } from '../core';
 
+export type CronSchedule = string | Date;
+
+type CronJob = import('croner').Cron;
+
 interface JobSpec {
-  job: Job;
-  options: Spec;
+  job: CronJob;
+  options: CronSchedule;
   name: string | null;
 }
 
@@ -14,7 +16,7 @@ export type CronTask =
   | TaskFn
   | {
       task: TaskFn;
-      options: Spec;
+      options: CronSchedule;
     };
 
 export interface CronTasks {
