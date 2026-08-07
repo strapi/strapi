@@ -65,6 +65,9 @@ import type { Folder } from '../../../../../shared/contracts/folders';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
+// Module-level so the header sentinel's observer isn't rebuilt every render.
+const HEADER_SENTINEL_OPTIONS: IntersectionObserverInit = { threshold: 0 };
+
 const ITEM_COUNT_MESSAGE = {
   id: getTranslationKey('header.content.item-count'),
   defaultMessage: '{count, plural, =1 {# item} other {# items}}',
@@ -548,9 +551,13 @@ export const AssetsPage = () => {
   // sentinel sits at the very top of the scroll content; when it leaves the
   // viewport we're scrolled → compact.
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+  const onHeaderSentinelVisibility = useCallback(
+    (isVisible: boolean) => setIsHeaderCompact(!isVisible),
+    []
+  );
   const headerSentinelRef = useElementOnScreen<HTMLDivElement>(
-    (isVisible) => setIsHeaderCompact(!isVisible),
-    { threshold: 0 }
+    onHeaderSentinelVisibility,
+    HEADER_SENTINEL_OPTIONS
   );
 
   // Upload handlers

@@ -372,9 +372,6 @@
   "sidebar.tree.expand": "Expand {name}",
   "sidebar.tree.collapse": "Collapse {name}",
   "sidebar.tree.empty": "No folders yet",
-  "sidebar.tree.no-results": "No folders match \"{query}\"",
   "sidebar.tree.loading": "Loading folders...",
-  "sidebar.tree.error": "Could not load folders.",
-  "sidebar.search.label": "Search folders",
-  "sidebar.search.placeholder": "Search folders"
+  "sidebar.tree.error": "Could not load folders."
 }
