@@ -37,7 +37,13 @@ const mutateEditViewHook = ({ layout, query }: MutateEditViewArgs): MutateEditVi
     return { layout, query };
   }
 
-  const decorateField = (field: EditFieldLayout) => addLabelActionToField(field, layout);
+  // Root fields: localized → Earth; shared → Lock on secondary locales only.
+  // Component fields: only Earth when explicitly localized — nested fields inherit
+  // shared/locked state from their parent attribute (see #24890).
+  const decorateRootField = (field: EditFieldLayout) =>
+    addLabelActionToField(field, layout, { isComponentField: false });
+  const decorateComponentField = (field: EditFieldLayout) =>
+    addLabelActionToField(field, layout, { isComponentField: true });
 
   const components = Object.entries(layout.components).reduce<EditLayout['components']>(
     (acc, [key, componentLayout]) => {
@@ -45,7 +51,7 @@ const mutateEditViewHook = ({ layout, query }: MutateEditViewArgs): MutateEditVi
         ...acc,
         [key]: {
           ...componentLayout,
-          layout: componentLayout.layout.map((row) => row.map(decorateField)),
+          layout: componentLayout.layout.map((row) => row.map(decorateComponentField)),
         },
       };
     },
@@ -56,7 +62,7 @@ const mutateEditViewHook = ({ layout, query }: MutateEditViewArgs): MutateEditVi
     layout: {
       ...layout,
       components,
-      layout: layout.layout.map((panel) => panel.map((row) => row.map(decorateField))),
+      layout: layout.layout.map((panel) => panel.map((row) => row.map(decorateRootField))),
     },
     query,
   } satisfies MutateEditViewArgs;
@@ -88,7 +94,11 @@ const isFieldLocalized = (attribute: EditFieldLayout['attribute'], layout: EditL
   return pluginOptions?.i18n?.localized === true;
 };
 
-const addLabelActionToField = (field: EditFieldLayout, layout: EditLayout) => {
+const addLabelActionToField = (
+  field: EditFieldLayout,
+  layout: EditLayout,
+  { isComponentField }: { isComponentField: boolean }
+) => {
   const localized = isFieldLocalized(field.attribute, layout);
 
   if (localized) {
@@ -101,6 +111,22 @@ const addLabelActionToField = (field: EditFieldLayout, layout: EditLayout) => {
       ...field,
       labelAction: <LabelAction title={title} icon="earth" />,
     };
+  }
+
+  // Nested fields: no shared-field icon — parent component/DZ owns that signal (#24890).
+  if (isComponentField) {
+    return field;
+  }
+
+  // Dynamic zones are excluded from admin non-localized inheritance (same as relations
+  // in useDocument) — a Lock icon would be misleading (empty + not locked in the UI).
+  if (
+    field.attribute &&
+    typeof field.attribute === 'object' &&
+    'type' in field.attribute &&
+    field.attribute.type === 'dynamiczone'
+  ) {
+    return field;
   }
 
   return {
@@ -142,17 +168,18 @@ const NonLocalizedLabelAction = () => {
     : undefined;
   const locked = Boolean(currentLocale && defaultLocale && currentLocale !== defaultLocale);
 
-  const title: MessageDescriptor = locked
-    ? {
-        id: getTranslation('Field.not-localized-locked'),
-        defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
-      }
-    : {
-        id: getTranslation('Field.not-localized'),
-        defaultMessage: 'This value is common to all locales',
-      };
+  // Default locale: no icon on shared fields (regression of #24890 if we show Earth).
+  // Secondary locale: Lock + tooltip pointing editors at the default locale.
+  if (!locked) {
+    return null;
+  }
 
-  return <LabelAction title={title} icon={locked ? 'lock' : 'earth'} />;
+  const title: MessageDescriptor = {
+    id: getTranslation('Field.not-localized-locked'),
+    defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
+  };
+
+  return <LabelAction title={title} icon="lock" />;
 };
 
 const Span = styled(Flex)`
