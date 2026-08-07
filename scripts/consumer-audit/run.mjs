@@ -315,11 +315,16 @@ function main() {
 
   if (install.status !== 0) {
     rmSync(scratchDir, { recursive: true, force: true });
-    fail(`npm install failed (exit ${install.status}). See ${path.join(outDir, 'npm-install.log')}`);
+    fail(
+      `npm install failed (exit ${install.status}). See ${path.join(outDir, 'npm-install.log')}`
+    );
   }
 
   const deprecations = parseDeprecations(installLog);
-  writeFileSync(path.join(outDir, 'deprecations.json'), `${JSON.stringify(deprecations, null, 2)}\n`);
+  writeFileSync(
+    path.join(outDir, 'deprecations.json'),
+    `${JSON.stringify(deprecations, null, 2)}\n`
+  );
 
   console.log('==> Running npm audit');
   const auditProc = spawnSync('npm', ['audit', '--json'], {
@@ -333,7 +338,10 @@ function main() {
   try {
     audit = JSON.parse(auditProc.stdout || '{}');
   } catch {
-    writeFileSync(path.join(outDir, 'npm-audit.raw.txt'), auditProc.stdout || auditProc.stderr || '');
+    writeFileSync(
+      path.join(outDir, 'npm-audit.raw.txt'),
+      auditProc.stdout || auditProc.stderr || ''
+    );
     rmSync(scratchDir, { recursive: true, force: true });
     fail('failed to parse npm audit JSON');
   }
@@ -361,8 +369,10 @@ function main() {
   const classified = classify(findings, baseline);
 
   const nodeV = spawnSync('node', ['-v'], { encoding: 'utf8' }).stdout.trim();
-  const npmV = spawnSync('npm', ['-v'], { encoding: 'utf8', shell: process.platform === 'win32' })
-    .stdout.trim();
+  const npmV = spawnSync('npm', ['-v'], {
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+  }).stdout.trim();
 
   const report = writeReport({
     outDir,
@@ -383,7 +393,9 @@ function main() {
   rmSync(scratchDir, { recursive: true, force: true });
 
   console.log('');
-  console.log(`Novel: ${classified.novel.length} · Known: ${classified.known.length} · Accepted: ${classified.accepted.length}`);
+  console.log(
+    `Novel: ${classified.novel.length} · Known: ${classified.known.length} · Accepted: ${classified.accepted.length}`
+  );
   console.log(`Reports: ${path.join(outDir, 'report.md')}`);
 
   if (classified.novel.length > 0) {
