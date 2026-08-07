@@ -23,10 +23,10 @@ export const publicStatic: Core.MiddlewareFactory = (
       },
       config: { auth: false },
     },
-    // All other public GET-routes except /uploads/(.*) which is handled in upload middleware
+    // All other public GET-routes except /uploads/{*path} which is handled in upload middleware
     {
       method: 'GET',
-      path: '/((?!uploads/).+)',
+      path: /^\/(?!uploads\/).+/,
       handler: koaStatic(strapi.dirs.static.public, {
         maxage: maxAge,
         defer: true,

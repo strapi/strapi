@@ -12,7 +12,8 @@ export default [
   },
   {
     method: 'GET',
-    path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
+    // Named params so the plugin prefix (`/documentation`) is applied; RegExp paths skip prefix.
+    path: '/v:major.:minor.:patch',
     handler: 'documentation.index',
     config: {
       auth: false,

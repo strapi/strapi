@@ -11,7 +11,8 @@ const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
 };
 
-const getPath = (route: Core.Route) => trim(route.path);
+const getPath = (route: Core.Route) =>
+  typeof route.path === 'string' ? trim(route.path) : route.path;
 
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
