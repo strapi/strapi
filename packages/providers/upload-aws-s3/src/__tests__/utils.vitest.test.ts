@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 import { ObjectCannedACL } from '@aws-sdk/client-s3';
 import type { InitOptions } from '..';
 import { extractCredentials } from '../utils';
@@ -85,7 +87,7 @@ describe('Utils', () => {
     });
 
     test('Extracts root-level accessKeyId/secretAccessKey from s3Options', () => {
-      const warningSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warningSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const options: InitOptions = {
         s3Options: {

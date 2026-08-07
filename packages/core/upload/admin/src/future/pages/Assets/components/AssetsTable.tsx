@@ -2,7 +2,7 @@ import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
-  IconButton,
+  Loader,
   RawTable,
   RawTbody,
   RawTd,
@@ -13,7 +13,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Folder as FolderIcon, More, WarningCircle } from '@strapi/icons';
+import { Folder as FolderIcon, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
@@ -24,10 +24,12 @@ import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
+import { AssetActionsMenu } from './AssetActionsMenu';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -88,6 +90,7 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled.tr<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
   $isSelected?: boolean;
@@ -96,15 +99,15 @@ const StyledTr = styled.tr<{
   user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
-  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
-    if ($isMovePending) {
+  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget }) => {
+    if ($isMovePending || $isBusy) {
       return 'wait';
     }
 
     return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
   }};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  opacity: ${({ $isDragging, $isBusy }) => ($isDragging || $isBusy ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -221,9 +224,10 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -239,7 +243,15 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
   // a range, cmd/ctrl toggles.
+  //
+  // The containment guard on this and the handler below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // opening the details drawer or toggling the selection.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -251,6 +263,10 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
 
   // Desktop: Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
@@ -281,12 +297,18 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
       {/* No checkbox without the update permission (nothing selectable can be
           acted on). Shown at every viewport width otherwise. */}
@@ -310,7 +332,16 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       <StyledTd>
         <Flex alignItems="center" justifyContent="space-between" gap={2} minWidth={0}>
           <Flex gap={3} alignItems="center" minWidth={0}>
-            <AssetPreviewCell asset={asset} />
+            {/* The row is dimmed and inert while busy; the spinner in place of the
+                thumbnail is what says so positively. Its label carries the reason
+                to screen readers — the row itself has no other announcement. */}
+            {busyMessage !== null ? (
+              <Flex justifyContent="center" width="3.2rem" height="3.2rem">
+                <Loader small>{busyMessage}</Loader>
+              </Flex>
+            ) : (
+              <AssetPreviewCell asset={asset} />
+            )}
             <Flex direction="column" alignItems="flex-start" minWidth={0}>
               <NameButton type="button" onClick={handleNameClick}>
                 <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
@@ -350,18 +381,11 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would open the details drawer). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
       </StyledTd>
     </StyledTr>
