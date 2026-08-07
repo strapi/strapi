@@ -10,6 +10,7 @@ import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
+import { loadTsConfig, TsConfig } from '../cli/utils/tsconfig';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
 const lazy = <T>(spec: string): (() => T) => {
@@ -46,14 +47,19 @@ interface DevelopOptions extends CLIContext {
    * @default true
    */
   installDeps?: boolean;
+
+  /**
+   * Custom tsconfig path
+   */
+  tsconfigPath: string;
 }
 
 // This method removes all non-admin build files from the dist directory
 const cleanupDistDirectory = async ({
-  tsconfig,
   logger,
   timer,
-}: Pick<DevelopOptions, 'tsconfig' | 'logger'> & { timer: TimeMeasurer }) => {
+  tsconfig,
+}: Pick<DevelopOptions, 'logger'> & { timer: TimeMeasurer; tsconfig?: TsConfig }) => {
   const distDir = tsconfig?.config?.options?.outDir;
 
   if (
@@ -94,13 +100,13 @@ const develop = async ({
   cwd,
   polling,
   logger,
-  tsconfig,
   watchAdmin,
   buildAdmin,
   installDeps = true,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
+  const tsconfig = loadTsConfig({ cwd, logger, path: options.tsconfigPath });
 
   if (cluster.isPrimary) {
     const shouldContinue = await handleAdminDependencies({
@@ -117,7 +123,10 @@ const develop = async ({
       // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
       try {
-        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+        await tsUtils().compile(cwd, {
+          tsconfigPath: tsconfig.path,
+          configOptions: { ignoreDiagnostics: true },
+        });
       } catch (err: unknown) {
         logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
         // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
@@ -169,7 +178,10 @@ const develop = async ({
             try {
               // Build without diagnostics in case schemas have changed
               await cleanupDistDirectory({ tsconfig, logger, timer });
-              await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+              await tsUtils().compile(cwd, {
+                tsconfigPath: tsconfig.path,
+                configOptions: { ignoreDiagnostics: true },
+              });
             } catch (err: unknown) {
               const message = err instanceof Error ? err.message : String(err);
               logger.error(`Error during TypeScript compilation on reload: ${message}`);
@@ -291,7 +303,10 @@ const develop = async ({
         compilingTsSpinner.start();
 
         await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+        await tsUtils().compile(cwd, {
+          tsconfigPath: tsconfig.path,
+          configOptions: { ignoreDiagnostics: false },
+        });
 
         const compilingDuration = timer.end('compilingTS');
         compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;

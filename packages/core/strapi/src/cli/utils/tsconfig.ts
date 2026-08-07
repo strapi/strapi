@@ -1,5 +1,8 @@
-import os from 'os';
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs';
 import type ts from 'typescript';
+import { InvalidOptionArgumentError } from 'commander';
 import type { Logger } from './logger';
 
 // Lazy: defer `typescript` (~115 ms) until a CLI command actually loads tsconfig
@@ -49,6 +52,16 @@ const loadTsConfig = ({
     path: configPath,
   };
 };
+
+export function parseTsconfigPath(value: string) {
+  const resolved = path.resolve(value);
+
+  if (!fs.existsSync(resolved)) {
+    throw new InvalidOptionArgumentError(`File not found: ${resolved}`);
+  }
+
+  return resolved;
+}
 
 export { loadTsConfig };
 export type { TsConfig };
