@@ -20,7 +20,7 @@ import {
   List,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { useAIAvailability } from '../../../hooks/useAiAvailability';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -64,10 +64,6 @@ import type { File, UploadFileInfo } from '../../../../../shared/contracts/files
 import type { Folder } from '../../../../../shared/contracts/folders';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
-
-// Shared horizontal padding for the header and the list (matches the admin's
-// RESPONSIVE_DEFAULT_SPACING) so the list lines up with the title/toolbar.
-const HORIZONTAL_PADDING = { initial: 4, medium: 6, large: 10 };
 
 const ITEM_COUNT_MESSAGE = {
   id: getTranslationKey('header.content.item-count'),
@@ -320,12 +316,54 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
 `;
 
 // A single sticky header — same layout scrolled or not, so the toolbar
-// alignment can't reflow the way the shared sticky header did.
-const StickyHeader = styled(Box)`
+// alignment can't reflow the way the shared sticky header did. Once the list
+// scrolls under it, it shrinks (reduced vertical padding + a shadow to lift it
+// off the rows), like the sticky headers elsewhere in the admin. Horizontal
+// padding stays responsive (passed as props); only the vertical rhythm + shadow
+// change here so they can animate.
+const StickyHeader = styled(Box)<{ $compact: boolean }>`
   position: sticky;
   top: 0;
   z-index: 2;
-  background: ${({ theme }) => theme.colors.neutral0};
+  /* Transparent at rest (the grey page shows through); an opaque background +
+     shadow appear only once it sticks and content scrolls under it. */
+  background: transparent;
+  /* Horizontal padding matches the list's default spacing (Layouts.Content /
+     RESPONSIVE_DEFAULT_SPACING: 4 / 6 / 10) so the header lines up with the rows. */
+  padding: ${({ theme }) => `${theme.spaces[6]} ${theme.spaces[4]}`};
+  transition:
+    padding 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-left: ${({ theme }) => theme.spaces[6]};
+    padding-right: ${({ theme }) => theme.spaces[6]};
+  }
+  ${({ theme }) => theme.breakpoints.large} {
+    padding-left: ${({ theme }) => theme.spaces[10]};
+    padding-right: ${({ theme }) => theme.spaces[10]};
+  }
+
+  ${({ $compact, theme }) =>
+    $compact &&
+    css`
+      padding-top: ${theme.spaces[3]};
+      padding-bottom: ${theme.spaces[3]};
+      padding-left: ${theme.spaces[2]};
+      padding-right: ${theme.spaces[2]};
+      background: ${theme.colors.neutral0};
+      box-shadow: ${theme.shadows.tableShadow};
+
+      ${theme.breakpoints.medium} {
+        padding-left: ${theme.spaces[4]};
+        padding-right: ${theme.spaces[4]};
+      }
+      ${theme.breakpoints.large} {
+        padding-left: ${theme.spaces[6]};
+        padding-right: ${theme.spaces[6]};
+      }
+    `}
 `;
 
 // New button aligns with the title, not the toolbar.
@@ -342,11 +380,12 @@ const TitleRow = styled(Flex)`
 // Two groups in source order (Filter, Search / Sort, Toggle). Mobile: stacked —
 // Filter+Search on row 1, Sort+Toggle on row 2. Desktop (large+): one row,
 // Filter+Search on the left, Sort+Toggle pushed right.
-const Toolbar = styled(Flex)`
-  margin-top: ${({ theme }) => theme.spaces[5]};
+const Toolbar = styled(Flex)<{ $compact: boolean }>`
+  margin-top: ${({ theme, $compact }) => ($compact ? theme.spaces[2] : theme.spaces[5])};
   flex-direction: column;
   align-items: stretch;
   gap: ${({ theme }) => theme.spaces[3]};
+  transition: margin-top 0.2s ease;
 
   ${({ theme }) => theme.breakpoints.large} {
     flex-direction: row;
@@ -505,6 +544,15 @@ export const AssetsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
+  // Shrink the sticky header once the list scrolls beneath it. A zero-height
+  // sentinel sits at the very top of the scroll content; when it leaves the
+  // viewport we're scrolled → compact.
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+  const headerSentinelRef = useElementOnScreen<HTMLDivElement>(
+    (isVisible) => setIsHeaderCompact(!isVisible),
+    { threshold: 0 }
+  );
+
   // Upload handlers
   const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
@@ -593,7 +641,6 @@ export const AssetsPage = () => {
           <AssetsDndProvider locations={itemLocations}>
             <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Layouts.Root
-              background="neutral0"
               sideNav={
                 <FolderTree
                   currentFolderId={currentFolderId}
@@ -608,12 +655,11 @@ export const AssetsPage = () => {
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
                   </VisuallyHidden>
 
-                  <StickyHeader
-                    paddingLeft={HORIZONTAL_PADDING}
-                    paddingRight={HORIZONTAL_PADDING}
-                    paddingTop={6}
-                    paddingBottom={4}
-                  >
+                  {/* Zero-height marker: leaves the viewport as soon as the list
+                      scrolls, flipping the header into its compact state. */}
+                  <Box ref={headerSentinelRef} height={0} aria-hidden />
+
+                  <StickyHeader $compact={isHeaderCompact}>
                     <TitleRow>
                       <Typography variant="alpha" tag="h1">
                         {pageHeaderTitle}
@@ -653,7 +699,7 @@ export const AssetsPage = () => {
                       )}
                     </TitleRow>
 
-                    <Toolbar>
+                    <Toolbar $compact={isHeaderCompact}>
                       <FilterSearchGroup>
                         <Box>
                           <FilterMenu listFilters={listFilters} />
@@ -712,7 +758,7 @@ export const AssetsPage = () => {
                       </SortToggleGroup>
                     </Toolbar>
 
-                    <FilterBadges listFilters={listFilters} />
+                    <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
                   </StickyHeader>
 
                   <Layouts.Content>
