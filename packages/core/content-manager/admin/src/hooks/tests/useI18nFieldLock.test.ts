@@ -168,7 +168,7 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(false);
     });
 
-    it('does not lock relations or uids (always locale-specific on the server)', () => {
+    it('does not lock relations, uids, or dynamic zones', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
@@ -184,9 +184,16 @@ describe('useI18nFieldLock', () => {
       const { result: uidResult } = renderHook(() =>
         useShouldLockNonLocalizedField({ type: 'uid' })
       );
+      const { result: dzResult } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'dynamiczone',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
 
       expect(relationResult.current).toBe(false);
       expect(uidResult.current).toBe(false);
+      expect(dzResult.current).toBe(false);
     });
 
     it('does not lock when the attribute is undefined', () => {

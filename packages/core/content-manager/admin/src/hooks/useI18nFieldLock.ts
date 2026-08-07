@@ -61,7 +61,13 @@ const useShouldLockNonLocalizedField = (
 
   // Match server `isLocalizedAttribute`: relations and uids are always locale-specific
   // even when they omit `pluginOptions.i18n.localized` (CTB never offers that checkbox).
-  if (attribute.type === 'relation' || attribute.type === 'uid') {
+  // Dynamic zones are also excluded: admin inheritance skips them (see useDocument), so
+  // locking an empty DZ on secondary locales is misleading.
+  if (
+    attribute.type === 'relation' ||
+    attribute.type === 'uid' ||
+    attribute.type === 'dynamiczone'
+  ) {
     return false;
   }
 

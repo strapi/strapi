@@ -115,7 +115,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     }
   });
 
-  it('does not show localization icon for a non-localized component field', () => {
+  it('does not show a localization icon for a non-localized field on the default locale', () => {
     const componentUid = 'shared.button';
 
     const layout = makeEditLayout({
@@ -153,11 +153,13 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     const { layout: mutated } = mutateEditViewHook({ layout });
     const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
 
+    // NonLocalizedLabelAction mounts but renders null on the default locale (#24890).
+    expect(React.isValidElement(action)).toBe(true);
     render(action);
     expect(
       screen.queryByText(/This value is unique for the selected locale/i)
     ).not.toBeInTheDocument();
-    expect(screen.getByText(/This value is common to all locales/i)).toBeInTheDocument();
+    expect(screen.queryByText(/This value is common to all locales/i)).not.toBeInTheDocument();
   });
 
   it('shows a locked tooltip for non-localized fields on a non-default locale', () => {
@@ -182,6 +184,80 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
     ).toBeInTheDocument();
+  });
+
+  it('does not show a lock icon for non-localized dynamic zones', () => {
+    const dzField = makeEditField({
+      attribute: {
+        type: 'dynamiczone',
+        components: ['shared.button'],
+        pluginOptions: { i18n: { localized: false } },
+      },
+      label: 'Body',
+      name: 'body',
+      type: 'dynamiczone',
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[dzField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    expect(mutated.layout[0][0][0].labelAction).toBeUndefined();
+  });
+
+  it('does not stamp lock icons onto nested component fields', () => {
+    const componentUid = 'shared.button';
+    const nestedField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+      label: 'Label',
+      name: 'label',
+    });
+
+    const layout = makeEditLayout({
+      ctLocalized: true,
+      topFields: [
+        [
+          makeEditField({
+            attribute: {
+              type: 'component',
+              component: componentUid,
+              pluginOptions: { i18n: { localized: false } },
+            },
+            label: 'CTA',
+            name: 'cta',
+            type: 'component',
+          }),
+        ],
+      ],
+      components: {
+        [componentUid]: {
+          layout: [[nestedField]],
+          settings: {
+            displayName: 'Button',
+          } as unknown as EditLayout['components'][string]['settings'],
+        },
+      },
+    });
+
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const nestedAction = mutated.components[componentUid].layout[0][0].labelAction;
+    expect(nestedAction).toBeUndefined();
   });
 
   it('treats relations without i18n pluginOptions as localized (server parity)', () => {
