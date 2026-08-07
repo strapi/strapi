@@ -79,6 +79,7 @@ const mockDataManager = ({
   isModified: false,
   isSaving: false,
   applyChange() {},
+  setContentTypeIndexes() {},
   ...overrides,
   history: {
     canUndo: true,

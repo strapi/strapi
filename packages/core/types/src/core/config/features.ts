@@ -5,6 +5,7 @@
  */
 export interface FeaturesFutureFlags {
   unstableMediaLibrary?: boolean;
+  unstableContentTypeBuilderIndexing?: boolean;
   experimental_firstPublishedAt?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }

@@ -166,6 +166,14 @@ class Database {
   }
 
   /**
+   * Returns the current transaction if the caller is running inside a transaction callback.
+   * Use this to run ad-hoc queries (e.g. on non-entity tables) in the same transaction.
+   */
+  getTransaction(): Knex.Transaction | undefined {
+    return transactionCtx.get() ?? undefined;
+  }
+
+  /**
    * Run work inside a DB transaction. On a fulfilled callback, the transaction
    * is committed; on rejection, it is rolled back. The callback receives Knex
    * `commit` and `rollback` helpers: if you call `rollback` and return without

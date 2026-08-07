@@ -29,6 +29,7 @@ import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { RelationsInput } from './FormInputs/Relations/Relations';
+import { StringWithAvailabilityInput } from './FormInputs/StringWithAvailabilityInput';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
@@ -235,6 +236,42 @@ const BaseInputRenderer = ({
         <Wysiwyg
           key={`input-${props.name}-${localeKey}`}
           {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+    case 'string':
+    case 'text':
+      if (props.hasUniqueIndex) {
+        const {
+          unique: _su,
+          mainField: _smf,
+          hasUniqueIndex: _shi,
+          options: _sopt,
+          ...stringUniqueRest
+        } = props;
+        return (
+          <StringWithAvailabilityInput
+            key={`input-${props.name}-${localeKey}`}
+            {...stringUniqueRest}
+            hint={hint}
+            disabled={fieldIsDisabled}
+          />
+        );
+      }
+      const {
+        unique: _u,
+        mainField: _mf,
+        hasUniqueIndex: _hui,
+        options: _sopt,
+        ...stringRest
+      } = props;
+      return (
+        <FormInputRenderer
+          key={`input-${props.name}-${localeKey}`}
+          {...stringRest}
+          {...previewProps}
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}

@@ -136,6 +136,46 @@ export default (db: Database) => {
 };
 
 const createHelpers = (db: Database) => {
+  const toIndexNameKey = (index: Index) => index.name.toLowerCase();
+
+  const toIndexSignature = (index: Index) => {
+    const type = (index.type ?? 'index').toLowerCase();
+    const columns = index.columns.map((column) => column.toLowerCase()).join(',');
+    return `${type}::${columns}`;
+  };
+
+  const getSafeIndexesToCreate = (indexesToCreate: Index[], existingIndexes: Index[] = []) => {
+    const existingNames = new Set(existingIndexes.map(toIndexNameKey));
+    const existingSignatures = new Set(existingIndexes.map(toIndexSignature));
+    const plannedNames = new Set<string>();
+    const plannedSignatures = new Set<string>();
+
+    const safeIndexes: Index[] = [];
+
+    for (const index of indexesToCreate) {
+      const nameKey = toIndexNameKey(index);
+      const signature = toIndexSignature(index);
+
+      if (existingNames.has(nameKey) || plannedNames.has(nameKey)) {
+        debug(
+          `Skipping index creation "${index.name}" because another index with the same name already exists`
+        );
+        continue;
+      }
+
+      if (existingSignatures.has(signature) || plannedSignatures.has(signature)) {
+        debug(`Skipping index creation "${index.name}" because an equivalent index already exists`);
+        continue;
+      }
+
+      plannedNames.add(nameKey);
+      plannedSignatures.add(signature);
+      safeIndexes.push(index);
+    }
+
+    return safeIndexes;
+  };
+
   /**
    *  Creates a foreign key on a table
    */
@@ -199,8 +239,6 @@ const createHelpers = (db: Database) => {
 
   /**
    * Drops an index from table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Index} index
    */
   const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index, existingIndexes?: Index[]) => {
     if (!db.config.settings?.forceMigration) {
@@ -279,7 +317,9 @@ const createHelpers = (db: Database) => {
       (table.columns || []).forEach((column) => createColumn(tableBuilder, column));
 
       // indexes
-      (table.indexes || []).forEach((index) => createIndex(tableBuilder, index));
+      getSafeIndexesToCreate(table.indexes || []).forEach((index) =>
+        createIndex(tableBuilder, index)
+      );
 
       // foreign keys
 
@@ -344,11 +384,15 @@ const createHelpers = (db: Database) => {
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name} on ${table.name}`);
         dropIndex(tableBuilder, removedIndex, existingIndexes);
+        existingIndexes = existingIndexes.filter((index) => index.name !== removedIndex.name);
       }
 
       for (const updatedIndex of table.indexes.updated) {
         debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
         dropIndex(tableBuilder, updatedIndex.object, existingIndexes);
+        existingIndexes = existingIndexes.filter(
+          (index) => index.name !== updatedIndex.object.name
+        );
       }
 
       // Drop columns after FKs have been removed to avoid FK errors
@@ -388,19 +432,19 @@ const createHelpers = (db: Database) => {
         createForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      for (const updatedIndex of table.indexes.updated) {
-        debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
-        createIndex(tableBuilder, updatedIndex.object);
-      }
-
       for (const addedForeignKey of table.foreignKeys.added) {
         debug(`Creating foreign key ${addedForeignKey.name} on ${table.name}`);
         createForeignKey(tableBuilder, addedForeignKey);
       }
 
-      for (const addedIndex of table.indexes.added) {
-        debug(`Creating index ${addedIndex.name} on ${table.name}`);
-        createIndex(tableBuilder, addedIndex);
+      const indexesToCreate = [
+        ...table.indexes.updated.map((updatedIndex) => updatedIndex.object),
+        ...table.indexes.added,
+      ];
+
+      for (const index of getSafeIndexesToCreate(indexesToCreate, existingIndexes)) {
+        debug(`Creating index ${index.name} on ${table.name}`);
+        createIndex(tableBuilder, index);
       }
     });
   };

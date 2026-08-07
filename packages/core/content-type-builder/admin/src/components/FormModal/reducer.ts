@@ -37,6 +37,7 @@ export type FormModalData = Record<string, unknown> & {
   draftAndPublish?: boolean;
   enum?: string[];
   icon?: string;
+  indexed?: boolean;
   kind?: Struct.ContentTypeKind;
   multiple?: boolean;
   name?: string;
@@ -410,9 +411,9 @@ const slice = createSlice({
           components: [],
         };
       } else if (attributeType === 'text') {
-        dataToSet = { ...options, type: 'string' };
+        dataToSet = { ...options, type: 'string', indexed: false };
       } else if (attributeType === 'number' || attributeType === 'date') {
-        dataToSet = options;
+        dataToSet = { ...options, indexed: false };
       } else if (attributeType === 'media') {
         dataToSet = {
           allowedTypes: ['images', 'files', 'videos', 'audios'],
@@ -421,7 +422,7 @@ const slice = createSlice({
           ...options,
         };
       } else if (attributeType === 'enumeration') {
-        dataToSet = { ...options, type: 'enumeration', enum: [] };
+        dataToSet = { ...options, type: 'enumeration', enum: [], indexed: false };
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: snakeCase(nameToSetForRelation),
@@ -431,10 +432,10 @@ const slice = createSlice({
           type: 'relation',
         };
       } else {
-        dataToSet = { ...options, type: attributeType, default: null };
+        dataToSet = { ...options, type: attributeType, default: null, indexed: false };
       }
 
-      state.modifiedData = dataToSet;
+      state.modifiedData = dataToSet as FormModalData;
     },
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
       const { payload } = action;
