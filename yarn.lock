@@ -9683,10 +9683,8 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.51.2"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.51.2"
-    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     qs: "npm:6.15.3"
     sift: "npm:16.0.1"
