@@ -219,6 +219,35 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(closeDetails).toHaveBeenCalledTimes(1));
   });
 
+  it('deletes the asset currently shown after the drawer switches assets', async () => {
+    const firstAsset = { ...baseAsset, id: 1, name: 'first.png' };
+    const secondAsset = { ...baseAsset, id: 2, name: 'second.png' };
+    let deleteId: string | null = null;
+
+    server.use(
+      http.delete('/upload/files/:id', ({ params }) => {
+        deleteId = String(params.id);
+        return HttpResponse.json({ id: Number(params.id) });
+      })
+    );
+
+    const closeDetails = jest.fn();
+    const { user, rerender } = render(
+      <AssetDetails asset={firstAsset} closeDetails={closeDetails} />
+    );
+    await screen.findByRole('combobox');
+
+    rerender(<AssetDetails asset={secondAsset} closeDetails={closeDetails} />);
+    expect(await screen.findByDisplayValue('second.png')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Delete this file' }));
+    await screen.findByText(/This file cannot be recovered/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(deleteId).not.toBeNull());
+    expect(deleteId).toBe('2');
+  });
+
   it('keeps the drawer open and surfaces the error message when the delete request fails', async () => {
     const closeDetails = jest.fn();
     server.use(
@@ -285,6 +314,40 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);
+  });
+
+  it('replaces the asset currently shown after the drawer switches assets', async () => {
+    const firstAsset = { ...baseAsset, id: 1, name: 'first.png' };
+    const secondAsset = { ...baseAsset, id: 2, name: 'second.png' };
+    let replaceId: string | null = null;
+
+    server.use(
+      http.post('/upload', async ({ request }) => {
+        const url = new URL(request.url, 'http://localhost:1337');
+        replaceId = url.searchParams.get('id');
+        return HttpResponse.json({ ...secondAsset, name: 'replacement.png' });
+      })
+    );
+
+    const closeDetails = jest.fn();
+    const { user, rerender } = render(
+      <AssetDetails asset={firstAsset} closeDetails={closeDetails} />
+    );
+    await screen.findByRole('combobox');
+
+    rerender(<AssetDetails asset={secondAsset} closeDetails={closeDetails} />);
+    expect(await screen.findByDisplayValue('second.png')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+    await screen.findByText(/Replace this media file\?/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['hello'], 'replacement.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => expect(replaceId).not.toBeNull());
+    expect(replaceId).toBe('2');
   });
 
   // The overlay covers the form while a mutation is in flight. It had no

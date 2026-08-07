@@ -771,32 +771,35 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   );
 
   // Owns the replace upload so isReplacing can drive the busy overlay.
-  const handleReplace = async (file: globalThis.File) => {
-    const res = await replaceMutation({ id: asset.id, file });
-    if ('error' in res) {
-      const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-      const message =
-        error?.data?.error?.message ??
-        error?.data?.message ??
-        formatMessage({
-          id: getTranslationKey('asset-details.replace.error'),
-          defaultMessage: 'Failed to replace the file.',
-        });
-      notify({ type: 'danger', message });
-      return;
-    }
-    notify({
-      type: 'success',
-      message: formatMessage({
-        id: getTranslationKey('asset-details.replace.success'),
-        defaultMessage: 'File replaced.',
-      }),
-    });
-  };
+  const handleReplace = React.useCallback(
+    async (file: globalThis.File) => {
+      const res = await replaceMutation({ id: asset.id, file });
+      if ('error' in res) {
+        const error = res.error as { data?: { error?: { message?: string }; message?: string } };
+        const message =
+          error?.data?.error?.message ??
+          error?.data?.message ??
+          formatMessage({
+            id: getTranslationKey('asset-details.replace.error'),
+            defaultMessage: 'Failed to replace the file.',
+          });
+        notify({ type: 'danger', message });
+        return;
+      }
+      notify({
+        type: 'success',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.replace.success'),
+          defaultMessage: 'File replaced.',
+        }),
+      });
+    },
+    [asset.id, formatMessage, notify, replaceMutation]
+  );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
   // a persistent global notification then close the drawer.
-  const handleDelete = async () => {
+  const handleDelete = React.useCallback(async () => {
     const res = await deleteMutation(asset.id);
     if ('error' in res) {
       const error = res.error as { data?: { error?: { message?: string }; message?: string } };
@@ -821,7 +824,15 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       ),
     });
     closeDetails();
-  };
+  }, [
+    asset.id,
+    closeDetails,
+    deleteMutation,
+    folderName,
+    formatMessage,
+    notify,
+    toggleNotification,
+  ]);
 
   const notifyCropError = () => {
     notify({
@@ -891,10 +902,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       isReplacing,
       isDeleting,
     }),
-    // handleReplace / handleDelete close over asset+mutations and don't need a
-    // stable identity here; the consumers re-render with the new context value.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isReplacing, isDeleting]
+    [handleReplace, handleDelete, isReplacing, isDeleting]
   );
 
   return (
