@@ -104,6 +104,16 @@ In Strapi v5, they will be used for:
 - user-facing config factories to assist in typing project configuration
 - as part of the environment variable configuration loading to validate the structure of the base config file parsers to parse and strongly type values from the environment
 
+### Config factories (opt-in)
+
+Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineConfig('admin', …)` from `@strapi/strapi` when authoring `config/*` files. These are identity helpers with Zod runtime validation:
+
+- TypeScript users get inference without manual `: Core.Config.*` annotations
+- JavaScript users get the same runtime checks when the config loads
+- Existing plain object / function exports remain supported (non-breaking)
+
+Schemas currently live in `@strapi/core` (`configuration/schemas`) and are intended to move to `@strapi/definitions` (`schemas.config.*`) once that package lands. Load-time validation of *all* configs (without opting into factories) and strict unknown-key rejection are follow-ups.
+
 ### Configuration filename restrictions
 
 In Strapi v5, environment variables with the prefix `STRAPI_` will be loaded automatically into Strapi configuration. Because of that, some naming restrictions have been added to prevent conflicts.

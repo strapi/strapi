@@ -5,6 +5,16 @@ import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
+import {
+  configSchemas,
+  defineConfig,
+  defineAdminConfig,
+  defineServerConfig,
+  defineApiConfig,
+  defineFeaturesConfig,
+  defineTypescriptConfig,
+  defineDatabaseConfig,
+} from './configuration/define-config';
 
 const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
@@ -131,4 +141,13 @@ export {
   createCoreRouter,
   createCoreValidator,
   isCustomController,
+  // Config factories (opt-in Zod validation + TS inference)
+  configSchemas,
+  defineConfig,
+  defineAdminConfig,
+  defineServerConfig,
+  defineApiConfig,
+  defineFeaturesConfig,
+  defineTypescriptConfig,
+  defineDatabaseConfig,
 };
