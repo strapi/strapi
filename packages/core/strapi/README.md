@@ -117,8 +117,9 @@ Database driver packages often have their own minimum versions for each version 
 
 | Node Version | PostgreSQL (pg) | MySQL (mysql2) | SQLite (better-sqlite3) |
 | ------------ | --------------- | -------------- | ----------------------- |
-| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@11.x     |
-| 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
+| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
+| 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
+| 26           | pg@8.x          | mysql2@3.x     | better-sqlite3@13.x     |
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 
