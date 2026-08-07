@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
+import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
@@ -67,7 +68,9 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
 
   return (
     <>
-      <Menu.Root>
+      {/* See AssetActionsMenu: non-modal so clicking another row's trigger
+          closes this menu and opens that one in a single click. */}
+      <Menu.Root modal={false}>
         <Menu.Trigger
           tag={IconButton}
           icon={<More />}
@@ -77,7 +80,10 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
             defaultMessage: 'More actions',
           })}
         />
-        <Menu.Content popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
+        {/* See ActionsMenuContent: the design system's 15rem default clamps the
+            menu against a hidden scrollbar, so items can be silently cut off
+            near the viewport edge. This one is shorter, but kept in sync. */}
+        <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
           <Menu.Item startIcon={<Link />} onSelect={handleCopyLink}>
             {formatMessage({
               id: getTranslationKey('list.folder.actions.copy-link'),
@@ -97,7 +103,7 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
               defaultMessage: 'Delete folder',
             })}
           </Menu.Item>
-        </Menu.Content>
+        </ActionsMenuContent>
       </Menu.Root>
       {isMoveOpen && (
         <BulkMoveDialog
