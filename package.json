@@ -40,6 +40,7 @@
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
     "doc:api": "node scripts/open-api/serve.js",
+    "consumer-audit": "node scripts/consumer-audit/run.mjs",
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",
     "format:other": "yarn prettier:other --write",

@@ -181,3 +181,6 @@ examples/**/types/generated
 
 # Ignore yarn.lock inside templates
 templates/yarn.lock
+
+# Local consumer-audit output
+scripts/consumer-audit/.output/
