@@ -31,11 +31,20 @@ const resolveUploadFileIdWithHashFallback = async (
     return undefined;
   }
 
-  const entry = await strapi.db.query('plugin::upload.file').findOne({
+  // `hash` is required but not unique on plugin::upload.file — refuse to guess.
+  const entries = await strapi.db.query('plugin::upload.file').findMany({
     where: { hash: lookupHash },
     select: ['id'],
   });
 
+  if (entries.length > 1) {
+    onWarning?.(
+      `[Data transfer] Ambiguous hash "${lookupHash}" matched ${entries.length} media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
+    );
+    return undefined;
+  }
+
+  const entry = entries[0];
   if (entry?.id) {
     onWarning?.(
       `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
@@ -106,12 +115,16 @@ export function createAssetsDestinationWritable(
         transaction
           .attach(async () => {
             try {
-              const fileId = await resolveUploadFileIdWithHashFallback(
-                strapi,
-                uploadData,
-                resolveUploadFileId,
-                onWarning
-              );
+              // Hash fallback is only useful when we will update media-library rows.
+              // With --only files, restoreMediaEntitiesContent is false: upload bytes only.
+              const fileId = restoreMediaEntitiesContent
+                ? await resolveUploadFileIdWithHashFallback(
+                    strapi,
+                    uploadData,
+                    resolveUploadFileId,
+                    onWarning
+                  )
+                : resolveUploadFileId(uploadData);
 
               await strapi.plugin('upload').provider.uploadStream(uploadData);
 

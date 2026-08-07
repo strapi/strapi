@@ -315,12 +315,14 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   const createStrapiWithQuery = (
     uploadStream: jest.Mock,
     {
-      findOne,
+      findOne = jest.fn(),
+      findMany = jest.fn().mockResolvedValue([]),
       update = jest.fn().mockResolvedValue(null),
     }: {
-      findOne: jest.Mock;
+      findOne?: jest.Mock;
+      findMany?: jest.Mock;
       update?: jest.Mock;
-    }
+    } = {}
   ) =>
     ({
       config: {
@@ -338,6 +340,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
         },
         query: jest.fn(() => ({
           findOne,
+          findMany,
           update,
         })),
       },
@@ -352,15 +355,14 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   test('uploads asset when entity ID mapping is missing but hash matches an existing record', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindOne = jest
-      .fn()
-      .mockResolvedValueOnce({ id: 42 })
-      .mockResolvedValueOnce({ id: 42, url: 'old.jpg', formats: {} });
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42 }]);
+    const mockFindOne = jest.fn().mockResolvedValue({ id: 42, url: 'old.jpg', formats: {} });
     const mockUpdate = jest.fn().mockResolvedValue(null);
     const onWarning = jest.fn();
 
     const strapi = createStrapiWithQuery(uploadStream, {
       findOne: mockFindOne,
+      findMany: mockFindMany,
       update: mockUpdate,
     });
     const transaction = createTransaction(strapi);
@@ -393,6 +395,11 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     await waitForUploadStream(uploadStream);
 
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { hash: 'photo_hash' },
+      })
+    );
     expect(onWarning).toHaveBeenCalledWith(
       expect.stringContaining('Resolved upload file ID via hash')
     );
@@ -407,10 +414,10 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   test('uploads asset bytes and warns when no file record can be updated', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindOne = jest.fn().mockResolvedValue(null);
+    const mockFindMany = jest.fn().mockResolvedValue([]);
     const onWarning = jest.fn();
 
-    const strapi = createStrapiWithQuery(uploadStream, { findOne: mockFindOne });
+    const strapi = createStrapiWithQuery(uploadStream, { findMany: mockFindMany });
     const transaction = createTransaction(strapi);
     const stream = createAssetsDestinationWritable({
       strapi,
@@ -451,22 +458,127 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
     transaction.end();
   });
 
+  test('uploads bytes and skips DB update when hash matches multiple records', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 10 }, { id: 20 }]);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'dup.jpg',
+      filepath: '/dup.jpg',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'dup_hash',
+        name: 'dup.jpg',
+        id: 7,
+        url: 'dup.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('Ambiguous hash "dup_hash"'));
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('could not update the media library record')
+    );
+    expect(mockUpdate).not.toHaveBeenCalled();
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  test('uploads bytes without DB update when media entities restore is disabled', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42 }]);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    // Mirrors --only files: assets stage runs, but plugin::upload.file is out of entity scope.
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: false,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'photo.jpg',
+      filepath: '/photo.jpg',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'photo_hash',
+        name: 'photo.jpg',
+        id: 99,
+        url: 'photo.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(uploadStream).toHaveBeenCalledTimes(1);
+    expect(mockFindMany).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(onWarning).not.toHaveBeenCalled();
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
   test('resolves parent file via mainHash for responsive format variants', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindOne = jest
-      .fn()
-      .mockResolvedValueOnce({ id: 42 })
-      .mockResolvedValueOnce({
-        id: 42,
-        url: 'photo.jpg',
-        formats: { thumbnail: { hash: 'thumb_hash', url: 'old-thumb.jpg' } },
-      });
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42 }]);
+    const mockFindOne = jest.fn().mockResolvedValue({
+      id: 42,
+      url: 'photo.jpg',
+      formats: { thumbnail: { hash: 'thumb_hash', url: 'old-thumb.jpg' } },
+    });
     const mockUpdate = jest.fn().mockResolvedValue(null);
     const onWarning = jest.fn();
 
     const strapi = createStrapiWithQuery(uploadStream, {
       findOne: mockFindOne,
+      findMany: mockFindMany,
       update: mockUpdate,
     });
     const transaction = createTransaction(strapi);
@@ -501,7 +613,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     await waitForUploadStream(uploadStream);
 
-    expect(mockFindOne).toHaveBeenCalledWith(
+    expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { hash: 'photo_hash' },
       })
