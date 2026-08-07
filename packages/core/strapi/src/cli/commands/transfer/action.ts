@@ -1,4 +1,5 @@
 import { isObject } from 'lodash/fp';
+import chalk from 'chalk';
 import ora from 'ora';
 import type { Ora } from 'ora';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
@@ -155,6 +156,9 @@ export default async (opts: CmdOptions) => {
   if (!source || !destination) {
     exitWith(1, 'Could not create providers');
   }
+
+  // Match import CLI: surface destination soft-fail warnings (e.g. asset hash fallback).
+  destination.onWarning = (message) => console.warn(`\n${chalk.yellow('warn')}: ${message}`);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'exact',

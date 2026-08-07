@@ -95,6 +95,27 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'local-destination-provider',
+      },
+      kind: 'warning',
+    });
+  }
+
+  #emitWarning(message: string) {
+    // Prefer CLI/API onWarning when wired (import/transfer console.warn); otherwise
+    // still surface via engine diagnostics so soft-fails are never silent.
+    if (this.onWarning) {
+      this.onWarning(message);
+      return;
+    }
+    this.#reportWarning(message);
+  }
+
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
     assertValidStrapi(this.strapi);
@@ -329,7 +350,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       resolveUploadFileId: (metadata) => fileEntitiesMapper?.[metadata.id],
       restoreMediaEntitiesContent: this.#isContentTypeIncluded('plugin::upload.file'),
       removeAssetsBackup: this.#removeAssetsBackup.bind(this),
-      onWarning: this.onWarning,
+      onWarning: (message) => this.#emitWarning(message),
     });
   }
 
@@ -359,7 +380,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
-      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);
+      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, (message) =>
+        this.#emitWarning(message)
+      );
     }
 
     throw new ProviderValidationError(`Invalid strategy ${strategy}`, {
