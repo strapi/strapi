@@ -12,7 +12,7 @@ export default [
   },
   {
     method: 'GET',
-    path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
+    path: /^\/documentation\/v(\d+)\.(\d+)\.(\d+)/,
     handler: 'documentation.index',
     config: {
       auth: false,

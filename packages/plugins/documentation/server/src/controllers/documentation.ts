@@ -56,7 +56,10 @@ export default {
        * We don't expose the specs using koa-static or something else due to security reasons.
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
        */
-      const { major, minor, patch } = ctx.params;
+      const captures = (ctx as { captures?: string[] }).captures;
+      const major = ctx.params.major ?? captures?.[0];
+      const minor = ctx.params.minor ?? captures?.[1];
+      const patch = ctx.params.patch ?? captures?.[2];
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`

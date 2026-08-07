@@ -23,7 +23,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.server.routes([
     {
       method: 'GET',
-      path: '/uploads/(.*)',
+      path: '/uploads/{*path}',
       handler: [range, koaStatic(strapi.dirs.static.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },

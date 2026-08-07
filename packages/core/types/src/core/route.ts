@@ -23,7 +23,7 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | '
 
 export interface Route {
   method: HTTPMethod;
-  path: string;
+  path: string | RegExp;
   handler: HandlerReference | MiddlewareHandler | MiddlewareHandler[];
   info: RouteInfo;
   config?: RouteConfig;

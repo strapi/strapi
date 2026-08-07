@@ -22,7 +22,14 @@ const policyOrMiddlewareSchema = yup.lazy((value) => {
 
 const routeSchema = yup.object({
   method: yup.string().oneOf(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'ALL']).required(),
-  path: yup.string().required(),
+  path: yup
+    .mixed()
+    .test(
+      'string-or-regexp',
+      'path must be a string or RegExp',
+      (value) => typeof value === 'string' || value instanceof RegExp
+    )
+    .required(),
   handler: yup.lazy((value) => {
     if (typeof value === 'string') {
       return yup.string().required();

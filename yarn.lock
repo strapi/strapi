@@ -4975,16 +4975,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@koa/router@npm:12.0.2":
-  version: 12.0.2
-  resolution: "@koa/router@npm:12.0.2"
+"@koa/router@npm:15.7.0":
+  version: 15.7.0
+  resolution: "@koa/router@npm:15.7.0"
   dependencies:
-    debug: "npm:^4.3.4"
-    http-errors: "npm:^2.0.0"
+    debug: "npm:^4.4.3"
+    http-errors: "npm:^2.0.1"
     koa-compose: "npm:^4.1.0"
-    methods: "npm:^1.1.2"
-    path-to-regexp: "npm:^6.3.0"
-  checksum: 10c0/9d33af8b5cb7e80cf2a17e156fe1821ad31ad672ff8e9df62a3af2d2e4a6f49abbbb7038edaea45ef078cabdd8a1ce595ad7da810e96b17c5b954ee46f7e554d
+    path-to-regexp: "npm:^8.4.2"
+  peerDependencies:
+    koa: ^2.0.0 || ^3.0.0
+  peerDependenciesMeta:
+    koa:
+      optional: false
+  checksum: 10c0/da1f23f07684f5b39db5536cd6d4b77f7e38930786c2c0c13cf27d84ab90b6c9eea5ecf17f8f4c1b87ccc822a874f64c351b6e9b4c2e6c9324765564fce689cb
   languageName: node
   linkType: hard
 
@@ -9308,7 +9312,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
-    "@koa/router": "npm:12.0.2"
+    "@koa/router": "npm:15.7.0"
     "@modelcontextprotocol/sdk": "npm:1.29.0"
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:5.51.2"
@@ -10173,7 +10177,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
-    "@koa/router": "npm:12.0.2"
+    "@koa/router": "npm:15.7.0"
     "@modelcontextprotocol/sdk": "npm:1.29.0"
     "@strapi/database": "npm:5.51.2"
     "@strapi/logger": "npm:5.51.2"
@@ -25844,7 +25848,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:8.4.2, path-to-regexp@npm:^8.0.0":
+"path-to-regexp@npm:8.4.2, path-to-regexp@npm:^8.0.0, path-to-regexp@npm:^8.4.2":
   version: 8.4.2
   resolution: "path-to-regexp@npm:8.4.2"
   checksum: 10c0/05b115c49b47ad252ce05faa32930f643f23769c68b8bcfe78ad833545140c48bbffb3266986d6c8d5db13a64cf12e07e0d72d9882cab830efeefa553533ebaf
