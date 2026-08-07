@@ -115,6 +115,7 @@ export const adminConfigSchema = z
         emailTemplate: z.union([z.string(), unknownRecord]).optional(),
         from: z.string().optional(),
         replyTo: z.string().optional(),
+        expiresIn: z.union([z.string(), z.number()]).optional(),
       })
       .passthrough()
       .optional(),
@@ -139,7 +140,17 @@ export const adminConfigSchema = z
       })
       .passthrough()
       .optional(),
+    /**
+     * @deprecated Use `features.future.experimental_firstPublishedAt` instead.
+     */
+    firstPublishedAtField: z
+      .object({
+        enabled: z.boolean(),
+      })
+      .passthrough()
+      .optional(),
     url: z.string().optional(),
+    absoluteUrl: z.string().optional(),
     path: z.string().optional(),
     serveAdminPanel: z.boolean().optional(),
     autoOpen: z.boolean().optional(),
@@ -166,9 +177,28 @@ export const serverConfigSchema = z
             https: z.string().optional(),
             fetch: z.string().optional(),
             koa: z.boolean().optional(),
+            ipHeader: z.string().optional(),
+            maxIpsCount: z.number().optional(),
           })
           .passthrough(),
       ])
+      .optional(),
+    /**
+     * @deprecated Use `server.proxy.global` instead.
+     */
+    globalProxy: z.string().optional(),
+    /**
+     * @deprecated Not read by Strapi.
+     */
+    emitErrors: z.boolean().optional(),
+    /**
+     * @deprecated Use `admin.autoOpen` instead.
+     */
+    admin: z
+      .object({
+        autoOpen: z.boolean().optional(),
+      })
+      .passthrough()
       .optional(),
     app: z
       .object({
@@ -235,6 +265,7 @@ export const serverConfigSchema = z
       .passthrough()
       .optional(),
     openapi: unknownRecord.optional(),
+    absoluteUrl: z.string().optional(),
   })
   .passthrough();
 

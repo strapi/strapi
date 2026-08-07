@@ -90,4 +90,26 @@ describe('defineConfig factories', () => {
       defineConfig('not-a-namespace', {})
     ).toThrow(/Unknown Strapi config namespace/);
   });
+
+  it('accepts known Core.Config fields omitted from early schema drafts', () => {
+    expect(() =>
+      defineAdminConfig({
+        forgotPassword: { expiresIn: '15m' },
+      })
+    ).not.toThrow();
+  });
+
+  it('throws when a factory function returns an invalid shape', () => {
+    const factory = defineServerConfig(({ env }) => ({
+      host: env('HOST', '0.0.0.0'),
+      // @ts-expect-error intentional invalid runtime shape
+      port: 'not-a-number',
+    }));
+
+    expect(() =>
+      (factory as (params: { env: (key: string, fallback?: string) => string }) => unknown)({
+        env: (key, fallback) => fallback ?? '',
+      })
+    ).toThrow(/Invalid Strapi config "server"/);
+  });
 });
