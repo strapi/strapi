@@ -39,8 +39,8 @@ export const useEditFolder = () => {
     EditFolderRequestParams
   >((...args) => editFolderRequest(put, post, ...args), {
     async onSuccess() {
-      await queryClient.refetchQueries([pluginId, 'folders'], { active: true });
-      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
+      await queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
+      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { type: 'active' });
     },
   });
 

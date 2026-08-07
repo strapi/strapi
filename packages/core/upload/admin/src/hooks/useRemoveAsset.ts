@@ -27,8 +27,8 @@ export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
     (assetId: number) => del<DeleteFile.Response>(`/upload/files/${assetId}`),
     {
       onSuccess() {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
 
         toggleNotification({
           type: 'success',

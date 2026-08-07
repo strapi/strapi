@@ -124,7 +124,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'assets'], {
-        active: true,
+        type: 'active',
       })
     );
   });

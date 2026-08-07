@@ -16,7 +16,8 @@ jest.setTimeout(60 * 1000);
  */
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { notifyManager } = require('@tanstack/react-query') as typeof import('@tanstack/react-query');
+  const { notifyManager } =
+    require('@tanstack/react-query') as typeof import('@tanstack/react-query');
 
   notifyManager.setNotifyFunction((fn) => act(fn));
   notifyManager.setBatchNotifyFunction((fn) => act(fn));

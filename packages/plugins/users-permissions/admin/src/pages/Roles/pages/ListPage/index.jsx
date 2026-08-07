@@ -61,7 +61,7 @@ export const RolesListPage = () => {
     data: { roles },
     isFetching,
     refetch,
-  } = useQuery('get-roles', () => fetchData(toggleNotification, formatMessage, notifyStatus), {
+  } = useQuery(['get-roles'], () => fetchData(toggleNotification, formatMessage, notifyStatus), {
     initialData: {},
     enabled: canRead,
   });

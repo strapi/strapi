@@ -63,13 +63,13 @@ export const useBulkMove = () => {
       } = res;
 
       if (data?.files?.length > 0) {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
       }
 
       // folders need to be re-fetched in any case, because assets might have been
       // moved into a sub-folder and therefore the count needs to be updated
-      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
 
       toggleNotification({
         type: 'success',

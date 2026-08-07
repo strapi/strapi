@@ -42,9 +42,9 @@ export const useBulkEdit = () => {
       const { data } = res;
 
       if (data && data.length > 0) {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
-        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
       }
 
       toggleNotification({

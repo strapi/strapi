@@ -88,8 +88,8 @@ export const useUpload = () => {
     {
       mutationKey: [pluginId, 'upload'],
       onSuccess() {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
         dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics', 'AiUsage']));
       },
     }
