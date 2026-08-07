@@ -356,6 +356,25 @@ export const middlewaresConfigSchema = z.array(
   ])
 );
 
+/**
+ * Plugins config envelope only (`enabled` / `resolve` / `config`).
+ * Per-plugin `config` payloads stay `unknown` here — deep validation belongs on
+ * each plugin's `config.validator` (and future schema registry / augmentation).
+ */
+export const pluginsConfigSchema = z.record(
+  z.string(),
+  z.union([
+    z.boolean(),
+    z
+      .object({
+        enabled: z.boolean().optional(),
+        resolve: z.string().optional(),
+        config: z.unknown().optional(),
+      })
+      .passthrough(),
+  ])
+);
+
 export const configSchemas = {
   admin: adminConfigSchema,
   server: serverConfigSchema,
@@ -364,6 +383,7 @@ export const configSchemas = {
   typescript: typescriptConfigSchema,
   database: databaseConfigSchema,
   middlewares: middlewaresConfigSchema,
+  plugins: pluginsConfigSchema,
 } as const;
 
 export type ConfigSchemaNamespace = keyof typeof configSchemas;
