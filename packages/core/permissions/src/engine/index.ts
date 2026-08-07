@@ -116,10 +116,12 @@ const newEngine = (params: EngineParams): Engine => {
       return register({ action, subject, properties });
     }
 
-    const resolveConditions = _.map(providers.condition.get);
+    const resolveConditions = (ids: string[]): (Condition | undefined)[] =>
+      ids.map((id) => providers.condition.get(id) as Condition | undefined);
 
     const removeInvalidConditions = _.filter(
-      (condition: Condition) => condition != null && _.isFunction(condition.handler)
+      (condition: Condition | undefined): condition is Condition =>
+        condition != null && _.isFunction(condition.handler)
     );
 
     const evaluateConditions = (conditions: Condition[]) => {
