@@ -74,7 +74,7 @@ const createCronService = () => {
             name: taskName ?? undefined,
             paused: !running,
             ...(options instanceof Date ? { maxRuns: 1 } : {}),
-            catch: (error) => {
+            catch(error) {
               strapi.log.error(`Cron job "${jobLabel}" failed`, error);
             },
           },
