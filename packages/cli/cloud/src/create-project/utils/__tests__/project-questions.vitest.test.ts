@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import type { DistinctQuestion } from 'inquirer';
 import type { ProjectAnswers } from '../../../types';
 import {

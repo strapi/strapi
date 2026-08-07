@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 import _ from 'lodash';
 import { subject } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
@@ -101,13 +103,13 @@ describe('Permissions Engine', () => {
     engineProviders?: { action: any; condition: any };
     abilityOptions?: Record<string, unknown>;
   }) => {
-    const registerFunctions: jest.Mock[] = [];
+    const registerFunctions: Mock[] = [];
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
     const engineCrf = engine.createRegisterFunction;
-    const createRegisterFunction = jest
+    const createRegisterFunction = vi
       .spyOn(engine, 'createRegisterFunction')
       .mockImplementation((can, options) => {
-        const registerFunction = jest.fn(engineCrf(can, options));
+        const registerFunction = vi.fn(engineCrf(can, options));
         registerFunctions.push(registerFunction);
         return registerFunction;
       });
@@ -609,10 +611,10 @@ describe('Permissions Engine', () => {
   describe('before-* hooks', () => {
     it('execute in the correct order', async () => {
       let called = '';
-      const beforeEvaluateFn = jest.fn(() => {
+      const beforeEvaluateFn = vi.fn(() => {
         called = 'beforeEvaluate';
       });
-      const beforeRegisterFn = jest.fn(() => {
+      const beforeRegisterFn = vi.fn(() => {
         expect(called).toEqual('beforeEvaluate');
         called = 'beforeRegister';
       });

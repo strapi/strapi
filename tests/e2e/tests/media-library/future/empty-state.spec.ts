@@ -9,7 +9,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 
 const FIXTURE_IMAGE = path.join(__dirname, '../../../data/uploads/test-image.jpg');
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Empty state',
   () => {
     test.beforeEach(async ({ page }) => {
