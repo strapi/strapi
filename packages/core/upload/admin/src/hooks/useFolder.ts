@@ -11,10 +11,12 @@ export const useFolder = (id: number | null | undefined, { enabled = true } = {}
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();
 
-  const { data, error, isLoading } = useQuery<
-    GetFolder.Response['data'],
-    GetFolder.Response['error']
-  >(
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery<GetFolder.Response['data'], GetFolder.Response['error']>(
     [pluginId, 'folder', id],
     async () => {
       const {

@@ -43,15 +43,16 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     ];
   };
 
-  const { data, error, isLoading } = useQuery(
-    [pluginId, 'folder', 'structure'],
-    fetchFolderStructure,
-    {
-      enabled,
-      staleTime: 0,
-      cacheTime: 0,
-    }
-  );
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery([pluginId, 'folder', 'structure'], fetchFolderStructure, {
+    enabled,
+    staleTime: 0,
+    cacheTime: 0,
+  });
 
   return { data, error, isLoading };
 };

@@ -54,10 +54,12 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
     };
   }
 
-  const { data, error, isLoading } = useQuery<
-    GetFolders.Response['data'],
-    GetFolders.Response['error']
-  >(
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery<GetFolders.Response['data'], GetFolders.Response['error']>(
     [pluginId, 'folders', stringify(params)],
     async () => {
       const {

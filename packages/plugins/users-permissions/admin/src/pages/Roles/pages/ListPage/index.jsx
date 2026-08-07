@@ -58,7 +58,7 @@ export const RolesListPage = () => {
 
   const {
     isLoading: isLoadingForData,
-    data: { roles },
+    data: { roles } = {},
     isFetching,
     refetch,
   } = useQuery(['get-roles'], () => fetchData(toggleNotification, formatMessage, notifyStatus), {
