@@ -109,6 +109,10 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
           </Menu.Item>
         </Menu.Content>
       </Menu.Root>
+      {/* These dialogs live inside the row, so a background refetch that drops
+          the row would take an open dialog with it. Nothing invalidates until
+          the mutation resolves, and the dialog closes in the same tick, so the
+          flows themselves can't trigger it. */}
       {isRenameOpen && (
         <FolderFormDialog
           open
