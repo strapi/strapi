@@ -35,69 +35,15 @@
   ],
   "known": [
     {
-      "id": "vulnerability:sharp",
-      "kind": "vulnerability",
-      "package": "sharp",
-      "reason": "Track: bump sharp in @strapi/upload to >=0.35.0"
-    },
-    {
       "id": "vulnerability:@hono/node-server",
       "kind": "vulnerability",
       "package": "@hono/node-server",
       "reason": "Track: bump @modelcontextprotocol/sdk to >=1.30.0"
     },
     {
-      "id": "vulnerability:@modelcontextprotocol/sdk",
-      "kind": "vulnerability",
-      "package": "@modelcontextprotocol/sdk",
-      "reason": "Track: parent of @hono/node-server; bump to >=1.30.0"
-    },
-    {
-      "id": "vulnerability:ajv",
-      "kind": "vulnerability",
-      "package": "ajv",
-      "reason": "Track: via umzug/@rushstack — upstream"
-    },
-    {
-      "id": "vulnerability:@rushstack/node-core-library",
-      "kind": "vulnerability",
-      "package": "@rushstack/node-core-library",
-      "reason": "Track: via umzug — upstream"
-    },
-    {
-      "id": "vulnerability:@rushstack/terminal",
-      "kind": "vulnerability",
-      "package": "@rushstack/terminal",
-      "reason": "Track: via umzug — upstream"
-    },
-    {
-      "id": "vulnerability:@rushstack/ts-command-line",
-      "kind": "vulnerability",
-      "package": "@rushstack/ts-command-line",
-      "reason": "Track: via umzug — upstream"
-    },
-    {
       "id": "vulnerability:@ai-sdk/provider-utils",
       "kind": "vulnerability",
       "package": "@ai-sdk/provider-utils",
-      "reason": "Track: AI SDK major in content-type-builder"
-    },
-    {
-      "id": "vulnerability:@ai-sdk/gateway",
-      "kind": "vulnerability",
-      "package": "@ai-sdk/gateway",
-      "reason": "Track: AI SDK major in content-type-builder"
-    },
-    {
-      "id": "vulnerability:@ai-sdk/react",
-      "kind": "vulnerability",
-      "package": "@ai-sdk/react",
-      "reason": "Track: AI SDK major in content-type-builder"
-    },
-    {
-      "id": "vulnerability:ai",
-      "kind": "vulnerability",
-      "package": "ai",
       "reason": "Track: AI SDK major in content-type-builder"
     },
     {

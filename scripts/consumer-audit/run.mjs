@@ -368,13 +368,20 @@ function main() {
 
   const classified = classify(findings, baseline);
 
+  const seenIds = new Set(findings.map((f) => f.id));
+  for (const entry of [...(baseline.accepted || []), ...(baseline.known || [])]) {
+    if (!seenIds.has(entry.id)) {
+      console.warn(`warn: baseline entry not seen this run (consider removing): ${entry.id}`);
+    }
+  }
+
   const nodeV = spawnSync('node', ['-v'], { encoding: 'utf8' }).stdout.trim();
   const npmV = spawnSync('npm', ['-v'], {
     encoding: 'utf8',
     shell: process.platform === 'win32',
   }).stdout.trim();
 
-  const report = writeReport({
+  writeReport({
     outDir,
     meta: {
       generatedAt: new Date().toISOString(),
@@ -408,9 +415,6 @@ function main() {
     }
     console.log('\n(--no-fail: not failing CI)');
   }
-
-  // silence unused
-  void report;
 }
 
 try {

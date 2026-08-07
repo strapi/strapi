@@ -10,5 +10,5 @@ node scripts/consumer-audit/run.mjs --no-fail   # report only
 ```
 
 - **`packages.json`** — CSA root packages + app-level deps
-- **`baseline.json`** — `accepted` (holds) and `known` (tracked debt); CI fails only on **novel** findings
-- **CI** — `.github/workflows/consumer-audit.yml` (weekly + `workflow_dispatch`)
+- **`baseline.json`** — `accepted` (holds) and `known` (tracked debt); CI fails only on **novel** findings. Remove entries once fixed so regressions alert again.
+- **CI** — `.github/workflows/consumer-audit.yml` (weekly Mondays, `workflow_dispatch`, and PRs that touch these files)
