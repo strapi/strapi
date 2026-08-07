@@ -124,8 +124,13 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       },
     };
     const mockFindOne = jest.fn().mockResolvedValue(null);
+    const mockFindMany = jest.fn().mockResolvedValue([]);
     const mockUpdate = jest.fn().mockResolvedValue(null);
-    const mockQuery = jest.fn(() => ({ findOne: mockFindOne, update: mockUpdate }));
+    const mockQuery = jest.fn(() => ({
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    }));
     const provider = createLocalStrapiDestinationProvider({
       getStrapi: () =>
         createStrapi({
