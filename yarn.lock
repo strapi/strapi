@@ -9862,13 +9862,13 @@ __metadata:
     "@strapi/design-system": "npm:2.2.3"
     "@strapi/icons": "npm:2.2.3"
     "@strapi/strapi": "npm:5.51.2"
-    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
-    jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.51.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0

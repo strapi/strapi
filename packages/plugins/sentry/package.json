@@ -54,9 +54,9 @@
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts:back": "run -T tsc -p server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T rollup -c -w"
+    "watch": "run -T rollup -c -w",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
     "@sentry/node": "7.112.2",
@@ -65,13 +65,13 @@
   },
   "devDependencies": {
     "@strapi/strapi": "5.51.2",
-    "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
-    "jest": "29.6.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.4",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.51.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",
