@@ -450,4 +450,69 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
     });
     transaction.end();
   });
+
+  test('resolves parent file via mainHash for responsive format variants', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindOne = jest
+      .fn()
+      .mockResolvedValueOnce({ id: 42 })
+      .mockResolvedValueOnce({
+        id: 42,
+        url: 'photo.jpg',
+        formats: { thumbnail: { hash: 'thumb_hash', url: 'old-thumb.jpg' } },
+      });
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'thumbnail_photo.jpg',
+      filepath: '/thumbnail_photo.jpg',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'thumb_hash',
+        mainHash: 'photo_hash',
+        type: 'thumbnail',
+        name: 'thumbnail_photo.jpg',
+        id: 99,
+        url: 'thumbnail_photo.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(mockFindOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { hash: 'photo_hash' },
+      })
+    );
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Resolved upload file ID via hash "photo_hash"')
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
 });

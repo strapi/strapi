@@ -1,4 +1,7 @@
-import { buildFallbackAssetMetadataFromFilename } from '../asset-metadata-fallback';
+import {
+  buildFallbackAssetMetadataFromFilename,
+  isMissingAssetMetadataSidecarError,
+} from '../asset-metadata-fallback';
 
 describe('buildFallbackAssetMetadataFromFilename', () => {
   test('derives hash, ext, and mime from export-style filename', () => {
@@ -21,5 +24,23 @@ describe('buildFallbackAssetMetadataFromFilename', () => {
     expect(metadata.hash).toBe('file');
     expect(metadata.ext).toBe('.bin');
     expect(metadata.mime).toBe('application/octet-stream');
+  });
+});
+
+describe('isMissingAssetMetadataSidecarError', () => {
+  test('accepts ENOENT from directory sources', () => {
+    const error = Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    expect(isMissingAssetMetadataSidecarError(error)).toBe(true);
+  });
+
+  test('accepts tar/file missing-entry errors', () => {
+    expect(isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))).toBe(
+      true
+    );
+  });
+
+  test('rejects malformed JSON and other failures', () => {
+    expect(isMissingAssetMetadataSidecarError(new SyntaxError('Unexpected token'))).toBe(false);
+    expect(isMissingAssetMetadataSidecarError(new Error('EACCES: permission denied'))).toBe(false);
   });
 });

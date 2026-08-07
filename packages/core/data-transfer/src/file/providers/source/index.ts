@@ -18,6 +18,7 @@ import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import {
   buildFallbackAssetMetadataFromFilename,
+  isMissingAssetMetadataSidecarError,
   missingAssetMetadataSidecarMessage,
 } from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -236,7 +237,10 @@ class LocalFileSourceProvider implements ISourceProvider {
               let metadata: IFile;
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-              } catch {
+              } catch (error) {
+                if (!isMissingAssetMetadataSidecarError(error)) {
+                  throw error;
+                }
                 reportWarning(missingAssetMetadataSidecarMessage(file));
                 metadata = buildFallbackAssetMetadataFromFilename(file, { size });
               }

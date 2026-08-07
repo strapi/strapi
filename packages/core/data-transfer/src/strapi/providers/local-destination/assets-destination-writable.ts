@@ -24,18 +24,21 @@ const resolveUploadFileIdWithHashFallback = async (
     return mappedId;
   }
 
-  if (!uploadData.hash) {
+  // Responsive variants store the variant hash in `hash`, but the parent media
+  // library row is keyed by the main file hash (provided as `mainHash`).
+  const lookupHash = uploadData.mainHash ?? uploadData.hash;
+  if (!lookupHash) {
     return undefined;
   }
 
   const entry = await strapi.db.query('plugin::upload.file').findOne({
-    where: { hash: uploadData.hash },
+    where: { hash: lookupHash },
     select: ['id'],
   });
 
   if (entry?.id) {
     onWarning?.(
-      `[Data transfer] Resolved upload file ID via hash "${uploadData.hash}" (source id ${uploadData.id} was not mapped).`
+      `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
     );
     return entry.id;
   }
