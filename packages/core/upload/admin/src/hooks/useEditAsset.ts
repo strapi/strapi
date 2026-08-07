@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { useNotification, useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
-import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIntl } from 'react-intl';
 
 import { UpdateFile, File as FileAsset } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';

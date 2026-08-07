@@ -15,8 +15,8 @@ jest.setTimeout(60 * 1000);
  * This does not affect production behavior.
  */
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { notifyManager } =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('@tanstack/react-query') as typeof import('@tanstack/react-query');
 
   notifyManager.setNotifyFunction((fn) => act(fn));

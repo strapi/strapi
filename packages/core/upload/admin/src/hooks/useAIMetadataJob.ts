@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
-import { useIntl } from 'react-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
 

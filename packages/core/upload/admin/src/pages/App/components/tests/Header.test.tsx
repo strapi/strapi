@@ -1,8 +1,8 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Header } from '../Header';

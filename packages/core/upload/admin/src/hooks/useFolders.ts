@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useQuery } from '@tanstack/react-query';
 
 import { GetFolders } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
