@@ -42,10 +42,9 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
   // Stable identity: the move dialog memoizes its destination walk on it.
   const moveItems = useMemo(() => [dragData], [dragData]);
 
-  // Built from window.location rather than a route constant so the link keeps
-  // working through the eventual `unstable-upload` → `upload` route rename. Every
-  // other query param (search, sort, open drawer) is dropped — this is a clean
-  // deep-link to the folder.
+  // Built from window.location so the link inherits whatever path the library is
+  // mounted at. Every other query param (search, sort, open drawer) is dropped —
+  // this is a clean deep-link to the folder.
   const handleCopyLink = async () => {
     const url = `${window.location.origin}${window.location.pathname}?folder=${folder.id}`;
     const didCopy = await copy(url);

@@ -4,9 +4,11 @@ import path from 'path';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { login } from '../../../utils/login';
-import { navToHeader } from '../../../utils/shared';
+import { describeOnCondition, navToHeader } from '../../../utils/shared';
 
-test.describe('Media Library', () => {
+// With `betaMediaLibrary` on, `plugins/upload` serves the beta Media Library
+// instead of this one, so the legacy suite only applies when the flag is off.
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY !== 'true')('Media Library', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await resetFiles();
