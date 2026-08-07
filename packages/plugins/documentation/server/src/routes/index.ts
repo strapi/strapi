@@ -12,7 +12,7 @@ export default [
   },
   {
     method: 'GET',
-    path: /^\/documentation\/v(\d+)\.(\d+)\.(\d+)/,
+    path: /^\/documentation\/v(\d+)\.(\d+)\.(\d+)\/?$/,
     handler: 'documentation.index',
     config: {
       auth: false,
