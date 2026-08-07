@@ -81,12 +81,18 @@ const mockAssets: File[] = [
 interface SetupProps {
   assets?: File[];
   folders?: Folder[];
+  canUpdate?: boolean;
 }
 
-const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
+const setup = ({ assets = mockAssets, folders, canUpdate = true }: SetupProps = {}) =>
   render(
     <>
-      <AssetsTable assets={assets} folders={folders} onAssetItemClick={mockOnAssetItemClick} />
+      <AssetsTable
+        assets={assets}
+        folders={folders}
+        onAssetItemClick={mockOnAssetItemClick}
+        canUpdate={canUpdate}
+      />
       <BulkActionsBar assets={assets} />
     </>,
     { renderOptions: { wrapper: AssetSelectionProvider } }
@@ -124,6 +130,26 @@ describe('AssetsTable', () => {
       expect(screen.getByText('image1.png')).toBeInTheDocument();
       expect(screen.getByText('image2.png')).toBeInTheDocument();
       expect(screen.getByText('image3.png')).toBeInTheDocument();
+    });
+
+    // CMS-1574: a fixed table layout with colgroup-pinned widths stops columns
+    // from re-measuring (and visibly shifting) each time infinite scroll appends
+    // a page. The invariant that makes it work: every column has a fixed width
+    // except `name`, which absorbs the remainder — so widths never depend on the
+    // rows.
+    it('pins column widths with a colgroup, leaving only the name column flexible', () => {
+      const { container } = setup();
+
+      // <colgroup>/<col> carry no ARIA role, so Testing Library can't query
+      // them — read the DOM directly here.
+      /* eslint-disable testing-library/no-node-access, testing-library/no-container */
+      const cols = Array.from(container.querySelectorAll('colgroup > col'));
+      // checkbox + name + creation date + last modified + size + actions.
+      expect(cols.length).toBeGreaterThanOrEqual(5);
+
+      const remainderCols = cols.filter((col) => !(col as HTMLTableColElement).style.width);
+      /* eslint-enable testing-library/no-node-access, testing-library/no-container */
+      expect(remainderCols).toHaveLength(1);
     });
   });
 
@@ -359,23 +385,8 @@ describe('AssetsTable', () => {
 
   describe('Selection', () => {
     it('hides all selection checkboxes and the select-all header without assets.update', async () => {
-      render(
-        <>
-          <AssetsTable
-            assets={mockAssets}
-            folders={[createMockFolder(1, 'Photos')]}
-            onAssetItemClick={mockOnAssetItemClick}
-          />
-          <BulkActionsBar />
-        </>,
-        {
-          renderOptions: { wrapper: AssetSelectionProvider },
-          providerOptions: {
-            permissions: (defaults: Array<{ action: string }>) =>
-              defaults.filter((permission) => permission.action !== 'plugin::upload.assets.update'),
-          },
-        }
-      );
+      // canUpdate is resolved by the page and passed down; false = no assets.update.
+      setup({ folders: [createMockFolder(1, 'Photos')], canUpdate: false });
 
       // Rows still render; only the selection affordance is gone.
       expect(await screen.findByText('image1.png')).toBeInTheDocument();

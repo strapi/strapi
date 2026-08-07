@@ -17,7 +17,6 @@ import { Folder as FolderIcon, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -35,36 +34,32 @@ import { FolderActionsMenu } from './FolderActionsMenu';
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
 
+// Column widths are pinned by a <colgroup> (see COLUMN_WIDTHS) under a fixed
+// table layout. Auto layout re-measures every column from the widest content
+// across all rows, so appending a page of assets during infinite scroll would
+// redistribute widths and visibly shift the layout (CMS-1574). Fixed widths
+// don't depend on the rows, so paging can't retrigger it; the name column takes
+// the remainder and ellipsizes.
 const StyledTable = styled(RawTable)`
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: 4px;
   overflow: hidden;
-
-  /* Below desktop only the name column remains. A fixed layout makes a long
-     name ellipsize instead of widening the table past the viewport — the
-     checkbox (first) and actions (last) columns keep a fixed width and the name
-     takes the rest. Desktop keeps the content-sized auto layout. */
-  table-layout: fixed;
-
-  & td:last-child,
-  & th:last-child {
-    width: 5.6rem;
-    white-space: nowrap;
-  }
-
-  ${({ theme }) => theme.breakpoints.large} {
-    table-layout: auto;
-
-    & td:last-child,
-    & th:last-child {
-      width: auto;
-      white-space: normal;
-    }
-  }
 `;
+
+// Per-column widths for the fixed layout, keyed by TABLE_HEADERS name. `name`
+// is intentionally absent — it's the one auto column, so it absorbs whatever is
+// left after the fixed columns.
+const CHECKBOX_COLUMN_WIDTH = '5.6rem';
+const COLUMN_WIDTHS: Partial<Record<string, string>> = {
+  createdAt: '16rem',
+  updatedAt: '16rem',
+  size: '10rem',
+  actions: '5.6rem',
+};
 
 const StyledThead = styled(RawThead)`
   background: ${({ theme }) => theme.colors.neutral100};
@@ -130,16 +125,12 @@ const StyledTr = styled.tr<{
   }
 `;
 
-// Leading checkbox column. Fixed narrow width so it holds its own column under
-// the mobile fixed table-layout (a 1% width would collapse and let the name
-// cell's preview overlap the control).
+// Leading checkbox column (width pinned by the colgroup).
 const CheckboxTd = styled(StyledTd)`
-  width: 5.6rem;
   white-space: nowrap;
 `;
 
 const CheckboxTh = styled(StyledTh)`
-  width: 5.6rem;
   white-space: nowrap;
 `;
 
@@ -215,15 +206,15 @@ interface AssetRowProps {
   asset: File;
   orderedItemKeys: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
+  canUpdate: boolean;
 }
 
-const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) => {
+const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick, canUpdate }: AssetRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -377,14 +368,14 @@ const FolderTr = styled(StyledTr)`
 interface FolderRowProps {
   folder: Folder;
   orderedItemKeys: ItemKey[];
+  canUpdate: boolean;
 }
 
-const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
+const FolderRow = ({ folder, orderedItemKeys, canUpdate }: FolderRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     dragData,
@@ -544,6 +535,13 @@ interface AssetsTableProps {
    */
   mixedItems?: MixedItem[] | null;
   onAssetItemClick: (assetId: number) => void;
+  /**
+   * Resolved once by the page (which holds rendering until RBAC settles) and
+   * passed down — never resolved per-row/table here. A local `useRBAC` would
+   * start `false` for one render and pop the checkbox column/cells in late,
+   * shifting the layout.
+   */
+  canUpdate: boolean;
 }
 
 export const AssetsTable = ({
@@ -551,11 +549,11 @@ export const AssetsTable = ({
   folders = [],
   mixedItems = null,
   onAssetItemClick,
+  canUpdate,
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
   // the date/size columns don't fit; size moves under the name as a subtitle.
@@ -599,6 +597,17 @@ export const AssetsTable = ({
 
   return (
     <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
+      {/* Pins the fixed-layout column widths so appended pages can't re-measure
+          them (CMS-1574). Order must match the header/body cells: optional
+          checkbox, then the visible headers; `name` has no width so it takes
+          the remainder. */}
+      <colgroup>
+        {showCheckboxColumn && <col style={{ width: CHECKBOX_COLUMN_WIDTH }} />}
+        {visibleHeaders.map((header) => {
+          const width = COLUMN_WIDTHS[header.name];
+          return <col key={header.name} style={width ? { width } : undefined} />;
+        })}
+      </colgroup>
       <StyledThead>
         <RawTr>
           {showCheckboxColumn && (
@@ -650,6 +659,7 @@ export const AssetsTable = ({
               key={`folder-${item.folder.id}`}
               folder={item.folder}
               orderedItemKeys={orderedItemKeys}
+              canUpdate={canUpdate}
             />
           ) : (
             <AssetRow
@@ -657,6 +667,7 @@ export const AssetsTable = ({
               asset={item.asset}
               orderedItemKeys={orderedItemKeys}
               onAssetItemClick={onAssetItemClick}
+              canUpdate={canUpdate}
             />
           )
         )}
@@ -666,6 +677,7 @@ export const AssetsTable = ({
               key={`folder-${folder.id}`}
               folder={folder}
               orderedItemKeys={orderedItemKeys}
+              canUpdate={canUpdate}
             />
           ))}
         {!mixedItems &&
@@ -675,6 +687,7 @@ export const AssetsTable = ({
               asset={asset}
               orderedItemKeys={orderedItemKeys}
               onAssetItemClick={onAssetItemClick}
+              canUpdate={canUpdate}
             />
           ))}
       </RawTbody>

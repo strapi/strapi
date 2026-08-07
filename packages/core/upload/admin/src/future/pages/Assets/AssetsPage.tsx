@@ -106,6 +106,12 @@ interface AssetsViewProps {
   view: number;
   folders: Folder[];
   isLoadingFolders: boolean;
+  /** RBAC still resolving — hold the table so the checkbox column (canUpdate)
+   *  doesn't pop in and shove the columns right once permissions land. */
+  arePermissionsLoading: boolean;
+  /** Resolved once at the page and passed to the table/rows so they don't each
+   *  re-resolve it (and flicker the checkbox column in). */
+  canUpdate: boolean;
   assets: File[];
   isLoadingAssets: boolean;
   isFetchingMore: boolean;
@@ -128,6 +134,8 @@ const AssetsView = ({
   view,
   folders,
   isLoadingFolders,
+  arePermissionsLoading,
+  canUpdate,
   assets,
   isLoadingAssets,
   isFetchingMore,
@@ -148,7 +156,7 @@ const AssetsView = ({
   const { formatMessage } = useIntl();
 
   const isGridView = view === viewOptions.GRID;
-  const isLoading = isLoadingAssets || isLoadingFolders;
+  const isLoading = isLoadingAssets || isLoadingFolders || arePermissionsLoading;
 
   // "Folders: Mixed with files" — interleave the complete folder list into the
   // loaded asset stream client-side, following the active sort. Table view
@@ -218,6 +226,7 @@ const AssetsView = ({
           folders={folders}
           mixedItems={mixedItems}
           onAssetItemClick={onAssetItemClick}
+          canUpdate={canUpdate}
         />
       )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
@@ -436,7 +445,7 @@ const ToggleLabel = styled.span`
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
   const { openDetails } = useAssetDetailsParam();
-  const { canCreate, canUpdate } = useMediaLibraryPermissions();
+  const { canCreate, canUpdate, isLoading: arePermissionsLoading } = useMediaLibraryPermissions();
 
   const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
   // Deleted or missing folders (404) need a fetch — handled here, not in
@@ -771,6 +780,8 @@ export const AssetsPage = () => {
                         view={view}
                         folders={folders}
                         isLoadingFolders={isLoadingFolders}
+                        arePermissionsLoading={arePermissionsLoading}
+                        canUpdate={canUpdate}
                         assets={assets}
                         isLoadingAssets={isLoadingAssets}
                         isFetchingMore={isFetchingMore}
