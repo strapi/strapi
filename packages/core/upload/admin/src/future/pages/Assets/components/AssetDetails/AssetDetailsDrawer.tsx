@@ -41,6 +41,7 @@ import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
+import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
@@ -50,7 +51,6 @@ import {
   useUpdateAssetMutation,
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
-import { useGetUploadSettingsQuery } from '../../../../services/settings';
 import { downloadFile } from '../../../../utils/downloadFile';
 import {
   formatBytes,
@@ -60,6 +60,7 @@ import {
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
+import { BusyOverlay } from '../BusyOverlay';
 
 import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
@@ -247,25 +248,14 @@ const DrawerToastSlot = styled(Box)`
 `;
 
 /**
- * Full-form overlay rendered during long-running drawer-scoped mutations
- * (e.g. replacing the binary). Sits above the toast slot (z-index 10) and
- * the in-drawer Alert so the user can't interact with the form mid-flight.
- */
-const DrawerBusyOverlay = styled(Flex)`
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  align-items: center;
-  justify-content: center;
-  background: ${({ theme }) => theme.colors.neutral0};
-  opacity: 0.7;
-`;
-
-/**
  * Map the drawer-scoped mutation flags to a single i18n message for the busy
  * overlay loader. Returns `null` when nothing is in flight.
+ *
+ * Exported for the unit test: the branch order only matters when two flags are
+ * true at once, which the UI makes hard to stage through the rendered drawer
+ * (each trigger disables itself while its own mutation runs).
  */
-const getBusyMessage = (state: {
+export const getBusyMessage = (state: {
   isDeleting: boolean;
   isReplacing: boolean;
   isCropCopying: boolean;
@@ -556,13 +546,17 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * ReplaceAssetButton
  * -----------------------------------------------------------------------------------------------*/
 
-const ReplaceAssetButton = () => {
+interface ReplaceAssetButtonProps {
+  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  mime?: string | null;
+}
+
+const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
   const { formatMessage } = useIntl();
   const { replaceAsset, isReplacing } = useAssetOperation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const { data: settings } = useGetUploadSettingsQuery();
-  const aiEnabled = settings?.data?.aiMetadata ?? false;
+  const aiEnabled = useAIMetadataEnabled({ mime });
 
   const handleTriggerClick = () => {
     setIsDialogOpen(true);
@@ -661,11 +655,11 @@ const ReplaceAssetButton = () => {
  * AssetImageActions - crop and replace buttons overlaid on the image preview.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps {
+interface AssetImageActionsProps extends ReplaceAssetButtonProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
@@ -683,7 +677,7 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton />
+      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -937,11 +931,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       canSaveAsCopy={canCreate}
                     />
                   ) : null}
-                  {busyMessage ? (
-                    <DrawerBusyOverlay>
-                      <Loader>{formatMessage(busyMessage)}</Loader>
-                    </DrawerBusyOverlay>
-                  ) : null}
+                  {busyMessage ? <BusyOverlay>{formatMessage(busyMessage)}</BusyOverlay> : null}
                   {drawerToast ? (
                     <DrawerToastSlot>
                       <Alert
@@ -958,7 +948,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       asset={asset}
                       actions={
                         isImage && canUpdate ? (
-                          <AssetImageActions onCrop={() => setIsCropOpen(true)} />
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
                         ) : null
                       }
                     />

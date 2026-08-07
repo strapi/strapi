@@ -6,10 +6,9 @@ import {
   Checkbox,
   Flex,
   Grid,
-  IconButton,
   Typography,
 } from '@strapi/design-system';
-import { Folder as FolderIcon, More } from '@strapi/icons';
+import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
@@ -20,9 +19,12 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
+import { AssetActionsMenu } from './AssetActionsMenu';
+import { BusyOverlay } from './BusyOverlay';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -57,15 +59,18 @@ const CheckboxOverlay = styled(Flex)`
 const StyledCard = styled(Card)<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isSelected?: boolean;
 }>`
   border: 1px solid
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
-  cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
+  cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  /* No opacity change while busy — the overlay does the dimming, and stacking
+     one on the other would wash the card out. */
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
   background: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary100 : undefined)};
   /* Shift+click range selection must not highlight card text. */
   user-select: none;
@@ -407,9 +412,10 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
@@ -417,7 +423,15 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
   // a range, cmd/ctrl toggles.
+  //
+  // The containment guard on this and the handler below is what keeps the
+  // actions menu's portaled dialogs — React children of this card — from
+  // opening the details drawer or toggling the selection.
   const handleCardClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -429,6 +443,10 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 
   // Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
@@ -461,12 +479,18 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="listitem"
       onDragStart={(e) => e.preventDefault()}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
       <StyledCardHeader>
         {canUpdate && (
@@ -485,6 +509,11 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
           </CheckboxOverlay>
         )}
         <AssetPreview asset={asset} />
+        {/* The header is the card's only positioned ancestor, and it's the part
+            worth covering — the footer keeps the name legible while the preview
+            is mid-replace. Below the checkbox overlay (z-index 1) would hide
+            the spinner, so it sits above it. */}
+        {busyMessage !== null ? <BusyOverlay zIndex={2}>{busyMessage}</BusyOverlay> : null}
       </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2}>
@@ -496,16 +525,9 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
               {asset.name}
             </FileName>
           </NameButton>
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+            <AssetActionsMenu asset={asset} dragData={dragData} />
+          </Flex>
         </CardFooter>
       </CardBody>
     </StyledCard>
