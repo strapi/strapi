@@ -53,6 +53,10 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     await expect(slugField).not.toBeDisabled();
     await expect(countries).not.toBeDisabled();
 
+    // Regression of #24890 / Mathilde review on #27184: shared fields must NOT show
+    // a Globe / "common to all locales" icon on the default locale.
+    await expect(page.getByText(/This value is common to all locales/i)).toHaveCount(0);
+
     // Create a Spanish translation
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
