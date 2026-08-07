@@ -100,7 +100,7 @@ describe('FilterMenu', () => {
 
     await user.click(screen.getByRole('button', { name: 'Filter' }));
     await user.click(screen.getByText('Creation date'));
-    await user.click(await screen.findByRole('menuitem', { name: '1 week ago' }));
+    await user.click(await screen.findByRole('menuitemradio', { name: '1 week ago' }));
 
     expect(listFilters.addFilter).toHaveBeenCalledWith({
       kind: 'date',
@@ -111,13 +111,39 @@ describe('FilterMenu', () => {
     });
   });
 
+  it('replaces the field preset badge in place instead of adding another (single-select)', async () => {
+    const listFilters = makeListFilters([
+      {
+        kind: 'date',
+        field: 'createdAt',
+        mode: 'preset',
+        condition: 'withinLast',
+        preset: '1week',
+      },
+    ]);
+    const { user } = render(<FilterMenu listFilters={listFilters} />);
+
+    await user.click(screen.getByRole('button', { name: /Filter/ }));
+    await user.click(screen.getByText('Creation date'));
+    await user.click(await screen.findByRole('menuitemradio', { name: '3 days ago' }));
+
+    expect(listFilters.addFilter).not.toHaveBeenCalled();
+    expect(listFilters.updateFilter).toHaveBeenCalledWith(0, {
+      kind: 'date',
+      field: 'createdAt',
+      mode: 'preset',
+      condition: 'withinLast',
+      preset: '3days',
+    });
+  });
+
   it('offers the date range only under Creation date', async () => {
     const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
 
     await user.click(screen.getByRole('button', { name: 'Filter' }));
     await user.click(screen.getByText('Last modified'));
 
-    expect(await screen.findByRole('menuitem', { name: '1 year ago' })).toBeInTheDocument();
+    expect(await screen.findByRole('menuitemradio', { name: '1 year ago' })).toBeInTheDocument();
     expect(screen.queryByText('Select date range')).not.toBeInTheDocument();
   });
 });

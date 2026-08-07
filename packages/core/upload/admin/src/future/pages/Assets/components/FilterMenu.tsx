@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { Badge, Box, Checkbox, Flex, Menu } from '@strapi/design-system';
-import { ChevronDown, Filter as FilterIcon } from '@strapi/icons';
+import { Check, ChevronDown, Filter as FilterIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -145,7 +145,18 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     }
   };
 
+  // Creation date / Last modified are single-select (per design): selecting a
+  // preset replaces the field's existing preset badge in place (keeping its
+  // condition) rather than adding another pill; a badge is created only when the
+  // field has none yet.
   const addPreset = (field: DateField, preset: DatePreset) => {
+    for (let i = filters.length - 1; i >= 0; i -= 1) {
+      const f = filters[i];
+      if (f.kind === 'date' && f.mode === 'preset' && f.field === field) {
+        updateFilter(i, { ...f, preset });
+        return;
+      }
+    }
     addFilter({ kind: 'date', field, mode: 'preset', condition: 'withinLast', preset });
   };
 
@@ -193,12 +204,41 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     </Menu.Item>
   ));
 
-  const presetItems = (field: DateField) =>
-    DATE_PRESETS.map((preset) => (
-      <Menu.Item key={preset} onSelect={() => addPreset(field, preset)}>
+  // The field's currently-selected preset (single-select), so the menu can mark
+  // it with a check.
+  const selectedPresetForField = (field: DateField): DatePreset | null => {
+    for (let i = filters.length - 1; i >= 0; i -= 1) {
+      const f = filters[i];
+      if (f.kind === 'date' && f.mode === 'preset' && f.field === field) {
+        return f.preset;
+      }
+    }
+    return null;
+  };
+
+  const presetItems = (field: DateField) => {
+    const selected = selectedPresetForField(field);
+
+    return DATE_PRESETS.map((preset) => (
+      <Menu.Item
+        key={preset}
+        role="menuitemradio"
+        aria-checked={selected === preset}
+        onSelect={(e: Event) => {
+          // Keep the menu open so the check moves to the picked value.
+          e.preventDefault();
+          addPreset(field, preset);
+        }}
+        endIcon={
+          selected === preset ? (
+            <Check aria-hidden width="1.6rem" height="1.6rem" fill="primary600" />
+          ) : null
+        }
+      >
         {formatMessage(PRESET_LABELS[preset])}
       </Menu.Item>
     ));
+  };
 
   const typeLabel = formatMessage({
     id: getTranslationKey('list.filters.field.type'),
