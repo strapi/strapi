@@ -144,7 +144,7 @@ describe('future assets service - generateAiMetadata', () => {
   beforeEach(() => {
     lastRequestBody = undefined;
     server.use(
-      http.post('*/upload/actions/generate-ai-metadata-for-files', async ({ request }) => {
+      http.post('*/upload/actions/generate-ai-metadata', async ({ request }) => {
         lastRequestBody = (await request.json()) as { fileIds?: number[] };
         return HttpResponse.json({
           data: [

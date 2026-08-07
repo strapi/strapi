@@ -8,9 +8,9 @@ import { AI_METADATA_CHUNK_SIZE, AI_METADATA_SUPPORTED_IMAGE_TYPES } from '../co
 
 import { isAIMetadataSupportedMime } from '../../../shared/constants';
 
-import type { GenerateAIMetadataForFiles } from '../../../shared/contracts/files';
+import type { GenerateAIMetadata } from '../../../shared/contracts/files';
 
-export type AIMetadataFileResult = GenerateAIMetadataForFiles.FileResult;
+export type AIMetadataFileResult = GenerateAIMetadata.FileResult;
 
 /**
  * Supported image types for AI metadata generation. Lives in `shared/` so the

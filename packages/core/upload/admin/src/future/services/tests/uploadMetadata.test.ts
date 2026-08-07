@@ -5,7 +5,7 @@ import { maybeGenerateMetadata, uploadApi, useGenerateAiMetadataMutation } from 
 
 import type {
   File as UploadedFile,
-  GenerateAIMetadataForFiles,
+  GenerateAIMetadata,
 } from '../../../../../shared/contracts/files';
 
 const makeUploadedFile = (id: number, mime: string): UploadedFile =>
@@ -27,7 +27,7 @@ const runHelper = async ({
 }: {
   file: UploadedFile;
   enabled?: boolean;
-  result?: { data: GenerateAIMetadataForFiles.Response['data'] } | { error: Error };
+  result?: { data: GenerateAIMetadata.Response['data'] } | { error: Error };
 }) => {
   const actions: Array<{ type: string; payload?: unknown }> = [];
   let didInitiate = false;
@@ -205,7 +205,7 @@ describe('generateAiMetadata endpoint', () => {
   it('posts a single-element fileIds array for one completed file', async () => {
     let body: { fileIds?: number[] } | undefined;
     server.use(
-      http.post('*/upload/actions/generate-ai-metadata-for-files', async ({ request }) => {
+      http.post('*/upload/actions/generate-ai-metadata', async ({ request }) => {
         body = (await request.json()) as { fileIds?: number[] };
         return HttpResponse.json({ data: [{ id: 42, status: 'success' }] });
       })

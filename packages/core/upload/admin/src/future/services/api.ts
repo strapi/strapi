@@ -21,7 +21,7 @@ import type {
   CreateFilesStream,
   CreateFilesStreamEvents,
   File as UploadedFile,
-  GenerateAIMetadataForFiles,
+  GenerateAIMetadata,
   UploadFileInfo,
 } from '../../../../shared/contracts/files';
 import type { FileMetadataResultStatus } from '../store/uploadProgress';
@@ -152,10 +152,7 @@ type UploadPoolResult =
   | { error: UploadError; data?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
-const METADATA_STATUS_BY_RESULT: Record<
-  GenerateAIMetadataForFiles.FileStatus,
-  FileMetadataResultStatus
-> = {
+const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
   success: 'generated',
   skipped: 'skipped',
   error: 'failed',
@@ -761,15 +758,15 @@ const uploadApi = adminApi
        * Re-exported from `assets.ts` for the components that consume the hook.
        */
       generateAiMetadata: builder.mutation<
-        GenerateAIMetadataForFiles.Response['data'],
+        GenerateAIMetadata.Response['data'],
         { fileIds: number[] }
       >({
         query: ({ fileIds }) => ({
-          url: '/upload/actions/generate-ai-metadata-for-files',
+          url: '/upload/actions/generate-ai-metadata',
           method: 'POST',
           data: { fileIds },
         }),
-        transformResponse: (response: { data: GenerateAIMetadataForFiles.Response['data'] }) =>
+        transformResponse: (response: { data: GenerateAIMetadata.Response['data'] }) =>
           response.data,
         invalidatesTags: (_result, _error, { fileIds }) => [
           ...fileIds.map((id) => ({ type: 'Asset' as const, id })),

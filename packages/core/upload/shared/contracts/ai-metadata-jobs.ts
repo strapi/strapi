@@ -10,7 +10,7 @@ export interface AIMetadataJob {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/latest
+ * GET /upload/ai-metadata-jobs/latest
  *
  * Return the latest AI metadata job
  */
@@ -25,7 +25,7 @@ export declare namespace GetLatestAIMetadataJob {
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata
+ * POST /upload/ai-metadata-jobs
  *
  * Start a new AI metadata generation job
  */
@@ -43,7 +43,7 @@ export declare namespace StartAIMetadataJob {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/count
+ * GET /upload/ai-metadata-jobs/pending-count
  *
  * Return count of images without metadata
  */

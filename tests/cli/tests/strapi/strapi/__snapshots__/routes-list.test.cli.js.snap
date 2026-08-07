@@ -262,8 +262,8 @@ exports[`routes:list should output list of routes 1`] = `
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │
 │ POST               │ /upload/actions/upload-from-urls                                                │
-│ POST               │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files                                                                   │
+│ POST               │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files/:id                                                               │
 │ PUT                │ /upload/files/:id                                                               │
 │ POST               │ /upload/files/:id/replace                                                       │
@@ -277,9 +277,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /upload/actions/bulk-move                                                       │
 │ POST               │ /upload/actions/bulk-update                                                     │
 │ POST               │ /upload/actions/generate-ai-metadata                                            │
-│ HEAD|GET           │ /upload/actions/generate-ai-metadata/count                                      │
-│ HEAD|GET           │ /upload/actions/generate-ai-metadata/latest                                     │
-│ POST               │ /upload/actions/generate-ai-metadata-for-files                                  │
+│ POST               │ /upload/ai-metadata-jobs                                                        │
+│ HEAD|GET           │ /upload/ai-metadata-jobs/latest                                                 │
+│ HEAD|GET           │ /upload/ai-metadata-jobs/pending-count                                          │
 │ HEAD|GET           │ /upload/configuration                                                           │
 │ PUT                │ /upload/configuration                                                           │
 │ HEAD|GET           │ /i18n/iso-locales                                                               │

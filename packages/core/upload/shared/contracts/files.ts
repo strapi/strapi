@@ -347,9 +347,9 @@ export declare namespace BulkUpdateFiles {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ * GET /upload/ai-metadata-jobs/pending-count - Get count of images without metadata
  */
-export declare namespace GetAIMetadataCount {
+export declare namespace GetAIMetadataPendingCount {
   export interface Request {
     query: {};
   }
@@ -364,9 +364,9 @@ export declare namespace GetAIMetadataCount {
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ * POST /upload/ai-metadata-jobs - Create a backfill job over every image missing metadata
  */
-export declare namespace GenerateAIMetadata {
+export declare namespace CreateAIMetadataJob {
   export interface Request {
     body: {};
   }
@@ -386,14 +386,14 @@ export declare namespace GenerateAIMetadata {
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata-for-files - Generate AI metadata for selected files
+ * POST /upload/actions/generate-ai-metadata - Generate AI metadata for selected files
  *
  * Synchronous (no job): generates and persists alt text / caption for the given
  * files and reports the outcome per file. Non-images are `skipped`; ids that no
  * longer exist and files whose generation failed are reported as `error` rather
  * than failing the whole request.
  */
-export declare namespace GenerateAIMetadataForFiles {
+export declare namespace GenerateAIMetadata {
   export type FileStatus = 'success' | 'skipped' | 'error';
 
   export interface FileResult {

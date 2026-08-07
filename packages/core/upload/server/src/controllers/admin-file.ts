@@ -84,7 +84,13 @@ export default {
     ctx.body = body;
   },
 
-  async getAIMetadataCount(ctx: Context) {
+  /**
+   * `GET /upload/ai-metadata-jobs/pending-count`
+   *
+   * How many images a backfill job would have to process, i.e. those still
+   * missing AI metadata, alongside the total image count.
+   */
+  async getAIMetadataPendingCount(ctx: Context) {
     const { userAbility } = ctx.state;
 
     const pm = strapi.service('admin::permission').createPermissionsManager({
@@ -124,7 +130,15 @@ export default {
     }
   },
 
-  async generateAIMetadata(ctx: Context) {
+  /**
+   * `POST /upload/ai-metadata-jobs`
+   *
+   * Create a backfill job that generates AI metadata for every image still
+   * missing it, and return the job so the client can poll it. Processing runs
+   * detached from this request; see `generateAIMetadata` for the synchronous
+   * counterpart that works on an explicit selection.
+   */
+  async createAIMetadataJob(ctx: Context) {
     const { userAbility } = ctx.state;
 
     const pm = strapi.service('admin::permission').createPermissionsManager({
@@ -185,15 +199,16 @@ export default {
   },
 
   /**
-   * `POST /upload/actions/generate-ai-metadata-for-files`
+   * `POST /upload/actions/generate-ai-metadata`
    *
-   * Generate AI metadata for an explicit selection of files, synchronously.
+   * Generate AI metadata for the explicit selection of files in the body,
+   * synchronously: the request resolves once every file has been processed and
+   * reports the outcome per file, so a single bad id or a non-image in the
+   * selection never fails the whole batch.
    *
-   * Unlike `generateAIMetadata`, no job is created: the request resolves once
-   * every file has been processed and reports the outcome per file, so a single
-   * bad id or a non-image in the selection never fails the whole batch.
+   * For the whole-library backfill, see `createAIMetadataJob`.
    */
-  async generateAIMetadataForFiles(ctx: Context) {
+  async generateAIMetadata(ctx: Context) {
     const { userAbility } = ctx.state;
     const { body } = ctx.request;
 
@@ -220,6 +235,12 @@ export default {
     ctx.body = { data: results };
   },
 
+  /**
+   * `GET /upload/ai-metadata-jobs/latest`
+   *
+   * The most recent still-active backfill job, so a client that reloads mid-run
+   * can pick the progress bar back up. 404s when nothing is running.
+   */
   async getLatestAIMetadataJob(ctx: Context) {
     if ((await getService('aiMetadata').isEnabled()) === false) {
       return ctx.notFound();

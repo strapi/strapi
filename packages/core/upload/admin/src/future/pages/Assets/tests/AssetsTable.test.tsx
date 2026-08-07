@@ -621,7 +621,7 @@ describe('AssetsTable', () => {
       let requestBody: unknown;
       server.use(
         http.post(
-          '*/upload/actions/generate-ai-metadata-for-files',
+          '*/upload/actions/generate-ai-metadata',
           async ({ request }) => {
             requestBody = await request.json();
             return HttpResponse.json({
@@ -655,7 +655,7 @@ describe('AssetsTable', () => {
     it('summarises a partial metadata result in a warning toast', async () => {
       server.use(
         http.post(
-          '*/upload/actions/generate-ai-metadata-for-files',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json({
               data: [
@@ -713,7 +713,7 @@ describe('AssetsTable', () => {
     it('reports folders in the selection as ignored rather than silently dropping them', async () => {
       server.use(
         http.post(
-          '*/upload/actions/generate-ai-metadata-for-files',
+          '*/upload/actions/generate-ai-metadata',
           () => HttpResponse.json({ data: [{ id: 1, status: 'success' }] }),
           { once: true }
         )
@@ -738,7 +738,7 @@ describe('AssetsTable', () => {
     it('keeps the selection and shows an error toast when metadata generation fails', async () => {
       server.use(
         http.post(
-          '*/upload/actions/generate-ai-metadata-for-files',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json(
               { error: { message: 'AI Metadata service is not enabled' } },
@@ -766,7 +766,7 @@ describe('AssetsTable', () => {
     it('keeps the selection and shows an error toast when every file fails server-side', async () => {
       server.use(
         http.post(
-          '*/upload/actions/generate-ai-metadata-for-files',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json({
               data: [

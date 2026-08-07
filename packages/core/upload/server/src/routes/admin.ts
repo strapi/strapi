@@ -50,14 +50,6 @@ export const routes = {
       },
     },
     {
-      method: 'POST',
-      path: '/files',
-      handler: 'admin-upload.uploadFile',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
       method: 'GET',
       path: '/files',
       handler: 'admin-file.find',
@@ -71,6 +63,14 @@ export const routes = {
             },
           },
         ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/files',
+      handler: 'admin-upload.uploadFile',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
@@ -266,33 +266,9 @@ export const routes = {
       },
     },
     {
-      method: 'GET',
-      path: '/actions/generate-ai-metadata/count',
-      handler: 'admin-file.getAIMetadataCount',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/actions/generate-ai-metadata/latest',
-      handler: 'admin-file.getLatestAIMetadataJob',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
       method: 'POST',
-      path: '/actions/generate-ai-metadata-for-files',
-      handler: 'admin-file.generateAIMetadataForFiles',
+      path: '/ai-metadata-jobs',
+      handler: 'admin-file.createAIMetadataJob',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -300,6 +276,30 @@ export const routes = {
             name: 'admin::hasPermissions',
             config: {
               actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-metadata-jobs/latest',
+      handler: 'admin-file.getLatestAIMetadataJob',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-metadata-jobs/pending-count',
+      handler: 'admin-file.getAIMetadataPendingCount',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
             },
           },
         ],
