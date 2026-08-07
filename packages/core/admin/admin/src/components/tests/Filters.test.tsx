@@ -24,6 +24,18 @@ const getAppliedFilters = () => {
   return [...params.keys()].filter((key) => key.startsWith('filters[$and]'));
 };
 
+/**
+ * The `$and` entries as `key=value` pairs, so a test can assert *which* entry changed
+ * rather than only how many there are.
+ */
+const getAppliedFilterEntries = () => {
+  const params = new URLSearchParams(currentSearch);
+
+  return [...params.entries()]
+    .filter(([key]) => key.startsWith('filters[$and]'))
+    .map(([key, value]) => `${key}=${value}`);
+};
+
 beforeEach(() => {
   currentSearch = '';
 });
@@ -48,6 +60,12 @@ const DEFAULT_FILTERS = [
     name: 'createdAt',
     label: 'Created At',
     type: 'date',
+  },
+  {
+    name: 'author',
+    label: 'Author',
+    mainField: { name: 'name', type: 'string' },
+    type: 'relation',
   },
 ] satisfies Filters.Filter[];
 
@@ -301,12 +319,15 @@ describe('Filters', () => {
       await user.click(await screen.findByRole('option', { name: 'Published' }));
       fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
 
-      // One entry changed, the other left alone.
+      // The clicked entry changed and the other kept its original value & position.
       await waitFor(() => {
         expect(screen.getByText('Status $eq published')).toBeInTheDocument();
       });
       expect(screen.queryAllByText('Status $eq draft')).toHaveLength(1);
-      expect(getAppliedFilters()).toHaveLength(2);
+      expect(getAppliedFilterEntries()).toEqual([
+        'filters[$and][0][status][$eq]=published',
+        'filters[$and][1][status][$eq]=draft',
+      ]);
     });
 
     it('should handle a URL that already contains duplicate filters', async () => {
@@ -333,6 +354,112 @@ describe('Filters', () => {
 
       await waitFor(() => {
         expect(screen.queryAllByText('Status $eq draft')).toHaveLength(1);
+      });
+      expect(getAppliedFilters()).toHaveLength(1);
+    });
+
+    it('should remove one of two identical relation filters', async () => {
+      // Relation entries nest the operator under `mainField`, so they exercise a different
+      // branch of `getFilterDetails` than scalar filters.
+      renderRTL(
+        <Filters.Root options={DEFAULT_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        {
+          initialEntries: [
+            '/?filters[$and][0][author][name][$eq]=Bob&filters[$and][1][author][name][$eq]=Bob',
+          ],
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.queryAllByText('Author $eq Bob')).toHaveLength(2);
+      });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Author $eq Bob' })[0]);
+
+      await waitFor(() => {
+        expect(screen.queryAllByText('Author $eq Bob')).toHaveLength(1);
+      });
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][author][name][$eq]=Bob']);
+    });
+
+    it('should edit one of two identical $null filters without touching the other', async () => {
+      // `$null`/`$notNull` carry no value, so the deleted `isFilterMatch` matched them on
+      // `(name, operator)` alone — duplicates were maximally ambiguous.
+      const { user } = renderRTL(
+        <Filters.Root options={DEFAULT_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        {
+          initialEntries: [
+            '/?filters[$and][0][name][$null]=true&filters[$and][1][name][$null]=true',
+          ],
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.queryAllByText('Name $null')).toHaveLength(2);
+      });
+
+      // Edit the first of the two, switching it to `is not null`.
+      await user.click(screen.getAllByText('Name $null')[0]);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+      await user.click(await screen.findByRole('option', { name: 'is not null' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+      await waitFor(() => {
+        expect(getAppliedFilterEntries()).toEqual([
+          'filters[$and][0][name][$notNull]=true',
+          'filters[$and][1][name][$null]=true',
+        ]);
+      });
+    });
+
+    it('should remove one of two identical chips rendered by a custom input', async () => {
+      // Custom inputs resolve the chip label through their own `options`, a separate code path
+      // from the default renderer.
+      const CUSTOM_FILTERS = [
+        {
+          name: 'owner',
+          label: 'Owner',
+          input: () => null,
+          options: [{ label: 'Ada Lovelace', value: 'ada' }],
+          type: 'enumeration',
+        },
+      ] satisfies Filters.Filter[];
+
+      renderRTL(
+        <Filters.Root options={CUSTOM_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        {
+          initialEntries: ['/?filters[$and][0][owner][$eq]=ada&filters[$and][1][owner][$eq]=ada'],
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.queryAllByText('Owner $eq Ada Lovelace')).toHaveLength(2);
+      });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Owner $eq Ada Lovelace' })[0]);
+
+      await waitFor(() => {
+        expect(screen.queryAllByText('Owner $eq Ada Lovelace')).toHaveLength(1);
       });
       expect(getAppliedFilters()).toHaveLength(1);
     });
