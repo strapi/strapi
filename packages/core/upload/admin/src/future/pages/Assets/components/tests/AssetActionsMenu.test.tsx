@@ -122,12 +122,28 @@ describe('AssetActionsMenu', () => {
   // The design system caps Menu.Content at 15rem and hides the scrollbar. This
   // menu is taller than the space under a last-row trigger, so with the default
   // the popper clamped it and cut Delete off with nothing on screen to say so.
-  it('lets the menu size to its content instead of scrolling inside the DS cap', async () => {
+  // Capping to the height Radix measured lifts the clamp without giving up the
+  // scroll fallback the DS default relied on — see ActionsMenuContent.
+  it('caps the menu to the available height rather than the DS 15rem default', async () => {
     const { user } = setup();
 
     await openMenu(user);
 
-    expect(screen.getByRole('menu')).toHaveStyle({ maxHeight: 'fit-content' });
+    expect(screen.getByRole('menu')).toHaveStyle({
+      maxHeight: 'min(var(--radix-popper-available-height, 100vh), 100vh)',
+    });
+  });
+
+  // The cap is only half the fix: the menu also has to stay scrollable, so the
+  // DS's `overflow: auto` must survive the override. (The matching
+  // `scrollbar-width: thin` that un-hides the scrollbar can't be asserted here —
+  // jsdom's computed style doesn't implement that property.)
+  it('stays scrollable so overflow past the cap remains reachable', async () => {
+    const { user } = setup();
+
+    await openMenu(user);
+
+    expect(screen.getByRole('menu')).toHaveStyle({ overflow: 'auto' });
   });
 
   describe('Copy link to media', () => {
@@ -248,8 +264,14 @@ describe('AssetActionsMenu', () => {
       // A GIF clears the server's looser `image/*` replace gate but is not on
       // the provider allowlist, so it would be skipped after upload.
       ['a GIF', 'image/gif', '.gif'],
+      // `File.mime` is optional on the contract. An asset without one has to
+      // fail closed: it can't be shown to be on the provider allowlist, so
+      // promising regenerated metadata would be describing something that may
+      // never happen. Guards the ungated overload from being reached by
+      // accident — see `useAIMetadataEnabled`.
+      ['an asset with no mime', undefined, ''],
     ])('does not promise AI metadata for %s', async (_label, mime, ext) => {
-      const { user } = setup({ asset: { ...asset, mime, ext } as File });
+      const { user } = setup({ asset: { ...asset, mime, ext } as unknown as File });
 
       await openMenu(user);
       await user.click(screen.getByRole('menuitem', { name: 'Replace media' }));

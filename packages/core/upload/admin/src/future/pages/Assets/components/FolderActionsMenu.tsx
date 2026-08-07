@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
+import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
@@ -79,15 +80,10 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
             defaultMessage: 'More actions',
           })}
         />
-        {/* See AssetActionsMenu: the design system's 15rem default clamps the
+        {/* See ActionsMenuContent: the design system's 15rem default clamps the
             menu against a hidden scrollbar, so items can be silently cut off
             near the viewport edge. This one is shorter, but kept in sync. */}
-        <Menu.Content
-          popoverPlacement="bottom-end"
-          zIndex={2}
-          minWidth="22rem"
-          maxHeight="fit-content"
-        >
+        <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
           <Menu.Item startIcon={<Link />} onSelect={handleCopyLink}>
             {formatMessage({
               id: getTranslationKey('list.folder.actions.copy-link'),
@@ -107,7 +103,7 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
               defaultMessage: 'Delete folder',
             })}
           </Menu.Item>
-        </Menu.Content>
+        </ActionsMenuContent>
       </Menu.Root>
       {isMoveOpen && (
         <BulkMoveDialog

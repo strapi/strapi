@@ -12,14 +12,21 @@ import { useGetUploadSettingsQuery } from '../services/settings';
  * licenses without AI, so the setting alone over-promises. The server's own
  * check (`aiMetadata.isEnabled()`) ANDs the same two conditions.
  *
- * Pass a `mime` to add the third gate the replace flow applies: it only
+ * Pass `{ mime }` to add the third gate the replace flow applies: it only
  * regenerates metadata for images the AI provider can read
  * (`admin-upload.replaceFile` → `aiMetadata.processFiles`, which filters on this
  * same allowlist). Promising it for a PDF — or for a GIF, which clears the
  * server's looser `image/*` gate but is skipped by the provider — would describe
- * something that never happens. Omit it where the file isn't known yet.
+ * something that never happens.
+ *
+ * The argument is an object rather than a bare `mime` so the two intents stay
+ * distinguishable: `File.mime` is optional on the contract, so a positional
+ * parameter let `useAIMetadataEnabled(asset.mime)` collapse into the ungated
+ * call whenever the mime was missing — silently taking the permissive path this
+ * hook exists to close. `useAIMetadataEnabled({ mime: undefined })` still gates
+ * (and fails closed); only an omitted `options` skips the mime check.
  */
-export const useAIMetadataEnabled = (mime?: string | null): boolean => {
+export const useAIMetadataEnabled = (options?: { mime?: string | null }): boolean => {
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetUploadSettingsQuery();
 
@@ -27,5 +34,5 @@ export const useAIMetadataEnabled = (mime?: string | null): boolean => {
     return false;
   }
 
-  return mime === undefined ? true : isAIMetadataSupportedMime(mime);
+  return options === undefined ? true : isAIMetadataSupportedMime(options.mime);
 };

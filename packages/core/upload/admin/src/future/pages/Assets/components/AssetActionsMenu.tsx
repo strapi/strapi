@@ -21,6 +21,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
+import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
@@ -60,7 +61,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
-  const aiEnabled = useAIMetadataEnabled(asset.mime);
+  const aiEnabled = useAIMetadataEnabled({ mime: asset.mime });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isReplaceOpen, setIsReplaceOpen] = useState(false);
@@ -205,18 +206,10 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
             defaultMessage: 'More actions',
           })}
         />
-        {/* `maxHeight` overrides the design system's 15rem default: the menu is
-            taller than the space under a last-row trigger, and the DS hides the
-            scrollbar (`scrollbar-width: none`), so the clamped overflow left
-            Delete unreachable with nothing on screen to hint at it. Letting the
-            content set its own height keeps Radix's collision flip — which
-            already picks the side with room — as the only thing that moves it. */}
-        <Menu.Content
-          popoverPlacement="bottom-end"
-          zIndex={2}
-          minWidth="22rem"
-          maxHeight="fit-content"
-        >
+        {/* `ActionsMenuContent` replaces the design system's flat 15rem clamp
+            with the height Radix actually measured, and un-hides the scrollbar
+            it would otherwise overflow into. See that file for why. */}
+        <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
           {canUpdate && (
             <Menu.Item
               startIcon={<ArrowsCounterClockwise />}
@@ -266,7 +259,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
               </Menu.Item>
             </>
           )}
-        </Menu.Content>
+        </ActionsMenuContent>
       </Menu.Root>
       <Dialog.Root open={isReplaceOpen} onOpenChange={setIsReplaceOpen}>
         <Dialog.Content>

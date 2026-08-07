@@ -566,7 +566,7 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
   const { replaceAsset, isReplacing } = useAssetOperation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const aiEnabled = useAIMetadataEnabled(mime);
+  const aiEnabled = useAIMetadataEnabled({ mime });
 
   const handleTriggerClick = () => {
     setIsDialogOpen(true);
