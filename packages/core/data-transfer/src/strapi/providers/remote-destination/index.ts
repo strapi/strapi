@@ -74,6 +74,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   stats!: { [TStage in Exclude<TransferStage, 'schemas'>]: { count: number } };
 
+  onWarning?: ((message: string) => void) | undefined;
+
   #diagnostics?: IDiagnosticReporter;
 
   #checksumsEnabled = false;

@@ -88,7 +88,7 @@ export default async (opts: CmdOptions) => {
   validateContentTypeTransferOptionsForStrapi(opts, strapi);
   const checksumsEnabled = opts.checksums !== false;
   let source;
-  let destination;
+  let destination: engineDataTransfer.IDestinationProvider | undefined;
 
   // if no URL provided, use local Strapi
   if (!opts.from) {
@@ -158,7 +158,8 @@ export default async (opts: CmdOptions) => {
   }
 
   // Match import CLI: surface destination soft-fail warnings (e.g. asset hash fallback).
-  destination.onWarning = (message) => console.warn(`\n${chalk.yellow('warn')}: ${message}`);
+  destination.onWarning = (message: string) =>
+    console.warn(`\n${chalk.yellow('warn')}: ${message}`);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'exact',
