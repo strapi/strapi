@@ -1,5 +1,5 @@
 import type * as UID from '../../../uid';
-import { Extends, MatchAllIntersect } from '../../../utils';
+import { Extends, MatchAllIntersect, Object } from '../../../utils';
 
 import type { GetPluginParams } from '..';
 
@@ -17,24 +17,39 @@ import type * as Locale from './locale';
 // Utils
 import type * as Attribute from './attributes';
 
+/**
+ * @remark
+ * Every optional param below explicitly allows `undefined` so that callers compiling with
+ * `exactOptionalPropertyTypes` can forward their own optional values (`{ populate: maybePopulate }`)
+ * without having to conditionally spread each key. This is a no-op when the flag is off.
+ */
 export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIntersect<
   [
     // Sort
-    [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
-    [HasMember<TKind, 'sort:string'>, { sort?: Sort.StringNotation<TSchemaUID> }],
-    [HasMember<TKind, 'sort:array'>, { sort?: Sort.ArrayNotation<TSchemaUID> }],
-    [HasMember<TKind, 'sort:object'>, { sort?: Sort.ObjectNotation<TSchemaUID> }],
+    [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> | undefined }],
+    [HasMember<TKind, 'sort:string'>, { sort?: Sort.StringNotation<TSchemaUID> | undefined }],
+    [HasMember<TKind, 'sort:array'>, { sort?: Sort.ArrayNotation<TSchemaUID> | undefined }],
+    [HasMember<TKind, 'sort:object'>, { sort?: Sort.ObjectNotation<TSchemaUID> | undefined }],
     // Fields
-    [HasMember<TKind, 'fields'>, { fields?: Fields.Any<TSchemaUID> }],
-    [HasMember<TKind, 'fields:string'>, { fields?: Fields.StringNotation<TSchemaUID> }],
-    [HasMember<TKind, 'fields:array'>, { fields?: Fields.ArrayNotation<TSchemaUID> }],
+    [HasMember<TKind, 'fields'>, { fields?: Fields.Any<TSchemaUID> | undefined }],
+    [HasMember<TKind, 'fields:string'>, { fields?: Fields.StringNotation<TSchemaUID> | undefined }],
+    [HasMember<TKind, 'fields:array'>, { fields?: Fields.ArrayNotation<TSchemaUID> | undefined }],
     // Filters
-    [HasMember<TKind, 'filters'>, { filters?: Filters.Any<TSchemaUID> }],
+    [HasMember<TKind, 'filters'>, { filters?: Filters.Any<TSchemaUID> | undefined }],
     // Populate
-    [HasMember<TKind, 'populate'>, { populate?: Populate.Any<TSchemaUID> }],
-    [HasMember<TKind, 'populate:string'>, { populate?: Populate.StringNotation<TSchemaUID> }],
-    [HasMember<TKind, 'populate:array'>, { populate?: Populate.ArrayNotation<TSchemaUID> }],
-    [HasMember<TKind, 'populate:object'>, { populate?: Populate.ObjectNotation<TSchemaUID> }],
+    [HasMember<TKind, 'populate'>, { populate?: Populate.Any<TSchemaUID> | undefined }],
+    [
+      HasMember<TKind, 'populate:string'>,
+      { populate?: Populate.StringNotation<TSchemaUID> | undefined },
+    ],
+    [
+      HasMember<TKind, 'populate:array'>,
+      { populate?: Populate.ArrayNotation<TSchemaUID> | undefined },
+    ],
+    [
+      HasMember<TKind, 'populate:object'>,
+      { populate?: Populate.ObjectNotation<TSchemaUID> | undefined },
+    ],
     // Pagination
     [HasMember<TKind, 'pagination'>, Pagination.Any],
     [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
@@ -45,18 +60,21 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     [HasMember<TKind, 'hasPublishedVersion'>, PublicationStatus.Param],
     [HasMember<TKind, 'publicationFilter'>, PublicationStatus.PublicationFilterParam],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: Locale.Any }],
-    [HasMember<TKind, 'locale:string'>, { locale?: Locale.StringNotation }],
-    [HasMember<TKind, 'locale:array'>, { locale?: Locale.ArrayNotation }],
+    [HasMember<TKind, 'locale'>, { locale?: Locale.Any | undefined }],
+    [HasMember<TKind, 'locale:string'>, { locale?: Locale.StringNotation | undefined }],
+    [HasMember<TKind, 'locale:array'>, { locale?: Locale.ArrayNotation | undefined }],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
-    [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
-    [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
+    [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> | undefined }],
+    [
+      HasMember<TKind, 'data:partial'>,
+      { data?: Object.PartialWithUndefined<Data.Input<TSchemaUID>> | undefined },
+    ],
     // Search
-    [HasMember<TKind, '_q'>, { _q?: Search.Q }],
+    [HasMember<TKind, '_q'>, { _q?: Search.Q | undefined }],
     // Look Up - For internal use only
-    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }],
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> | undefined }],
   ]
 >;
 
