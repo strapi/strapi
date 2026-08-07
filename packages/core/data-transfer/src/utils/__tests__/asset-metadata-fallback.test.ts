@@ -34,9 +34,9 @@ describe('isMissingAssetMetadataSidecarError', () => {
   });
 
   test('accepts tar/file missing-entry errors', () => {
-    expect(isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))).toBe(
-      true
-    );
+    expect(
+      isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))
+    ).toBe(true);
   });
 
   test('rejects malformed JSON and other failures', () => {
