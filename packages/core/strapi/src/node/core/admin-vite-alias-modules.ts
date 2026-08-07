@@ -33,12 +33,56 @@ export const ADMIN_VITE_ALIAS_MODULES = [
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
 
 /**
- * Modules passed to Vite resolve.dedupe (and aliased): the admin alias modules plus the
- * CodeMirror singletons, so every copy collapses onto a single runtime instance.
+ * Modules deduplicated but deliberately NOT aliased.
+ *
+ * A local plugin (`config/plugins.ts` → `{ resolve: './src/plugins/x' }`) is imported into the
+ * generated `.strapi/client/app.js` by a *relative* path, so Rollup treats its built
+ * `dist/admin/index.mjs` as project source rather than as a dependency. The bare specifiers that
+ * `@strapi/sdk-plugin` externalises into that file are therefore resolved from the plugin's own
+ * directory first — and a local plugin installed with npm/pnpm has its own `node_modules`, because
+ * the SDK template lists `@strapi/strapi` in the generated `devDependencies`.
+ *
+ * Without dedupe, every local plugin pulls a second copy of the whole admin application into the
+ * build graph (`@strapi/admin`, `@strapi/content-manager`, `@strapi/upload`, … and their trees).
+ * Measured on a stock app: one empty generated plugin added 4,940 modules (+99%) and ~840MB of
+ * peak build heap, which is what makes `strapi build` OOM once a project has a handful of local
+ * plugins (#22946).
+ *
+ * `@strapi/strapi` is the head of that chain — `@strapi/admin` and the core plugins are reached
+ * *through* it — so deduping it alone collapses ~98% of the duplication. `react-intl` and
+ * `@strapi/icons` are added because the SDK's plugin template imports them directly rather than
+ * via `@strapi/strapi`, so they need their own entries.
+ *
+ * These MUST NOT be added to {@link ADMIN_VITE_ALIAS_MODULES}: `resolve.alias` prefix-substitutes
+ * to a filesystem path and so bypasses the package's `exports` map.
+ *   - `@strapi/strapi` exports `./admin` (real target `dist/admin/index.mjs`) — the exact subpath
+ *     every plugin imports. Aliasing rewrites it to a non-existent `<pkgdir>/admin` and the build
+ *     dies with "[vite:load-fallback] Could not load …/@strapi/strapi/admin".
+ *   - `@strapi/icons` exports `./symbols` and fails the same way.
+ *   - `@strapi/admin` publishes no `.` export at all, so `getModulePath()` would throw
+ *     ERR_PACKAGE_PATH_NOT_EXPORTED at config time. It needs no entry here: deduping
+ *     `@strapi/strapi` already collapses it.
+ * The contract tests in `__tests__/admin-vite-aliases.test.ts` enforce this separation.
+ *
+ * @internal
+ */
+export const ADMIN_VITE_DEDUPE_ONLY_MODULES = [
+  '@strapi/strapi',
+  '@strapi/icons',
+  'react-intl',
+] as const;
+
+export type AdminViteDedupeOnlyModule = (typeof ADMIN_VITE_DEDUPE_ONLY_MODULES)[number];
+
+/**
+ * Modules passed to Vite resolve.dedupe: the admin alias modules plus the CodeMirror singletons
+ * (both of which are also aliased), plus the dedupe-only modules above, so every copy collapses
+ * onto a single runtime instance.
  */
 export const ADMIN_VITE_DEDUPE_MODULES = [
   ...ADMIN_VITE_ALIAS_MODULES,
   ...ADMIN_VITE_SINGLETON_MODULES,
+  ...ADMIN_VITE_DEDUPE_ONLY_MODULES,
 ] as const;
 
 export { ADMIN_VITE_SINGLETON_MODULES };
