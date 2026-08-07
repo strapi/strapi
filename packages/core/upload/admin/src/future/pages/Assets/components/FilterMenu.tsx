@@ -5,6 +5,7 @@ import { Filter as FilterIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { getTranslationKey } from '../../../utils/translations';
 import {
   DATE_PRESETS,
@@ -93,8 +94,14 @@ interface FilterMenuProps {
  */
 export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = useState(false);
   const { filters, addFilter, updateFilter, removeFilter } = listFilters;
+
+  // Fired whenever a filter facet is turned on (not on removal). `filter` names
+  // the facet, mirroring the legacy field-key payload.
+  const trackFilter = (filter: string) =>
+    trackUsage('didFilterMediaLibraryElements', { location: MEDIA_LIBRARY_LOCATION, filter });
 
   // The Type submenu edits the LAST type badge in place while the menu stays
   // open (checking values accumulates into one badge, per design).
@@ -110,9 +117,14 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     lastTypeFilter && lastTypeFilter.kind === 'type' ? lastTypeFilter.values : [];
 
   const toggleTypeValue = (value: TypeValue) => {
-    const nextValues = checkedValues.includes(value)
-      ? checkedValues.filter((v) => v !== value)
-      : [...checkedValues, value];
+    const isAdding = !checkedValues.includes(value);
+    const nextValues = isAdding
+      ? [...checkedValues, value]
+      : checkedValues.filter((v) => v !== value);
+
+    if (isAdding) {
+      trackFilter('type');
+    }
 
     if (lastTypeFilter && lastTypeFilter.kind === 'type') {
       if (nextValues.length === 0) {
@@ -129,10 +141,12 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   };
 
   const addPreset = (field: DateField, preset: DatePreset) => {
+    trackFilter(field);
     addFilter({ kind: 'date', field, mode: 'preset', condition: 'withinLast', preset });
   };
 
   const addRange = (from: string, to: string) => {
+    trackFilter('createdAt');
     addFilter({ kind: 'date', field: 'createdAt', mode: 'range', condition: 'is', from, to });
     // The calendar is not a Menu.Item — close the menu explicitly on commit.
     setIsOpen(false);

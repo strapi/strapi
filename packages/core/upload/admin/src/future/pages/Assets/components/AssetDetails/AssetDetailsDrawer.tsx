@@ -43,6 +43,7 @@ import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
 import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../../hooks/useTracking';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
@@ -704,6 +705,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();
+  const { trackUsage } = useTracking();
   const [replaceMutation, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const [deleteMutation, { isLoading: isDeleting }] = useDeleteAssetMutation();
   const [uploadCroppedCopy, { isLoading: isCropCopying }] = useUploadFileSilentlyMutation();
@@ -755,6 +757,13 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       return;
     }
 
+    trackUsage('didEditMediaLibraryElements', {
+      location: MEDIA_LIBRARY_LOCATION,
+      // Legacy sends the mime top-level type (image/video/audio/application…).
+      type: asset.mime?.split('/')[0],
+      changeLocation: values.folder !== initialValues.folder,
+    });
+
     notify({
       type: 'success',
       message: formatMessage({
@@ -786,6 +795,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         notify({ type: 'danger', message });
         return;
       }
+      trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
       notify({
         type: 'success',
         message: formatMessage({
@@ -794,7 +804,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, notify, replaceMutation]
+    [asset.id, formatMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -858,6 +868,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError();
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
     notify({
       type: 'success',
       message: formatMessage({
@@ -886,6 +897,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError();
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });
     notify({
       type: 'success',
       message: formatMessage({

@@ -17,6 +17,7 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -528,6 +529,7 @@ export const AssetsTable = ({
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const { trackUsage } = useTracking();
 
   const visibleHeaders = isMobile
     ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
@@ -558,6 +560,7 @@ export const AssetsTable = ({
     if (allSelected) {
       clear();
     } else {
+      trackUsage('didSelectAllMediaLibraryElements');
       selectAll(orderedItemKeys);
     }
   };

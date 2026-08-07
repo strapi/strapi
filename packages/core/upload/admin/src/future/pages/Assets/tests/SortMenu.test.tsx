@@ -4,6 +4,13 @@ import { SortMenu } from '../components/SortMenu';
 
 import type { ListSort } from '../hooks/useListSort';
 
+const mockTrackUsage = jest.fn();
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
 const makeSort = (overrides: Partial<ListSort> = {}): ListSort => ({
   sortBy: 'mostRecentUpdates',
   direction: null,
@@ -18,6 +25,10 @@ const makeSort = (overrides: Partial<ListSort> = {}): ListSort => ({
 });
 
 describe('SortMenu', () => {
+  beforeEach(() => {
+    mockTrackUsage.mockClear();
+  });
+
   it('shows the active primary rule on the trigger and all options grouped', async () => {
     const { user } = render(<SortMenu sort={makeSort()} />);
 
@@ -106,5 +117,44 @@ describe('SortMenu', () => {
     await user.click(screen.getByRole('menuitemradio', { name: 'Mixed with files' }));
 
     expect(sort.setFoldersPosition).toHaveBeenCalledWith('mixed');
+  });
+
+  describe('tracking', () => {
+    it('fires didSortMediaLibraryElements when selecting a non-active sort-by option', async () => {
+      const { user } = render(<SortMenu sort={makeSort()} />);
+
+      await user.click(screen.getByRole('button', { name: /sort:/i }));
+      await user.click(screen.getByRole('menuitemradio', { name: 'Oldest uploads' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSortMediaLibraryElements', {
+        location: 'upload',
+        sort: 'oldestUploads',
+      });
+    });
+
+    it('fires didSortMediaLibraryElements when selecting a non-active sort-direction option', async () => {
+      const { user } = render(<SortMenu sort={makeSort()} />);
+
+      await user.click(screen.getByRole('button', { name: /sort:/i }));
+      await user.click(screen.getByRole('menuitemradio', { name: 'A to Z' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSortMediaLibraryElements', {
+        location: 'upload',
+        sort: 'nameAsc',
+      });
+    });
+
+    it('does not fire didSortMediaLibraryElements when clicking the already-active option', async () => {
+      const { user } = render(<SortMenu sort={makeSort()} />);
+
+      await user.click(screen.getByRole('button', { name: /sort:/i }));
+      // 'Most recent updates' is the active sort per makeSort() defaults.
+      await user.click(screen.getByRole('menuitemradio', { name: 'Most recent updates' }));
+
+      expect(mockTrackUsage).not.toHaveBeenCalledWith(
+        'didSortMediaLibraryElements',
+        expect.objectContaining({ sort: 'mostRecentUpdates' })
+      );
+    });
   });
 });
