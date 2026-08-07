@@ -1,16 +1,10 @@
 import os from 'os';
 import type ts from 'typescript';
+import { lazyInit } from '@strapi/utils';
 import type { Logger } from './logger';
 
 // Lazy: defer `typescript` (~115 ms) until a CLI command actually loads tsconfig
-let lazyTs: typeof ts | undefined;
-const tsLib = (): typeof ts => {
-  if (!lazyTs) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTs = require('typescript');
-  }
-  return lazyTs as typeof ts;
-};
+const tsLib = lazyInit<typeof import('typescript')>(() => require('typescript'));
 
 interface TsConfig {
   config: ts.ParsedCommandLine;

@@ -3,19 +3,14 @@ import path from 'path';
 import _ from 'lodash';
 import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
-import { env, generateInstallId } from '@strapi/utils';
+import { env, generateInstallId, lazyInit } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
 
 // Lazy: only resolved when telemetry is enabled and a sender is constructed
-let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
-const tsUtils = (): typeof import('@strapi/typescript-utils') => {
-  if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTsUtils = require('@strapi/typescript-utils');
-  }
-  return lazyTsUtils as typeof import('@strapi/typescript-utils');
-};
+const tsUtils = lazyInit<typeof import('@strapi/typescript-utils')>(() =>
+  require('@strapi/typescript-utils')
+);
 
 export interface Payload {
   eventProperties?: Record<string, unknown>;
