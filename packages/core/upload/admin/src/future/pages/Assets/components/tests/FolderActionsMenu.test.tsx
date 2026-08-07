@@ -50,6 +50,42 @@ describe('FolderActionsMenu', () => {
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
   });
 
+  // See AssetActionsMenu: Radix's default modal menu made a sibling trigger
+  // unclickable, so closing several opened menus took one click each.
+  it("closes an open menu when another row's menu is opened", async () => {
+    const otherFolder: Folder = {
+      id: 6,
+      name: 'Videos',
+      pathId: 6,
+      path: '/6',
+      parent: null,
+    };
+    const otherDragData: DragFolderData = {
+      kind: 'folder',
+      id: 6,
+      name: 'Videos',
+      parentId: null,
+    };
+
+    const { user } = render(
+      <>
+        <FolderActionsMenu folder={folder} dragData={dragData} />
+        <FolderActionsMenu folder={otherFolder} dragData={otherDragData} />
+      </>
+    );
+
+    const [firstTrigger, secondTrigger] = screen.getAllByRole('button', { name: 'More actions' });
+
+    await user.click(firstTrigger);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+
+    await user.click(secondTrigger);
+
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(1));
+    expect(secondTrigger).toHaveAttribute('aria-expanded', 'true');
+    expect(firstTrigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('opens the menu with the four actions, separated after the copy link', async () => {
     const { user } = setup();
 

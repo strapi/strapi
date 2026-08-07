@@ -1,19 +1,22 @@
-import * as Sentry from '@sentry/node';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import sentryServiceLoader from '../sentry';
 import defaultConfig from '../../config';
 
-const INVALID_DSN = 'an_invalid_dsn';
-const VALID_DSN = 'a_valid_dsn';
+const { captureException, INVALID_DSN, VALID_DSN } = vi.hoisted(() => ({
+  captureException: vi.fn(),
+  INVALID_DSN: 'an_invalid_dsn',
+  VALID_DSN: 'a_valid_dsn',
+}));
 
-jest.mock('@sentry/node', () => {
+vi.mock('@sentry/node', () => {
   return {
-    init(options: Sentry.NodeOptions = {}) {
+    init(options: { dsn?: string } = {}) {
       if (options.dsn !== VALID_DSN) {
         throw Error('invalid dsn');
       }
     },
-    captureException: jest.fn(),
+    captureException,
     withScope(configureScope: () => void) {
       configureScope();
     },
@@ -22,25 +25,27 @@ jest.mock('@sentry/node', () => {
 
 describe('Sentry service', () => {
   beforeEach(() => {
+    captureException.mockClear();
+
     // Reset Strapi state
     global.strapi = {
       config: {
         // @ts-expect-error - ignore the generic type
         get: () => defaultConfig,
-        set: jest.fn(),
-        has: jest.fn(),
+        set: vi.fn(),
+        has: vi.fn(),
       },
       // @ts-expect-error - we only need a subset of the strapi log object
       log: {
-        warn: jest.fn(),
-        info: jest.fn(),
+        warn: vi.fn(),
+        info: vi.fn(),
       },
     };
   });
 
   afterEach(() => {
     // Reset the plugin resource state
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('disables Sentry when no DSN is provided', () => {
@@ -84,11 +89,10 @@ describe('Sentry service', () => {
 
     // Send error
     const error = Error('an error');
-    const configureScope = jest.fn();
+    const configureScope = vi.fn();
     sentryService.sendError(error, configureScope);
     expect(configureScope).toHaveBeenCalled();
-    const captureExceptionSpy = jest.spyOn(Sentry, 'captureException');
-    expect(captureExceptionSpy).toHaveBeenCalled();
+    expect(captureException).toHaveBeenCalled();
   });
 
   it('does not send metadata when the option is disabled', () => {
@@ -100,7 +104,7 @@ describe('Sentry service', () => {
 
     // Send error
     const error = Error('an error');
-    const configureScope = jest.fn();
+    const configureScope = vi.fn();
     sentryService.sendError(error, configureScope);
     expect(configureScope).not.toHaveBeenCalled();
   });
