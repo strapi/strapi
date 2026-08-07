@@ -14,7 +14,7 @@ Scheduling provides users with the ability to set a scheduled date for the relea
 
 ## How it works
 
-Everytime you create or update a release and add a scheduled date, the server responsible for handling this request will generate a new cronjob (utilizing node-schedule) for the selected date to publish the release.
+Everytime you create or update a release and add a scheduled date, the server responsible for handling this request will generate a new cronjob (via `strapi.cron` / croner) for the selected date to publish the release.
 
 ## Timezones
 
