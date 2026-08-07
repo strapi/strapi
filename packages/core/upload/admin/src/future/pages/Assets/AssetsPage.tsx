@@ -39,13 +39,13 @@ import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsSearchInput } from './components/AssetsSearchInput';
 import { AssetsTable } from './components/AssetsTable';
 import { BulkActionsBar } from './components/BulkActionsBar';
-import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
 import { EmptyState, FilteredEmptyState } from './components/EmptyState';
 import { FilterBadges } from './components/FilterBadges';
 import { FilterMenu } from './components/FilterMenu';
+import { FolderFormDialog } from './components/FolderFormDialog';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { SortMenu } from './components/SortMenu';
@@ -687,9 +687,10 @@ export const AssetsPage = () => {
           </BusyAssetsProvider>
         </AssetSelectionProvider>
       </UploadDropZoneProvider>
-      <CreateFolderDialog
+      <FolderFormDialog
         open={isCreateFolderDialogOpen}
-        folderName={title}
+        mode="create"
+        parentFolderName={title}
         parentFolderId={currentFolderId}
         onClose={() => setIsCreateFolderDialogOpen(false)}
       />
