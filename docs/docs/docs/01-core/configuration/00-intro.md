@@ -112,7 +112,7 @@ Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineConfig('adm
 - JavaScript users get the same runtime checks when the config loads
 - Existing plain object / function exports remain supported (non-breaking)
 
-Schemas currently live in `@strapi/core` (`configuration/schemas`) and are intended to move to `@strapi/definitions` (`schemas.config.*`) once that package lands. Load-time validation of *all* configs (without opting into factories) and strict unknown-key rejection are follow-ups.
+Schemas currently live in `@strapi/core` (`configuration/schemas`) and are intended to move to `@strapi/definitions` (`schemas.config.*`) once that package lands. Load-time validation of _all_ configs (without opting into factories) and strict unknown-key rejection are follow-ups.
 
 ### Configuration filename restrictions
 
