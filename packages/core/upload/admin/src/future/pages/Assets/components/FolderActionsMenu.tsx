@@ -88,7 +88,7 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
             })}
           </Menu.Item>
           <Menu.Separator />
-          {/* TODO: gate Rename, Move and Delete on `assets.canUpdate` */}
+          {/* TODO: gate Rename, Move and Delete on `assets.canUpdate` CMS-387 */}
           <Menu.Item startIcon={<Pencil />} onSelect={() => setIsRenameOpen(true)}>
             {formatMessage({
               id: getTranslationKey('list.folder.actions.rename'),
