@@ -16,7 +16,7 @@ export type DeferredRelationCopy = {
   schemaUid: UID.Schema;
   attributeName: string;
   kind: 'joinTable' | 'fkColumn' | 'morphToOne';
-  /** Lodash path to the owning entity in entry data (e.g. `details`). `null` = root entry. */
+  /** Lodash path to the owning entity in entry data (e.g. `details` or `items.0`). `null` = root entry. */
   ownerPath: string | null;
 };
 
@@ -156,7 +156,11 @@ const collectNestedCloneRelationAdjustments = async (
       }
 
       const relationPath = path.rawWithIndices!;
-      const ownerPath = path.raw === key ? null : (path.raw ?? null);
+      // Owner is the parent of the relation path (preserve indices for
+      // repeatable components / DZs, e.g. `items.0.tag` → `items.0`).
+      // Top-level relations have no parent segment → null (root entry).
+      const lastDot = relationPath.lastIndexOf('.');
+      const ownerPath = lastDot === -1 ? null : relationPath.slice(0, lastDot);
 
       if (ownerPath == null) {
         return;
@@ -522,10 +526,17 @@ export const applyDeferredCloneRelationCopies = async (
   }
 
   for (const task of deferredCopies) {
-    const sourceEntryId =
-      resolveOwnerEntryId(originalData, task.ownerPath, sourceRootId) ?? sourceRootId;
-    const targetEntryId =
-      resolveOwnerEntryId(clonedData, task.ownerPath, targetRootId) ?? targetRootId;
+    // Root owners (ownerPath === null) resolve via the fallback root IDs.
+    // Nested owners must resolve explicitly — falling back to the root ID would
+    // copy component-schema relation rows using an unrelated document ID.
+    const sourceEntryId = resolveOwnerEntryId(originalData, task.ownerPath, sourceRootId);
+    const targetEntryId = resolveOwnerEntryId(clonedData, task.ownerPath, targetRootId);
+
+    if (sourceEntryId == null || targetEntryId == null) {
+      throw new Error(
+        `Unable to resolve clone relation owner for "${task.attributeName}" at path "${task.ownerPath ?? '<root>'}"`
+      );
+    }
 
     if (sourceEntryId === targetEntryId) {
       continue;
