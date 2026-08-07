@@ -5,7 +5,7 @@ import {
   adminApi,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';

@@ -1,5 +1,5 @@
 import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CreateFolders, UpdateFolder } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';

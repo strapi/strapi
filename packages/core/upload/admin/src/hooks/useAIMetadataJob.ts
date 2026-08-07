@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getTrad } from '../utils';
 

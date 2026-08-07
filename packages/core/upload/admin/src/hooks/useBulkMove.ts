@@ -1,6 +1,6 @@
 import { type FetchResponse, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { File, BulkMoveFiles } from '../../../shared/contracts/files';
 import { Folder, BulkMoveFolders } from '../../../shared/contracts/folders';

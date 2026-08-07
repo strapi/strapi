@@ -2,7 +2,7 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useFolderStructure } from '../useFolderStructure';
 

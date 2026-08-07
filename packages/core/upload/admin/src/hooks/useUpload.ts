@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { adminApi } from '@strapi/admin/strapi-admin';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDispatch, useStore } from 'react-redux';
 
 import { File, RawFile, CreateFile } from '../../../shared/contracts/files';

@@ -4,7 +4,7 @@ import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { GetFolders } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';

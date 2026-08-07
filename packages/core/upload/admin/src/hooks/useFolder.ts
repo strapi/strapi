@@ -1,6 +1,6 @@
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { GetFolder } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';

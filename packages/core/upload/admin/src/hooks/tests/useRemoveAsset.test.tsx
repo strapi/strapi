@@ -6,7 +6,7 @@ import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/rea
 import { server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Provider } from 'react-redux';
 
 import { useRemoveAsset } from '../useRemoveAsset';
@@ -40,8 +40,8 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 
 const refetchQueriesMock = jest.fn();
 
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
+jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     refetchQueries: refetchQueriesMock,
   }),

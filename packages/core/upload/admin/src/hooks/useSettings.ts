@@ -1,5 +1,5 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import type { GetSettings } from '../../../shared/contracts/settings';
 

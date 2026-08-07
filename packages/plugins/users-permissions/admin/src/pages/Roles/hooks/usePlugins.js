@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
-import { useQueries } from 'react-query';
+import { useQueries } from '@tanstack/react-query';
 
 import { cleanPermissions, getTrad } from '../../../utils';
 

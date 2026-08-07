@@ -2,7 +2,7 @@ import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { BulkMoveDialog, BulkMoveDialogProps } from '../BulkMoveDialog';
 
