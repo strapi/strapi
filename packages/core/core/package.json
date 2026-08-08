@@ -77,7 +77,6 @@
     "chalk": "4.1.2",
     "ci-info": "4.0.0",
     "cli-table3": "0.6.5",
-    "commander": "8.3.0",
     "configstore": "5.0.1",
     "debug": "4.3.4",
     "delegates": "1.0.0",

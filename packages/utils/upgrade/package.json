@@ -68,7 +68,7 @@
     "@strapi/utils": "5.51.2",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
-    "commander": "8.3.0",
+    "commander": "14.0.3",
     "esbuild-register": "3.6.0",
     "execa": "5.1.1",
     "fast-glob": "3.3.2",
