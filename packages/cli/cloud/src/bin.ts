@@ -6,11 +6,11 @@ import { buildStrapiCloudCommands } from './index';
 
 function loadStrapiCloudCommand(argv = process.argv, command = new Command()) {
   // Initial program setup
-  command.storeOptionsAsProperties(false).allowUnknownOption(true);
+  command.allowUnknownOption(true);
 
   // Help command
   command.helpOption('-h, --help', 'Display help for command');
-  command.addHelpCommand('help [command]', 'Display help for command');
+  command.helpCommand('help [command]', 'Display help for command');
 
   const cwd = process.cwd();
 
