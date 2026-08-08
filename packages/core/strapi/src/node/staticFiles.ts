@@ -43,9 +43,7 @@ const getEntryModule = (ctx: BuildContext): string => {
 };
 
 interface GetDocumentHTMLArgs extends Pick<BuildContext, 'logger'> {
-  props?: {
-    entryPath?: string;
-  };
+  props: { entryPath?: string } | undefined;
 }
 
 /**

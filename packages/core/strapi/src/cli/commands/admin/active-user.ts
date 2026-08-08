@@ -8,8 +8,8 @@ import { runAction } from '../../utils/helpers';
 import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
-  email?: string;
-  active?: string;
+  email: string | undefined;
+  active: string | undefined;
 }
 
 interface Answers {
@@ -59,7 +59,7 @@ async function setActive({ email, active }: CmdOptions) {
 /**
  * Change a user's active status
  */
-const action = async (cmdOptions: CmdOptions = {}) => {
+const action = async (cmdOptions: CmdOptions) => {
   const { email, active } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(active) && process.stdin.isTTY) {

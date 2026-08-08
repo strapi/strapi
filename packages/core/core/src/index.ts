@@ -1,5 +1,5 @@
 import * as qs from 'qs';
-import type { Core } from '@strapi/types';
+import type { Core, Utils } from '@strapi/types';
 
 import Strapi, { type StrapiOptions } from './Strapi';
 import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from './utils';
@@ -8,7 +8,9 @@ export { default as compileStrapi } from './compile';
 export * as factories from './factories';
 export * as ai from './ai';
 
-export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
+export const createStrapi = (
+  options: Utils.Object.PartialWithUndefined<StrapiOptions> = {}
+): Core.Strapi => {
   const strapi = new Strapi({
     ...options,
     ...resolveWorkingDirectories(options),

@@ -201,7 +201,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
       chunkFilename: '[name].[contenthash:8].chunk.js',
     },
     optimization: {
-      minimize: ctx.options.minify,
+      minimize: ctx.options.minify ?? false,
       minimizer: [
         new EsbuildPlugin({
           target,
