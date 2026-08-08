@@ -2,7 +2,7 @@ import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
-  IconButton,
+  Loader,
   RawTable,
   RawTbody,
   RawTd,
@@ -12,20 +12,26 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Folder as FolderIcon, More } from '@strapi/icons';
+import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
+import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
+import { AssetActionsMenu } from './AssetActionsMenu';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
+import { FolderActionsMenu } from './FolderActionsMenu';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -61,6 +67,7 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled.tr<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
   $isSelected?: boolean;
@@ -69,15 +76,15 @@ const StyledTr = styled.tr<{
   user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
-  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
-    if ($isMovePending) {
+  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget }) => {
+    if ($isMovePending || $isBusy) {
       return 'wait';
     }
 
     return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
   }};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  opacity: ${({ $isDragging, $isBusy }) => ($isDragging || $isBusy ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -136,8 +143,14 @@ const NameButton = styled.button`
   }
 `;
 
+// Shields the row from its own controls (checkbox, "..." trigger) without
+// severing propagation for the menu's portaled content — those events are React
+// children of the cell but not DOM descendants, and Radix needs them to reach
+// `document` to dismiss its layers.
 const stopRowEvent = (e: React.SyntheticEvent) => {
-  e.stopPropagation();
+  if (isEventFromWithin(e)) {
+    e.stopPropagation();
+  }
 };
 
 interface AssetPreviewCellProps {
@@ -174,26 +187,41 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
-  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
+  const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
-  // Click semantics: plain click selects one; cmd/ctrl toggles; shift selects a contiguous
-  // range (anchor → target), replacing the current selection.
+  // Plain click opens the asset details; pointer selection lives on the
+  // checkbox only. Modifier clicks keep the selection semantics: shift selects
+  // a range, cmd/ctrl toggles.
+  //
+  // The containment guard on this and the handler below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // opening the details drawer or toggling the selection.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
       toggle(key);
     } else {
-      selectOnly(key);
+      onAssetItemClick(asset.id);
     }
   };
 
   // Desktop: Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
@@ -224,15 +252,22 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
-      {/* TODO:? no checkbox column on mobile — multi-select on mobile is deferred. */}
-      {!isMobile && (
+      {/* No checkbox column on mobile (multi-select deferred) or without the
+          update permission (nothing selectable can be acted on). */}
+      {!isMobile && canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -251,7 +286,16 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       )}
       <StyledTd>
         <Flex gap={3} alignItems="center">
-          <AssetPreviewCell asset={asset} />
+          {/* The row is dimmed and inert while busy; the spinner in place of the
+              thumbnail is what says so positively. Its label carries the reason
+              to screen readers — the row itself has no other announcement. */}
+          {busyMessage !== null ? (
+            <Flex justifyContent="center" width="3.2rem" height="3.2rem">
+              <Loader small>{busyMessage}</Loader>
+            </Flex>
+          ) : (
+            <AssetPreviewCell asset={asset} />
+          )}
           <Flex direction="column" alignItems="flex-start" minWidth={0}>
             <NameButton type="button" onClick={handleNameClick}>
               <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
@@ -285,18 +329,11 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would open the details drawer). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
       </StyledTd>
     </StyledTr>
@@ -319,8 +356,10 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
+    dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
     showValidDropHighlight,
@@ -331,7 +370,15 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 
   // Folders share the selection mechanism with assets. Only the plain-click
   // semantic differs: it navigates into the folder instead of selecting it.
+  //
+  // The containment guard on this and the handlers below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // navigating into the folder or starting a drag.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -343,6 +390,10 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 
   // Enter navigates into the folder, Space toggles selection (same as assets).
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
@@ -376,11 +427,20 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
-      onDragStart={(e) => e.preventDefault()}
+      onDragStart={(e: React.DragEvent) => {
+        if (isEventFromWithin(e)) {
+          e.preventDefault();
+        }
+      }}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
-      {!isMobile && (
+      {!isMobile && canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -436,18 +496,11 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would navigate into the folder). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <FolderActionsMenu folder={folder} dragData={dragData} />
         </Flex>
       </StyledTd>
     </FolderTr>
@@ -457,30 +510,48 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
 interface AssetsTableProps {
   assets: File[];
   folders?: Folder[];
+  /**
+   * When set ("Folders: Mixed with files"), rows render in this interleaved
+   * order instead of folders-first. Range selection follows the same order.
+   */
+  mixedItems?: MixedItem[] | null;
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTableProps) => {
+export const AssetsTable = ({
+  assets,
+  folders = [],
+  mixedItems = null,
+  onAssetItemClick,
+}: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
+  const { canUpdate } = useMediaLibraryPermissions();
 
   const visibleHeaders = isMobile
     ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
     : TABLE_HEADERS;
 
   // The checkbox column is a dedicated structural column (not part of
-  // TABLE_HEADERS) and is hidden on mobile.
-  const showCheckboxColumn = !isMobile;
+  // TABLE_HEADERS). Hidden on mobile (multi-select deferred) and without the
+  // update permission — every bulk action needs `assets.update`, so a
+  // read-only user has nothing to select for.
+  const showCheckboxColumn = !isMobile && canUpdate;
   const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;
 
-  // Render order: folders first, then assets — range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  // Render order — folders first by default, or the interleaved mixed order.
+  // Range selection follows it.
+  const orderedItemKeys: ItemKey[] = mixedItems
+    ? mixedItems.map((item) =>
+        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
+      )
+    : [
+        ...folders.map((folder) => folderKey(folder.id)),
+        ...assets.map((asset) => assetKey(asset.id)),
+      ];
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {
@@ -498,7 +569,7 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
   }
 
   return (
-    <StyledTable colCount={colCount} rowCount={totalRows + 1}>
+    <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
       <StyledThead>
         <RawTr>
           {showCheckboxColumn && (
@@ -544,21 +615,39 @@ export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTa
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {folders.map((folder) => (
-          <FolderRow
-            key={`folder-${folder.id}`}
-            folder={folder}
-            orderedItemKeys={orderedItemKeys}
-          />
-        ))}
-        {assets.map((asset) => (
-          <AssetRow
-            key={asset.id}
-            asset={asset}
-            orderedItemKeys={orderedItemKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        ))}
+        {mixedItems?.map((item) =>
+          item.kind === 'folder' ? (
+            <FolderRow
+              key={`folder-${item.folder.id}`}
+              folder={item.folder}
+              orderedItemKeys={orderedItemKeys}
+            />
+          ) : (
+            <AssetRow
+              key={item.asset.id}
+              asset={item.asset}
+              orderedItemKeys={orderedItemKeys}
+              onAssetItemClick={onAssetItemClick}
+            />
+          )
+        )}
+        {!mixedItems &&
+          folders.map((folder) => (
+            <FolderRow
+              key={`folder-${folder.id}`}
+              folder={folder}
+              orderedItemKeys={orderedItemKeys}
+            />
+          ))}
+        {!mixedItems &&
+          assets.map((asset) => (
+            <AssetRow
+              key={asset.id}
+              asset={asset}
+              orderedItemKeys={orderedItemKeys}
+              onAssetItemClick={onAssetItemClick}
+            />
+          ))}
       </RawTbody>
     </StyledTable>
   );

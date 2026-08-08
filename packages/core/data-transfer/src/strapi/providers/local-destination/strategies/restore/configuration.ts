@@ -52,7 +52,7 @@ export const createConfigurationWriteStream = async (
       await transaction?.attach(async () => {
         try {
           await restoreConfigs(strapi, config);
-        } catch (error) {
+        } catch {
           return callback(
             new ProviderTransferError(
               `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(

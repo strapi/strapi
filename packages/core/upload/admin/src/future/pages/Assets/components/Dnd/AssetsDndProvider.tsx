@@ -22,12 +22,14 @@ import { useNotification } from '@strapi/admin/strapi-admin';
 import { Box, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../../services/folders';
 import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
 import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
 import { getFolderLabel } from '../../../../utils/getFolderLabel';
+import { emptyItemLocations, type ItemLocations } from '../../../../utils/itemLocations';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetSelectionOptional } from '../../hooks/useAssetSelection';
 import { useFolderNavigation } from '../../hooks/useFolderNavigation';
@@ -71,11 +73,21 @@ export const useAssetsDndOptional = () => useContext(AssetsDndContext);
 
 interface AssetsDndProviderProps {
   children: ReactNode;
+  /**
+   * Real location of every loaded row, so a multi-item drag validates against
+   * each item's own parent. Defaults to a lookup that misses everything, which
+   * falls back to the folder currently open.
+   */
+  locations?: ItemLocations;
 }
 
 interface DragSession {
   items: DragItemData[];
   fromSelection: boolean;
+  /** Location of the grabbed row — names the source in the success toast. */
+  activeSourceFolderId: number | null;
+  /** True when the set spans several source folders, so none can be named. */
+  spansMultipleSources: boolean;
 }
 
 const resolveDestination = (
@@ -100,7 +112,15 @@ const resolveDestination = (
   return null;
 };
 
-export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
+// Activation distance no real pointer gesture will ever reach — used to keep a
+// constant-length sensor array while disabling drag for users without the move
+// permission (see the note in the provider).
+const DRAG_DISABLED_DISTANCE = Number.MAX_SAFE_INTEGER;
+
+export const AssetsDndProvider = ({
+  children,
+  locations = emptyItemLocations,
+}: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const selection = useAssetSelectionOptional();
@@ -114,16 +134,33 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   const [dragItems, setDragItems] = useState<DragItemData[]>([]);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
   // Sync session for drag-end — state alone can lag one render behind dragStart.
-  const dragSessionRef = useRef<DragSession>({ items: [], fromSelection: false });
+  const dragSessionRef = useRef<DragSession>({
+    items: [],
+    fromSelection: false,
+    activeSourceFolderId: null,
+    spansMultipleSources: false,
+  });
 
   const announceToLiveRegion = useCallback((message: string) => {
     setLiveAnnouncement('');
     requestAnimationFrame(() => setLiveAnnouncement(message));
   }, []);
 
+  // Moving is a mutation (bulk-move → `assets.update`); without the permission
+  // pointer drag must never activate. Keyboard moves go through BulkMoveDialog,
+  // which is itself gated.
+  //
+  // The gate has to keep BOTH the `useSensor`/`useSensors` calls AND the sensor
+  // array's length constant across renders: `canUpdate` starts false and flips
+  // true once the RBAC check resolves, and dnd-kit keys internal memos/effects
+  // on the sensor list, erroring if its size changes ("argument changed size
+  // between renders"). So adding/removing a sensor is out — instead keep one
+  // PointerSensor always and push its activation distance out of reach when the
+  // user can't move, which no real drag gesture will ever satisfy.
+  const { canUpdate } = useMediaLibraryPermissions();
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: canUpdate ? 8 : DRAG_DISABLED_DISTANCE },
     })
   );
 
@@ -147,7 +184,12 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   );
 
   const clearDragState = useCallback(() => {
-    dragSessionRef.current = { items: [], fromSelection: false };
+    dragSessionRef.current = {
+      items: [],
+      fromSelection: false,
+      activeSourceFolderId: null,
+      spansMultipleSources: false,
+    };
     setDragItems([]);
   }, []);
 
@@ -160,17 +202,18 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
         return;
       }
 
-      const { items, fromSelection } = buildDragSet(data, selection?.selectedKeys, currentFolderId);
-      dragSessionRef.current = { items, fromSelection };
-      setDragItems(items);
+      const dragSet = buildDragSet(data, selection?.selectedKeys, locations, currentFolderId);
+      dragSessionRef.current = dragSet;
+      setDragItems(dragSet.items);
     },
-    [clearDragState, currentFolderId, selection?.selectedKeys]
+    [clearDragState, currentFolderId, locations, selection?.selectedKeys]
   );
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
       const { over } = event;
-      const { items, fromSelection } = dragSessionRef.current;
+      const { items, fromSelection, activeSourceFolderId, spansMultipleSources } =
+        dragSessionRef.current;
       clearDragState();
 
       if (isMovePending || !over || items.length === 0) {
@@ -196,13 +239,19 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       }
 
       const payload = buildBulkMovePayload(items);
-      // Source is always the current folder — dragged items are, by definition,
-      // visible in the current view. Destination is the drop target. Both use
-      // leaf names so the DnD toast reads identically to the dialog's.
+      // Source is the grabbed row's own location, not the folder currently open:
+      // a global search result can be dragged out of a folder the user isn't in.
+      // A search-built selection can also span folders, and then no single
+      // source is true for the whole set — `null` drops it from the wording
+      // instead of naming one item's folder for all of them. Destination is the
+      // drop target. Both use leaf names so the DnD toast reads identically to
+      // the dialog's.
       const successMessage = formatMoveSuccessMessage({
         formatMessage,
         count: items.length,
-        source: getFolderLabel(folderStructure, currentFolderId, rootLabel),
+        source: spansMultipleSources
+          ? null
+          : getFolderLabel(folderStructure, activeSourceFolderId, rootLabel),
         destination: getFolderLabel(folderStructure, targetFolderId, rootLabel),
       });
       const errorFallback = formatMessage({
@@ -246,7 +295,6 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       announceToLiveRegion,
       bulkMove,
       clearDragState,
-      currentFolderId,
       folderStructure,
       formatMessage,
       isMovePending,
@@ -290,7 +338,12 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           return '';
         }
 
-        const { items } = buildDragSet(activeData, selection?.selectedKeys, currentFolderId);
+        const { items } = buildDragSet(
+          activeData,
+          selection?.selectedKeys,
+          locations,
+          currentFolderId
+        );
 
         if (
           !canDropItemOnFolder({
@@ -313,7 +366,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
           defaultMessage: 'Drag cancelled.',
         }),
     }),
-    [currentFolderId, folderStructure, formatMessage, selection?.selectedKeys]
+    [currentFolderId, folderStructure, formatMessage, locations, selection?.selectedKeys]
   );
 
   return (
