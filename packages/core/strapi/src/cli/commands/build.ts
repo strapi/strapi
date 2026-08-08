@@ -1,20 +1,20 @@
 import { createCommand } from 'commander';
-import type { StrapiCommand } from '../types';
+import type { CLIContext, StrapiCommand } from '../types';
 
 import { build as nodeBuild, BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type BuildCLIOptions = BuildOptions;
 
-const action = async (options: BuildCLIOptions) => {
+const action = async (options: BuildCLIOptions, ctx: CLIContext) => {
   try {
     if (options.bundler === 'webpack') {
-      options.logger.warn(
+      ctx.logger.warn(
         '[@strapi/strapi]: Using webpack as a bundler is deprecated. You should migrate to vite.'
       );
     }
 
-    await nodeBuild(options);
+    await nodeBuild(options, ctx);
   } catch (err) {
     handleUnexpectedError(err);
   }
@@ -33,9 +33,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--stats', 'Print build statistics to the console', false)
     .option('--install-deps', 'Auto-install missing admin dependencies', false)
     .description('Build the strapi admin app')
-    .action(async (options: BuildCLIOptions) => {
-      return action({ ...options, ...ctx });
-    });
+    .action((options) => action(options, ctx));
 };
 
 export { command };

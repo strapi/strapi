@@ -1,22 +1,22 @@
 import { createCommand } from 'commander';
 import cluster from 'node:cluster';
-import type { StrapiCommand } from '../types';
+import type { CLIContext, StrapiCommand } from '../types';
 import { develop as nodeDevelop, DevelopOptions } from '../../node/develop';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type DevelopCLIOptions = DevelopOptions;
 
-const action = async (options: DevelopCLIOptions) => {
+const action = async (options: DevelopCLIOptions, ctx: CLIContext) => {
   try {
     if (cluster.isPrimary) {
       if (options.bundler === 'webpack') {
-        options.logger.warn(
+        ctx.logger.warn(
           '[@strapi/strapi]: Using webpack as a bundler is deprecated. You should migrate to vite.'
         );
       }
     }
 
-    await nodeDevelop(options);
+    await nodeDevelop(options, ctx);
   } catch (err) {
     handleUnexpectedError(err);
   }
@@ -40,9 +40,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--install-deps', 'Auto-install missing admin dependencies', true)
     .option('--no-install-deps', 'Do not auto-install missing admin dependencies')
     .description('Start your Strapi application in development mode')
-    .action(async (options: DevelopCLIOptions) => {
-      return action({ ...options, ...ctx });
-    });
+    .action((options) => action(options, ctx));
 };
 
 export { command };
