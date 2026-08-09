@@ -1,6 +1,7 @@
-import type { Constants, If, Intersect } from '../../../utils';
-import type { Attribute, NonPopulatableAttributeNames } from '../..';
+import type { And, Constants, Extends, If, Intersect } from '../../../utils';
+import type { Attribute } from '../..';
 import type { ContentType } from '../../../data';
+import type * as UID from '../../../uid';
 
 export type MediaTargetUID = 'plugin::upload.file';
 export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
@@ -34,28 +35,45 @@ export type Media<
 >;
 
 /**
+ * Whether `plugin::upload.file` is actually present in the extended content-type registry.
+ *
+ * `Constants.AreSchemaRegistriesExtended` alone isn't enough: it's true as soon as *either*
+ * the component or the content-type registry has been extended, which doesn't guarantee the
+ * upload file content-type itself was registered (e.g. component-only augmentation, or a
+ * selective/partial content-type registry that omits it).
+ */
+export type IsMediaTargetRegistered = Extends<MediaTargetUID, UID.ContentType>;
+
+/**
  * The shape of a resolved media value.
  *
- * Restricted to the file schema's non-populatable (scalar) attributes: including its
- * `folder`/`related` relations would let the type recurse into arbitrary content types
- * (anything that itself has a media field), which blows up type-checking on real projects.
+ * Uses the file schema's full attribute set (same as any other relation target, via
+ * {@link ContentType}) rather than a restricted subset, so nested upload relations
+ * (e.g. `folder`, `related`) stay accessible on populated media - consistent with how
+ * relation attributes are resolved everywhere else and with what the query/populate types
+ * already accept.
  *
- * Only resolved once the schema registries are extended (i.e. a project's generated types are
- * loaded). Outside of that (e.g. this package's own framework-internal, schema-agnostic code),
- * `plugin::upload.file` isn't a real registered schema, so this falls back to `any` - the same
- * escape hatch {@link Attribute.Value}'s other branches rely on in that context.
+ * `isUrlSigned` is added separately since it's runtime-only metadata (set by the upload
+ * middleware for private providers) and isn't part of the file schema's attributes.
+ *
+ * Only resolved once the content-type registry is extended AND `plugin::upload.file` is part
+ * of it (i.e. a project's generated types are loaded). Outside of that (e.g. this package's own
+ * framework-internal, schema-agnostic code, or a component-only/partial registry), falls back
+ * to `any` - the same escape hatch {@link Attribute.Value}'s other branches rely on in that
+ * context.
  */
 export type MediaAttributeValue = If<
-  Constants.AreSchemaRegistriesExtended,
-  ContentType<MediaTargetUID, NonPopulatableAttributeNames<MediaTargetUID>>,
+  And<Constants.IsContentTypeRegistryExtended, IsMediaTargetRegistered>,
+  ContentType<MediaTargetUID> & { isUrlSigned?: boolean },
   any
 >;
 
-export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
-  TMultiple,
-  MediaAttributeValue[],
-  MediaAttributeValue
->;
+export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.False> =
+  TMultiple extends Constants.True
+    ? MediaAttributeValue[]
+    : TMultiple extends Constants.False
+      ? MediaAttributeValue
+      : MediaAttributeValue[] | MediaAttributeValue;
 
 export type GetMediaValue<TAttribute extends Attribute.Attribute> =
   TAttribute extends Media<
