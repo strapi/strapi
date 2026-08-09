@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useIntl, type IntlShape, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -235,10 +235,55 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && !Array.isArray(value) && value !== null;
 };
 
-const isMessageDescriptor = (value: unknown): value is MessageDescriptor => {
+/**
+ * Validation messages can carry the values needed to interpolate their placeholders, e.g.
+ * `components.Input.error.validation.minLength` ("The value is too short (min: {min}).").
+ */
+type TranslationMessage = MessageDescriptor & { values?: Record<string, PrimitiveType> };
+
+const isMessageDescriptor = (value: unknown): value is TranslationMessage => {
   return (
     isRecord(value) && typeof value.id === 'string' && typeof value.defaultMessage === 'string'
   );
+};
+
+/**
+ * @description Turns a yup validation message into a displayable string. The message can be a
+ * plain string, a descriptor, or a descriptor wrapped in `{ message }` / `{ errors: [] }`.
+ *
+ * `values` is forwarded to `formatMessage`, otherwise react-intl cannot interpolate placeholders
+ * such as the `{min}` of `components.Input.error.validation.minLength` and renders the raw
+ * pattern instead. See strapi/strapi#19030.
+ */
+export const formatValidationMessage = (
+  msg: unknown,
+  formatMessage: IntlShape['formatMessage']
+): string => {
+  const format = ({ values, ...message }: TranslationMessage) => formatMessage(message, values);
+
+  try {
+    if (msg === undefined || msg === null) return '';
+    if (typeof msg === 'string') return msg;
+    // Direct descriptor
+    if (isMessageDescriptor(msg)) return format(msg);
+    // Wrapped descriptor: { message: { id, defaultMessage } }
+    if (isRecord(msg) && isMessageDescriptor(msg.message)) {
+      return format(msg.message);
+    }
+    // errors array: [{ id, defaultMessage }]
+    if (isRecord(msg) && Array.isArray(msg.errors) && msg.errors.length > 0) {
+      const first = msg.errors[0];
+      if (typeof first === 'string') return first;
+      if (isMessageDescriptor(first)) return format(first);
+    }
+    // fallback to defaultMessage if present
+    if (isRecord(msg) && typeof msg.defaultMessage === 'string') {
+      return msg.defaultMessage;
+    }
+    return String(msg);
+  } catch {
+    return String(msg);
+  }
 };
 
 const Register = ({ hasAdmin }: RegisterProps) => {
@@ -431,36 +476,10 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                const formatDescriptor = (msg: unknown) => {
-                  try {
-                    if (msg === undefined || msg === null) return '';
-                    if (typeof msg === 'string') return msg;
-                    // Direct descriptor
-                    if (isMessageDescriptor(msg)) return formatMessage(msg);
-                    // Wrapped descriptor: { message: { id, defaultMessage } }
-                    if (isRecord(msg) && isMessageDescriptor(msg.message)) {
-                      return formatMessage(msg.message);
-                    }
-                    // errors array: [{ id, defaultMessage }]
-                    if (isRecord(msg) && Array.isArray(msg.errors) && msg.errors.length > 0) {
-                      const first = msg.errors[0];
-                      if (typeof first === 'string') return first;
-                      if (isMessageDescriptor(first)) return formatMessage(first);
-                    }
-                    // fallback to defaultMessage if present
-                    if (isRecord(msg) && typeof msg.defaultMessage === 'string') {
-                      return msg.defaultMessage;
-                    }
-                    return String(msg);
-                  } catch {
-                    return String(msg);
-                  }
-                };
-
                 const computed = err.inner.reduce<Record<string, string>>(
                   (acc, { message, path }) => {
                     if (!path) return acc;
-                    acc[path] = formatDescriptor(message);
+                    acc[path] = formatValidationMessage(message, formatMessage);
                     return acc;
                   },
                   {}

@@ -2,7 +2,10 @@ import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
-import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
+import {
+  buildAdminViteResolveAliases,
+  getResolvableSingletonModules,
+} from '../core/admin-vite-aliases';
 import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -29,6 +32,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   return {
     root: ctx.cwd,
     base: ctx.basePath,
+    // Public files are served by the strapi::public middleware at runtime, so they do not need to
+    // be copied into the admin build output.
+    publicDir: false,
     build: {
       emptyOutDir: false, // Rely on CLI to do this
       outDir: ctx.distDir,
@@ -42,9 +48,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
+      // Contract (#26964, #26944, #27014):
+      // - CJS packages imported by @strapi/admin MUST be in optimizeDeps.include (invariant, lodash, …).
+      // - The admin entry host (@strapi/strapi) MUST NOT be in optimizeDeps.exclude.
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
       // so changes are reflected without clearing node_modules/.strapi/vite cache.
-      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      // Also skip allowlisted / opt-in pre-built ESM plugin UI kits (see collectAdminOptimizeDepsExclude).
       ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
@@ -65,16 +74,21 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Omit when linked so local changes are picked up (see exclude above)
         ...(!designSystemLinked ? ['@strapi/design-system'] : []),
         '@radix-ui/react-tooltip',
-        // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
-        // is CommonJS-only; pre-bundling converts it to ESM for the browser
+        // CJS-only; required for @strapi/admin in dev (#26944, #26964, #27014).
         'lodash',
-        // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
-        // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
+        'invariant',
+        // UMD; without pre-bundling plugin chunks get empty namespace → "Prism is not defined" (#26964).
         'prismjs',
-        // Content-manager Blocks code editor side-effect-imports these; they expect global `Prism`.
-        // Must pre-bundle for all apps (not only monorepo examples) or fresh create-strapi-app
-        // projects blank-crash the admin (#25070, #26964).
-        'prismjs/components/*.js',
+        // Do NOT add `prismjs/components/*.js` to include. #26978 prebundled every language for
+        // all apps; combined with #27014's optimizeDeps contract, Vite evaluates those chunks in
+        // reverse import order so parents (e.g. basic before vbnet) load too late →
+        // `Cannot set properties of undefined (setting 'comment')` and a blank admin in develop.
+        // Keep `prismjs` only; let language components load as normal ESM side-effect imports.
+        // CodeMirror must be a single instance across design-system, lang-json and uiw or the
+        // JSON custom field crashes on instanceof checks. Pre-bundle for every build — dev and
+        // production — not only monorepo examples. Use the resolvable subset so include stays in
+        // lockstep with resolve.alias (an unresolvable singleton must not be forced into pre-bundling).
+        ...getResolvableSingletonModules(),
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
