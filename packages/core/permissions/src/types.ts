@@ -11,9 +11,11 @@ export interface ParametrizedAction {
 }
 export interface PermissionRule {
   action: string | ParametrizedAction;
-  subject?: Subject | null;
-  properties?: {
-    fields?: string[];
-  };
+  subject?: Subject | null | undefined;
+  properties?:
+    | {
+        fields?: string[];
+      }
+    | undefined;
   condition?: Record<string, unknown>;
 }

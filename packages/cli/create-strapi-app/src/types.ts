@@ -30,12 +30,12 @@ export type DBClient = 'mysql' | 'postgres' | 'sqlite';
 export type DBConfig = {
   client: DBClient;
   connection: {
-    host?: string;
-    port?: string;
-    database?: string;
-    username?: string;
-    password?: string;
-    filename?: string;
+    host?: string | undefined;
+    port?: string | undefined;
+    database?: string | undefined;
+    username?: string | undefined;
+    password?: string | undefined;
+    filename?: string | undefined;
     ssl?: boolean;
   };
 };
@@ -45,9 +45,9 @@ export type PackageManager = 'npm' | 'yarn' | 'pnpm';
 export interface Scope {
   name: string;
   rootPath: string;
-  template?: string;
-  templateBranch?: string;
-  templatePath?: string;
+  template?: string | undefined;
+  templateBranch?: string | undefined;
+  templatePath?: string | undefined;
   strapiVersion?: string;
   installDependencies?: boolean;
   devDependencies?: Record<string, string>;
@@ -55,7 +55,7 @@ export interface Scope {
   docker?: boolean;
   packageManager: PackageManager;
   runApp?: boolean;
-  isQuickstart?: boolean;
+  isQuickstart?: boolean | undefined;
   uuid?: string;
   installId?: string;
   database: DatabaseInfo;
@@ -74,12 +74,12 @@ export type ClientName = 'mysql' | 'postgres' | 'sqlite';
 export interface DatabaseInfo {
   client: ClientName;
   connection?: {
-    host?: string;
-    port?: string;
-    database?: string;
-    username?: string;
-    password?: string;
-    filename?: string;
+    host?: string | undefined;
+    port?: string | undefined;
+    database?: string | undefined;
+    username?: string | undefined;
+    password?: string | undefined;
+    filename?: string | undefined;
     ssl?: boolean;
   };
 }

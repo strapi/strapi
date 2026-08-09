@@ -22,7 +22,7 @@ export interface ILocalDirectoryDestinationProviderOptions {
     path: string;
   };
   file: {
-    maxSizeJsonl?: number;
+    maxSizeJsonl?: number | undefined;
   };
 }
 

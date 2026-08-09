@@ -27,12 +27,12 @@ export interface VisitorOptions {
   schema: Model;
   key: string;
   value: Data[keyof Data];
-  attribute?: AnyAttribute;
+  attribute?: AnyAttribute | undefined;
   path: Path;
   getModel(uid: string): Model;
-  parent?: Parent;
+  parent?: Parent | undefined;
   /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
-  allowedExtraRootKeys?: string[];
+  allowedExtraRootKeys?: string[] | undefined;
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
@@ -46,14 +46,14 @@ export interface Path {
 export interface TraverseOptions {
   schema: Model;
   path?: Path;
-  parent?: Parent;
+  parent?: Parent | undefined;
   getModel(uid: string): Model;
   /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
-  allowedExtraRootKeys?: string[];
+  allowedExtraRootKeys?: string[] | undefined;
 }
 
 export interface Parent {
-  attribute?: Attribute;
+  attribute?: Attribute | undefined;
   key: string | null;
   path: Path;
   schema: Model;

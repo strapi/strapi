@@ -119,7 +119,7 @@ const isBooleanLike = (value: unknown): boolean => {
   return false;
 };
 
-const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean => {
+const parseBoolean = (value: unknown, options: { forceCast?: boolean | undefined }): boolean => {
   const { forceCast = false } = options;
 
   if (typeof value === 'boolean') {

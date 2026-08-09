@@ -81,6 +81,7 @@ const createProvider = (config: Config) => {
     const newError = new Error(`Could not load upload provider "${providerName}".`);
 
     if (err instanceof Error) {
+      // @ts-expect-error - es5 Error.stack missing undefined
       newError.stack = err.stack;
     }
 

@@ -141,6 +141,7 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
+      // @ts-expect-error - undici-types does not support yet exactOptionalPropertyTypes
       dispatcher: agent,
     });
 

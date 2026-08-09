@@ -30,7 +30,7 @@ type User = {
 type ID = string | number;
 
 type CommonOptions = {
-  user?: User;
+  user?: User | undefined;
 };
 
 type Metas = {
@@ -124,7 +124,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ref?: string;
       field?: string;
       path?: string;
-      tmpWorkingDirectory?: string;
+      tmpWorkingDirectory?: string | undefined;
     } = {}
   ): Promise<Omit<UploadableFile, 'getStream'>> {
     const fileService = getService('file');

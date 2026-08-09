@@ -65,9 +65,9 @@ export function groupRecipientsByDomain(recipients: string[]): Record<string, st
 
 /** Collect all recipients from to / cc / bcc (same sources as legacy sendmail). */
 export function collectRecipients(mail: {
-  to?: string | string[];
-  cc?: string | string[];
-  bcc?: string | string[];
+  to?: string | string[] | undefined;
+  cc?: string | string[] | undefined;
+  bcc?: string | string[] | undefined;
 }): string[] {
   return [
     ...parseAddressList(mail.to),

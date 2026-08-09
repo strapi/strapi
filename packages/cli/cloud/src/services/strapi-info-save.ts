@@ -30,7 +30,7 @@ export async function save(data: LocalSave, { directoryPath }: { directoryPath?:
 
 export async function retrieve({
   directoryPath,
-}: { directoryPath?: string } = {}): Promise<LocalSave> {
+}: { directoryPath?: string | undefined } = {}): Promise<LocalSave> {
   const pathToFile = getFilePath(directoryPath);
   const pathExists = await fse.pathExists(pathToFile);
   if (!pathExists) {

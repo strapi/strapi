@@ -14,7 +14,7 @@ const { factory } = ts;
 export const getAttributeType = (
   attributeName: string,
   attribute: Attribute,
-  uid?: string
+  uid: string | undefined
 ): ts.TypeReferenceNode | null => {
   if (!Object.keys(mappers).includes(attribute.type)) {
     console.warn(

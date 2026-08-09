@@ -9,11 +9,11 @@ export interface SessionEntryLike {
 
 export interface SanitizedSessionEntry {
   id: string;
-  deviceId?: string;
-  deviceName?: string;
+  deviceId?: string | undefined;
+  deviceName?: string | undefined;
   current: boolean;
-  loginAt?: string;
-  lastActiveAt?: string;
+  loginAt?: string | undefined;
+  lastActiveAt?: string | undefined;
 }
 
 export interface SessionDisplayEntry {

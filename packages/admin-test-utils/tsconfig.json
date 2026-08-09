@@ -2,6 +2,7 @@
   "extends": "tsconfig/client.json",
   "include": ["src", "./custom.d.ts"],
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom"],
+    "exactOptionalPropertyTypes": true
   }
 }

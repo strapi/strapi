@@ -5,7 +5,7 @@ import { TsConfig } from './utils/tsconfig';
 export interface CLIContext {
   cwd: string;
   logger: Logger;
-  tsconfig?: TsConfig;
+  tsconfig: TsConfig | undefined;
 }
 
 export type StrapiCommand = (params: {

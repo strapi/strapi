@@ -32,7 +32,7 @@ export interface Options {
    * When set, extra query/input params are derived from the route's request schema (and validated/sanitized with Zod).
    * When absent, no extra params are allowed in strict mode.
    */
-  route?: RouteLike;
+  route?: RouteLike | undefined;
 }
 
 export interface Sanitizer {

@@ -185,7 +185,7 @@ const cleanSchemaAttributes = (
           items: {
             anyOf: components,
           },
-          discriminator,
+          ...(discriminator ? { discriminator } : {}),
         };
         break;
       }

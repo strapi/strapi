@@ -8722,6 +8722,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/cloud-cli@workspace:packages/cli/cloud"
   dependencies:
+    "@strapi/types": "npm:5.51.2"
     "@strapi/utils": "npm:5.51.2"
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"

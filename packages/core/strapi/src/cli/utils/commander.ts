@@ -118,7 +118,7 @@ const getCommanderConfirmMessage = (
   };
 };
 
-const confirmMessage = async (message: string, { force }: { force?: boolean } = {}) => {
+const confirmMessage = async (message: string, { force }: { force?: boolean | undefined } = {}) => {
   // if we have a force option, respond yes
   if (force === true) {
     // attempt to mimic the inquirer prompt exactly

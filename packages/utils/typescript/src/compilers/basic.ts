@@ -16,7 +16,7 @@ export interface ConfigOptions {
 export function run(tsConfigPath: string, configOptions: ConfigOptions = {}) {
   const { ignoreDiagnostics = false } = configOptions;
   // Parse the tsconfig.json file & resolve the configuration options
-  const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);
+  const { fileNames, options, projectReferences = [] } = resolveConfigOptions(tsConfigPath);
 
   const compilerOptions = merge(options, configOptions.options);
 

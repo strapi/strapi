@@ -7,7 +7,7 @@ import type { Attribute } from './utils';
 const { factory } = ts;
 
 export interface MapperContext {
-  uid?: string;
+  uid: string | undefined;
   attribute: Attribute;
   attributeName?: string;
 }
