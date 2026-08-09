@@ -1,11 +1,12 @@
 import { createCommand } from 'commander';
 import fs from 'fs';
 import _ from 'lodash';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 import type { Database } from '@strapi/database';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { compileStrapi } from '../../../compile';
 
 type Strategy = 'replace' | 'merge' | 'keep';
 

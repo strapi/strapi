@@ -1,9 +1,10 @@
 import fs from 'fs';
 import { createCommand } from 'commander';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { compileStrapi } from '../../../compile';
 
 interface CmdOptions {
   file?: string;

@@ -2,11 +2,12 @@ import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
 import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
+import { compileStrapi } from '../../../compile';
 
 interface CmdOptions {
   email?: string;

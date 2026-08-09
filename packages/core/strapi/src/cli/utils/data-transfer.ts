@@ -3,7 +3,7 @@ import path from 'node:path';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger, type winston, formats } from '@strapi/logger';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
@@ -16,6 +16,7 @@ import {
   exitWith,
 } from './helpers';
 import { getParseListWithChoices, parseInteger, parseList, confirmMessage } from './commander';
+import { compileStrapi } from '../../compile';
 
 const {
   errors: { TransferEngineInitializationError },

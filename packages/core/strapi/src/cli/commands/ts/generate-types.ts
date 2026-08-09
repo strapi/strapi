@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { compileStrapi } from '../../../compile';
 
 interface CmdOptions {
   debug?: boolean;
@@ -20,7 +21,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const tsUtils = require('@strapi/typescript-utils');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createStrapi, compileStrapi } = require('@strapi/core');
+  const { createStrapi } = require('@strapi/core');
 
   const appContext = await compileStrapi({ ignoreDiagnostics: true });
   const app = await createStrapi(appContext).register();

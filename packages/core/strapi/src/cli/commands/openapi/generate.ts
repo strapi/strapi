@@ -1,4 +1,4 @@
-import { compileStrapi, createStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 import * as openapi from '@strapi/openapi';
 
 import type { Core } from '@strapi/types';
@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
 import chalk from 'chalk';
 import fse from 'fs-extra';
 import path from 'path';
+import { compileStrapi } from '../../../compile';
 
 const DEFAULT_OUTPUT = path.join(process.cwd(), 'specification.json');
 

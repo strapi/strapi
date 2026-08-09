@@ -13,10 +13,7 @@ interface Options {
   ignoreDiagnostics?: boolean;
 }
 
-/**
- * @deprecated use `compileStrapi` from `@strapi/strapi`
- */
-export default async function compile(options?: Options) {
+export async function compileStrapi(options?: Options) {
   const { appDir = process.cwd(), ignoreDiagnostics = false } = options ?? {};
   const isTSProject = await tsUtils().isUsingTypeScript(appDir);
   const outDir = await tsUtils().resolveOutDir(appDir);

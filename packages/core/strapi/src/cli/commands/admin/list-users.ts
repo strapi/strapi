@@ -1,10 +1,11 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
+import { compileStrapi } from '../../../compile';
 
 /**
  * List admin users

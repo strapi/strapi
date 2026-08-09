@@ -1,8 +1,9 @@
 import { createCommand } from 'commander';
 import { EOL } from 'os';
-import { createStrapi, compileStrapi } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
+import { compileStrapi } from '../../compile';
 
 interface CmdOptions {
   uuid: boolean;
