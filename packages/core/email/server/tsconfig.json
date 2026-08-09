@@ -1,6 +1,7 @@
 {
   "extends": "tsconfig/base.json",
   "include": ["./src", "../shared"],
+  "exclude": ["**/*.test.ts"],
   "compilerOptions": {
     "types": ["node"],
     "exactOptionalPropertyTypes": true
