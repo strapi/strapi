@@ -2,7 +2,6 @@ import { createCommand } from 'commander';
 import { EOL } from 'os';
 import { createStrapi, compileStrapi } from '@strapi/core';
 import type { StrapiCommand } from '../types';
-import { runAction } from '../utils/helpers';
 
 interface CmdOptions {
   uuid: boolean;
@@ -50,7 +49,7 @@ const command: StrapiCommand = () => {
     .option('-u, --uuid', 'Include Project UUID')
     .option('-d, --dependencies', 'Include Project Dependencies')
     .option('--all', 'Include All Information')
-    .action(runAction('report', action));
+    .action(action);
 };
 
 export { command };
