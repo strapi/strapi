@@ -638,7 +638,7 @@ const RelationsInput = ({
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
-      <DocumentRBAC permissions={permissions} model={relation.model}>
+      <DocumentRBAC permissions={permissions} model={relation.model} showLoader={false}>
         <MemoizedRelationModalWithContext
           relation={relation}
           name={name}
