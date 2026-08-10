@@ -198,7 +198,8 @@ const HeaderStatus = ({
         : formatMessage(
             {
               id: getTranslationKey('upload.progress.success.subtitle'),
-              defaultMessage: '{count} files uploaded successfully',
+              defaultMessage:
+                '{count} files uploaded successfully',
             },
             { count: successfulCount }
           );

@@ -54,7 +54,7 @@ export const CarouselAssetActions = ({
         <IconButton
           label={formatMessage({
             id: getTrad('control-card.edit'),
-            defaultMessage: 'edit',
+            defaultMessage: 'Edit',
           })}
           onClick={onEditAsset}
         >

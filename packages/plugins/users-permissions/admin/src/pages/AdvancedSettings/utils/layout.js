@@ -36,11 +36,11 @@ const layout = [
     },
     hint: {
       id: getTrad('EditForm.inputToggle.description.email-reset-password'),
-      defaultMessage: "URL of your application's reset password page.",
+      defaultMessage: "URL of your application's reset password page",
     },
     placeholder: {
       id: getTrad('EditForm.inputToggle.placeholder.email-reset-password'),
-      defaultMessage: 'ex: https://youtfrontend.com/reset-password',
+      defaultMessage: 'ex: https://yourfrontend.com/reset-password',
     },
     name: 'email_reset_password',
     type: 'string',
@@ -70,7 +70,7 @@ const layout = [
     },
     placeholder: {
       id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-redirection'),
-      defaultMessage: 'ex: https://youtfrontend.com/email-confirmation',
+      defaultMessage: 'ex: https://yourfrontend.com/email-confirmation-redirection',
     },
     name: 'email_confirmation_redirection',
     type: 'string',

@@ -86,7 +86,7 @@ const LocalePicker = () => {
       size="S"
       aria-label={formatMessage({
         id: getTranslation('actions.select-locale'),
-        defaultMessage: 'Select locale',
+        defaultMessage: 'Select a locale',
       })}
       value={query.plugins?.i18n?.locale || locales.find((locale) => locale.isDefault)?.code}
       // @ts-expect-error – This can be removed in V2 of the DS.

@@ -572,7 +572,7 @@ const ListViewPage = () => {
                                         size="S"
                                         label={formatMessage({
                                           id: 'content-manager.actions.copy-documentId.label',
-                                          defaultMessage: 'Copy',
+                                          defaultMessage: 'Copy document ID',
                                         })}
                                         onClick={(e) => handleCopyDocumentId(e, row.documentId)}
                                       >

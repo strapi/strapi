@@ -169,7 +169,7 @@ export default {
                 type: 'checkboxConfirmation',
                 intlLabel: {
                   id: getTranslation('plugin.schema.i18n.localized.label-content-type'),
-                  defaultMessage: 'Localization',
+                  defaultMessage: 'Internationalization',
                 },
               },
             ];
@@ -208,7 +208,7 @@ export default {
                 name: 'pluginOptions.i18n.localized',
                 description: {
                   id: getTranslation('plugin.schema.i18n.localized.description-field'),
-                  defaultMessage: 'The field can have different values in each locale',
+                  defaultMessage: 'The field can have different values in each language',
                 },
                 type: 'checkbox',
                 intlLabel: {

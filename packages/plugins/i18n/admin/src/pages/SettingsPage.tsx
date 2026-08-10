@@ -108,7 +108,7 @@ const SettingsPage = () => {
         })}
         subtitle={formatMessage({
           id: getTranslation('Settings.list.description'),
-          defaultMessage: 'Configure the settings',
+          defaultMessage: 'Configure the settings for the Internationalization plugin',
         })}
       />
       <Layouts.Content>
@@ -160,7 +160,7 @@ const SettingsPage = () => {
             icon={<EmptyDocuments width={undefined} height={undefined} />}
             content={formatMessage({
               id: getTranslation('Settings.list.empty.title'),
-              defaultMessage: 'There are no locales',
+              defaultMessage: 'There are no locales.',
             })}
             action={<CreateLocale disabled={!canCreate} variant="secondary" />}
           />

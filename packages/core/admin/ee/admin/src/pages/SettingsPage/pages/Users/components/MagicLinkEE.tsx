@@ -29,7 +29,7 @@ export const MagicLinkEE = ({ registrationToken }: MagicLinkCEProps) => {
       {formatMessage({
         id: 'app.components.Users.MagicLink.connect.sso',
         defaultMessage:
-          'Send this link to the user, the first login can be made via a SSO provider.',
+          'Send this link to the user, the first login can be made via a SSO provider',
       })}
     </MagicLinkWrapper>
   );

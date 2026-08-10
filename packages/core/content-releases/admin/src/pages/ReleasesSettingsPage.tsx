@@ -128,7 +128,7 @@ const ReleasesSettingsPage = () => {
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: releasePageTitle,
           }

@@ -307,7 +307,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
         reviewStageHint = formatMessage({
           id: 'review-workflows.stages.single-stage',
           defaultMessage:
-            'This workflow only has one stage. Add more stages to be able to update it here.',
+            'This workflow only has one stage. Add more stages to be able to transition between them.',
         });
       } else {
         reviewStageHint = formatMessage({

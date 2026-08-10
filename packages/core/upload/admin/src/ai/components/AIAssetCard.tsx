@@ -284,11 +284,11 @@ const StyledCard = styled(Card)`
 const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
   switch (assetType) {
     case ASSET_TYPES.Image:
-      return { id: getTrad('settings.section.image.label'), defaultMessage: 'IMAGE' };
+      return { id: getTrad('settings.section.image.label'), defaultMessage: 'Image' };
     case ASSET_TYPES.Video:
-      return { id: getTrad('settings.section.video.label'), defaultMessage: 'VIDEO' };
+      return { id: getTrad('settings.section.video.label'), defaultMessage: 'Video' };
     case ASSET_TYPES.Audio:
-      return { id: getTrad('settings.section.audio.label'), defaultMessage: 'AUDIO' };
+      return { id: getTrad('settings.section.audio.label'), defaultMessage: 'Audio' };
     case DOC_TYPES.Pdf:
       return { id: getTrad('settings.section.pdf.label'), defaultMessage: 'PDF' };
     case DOC_TYPES.Csv:
@@ -298,7 +298,7 @@ const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
     case DOC_TYPES.Zip:
       return { id: getTrad('settings.section.zip.label'), defaultMessage: 'ZIP' };
     default:
-      return { id: getTrad('settings.section.doc.label'), defaultMessage: 'DOC' };
+      return { id: getTrad('settings.section.doc.label'), defaultMessage: 'Doc' };
   }
 };
 
@@ -392,7 +392,7 @@ export const AIAssetCard = ({
               name="alternativeText"
               hint={formatMessage({
                 id: getTrad('form.input.description.file-alt'),
-                defaultMessage: "This text will be displayed if the asset can't be shown.",
+                defaultMessage: 'This text will be displayed if the asset can’t be shown.',
               })}
             >
               <Flex alignItems="center" gap={2}>

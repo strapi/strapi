@@ -122,7 +122,7 @@ const ConfigurationForm = ({
                       id: getTranslation(
                         'containers.SettingPage.editSettings.entry.title.description'
                       ),
-                      defaultMessage: 'Set the display field of your entry',
+                      defaultMessage: 'Set the displayed field of your entry',
                     })}
                     name="settings.mainField"
                     options={Object.entries(attributes).reduce<

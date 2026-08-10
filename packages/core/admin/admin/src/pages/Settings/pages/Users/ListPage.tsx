@@ -87,7 +87,7 @@ const ListPageCE = () => {
         type: 'danger',
         message: formatMessage({
           id: 'global.error',
-          defaultMessage: 'An error occurred',
+          defaultMessage: 'Something went wrong',
         }),
       });
     }
@@ -122,7 +122,7 @@ const ListPageCE = () => {
     <Page.Main aria-busy={isLoading}>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Users',
           }

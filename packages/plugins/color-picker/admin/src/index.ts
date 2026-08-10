@@ -41,7 +41,7 @@ export default {
             defaultValue: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
             description: {
               id: getTrad('color-picker.options.advanced.regex.description'),
-              defaultMessage: 'The text of the regular expression',
+              defaultMessage: 'Provide a regular expression to validate the HEX value',
             },
           },
           {

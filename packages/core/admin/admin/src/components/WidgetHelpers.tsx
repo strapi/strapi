@@ -101,7 +101,7 @@ const NoPermissions = ({ children }: NoPermissionsProps) => {
         {children ??
           formatMessage({
             id: 'HomePage.widget.no-permissions',
-            defaultMessage: 'You don’t have the permission to see this widget',
+            defaultMessage: "You don't have the permission to see this widget",
           })}
       </Typography>
     </Flex>

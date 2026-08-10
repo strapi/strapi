@@ -181,7 +181,7 @@ const ListPage = () => {
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Webhooks',
           }
@@ -299,7 +299,7 @@ const ListPage = () => {
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: 'Settings.webhooks.list.th.status',
-                        defaultMessage: 'Status',
+                        defaultMessage: 'status',
                       })}
                     </Typography>
                   </Th>
@@ -307,7 +307,7 @@ const ListPage = () => {
                     <VisuallyHidden>
                       {formatMessage({
                         id: 'Settings.webhooks.list.th.actions',
-                        defaultMessage: 'Actions',
+                        defaultMessage: 'actions',
                       })}
                     </VisuallyHidden>
                   </Th>
@@ -356,7 +356,7 @@ const ListPage = () => {
                           })}
                           aria-label={`${webhook.name} ${formatMessage({
                             id: 'Settings.webhooks.list.th.status',
-                            defaultMessage: 'Status',
+                            defaultMessage: 'status',
                           })}`}
                           checked={webhook.isEnabled}
                           onCheckedChange={(enabled) => {

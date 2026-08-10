@@ -170,7 +170,7 @@ const useSettingsMenu = (): {
       },
       {
         id: 'permissions',
-        intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
+        intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration panel' },
         links: adminLinks.map(addPermissions),
       },
       ...Object.values(otherSections),

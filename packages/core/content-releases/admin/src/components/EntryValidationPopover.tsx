@@ -284,7 +284,7 @@ const getReviewStageMessage = ({
 
   return formatMessage({
     id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage.stage-not-required',
-    defaultMessage: 'No required stage for publication',
+    defaultMessage: 'No required stage for publication.',
   });
 };
 

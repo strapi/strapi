@@ -1643,7 +1643,7 @@ const UnpublishAction: DocumentActionComponent = ({
                 <Typography tag="p" variant="omega" textAlign="center">
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.body',
-                    defaultMessage: 'Are you sure?',
+                    defaultMessage: 'Are you sure you want to unpublish this?',
                   })}
                 </Typography>
               </Flex>
@@ -1659,13 +1659,13 @@ const UnpublishAction: DocumentActionComponent = ({
                 <Radio.Item checked={shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.KEEP}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
-                    defaultMessage: 'Keep draft',
+                    defaultMessage: 'Unpublish and keep last draft',
                   })}
                 </Radio.Item>
                 <Radio.Item checked={!shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
-                    defaultMessage: 'Replace draft',
+                    defaultMessage: 'Unpublish and replace last draft',
                   })}
                 </Radio.Item>
               </Radio.Group>
@@ -1746,7 +1746,8 @@ const DiscardAction: DocumentActionComponent = ({
           <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
-              defaultMessage: 'Are you sure?',
+              defaultMessage:
+                'Are you sure you want to discard the changes? This action is irreversible.',
             })}
           </Typography>
         </Flex>

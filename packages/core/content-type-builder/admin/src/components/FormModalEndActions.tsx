@@ -190,7 +190,7 @@ export const FormModalEndActions = ({
               })
             : formatMessage({
                 id: getTrad('form.button.select-component'),
-                defaultMessage: 'Configure the component',
+                defaultMessage: 'Select a component',
               })}
         </Button>
       );

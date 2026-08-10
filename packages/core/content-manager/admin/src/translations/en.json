@@ -356,5 +356,6 @@
   "restore.success.message": "A past version of the content was restored.",
   "search.placeholder": "Search",
   "containers.SettingPage.edit-settings.modal-form.mainField.hint": "Set the displayed field",
-  "containers.ListSettingsView.modal-form.size": "Size"
+  "containers.ListSettingsView.modal-form.size": "Size",
+  "containers.edit-settings.modal-form.title": "Edit {fieldName}"
 }

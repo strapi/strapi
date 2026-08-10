@@ -255,7 +255,7 @@ export const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.number.type.biginteger'),
-                      defaultMessage: 'biginteger (ex: 123456789)',
+                      defaultMessage: 'big integer (ex: 123456789)',
                     },
                   },
                 },
@@ -275,7 +275,7 @@ export const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.number.type.float'),
-                      defaultMessage: 'decimal (ex: 3.3333333)',
+                      defaultMessage: 'float (ex: 3.33333333)',
                     },
                   },
                 },
@@ -322,7 +322,7 @@ export const baseForm = {
                 {
                   title: {
                     id: getTrad('form.attribute.text.option.short-text'),
-                    defaultMessage: 'Sort text',
+                    defaultMessage: 'Short text',
                   },
                   description: {
                     id: getTrad('form.attribute.text.option.short-text.description'),
@@ -368,7 +368,7 @@ export const baseForm = {
                 {
                   title: {
                     id: getTrad('form.attribute.text.option.short-text'),
-                    defaultMessage: 'Sort text',
+                    defaultMessage: 'Short text',
                   },
                   description: {
                     id: getTrad('form.attribute.text.option.short-text.description'),

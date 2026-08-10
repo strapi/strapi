@@ -337,7 +337,7 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             {formatMessage(
               {
                 id: 'content-manager.widget.chart-entries.count.label',
-                defaultMessage: '{count, plural, =0 {entries} one {entry} other {entries}}',
+                defaultMessage: '{count, plural, =0 {Entries} one {Entry} other {Entries}}',
               },
               { count: total }
             )}
@@ -367,7 +367,7 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
               {formatMessage(
                 {
                   id: 'content-manager.widget.chart-entries.tooltip',
-                  defaultMessage: '{count} items',
+                  defaultMessage: '{count} {label}',
                 },
                 {
                   count: tooltip.value.count,

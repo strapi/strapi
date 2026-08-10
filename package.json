@@ -55,6 +55,7 @@
     "ai:test": "tsx --test scripts/ai-tooling/__tests__/*.test.ts",
     "verify:translations": "tsx scripts/front/verify-translations/index.ts",
     "verify:translations:fix": "tsx scripts/front/verify-translations/index.ts --fix",
+    "verify:translations:write-en": "tsx scripts/front/verify-translations/index.ts --write-en",
     "verify:translations:test": "tsx --test scripts/front/verify-translations/__tests__/*.test.ts",
     "postinstall": "husky",
     "prepack": "pinst --disable",

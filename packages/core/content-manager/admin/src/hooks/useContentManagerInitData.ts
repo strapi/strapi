@@ -89,7 +89,7 @@ const useContentManagerInitData = (): AppState => {
       notifyStatus(
         formatMessage({
           id: getTranslation('App.schemas.data-loaded'),
-          defaultMessage: 'The schemas have been successfully loaded.',
+          defaultMessage: 'The schemas have been successfully loaded',
         })
       );
     }

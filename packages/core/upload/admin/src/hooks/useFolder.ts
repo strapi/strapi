@@ -43,7 +43,7 @@ export const useFolder = (id: number | null | undefined, { enabled = true } = {}
           type: 'danger',
           message: formatMessage({
             id: getTrad('notification.warning.404'),
-            defaultMessage: 'Not found',
+            defaultMessage: '404 - Not found',
           }),
         });
       },

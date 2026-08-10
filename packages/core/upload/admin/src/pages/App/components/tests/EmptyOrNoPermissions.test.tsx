@@ -25,7 +25,7 @@ describe('EmptyOrNoPermissions', () => {
   test('isFiltering', () => {
     const { getByText } = setup({ isFiltering: true });
 
-    expect(getByText('There are no elements with the applied filters')).toBeInTheDocument();
+    expect(getByText('There are no assets with the applied filters')).toBeInTheDocument();
   });
 
   test('canCreate', () => {
@@ -43,12 +43,12 @@ describe('EmptyOrNoPermissions', () => {
   test('canRead and not canCreate', () => {
     const { getByText } = setup({ canCreate: false });
 
-    expect(getByText('Media Library is empty')).toBeInTheDocument();
+    expect(getByText('Upload your first assets...')).toBeInTheDocument();
   });
 
   test('not canRead', () => {
     const { getByText } = setup({ canRead: false });
 
-    expect(getByText('No permissions to view')).toBeInTheDocument();
+    expect(getByText('The asset list is empty')).toBeInTheDocument();
   });
 });

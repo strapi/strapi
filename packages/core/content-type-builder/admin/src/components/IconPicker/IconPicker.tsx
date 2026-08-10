@@ -170,7 +170,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                 withTooltip={false}
                 label={formatMessage({
                   id: getTrad('IconPicker.remove.button'),
-                  defaultMessage: 'Remove the selected icon',
+                  defaultMessage: 'Remove the selected icon button',
                 })}
                 variant="ghost"
               >

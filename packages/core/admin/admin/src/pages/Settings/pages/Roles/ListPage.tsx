@@ -123,7 +123,7 @@ const ListPage = () => {
     <Page.Main>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Roles',
           }
@@ -142,7 +142,7 @@ const ListPage = () => {
         }
         title={formatMessage({
           id: 'global.roles',
-          defaultMessage: 'roles',
+          defaultMessage: 'Roles',
         })}
         subtitle={formatMessage({
           id: 'Settings.roles.list.description',
@@ -158,7 +158,7 @@ const ListPage = () => {
                 {
                   target: formatMessage({
                     id: 'global.roles',
-                    defaultMessage: 'roles',
+                    defaultMessage: 'Roles',
                   }),
                 }
               )}

@@ -62,14 +62,14 @@ export const getFilterList = ({
         {
           intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$lt',
-            defaultMessage: 'is less than',
+            defaultMessage: 'is lower than',
           },
           value: '$lt',
         },
         {
           intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$lte',
-            defaultMessage: 'is less than or equal to',
+            defaultMessage: 'is lower than or equal to',
           },
           value: '$lte',
         },

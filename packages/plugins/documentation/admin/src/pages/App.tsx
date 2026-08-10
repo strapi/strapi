@@ -59,7 +59,7 @@ const App = () => {
           type: 'success',
           message: formatMessage({
             id: getTrad('notification.generate.success'),
-            defaultMessage: 'Successfully generated documentation',
+            defaultMessage: 'Doc generated',
           }),
         });
       })
@@ -84,7 +84,7 @@ const App = () => {
           type: 'success',
           message: formatMessage({
             id: getTrad('notification.delete.success'),
-            defaultMessage: 'Successfully deleted documentation',
+            defaultMessage: 'Doc deleted',
           }),
         });
       })
@@ -135,7 +135,7 @@ const App = () => {
             >
               {formatMessage({
                 id: getTrad('pages.PluginPage.Button.open'),
-                defaultMessage: 'Open Documentation',
+                defaultMessage: 'Open documentation',
               })}
             </OpenDocLink>
           }
@@ -157,7 +157,7 @@ const App = () => {
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('pages.PluginPage.table.generated'),
-                        defaultMessage: 'Last Generated',
+                        defaultMessage: 'Last generated',
                       })}
                     </Typography>
                   </Th>
