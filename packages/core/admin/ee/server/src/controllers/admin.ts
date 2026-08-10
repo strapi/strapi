@@ -4,6 +4,50 @@ import { env } from '@strapi/utils';
 import type { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
 
+type PlanEntitlementLimit = { key: string; unit?: 'days' | 'count'; value: number | null };
+type RetainedFeature = { name: string; [key: string]: any };
+
+// Mirrors UNLIMITED_ENTITLEMENT_THRESHOLD in packages/core/core/src/ee/entitlements.ts (kept
+// in sync manually, not imported: @strapi/admin does not depend on @strapi/core). A retained
+// option value that is nullish or >= this threshold means "Unlimited", same as the live registry.
+const UNLIMITED_ENTITLEMENT_THRESHOLD = 9999;
+
+// Known feature option keys and the unit they're reported in, using the same convention as
+// the entitlements registry (packages/core/core/src/ee/entitlements.ts).
+const RETAINED_LIMIT_UNITS: Record<string, 'days' | 'count'> = {
+  retentionDays: 'days',
+  numberOfWorkflows: 'count',
+  stagesPerWorkflow: 'count',
+  maximumReleases: 'count',
+};
+
+const normalizeRetainedLimitValue = (value: unknown): number | null => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null;
+  }
+  return value >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : value;
+};
+
+const deriveLimitsFromRetainedOptions = (
+  options: Record<string, unknown> | undefined
+): PlanEntitlementLimit[] => {
+  if (!options) {
+    return [];
+  }
+
+  return Object.entries(RETAINED_LIMIT_UNITS)
+    .filter(([key]) => key in options)
+    .map(([key, unit]) => ({ key, unit, value: normalizeRetainedLimitValue(options[key]) }));
+};
+
+const findRetainedFeature = (
+  retainedFeatures: Array<RetainedFeature | string> | undefined,
+  featureName: string
+): RetainedFeature | undefined =>
+  retainedFeatures
+    ?.map((entry) => (typeof entry === 'string' ? { name: entry } : entry))
+    .find((entry) => entry.name === featureName);
+
 export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
@@ -32,6 +76,11 @@ export default {
 
   async licenseLimitInformation() {
     const permittedSeats = strapi.ee.seats;
+    // Display-only fallback so an expired/unknown license can still show its plan, seats
+    // and subscription. Never used for enforcement (permittedSeats above is untouched).
+    const retained = strapi.ee.retainedLicense;
+    const isActiveLicense = strapi.ee.licenseStatus === 'active';
+    const activeEntitlements = strapi.ee.entitlements.list();
 
     let shouldNotify = false;
     let licenseLimitStatus = null;
@@ -95,9 +144,28 @@ export default {
       enforcementUserCount,
       currentActiveUserCount,
       permittedSeats: permittedSeats ?? null,
-      seats: strapi.ee.seats ?? null,
-      subscriptionId: strapi.ee.subscriptionId ?? null,
-      expireAt: strapi.ee.expireAt ?? null,
+      seats: strapi.ee.seats ?? retained?.seats ?? null,
+      subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
+      expireAt: strapi.ee.expireAt ?? retained?.expireAt ?? null,
+      licenseStatus: strapi.ee.licenseStatus,
+      renewalDate: strapi.ee.renewalDate,
+      planEntitlements: strapi.ee.planFeatureCatalog.map((feature) => {
+        if (isActiveLicense) {
+          return {
+            feature,
+            available: strapi.ee.features.isEnabled(feature),
+            limits: activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? [],
+          };
+        }
+
+        const retainedFeature = findRetainedFeature(retained?.features, feature);
+
+        return {
+          feature,
+          available: Boolean(retainedFeature),
+          limits: deriveLimitsFromRetainedOptions(retainedFeature?.options),
+        };
+      }),
       licenseMode,
       lastRegistrySyncAt,
       nextRegistrySyncAt,
@@ -107,7 +175,7 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type ?? null,
+      type: strapi.ee.type ?? retained?.type ?? null,
       isTrial: strapi.ee.isTrial,
       // `features.list()` is loosely typed at the source (`{ name: string; [k]: any }[]`);
       // narrow it to the contract's named-feature union so consumers (e.g. useLicenseLimits) keep their types.

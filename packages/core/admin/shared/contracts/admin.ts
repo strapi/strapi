@@ -218,6 +218,13 @@ export declare namespace GetLicenseLimitInformation {
       seats: number | null;
       subscriptionId: string | null;
       expireAt: string | null;
+      licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+      renewalDate: string | null;
+      planEntitlements: Array<{
+        feature: string;
+        available: boolean;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
       licenseMode: 'online' | 'offline';
       lastRegistrySyncAt: number | null;
       nextRegistrySyncAt: number | null;

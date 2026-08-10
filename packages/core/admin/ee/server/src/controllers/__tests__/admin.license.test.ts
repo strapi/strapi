@@ -1,5 +1,14 @@
 import adminController from '../admin';
 
+const GOLD_CATALOG = [
+  'sso',
+  'cms-advanced-preview',
+  'cms-content-releases',
+  'review-workflows',
+  'cms-content-history',
+  'audit-logs',
+];
+
 const createStrapiMock = (overrides: any = {}) => {
   const stored = overrides.stored ?? null;
   global.strapi = {
@@ -10,7 +19,14 @@ const createStrapiMock = (overrides: any = {}) => {
       isTrial: false,
       subscriptionId: 'sub_123',
       expireAt: '2026-12-31T00:00:00.000Z',
-      features: { list: () => [{ name: 'sso' }] },
+      licenseStatus: 'active',
+      renewalDate: null,
+      retainedLicense: null,
+      planFeatureCatalog: GOLD_CATALOG,
+      features: {
+        list: () => [{ name: 'sso' }],
+        isEnabled: (name: string) => ['sso', 'audit-logs'].includes(name),
+      },
       entitlements: {
         list: () => [
           { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
@@ -24,6 +40,13 @@ const createStrapiMock = (overrides: any = {}) => {
     ...overrides.strapi,
   } as any;
   return global.strapi;
+};
+
+const stubUserServices = () => {
+  (global.strapi as any).service = () => ({
+    getCurrentActiveUserCount: async () => 0,
+    getDisabledUserList: async () => [],
+  });
 };
 
 describe('licenseLimitInformation (extended fields)', () => {
@@ -163,5 +186,152 @@ describe('licenseLimitInformation (extended fields)', () => {
     const data = (await adminController.licenseLimitInformation()).data as any;
     expect(data.licenseMode).toBe('offline');
     expect(data.nextRegistrySyncAt).toBeNull();
+  });
+});
+
+describe('licenseLimitInformation (planEntitlements)', () => {
+  const OLD_ENV = process.env;
+  beforeEach(() => {
+    process.env = { ...OLD_ENV };
+  });
+  afterEach(() => {
+    process.env = OLD_ENV;
+  });
+
+  it('active gold license: lists the 6 gold features in catalog order with availability and limits', async () => {
+    createStrapiMock({ stored: null });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+
+    expect(data.licenseStatus).toBe('active');
+    expect(data.planEntitlements.map((entry: any) => entry.feature)).toEqual(GOLD_CATALOG);
+
+    const sso = data.planEntitlements.find((entry: any) => entry.feature === 'sso');
+    expect(sso).toEqual({ feature: 'sso', available: true, limits: [] });
+
+    const auditLogs = data.planEntitlements.find((entry: any) => entry.feature === 'audit-logs');
+    expect(auditLogs.available).toBe(true);
+    expect(auditLogs.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: 90 }]);
+  });
+
+  it('active silver license without sso: sso is unavailable', async () => {
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: 'silver',
+        planFeatureCatalog: [
+          'sso',
+          'cms-advanced-preview',
+          'cms-content-releases',
+          'cms-content-history',
+        ],
+        features: {
+          list: () => [{ name: 'cms-advanced-preview' }],
+          isEnabled: (name: string) => name === 'cms-advanced-preview',
+        },
+        entitlements: { list: () => [] },
+      },
+    });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+
+    const sso = data.planEntitlements.find((entry: any) => entry.feature === 'sso');
+    expect(sso).toEqual({ feature: 'sso', available: false, limits: [] });
+  });
+
+  it('expired license: falls back to the retained snapshot for type/subscriptionId and planEntitlements', async () => {
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: null,
+        seats: null,
+        subscriptionId: null,
+        expireAt: null,
+        licenseStatus: 'expired',
+        retainedLicense: {
+          type: 'gold',
+          seats: 10,
+          subscriptionId: 'sub_123',
+          expireAt: '2026-01-01T00:00:00.000Z',
+          isTrial: false,
+          features: [{ name: 'sso' }, { name: 'audit-logs', options: { retentionDays: 90 } }],
+        },
+        features: { list: () => [], isEnabled: () => false },
+        entitlements: { list: () => [] },
+      },
+    });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+
+    expect(data.licenseStatus).toBe('expired');
+    expect(data.type).toBe('gold');
+    expect(data.subscriptionId).toBe('sub_123');
+    expect(data.seats).toBe(10);
+    expect(data.expireAt).toBe('2026-01-01T00:00:00.000Z');
+
+    const sso = data.planEntitlements.find((entry: any) => entry.feature === 'sso');
+    expect(sso).toEqual({ feature: 'sso', available: true, limits: [] });
+
+    const auditLogs = data.planEntitlements.find((entry: any) => entry.feature === 'audit-logs');
+    expect(auditLogs.available).toBe(true);
+    expect(auditLogs.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: 90 }]);
+
+    const reviewWorkflows = data.planEntitlements.find(
+      (entry: any) => entry.feature === 'review-workflows'
+    );
+    expect(reviewWorkflows).toEqual({ feature: 'review-workflows', available: false, limits: [] });
+  });
+
+  it('a retained option value at/above the unlimited threshold normalizes to null', async () => {
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: null,
+        licenseStatus: 'expired',
+        retainedLicense: {
+          type: 'gold',
+          isTrial: false,
+          features: [{ name: 'cms-content-history', options: { retentionDays: 99999 } }],
+        },
+        features: { list: () => [], isEnabled: () => false },
+        entitlements: { list: () => [] },
+      },
+    });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    const contentHistory = data.planEntitlements.find(
+      (entry: any) => entry.feature === 'cms-content-history'
+    );
+    expect(contentHistory.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: null }]);
+  });
+});
+
+describe('licenseLimitInformation (renewalDate)', () => {
+  const OLD_ENV = process.env;
+  beforeEach(() => {
+    process.env = { ...OLD_ENV };
+  });
+  afterEach(() => {
+    process.env = OLD_ENV;
+  });
+
+  it('is null when absent', async () => {
+    createStrapiMock({ stored: null, ee: { renewalDate: null } });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.renewalDate).toBeNull();
+  });
+
+  it('is echoed when present', async () => {
+    createStrapiMock({ stored: null, ee: { renewalDate: '2027-01-01T00:00:00.000Z' } });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.renewalDate).toBe('2027-01-01T00:00:00.000Z');
   });
 });
