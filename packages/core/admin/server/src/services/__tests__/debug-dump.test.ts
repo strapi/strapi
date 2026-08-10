@@ -10,6 +10,7 @@ const makeStrapi = () =>
       seats: 10,
       subscriptionId: 'sub_1',
       expireAt: '2026-12-31T00:00:00.000Z',
+      planPriceId: 'enterprise_monthly',
       features: { list: () => [{ name: 'sso' }] },
       entitlements: { list: () => [] },
       licenseInfo: { licenseKey: 'SUPER_SECRET_KEY' },
@@ -82,12 +83,23 @@ describe('debug-dump service', () => {
 
     expect(dump.dumpVersion).toBe(1);
     expect(dump.strapi.edition).toBe('EE');
+    // Not a growth-like plan price id, so it reports as Enterprise, not Growth.
+    expect(dump.strapi.projectType).toBe('Enterprise');
     expect(dump.license).toBeDefined();
     expect(dump.license?.subscriptionId).toBe('sub_1');
 
     const serialized = JSON.stringify(dump);
     expect(serialized).not.toContain('SUPER_SECRET_KEY');
     expect(serialized).not.toContain('licenseKey');
+  });
+
+  it('reports "Growth" as the projectType when the plan price id is growth-like', async () => {
+    const strapi = makeStrapi();
+    strapi.ee.planPriceId = 'cms-growth-monthly';
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.strapi.edition).toBe('EE');
+    expect(dump.strapi.projectType).toBe('Growth');
   });
 
   it('masks secrets in the full config block', async () => {
@@ -114,5 +126,6 @@ describe('debug-dump service', () => {
     const dump = await debugDumpService({ strapi }).generate();
     expect(dump.license).toBeUndefined();
     expect(dump.strapi.edition).toBe('CE');
+    expect(dump.strapi.projectType).toBe('Community');
   });
 });

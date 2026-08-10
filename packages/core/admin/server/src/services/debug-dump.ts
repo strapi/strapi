@@ -2,6 +2,7 @@ import os from 'os';
 import type { Core } from '@strapi/types';
 import { scrub } from '../utils/debug-dump/redact';
 import type { DebugDumpPayload } from '../../../shared/contracts/admin';
+import { getProjectType } from '../../../shared/utils/get-project-type';
 
 // Only these process.env keys are ever emitted (never the whole environment).
 const ENV_ALLOWLIST = [
@@ -68,8 +69,10 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
       strapi: {
         version: strapi.config.get('info.strapi', null) as string | null,
         edition: strapi.EE ? 'EE' : 'CE',
-        // window.strapi.projectType is client-side; on the server derive from plan.
-        projectType: strapi.EE ? 'Enterprise' : 'Community',
+        projectType: getProjectType({
+          isEE: Boolean(strapi.EE),
+          planPriceId: strapi.ee.planPriceId ?? undefined,
+        }),
         environment: strapi.config.get('environment', '') as string,
         autoReload: strapi.config.get('autoReload', false) as boolean,
       },

@@ -6,7 +6,7 @@ import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
-import type { ProjectType } from '../../../../../utils/getProjectType';
+import type { ProjectType } from '../../../../../../../shared/utils/get-project-type';
 
 /* -------------------------------------------------------------------------------------------------
  * PlanDetail
