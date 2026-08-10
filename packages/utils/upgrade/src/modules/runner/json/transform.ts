@@ -57,7 +57,8 @@ export const transformJSON = async (
   const esbuildOptions = {
     extensions: ['.js', '.mjs', '.ts'],
     hookIgnoreNodeModules: false,
-    hookMatcher: (filename: string) => isEqual(codemodPath, filename) || isPathInsideResources(filename),
+    hookMatcher: (filename: string) =>
+      isEqual(codemodPath, filename) || isPathInsideResources(filename),
   };
   const { unregister } = register(esbuildOptions);
 

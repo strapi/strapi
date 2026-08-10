@@ -7,14 +7,8 @@ const coffee = require('coffee');
 
 const repoRoot = path.resolve(__dirname, '../../../..');
 const upgradeRoot = path.join(repoRoot, 'packages/utils/upgrade');
-const transformJs = path.join(
-  upgradeRoot,
-  'dist/src/modules/runner/json/transform.js'
-);
-const smokeCodemod = path.join(
-  upgradeRoot,
-  'resources/examples/smoke-shared-util-import.json.ts'
-);
+const transformJs = path.join(upgradeRoot, 'dist/src/modules/runner/json/transform.js');
+const smokeCodemod = path.join(upgradeRoot, 'resources/examples/smoke-shared-util-import.json.ts');
 
 /** Spawns plain Node so Jest does not transpile the codemod / util import graph. */
 function spawnSmoke(projectDir) {
