@@ -118,6 +118,9 @@ const LicenseInfoEE = () => {
 
   const isGrowth = window.strapi.projectType === 'Growth';
 
+  // Retention is shown in days (the design lists "30 days retention" / "90 days
+  // retention"); only sentinel-sized values collapse to years, so a licence with
+  // e.g. 1500 days does not read as a meaningless number.
   const formatDays = (value: number): string => {
     if (value >= 365) {
       return formatMessage(
@@ -126,15 +129,6 @@ const LicenseInfoEE = () => {
           defaultMessage: '~{years, plural, one {# year} other {# years}}',
         },
         { years: Math.round(value / 365) }
-      );
-    }
-    if (value >= 60) {
-      return formatMessage(
-        {
-          id: 'Settings.license.limit.months',
-          defaultMessage: '~{months, plural, one {# month} other {# months}}',
-        },
-        { months: Math.round(value / 30) }
       );
     }
     return formatMessage(

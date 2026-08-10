@@ -196,7 +196,6 @@
   "Settings.license.limit.count": "{value, number}",
   "Settings.license.limit.days": "{days, plural, one {# day retention} other {# days retention}}",
   "Settings.license.limit.maximumReleases": "Releases",
-  "Settings.license.limit.months": "~{months, plural, one {# month} other {# months}}",
   "Settings.license.limit.numberOfWorkflows": "Workflows",
   "Settings.license.limit.retentionDays": "Retention",
   "Settings.license.limit.stagesPerWorkflow": "Stages per workflow",
