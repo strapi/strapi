@@ -16,6 +16,7 @@ import { snakeCase } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
+import { createHeartbeatLogger, type HeartbeatLogger } from '../heartbeat';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
 
@@ -114,11 +115,17 @@ const getNextIdsToCreateDocumentId = async (
 };
 
 // Migrate document ids for tables that have localizations
-const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, meta: Meta) => {
+const migrateDocumentIdsWithLocalizations = async (
+  db: Database,
+  knex: Knex,
+  meta: Meta,
+  heartbeat: HeartbeatLogger
+) => {
   const singularName = meta.singularName.toLowerCase();
   const joinColumn = snakeCase(`${singularName}_id`);
   const inverseJoinColumn = snakeCase(`inv_${singularName}_id`);
   let ids: number[];
+  let processed = 0;
 
   do {
     ids = await getNextIdsToCreateDocumentId(db, knex, {
@@ -130,16 +137,27 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
 
     if (ids.length > 0) {
       await knex(meta.tableName).update({ document_id: createId() }).whereIn('id', ids);
+      processed += ids.length;
+      heartbeat.tick(
+        (elapsedSeconds) =>
+          `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${processed} rows processed`
+      );
     }
   } while (ids.length > 0);
 };
 
 // Migrate document ids for tables that don't have localizations
-const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
+const migrationDocumentIds = async (
+  db: Database,
+  knex: Knex,
+  meta: Meta,
+  heartbeat: HeartbeatLogger
+) => {
   const batchSize = getBatchSize(knex);
-  let recordsLeft = +(
+  const total = +(
     await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id')
   )[0].recordsLeft;
+  let recordsLeft = total;
   while (recordsLeft > 0) {
     const currentBatchSize = recordsLeft < batchSize ? recordsLeft : batchSize;
     const updateRecords = (
@@ -147,6 +165,11 @@ const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
     ).map((item) => ({ id: item.id, document_id: createId() }));
     await knex(meta.tableName).insert(updateRecords).onConflict('id').merge();
     recordsLeft -= updateRecords.length;
+    const processed = total - recordsLeft;
+    heartbeat.tick(
+      (elapsedSeconds) =>
+        `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${processed}/${total}`
+    );
   }
 };
 
@@ -179,7 +202,10 @@ const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
 export const createdDocumentId: Migration = {
   name: '5.0.0-02-created-document-id',
   async up(knex, db) {
-    // do sth
+    const heartbeat = createHeartbeatLogger((message) => {
+      db.logger.info(message);
+    });
+
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
 
@@ -195,9 +221,9 @@ export const createdDocumentId: Migration = {
         }
 
         if (await hasLocalizationsJoinTable(knex, meta.tableName)) {
-          await migrateDocumentIdsWithLocalizations(db, knex, meta);
+          await migrateDocumentIdsWithLocalizations(db, knex, meta, heartbeat);
         } else {
-          await migrationDocumentIds(db, knex, meta);
+          await migrationDocumentIds(db, knex, meta, heartbeat);
         }
       }
     }
