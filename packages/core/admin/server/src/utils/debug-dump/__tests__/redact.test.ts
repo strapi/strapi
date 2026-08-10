@@ -1,5 +1,10 @@
 import { scrub, REDACTED } from '../redact';
 
+// scrub() returns `unknown` by design (it scrubs arbitrary input); route the
+// object cases through this typed helper instead of casting at every call site.
+const scrubObject = (value: unknown, options?: Parameters<typeof scrub>[1]) =>
+  scrub(value, options) as Record<string, unknown>;
+
 describe('debug-dump scrub', () => {
   it('masks values under secret-named keys, preserving the key', () => {
     const out = scrub({ apiToken: { salt: 'abc' }, password: 'p', keep: 'v' }) as any;
@@ -90,15 +95,15 @@ describe('debug-dump scrub', () => {
   });
 
   it('masks credential-shaped keys outside known secret containers', () => {
-    expect(scrub({ accessKeyId: 'AKIAIOSFODNN7EXAMPLE' }).accessKeyId).toBe(REDACTED);
+    expect(scrubObject({ accessKeyId: 'AKIAIOSFODNN7EXAMPLE' }).accessKeyId).toBe(REDACTED);
     // nested SMTP auth.pass (Ben's case) — auth is not a secret container, pass is
     expect(scrub({ auth: { pass: 'hunter2', user: 'admin' } })).toEqual({
       auth: { pass: REDACTED, user: 'admin' },
     });
     expect(scrub({ smtp: { pwd: 'x' } })).toEqual({ smtp: { pwd: REDACTED } });
-    expect(scrub({ passwd: 'x' }).passwd).toBe(REDACTED);
-    expect(scrub({ mnemonic: 'word word word' }).mnemonic).toBe(REDACTED);
-    expect(scrub({ authorization: 'Bearer abc' }).authorization).toBe(REDACTED);
+    expect(scrubObject({ passwd: 'x' }).passwd).toBe(REDACTED);
+    expect(scrubObject({ mnemonic: 'word word word' }).mnemonic).toBe(REDACTED);
+    expect(scrubObject({ authorization: 'Bearer abc' }).authorization).toBe(REDACTED);
     expect(scrub({ sentry: { dsn: 'https://k@o.ingest.sentry.io/1' } })).toEqual({
       sentry: { dsn: REDACTED },
     });
@@ -141,29 +146,33 @@ describe('debug-dump scrub', () => {
 
   it('masks secret-bearing URLs, PEM keys, and more shapes found by the stress-test', () => {
     // credentials in a URL authority, including empty-user (Redis)
-    expect(scrub({ redisUrl: 'redis://:passw0rd@cache.internal:6379/0' }).redisUrl).toBe(REDACTED);
+    expect(scrubObject({ redisUrl: 'redis://:passw0rd@cache.internal:6379/0' }).redisUrl).toBe(
+      REDACTED
+    );
     // PEM private key block (not caught by key name)
     expect(
-      scrub({
+      scrubObject({
         ciDeployKey: '-----BEGIN OPENSSH PRIVATE KEY-----\nAAAA\n-----END OPENSSH PRIVATE KEY-----',
       }).ciDeployKey
     ).toBe(REDACTED);
     // Slack incoming webhook + Sentry DSN (secret carried in host/path)
-    expect(scrub({ hook: 'https://hooks.slack.com/services/T00/B00/XXXXXXXXXXXX' }).hook).toBe(
-      REDACTED
-    );
-    expect(scrub({ tracing: 'https://abc123def456@o12345.ingest.sentry.io/42' }).tracing).toBe(
-      REDACTED
-    );
+    expect(
+      scrubObject({ hook: 'https://hooks.slack.com/services/T00/B00/XXXXXXXXXXXX' }).hook
+    ).toBe(REDACTED);
+    expect(
+      scrubObject({ tracing: 'https://abc123def456@o12345.ingest.sentry.io/42' }).tracing
+    ).toBe(REDACTED);
     // Strapi EE license key + crypto seed phrase (by key name)
-    expect(scrub({ licenseKey: '38206b7c-a2bf-4b65-9cfb-c614d51ba28d' }).licenseKey).toBe(REDACTED);
-    expect(scrub({ seedPhrase: 'abandon abandon abandon' }).seedPhrase).toBe(REDACTED);
+    expect(scrubObject({ licenseKey: '38206b7c-a2bf-4b65-9cfb-c614d51ba28d' }).licenseKey).toBe(
+      REDACTED
+    );
+    expect(scrubObject({ seedPhrase: 'abandon abandon abandon' }).seedPhrase).toBe(REDACTED);
     // flat camelCase password suffix, but not lowercase look-alikes
-    expect(scrub({ smtpAuthPass: 'hunter2' }).smtpAuthPass).toBe(REDACTED);
+    expect(scrubObject({ smtpAuthPass: 'hunter2' }).smtpAuthPass).toBe(REDACTED);
     expect(scrub({ compass: 'north', bypass: 'on' })).toEqual({ compass: 'north', bypass: 'on' });
     // publishable (public) Stripe key stays visible
-    expect(scrub({ publishableKey: 'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA' }).publishableKey).toBe(
-      'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA'
-    );
+    expect(
+      scrubObject({ publishableKey: 'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA' }).publishableKey
+    ).toBe('pk_live_51NxAAAAAAAAAAAAAAAAAAAAA');
   });
 });
