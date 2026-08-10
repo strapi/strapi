@@ -132,6 +132,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/plugins                                                                  │
 │ HEAD|GET           │ /admin/license-trial-time-left                                                  │
 │ HEAD|GET           │ /admin/guided-tour-meta                                                         │
+│ HEAD|GET           │ /admin/debug-dump                                                               │
 │ POST               │ /admin/login                                                                    │
 │ POST               │ /admin/access-token                                                             │
 │ POST               │ /admin/register-admin                                                           │

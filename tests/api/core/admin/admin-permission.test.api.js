@@ -422,6 +422,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "options",
               },
               {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::marketplace.read",
                 "category": "plugins and marketplace",
                 "displayName": "Access the marketplace",
@@ -1035,6 +1041,12 @@ describe('Role CRUD End to End', () => {
                 "action": "admin::api-tokens.update",
                 "category": "api tokens",
                 "displayName": "Update",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::debug-dump.read",
+                "category": "debug and support",
+                "displayName": "Generate a support debug dump",
                 "subCategory": "general",
               },
               {
