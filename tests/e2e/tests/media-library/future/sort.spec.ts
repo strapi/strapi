@@ -10,7 +10,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 const FIXTURE_IMAGE_1 = path.join(__dirname, '../../../data/uploads/test-image-1.jpg');
 const FIXTURE_IMAGE_2 = path.join(__dirname, '../../../data/uploads/test-image-2.jpg');
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('Media Library - Sort', () => {
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - Sort', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');

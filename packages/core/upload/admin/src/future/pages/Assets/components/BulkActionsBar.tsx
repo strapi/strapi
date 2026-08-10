@@ -10,7 +10,7 @@ import {
   AI_METADATA_MAX_FILES,
   isAIMetadataSupportedMime,
 } from '../../../../../../shared/constants';
-import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
@@ -80,7 +80,9 @@ export const BulkActionsBar = ({
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // No mime argument: the action is selection-scoped, so the per-asset
+  // allowlist check happens below in `eligibleCount`.
+  const isAiMetadataEnabled = useAIMetadataEnabled();
   // Every bulk action (move, delete, metadata) is an `assets.update` mutation
   // server-side — one flag gates the whole cluster.
   const { canUpdate } = useMediaLibraryPermissions();
