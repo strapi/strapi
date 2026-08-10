@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import { isUrlFromBucket } from '../utils';
 
 describe('Test for URLs', () => {

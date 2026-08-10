@@ -1,5 +1,7 @@
 import path from 'path';
 import os from 'os';
+import { describe, expect, it } from 'vitest';
+
 import { isIgnoredFile } from '../compress-files';
 
 describe('isIgnoredFile', () => {
