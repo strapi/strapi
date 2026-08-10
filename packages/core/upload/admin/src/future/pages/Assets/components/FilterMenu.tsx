@@ -81,6 +81,30 @@ const FieldToggle = styled(Menu.Item)`
   width: 100%;
 `;
 
+// The options revealed under a field row.
+//
+// `width: 100%` is load-bearing: Menu.Content is a column flex with
+// `align-items: flex-start`, so a child shrink-wraps to its content unless it
+// sets a width explicitly. Without it the group collapsed to the widest option
+// label and the rows' own `width: 100%` resolved against that, so a selected row
+// highlighted only part of the panel.
+//
+// The indent then lives on each row's padding rather than on this wrapper —
+// padding here would inset the rows, and the highlight with them.
+const OptionGroup = styled(Box)`
+  width: 100%;
+
+  > * {
+    width: 100%;
+  }
+
+  /* menuitem, menuitemradio and menuitemcheckbox — every option row, plus the
+     "Select date range" toggle, which sits at the same level. */
+  > [role^='menuitem'] {
+    padding-left: ${({ theme }) => theme.spaces[6]};
+  }
+`;
+
 // Rotates the chevron when its section is open.
 const Chevron = styled(ChevronDown)<{ $open: boolean }>`
   transition: transform 0.2s ease;
@@ -292,7 +316,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
             >
               {typeLabel}
             </FieldToggle>
-            {openField === 'type' && <Box paddingLeft={2}>{typeItems}</Box>}
+            {openField === 'type' && <OptionGroup>{typeItems}</OptionGroup>}
 
             {(['createdAt', 'updatedAt'] as const).map((field) => (
               <Box key={field} width="100%">
@@ -307,7 +331,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
                   {formatMessage(DATE_FIELD_LABELS[field])}
                 </FieldToggle>
                 {openField === field && (
-                  <Box paddingLeft={2}>
+                  <OptionGroup>
                     {presetItems(field)}
                     {/* Only Creation date offers a range from the UI (design). */}
                     {field === 'createdAt' && (
@@ -329,7 +353,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
                         )}
                       </>
                     )}
-                  </Box>
+                  </OptionGroup>
                 )}
               </Box>
             ))}
