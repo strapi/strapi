@@ -41,6 +41,8 @@ import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
+import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
+import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
@@ -49,7 +51,6 @@ import {
   useUpdateAssetMutation,
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
-import { useGetSettingsQuery } from '../../../../services/settings';
 import { downloadFile } from '../../../../utils/downloadFile';
 import {
   formatBytes,
@@ -59,6 +60,7 @@ import {
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
+import { BusyOverlay } from '../BusyOverlay';
 
 import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
@@ -246,25 +248,14 @@ const DrawerToastSlot = styled(Box)`
 `;
 
 /**
- * Full-form overlay rendered during long-running drawer-scoped mutations
- * (e.g. replacing the binary). Sits above the toast slot (z-index 10) and
- * the in-drawer Alert so the user can't interact with the form mid-flight.
- */
-const DrawerBusyOverlay = styled(Flex)`
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  align-items: center;
-  justify-content: center;
-  background: ${({ theme }) => theme.colors.neutral0};
-  opacity: 0.7;
-`;
-
-/**
  * Map the drawer-scoped mutation flags to a single i18n message for the busy
  * overlay loader. Returns `null` when nothing is in flight.
+ *
+ * Exported for the unit test: the branch order only matters when two flags are
+ * true at once, which the UI makes hard to stage through the rendered drawer
+ * (each trigger disables itself while its own mutation runs).
  */
-const getBusyMessage = (state: {
+export const getBusyMessage = (state: {
   isDeleting: boolean;
   isReplacing: boolean;
   isCropCopying: boolean;
@@ -303,13 +294,28 @@ interface DetailFieldProps {
   name: string;
   label: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
-const DetailField = ({ name, label, required }: DetailFieldProps) => {
+const DetailField = ({ name, label, required, disabled }: DetailFieldProps) => {
   const { formatMessage } = useIntl();
   const field = useField<string>(name);
   const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
-  const value = field.value ?? '';
+
+  // The form context (use-context-selector) echoes changes back
+  // asynchronously — driving the input straight from `field.value` makes
+  // React rewrite the DOM value after the keystroke, which throws the cursor
+  // to the end of the field. The input is therefore controlled by local state
+  // (synchronous, cursor-safe) and the form follows; the effect below only
+  // matters for EXTERNAL value changes (discard/reset), where a cursor jump
+  // is fine because the user isn't typing.
+  const fieldValue = field.value ?? '';
+  const [value, setValue] = React.useState(fieldValue);
+
+  React.useEffect(() => {
+    setValue(fieldValue);
+  }, [fieldValue]);
+
   const emptyTooltipLabel = formatMessage(
     {
       id: getTranslationKey('asset-details.field.empty'),
@@ -323,9 +329,10 @@ const DetailField = ({ name, label, required }: DetailFieldProps) => {
       <Field.Label>{label}</Field.Label>
       <TextInput
         value={value}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-          field.onChange(name, event.target.value)
-        }
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(event.target.value);
+          field.onChange(name, event.target.value);
+        }}
         endAction={
           !value ? (
             <Tooltip label={emptyTooltipLabel}>
@@ -334,7 +341,7 @@ const DetailField = ({ name, label, required }: DetailFieldProps) => {
           ) : undefined
         }
         type="text"
-        disabled={isSubmitting}
+        disabled={isSubmitting || disabled}
       />
     </Field.Root>
   );
@@ -348,9 +355,10 @@ interface LocationFieldProps {
   label: string;
   rootLabel: string;
   folders: Array<{ id: number; name: string }>;
+  disabled?: boolean;
 }
 
-const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
+const LocationField = ({ label, rootLabel, folders, disabled }: LocationFieldProps) => {
   const field = useField<number | null>('folder');
   const isSubmitting = useForm('LocationField', (state) => state.isSubmitting);
 
@@ -367,7 +375,7 @@ const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
           const next = value === '' ? null : Number(value);
           field.onChange('folder', next);
         }}
-        disabled={isSubmitting}
+        disabled={isSubmitting || disabled}
       >
         <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
         {folders.map((folder) => (
@@ -538,13 +546,17 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * ReplaceAssetButton
  * -----------------------------------------------------------------------------------------------*/
 
-const ReplaceAssetButton = () => {
+interface ReplaceAssetButtonProps {
+  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  mime?: string | null;
+}
+
+const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
   const { formatMessage } = useIntl();
   const { replaceAsset, isReplacing } = useAssetOperation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const { data: settings } = useGetSettingsQuery();
-  const aiEnabled = settings?.data?.aiMetadata ?? false;
+  const aiEnabled = useAIMetadataEnabled({ mime });
 
   const handleTriggerClick = () => {
     setIsDialogOpen(true);
@@ -643,11 +655,11 @@ const ReplaceAssetButton = () => {
  * AssetImageActions - crop and replace buttons overlaid on the image preview.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps {
+interface AssetImageActionsProps extends ReplaceAssetButtonProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
@@ -665,7 +677,7 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton />
+      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -688,6 +700,7 @@ interface AssetFormState {
 
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();
@@ -758,32 +771,35 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   );
 
   // Owns the replace upload so isReplacing can drive the busy overlay.
-  const handleReplace = async (file: globalThis.File) => {
-    const res = await replaceMutation({ id: asset.id, file });
-    if ('error' in res) {
-      const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-      const message =
-        error?.data?.error?.message ??
-        error?.data?.message ??
-        formatMessage({
-          id: getTranslationKey('asset-details.replace.error'),
-          defaultMessage: 'Failed to replace the file.',
-        });
-      notify({ type: 'danger', message });
-      return;
-    }
-    notify({
-      type: 'success',
-      message: formatMessage({
-        id: getTranslationKey('asset-details.replace.success'),
-        defaultMessage: 'File replaced.',
-      }),
-    });
-  };
+  const handleReplace = React.useCallback(
+    async (file: globalThis.File) => {
+      const res = await replaceMutation({ id: asset.id, file });
+      if ('error' in res) {
+        const error = res.error as { data?: { error?: { message?: string }; message?: string } };
+        const message =
+          error?.data?.error?.message ??
+          error?.data?.message ??
+          formatMessage({
+            id: getTranslationKey('asset-details.replace.error'),
+            defaultMessage: 'Failed to replace the file.',
+          });
+        notify({ type: 'danger', message });
+        return;
+      }
+      notify({
+        type: 'success',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.replace.success'),
+          defaultMessage: 'File replaced.',
+        }),
+      });
+    },
+    [asset.id, formatMessage, notify, replaceMutation]
+  );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
   // a persistent global notification then close the drawer.
-  const handleDelete = async () => {
+  const handleDelete = React.useCallback(async () => {
     const res = await deleteMutation(asset.id);
     if ('error' in res) {
       const error = res.error as { data?: { error?: { message?: string }; message?: string } };
@@ -808,7 +824,15 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       ),
     });
     closeDetails();
-  };
+  }, [
+    asset.id,
+    closeDetails,
+    deleteMutation,
+    folderName,
+    formatMessage,
+    notify,
+    toggleNotification,
+  ]);
 
   const notifyCropError = () => {
     notify({
@@ -878,10 +902,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       isReplacing,
       isDeleting,
     }),
-    // handleReplace / handleDelete close over asset+mutations and don't need a
-    // stable identity here; the consumers re-render with the new context value.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isReplacing, isDeleting]
+    [handleReplace, handleDelete, isReplacing, isDeleting]
   );
 
   return (
@@ -907,13 +928,10 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       onClose={() => setIsCropOpen(false)}
                       onApply={handleCropApply}
                       onSaveAsCopy={handleCropSaveAsCopy}
+                      canSaveAsCopy={canCreate}
                     />
                   ) : null}
-                  {busyMessage ? (
-                    <DrawerBusyOverlay>
-                      <Loader>{formatMessage(busyMessage)}</Loader>
-                    </DrawerBusyOverlay>
-                  ) : null}
+                  {busyMessage ? <BusyOverlay>{formatMessage(busyMessage)}</BusyOverlay> : null}
                   {drawerToast ? (
                     <DrawerToastSlot>
                       <Alert
@@ -929,7 +947,9 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                     <AssetPreview
                       asset={asset}
                       actions={
-                        isImage ? <AssetImageActions onCrop={() => setIsCropOpen(true)} /> : null
+                        isImage && canUpdate ? (
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
+                        ) : null
                       }
                     />
                     <Flex
@@ -1043,6 +1063,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                           defaultMessage: 'File name',
                         })}
                         required
+                        disabled={!canUpdate}
                       />
                       <LocationField
                         label={formatMessage({
@@ -1054,6 +1075,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                           defaultMessage: 'Home',
                         })}
                         folders={folders}
+                        disabled={!canUpdate}
                       />
                       {isImage && (
                         <>
@@ -1063,6 +1085,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                               id: getTranslationKey('asset-details.caption'),
                               defaultMessage: 'Caption',
                             })}
+                            disabled={!canUpdate}
                           />
                           <DetailField
                             name="alternativeText"
@@ -1070,39 +1093,46 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                               id: getTranslationKey('asset-details.alternativeText'),
                               defaultMessage: 'Alternative text',
                             })}
+                            disabled={!canUpdate}
                           />
                         </>
                       )}
                     </Flex>
                   </Drawer.ScrollableContent>
-                  <Flex
-                    justifyContent="space-between"
-                    alignItems="center"
-                    gap={2}
-                    padding={3}
-                    borderColor="neutral150"
-                    borderStyle="solid"
-                    borderWidth="1px 0 0 0"
-                    background="neutral0"
-                  >
-                    <Flex gap={2}>
-                      <DeleteAssetButton />
-                      <CopyLinkButton asset={asset} />
-                      <DownloadAssetButton asset={asset} />
-                    </Flex>
-                    <Button
-                      type="submit"
-                      variant="default"
-                      loading={isSubmitting}
-                      // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
-                      disabled={!modified || isSubmitting || nameIsEmpty}
+                  {/* Every footer action is permission-gated — when none survive,
+                      drop the whole bar instead of showing an empty strip. */}
+                  {(canUpdate || canCopyLink || canDownload) && (
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      gap={2}
+                      padding={3}
+                      borderColor="neutral150"
+                      borderStyle="solid"
+                      borderWidth="1px 0 0 0"
+                      background="neutral0"
                     >
-                      {formatMessage({
-                        id: getTranslationKey('asset-details.save'),
-                        defaultMessage: 'Save changes',
-                      })}
-                    </Button>
-                  </Flex>
+                      <Flex gap={2}>
+                        {canUpdate && <DeleteAssetButton />}
+                        {canCopyLink && <CopyLinkButton asset={asset} />}
+                        {canDownload && <DownloadAssetButton asset={asset} />}
+                      </Flex>
+                      {canUpdate && (
+                        <Button
+                          type="submit"
+                          variant="default"
+                          loading={isSubmitting}
+                          // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
+                          disabled={!modified || isSubmitting || nameIsEmpty}
+                        >
+                          {formatMessage({
+                            id: getTranslationKey('asset-details.save'),
+                            defaultMessage: 'Save changes',
+                          })}
+                        </Button>
+                      )}
+                    </Flex>
+                  )}
                 </>
               );
             }}
@@ -1240,7 +1270,11 @@ export const AssetDetailsDrawer = () => {
       <Drawer.Body
         animationDirection="left"
         width="41.6rem"
-        height="100vh"
+        // dvh, not vh: the drawer is anchored to the bottom, so with 100vh on
+        // mobile (where the URL bar shrinks the visual viewport below 100vh)
+        // the top of the drawer — header, title, close button — is pushed
+        // off-screen. dvh tracks the actual visible height.
+        height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
       >
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />

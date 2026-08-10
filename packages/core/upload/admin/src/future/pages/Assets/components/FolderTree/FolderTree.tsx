@@ -1,6 +1,15 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Loader,
+  Searchbar,
+  Tooltip,
+  Typography,
+  useFilter,
+} from '@strapi/design-system';
 import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
@@ -10,6 +19,7 @@ import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
 
+import { filterFolderTree } from './filterFolderTree';
 import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
 import type { FolderNode } from '../../../../../../../shared/contracts/folders';
@@ -249,6 +259,7 @@ interface FolderTreeItemProps {
   node: FolderNode;
   level: number;
   currentFolderId: number | null;
+  showActiveFolder: boolean;
   isExpanded: (id: number) => boolean;
   onToggle: (id: number) => void;
   onExpand: (id: number) => void;
@@ -268,6 +279,7 @@ const FolderTreeItemInner = ({
   folderChildren,
   level,
   currentFolderId,
+  showActiveFolder,
   isExpanded,
   onToggle,
   onExpand,
@@ -277,7 +289,7 @@ const FolderTreeItemInner = ({
   const { formatMessage } = useIntl();
   const hasChildren = folderChildren.length > 0;
   const isFolderExpanded = isExpanded(id);
-  const isActive = currentFolderId === id;
+  const isActive = showActiveFolder && currentFolderId === id;
 
   const {
     droppable: { setNodeRef },
@@ -353,6 +365,7 @@ const FolderTreeItemInner = ({
               node={child}
               level={level + 1}
               currentFolderId={currentFolderId}
+              showActiveFolder={showActiveFolder}
               isExpanded={isExpanded}
               onToggle={onToggle}
               onExpand={onExpand}
@@ -409,6 +422,11 @@ const SidebarBody = styled(Flex)`
 
 interface FolderTreeProps {
   currentFolderId: number | null;
+  /**
+   * Set to `false` while a global asset search is active: the results span the
+   * whole library, so highlighting one folder would misrepresent them.
+   * */
+  showActiveFolder?: boolean;
   onSelectFolder: (folderId: number | null) => void;
 }
 
@@ -417,16 +435,24 @@ interface FolderTreeProps {
  * and renders:
  *
  * 1. A "Media library" title
- * 2. A "Home" entry that clears the folder query param
- * 3. A "FOLDERS" section header
- * 4. The folder tree itself
+ * 2. A filter input that prunes the tree to matching destinations
+ * 3. A "Home" entry that clears the folder query param
+ * 4. A "FOLDERS" section header
+ * 5. The folder tree itself
+ *
+ * The filter is purely local: it never touches the URL and never affects the
+ * asset list, which has its own independent search in the content toolbar.
  *
  * Presentational with respect to routing — navigation is delegated to the parent
  * via `onSelectFolder` so the URL stays the single source of truth (see
  * `useFolderNavigation`).
  */
-export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps) => {
-  const { formatMessage } = useIntl();
+export const FolderTree = ({
+  currentFolderId,
+  showActiveFolder = true,
+  onSelectFolder,
+}: FolderTreeProps) => {
+  const { formatMessage, locale } = useIntl();
   const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
   const { isExpanded, toggleExpanded, expandFolder } = useExpandedFolders(
     folderStructure,
@@ -434,7 +460,26 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
   );
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
 
-  const isHomeActive = currentFolderId == null;
+  const [treeFilter, setTreeFilter] = useState('');
+  const { contains } = useFilter(locale, { sensitivity: 'base' });
+  const trimmedFilter = treeFilter.trim();
+
+  const { nodes: visibleNodes, expandedIds: filterExpandedIds } = useMemo(
+    () =>
+      trimmedFilter
+        ? filterFolderTree(folderStructure, (name) => contains(name, trimmedFilter))
+        : { nodes: folderStructure, expandedIds: [] },
+    [folderStructure, trimmedFilter, contains]
+  );
+
+  // An override layered on top of the user's own expansion rather than written
+  // into it, so clearing the filter restores exactly what they had open.
+  const isExpandedForRender = useCallback(
+    (id: number) => filterExpandedIds.includes(id) || isExpanded(id),
+    [filterExpandedIds, isExpanded]
+  );
+
+  const isHomeActive = showActiveFolder && currentFolderId == null;
   const homeLabel = formatMessage({
     id: getTranslationKey('sidebar.home'),
     defaultMessage: 'Home',
@@ -457,12 +502,34 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
       })}
     >
       <SidebarHeader paddingTop={4} paddingBottom={4} paddingLeft={5} paddingRight={5}>
-        <Typography variant="beta" tag="h2">
-          {formatMessage({
-            id: getTranslationKey('sidebar.title'),
-            defaultMessage: 'Media library',
-          })}
-        </Typography>
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          <Typography variant="beta" tag="h2">
+            {formatMessage({
+              id: getTranslationKey('sidebar.title'),
+              defaultMessage: 'Media library',
+            })}
+          </Typography>
+
+          <Searchbar
+            name="search-folders"
+            value={treeFilter}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setTreeFilter(event.target.value)
+            }
+            onClear={() => setTreeFilter('')}
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            placeholder={formatMessage({
+              id: getTranslationKey('sidebar.search.placeholder'),
+              defaultMessage: 'Search folders',
+            })}
+            size="S"
+          >
+            {formatMessage({
+              id: getTranslationKey('sidebar.search.label'),
+              defaultMessage: 'Search folders',
+            })}
+          </Searchbar>
+        </Flex>
       </SidebarHeader>
 
       <SidebarBody direction="column" alignItems="stretch" gap={1} padding={3}>
@@ -526,25 +593,34 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
                 })}
               </Typography>
             </Box>
-          ) : folderStructure.length === 0 ? (
+          ) : visibleNodes.length === 0 ? (
             // TODO: revisit empty state before revamp GA
             <Box padding={1} paddingTop={2}>
               <Typography variant="pi" textColor="neutral500">
-                {formatMessage({
-                  id: getTranslationKey('sidebar.tree.empty'),
-                  defaultMessage: 'No folders yet',
-                })}
+                {trimmedFilter
+                  ? formatMessage(
+                      {
+                        id: getTranslationKey('sidebar.tree.no-results'),
+                        defaultMessage: 'No folders match "{query}"',
+                      },
+                      { query: trimmedFilter }
+                    )
+                  : formatMessage({
+                      id: getTranslationKey('sidebar.tree.empty'),
+                      defaultMessage: 'No folders yet',
+                    })}
               </Typography>
             </Box>
           ) : (
             <NavList>
-              {folderStructure.map((node) => (
+              {visibleNodes.map((node) => (
                 <FolderTreeItem
                   key={node.id ?? node.name}
                   node={node}
                   level={0}
                   currentFolderId={currentFolderId}
-                  isExpanded={isExpanded}
+                  showActiveFolder={showActiveFolder}
+                  isExpanded={isExpandedForRender}
                   onToggle={toggleExpanded}
                   onExpand={expandFolder}
                   onSelect={onSelectFolder}

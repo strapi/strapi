@@ -2,7 +2,6 @@ import { getListQueryKey } from '../listQueryKey';
 
 const baseInput = {
   folderId: 1,
-  view: 0,
   search: '',
   sort: null,
   filter: null,
@@ -25,11 +24,12 @@ describe('getListQueryKey', () => {
     expect(keyA).not.toBe(keyB);
   });
 
-  it('returns different keys for different view', () => {
-    const keyA = getListQueryKey(baseInput);
-    const keyB = getListQueryKey({ ...baseInput, view: 1 });
+  it('ignores the view — switching table/grid must not clear the selection', () => {
+    // The view is deliberately NOT part of the key: both views render the same
+    // list, so toggling only changes the presentation.
+    const key = getListQueryKey(baseInput);
 
-    expect(keyA).not.toBe(keyB);
+    expect(key).not.toContain('view');
   });
 
   it('returns different keys for different search', () => {

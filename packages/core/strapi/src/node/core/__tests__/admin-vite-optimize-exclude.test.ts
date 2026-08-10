@@ -1,8 +1,11 @@
 import {
+  ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST,
   collectAdminOptimizeDepsExclude,
   getPluginPackageName,
   hasReactPeerDependency,
+  isEligibleForOptimizeDepsExclude,
   isEsmPackage,
+  packageOptsIntoOptimizeDepsExclude,
   shipsPreBuiltDist,
   shouldExcludeFromOptimizeDeps,
 } from '../admin-vite-optimize-exclude';
@@ -30,7 +33,7 @@ const PINNED_OPTIMIZE_MODULES = [
   '@strapi/strapi',
 ] as const;
 
-const preBuiltReactPeerPackage = (name: string) => ({
+const preBuiltReactPeerPackage = (name: string, extras: Record<string, unknown> = {}) => ({
   name,
   type: 'module',
   module: './dist/index.js',
@@ -39,6 +42,7 @@ const preBuiltReactPeerPackage = (name: string) => ({
     react: '^18.0.0',
     'react-dom': '^18.0.0',
   },
+  ...extras,
 });
 
 const strapiDesignExtendedLike = {
@@ -57,6 +61,15 @@ const strapiDesignExtendedLike = {
     '@strapi/design-system': '^2.2.0',
   },
 };
+
+/** CKEditor-class: matches the UI-kit shape but must not auto-exclude (#27136). */
+const ckeditorPluginLike = preBuiltReactPeerPackage('@_sh/strapi-plugin-ckeditor', {
+  dependencies: {
+    ckeditor5: '^43.0.0',
+    yup: '^0.32.0',
+    fuzzysort: '^3.0.0',
+  },
+});
 
 describe('admin vite optimize exclude heuristics', () => {
   it('matches pre-built ESM libraries with React peers', () => {
@@ -130,7 +143,52 @@ describe('admin vite optimize exclude heuristics', () => {
     expect(shipsPreBuiltDist({ files: ['dist'] })).toBe(true);
     expect(shipsPreBuiltDist({ module: './lib/index.js' })).toBe(false);
   });
+
+  it('allowlists only known thin UI kits', () => {
+    expect(ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST.has('strapi-design-extended')).toBe(true);
+    expect(ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST.has('@_sh/strapi-plugin-ckeditor')).toBe(
+      false
+    );
+  });
+
+  it('reads package.json opt-in for optimizeDeps.exclude', () => {
+    expect(
+      packageOptsIntoOptimizeDepsExclude({
+        strapi: { admin: { vite: { optimizeDepsExclude: true } } },
+      } as PackageJsonLike)
+    ).toBe(true);
+    expect(packageOptsIntoOptimizeDepsExclude(strapiDesignExtendedLike as PackageJsonLike)).toBe(
+      false
+    );
+  });
+
+  it('requires allowlist or opt-in on top of the UI-kit shape (#27136)', () => {
+    expect(
+      isEligibleForOptimizeDepsExclude('strapi-design-extended', strapiDesignExtendedLike)
+    ).toBe(true);
+    expect(
+      isEligibleForOptimizeDepsExclude('@_sh/strapi-plugin-ckeditor', ckeditorPluginLike)
+    ).toBe(false);
+    expect(
+      isEligibleForOptimizeDepsExclude(
+        'my-thin-ui-kit',
+        preBuiltReactPeerPackage('my-thin-ui-kit', {
+          strapi: { admin: { vite: { optimizeDepsExclude: true } } },
+        })
+      )
+    ).toBe(true);
+    expect(
+      isEligibleForOptimizeDepsExclude('opted-in-but-cjs', {
+        name: 'opted-in-but-cjs',
+        main: 'index.js',
+        peerDependencies: { react: '^18.0.0' },
+        strapi: { admin: { vite: { optimizeDepsExclude: true } } },
+      } as PackageJsonLike)
+    ).toBe(false);
+  });
 });
+
+type PackageJsonLike = Parameters<typeof packageOptsIntoOptimizeDepsExclude>[0];
 
 describe('collectAdminOptimizeDepsExclude', () => {
   const getModuleMock = getModule as jest.Mock;
@@ -140,7 +198,7 @@ describe('collectAdminOptimizeDepsExclude', () => {
     readPkgUp.mockResolvedValue(undefined);
   });
 
-  it('excludes pre-built React peer libraries from plugin dependencies', async () => {
+  it('excludes allowlisted pre-built React peer libraries from plugin dependencies', async () => {
     const plugins: PluginMeta[] = [
       {
         name: 'my-plugin',
@@ -171,7 +229,69 @@ describe('collectAdminOptimizeDepsExclude', () => {
     ]);
   });
 
-  it('never excludes @strapi/strapi from app root but still excludes matching UI kits', async () => {
+  it('does not auto-exclude CKEditor-class plugins that only match the UI-kit shape (#27136)', async () => {
+    const plugins: PluginMeta[] = [
+      {
+        name: 'ckeditor',
+        importName: 'ckeditor',
+        type: 'module',
+        modulePath: '@_sh/strapi-plugin-ckeditor/strapi-admin',
+      },
+    ];
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@_sh/strapi-plugin-ckeditor') {
+        return ckeditorPluginLike;
+      }
+
+      return null;
+    });
+
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          '@_sh/strapi-plugin-ckeditor': '^1.0.0',
+        },
+      },
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([]);
+  });
+
+  it('excludes packages that opt in via strapi.admin.vite.optimizeDepsExclude', async () => {
+    const plugins: PluginMeta[] = [
+      {
+        name: 'my-plugin',
+        importName: 'myPlugin',
+        type: 'module',
+        modulePath: '@org/my-plugin/strapi-admin',
+      },
+    ];
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@org/my-plugin') {
+        return {
+          dependencies: {
+            'my-thin-ui-kit': '^1.0.0',
+          },
+        };
+      }
+
+      if (name === 'my-thin-ui-kit') {
+        return preBuiltReactPeerPackage('my-thin-ui-kit', {
+          strapi: { admin: { vite: { optimizeDepsExclude: true } } },
+        });
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', plugins)).resolves.toEqual([
+      'my-thin-ui-kit',
+    ]);
+  });
+
+  it('never excludes @strapi/strapi from app root but still excludes allowlisted UI kits', async () => {
     readPkgUp.mockResolvedValue({
       packageJson: {
         dependencies: {
