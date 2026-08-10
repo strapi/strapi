@@ -138,9 +138,10 @@ const migrateDocumentIdsWithLocalizations = async (
     if (ids.length > 0) {
       await knex(meta.tableName).update({ document_id: createId() }).whereIn('id', ids);
       processed += ids.length;
+      const rowsProcessed = processed;
       heartbeat.tick(
         (elapsedSeconds) =>
-          `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${processed} rows processed`
+          `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${rowsProcessed} rows processed`
       );
     }
   } while (ids.length > 0);
@@ -154,9 +155,8 @@ const migrationDocumentIds = async (
   heartbeat: HeartbeatLogger
 ) => {
   const batchSize = getBatchSize(knex);
-  const total = +(
-    await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id')
-  )[0].recordsLeft;
+  const total = +(await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id'))[0]
+    .recordsLeft;
   let recordsLeft = total;
   while (recordsLeft > 0) {
     const currentBatchSize = recordsLeft < batchSize ? recordsLeft : batchSize;
