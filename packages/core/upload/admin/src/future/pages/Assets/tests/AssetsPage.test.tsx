@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDeleteAssetMutation } from '../../../services/assets';
 import { AssetsPage } from '../AssetsPage';
+import { localStorageKeys, viewOptions } from '../constants';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
@@ -601,6 +602,13 @@ describe('AssetsPage RBAC gating', () => {
     },
   };
 
+  const withoutUpdate = {
+    providerOptions: {
+      permissions: (defaults: Array<{ action: string }>) =>
+        defaults.filter((permission) => permission.action !== 'plugin::upload.assets.update'),
+    },
+  };
+
   it('shows the New menu with the default permissions', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
@@ -629,5 +637,49 @@ describe('AssetsPage RBAC gating', () => {
 
     expect(await screen.findByText('No assets yet')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Add assets' })).not.toBeInTheDocument();
+  });
+
+  /**
+   * The table's selection column is driven by `canUpdate`, which the page
+   * resolves once and passes down. Asserting it from the page — rather than
+   * handing the prop straight to `AssetsTable` — is what covers that wiring: a
+   * page that resolved the wrong permission would still satisfy the table's own
+   * tests. Both polarities are here so an always-false value fails too.
+   */
+  describe('table selection column', () => {
+    // The view is persisted and defaults to grid, so the table has to be
+    // selected before render and cleared again to keep the key out of the
+    // other tests.
+    beforeEach(() => {
+      window.localStorage.setItem(localStorageKeys.view, JSON.stringify(viewOptions.TABLE));
+    });
+
+    afterEach(() => {
+      window.localStorage.removeItem(localStorageKeys.view);
+    });
+
+    it('renders selection checkboxes with the default permissions', async () => {
+      respondWithAssets([createAsset(1, 'image.png')]);
+
+      renderPage();
+      await findHeading();
+
+      expect(await screen.findByText('image.png')).toBeInTheDocument();
+      // gridcells confirm the table rendered rather than the grid of cards.
+      expect(screen.getAllByRole('gridcell').length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
+    });
+
+    it('hides the selection checkboxes without assets.update', async () => {
+      respondWithAssets([createAsset(1, 'image.png')]);
+
+      render(<AssetsPage />, { initialEntries: ['/'], ...withoutUpdate });
+      await findHeading();
+
+      // Rows still render; only the selection affordance is gone.
+      expect(await screen.findByText('image.png')).toBeInTheDocument();
+      expect(screen.getAllByRole('gridcell').length).toBeGreaterThan(0);
+      await waitFor(() => expect(screen.queryByRole('checkbox')).not.toBeInTheDocument());
+    });
   });
 });

@@ -39,9 +39,9 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 // Column widths are pinned by a <colgroup> (see COLUMN_WIDTHS) under a fixed
 // table layout. Auto layout re-measures every column from the widest content
 // across all rows, so appending a page of assets during infinite scroll would
-// redistribute widths and visibly shift the layout (CMS-1574). Fixed widths
-// don't depend on the rows, so paging can't retrigger it; the name column takes
-// the remainder and ellipsizes.
+// redistribute widths and visibly shift the layout. Fixed widths don't depend
+// on the rows, so paging can't retrigger it; the name column takes the
+// remainder and ellipsizes.
 const StyledTable = styled(RawTable)`
   width: 100%;
   table-layout: fixed;
@@ -624,9 +624,8 @@ export const AssetsTable = ({
   return (
     <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
       {/* Pins the fixed-layout column widths so appended pages can't re-measure
-          them (CMS-1574). Order must match the header/body cells: optional
-          checkbox, then the visible headers; `name` has no width so it takes
-          the remainder. */}
+          them. Order must match the header/body cells: optional checkbox, then
+          the visible headers; `name` has no width so it takes the remainder. */}
       <colgroup>
         {showCheckboxColumn && <col style={{ width: CHECKBOX_COLUMN_WIDTH }} />}
         {visibleHeaders.map((header) => {

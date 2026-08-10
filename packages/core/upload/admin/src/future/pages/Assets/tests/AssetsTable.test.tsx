@@ -134,9 +134,9 @@ describe('AssetsTable', () => {
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
 
-    // CMS-1574: a fixed table layout with colgroup-pinned widths stops columns
-    // from re-measuring (and visibly shifting) each time infinite scroll appends
-    // a page. The invariant that makes it work: every column has a fixed width
+    // A fixed table layout with colgroup-pinned widths stops columns from
+    // re-measuring (and visibly shifting) each time infinite scroll appends a
+    // page. The invariant that makes it work: every column has a fixed width
     // except `name`, which absorbs the remainder — so widths never depend on the
     // rows.
     it('pins column widths with a colgroup, leaving only the name column flexible', () => {
