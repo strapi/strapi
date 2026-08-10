@@ -50,11 +50,39 @@ export function getCollectionType(url: string) {
   return match ? match[1] : undefined;
 }
 
+/**
+ * Definite viewport height for the relation modal dialog.
+ * Percentage heights (`90%`) break the nested flex/scroll chain and can push
+ * Save/Publish out of reach when the form is tall (#27285).
+ *
+ * @internal Exported for regression coverage.
+ */
+export const RELATION_MODAL_VIEWPORT_HEIGHT = '90vh';
+
 const StyledModalContent = styled(Modal.Content)`
   width: 90%;
   max-width: 100%;
-  height: 90%;
-  max-height: 100%;
+  height: ${RELATION_MODAL_VIEWPORT_HEIGHT};
+  max-height: ${RELATION_MODAL_VIEWPORT_HEIGHT};
+
+  /*
+   * The design-system Content already styles \`> form\` as a column flex container.
+   * Grow that form under the header so Modal.Body can scroll while Modal.Footer stays pinned.
+   */
+  & > form {
+    flex: 1;
+    min-height: 0;
+  }
+`;
+
+const StyledModalBody = styled(Modal.Body)`
+  flex: 1;
+  min-height: 0;
+`;
+
+const StyledModalFooter = styled(Modal.Footer)`
+  /* Override DS Footer's flex:1 so actions stay compact at the bottom (#27285). */
+  flex: 0 0 auto;
 `;
 
 const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
@@ -433,34 +461,33 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
               </IconButton>
             </Flex>
           </Modal.Header>
-          <Modal.Body>
-            <FormContext
-              method={isCreating ? 'POST' : 'PUT'}
-              initialValues={currentDocument.getInitialFormValues(isCreating)}
-              validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-                const yupSchema = createYupSchema(
-                  currentDocument.schema?.attributes,
-                  currentDocument.components,
-                  {
-                    status: currentDocument.document?.status,
-                    ...options,
-                  }
-                );
+          <FormContext
+            method={isCreating ? 'POST' : 'PUT'}
+            height="100%"
+            initialValues={currentDocument.getInitialFormValues(isCreating)}
+            validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+              const yupSchema = createYupSchema(
+                currentDocument.schema?.attributes,
+                currentDocument.components,
+                {
+                  status: currentDocument.document?.status,
+                  ...options,
+                }
+              );
 
-                return yupSchema.validate(values, { abortEarly: false });
-              }}
-            >
-              <RelationModalBody />
-            </FormContext>
-          </Modal.Body>
+              return yupSchema.validate(values, { abortEarly: false });
+            }}
+          >
+            <RelationModalBody />
+          </FormContext>
         </StyledModalContent>
       </Modal.Root>
     </ComponentProvider>
   );
 };
 /**
- * All the main content (not header and footer) of the relation modal, plus the confirmation dialog.
- * Will be wrapped in a Modal.Body by the RelationModal component.
+ * All the main content of the relation modal (body + footer), plus the confirmation dialog.
+ * FormContext wraps this so document actions in the footer stay inside the form.
  * Cannot be moved directly inside RelationModal because it needs access to the context via hooks.
  */
 const RelationModalBody = () => {
@@ -636,6 +663,9 @@ const StyledRelationLink = styled(RouterLink)`
 /**
  * The mini edit view for a relation that is displayed inside a modal.
  * It's complete with its header, document actions and form layout.
+ *
+ * Save/Publish live in Modal.Footer so they stay reachable when the form is tall
+ * (e.g. dynamic zones). Modal.Body is the single scroll surface (#27285).
  */
 const RelationModalForm = () => {
   const { formatMessage } = useIntl();
@@ -669,12 +699,14 @@ const RelationModalForm = () => {
 
   if (isLoading && !currentDocument.document?.documentId) {
     return (
-      <Loader small>
-        {formatMessage({
-          id: 'content-manager.ListViewTable.relation-loading',
-          defaultMessage: 'Relations are loading',
-        })}
-      </Loader>
+      <StyledModalBody>
+        <Loader small>
+          {formatMessage({
+            id: 'content-manager.ListViewTable.relation-loading',
+            defaultMessage: 'Relations are loading',
+          })}
+        </Loader>
+      </StyledModalBody>
     );
   }
 
@@ -688,15 +720,17 @@ const RelationModalForm = () => {
     !initialValues
   ) {
     return (
-      <Flex alignItems="center" height="100%" justifyContent="center">
-        <EmptyStateLayout
-          icon={<WarningCircle width="16rem" />}
-          content={formatMessage({
-            id: 'anErrorOccurred',
-            defaultMessage: 'Whoops! Something went wrong. Please, try again.',
-          })}
-        />
-      </Flex>
+      <StyledModalBody>
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <EmptyStateLayout
+            icon={<WarningCircle width="16rem" />}
+            content={formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+            })}
+          />
+        </Flex>
+      </StyledModalBody>
     );
   }
 
@@ -714,71 +748,69 @@ const RelationModalForm = () => {
 
   return (
     <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
-      <Flex alignItems="flex-start" direction="column" gap={2}>
-        <Flex width="100%" justifyContent="space-between" gap={2}>
+      <StyledModalBody>
+        <Flex alignItems="flex-start" direction="column" gap={2}>
           <Typography tag="h2" variant="alpha">
             {documentTitle}
           </Typography>
-          <Flex gap={2}>
-            <DescriptionComponentRenderer
-              props={props}
-              descriptions={(
-                plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-              ).getDocumentActions('relation-modal')}
-            >
-              {(actions) => {
-                const filteredActions = actions.filter((action) => {
-                  return [action.position].flat().includes('relation-modal');
-                });
-                const [primaryAction, secondaryAction] = filteredActions;
-
-                if (!primaryAction && !secondaryAction) return null;
-
-                // Both actions are available when draft and publish enabled
-                if (primaryAction && secondaryAction) {
-                  return (
-                    <>
-                      {/* Save */}
-                      <DocumentActionButton
-                        {...secondaryAction}
-                        variant={secondaryAction.variant || 'secondary'}
-                      />
-                      {/* Publish */}
-                      <DocumentActionButton
-                        {...primaryAction}
-                        variant={primaryAction.variant || 'default'}
-                      />
-                    </>
-                  );
-                }
-
-                // Otherwise we just have the save action
-                return (
-                  <DocumentActionButton
-                    {...primaryAction}
-                    variant={primaryAction.variant || 'secondary'}
-                  />
-                );
-              }}
-            </DescriptionComponentRenderer>
-          </Flex>
+          {hasDraftAndPublished ? (
+            <Box>
+              <DocumentStatus status={currentDocument.document?.status} />
+            </Box>
+          ) : null}
         </Flex>
-        {hasDraftAndPublished ? (
-          <Box>
-            <DocumentStatus status={currentDocument.document?.status} />
-          </Box>
-        ) : null}
-      </Flex>
 
-      <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
-        <Box overflow="auto" flex={1}>
+        <Box paddingTop={7}>
           <FormLayout
             layout={documentLayoutResponse.edit.layout}
             document={currentDocument}
             hasBackground={false}
           />
         </Box>
-      </Flex>
+      </StyledModalBody>
+      <StyledModalFooter justifyContent="flex-end" gap={2}>
+        <DescriptionComponentRenderer
+          props={props}
+          descriptions={(
+            plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+          ).getDocumentActions('relation-modal')}
+        >
+          {(actions) => {
+            const filteredActions = actions.filter((action) => {
+              return [action.position].flat().includes('relation-modal');
+            });
+            const [primaryAction, secondaryAction] = filteredActions;
+
+            if (!primaryAction && !secondaryAction) return null;
+
+            // Both actions are available when draft and publish enabled
+            if (primaryAction && secondaryAction) {
+              return (
+                <>
+                  {/* Save */}
+                  <DocumentActionButton
+                    {...secondaryAction}
+                    variant={secondaryAction.variant || 'secondary'}
+                  />
+                  {/* Publish */}
+                  <DocumentActionButton
+                    {...primaryAction}
+                    variant={primaryAction.variant || 'default'}
+                  />
+                </>
+              );
+            }
+
+            // Otherwise we just have the save action
+            return (
+              <DocumentActionButton
+                {...primaryAction}
+                variant={primaryAction.variant || 'secondary'}
+              />
+            );
+          }}
+        </DescriptionComponentRenderer>
+      </StyledModalFooter>
     </DocumentRBAC>
   );
 };
