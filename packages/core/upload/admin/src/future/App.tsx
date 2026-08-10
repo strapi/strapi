@@ -7,8 +7,9 @@ import { Route, Routes } from 'react-router-dom';
 import { AssetsPage } from './pages/Assets/AssetsPage';
 import { getTranslationKey } from './utils/translations';
 
-export const UnstableMediaLibrary = () => {
+export const BetaMediaLibrary = () => {
   const { formatMessage } = useIntl();
+
   const title = formatMessage({
     id: getTranslationKey('plugin.name'),
     defaultMessage: 'Media Library',

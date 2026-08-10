@@ -4,7 +4,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import
 import { AssetsPage } from './page-objects/AssetsPage';
 import { describeOnCondition } from '../../../../utils/shared';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Folder Creation',
   () => {
     test.beforeEach(async ({ page }) => {

@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw';
 import * as qs from 'qs';
 
 import { useDeleteAssetMutation, useUpdateAssetMutation } from '../assets';
-import { useGetFoldersQuery, useGetFolderQuery } from '../folders';
+import { useGetFoldersQuery, useGetFolderQuery, useUpdateFolderMutation } from '../folders';
 
 describe('future folders service - getFolders filter shape', () => {
   let lastRequestParams:
@@ -129,6 +129,94 @@ describe('future folders service - getFolders filter shape', () => {
       });
       expect(lastRequestParams).not.toHaveProperty('_q');
     });
+  });
+});
+
+describe('future folders service - updateFolder', () => {
+  const captureRename = () => {
+    const captured: { url?: string; body?: unknown } = {};
+
+    server.use(
+      http.put('*/upload/folders/:id', async ({ request }) => {
+        captured.url = new URL(request.url).pathname;
+        captured.body = await request.json();
+        return HttpResponse.json({ data: { id: 5, name: 'Pictures' } });
+      })
+    );
+
+    return captured;
+  };
+
+  it('PUTs to the folder endpoint', async () => {
+    const captured = captureRename();
+
+    const { result } = renderHook(() => useUpdateFolderMutation());
+
+    await act(async () => {
+      await result.current[0]({ id: 5, name: 'Pictures', parent: 7 }).unwrap();
+    });
+
+    expect(captured.url).toBe('/upload/folders/5');
+  });
+
+  it("sends the folder's real parent, so a rename is not read as a move to the root", async () => {
+    // The server's uniqueness check reads `parent` from the request body, and
+    // the update service moves the folder to whatever it finds there. Dropping
+    // or defaulting this value turns every rename of a nested folder into a
+    // move to the root.
+    const captured = captureRename();
+
+    const { result } = renderHook(() => useUpdateFolderMutation());
+
+    await act(async () => {
+      await result.current[0]({ id: 5, name: 'Pictures', parent: 7 }).unwrap();
+    });
+
+    expect(captured.body).toEqual({ name: 'Pictures', parent: 7 });
+  });
+
+  it('sends parent null for a folder that already sits at the root', async () => {
+    const captured = captureRename();
+
+    const { result } = renderHook(() => useUpdateFolderMutation());
+
+    await act(async () => {
+      await result.current[0]({ id: 5, name: 'Pictures', parent: null }).unwrap();
+    });
+
+    expect(captured.body).toEqual({ name: 'Pictures', parent: null });
+  });
+
+  it('refetches the folder list so the renamed row shows its new name', async () => {
+    let listRequests = 0;
+    let folderName = 'Photos';
+
+    server.use(
+      http.get('*/upload/folders', () => {
+        listRequests += 1;
+        return HttpResponse.json({ data: [{ id: 5, name: folderName, parent: null }] });
+      }),
+      http.put('*/upload/folders/:id', async ({ request }) => {
+        const body = (await request.json()) as { name: string };
+        folderName = body.name;
+        return HttpResponse.json({ data: { id: 5, name: body.name } });
+      })
+    );
+
+    const { result } = renderHook(() => ({
+      folders: useGetFoldersQuery({}),
+      updateFolder: useUpdateFolderMutation(),
+    }));
+
+    await waitFor(() => expect(result.current.folders.data?.[0].name).toBe('Photos'));
+    expect(listRequests).toBe(1);
+
+    await act(async () => {
+      await result.current.updateFolder[0]({ id: 5, name: 'Pictures', parent: null }).unwrap();
+    });
+
+    await waitFor(() => expect(result.current.folders.data?.[0].name).toBe('Pictures'));
+    expect(listRequests).toBeGreaterThan(1);
   });
 });
 

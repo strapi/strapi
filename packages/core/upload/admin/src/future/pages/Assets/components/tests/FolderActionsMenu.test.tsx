@@ -1,4 +1,4 @@
-import { render, screen, waitFor, server } from '@tests/utils';
+import { render, screen, waitFor, server, fireEvent } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { FolderActionsMenu } from '../FolderActionsMenu';
@@ -86,7 +86,7 @@ describe('FolderActionsMenu', () => {
     expect(firstTrigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('opens the menu with the three actions, separated after the copy link', async () => {
+  it('opens the menu with the four actions, separated after the copy link', async () => {
     const { user } = setup();
 
     await openMenu(user);
@@ -94,6 +94,7 @@ describe('FolderActionsMenu', () => {
     const items = screen.getAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'Copy link to folder',
+      'Rename folder',
       'Move to folder',
       'Delete folder',
     ]);
@@ -131,6 +132,90 @@ describe('FolderActionsMenu', () => {
           message: 'Failed to copy the folder link.',
         })
       );
+    });
+  });
+
+  describe('Rename folder', () => {
+    it('does not mount the dialog until the action is selected', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+
+    it('opens a dialog prefilled with the folder name', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      expect(await screen.findByRole('textbox')).toHaveValue('Photos');
+    });
+
+    it('renames this folder, resending its existing parent so it does not move', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.put(
+          '*/upload/folders/:id',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { id: 5, name: 'Pictures' } });
+          },
+          { once: true }
+        )
+      );
+
+      // A nested folder: dropping `parent` from the payload would silently move
+      // it to the root, since the server reads the parent from the request body.
+      const { user } = setup({ dragData: { ...dragData, parentId: 1 } });
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      // The form is submitted with fireEvent: user-event's click does not run
+      // jsdom's submit-button activation behaviour inside the modal's portal.
+      fireEvent.change(await screen.findByRole('textbox'), { target: { value: 'Pictures' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ name: 'Pictures', parent: 1 }));
+    });
+
+    it('keeps the selection, unlike move and delete', async () => {
+      server.use(
+        http.put('*/upload/folders/:id', () =>
+          HttpResponse.json({ data: { id: 5, name: 'Pictures' } })
+        )
+      );
+
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      fireEvent.change(await screen.findByRole('textbox'), { target: { value: 'Pictures' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: 'Folder has been renamed',
+        })
+      );
+      expect(mockClear).not.toHaveBeenCalled();
+    });
+
+    it('closes the dialog on cancel without renaming anything', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+      expect(await screen.findByRole('textbox')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
+      expect(mockToggleNotification).not.toHaveBeenCalled();
     });
   });
 
