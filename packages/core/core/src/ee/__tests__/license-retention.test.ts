@@ -211,4 +211,111 @@ describe('ee license retention', () => {
     expect(eeModule.retainedLicense?.type).toBe('gold');
     expect(eeModule.retainedLicense?.subscriptionId).toBe('sub_123');
   });
+
+  describe('renewalDate', () => {
+    it('is null when the license omits it', async () => {
+      const future = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({ ...GOLD_LICENSE_INFO, expireAt: future });
+
+      eeModule.init('/fake/license/dir');
+
+      expect(eeModule.renewalDate).toBeNull();
+    });
+
+    it('is returned when the license provides it', async () => {
+      const future = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({
+        ...GOLD_LICENSE_INFO,
+        expireAt: future,
+        renewalDate: '2027-01-01T00:00:00.000Z',
+      });
+
+      eeModule.init('/fake/license/dir');
+
+      expect(eeModule.renewalDate).toBe('2027-01-01T00:00:00.000Z');
+    });
+
+    it('survives expiry via the retained snapshot', async () => {
+      const past = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({
+        ...GOLD_LICENSE_INFO,
+        expireAt: past,
+        renewalDate: '2026-06-01T00:00:00.000Z',
+      });
+
+      eeModule.init('/fake/license/dir');
+
+      process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+      await eeModule.checkLicense({ strapi: mockStrapi });
+
+      expect(eeModule.licenseStatus).toBe('expired');
+      expect(eeModule.renewalDate).toBe('2026-06-01T00:00:00.000Z');
+    });
+  });
+
+  describe('planFeatureCatalog', () => {
+    it('returns the gold catalog for a gold license', async () => {
+      const future = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({ ...GOLD_LICENSE_INFO, expireAt: future });
+
+      eeModule.init('/fake/license/dir');
+
+      expect(eeModule.planFeatureCatalog).toEqual([
+        'sso',
+        'cms-advanced-preview',
+        'cms-content-releases',
+        'review-workflows',
+        'cms-content-history',
+        'audit-logs',
+      ]);
+    });
+
+    it('returns the silver catalog for a silver license', async () => {
+      const future = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({
+        ...GOLD_LICENSE_INFO,
+        type: 'silver',
+        expireAt: future,
+      });
+
+      eeModule.init('/fake/license/dir');
+
+      expect(eeModule.planFeatureCatalog).toEqual([
+        'sso',
+        'cms-advanced-preview',
+        'cms-content-releases',
+        'cms-content-history',
+      ]);
+    });
+
+    it('is empty with no license', () => {
+      expect(eeModule.planFeatureCatalog).toEqual([]);
+    });
+
+    it('still returns rows after expiry via the retained snapshot', async () => {
+      const past = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({ ...GOLD_LICENSE_INFO, expireAt: past });
+
+      eeModule.init('/fake/license/dir');
+
+      process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+      await eeModule.checkLicense({ strapi: mockStrapi });
+
+      expect(eeModule.licenseStatus).toBe('expired');
+      expect(eeModule.planFeatureCatalog).toEqual([
+        'sso',
+        'cms-advanced-preview',
+        'cms-content-releases',
+        'review-workflows',
+        'cms-content-history',
+        'audit-logs',
+      ]);
+    });
+  });
 });

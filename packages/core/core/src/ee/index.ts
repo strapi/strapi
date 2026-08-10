@@ -8,6 +8,7 @@ import {
   fetchLicense,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
+  PLAN_FEATURE_CATALOG,
 } from './license';
 import { createEntitlementsRegistry } from './entitlements';
 import { shiftCronExpression } from '../utils/cron';
@@ -23,6 +24,7 @@ interface LicenseInfoState {
   isTrial: boolean;
   subscriptionId?: string;
   planPriceId?: string;
+  renewalDate?: string;
 }
 
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
@@ -61,7 +63,16 @@ const disable = (message: string, status: 'expired' | 'unknown' = 'unknown') => 
   // so a repeat disable() call cannot overwrite the snapshot with an already-wiped one.
   if (ee.licenseInfo.type) {
     ee.retainedLicense = pick(
-      ['features', 'expireAt', 'seats', 'type', 'isTrial', 'subscriptionId', 'planPriceId'],
+      [
+        'features',
+        'expireAt',
+        'seats',
+        'type',
+        'isTrial',
+        'subscriptionId',
+        'planPriceId',
+        'renewalDate',
+      ],
       ee.licenseInfo
     );
   }
@@ -331,6 +342,23 @@ export default Object.freeze({
 
   get expireAt() {
     return ee.licenseInfo.expireAt;
+  },
+
+  /** Null when the registry does not provide it yet; survives expiry via the retained snapshot. */
+  get renewalDate() {
+    return ee.licenseInfo.renewalDate ?? ee.retainedLicense?.renewalDate ?? null;
+  },
+
+  /**
+   * Every feature the current plan supports, in display order, regardless of whether this
+   * license includes it. Falls back to the retained license's type so an expired license
+   * still lists rows. See `PLAN_FEATURE_CATALOG` in `./license`.
+   */
+  get planFeatureCatalog(): string[] {
+    const type = ee.licenseInfo.type ?? ee.retainedLicense?.type;
+    return type && type in PLAN_FEATURE_CATALOG
+      ? PLAN_FEATURE_CATALOG[type as keyof typeof PLAN_FEATURE_CATALOG]
+      : [];
   },
 
   get isTrial() {
