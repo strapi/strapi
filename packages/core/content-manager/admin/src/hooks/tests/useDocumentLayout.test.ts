@@ -588,7 +588,7 @@ describe('useDocumentLayout', () => {
     expect(result.current.edit.layout.length).toBeGreaterThan(0);
   });
 
-  it('does not crash when switching between single types where one has a repeatable component (regression CMS-1077)', async () => {
+  it('does not crash when switching between single types where one has a repeatable component (regression)', async () => {
     const simpleAUid = 'api::simple-test-a.simple-test-a';
     const simpleCUid = 'api::simple-test-c.simple-test-c';
     const componentUid = 'simple-test.entry';

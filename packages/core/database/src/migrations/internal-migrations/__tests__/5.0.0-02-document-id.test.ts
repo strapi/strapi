@@ -129,7 +129,7 @@ const buildHarness = (
   };
 };
 
-describe('createdDocumentId migration — idempotent recovery (CMS-689)', () => {
+describe('createdDocumentId migration — idempotent recovery', () => {
   it('creates the column and backfills document_id on a fresh run', async () => {
     const h = buildHarness({ rowsNeedingBackfill: 2 });
 

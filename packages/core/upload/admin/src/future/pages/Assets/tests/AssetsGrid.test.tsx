@@ -201,7 +201,7 @@ describe('AssetsGrid', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
-      it('cache-busts the thumbnail with updatedAt so a replaced image refetches (CMS-1237)', () => {
+      it('cache-busts the thumbnail with updatedAt so a replaced image refetches', () => {
         const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
         asset.updatedAt = '2024-05-06T00:00:00.000Z';
         setup({ assets: [asset] });

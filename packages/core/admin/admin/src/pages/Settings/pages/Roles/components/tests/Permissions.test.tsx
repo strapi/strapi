@@ -248,7 +248,7 @@ describe('hasLocaleValidationErrors() — ref API', () => {
 });
 
 /**
- * Regression test for CMS-627.
+ * Regression test for the admin-token permission matrix.
  *
  * On the Create/Edit Admin Token screen the permission matrix is rendered with
  * `userPermissions` so selections are restricted to what the token owner is

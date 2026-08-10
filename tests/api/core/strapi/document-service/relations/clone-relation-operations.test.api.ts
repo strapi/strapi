@@ -131,15 +131,15 @@ describe('Document Service clone relation operation payloads', () => {
     'clone applies duplicate-form disconnect for a top-level oneToOne relation',
     async () => {
       const { product, tag } = await createTaggedProduct(
-        'CMS-557 Source Product',
-        'CMS-557 Original Tag'
+        'Disconnect Operation Source Product',
+        'Disconnect Operation Original Tag'
       );
 
       const result = await strapi.documents(PRODUCT_UID).clone({
         documentId: product.documentId,
         locale: 'en',
         data: {
-          name: 'CMS-557 Clone without tag',
+          name: 'Disconnect Operation Clone',
           tag: {
             connect: [],
             disconnect: [{ documentId: tag.documentId }],
@@ -164,16 +164,16 @@ describe('Document Service clone relation operation payloads', () => {
     'clone applies duplicate-form selected target for a top-level oneToOne relation',
     async () => {
       const { product, tag: originalTag } = await createTaggedProduct(
-        'CMS-562 Source Product',
-        'CMS-562 Original Tag'
+        'Selected Target Source Product',
+        'Selected Target Original Tag'
       );
-      const selectedTag = await createTag('CMS-562 Selected Tag');
+      const selectedTag = await createTag('Selected Target New Tag');
 
       const result = await strapi.documents(PRODUCT_UID).clone({
         documentId: product.documentId,
         locale: 'en',
         data: {
-          name: 'CMS-562 Clone with selected tag',
+          name: 'Selected Target Clone',
           tag: {
             connect: [{ documentId: selectedTag.documentId }],
             disconnect: [{ documentId: originalTag.documentId }],
