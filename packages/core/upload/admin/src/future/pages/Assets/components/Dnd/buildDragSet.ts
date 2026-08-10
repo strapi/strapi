@@ -1,3 +1,5 @@
+import { locateItem, type ItemLocations } from '../../../../utils/itemLocations';
+import { sourceFolderIdOf } from '../../../../utils/itemSource';
 import { assetKey, folderKey, type ItemKey } from '../../utils/selection';
 
 import type { DragItemData } from '../../../../types/dnd';
@@ -6,18 +8,19 @@ export interface DragSet {
   items: DragItemData[];
   /** True when the active item was already selected — membership is the full selection. */
   fromSelection: boolean;
+  /**
+   * Location of the row the user actually grabbed — the only item in the set
+   * whose origin the user can point at. Names the source in the success toast.
+   */
+  activeSourceFolderId: number | null;
+  /**
+   * True when the set spans more than one source folder, which a global search
+   * selection can. There is then no single source to name, so the toast has to
+   * drop it rather than pick one item's folder and imply the others came from
+   * there too.
+   */
+  spansMultipleSources: boolean;
 }
-
-/**
- * Stamp an item with the authoritative current-folder location. Drag/selection is
- * page-scoped to the current folder, so this is more reliable than the item's own
- * `folderId`/`parentId` — a dragged folder's `parent` is not populated by the
- * folders query, so its `parentId` would otherwise collapse to `null`.
- */
-const locateItem = (item: DragItemData, currentFolderId: number | null): DragItemData =>
-  item.kind === 'file'
-    ? { ...item, folderId: currentFolderId }
-    : { ...item, parentId: currentFolderId };
 
 /**
  * Derive the drag payload once at drag start.
@@ -25,23 +28,29 @@ const locateItem = (item: DragItemData, currentFolderId: number | null): DragIte
  * - Dragging a selected item moves the complete current selection.
  * - Dragging an unselected item moves only that item.
  *
- * Selection is page-scoped to the current folder, so every item is stamped with
- * `currentFolderId` as its location for move validation.
+ * The active item carries its own location on `dragData` (the row it was
+ * grabbed from); the rest of the selection is resolved through `locations`.
+ * Neither is derived from the folder currently open, because search results are
+ * global — see `utils/itemLocations.ts`.
  */
 export const buildDragSet = (
   activeData: DragItemData,
   selectedKeys: Set<ItemKey> | undefined,
-  currentFolderId: number | null
+  locations: ItemLocations,
+  fallbackFolderId: number | null
 ): DragSet => {
-  if (!selectedKeys || selectedKeys.size === 0) {
-    return { items: [locateItem(activeData, currentFolderId)], fromSelection: false };
-  }
-
   const activeKey: ItemKey =
     activeData.kind === 'file' ? assetKey(activeData.id) : folderKey(activeData.id);
 
-  if (!selectedKeys.has(activeKey)) {
-    return { items: [locateItem(activeData, currentFolderId)], fromSelection: false };
+  const activeSourceFolderId = sourceFolderIdOf(activeData);
+
+  if (!selectedKeys || !selectedKeys.has(activeKey)) {
+    return {
+      items: [activeData],
+      fromSelection: false,
+      activeSourceFolderId,
+      spansMultipleSources: false,
+    };
   }
 
   const items: DragItemData[] = [];
@@ -52,22 +61,37 @@ export const buildDragSet = (
     const id = Number(key.slice(separator + 1));
 
     if (kind === 'asset') {
+      if (activeData.kind === 'file' && activeData.id === id) {
+        items.push(activeData);
+        return;
+      }
+
       items.push({
         kind: 'file',
         id,
-        name: activeData.kind === 'file' && activeData.id === id ? activeData.name : '',
-        folderId: currentFolderId,
+        name: '',
+        folderId: locateItem(locations, 'file', id, fallbackFolderId),
       });
+      return;
+    }
+
+    if (activeData.kind === 'folder' && activeData.id === id) {
+      items.push(activeData);
       return;
     }
 
     items.push({
       kind: 'folder',
       id,
-      name: activeData.kind === 'folder' && activeData.id === id ? activeData.name : '',
-      parentId: currentFolderId,
+      name: '',
+      parentId: locateItem(locations, 'folder', id, fallbackFolderId),
     });
   });
 
-  return { items, fromSelection: true };
+  return {
+    items,
+    fromSelection: true,
+    activeSourceFolderId,
+    spansMultipleSources: items.some((item) => sourceFolderIdOf(item) !== activeSourceFolderId),
+  };
 };

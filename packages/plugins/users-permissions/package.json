@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "5.51.1",
+  "version": "5.51.2",
   "description": "Protect your API with a full-authentication process based on JWT",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -32,7 +32,7 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./server/index.js",
+      "source": "./server/src/index.js",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
@@ -53,9 +53,9 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.3",
-    "@strapi/icons": "2.2.3",
-    "@strapi/utils": "5.51.1",
+    "@strapi/design-system": "2.2.4",
+    "@strapi/icons": "2.2.4",
+    "@strapi/utils": "5.51.2",
     "bcryptjs": "2.4.3",
     "formik": "2.4.9",
     "immer": "9.0.21",
@@ -72,7 +72,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.51.1",
+    "@strapi/strapi": "5.51.2",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -82,7 +82,7 @@
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.30.3",
+    "react-router-dom": "6.30.4",
     "styled-components": "6.4.1"
   },
   "peerDependencies": {

@@ -40,7 +40,7 @@ export class AssetsPage {
   }
 
   async goto() {
-    await this.page.goto('/admin/plugins/unstable-upload');
+    await this.page.goto('/admin/plugins/upload');
   }
 
   /**
@@ -268,6 +268,38 @@ export class AssetsPage {
 
   async switchToTableView() {
     await this.tableViewButton.click();
+  }
+
+  /**
+   * The toolbar "Filter" dropdown trigger (shows the applied-filter count).
+   */
+  getFilterMenuTrigger() {
+    return this.page.getByRole('button', { name: /^filter/i });
+  }
+
+  /**
+   * Open the Filter dropdown, hover a field submenu, pick one option.
+   * Type options keep the menu open (checkbox semantics) — Escape dismisses it.
+   */
+  async pickFilterOption(fieldName: string, optionName: string) {
+    await this.getFilterMenuTrigger().click();
+    await this.page.getByRole('menuitem', { name: fieldName, exact: true }).hover();
+    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * The applied-filter badges row under the toolbar.
+   */
+  getFilterBadges() {
+    return this.page.getByTestId('filter-badge');
+  }
+
+  /**
+   * Remove the badge whose field label matches (e.g. 'Type').
+   */
+  async removeFilterBadge(fieldLabel: string) {
+    await this.page.getByRole('button', { name: `Remove ${fieldLabel} filter` }).click();
   }
 
   async isGridViewActive() {
