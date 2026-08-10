@@ -14,18 +14,30 @@ import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
 
+interface LicenseInfoState {
+  licenseKey?: string;
+  features?: Array<{ name: string; [key: string]: any } | string>;
+  expireAt?: string;
+  seats?: number;
+  type?: string;
+  isTrial: boolean;
+  subscriptionId?: string;
+  planPriceId?: string;
+}
+
+type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
+
 interface EE {
   enabled: boolean;
-  licenseInfo: {
-    licenseKey?: string;
-    features?: Array<{ name: string; [key: string]: any } | string>;
-    expireAt?: string;
-    seats?: number;
-    type?: string;
-    isTrial: boolean;
-    subscriptionId?: string;
-    planPriceId?: string;
-  };
+  licenseInfo: LicenseInfoState;
+  /**
+   * Display-only copy of the last known license, retained when a license exists but is
+   * not usable (expired / could not be validated) so the admin panel can explain why.
+   * NEVER read by enforcement paths (features.list/get/isEnabled, isEE) and never holds
+   * the license key.
+   */
+  retainedLicense: Omit<LicenseInfoState, 'licenseKey'> | null;
+  licenseStatus: LicenseStatus;
   logger?: Logger;
 }
 
@@ -34,13 +46,27 @@ const ee: EE = {
   licenseInfo: {
     isTrial: false,
   },
+  retainedLicense: null,
+  licenseStatus: 'none',
 };
 
-const disable = (message: string) => {
+const disable = (message: string, status: 'expired' | 'unknown' = 'unknown') => {
   // Prevent emitting ee.disable if it was already disabled
   const shouldEmitEvent = ee.enabled !== false;
 
   ee.logger?.warn(`${message} Switching to CE.`);
+
+  // Retain a display-only snapshot (never the key) BEFORE wiping, so the admin panel can
+  // still show which license this instance has and why it is unusable. Guarded on `type`
+  // so a repeat disable() call cannot overwrite the snapshot with an already-wiped one.
+  if (ee.licenseInfo.type) {
+    ee.retainedLicense = pick(
+      ['features', 'expireAt', 'seats', 'type', 'isTrial', 'subscriptionId', 'planPriceId'],
+      ee.licenseInfo
+    );
+  }
+  ee.licenseStatus = status;
+
   // Only keep the license key and isTrial for potential re-enabling during a later check
   ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
 
@@ -59,6 +85,8 @@ const enable = () => {
   const shouldEmitEvent = ee.enabled !== true;
 
   ee.enabled = true;
+  ee.licenseStatus = 'active';
+  ee.retainedLicense = null;
 
   if (shouldEmitEvent) {
     // Notify EE features that they should be disabled
@@ -206,7 +234,7 @@ const validateInfo = () => {
   const expirationTime = new Date(ee.licenseInfo.expireAt).getTime();
 
   if (expirationTime < new Date().getTime()) {
-    return disable('License expired.');
+    return disable('License expired.', 'expired');
   }
 
   enable();
@@ -282,6 +310,15 @@ export default Object.freeze({
 
   get isEE() {
     return ee.enabled;
+  },
+
+  get licenseStatus() {
+    return ee.licenseStatus;
+  },
+
+  /** Display-only; see EE.retainedLicense. Never use for feature gating. */
+  get retainedLicense() {
+    return ee.retainedLicense;
   },
 
   get seats() {

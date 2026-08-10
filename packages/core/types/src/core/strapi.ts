@@ -53,6 +53,16 @@ export interface Strapi extends Container {
     isTrial: boolean;
     subscriptionId?: string | null | undefined;
     planPriceId?: string | null | undefined;
+    licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+    retainedLicense: {
+      features?: Array<{ name: string; [key: string]: any } | string>;
+      expireAt?: string;
+      seats?: number;
+      type?: string;
+      isTrial?: boolean;
+      subscriptionId?: string;
+      planPriceId?: string;
+    } | null;
     getTrialEndDate: ({
       strapi,
     }: {
