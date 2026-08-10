@@ -11,6 +11,7 @@ const baseAIUsageData = {
     cmsAiEnabled: true,
     cmsAiCreditsBase: 1000,
     cmsAiCreditsMaxUsage: null,
+    currentTermStart: '2026-01-01T00:00:00.000Z',
   },
   cmsAiCreditsUsed: 800,
 };
@@ -56,6 +57,7 @@ const setup = (threshold?: number) =>
 describe('useAIUsageWarning', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it('should not display notification when AI is not available', () => {
@@ -289,5 +291,36 @@ describe('useAIUsageWarning', () => {
       message: "You've exhausted your AI credits. No additional credits available.",
       timeout: 5000,
     });
+  });
+
+  it('should not display notification again after a remount', () => {
+    const { unmount } = setup();
+    unmount();
+
+    setup();
+
+    expect(toggleNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('should display notification again when a new billing period has started', () => {
+    const { unmount } = setup();
+    unmount();
+
+    // @ts-expect-error – mock
+    useGetAiUsageQuery.mockImplementationOnce(() => ({
+      data: {
+        ...baseAIUsageData,
+        subscription: {
+          ...baseAIUsageData.subscription,
+          currentTermStart: '2026-02-01T00:00:00.000Z',
+        },
+      },
+      isLoading: false,
+      error: null,
+    }));
+
+    setup();
+
+    expect(toggleNotification).toHaveBeenCalledTimes(2);
   });
 });
