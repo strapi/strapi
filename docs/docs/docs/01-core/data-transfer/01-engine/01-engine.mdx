@@ -189,22 +189,22 @@ This avoids ID conflicts during the `entities` and `links` stages, but it is **n
 
 Stage presets:
 
-| Preset | Stages | Typical payload |
-| --- | --- | --- |
+| Preset    | Stages          | Typical payload                                                  |
+| --------- | --------------- | ---------------------------------------------------------------- |
 | `content` | entities, links | Content-type rows (incl. media library DB records) and relations |
-| `files` | assets | Upload binaries under `public/uploads` |
-| `config` | configuration | Core store and webhooks |
+| `files`   | assets          | Upload binaries under `public/uploads`                           |
+| `config`  | configuration   | Core store and webhooks                                          |
 
 Schemas always transfer with the CLI (independent of these presets).
 
-| Flags | Transferred | Pre-transfer wipe | Destination preserved |
-| --- | --- | --- | --- |
-| (none) | content + files + config | All transferable entities, assets, config | Admin / ignored types only |
-| `--only content` | content | User content types only (not core store / webhooks) | Config + upload binaries |
-| `--only content,config` | content + config | All transferable entities + config | Upload binaries |
-| `--exclude config` | content + files | User content types only | Config (core store / webhooks) |
-| `--exclude files` | content + config | Entities + config (assets skipped) | Upload binaries; media library DB rows still transfer with content |
-| `--exclude media-library` | content (without upload types) + config | Entities except upload types + config | Upload binaries + `plugin::upload.file` / `folder` |
+| Flags                     | Transferred                             | Pre-transfer wipe                                   | Destination preserved                                              |
+| ------------------------- | --------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| (none)                    | content + files + config                | All transferable entities, assets, config           | Admin / ignored types only                                         |
+| `--only content`          | content                                 | User content types only (not core store / webhooks) | Config + upload binaries                                           |
+| `--only content,config`   | content + config                        | All transferable entities + config                  | Upload binaries                                                    |
+| `--exclude config`        | content + files                         | User content types only                             | Config (core store / webhooks)                                     |
+| `--exclude files`         | content + config                        | Entities + config (assets skipped)                  | Upload binaries; media library DB rows still transfer with content |
+| `--exclude media-library` | content (without upload types) + config | Entities except upload types + config               | Upload binaries + `plugin::upload.file` / `folder`                 |
 
 Content-type filters (`--only-content-types` / `--exclude-content-types`) further narrow the entities/links stream and restore wipe. When upload types are out of scope, the files stage is skipped automatically.
 
