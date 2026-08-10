@@ -341,5 +341,20 @@
   "widget.last-published.title": "Last published entries",
   "widget.last-published.no-data": "No published entries",
   "actions-drawer.open": "Open more actions",
-  "actions-drawer.close": "Close more actions"
+  "actions-drawer.close": "Close more actions",
+  "plugin.name": "Content Manager",
+  "containers.list.table-headers.status": "status",
+  "cancel": "Cancel",
+  "containers.ListPage.selectedEntriesModal.title": "Publish entries",
+  "Settings.list.actions.deleteAdditionalInfos": "This will delete the active locale versions <em>(from Internationalization)</em>",
+  "actions.unpublish.dialog.radio-label": "Choose an option to unpublish the document.",
+  "components.DynamicZone.more-actions": "More actions",
+  "components.DynamicZone.add-item-above": "Add component above",
+  "components.DynamicZone.add-item-below": "Add component below",
+  "history.sidebar.title.version-card.aria-label": "Version card",
+  "restore.success.title": "Version restored.",
+  "restore.success.message": "A past version of the content was restored.",
+  "search.placeholder": "Search",
+  "containers.SettingPage.edit-settings.modal-form.mainField.hint": "Set the displayed field",
+  "containers.ListSettingsView.modal-form.size": "Size"
 }

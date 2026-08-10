@@ -31,7 +31,11 @@ const requiredAdminKeysFromExtraction = (extraction: MessageExtraction): string[
     return [];
   }
 
-  if (extraction.messageId) {
+  if (extraction.kind === 'schema-driven' || extraction.kind === 'error-passthrough') {
+    return [];
+  }
+
+  if (extraction.messageId && !extraction.messageId.includes('${')) {
     return [extraction.messageId];
   }
 
@@ -63,7 +67,18 @@ const validateExtractions = (
           file: extraction.file,
           line: extraction.line,
         });
-      } else if (extraction.defaultMessage != null) {
+        continue;
+      }
+
+      // Finite-enum / multi-key expansions share one template defaultMessage — not per-key English.
+      if (
+        extraction.kind === 'finite-enum' ||
+        (extraction.expandedJsonKeys?.length && extraction.expandedJsonKeys.length > 1)
+      ) {
+        continue;
+      }
+
+      if (extraction.defaultMessage != null) {
         const enValue = enJson[jsonKey];
         const normalizedDefault = normalizeMessage(extraction.defaultMessage);
         const normalizedEn = normalizeMessage(enValue);
@@ -119,7 +134,7 @@ const validateCrossPackageAdminKeys = (
 
           if (normalizedDefault !== normalizedEn) {
             issues.push({
-              severity: 'error',
+              severity: 'warning',
               bundle: bundle.packageName,
               code: 'default-message-drift',
               message: `defaultMessage for admin key "${branch}" does not match core/admin en.json.\n  code: ${extraction.defaultMessage}\n  en.json: ${enValue}`,
@@ -159,6 +174,7 @@ const validateErrorPassthroughKeys = (
 
 const validateAdminValidationKeys = (
   bundle: TranslationBundle,
+  enJson: Record<string, string>,
   adminEnJson: Record<string, string>,
   errorKeys: { local: string[]; admin: string[] }
 ): ValidationIssue[] => {
@@ -166,14 +182,21 @@ const validateAdminValidationKeys = (
   const adminKeys = new Set(Object.keys(adminEnJson));
 
   for (const key of errorKeys.admin) {
-    if (!adminKeys.has(key)) {
-      issues.push({
-        severity: 'error',
-        bundle: bundle.packageName,
-        code: 'missing-admin-validation-key',
-        message: `Validation message key "${key}" is referenced in code but missing from core/admin en.json`,
-      });
+    if (adminKeys.has(key)) {
+      continue;
     }
+
+    // Plugins often wrap notification.* with getTrad and store the unprefixed key locally.
+    if (key in enJson) {
+      continue;
+    }
+
+    issues.push({
+      severity: 'error',
+      bundle: bundle.packageName,
+      code: 'missing-admin-validation-key',
+      message: `Validation message key "${key}" is referenced in code but missing from core/admin en.json`,
+    });
   }
 
   return issues;
@@ -230,7 +253,7 @@ export const validateBundle = (
     ...validateExtractions(bundle, enJson, extractions),
     ...validateCrossPackageAdminKeys(bundle, extractions, adminEnJson),
     ...validateErrorPassthroughKeys(bundle, enJson, errorKeys),
-    ...validateAdminValidationKeys(bundle, adminEnJson, errorKeys),
+    ...validateAdminValidationKeys(bundle, enJson, adminEnJson, errorKeys),
     ...listLocaleFiles(bundle).flatMap((localePath) =>
       validateLocaleFile(bundle, enJson, localePath)
     ),

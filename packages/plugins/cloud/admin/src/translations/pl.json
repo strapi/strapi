@@ -12,10 +12,5 @@
   "Homepage.deploy.cli.subTitle": "Użyj wiersza poleceń, aby wdrożyć swój projekt Strapi bezpośrednio",
   "Homepage.deploy.cli.ariaLabel": "Menedżer pakietów",
   "Homepage.deploy.cli.copy": "Kopiuj",
-  "Homepage.deploy.documentation": "Masz problemy? Sprawdź naszą dokumentację",
-  "Homepage.freePlan.api": "2.5K żądań API",
-  "Homepage.freePlan.storage": "10 GB pamięci",
-  "Homepage.freePlan.bandwidth": "10 GB przepustowości zasobów",
-  "Homepage.freePlan.cdn": "Globalny CDN",
-  "Homepage.freePlan.pushToDeploy": "Wypchnij, aby wdrożyć"
+  "Homepage.deploy.documentation": "Masz problemy? Sprawdź naszą dokumentację"
 }

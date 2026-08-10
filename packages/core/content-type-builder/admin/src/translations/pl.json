@@ -107,7 +107,6 @@
   "form.attribute.item.text.regex.description": "Wyrażenie regularne",
   "form.attribute.item.uniqueField": "Pole unikalne",
   "form.attribute.item.uniqueField.description": "Nie będziesz w stanie stworzyć wpisu jeżeli będzie istniał element z taką samą zawartością",
-  "form.attribute.item.uniqueField.v5.willBeDisabled": "Obecnie pole unikalne nie działa dobrze w komponentach. Jeśli wyłączysz tę funkcję, pole zostanie wyłączone do czasu naprawy.",
   "form.attribute.item.uniqueField.v5.disabled": "Obecnie pole unikalne nie działa dobrze w komponentach. To pole zostało wyłączone do czasu naprawy.",
   "form.attribute.media.allowed-types": "Wybierz dozwolone media",
   "form.attribute.media.allowed-types.option-files": "Pliki",

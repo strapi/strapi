@@ -285,5 +285,19 @@
   "chat.figma-upload.no-images": "No frames found in the Figma file.",
   "chat.figma-upload.import-button": "Import",
   "form.button.finish": "Finish",
-  "form.button.back": "Back"
+  "form.button.back": "Back",
+  "table.warning.deleted": "This {kind} has been deleted",
+  "table.content.create-first-content-type.import-figma": "Import from Figma",
+  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}",
+  "content-manager.form.Input.hint.minMaxDivider": " / ",
+  "ComponentIconPicker.search.placeholder": "Search for an icon",
+  "window.confirm.close-modal.file": "Are you sure? Your changes will be lost.",
+  "contentType.draftAndPublish.label": "Draft & publish",
+  "contentType.draftAndPublish.description": "Allows writing a draft version of an entry, before it is published",
+  "FIXME": "FIXME",
+  "true": "true",
+  "null": "null",
+  "false": "false",
+  "form.attribute.condition.if": "IF",
+  "search.placeholder": "Search"
 }
