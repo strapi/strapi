@@ -8,6 +8,12 @@ Validates Strapi admin `react-intl` message descriptors against `en.json` and lo
 # Full validation (exit 1 on errors)
 yarn verify:translations
 
+# Deterministic gap report: keys in en.json missing from some locales,
+# with sibling-locale values + code call sites (JSON to stdout or --out=)
+yarn verify:translations --report-gaps
+yarn verify:translations --report-gaps --locale=fr,de --out=gaps.json
+yarn verify:translations --report-gaps --bundle=core/upload
+
 # Sync en.json gaps from defaultMessage, then align call-site defaults to en.json
 # (existing catalog English is preserved; use --sync-existing to overwrite from code)
 yarn verify:translations --write-en
@@ -25,6 +31,18 @@ yarn verify:translations --bundle=core/content-manager
 `--fix` always closes `en.json` gaps **before** pruning locales. A key used in code with a
 `defaultMessage` but missing from `en.json` is added first; only then are locale keys absent
 from that catalog removed. That keeps translator work for live message ids.
+
+## Gap report (`--report-gaps`)
+
+Purely deterministic — no model calls. For each `en.json` key missing from one or more locale
+files, the JSON includes:
+
+- `en` — English catalog value
+- `missingLocales` — locale codes that lack the key (`--locale=` filters this list)
+- `presentLocales` — existing translations in other locales (context for fill/review)
+- `usages` — static call sites (`file`, `line`, `defaultMessage`) when extractable
+
+Use this as the input contract for later AI fill / AI review of community translation PRs.
 
 ## What it checks
 
@@ -50,7 +68,7 @@ Admin message namespaces (`global.`, `Settings.`, …) are derived from `core/ad
 ## Legacy scripts
 
 - `reorder-admin-translation-files.js` — replaced by `yarn verify:translations --fix`
-- `add-missing-keys-to-other-language.js` — kept for explicit translator workflows
+- `add-missing-keys-to-other-language.js` — kept for explicit translator workflows (copies English; prefer `--report-gaps` + AI fill later)
 
 ## Notes
 

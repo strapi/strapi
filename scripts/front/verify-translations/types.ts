@@ -43,5 +43,11 @@ export interface VerifyOptions {
   writeEn: boolean;
   /** With --write-en: overwrite existing en.json values from defaultMessage (code → catalog). */
   syncExisting: boolean;
+  /** Emit a deterministic missing-locale gap report (JSON) with sibling-locale + call-site context. */
+  reportGaps: boolean;
+  /** Optional path for --report-gaps JSON output (default: stdout). */
+  reportGapsOut?: string;
+  /** Optional comma-separated locale codes to include as gap targets (e.g. fr,de). */
+  locales?: string[];
   bundleFilter?: string;
 }
