@@ -1,12 +1,14 @@
 import { get, has, merge, set, unset } from 'lodash/fp';
 
 import type { Core, Schema, UID } from '@strapi/types';
-import type { traverseEntity } from '@strapi/utils';
+import { contentTypes, traverseEntity } from '@strapi/utils';
 import { transactionCtx } from '@strapi/database';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
+import { isLocalizedContentType } from '../transform/relations/utils/i18n';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
 type TraversableData = Parameters<typeof traverseEntity>[2];
+type TraverseVisitor = Parameters<typeof traverseEntity>[0];
 
 type CloneRelationAttribute = Schema.Attribute.Relation & {
   targetAttribute?: string;
@@ -23,6 +25,8 @@ export type DeferredRelationCopy = {
 export type PostCloneRelationUpdate = {
   dataPath: string;
   value: Record<string, unknown>;
+  schemaUid: UID.Schema;
+  ownerPath: string | null;
 };
 
 export type PrepareCloneDataResult = {
@@ -116,6 +120,31 @@ const isRelationUnchangedAtPath = (
   return isOperationPayload && !hasMeaningfulOperations;
 };
 
+/**
+ * Like `traverseEntityRelations`, but also visits inline storage (`useJoinTable: false`
+ * and `morphToOne`). Clone follow-up must see those relations; the shared transform
+ * helper intentionally skips them because they are handled in processData.
+ */
+const traverseAllEntityRelations = async (
+  visitor: TraverseVisitor,
+  options: Parameters<typeof traverseEntity>[1],
+  data: TraversableData
+) => {
+  return traverseEntity(
+    async (visitorOptions, utils) => {
+      const { attribute } = visitorOptions;
+
+      if (!attribute || attribute.type !== 'relation') {
+        return;
+      }
+
+      return visitor(visitorOptions, utils);
+    },
+    options,
+    data
+  );
+};
+
 const collectRelationOperationOverrides = async (
   submittedData: Record<string, unknown>,
   contentType: Schema.ContentType,
@@ -149,7 +178,7 @@ const collectNestedCloneRelationAdjustments = async (
   const deferredCopies: DeferredRelationCopy[] = [];
   const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
-  await traverseEntityRelations(
+  await traverseAllEntityRelations(
     ({ attribute, key, path, schema, value }) => {
       if (!attribute || !isRelationAttribute(attribute)) {
         return;
@@ -236,6 +265,8 @@ const collectNestedCloneRelationAdjustments = async (
         postCloneUpdates.push({
           dataPath: relationPath,
           value: submittedValue,
+          schemaUid: schema.uid as UID.Schema,
+          ownerPath,
         });
       }
     },
@@ -338,6 +369,8 @@ export const prepareCloneData = async (
       postCloneUpdates.push({
         dataPath: attributeName,
         value: submittedValue,
+        schemaUid: contentType.uid as UID.Schema,
+        ownerPath: null,
       });
     }
   }
@@ -570,9 +603,134 @@ export const applyDeferredCloneRelationCopies = async (
   }
 };
 
+const pickInlineRelationTargetRef = (
+  value: Record<string, unknown>
+): Record<string, unknown> | null | undefined => {
+  if (Object.prototype.hasOwnProperty.call(value, 'set')) {
+    const setValue = value.set;
+    if (!Array.isArray(setValue) || setValue.length === 0) {
+      return null;
+    }
+
+    const last = setValue[setValue.length - 1];
+    if (isRecord(last)) {
+      return last;
+    }
+    if (typeof last === 'number' || typeof last === 'string') {
+      return { id: last };
+    }
+
+    return undefined;
+  }
+
+  const connect = value.connect;
+  if (Array.isArray(connect) && connect.length > 0) {
+    const last = connect[connect.length - 1];
+    if (isRecord(last)) {
+      return last;
+    }
+    if (typeof last === 'number' || typeof last === 'string') {
+      return { id: last };
+    }
+
+    return undefined;
+  }
+
+  const disconnect = value.disconnect;
+  if (Array.isArray(disconnect) && disconnect.length > 0) {
+    return null;
+  }
+
+  return undefined;
+};
+
+const resolveEntryIdByRef = async (
+  strapi: Core.Strapi,
+  targetUid: UID.Schema,
+  ref: Record<string, unknown>,
+  opts: { locale?: string }
+): Promise<number | undefined> => {
+  if (typeof ref.id === 'number') {
+    return ref.id;
+  }
+
+  if (typeof ref.documentId !== 'string') {
+    return undefined;
+  }
+
+  const model = strapi.getModel(targetUid);
+  const where: Record<string, unknown> = { documentId: ref.documentId };
+
+  // Clone always produces drafts; prefer the draft row when the target uses D&P.
+  if (contentTypes.hasDraftAndPublish(model)) {
+    where.publishedAt = null;
+  }
+
+  if (opts.locale && isLocalizedContentType(targetUid)) {
+    where.locale = opts.locale;
+  }
+
+  const row = await strapi.db.query(targetUid).findOne({
+    where,
+    select: ['id'],
+  });
+
+  return typeof row?.id === 'number' ? row.id : undefined;
+};
+
+const resolveInlineRelationAssignment = async (
+  strapi: Core.Strapi,
+  attribute: CloneRelationAttribute,
+  value: Record<string, unknown>,
+  opts: { locale?: string }
+): Promise<unknown> => {
+  const targetRef = pickInlineRelationTargetRef(value);
+
+  if (targetRef === undefined) {
+    return undefined;
+  }
+
+  if (targetRef === null) {
+    return null;
+  }
+
+  if (isMorphToOneAttribute(attribute)) {
+    const morphColumn =
+      'morphColumn' in attribute
+        ? (attribute as { morphColumn?: { typeField?: string } }).morphColumn
+        : undefined;
+    const typeField = morphColumn?.typeField ?? '__type';
+    const targetUid = targetRef[typeField];
+
+    if (typeof targetUid !== 'string') {
+      throw new Error(`Inline morphToOne clone update requires ${typeField}`);
+    }
+
+    const id = await resolveEntryIdByRef(strapi, targetUid as UID.Schema, targetRef, opts);
+
+    if (id == null) {
+      throw new Error(`Unable to resolve morphToOne target for clone relation update`);
+    }
+
+    return { id, [typeField]: targetUid };
+  }
+
+  if (typeof attribute.target !== 'string') {
+    throw new Error('Inline FK clone update requires a relation target');
+  }
+
+  const id = await resolveEntryIdByRef(strapi, attribute.target as UID.Schema, targetRef, opts);
+
+  if (id == null) {
+    throw new Error(`Unable to resolve relation target for clone relation update`);
+  }
+
+  return id;
+};
+
 export const applyPostCloneRelationUpdates = async (
   strapi: Core.Strapi,
-  rootUid: UID.ContentType,
+  _rootUid: UID.ContentType,
   clonedEntryId: number,
   clonedData: Record<string, unknown>,
   postCloneUpdates: PostCloneRelationUpdate[]
@@ -581,67 +739,40 @@ export const applyPostCloneRelationUpdates = async (
     return;
   }
 
-  const documentId = clonedData.documentId as string | undefined;
-
-  if (!documentId) {
-    return;
-  }
+  const locale = clonedData.locale as string | undefined;
 
   for (const update of postCloneUpdates) {
     const attributeName = update.dataPath.split('.').pop()!;
-    const rootAttribute = strapi.db.metadata.get(rootUid).attributes[attributeName];
-    const isFkDisconnect =
-      rootAttribute?.type === 'relation' &&
-      'joinColumn' in rootAttribute &&
-      rootAttribute.joinColumn &&
-      !('joinTable' in rootAttribute && rootAttribute.joinTable) &&
-      isRelationOperationPayload(update.value) &&
-      Array.isArray(update.value.disconnect) &&
-      update.value.disconnect.length > 0 &&
-      (!Array.isArray(update.value.connect) || update.value.connect.length === 0) &&
-      !Object.prototype.hasOwnProperty.call(update.value, 'set');
+    const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
 
-    if (
-      isFkDisconnect &&
-      'joinColumn' in rootAttribute &&
-      rootAttribute.joinColumn &&
-      !update.dataPath.includes('.')
-    ) {
-      // processData only accepts attribute names, not raw join-column names
-      await strapi.db.query(rootUid).update({
-        where: { id: clonedEntryId },
-        data: { [attributeName]: null },
-      });
+    if (ownerEntryId == null) {
+      throw new Error(
+        `Unable to resolve clone relation owner for "${attributeName}" at path "${update.ownerPath ?? '<root>'}"`
+      );
+    }
+
+    const attribute = strapi.db.metadata.get(update.schemaUid).attributes[attributeName] as
+      | CloneRelationAttribute
+      | undefined;
+
+    if (!attribute || attribute.type !== 'relation') {
+      throw new Error(
+        `Unable to resolve clone relation attribute "${attributeName}" on "${update.schemaUid}"`
+      );
+    }
+
+    const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
+      locale,
+    });
+
+    if (assignment === undefined) {
       continue;
     }
 
-    const isMorphToOneDisconnect =
-      rootAttribute?.type === 'relation' &&
-      isMorphToOneAttribute(rootAttribute as CloneRelationAttribute) &&
-      isRelationOperationPayload(update.value) &&
-      Array.isArray(update.value.disconnect) &&
-      update.value.disconnect.length > 0 &&
-      (!Array.isArray(update.value.connect) || update.value.connect.length === 0) &&
-      !Object.prototype.hasOwnProperty.call(update.value, 'set');
-
-    if (
-      isMorphToOneDisconnect &&
-      'morphColumn' in rootAttribute &&
-      rootAttribute.morphColumn &&
-      !update.dataPath.includes('.')
-    ) {
-      // processData only accepts the morph attribute, not raw column names
-      await strapi.db.query(rootUid).update({
-        where: { id: clonedEntryId },
-        data: { [attributeName]: null },
-      });
-      continue;
-    }
-
-    await strapi.documents(rootUid).update({
-      documentId,
-      locale: clonedData.locale as string | undefined,
-      data: set(update.dataPath, update.value, {}),
+    // processData accepts attribute names (FK id / morph { id, __type }), not operation payloads.
+    await strapi.db.query(update.schemaUid).update({
+      where: { id: ownerEntryId },
+      data: { [attributeName]: assignment },
     });
   }
 };

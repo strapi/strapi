@@ -411,6 +411,46 @@ describe('Document Service clone relation operation payloads', () => {
   );
 
   testInTransaction(
+    'clone applies duplicate-form selected target for a useJoinTable:false oneToOne relation',
+    async () => {
+      const { product, tag: originalTag } = await createLegacyTaggedProduct(
+        'Legacy Selected Source Product',
+        'Legacy Selected Original Tag'
+      );
+      const selectedTag = await createTag('Legacy Selected Tag');
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Legacy Selected Clone',
+          legacyTag: {
+            connect: [{ documentId: selectedTag.documentId }],
+            disconnect: [{ documentId: originalTag.documentId }],
+          },
+        },
+        populate: { legacyTag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneLegacyTagDocumentId: relationDocumentId(
+          result.entries[0] as ProductWithTags,
+          'legacyTag'
+        ),
+        originalLegacyTagDocumentId: relationDocumentId(
+          originalProduct as ProductWithTags,
+          'legacyTag'
+        ),
+      }).toEqual({
+        cloneLegacyTagDocumentId: selectedTag.documentId,
+        originalLegacyTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
     'clone does not move subcategories from the original when the inverse oneToMany is unchanged',
     async () => {
       const parent = await strapi.documents(CATEGORY_UID).create({
@@ -491,6 +531,54 @@ describe('Document Service clone relation operation payloads', () => {
     }).toEqual({
       cloneMorphTarget: null,
       originalMorphTarget: targetB.documentId,
+    });
+  });
+
+  testInTransaction('clone applies duplicate-form selected target for morphToOne', async () => {
+    const targetA = await strapi.documents(MORPH_BOX_UID).create({ data: { name: 'Morph A' } });
+    const targetB = await strapi
+      .documents(MORPH_BOX_UID)
+      .create({ data: { name: 'Morph B Selected' } });
+    const targetARow = await strapi.db.query(MORPH_BOX_UID).findOne({
+      where: { documentId: targetA.documentId, publishedAt: null },
+    });
+    const targetBRow = await strapi.db.query(MORPH_BOX_UID).findOne({
+      where: { documentId: targetB.documentId, publishedAt: null },
+    });
+
+    const source = await strapi.documents(MORPH_BOX_UID).create({
+      data: {
+        name: 'Morph Selected Source',
+        mto: { id: targetARow!.id, __type: MORPH_BOX_UID },
+      },
+      populate: { mto: true },
+    });
+
+    const result = await strapi.documents(MORPH_BOX_UID).clone({
+      documentId: source.documentId,
+      data: {
+        name: 'Morph Selected Clone',
+        mto: {
+          connect: [{ id: targetBRow!.id, __type: MORPH_BOX_UID }],
+          disconnect: [{ id: targetARow!.id, __type: MORPH_BOX_UID }],
+        },
+      },
+      populate: { mto: true },
+    });
+
+    const original = await strapi.documents(MORPH_BOX_UID).findOne({
+      documentId: source.documentId,
+      populate: { mto: true },
+    });
+
+    const clone = result.entries[0] as { mto?: { documentId?: string } | null };
+
+    expect({
+      cloneMorphTarget: clone?.mto?.documentId ?? null,
+      originalMorphTarget: (original as { mto?: { documentId?: string } | null })?.mto?.documentId,
+    }).toEqual({
+      cloneMorphTarget: targetB.documentId,
+      originalMorphTarget: targetA.documentId,
     });
   });
 });
