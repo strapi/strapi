@@ -97,7 +97,11 @@
     "test:front:coverage": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles -- --runInBand --coverage",
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
-    "test:unit:vitest:watch": "vitest --watch"
+    "test:unit:vitest:watch": "vitest --watch",
+    "test:migrations": "node --import tsx tests/migration/scripts/run-migration-scenario.ts",
+    "test:migrations:plan": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --print-plan",
+    "test:migrations:smoke": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --initial legacy --database sqlite --skip-build",
+    "test:migrations:unit": "jest --config tests/migration/fixture/jest.config.js"
   },
   "resolutions": {
     "ajv@^8.0.0": "8.20.0",
@@ -107,7 +111,6 @@
     "ajv@^8.17.1": "8.20.0",
     "ajv@~8.13.0": "8.20.0",
     "ajv@~8.18.0": "8.20.0",
-    "webpack": "5.106.2",
     "@types/koa": "2.15.2",
     "@babel/core": "7.29.7",
     "@babel/runtime": "7.29.7",
@@ -187,7 +190,7 @@
     "nx": "20.8.4",
     "oxlint": "1.72.0",
     "plop": "4.0.5",
-    "prettier": "3.3.3",
+    "prettier": "3.6.2",
     "prettier-2": "npm:prettier@^2",
     "qs": "6.15.3",
     "rimraf": "6.1.3",
