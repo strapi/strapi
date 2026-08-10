@@ -1,14 +1,23 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import assert from 'node:assert';
+import path from 'node:path';
 import { isEqual } from 'lodash/fp';
 import { register } from 'esbuild-register/dist/node';
 
+import { INTERNAL_RESOURCES_DIRECTORY } from '../../codemod-repository/constants';
 import { createJSONTransformAPI, readJSON, saveJSON } from '../../json';
 
 import type { Report } from '../../report';
 
 import type { JSONRunnerConfiguration, JSONSourceFile, JSONTransformParams } from './types';
+
+const isPathInsideResources = (filename: string) => {
+  const resolved = path.resolve(filename);
+  const resourcesRoot = path.resolve(INTERNAL_RESOURCES_DIRECTORY);
+
+  return resolved === resourcesRoot || resolved.startsWith(resourcesRoot + path.sep);
+};
 
 export const transformJSON = async (
   codemodPath: string,
@@ -42,12 +51,13 @@ export const transformJSON = async (
    * Due to this, if hookIgnoreNodeModules is set to true or left unspecified,
    * esbuild-register won't try to compile them upon require.
    *
-   * hookMatcher is added to make sure we're not matching anything else than our codemod in external directories.
+   * hookMatcher scopes transpilation to the codemod itself (including out-of-tree paths) and to shared helpers
+   * under the package resources/ directory (e.g. resources/utils), without compiling arbitrary node_modules.
    */
   const esbuildOptions = {
     extensions: ['.js', '.mjs', '.ts'],
     hookIgnoreNodeModules: false,
-    hookMatcher: isEqual(codemodPath),
+    hookMatcher: (filename: string) => isEqual(codemodPath, filename) || isPathInsideResources(filename),
   };
   const { unregister } = register(esbuildOptions);
 
