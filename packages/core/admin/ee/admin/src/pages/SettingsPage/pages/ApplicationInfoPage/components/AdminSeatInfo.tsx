@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
+import { Flex, Tooltip, Typography, Link } from '@strapi/design-system';
 import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -44,7 +44,7 @@ export const AdminSeatInfoEE = () => {
   }
 
   return (
-    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+    <Flex direction="column" alignItems="start" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.admin-seats',
@@ -100,6 +100,6 @@ export const AdminSeatInfoEE = () => {
           })}
         </Link>
       )}
-    </Grid.Item>
+    </Flex>
   );
 };

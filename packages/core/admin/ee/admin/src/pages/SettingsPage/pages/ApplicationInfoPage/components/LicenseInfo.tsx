@@ -1,36 +1,54 @@
-import * as React from 'react';
-
-import { Flex, Grid, Table, Tbody, Td, Th, Thead, Tr, Typography } from '@strapi/design-system';
+import {
+  Divider,
+  Flex,
+  Status,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tooltip,
+  Tr,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Check, ClockCounterClockwise, Cross, Information } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
+import { PlanDetail } from '../../../../../../../../admin/src/pages/Settings/pages/ApplicationInfo/components/PlanCard';
+import { useGetLicenseTrialTimeLeftQuery } from '../../../../../../../../admin/src/services/admin';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
+
+import { AdminSeatInfoEE } from './AdminSeatInfo';
+import { AIUsage } from './AIUsage';
+
+import type { GetLicenseLimitInformation } from '../../../../../../../../shared/contracts/admin';
 
 // Feature key -> display label. Labels themselves resolve through i18n; only the
 // mapping of known license feature keys lives here.
 const FEATURE_LABELS: Record<string, MessageDescriptor> = {
   sso: { id: 'Settings.license.feature.sso', defaultMessage: 'Single Sign-On' },
-  'audit-logs': { id: 'Settings.license.feature.audit-logs', defaultMessage: 'Audit Logs' },
-  'review-workflows': {
-    id: 'Settings.license.feature.review-workflows',
-    defaultMessage: 'Review Workflows',
+  'cms-advanced-preview': {
+    id: 'Settings.license.feature.cms-advanced-preview',
+    defaultMessage: 'Live Preview',
   },
   'cms-content-releases': {
     id: 'Settings.license.feature.cms-content-releases',
-    defaultMessage: 'Content Releases',
+    defaultMessage: 'Releases',
+  },
+  'review-workflows': {
+    id: 'Settings.license.feature.review-workflows',
+    defaultMessage: 'Review Workflows',
   },
   'cms-content-history': {
     id: 'Settings.license.feature.cms-content-history',
     defaultMessage: 'Content History',
   },
-  'cms-advanced-preview': {
-    id: 'Settings.license.feature.cms-advanced-preview',
-    defaultMessage: 'Advanced Preview',
-  },
-  'cms-ai': { id: 'Settings.license.feature.cms-ai', defaultMessage: 'AI' },
+  'audit-logs': { id: 'Settings.license.feature.audit-logs', defaultMessage: 'Audit Logs' },
 };
 
-// Entitlement limit key -> display label. Only known limit keys are mapped;
-// unmapped keys fall back to rendering just the value.
+// Entitlement limit key -> display label. Only used when a feature has more than one limit and
+// each value needs to be told apart; a single limit is rendered on its own, unlabelled.
 const LIMIT_LABELS: Record<string, MessageDescriptor> = {
   numberOfWorkflows: {
     id: 'Settings.license.limit.numberOfWorkflows',
@@ -44,9 +62,40 @@ const LIMIT_LABELS: Record<string, MessageDescriptor> = {
   retentionDays: { id: 'Settings.license.limit.retentionDays', defaultMessage: 'Retention' },
 };
 
+type License = NonNullable<GetLicenseLimitInformation.Response['data']>;
+type PlanEntitlement = License['planEntitlements'][number];
+type Limit = PlanEntitlement['limits'][number];
+
+const STATUS_BADGE: Record<
+  License['licenseStatus'],
+  { variant: 'success' | 'danger' | 'warning'; label: MessageDescriptor }
+> = {
+  active: {
+    variant: 'success',
+    label: { id: 'Settings.license.status.active', defaultMessage: 'Active' },
+  },
+  expired: {
+    variant: 'danger',
+    label: { id: 'Settings.license.status.expired', defaultMessage: 'Expired' },
+  },
+  unknown: {
+    variant: 'warning',
+    label: { id: 'Settings.license.status.unknown', defaultMessage: 'Unknown' },
+  },
+  // A license-gated component only mounts for EE instances, so `none` should never occur here
+  // in practice. Fall back to the same treatment as `unknown` rather than rendering nothing.
+  none: {
+    variant: 'warning',
+    label: { id: 'Settings.license.status.unknown', defaultMessage: 'Unknown' },
+  },
+};
+
 const LicenseInfoEE = () => {
   const { formatMessage, formatDate, formatRelativeTime } = useIntl();
   const { license, isLoading, isError } = useLicenseLimits();
+  const { data: trialTimeLeft } = useGetLicenseTrialTimeLeftQuery(undefined, {
+    skip: !license?.isTrial,
+  });
 
   if (isLoading) {
     return null;
@@ -56,7 +105,18 @@ const LicenseInfoEE = () => {
     return null;
   }
 
-  const entitlementsByFeature = new Map(license.entitlements.map((e) => [e.feature, e.limits]));
+  const {
+    licenseMode,
+    licenseStatus,
+    renewalDate,
+    subscriptionId,
+    lastRegistrySyncAt,
+    expireAt,
+    isTrial,
+    planEntitlements,
+  } = license;
+
+  const isGrowth = window.strapi.projectType === 'Growth';
 
   const formatDays = (value: number): string => {
     if (value >= 365) {
@@ -80,15 +140,13 @@ const LicenseInfoEE = () => {
     return formatMessage(
       {
         id: 'Settings.license.limit.days',
-        defaultMessage: '{days, plural, one {# day} other {# days}}',
+        defaultMessage: '{days, plural, one {# day retention} other {# days retention}}',
       },
       { days: value }
     );
   };
 
-  const formatLimitValue = (
-    limit: (typeof license.entitlements)[number]['limits'][number]
-  ): string => {
+  const formatLimitValue = (limit: Limit): string => {
     if (limit.value === null) {
       return formatMessage({ id: 'Settings.license.unlimited', defaultMessage: 'Unlimited' });
     }
@@ -101,10 +159,9 @@ const LicenseInfoEE = () => {
     );
   };
 
-  // The next check-in is shown relative ("in about 11 hours") rather than as an
-  // absolute timestamp: on a 12h cadence the next check is usually the same
-  // calendar day, which reads as a flipped AM/PM when shown as a date.
-  const formatNextCheckin = (timestamp: number | null): string => {
+  // Shown relative ("2 hours ago") rather than as an absolute timestamp, matching how the rest of
+  // the admin surfaces recency.
+  const formatLastCheck = (timestamp: number | null): string => {
     if (typeof timestamp !== 'number') {
       return formatMessage({ id: 'Settings.license.checkin.never', defaultMessage: 'Not yet' });
     }
@@ -117,197 +174,184 @@ const LicenseInfoEE = () => {
     return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
   };
 
+  const currentPlanValue =
+    licenseMode === 'offline'
+      ? `${window.strapi.projectType} - offline`
+      : window.strapi.projectType;
+
+  const dateLabel: MessageDescriptor = isTrial
+    ? { id: 'Settings.license.trial-end-date', defaultMessage: 'trial end date' }
+    : { id: 'Settings.license.renewal-date', defaultMessage: 'renewal date' };
+
+  const rawDateValue = isTrial ? (trialTimeLeft?.trialEndsAt ?? null) : renewalDate;
+
+  const formattedDate = rawDateValue
+    ? formatDate(new Date(rawDateValue), { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
+  const statusBadge = STATUS_BADGE[licenseStatus];
+
+  const checkinLine =
+    licenseMode === 'offline'
+      ? expireAt
+        ? formatMessage(
+            { id: 'Settings.license.valid-until', defaultMessage: 'License valid until {date}' },
+            {
+              date: formatDate(new Date(expireAt), {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }),
+            }
+          )
+        : null
+      : formatMessage(
+          {
+            id: 'Settings.license.last-check',
+            defaultMessage: 'Last license validity check {relative}',
+          },
+          { relative: formatLastCheck(lastRegistrySyncAt) }
+        );
+
+  const renderLimitCell = (entitlement: PlanEntitlement) => {
+    const { available, limits } = entitlement;
+
+    if (limits.length === 0) {
+      return available ? (
+        <Check
+          aria-label={formatMessage({ id: 'Settings.license.yes', defaultMessage: 'Yes' })}
+          fill="success600"
+        />
+      ) : (
+        <Cross
+          aria-label={formatMessage({ id: 'Settings.license.no', defaultMessage: 'No' })}
+          fill="danger600"
+        />
+      );
+    }
+
+    if (limits.length === 1) {
+      return <Typography>{formatLimitValue(limits[0])}</Typography>;
+    }
+
+    return (
+      <Flex direction="column" alignItems="end" gap={1}>
+        {limits.map((limit) => (
+          <Typography key={limit.key} variant="pi">
+            {LIMIT_LABELS[limit.key]
+              ? `${formatMessage(LIMIT_LABELS[limit.key])}: ${formatLimitValue(limit)}`
+              : formatLimitValue(limit)}
+          </Typography>
+        ))}
+      </Flex>
+    );
+  };
+
   return (
-    // License and entitlements live in a single card, each keeping its own heading.
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={6}
-      hasRadius
-      background="neutral0"
-      shadow="tableShadow"
-      paddingTop={6}
-      paddingBottom={6}
-      paddingRight={7}
-      paddingLeft={7}
-    >
-      <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" tag="h3">
-          {formatMessage({ id: 'Settings.license.title', defaultMessage: 'License' })}
-        </Typography>
-        <Grid.Root gap={5} tag="dl">
-          <Detail
-            label={{ id: 'Settings.license.status', defaultMessage: 'Status' }}
-            value={
-              license.isTrial
-                ? formatMessage({
-                    id: 'Settings.license.status.trial',
-                    defaultMessage: 'Trial',
-                  })
-                : formatMessage({
-                    id: 'Settings.license.status.active',
-                    defaultMessage: 'Active',
-                  })
-            }
+    <Flex direction="column" alignItems="stretch" gap={6}>
+      <Flex alignItems="flex-start" gap={5} tag="dl">
+        <Flex direction="column" alignItems="stretch" gap={5} flex="1">
+          <PlanDetail
+            label={{ id: 'Settings.application.plan.current', defaultMessage: 'current plan' }}
+            value={currentPlanValue}
           />
-          <Detail
-            label={{ id: 'Settings.license.mode', defaultMessage: 'Mode' }}
-            value={
-              license.licenseMode === 'offline'
-                ? formatMessage({
-                    id: 'Settings.license.mode.offline',
-                    defaultMessage: 'Offline',
-                  })
-                : formatMessage({
-                    id: 'Settings.license.mode.online',
-                    defaultMessage: 'Online',
-                  })
-            }
-          />
-          {license.licenseMode === 'online' ? (
+          {!isGrowth && formattedDate && <PlanDetail label={dateLabel} value={formattedDate} />}
+          {isGrowth && (
             <>
-              <Detail
-                label={{ id: 'Settings.license.lastCheckin', defaultMessage: 'Last check-in' }}
-                value={
-                  license.lastRegistrySyncAt
-                    ? formatDate(new Date(license.lastRegistrySyncAt), {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      })
-                    : formatMessage({
-                        id: 'Settings.license.checkin.never',
-                        defaultMessage: 'Not yet',
-                      })
-                }
-              />
-              <Detail
-                label={{ id: 'Settings.license.nextCheckin', defaultMessage: 'Next check-in' }}
-                value={formatNextCheckin(license.nextRegistrySyncAt)}
-              />
+              <AdminSeatInfoEE />
+              <AIUsage />
             </>
-          ) : (
-            <Detail
-              label={{ id: 'Settings.license.expiry', defaultMessage: 'Expires' }}
-              value={
-                license.expireAt
-                  ? formatDate(new Date(license.expireAt), {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  : formatMessage({ id: 'Settings.license.expiry.none', defaultMessage: '—' })
-              }
-            />
           )}
-          {license.subscriptionId && (
-            <Detail
+        </Flex>
+        <Flex direction="column" alignItems="stretch" gap={5} flex="1">
+          <Flex direction="column" alignItems="start" gap={2}>
+            <Flex gap={2} alignItems="center" tag="dt">
+              <Typography variant="sigma" textColor="neutral600">
+                {formatMessage({
+                  id: 'Settings.license.status',
+                  defaultMessage: 'license status',
+                })}
+              </Typography>
+              <Tooltip
+                label={formatMessage({
+                  id: 'Settings.license.status-tooltip',
+                  defaultMessage:
+                    'Strapi checks the license status every 12 hours and on every build.',
+                })}
+              >
+                <Information width="1.4rem" height="1.4rem" fill="neutral500" />
+              </Tooltip>
+            </Flex>
+            <Flex direction="column" alignItems="start" gap={2} tag="dd">
+              <Status size="S" variant={statusBadge.variant}>
+                <Typography variant="omega" fontWeight="bold">
+                  {formatMessage(statusBadge.label)}
+                </Typography>
+              </Status>
+              {checkinLine && (
+                <Flex gap={1} alignItems="center">
+                  <ClockCounterClockwise width="1.2rem" height="1.2rem" fill="neutral500" />
+                  <Typography variant="pi" textColor="neutral600">
+                    {checkinLine}
+                  </Typography>
+                </Flex>
+              )}
+            </Flex>
+          </Flex>
+          {isGrowth && formattedDate && <PlanDetail label={dateLabel} value={formattedDate} />}
+          {subscriptionId && (
+            <PlanDetail
               label={{ id: 'Settings.license.subscription', defaultMessage: 'Subscription ID' }}
-              value={license.subscriptionId}
+              value={subscriptionId}
             />
           )}
-        </Grid.Root>
-        {license.usingCachedLicense && (
-          <Typography variant="pi" textColor="danger600">
+        </Flex>
+      </Flex>
+
+      {planEntitlements.length > 0 && (
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          <Divider />
+          <Typography variant="sigma" textColor="neutral600">
             {formatMessage({
-              id: 'Settings.license.cached-warning',
-              defaultMessage:
-                'Using a cached license. The license registry was unreachable at the last check.',
+              id: 'Settings.license.entitlements',
+              defaultMessage: 'plan entitlements',
             })}
           </Typography>
-        )}
-      </Flex>
+          <Table colCount={2} rowCount={planEntitlements.length}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({ id: 'Settings.license.feature', defaultMessage: 'Feature' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({ id: 'Settings.license.limit', defaultMessage: 'Limit' })}
+                  </VisuallyHidden>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {planEntitlements.map((entitlement) => {
+                const label = FEATURE_LABELS[entitlement.feature];
 
-      <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" tag="h3">
-          {formatMessage({
-            id: 'Settings.license.entitlements',
-            defaultMessage: 'Entitlements',
-          })}
-        </Typography>
-        <Table colCount={3} rowCount={license.features.length}>
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({
-                    id: 'Settings.license.feature',
-                    defaultMessage: 'Feature',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({
-                    id: 'Settings.license.enabled',
-                    defaultMessage: 'Enabled',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({ id: 'Settings.license.limit', defaultMessage: 'Limit' })}
-                </Typography>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {license.features.map((feature) => {
-              const limits = entitlementsByFeature.get(feature.name);
-              const label = FEATURE_LABELS[feature.name];
-              return (
-                <Tr key={feature.name}>
-                  <Td>
-                    <Typography>{label ? formatMessage(label) : feature.name}</Typography>
-                  </Td>
-                  <Td>
-                    <Typography>
-                      {formatMessage({ id: 'Settings.license.yes', defaultMessage: 'Yes' })}
-                    </Typography>
-                  </Td>
-                  <Td>
-                    {limits && limits.length ? (
-                      <Flex direction="column" alignItems="start" gap={1}>
-                        {limits.map((limit) => (
-                          <Typography key={limit.key} variant="pi">
-                            {LIMIT_LABELS[limit.key]
-                              ? `${formatMessage(LIMIT_LABELS[limit.key])}: ${formatLimitValue(limit)}`
-                              : formatLimitValue(limit)}
-                          </Typography>
-                        ))}
-                      </Flex>
-                    ) : (
-                      <Typography>
-                        {formatMessage({
-                          id: 'Settings.license.limit.none',
-                          defaultMessage: '—',
-                        })}
-                      </Typography>
-                    )}
-                  </Td>
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
-      </Flex>
+                return (
+                  <Tr key={entitlement.feature}>
+                    <Td>
+                      <Typography>{label ? formatMessage(label) : entitlement.feature}</Typography>
+                    </Td>
+                    <Td>
+                      <Flex justifyContent="flex-end">{renderLimitCell(entitlement)}</Flex>
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </Tbody>
+          </Table>
+        </Flex>
+      )}
     </Flex>
-  );
-};
-
-interface DetailProps {
-  label: MessageDescriptor;
-  value: React.ReactNode;
-}
-
-const Detail = ({ label, value }: DetailProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Grid.Item col={6} xs={12} direction="column" alignItems="start">
-      <Typography variant="sigma" textColor="neutral600" tag="dt">
-        {formatMessage(label)}
-      </Typography>
-      <Typography tag="dd">{value}</Typography>
-    </Grid.Item>
   );
 };
 

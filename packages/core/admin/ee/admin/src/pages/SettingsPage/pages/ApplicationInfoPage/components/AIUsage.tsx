@@ -1,4 +1,4 @@
-import { Flex, Typography, Grid, ProgressBar } from '@strapi/design-system';
+import { Flex, Typography, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -9,12 +9,6 @@ const StyledProgressBar = styled(ProgressBar)`
   background-color: ${({ theme }) => theme.colors.neutral200};
   > div {
     background-color: ${({ theme }) => theme.colors.neutral700};
-  }
-`;
-
-const StyledGridItem = styled(Grid.Item)`
-  ${({ theme }) => theme.breakpoints.large} {
-    grid-column: 7 / 13;
   }
 `;
 
@@ -47,7 +41,7 @@ export const AIUsage = () => {
   const isInOverages = overage > 0 && maxCredits !== totalCredits;
 
   return (
-    <StyledGridItem col={6} s={12} direction="column" alignItems="start" gap={2}>
+    <Flex direction="column" alignItems="start" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.ai-usage',
@@ -75,7 +69,13 @@ export const AIUsage = () => {
             </Typography>
           </>
         )}
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.application.ai-usage.overage-rate',
+            defaultMessage: '+$1.50 per 100 credits thereafter',
+          })}
+        </Typography>
       </Flex>
-    </StyledGridItem>
+    </Flex>
   );
 };
