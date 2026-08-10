@@ -33,7 +33,6 @@ async function traverseEntity(
 
 - **`options`**:  
   Configuration for traversal, including:
-
   - `schema` _(Model)_: The schema definition of the current entity.
   - `path` _(Path, optional)_: Tracks the current traversal path.
   - `parent` _(Parent, optional)_: Information about the parent attribute.

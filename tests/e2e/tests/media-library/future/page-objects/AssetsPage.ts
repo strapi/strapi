@@ -40,7 +40,7 @@ export class AssetsPage {
   }
 
   async goto() {
-    await this.page.goto('/admin/plugins/unstable-upload');
+    await this.page.goto('/admin/plugins/upload');
   }
 
   /**

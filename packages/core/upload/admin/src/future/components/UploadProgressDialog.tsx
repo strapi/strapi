@@ -641,7 +641,10 @@ export const UploadProgressDialog = () => {
   const dispatch = useTypedDispatch();
   const { isVisible, isMinimized, files } = useTypedSelector((state) => state.uploadProgress);
 
-  const currentFile = files.find((f) => f.status === 'uploading');
+  // With concurrent uploads several files are `uploading` at once — render every
+  // in-flight row, not just the first (a `find` here dated to the strictly
+  // sequential era and hid all but the lowest-index worker's row).
+  const uploadingFiles = files.filter((f) => f.status === 'uploading');
   const completedFiles = files
     .filter((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled')
     .sort((a, b) => {
@@ -674,7 +677,9 @@ export const UploadProgressDialog = () => {
             paddingLeft={4}
             paddingRight={4}
           >
-            {currentFile && <FileRowRenderer file={currentFile} />}
+            {uploadingFiles.map((file) => (
+              <FileRowRenderer key={file.index} file={file} />
+            ))}
 
             {completedFiles.length > 0 && (
               <CompletedFilesList>
