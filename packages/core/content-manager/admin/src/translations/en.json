@@ -274,6 +274,7 @@
   "preview.content.open-editor": "Open editor",
   "preview.device.select": "Select device type",
   "preview.device.desktop": "Desktop",
+  "preview.device.tablet": "Tablet",
   "preview.device.mobile": "Mobile",
   "preview.info.single-click-hint": "Double click to edit",
   "preview.error.invalid-field-path": "Could not locate this field in the current document",

@@ -115,8 +115,20 @@ export interface PreviewHandlerParams {
   [key: string]: unknown;
 }
 
+export interface PreviewViewportConfig {
+  width: number;
+  height: number;
+}
+
+export interface PreviewViewports {
+  desktop?: PreviewViewportConfig;
+  tablet?: PreviewViewportConfig;
+  mobile?: PreviewViewportConfig;
+}
+
 export interface PreviewConfig {
   allowedOrigins?: string[];
+  viewports?: PreviewViewports;
   handler: (
     uid: string,
     params: PreviewHandlerParams

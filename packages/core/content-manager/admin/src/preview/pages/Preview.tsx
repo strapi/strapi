@@ -31,12 +31,14 @@ import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayou
 import { Blocker } from '../../pages/EditView/components/Blocker';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
+import { useGetInitialDataQuery } from '../../services/init';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
+import { getPreviewDevices } from '../utils/devices';
 import { getSendMessage } from '../utils/getSendMessage';
 
 import type { Schema, UID } from '@strapi/types';
@@ -54,6 +56,15 @@ const DEVICES = [
     },
     width: '100%',
     height: '100%',
+  },
+  {
+    name: 'tablet',
+    label: {
+      id: 'content-manager.preview.device.tablet',
+      defaultMessage: 'Tablet',
+    },
+    width: '768px',
+    height: '1024px',
   },
   {
     name: 'mobile',
@@ -158,10 +169,16 @@ const PreviewPage = () => {
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
+  const { data: initialData } = useGetInitialDataQuery(undefined);
+  const devices = React.useMemo(
+    () => getPreviewDevices(DEVICES, initialData?.previewViewports),
+    [initialData?.previewViewports]
+  );
+
   const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
     DEVICES[0].name
   );
-  const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
+  const device = devices.find((d) => d.name === deviceName) ?? devices[0];
 
   const previewHighlightColors: PreviewHighlightColors = {
     highlightHoverColor: theme.colors.primary500,
@@ -418,7 +435,7 @@ const PreviewPage = () => {
                         defaultMessage: 'Select device type',
                       })}
                     >
-                      {DEVICES.map((deviceOption) => (
+                      {devices.map((deviceOption) => (
                         <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
                           {formatMessage(deviceOption.label)}
                         </SingleSelectOption>
