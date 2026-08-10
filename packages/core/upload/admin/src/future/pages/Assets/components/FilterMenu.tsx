@@ -65,6 +65,12 @@ const FieldSubTrigger = styled(Menu.SubTrigger)`
 /** Every panel of the filter tree shares this fixed width (design). */
 export const FILTER_PANEL_WIDTH = '24.2rem';
 
+// dvh, not vh: on a phone `vh` ignores the browser chrome, so a 70vh panel can
+// extend past the visual viewport and leave its lower rows (the last field, and
+// anything under the date-range calendar) stranded under the URL bar with no way
+// to scroll to them. Same reason the drawer caps on dvh.
+const PANEL_MAX_HEIGHT = '70dvh';
+
 // Mobile uses one flat panel (accordion), so it never needs room for a side
 // flyout — cap it to the viewport so it can't overflow a narrow screen.
 const MOBILE_PANEL_WIDTH = `min(${FILTER_PANEL_WIDTH}, calc(100dvw - 2rem))`;
@@ -107,6 +113,10 @@ interface FilterMenuProps {
  * - Creation date / Last modified → preset list (single pick, `within the
  *   last` by default) + "Select date range" (creation date only) opening the
  *   range calendar; a completed range adds an `is` range badge.
+ *
+ * Closing behaviour follows how many values a field can hold: a date is one
+ * value, so picking a preset (or committing a range) closes the menu; Type is a
+ * set, so it stays open until dismissed.
  */
 export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   const { formatMessage } = useIntl();
@@ -224,9 +234,10 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
         key={preset}
         role="menuitemradio"
         aria-checked={selected === preset}
-        onSelect={(e: Event) => {
-          // Keep the menu open so the check moves to the picked value.
-          e.preventDefault();
+        onSelect={() => {
+          // No preventDefault, unlike Type: a date field holds exactly one
+          // value, so the pick is complete and the menu closes on it. Type stays
+          // open because the user may still be building up a multi-value set.
           addPreset(field, preset);
         }}
         endIcon={
@@ -264,7 +275,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
       <Menu.Content
         popoverPlacement="bottom-start"
         zIndex={2}
-        maxHeight="70vh"
+        maxHeight={PANEL_MAX_HEIGHT}
         width={isMobile ? MOBILE_PANEL_WIDTH : FILTER_PANEL_WIDTH}
       >
         {isMobile ? (
@@ -327,7 +338,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
           <>
             <Menu.SubRoot>
               <FieldSubTrigger>{typeLabel}</FieldSubTrigger>
-              <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
+              <SubPanel zIndex={2} maxHeight={PANEL_MAX_HEIGHT} width={FILTER_PANEL_WIDTH}>
                 {typeItems}
               </SubPanel>
             </Menu.SubRoot>
@@ -335,7 +346,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
             {(['createdAt', 'updatedAt'] as const).map((field) => (
               <Menu.SubRoot key={field}>
                 <FieldSubTrigger>{formatMessage(DATE_FIELD_LABELS[field])}</FieldSubTrigger>
-                <SubPanel zIndex={2} maxHeight="70vh" width={FILTER_PANEL_WIDTH}>
+                <SubPanel zIndex={2} maxHeight={PANEL_MAX_HEIGHT} width={FILTER_PANEL_WIDTH}>
                   {presetItems(field)}
                   {/* Design constraint: only Creation date offers a range from the
                       UI. The URL codec and the badges support ranges on both date

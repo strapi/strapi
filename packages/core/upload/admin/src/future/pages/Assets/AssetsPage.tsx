@@ -354,19 +354,20 @@ const StickyHeader = styled(Box)<{ $compact: boolean }>`
     padding-right: ${({ theme }) => theme.spaces[10]};
   }
 
+  /* Compacting is scoped to medium and up, where the header actually sticks. On
+     mobile it scrolls away with the list, so shrinking it mid-scroll animated a
+     header the user could no longer see — the transition read as a glitch on the
+     way back up rather than as the header settling. */
   ${({ $compact, theme }) =>
     $compact &&
     css`
-      padding-top: ${theme.spaces[3]};
-      padding-bottom: ${theme.spaces[3]};
-      padding-left: ${theme.spaces[2]};
-      padding-right: ${theme.spaces[2]};
-      background: ${theme.colors.neutral0};
-      box-shadow: ${theme.shadows.tableShadow};
-
       ${theme.breakpoints.medium} {
+        padding-top: ${theme.spaces[3]};
+        padding-bottom: ${theme.spaces[3]};
         padding-left: ${theme.spaces[4]};
         padding-right: ${theme.spaces[4]};
+        background: ${theme.colors.neutral0};
+        box-shadow: ${theme.shadows.tableShadow};
       }
       ${theme.breakpoints.large} {
         padding-left: ${theme.spaces[6]};
@@ -390,11 +391,22 @@ const TitleRow = styled(Flex)`
 // Filter+Search on row 1, Sort+Toggle on row 2. Desktop (large+): one row,
 // Filter+Search on the left, Sort+Toggle pushed right.
 const Toolbar = styled(Flex)<{ $compact: boolean }>`
-  margin-top: ${({ theme, $compact }) => ($compact ? theme.spaces[2] : theme.spaces[5])};
+  margin-top: ${({ theme }) => theme.spaces[5]};
   flex-direction: column;
   align-items: stretch;
   gap: ${({ theme }) => theme.spaces[3]};
   transition: margin-top 0.2s ease;
+
+  /* Tightening the gap to the title belongs to the compact header, so it is
+     scoped to the breakpoints that compact. On mobile the header never sticks,
+     and this was the last thing still shifting as the page scrolled. */
+  ${({ $compact, theme }) =>
+    $compact &&
+    css`
+      ${theme.breakpoints.medium} {
+        margin-top: ${theme.spaces[2]};
+      }
+    `}
 
   ${({ theme }) => theme.breakpoints.large} {
     flex-direction: row;
