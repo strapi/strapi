@@ -15,11 +15,12 @@ jest.mock('../hooks/useFolderNavigation', () => ({
 }));
 
 jest.mock('../components/Dnd/useAssetDnd', () => ({
-  useFileDraggable: () => ({
+  useFileDraggable: (asset: { id: number; name: string }) => ({
     attributes: {},
     listeners: {},
     setNodeRef: jest.fn(),
     isDragging: false,
+    dragData: { kind: 'file', id: asset.id, name: asset.name, folderId: null },
   }),
   useFolderDraggableDroppable: (folder: { id: number; name: string }) => ({
     dragData: { kind: 'folder', id: folder.id, name: folder.name, parentId: null },
@@ -316,6 +317,27 @@ describe('AssetsGrid', () => {
         setup({ assets: [createMockAsset(1, 'test.png')] });
         expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
       });
+
+      it('opens the asset actions menu without opening the details drawer', async () => {
+        const user = userEvent.setup();
+        setup({ assets: [createMockAsset(1, 'test.png')] });
+
+        await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+        expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+        expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+      });
+
+      it('does not open the details drawer when the menu trigger is reached by keyboard', async () => {
+        const user = userEvent.setup();
+        setup({ assets: [createMockAsset(1, 'test.png')] });
+
+        screen.getByRole('button', { name: 'More actions' }).focus();
+        await user.keyboard('{Enter}');
+
+        expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+        expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+      });
     });
 
     describe('Edge cases', () => {
@@ -390,6 +412,60 @@ describe('AssetsGrid', () => {
   // the menu's wrapper puts up must therefore be scoped to its own DOM subtree —
   // `stopPropagation` would kill the native event before it reaches `document`,
   // where Radix listens in order to dismiss its layers.
+  describe('Asset actions menu dismissal', () => {
+    const setupAssetCard = () => setup({ assets: [createMockAsset(7, 'photo.png')], folders: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setupAssetCard>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    // `disableOutsidePointerEvents` puts `pointer-events: none` on the body, so
+    // user-event refuses to click there — the document element is where a real
+    // browser lands the click anyway. Radix attaches its document listener on a
+    // `setTimeout(…, 0)` once the layer mounts, so let that land first.
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupAssetCard();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('does not open the details drawer when the open dialog is clicked', async () => {
+      const { user } = setupAssetCard();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Folder actions menu dismissal', () => {
     // Folder 5 sits outside the default `/upload/folder-structure` fixture, so
     // the move dialog has somewhere to offer moving it to.
