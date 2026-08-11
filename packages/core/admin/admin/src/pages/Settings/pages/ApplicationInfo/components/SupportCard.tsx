@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
-import { Book, ExternalLink, PaperPlane } from '@strapi/icons';
-import { Discord, GitHub } from '@strapi/icons/symbols';
+// Themable icons only: the GitHub/Discord brand marks in `@strapi/icons/symbols` carry fixed
+// brand colours, so the black GitHub mark disappears against a dark-theme surface.
+import { Book, Code, Discuss, ExternalLink, Message, PaperPlane } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
@@ -33,15 +34,21 @@ const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTi
       rel="noopener noreferrer"
       display="block"
       hasRadius
+      background="neutral100"
       borderColor="neutral200"
       padding={4}
+      // The tile is the link, so the anchor's own underline and link colour must not bleed onto
+      // the text inside it; every colour below comes from a theme token so both themes match.
+      style={{ textDecoration: 'none' }}
     >
       <Flex justifyContent="space-between" alignItems="center">
-        <Icon width="2rem" height="2rem" aria-hidden />
+        <Icon width="2rem" height="2rem" fill="neutral500" aria-hidden />
         <ExternalLink fill="neutral400" aria-hidden />
       </Flex>
       <Flex direction="column" alignItems="start" gap={1} paddingTop={3}>
-        <Typography fontWeight="bold">{formatMessage(title)}</Typography>
+        <Typography fontWeight="bold" textColor="neutral800">
+          {formatMessage(title)}
+        </Typography>
         <Typography variant="pi" textColor="neutral600">
           {formatMessage(description)}
         </Typography>
@@ -71,7 +78,7 @@ const DOCUMENTATION_TILE: SupportLinkTileConfig = {
 const GITHUB_ISSUES_TILE: SupportLinkTileConfig = {
   id: 'github-issues',
   href: 'https://github.com/strapi/strapi/issues',
-  icon: GitHub,
+  icon: Code,
   title: {
     id: 'Settings.application.support.github-issues.title',
     defaultMessage: 'GitHub issues',
@@ -85,7 +92,7 @@ const GITHUB_ISSUES_TILE: SupportLinkTileConfig = {
 const GITHUB_DISCUSSIONS_TILE: SupportLinkTileConfig = {
   id: 'github-discussions',
   href: 'https://github.com/strapi/strapi/discussions',
-  icon: GitHub,
+  icon: Discuss,
   title: {
     id: 'Settings.application.support.github-discussions.title',
     defaultMessage: 'GitHub discussions',
@@ -99,7 +106,7 @@ const GITHUB_DISCUSSIONS_TILE: SupportLinkTileConfig = {
 const DISCORD_TILE: SupportLinkTileConfig = {
   id: 'discord',
   href: 'https://discord.strapi.io',
-  icon: Discord,
+  icon: Message,
   title: { id: 'Settings.application.support.discord.title', defaultMessage: 'Discord' },
   description: {
     id: 'Settings.application.support.discord.description',
