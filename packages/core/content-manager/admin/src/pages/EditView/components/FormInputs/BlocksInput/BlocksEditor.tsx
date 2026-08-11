@@ -349,13 +349,14 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
       try {
         Transforms.select(editor, Editor.start(editor, [targetIndex]));
-        ReactEditor.focus(editor);
-      } catch (_) {
-        // Slate tree may not be ready yet; best-effort focus
-        try {
-          ReactEditor.focus(editor);
-        } catch (_2) {}
+      } catch {
+        // Slate tree not yet ready; skip cursor positioning and scroll
         return;
+      }
+      try {
+        ReactEditor.focus(editor);
+      } catch {
+        // non-fatal — editor DOM not yet committed
       }
 
       // Defer scroll past the re-render triggered by Transforms.select above.
@@ -384,7 +385,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       });
 
       return () => cancelAnimationFrame(raf);
-    }, [blockIndex, editor]);
+      // `key` is included so that if useResetKey remounts the Slate editor (clearing
+      // editor.selection to null), this effect re-runs and restores the cursor position.
+    }, [blockIndex, editor, key]);
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
