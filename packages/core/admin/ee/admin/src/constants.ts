@@ -88,6 +88,4 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
         },
       ]
     : [],
-
-  applicationInfo: [],
 });

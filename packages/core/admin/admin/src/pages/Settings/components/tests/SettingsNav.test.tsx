@@ -12,8 +12,8 @@ jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
 
 const menu = [
   {
-    id: 'application-info',
-    intlLabel: { id: 'Settings.application-info', defaultMessage: 'Application Info' },
+    id: 'global',
+    intlLabel: { id: 'Settings.global', defaultMessage: 'Global Settings' },
     links: [
       {
         intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
@@ -23,12 +23,6 @@ const menu = [
         permissions: [],
         hasNotification: true,
       },
-    ],
-  },
-  {
-    id: 'global',
-    intlLabel: { id: 'Settings.global', defaultMessage: 'Global Settings' },
-    links: [
       {
         intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
         to: '/settings/webhooks',
