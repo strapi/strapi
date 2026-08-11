@@ -51,11 +51,10 @@ const captureUpdateRequest = (responseAsset: AssetWithPopulatedCreatedBy = baseA
   });
 
   server.use(
-    http.post('/upload', async ({ request }) => {
+    http.put('/upload/files/:id', async ({ request, params }) => {
       try {
-        const url = new URL(request.url, 'http://localhost:1337');
         resolveRequest({
-          id: url.searchParams.get('id'),
+          id: String(params.id),
           body: await request.formData(),
         });
       } catch (error) {
@@ -276,11 +275,10 @@ describe('AssetDetails (asset details drawer body)', () => {
       file: null,
     };
     server.use(
-      http.post('/upload', async ({ request }) => {
-        const url = new URL(request.url, 'http://localhost:1337');
+      http.post('/upload/files/:id/replace', async ({ request, params }) => {
         const body = await request.formData();
         captured = {
-          id: url.searchParams.get('id'),
+          id: String(params.id),
           file: body.get('files'),
         };
         return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
@@ -322,9 +320,8 @@ describe('AssetDetails (asset details drawer body)', () => {
     let replaceId: string | null = null;
 
     server.use(
-      http.post('/upload', async ({ request }) => {
-        const url = new URL(request.url, 'http://localhost:1337');
-        replaceId = url.searchParams.get('id');
+      http.post('/upload/files/:id/replace', async ({ params }) => {
+        replaceId = params.id as string;
         return HttpResponse.json({ ...secondAsset, name: 'replacement.png' });
       })
     );
@@ -378,7 +375,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     };
 
     it('covers the form while a replace is in flight and clears it once settled', async () => {
-      const release = gateRequest('post', '/upload');
+      const release = gateRequest('post', '/upload/files/:id/replace');
 
       const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
       await screen.findByRole('combobox');

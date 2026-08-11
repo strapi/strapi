@@ -10,9 +10,10 @@ export interface AIMetadataJob {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/latest
+ * GET /upload/ai-metadata-jobs/latest
  *
- * Return the latest AI metadata job
+ * The most recent still-active backfill job. 404s when nothing is running, so
+ * there is no `null` on the wire — callers get an error response instead.
  */
 export declare namespace GetLatestAIMetadataJob {
   export interface Request {
@@ -20,41 +21,15 @@ export declare namespace GetLatestAIMetadataJob {
   }
 
   export interface Response {
-    data: AIMetadataJob | null;
+    data: AIMetadataJob;
   }
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata
- *
- * Start a new AI metadata generation job
+ * The other two job endpoints — `POST /upload/ai-metadata-jobs` and
+ * `GET /upload/ai-metadata-jobs/pending-count` — are declared in `./files.ts`
+ * as `CreateAIMetadataJob` and `GetAIMetadataPendingCount`. They used to be
+ * duplicated here under different names and with response shapes that had
+ * drifted from what the controllers actually return; `./files.ts` is the one
+ * that matched, so it is the single source of truth for both.
  */
-export declare namespace StartAIMetadataJob {
-  export interface Request {
-    body?: {};
-  }
-
-  export interface Response {
-    data: {
-      jobId: number;
-      status: string;
-    };
-  }
-}
-
-/**
- * GET /upload/actions/generate-ai-metadata/count
- *
- * Return count of images without metadata
- */
-export declare namespace GetAIMetadataCount {
-  export interface Request {
-    query?: {};
-  }
-
-  export interface Response {
-    data: {
-      count: number;
-    };
-  }
-}

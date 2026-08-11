@@ -229,10 +229,10 @@ describe('AssetActionsMenu', () => {
       let uploadedId: string | null = null;
       server.use(
         http.post(
-          '*/upload',
-          ({ request }) => {
-            uploadedId = new URL(request.url).searchParams.get('id');
-            return HttpResponse.json([{ id: 5, name: 'new.png' }]);
+          '*/upload/files/:id/replace',
+          ({ params }) => {
+            uploadedId = params.id as string;
+            return HttpResponse.json({ id: 5, name: 'new.png' });
           },
           { once: true }
         )
@@ -266,12 +266,12 @@ describe('AssetActionsMenu', () => {
       let releaseUpload: (() => void) | undefined;
       server.use(
         http.post(
-          '*/upload',
+          '*/upload/files/:id/replace',
           async () => {
             await new Promise<void>((resolve) => {
               releaseUpload = resolve;
             });
-            return HttpResponse.json([{ id: 5, name: 'new.png' }]);
+            return HttpResponse.json({ id: 5, name: 'new.png' });
           },
           { once: true }
         )
@@ -300,7 +300,7 @@ describe('AssetActionsMenu', () => {
     it('releases the busy flag when the replace fails', async () => {
       server.use(
         http.post(
-          '*/upload',
+          '*/upload/files/:id/replace',
           () => HttpResponse.json({ error: { message: 'Nope.' } }, { status: 500 }),
           {
             once: true,
@@ -390,7 +390,7 @@ describe('AssetActionsMenu', () => {
 
     it('surfaces the server message when the replace fails', async () => {
       server.use(
-        http.post('*/upload', () =>
+        http.post('*/upload/files/:id/replace', () =>
           HttpResponse.json({ error: { message: 'File too large' } }, { status: 413 })
         )
       );
