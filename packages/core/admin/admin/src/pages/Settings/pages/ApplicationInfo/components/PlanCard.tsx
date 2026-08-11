@@ -4,7 +4,11 @@ import { Flex, Grid, LinkButton, Typography } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
-import type { ProjectType } from '../../../../../../../shared/utils/get-project-type';
+import {
+  getProjectType,
+  type ProjectType,
+} from '../../../../../../../shared/utils/get-project-type';
+import { useGetLicenseLimitsQuery } from '../../../../../services/admin';
 
 /* -------------------------------------------------------------------------------------------------
  * PlanDetail
@@ -73,6 +77,12 @@ const PlanCardBodyCE = () => (
 const PlanCard = () => {
   const { formatMessage } = useIntl();
 
+  // The authenticated license-limit-information endpoint is EE-only, so a CE instance gets a
+  // 404 here; treat that (or any other error/missing data) the same as "no license".
+  const { data: licenseLimitsData } = useGetLicenseLimitsQuery();
+  const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
+  const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
+
   // `useEnterprise`'s `enabled` option only ANDs with `isEE` - it can never force the EE body
   // on for a non-EE instance. An expired/unknown license still needs to show its retained
   // details even though `isEE` is (correctly) false, so the license body is loaded manually
@@ -81,9 +91,7 @@ const PlanCard = () => {
   // (an older bundle, a consumer building `window.strapi` itself), this must fall back to the
   // Community body instead of loading the license section.
   const shouldShowLicenseDetails =
-    window.strapi.isEE ||
-    window.strapi.licenseStatus === 'expired' ||
-    window.strapi.licenseStatus === 'unknown';
+    window.strapi.isEE || licenseStatus === 'expired' || licenseStatus === 'unknown';
   const [LicenseBody, setLicenseBody] = React.useState<React.ComponentType | null>(null);
 
   React.useEffect(() => {
@@ -111,7 +119,8 @@ const PlanCard = () => {
   // details. Once we know for certain there is no license to show, fall back to the CE body.
   const PlanCardBody = LicenseBody ?? (shouldShowLicenseDetails ? null : PlanCardBodyCE);
 
-  const { label, href } = PLAN_LINK[window.strapi.licensedPlan] ?? PLAN_LINK.Community;
+  const licensedPlan = getProjectType({ isEE: licenseStatus !== 'none', planPriceId });
+  const { label, href } = PLAN_LINK[licensedPlan] ?? PLAN_LINK.Community;
 
   return (
     <Flex

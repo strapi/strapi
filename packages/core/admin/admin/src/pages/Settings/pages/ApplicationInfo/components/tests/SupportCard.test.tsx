@@ -3,10 +3,31 @@ import { render, screen } from '@tests/utils';
 
 import { SupportCard } from '../SupportCard';
 
+type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
+
+interface MockLicenseLimitsQueryResult {
+  data: { data: { licenseStatus: LicenseStatus; planPriceId: string | null } } | undefined;
+}
+
+/**
+ * `SupportCard` reads the licensed plan from the authenticated `getLicenseLimits` query rather
+ * than `window.strapi`, so a CE instance (where `/admin/license-limit-information` 404s, since
+ * the route is EE-only) is modelled here as `data: undefined` - exactly what the query returns
+ * on that 404.
+ */
+let mockLicenseLimitsResult: MockLicenseLimitsQueryResult = { data: undefined };
+
+const setLicenseLimits = (licenseStatus?: LicenseStatus, planPriceId: string | null = null) => {
+  mockLicenseLimitsResult = licenseStatus
+    ? { data: { data: { licenseStatus, planPriceId } } }
+    : { data: undefined };
+};
+
 const trigger = jest.fn().mockResolvedValue({ data: undefined });
 
 jest.mock('../../../../../../services/admin', () => ({
   useLazyGetDebugDumpQuery: () => [trigger, { data: undefined, isFetching: false, isError: false }],
+  useGetLicenseLimitsQuery: () => mockLicenseLimitsResult,
 }));
 
 /**
@@ -37,6 +58,10 @@ const withDebugDumpPermission = () => {
 };
 
 describe('SupportCard', () => {
+  afterEach(() => {
+    setLicenseLimits(undefined);
+  });
+
   it('renders the CE tiles and not the Support portal tile', async () => {
     render(<SupportCard />);
 
@@ -61,9 +86,8 @@ describe('SupportCard', () => {
 
   it('renders the Support portal tile and not GitHub discussions on a paid plan', async () => {
     const original = window.strapi.isEE;
-    const originalPlan = window.strapi.licensedPlan;
     window.strapi.isEE = true;
-    window.strapi.licensedPlan = 'Enterprise';
+    setLicenseLimits('active', 'enterprise-plan');
 
     try {
       render(<SupportCard />);
@@ -87,7 +111,6 @@ describe('SupportCard', () => {
       expect(screen.queryByRole('link', { name: /github discussions/i })).not.toBeInTheDocument();
     } finally {
       window.strapi.isEE = original;
-      window.strapi.licensedPlan = originalPlan;
     }
   });
 
@@ -95,9 +118,8 @@ describe('SupportCard', () => {
     // A customer whose license expired still needs to reach Strapi support, so the tiles follow
     // the licensed plan rather than isEE. This swaps links only; it unlocks nothing.
     const original = window.strapi.isEE;
-    const originalPlan = window.strapi.licensedPlan;
     window.strapi.isEE = false;
-    window.strapi.licensedPlan = 'Enterprise';
+    setLicenseLimits('expired', 'enterprise-plan');
 
     try {
       render(<SupportCard />);
@@ -106,7 +128,6 @@ describe('SupportCard', () => {
       expect(window.strapi.isEE).toBe(false);
     } finally {
       window.strapi.isEE = original;
-      window.strapi.licensedPlan = originalPlan;
     }
   });
 

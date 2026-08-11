@@ -10,17 +10,26 @@ describe('Admin Controller', () => {
       } as any;
     });
 
-    test('Reports no license: isEE false, licenseStatus "none", licensedPlan "Community"', async () => {
+    test('Reports no license: isEE false', async () => {
       const result = await adminController.getProjectType();
 
       expect(result.data).toStrictEqual({
         isEE: false,
         features: [],
         flags: {},
-        licenseStatus: 'none',
-        licensedPlan: 'Community',
         ai: { enabled: false },
       });
+    });
+
+    // Regression guard for the anonymous licence-state leak: `/admin/project-type` is declared
+    // `config: { auth: false }` so the login page can read isEE/features before a session exists.
+    // licenseStatus/licensedPlan must never appear here, on CE or EE, since either would tell an
+    // unauthenticated caller about this instance's licence.
+    test('Does not include licenseStatus or licensedPlan', async () => {
+      const result = await adminController.getProjectType();
+
+      expect(result.data).not.toHaveProperty('licenseStatus');
+      expect(result.data).not.toHaveProperty('licensedPlan');
     });
   });
 

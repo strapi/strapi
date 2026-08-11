@@ -17,6 +17,7 @@ import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { PlanDetail } from '../../../../../../../../admin/src/pages/Settings/pages/ApplicationInfo/components/PlanCard';
 import { useGetLicenseTrialTimeLeftQuery } from '../../../../../../../../admin/src/services/admin';
+import { getProjectType } from '../../../../../../../../shared/utils/get-project-type';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 import { AdminSeatInfoEE } from './AdminSeatInfo';
@@ -134,7 +135,11 @@ const LicenseInfoEE = () => {
     planEntitlements,
   } = license;
 
-  const isGrowth = window.strapi.licensedPlan === 'Growth';
+  const licensedPlan = getProjectType({
+    isEE: licenseStatus !== 'none',
+    planPriceId: license.planPriceId ?? undefined,
+  });
+  const isGrowth = licensedPlan === 'Growth';
 
   // Retention is shown in days (the design lists "30 days retention" / "90 days
   // retention"); only sentinel-sized values collapse to years, so a licence with
@@ -186,10 +191,7 @@ const LicenseInfoEE = () => {
     return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
   };
 
-  const currentPlanValue =
-    licenseMode === 'offline'
-      ? `${window.strapi.licensedPlan} - offline`
-      : window.strapi.licensedPlan;
+  const currentPlanValue = licenseMode === 'offline' ? `${licensedPlan} - offline` : licensedPlan;
 
   const dateLabel: MessageDescriptor = isTrial
     ? { id: 'Settings.license.trial-end-date', defaultMessage: 'trial end date' }

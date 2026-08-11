@@ -119,8 +119,6 @@ window.strapi = {
     isEnabled: () => false,
   },
   projectType: 'Community',
-  licenseStatus: 'none',
-  licensedPlan: 'Community',
   telemetryDisabled: true,
   flags: {
     nps: true,

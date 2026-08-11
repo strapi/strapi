@@ -16,6 +16,10 @@ const baseLicense: LicenseData = {
   expireAt: '2026-12-31T00:00:00.000Z',
   licenseMode: 'online',
   licenseStatus: 'active',
+  // Deliberately not a Growth price id, so the derived plan resolves to "Enterprise" - the
+  // Growth-specific layout (admin seats / AI usage) is covered by AdminSeatInfo/AIUsage's own
+  // tests, not here.
+  planPriceId: 'enterprise-plan',
   renewalDate: '2027-03-18T00:00:00.000Z',
   lastRegistrySyncAt: Date.UTC(2026, 0, 1, 10, 0, 0),
   nextRegistrySyncAt: null,
@@ -66,10 +70,6 @@ describe('LicenseInfoEE', () => {
     licenseData = structuredClone(baseLicense);
     isLoading = false;
     isError = false;
-    // Enterprise puts the renewal date in the left column, next to the current plan — the
-    // Growth-specific layout (admin seats / AI usage) is covered by AdminSeatInfo/AIUsage's
-    // own tests, not here.
-    window.strapi.licensedPlan = 'Enterprise';
   });
 
   it('renders the Active badge, the last check-in line, and entitlement rows with a tick and a limit', async () => {
@@ -100,11 +100,11 @@ describe('LicenseInfoEE', () => {
   });
 
   it('shows the retained plan as the current plan for an expired license, even though isEE is false', async () => {
-    // Mirrors what the Plan card feeds this component once a license expires: `isEE` stays
-    // false (this is display-only, not a feature unlock) while `licensedPlan` still names the
-    // plan that was licensed, from the retained snapshot.
+    // Mirrors what the Plan card feeds this component once a license expires: `window.strapi.isEE`
+    // stays false (this is display-only, not a feature unlock) while the plan name is derived
+    // from the license's own `licenseStatus`/`planPriceId` - `licenseStatus: 'expired' !== 'none'`
+    // is enough to resolve "Enterprise" here, independently of `isEE`.
     window.strapi.isEE = false;
-    window.strapi.licensedPlan = 'Enterprise';
     licenseData = { ...structuredClone(baseLicense), licenseStatus: 'expired' };
     render(<LicenseInfoEE />);
 

@@ -27,10 +27,6 @@ interface BrowserStrapi {
     docLinks?: boolean;
   };
   projectType: 'Community' | 'Growth' | 'Enterprise';
-  // Display-only snapshot of the license's usability and licensed plan. Never used for feature
-  // gating - `isEE`/`projectType` above are what gate features and drive telemetry.
-  licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
-  licensedPlan: 'Community' | 'Growth' | 'Enterprise';
   telemetryDisabled: boolean;
   ai: {
     enabled: boolean;

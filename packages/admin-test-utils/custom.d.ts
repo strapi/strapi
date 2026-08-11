@@ -13,8 +13,6 @@ declare global {
         isEnabled: (name: string) => boolean;
       };
       projectType: string;
-      licenseStatus: string;
-      licensedPlan: string;
       telemetryDisabled: boolean;
       flags: {
         nps: boolean;

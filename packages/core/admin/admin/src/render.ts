@@ -56,8 +56,6 @@ const renderAdmin = async (
       isEnabled: () => false,
     },
     projectType: 'Community',
-    licenseStatus: 'none',
-    licensedPlan: 'Community',
     flags: {
       nps: false,
       promoteEE: true,
@@ -86,16 +84,12 @@ const renderAdmin = async (
     ai: {
       enabled: boolean;
     };
-    // Display-only: reflects a retained (possibly unusable) license snapshot. Never used to
-    // derive `isEE`/`projectType` below - those keep gating features and driving telemetry.
-    licenseStatus?: Window['strapi']['licenseStatus'];
-    licensedPlan?: Window['strapi']['licensedPlan'];
   }
 
   try {
     const {
       data: {
-        data: { isEE, isTrial, features, flags, ai, planPriceId, licenseStatus, licensedPlan },
+        data: { isEE, isTrial, features, flags, ai, planPriceId },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
@@ -108,8 +102,6 @@ const renderAdmin = async (
         features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = getProjectType({ isEE, planPriceId });
-    window.strapi.licenseStatus = licenseStatus ?? 'none';
-    window.strapi.licensedPlan = licensedPlan ?? window.strapi.projectType;
     // eslint-disable-next-line
     // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
     window.strapi.ai = ai;

@@ -29,10 +29,6 @@ declare global {
         docLinks?: boolean;
       };
       projectType: 'Community' | 'Growth' | 'Enterprise';
-      /** Display-only license state; never a feature gate. Keep in sync with admin/custom.d.ts. */
-      licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
-      /** Display-only plan label, retained across expiry. Keep in sync with admin/custom.d.ts. */
-      licensedPlan: 'Community' | 'Growth' | 'Enterprise';
       telemetryDisabled: boolean;
       ai: {
         enabled: boolean;

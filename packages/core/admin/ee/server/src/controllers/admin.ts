@@ -2,7 +2,6 @@ import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
 
 import type { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
-import { getProjectType } from '../../../../shared/utils/get-project-type';
 import { getService } from '../utils';
 
 type PlanEntitlementLimit = { key: string; unit?: 'days' | 'count'; value: number | null };
@@ -65,37 +64,13 @@ export default {
           flags,
           type: strapi.ee.type,
           planPriceId: strapi.ee.planPriceId,
-          licenseStatus: strapi.ee.licenseStatus,
-          // Display-only: names the licensed plan even once the license is unusable, so the
-          // admin can show "Enterprise / Expired" instead of silently reading as Community.
-          // Never used for feature gating - isEE stays false.
-          //
-          // Deliberately an allowlist plus a known-plan requirement rather than
-          // `licenseStatus !== 'none'`: a missing status (mixed-version install) must not read
-          // as licensed, and an unreadable or corrupt license file leaves no plan behind at
-          // all, so it must say Community rather than defaulting to Enterprise.
-          licensedPlan: getProjectType({
-            isEE:
-              Boolean(strapi.ee.type ?? strapi.ee.retainedLicense?.type) &&
-              ['active', 'expired', 'unknown'].includes(strapi.ee.licenseStatus),
-            planPriceId: strapi.ee.planPriceId ?? strapi.ee.retainedLicense?.planPriceId,
-          }),
           ai: {
             enabled: isAILicense && isAIConfigured.enabled,
           },
         },
       };
     } catch {
-      return {
-        data: {
-          isEE: false,
-          features: [],
-          flags,
-          licenseStatus: 'none' as const,
-          licensedPlan: 'Community' as const,
-          ai: { enabled: false },
-        },
-      };
+      return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },
 
@@ -173,6 +148,7 @@ export default {
       subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
       expireAt: strapi.ee.expireAt ?? retained?.expireAt ?? null,
       licenseStatus: strapi.ee.licenseStatus,
+      planPriceId: strapi.ee.planPriceId ?? retained?.planPriceId ?? null,
       renewalDate: strapi.ee.renewalDate,
       planEntitlements: strapi.ee.planFeatureCatalog.map((feature) => {
         if (isActiveLicense) {

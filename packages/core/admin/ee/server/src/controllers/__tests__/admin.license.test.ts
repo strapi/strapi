@@ -63,7 +63,7 @@ describe('getProjectType', () => {
     process.env = OLD_ENV;
   });
 
-  it('reports licenseStatus/licensedPlan alongside isEE for an active license', async () => {
+  it('reports isEE, type and planPriceId for an active license', async () => {
     createStrapiMock({
       ee: {
         planPriceId: 'enterprise-plan',
@@ -73,63 +73,47 @@ describe('getProjectType', () => {
     const data = (await adminController.getProjectType()).data as any;
 
     expect(data.isEE).toBe(true);
-    expect(data.licenseStatus).toBe('active');
-    expect(data.licensedPlan).toBe('Enterprise');
+    expect(data.type).toBe('gold');
+    expect(data.planPriceId).toBe('enterprise-plan');
   });
 
-  it('reports a Growth licensedPlan when the planPriceId names the Growth plan', async () => {
+  // Regression guard for the anonymous licence-state leak: `/admin/project-type` is declared
+  // `config: { auth: false }` so the login page can read isEE/features before a session exists.
+  // `licenseStatus`/`licensedPlan` must never appear in this response - they told an
+  // unauthenticated caller whether this instance's paid licence had lapsed. That information now
+  // only lives behind the authenticated `licenseLimitInformation` endpoint below.
+  it('does not include licenseStatus or licensedPlan, even for an active license', async () => {
     createStrapiMock({
       ee: {
-        planPriceId: 'strapi-growth-plan',
+        planPriceId: 'enterprise-plan',
       },
     });
 
     const data = (await adminController.getProjectType()).data as any;
 
-    expect(data.licensedPlan).toBe('Growth');
+    expect(data).not.toHaveProperty('licenseStatus');
+    expect(data).not.toHaveProperty('licensedPlan');
   });
 
-  it('an expired license: isEE stays false, but licensedPlan is resolved from the retained planPriceId', async () => {
+  it('does not include licenseStatus or licensedPlan on the catch fallback either', async () => {
     createStrapiMock({
-      // `disable()` flips `strapi.EE`/`ee.enabled` to false once a license is no longer usable
-      // - mirrored here rather than left at the mock's default `true`.
-      strapi: { EE: false },
       ee: {
-        type: null,
-        planPriceId: null,
-        licenseStatus: 'expired',
-        retainedLicense: {
-          type: 'gold',
-          planPriceId: 'enterprise-plan',
+        // Throws from inside the try block (`features: strapi.ee.features.list()`), so the
+        // catch fallback path is what actually runs here.
+        features: {
+          list() {
+            throw new Error('boom');
+          },
+          isEnabled: () => false,
         },
       },
     });
 
     const data = (await adminController.getProjectType()).data as any;
 
-    // The important assertion: an expired license must never flip isEE on. licensedPlan is
-    // display-only and is allowed to still say "Enterprise".
     expect(data.isEE).toBe(false);
-    expect(data.licenseStatus).toBe('expired');
-    expect(data.licensedPlan).toBe('Enterprise');
-  });
-
-  it('reports licenseStatus "none" and licensedPlan "Community" when there is no license at all', async () => {
-    createStrapiMock({
-      strapi: { EE: false },
-      ee: {
-        type: null,
-        planPriceId: null,
-        licenseStatus: 'none',
-        retainedLicense: null,
-      },
-    });
-
-    const data = (await adminController.getProjectType()).data as any;
-
-    expect(data.isEE).toBe(false);
-    expect(data.licenseStatus).toBe('none');
-    expect(data.licensedPlan).toBe('Community');
+    expect(data).not.toHaveProperty('licenseStatus');
+    expect(data).not.toHaveProperty('licensedPlan');
   });
 });
 

@@ -219,6 +219,7 @@ export declare namespace GetLicenseLimitInformation {
       subscriptionId: string | null;
       expireAt: string | null;
       licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+      planPriceId: string | null;
       renewalDate: string | null;
       planEntitlements: Array<{
         feature: string;

@@ -6,8 +6,10 @@ import { Discord, GitHub } from '@strapi/icons/symbols';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { getProjectType } from '../../../../../../../shared/utils/get-project-type';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useRBAC } from '../../../../../hooks/useRBAC';
+import { useGetLicenseLimitsQuery } from '../../../../../services/admin';
 
 import { DiagnosticSnapshotModal } from './DiagnosticSnapshotModal';
 
@@ -173,7 +175,13 @@ const SupportCard = () => {
   // Keyed on the licensed plan rather than `isEE` so a customer whose license has lapsed keeps
   // the Strapi support portal link, which is exactly what they need at that moment. This only
   // ever swaps which support links are shown; it gates no feature.
-  const isPaidPlan = window.strapi.licensedPlan !== 'Community';
+  // The authenticated license-limit-information endpoint is EE-only, so a CE instance gets a
+  // 404 here; treat that (or any other error/missing data) the same as "no license" (Community).
+  const { data: licenseLimitsData } = useGetLicenseLimitsQuery();
+  const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
+  const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
+  const licensedPlan = getProjectType({ isEE: licenseStatus !== 'none', planPriceId });
+  const isPaidPlan = licensedPlan !== 'Community';
   const tiles = isPaidPlan ? EE_TILES : CE_TILES;
 
   return (
