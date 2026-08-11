@@ -103,7 +103,10 @@ describe('ee license retention', () => {
   });
 
   afterEach(() => {
-    delete (global as any).strapi;
+    // `global.strapi` is deliberately left in place. The shared jest setup defines it via
+    // Object.defineProperty, so it is not configurable (deleting it throws on Node 26) and its
+    // setter dereferences the assigned value (so it cannot be reset to undefined either).
+    // `beforeEach` assigns a fresh mock and jest sandboxes each test file, so no cleanup is needed.
     delete process.env.STRAPI_LICENSE;
     delete process.env.STRAPI_DISABLE_EE;
     delete process.env.STRAPI_DISABLE_LICENSE_PING;

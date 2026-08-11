@@ -177,6 +177,7 @@
   "Settings.application.support.subtitle.enterprise": "Contact support, report a bug, or contribute to the Strapi community.",
   "Settings.application.support.support-portal.description": "Open a ticket with the Strapi support",
   "Settings.application.support.support-portal.title": "Support portal",
+  "Settings.application.support.tile-label": "Open {title} in a new tab",
   "Settings.application.support.title": "Support",
   "Settings.application.title": "Overview",
   "Settings.debug-dump.copied": "Copied to clipboard",

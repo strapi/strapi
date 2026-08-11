@@ -49,6 +49,16 @@ const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTi
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      // Without this the accessible name is the title and description concatenated, so the tile
+      // announces as e.g. "Documentation Guides and API reference" and collides with the
+      // same-named Settings nav link. Labelling it also tells screen readers it opens a new tab.
+      aria-label={formatMessage(
+        {
+          id: 'Settings.application.support.tile-label',
+          defaultMessage: 'Open {title} in a new tab',
+        },
+        { title: formatMessage(title) }
+      )}
       display="block"
       hasRadius
       background="neutral100"
