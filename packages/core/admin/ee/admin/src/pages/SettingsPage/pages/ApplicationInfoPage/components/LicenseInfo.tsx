@@ -90,8 +90,26 @@ const STATUS_BADGE: Record<
   },
 };
 
+/**
+ * Absolute dates are rendered as `yyyy/mm/dd` rather than through `formatDate`, so the
+ * value is unambiguous in every locale (a locale-ordered `03/04` could be either March 4th
+ * or April 3rd). Relative values, like the last license check, stay relative per the design.
+ */
+const formatAbsoluteDate = (value: string | number): string => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+
+  return `${date.getFullYear()}/${month}/${day}`;
+};
+
 const LicenseInfoEE = () => {
-  const { formatMessage, formatDate, formatRelativeTime } = useIntl();
+  const { formatMessage, formatRelativeTime } = useIntl();
   const { license, isLoading, isError } = useLicenseLimits();
   const { data: trialTimeLeft } = useGetLicenseTrialTimeLeftQuery(undefined, {
     skip: !license?.isTrial,
@@ -179,9 +197,7 @@ const LicenseInfoEE = () => {
 
   const rawDateValue = isTrial ? (trialTimeLeft?.trialEndsAt ?? null) : renewalDate;
 
-  const formattedDate = rawDateValue
-    ? formatDate(new Date(rawDateValue), { day: 'numeric', month: 'long', year: 'numeric' })
-    : null;
+  const formattedDate = rawDateValue ? formatAbsoluteDate(rawDateValue) : null;
 
   const statusBadge = STATUS_BADGE[licenseStatus];
 
@@ -190,13 +206,7 @@ const LicenseInfoEE = () => {
       ? expireAt
         ? formatMessage(
             { id: 'Settings.license.valid-until', defaultMessage: 'License valid until {date}' },
-            {
-              date: formatDate(new Date(expireAt), {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              }),
-            }
+            { date: formatAbsoluteDate(expireAt) }
           )
         : null
       : formatMessage(

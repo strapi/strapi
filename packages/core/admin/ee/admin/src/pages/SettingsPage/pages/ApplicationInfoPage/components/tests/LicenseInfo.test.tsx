@@ -39,10 +39,13 @@ const baseLicense: LicenseData = {
   shouldStopCreate: false,
 };
 
-const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' }).format(
-    new Date(iso)
-  );
+// Absolute dates render as locale-independent `yyyy/mm/dd`; mirror that here rather than
+// asserting a locale-formatted string.
+const formatDate = (iso: string) => {
+  const date = new Date(iso);
+
+  return `${date.getFullYear()}/${`${date.getMonth() + 1}`.padStart(2, '0')}/${`${date.getDate()}`.padStart(2, '0')}`;
+};
 
 // Reassigned per-test (fresh deep copy) so mutating one test's fixture can never
 // bleed into another test — see the `beforeEach` below.
