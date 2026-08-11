@@ -26,7 +26,7 @@ const devAliases: Record<string, string> = {
   '@strapi/review-workflows/strapi-admin': './packages/core/review-workflows/admin/src',
 };
 
-const getMonorepoAliases = ({ monorepo }: { monorepo?: StrapiMonorepo }) => {
+const getMonorepoAliases = ({ monorepo }: { monorepo: StrapiMonorepo | undefined }) => {
   if (!monorepo?.path) {
     return {};
   }

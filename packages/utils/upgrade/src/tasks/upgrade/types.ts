@@ -6,8 +6,8 @@ import type { ConfirmationCallback } from '../../modules/common/types';
 export interface UpgradeOptions {
   logger: Logger;
   confirm?: ConfirmationCallback;
-  cwd?: string;
+  cwd: string | undefined;
   dry?: boolean;
   target: Version.ReleaseType | Version.SemVer;
-  codemodsTarget?: Version.SemVer;
+  codemodsTarget: Version.SemVer | undefined;
 }

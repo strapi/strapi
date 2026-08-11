@@ -119,8 +119,8 @@ export async function copyTemplate(scope: Scope, rootPath: string) {
 type RepoInfo = {
   owner: string;
   repo: string;
-  branch?: string;
-  subPath?: string | null;
+  branch?: string | undefined;
+  subPath?: string | null | undefined;
 };
 
 async function downloadGithubRepo(rootPath: string, { owner, repo, branch, subPath }: RepoInfo) {

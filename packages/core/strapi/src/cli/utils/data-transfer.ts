@@ -228,8 +228,8 @@ const onlyContentTypesOption = new Option(
 ).argParser(parseList);
 
 type ContentTypeTransferOptions = {
-  excludeContentTypes?: string[];
-  onlyContentTypes?: string[];
+  excludeContentTypes?: string[] | undefined;
+  onlyContentTypes?: string[] | undefined;
 };
 
 type TransferExcludePreset = engineDataTransfer.TransferFilterPreset | typeof MEDIA_LIBRARY_PRESET;
@@ -237,11 +237,11 @@ type TransferExcludePreset = engineDataTransfer.TransferFilterPreset | typeof ME
 type TransferCliFilterOptions = Partial<
   Omit<engineDataTransfer.ITransferEngineOptions, 'exclude' | 'only'>
 > & {
-  exclude?: TransferExcludePreset[];
-  only?: engineDataTransfer.TransferFilterPreset[];
+  exclude?: TransferExcludePreset[] | undefined;
+  only?: engineDataTransfer.TransferFilterPreset[] | undefined;
 } & ContentTypeTransferOptions & {
     /** Set when the files stage is auto-skipped because upload types are out of scope. */
-    filesAutoExcluded?: boolean;
+    filesAutoExcluded?: boolean | undefined;
   };
 
 const validateExcludeOnly = (command: Command) => {
@@ -529,7 +529,7 @@ const getDiffHandler = (
     force,
     action,
   }: {
-    force?: boolean;
+    force?: boolean | undefined;
     action: string;
   }
 ) => {
@@ -612,7 +612,7 @@ const getAssetsBackupHandler = (
     force,
     action,
   }: {
-    force?: boolean;
+    force?: boolean | undefined;
     action: string;
   }
 ) => {

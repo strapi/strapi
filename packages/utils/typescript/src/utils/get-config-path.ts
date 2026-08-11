@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 
 interface GetConfigPathOptions {
-  filename?: string;
+  filename?: string | undefined;
   ancestorsLookup?: boolean;
 }
 

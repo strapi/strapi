@@ -1,4 +1,5 @@
 import type { DistinctQuestion } from 'inquirer';
+import type { Utils } from '@strapi/types';
 import type { ProjectAnswers } from '../../types';
 
 /**
@@ -47,7 +48,7 @@ export function questionDefaultValuesMapper(
  */
 export function getDefaultsFromQuestions(
   questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>
-): Partial<ProjectAnswers> {
+): Utils.Object.PartialWithUndefined<ProjectAnswers> {
   return questions.reduce((acc, question) => {
     if (question.default && question.name) {
       return { ...acc, [question.name]: question.default };

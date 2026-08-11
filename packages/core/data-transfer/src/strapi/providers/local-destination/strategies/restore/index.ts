@@ -10,7 +10,7 @@ export interface IRestoreOptions {
     coreStore?: boolean; // delete core store before transfer
   };
   entities?: {
-    include?: string[]; // only delete these stage entities before transfer
+    include?: string[] | undefined; // only delete these stage entities before transfer
     exclude?: string[]; // exclude these stage entities from deletion
     filters?: ((contentType: Struct.ContentTypeSchema) => boolean)[]; // custom filters to exclude a content type from deletion
     params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions

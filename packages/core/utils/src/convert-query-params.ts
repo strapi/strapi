@@ -144,7 +144,7 @@ type PopulateQuery =
 
 export interface Query {
   orderBy?: OrderByQuery;
-  select?: SelectQuery;
+  select?: SelectQuery | undefined;
   where?: WhereQuery;
   // NOTE: those are internal DB filters do not modify
   filters?: FiltersQuery;
@@ -152,7 +152,7 @@ export interface Query {
   count?: boolean;
   ordering?: unknown;
   _q?: string;
-  limit?: number;
+  limit?: number | undefined;
   offset?: number;
   page?: number;
   pageSize?: number;

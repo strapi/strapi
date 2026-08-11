@@ -3,6 +3,7 @@
   "include": ["src"],
   "exclude": ["src/templates"],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "exactOptionalPropertyTypes": true
   }
 }

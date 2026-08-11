@@ -120,15 +120,15 @@ type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 
 interface ProviderCapabilities {
   transport?: {
-    host?: string;
-    port?: number;
-    secure?: boolean;
-    pool?: boolean;
-    maxConnections?: number;
+    host?: string | undefined;
+    port?: number | undefined;
+    secure?: boolean | undefined;
+    pool?: boolean | undefined;
+    maxConnections?: number | undefined;
   };
   auth?: {
-    type?: string;
-    user?: string;
+    type?: string | undefined;
+    user?: string | undefined;
   };
   features?: string[];
 }

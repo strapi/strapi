@@ -8,8 +8,8 @@ import { runAction } from '../../utils/helpers';
 import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
-  email?: string;
-  block?: string;
+  email: string | undefined;
+  block: string | undefined;
 }
 
 interface Answers {
@@ -57,7 +57,7 @@ async function setBlock({ email, block }: CmdOptions) {
 /**
  * Change a user's block status
  */
-const action = async (cmdOptions: CmdOptions = {}) => {
+const action = async (cmdOptions: CmdOptions) => {
   const { email, block } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(block) && process.stdin.isTTY) {

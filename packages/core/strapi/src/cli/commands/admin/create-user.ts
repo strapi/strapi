@@ -9,10 +9,10 @@ import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
 interface CmdOptions {
-  email?: string;
-  password?: string;
-  firstname?: string;
-  lastname?: string;
+  email: string | undefined;
+  password: string | undefined;
+  firstname: string | undefined;
+  lastname: string | undefined;
 }
 
 const emailValidator = yup.string().email('Invalid email address').lowercase();
@@ -110,7 +110,7 @@ async function createAdmin({ email, password, firstname, lastname }: CmdOptions)
 /**
  * Create new admin user
  */
-const action = async (cmdOptions: CmdOptions = {}) => {
+const action = async (cmdOptions: CmdOptions) => {
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (

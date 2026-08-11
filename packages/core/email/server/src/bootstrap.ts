@@ -44,6 +44,7 @@ const createProvider = (emailConfig: EmailConfig) => {
   } catch (err) {
     const newError = new Error(`Could not load email provider "${providerName}".`);
     if (err instanceof Error) {
+      // @ts-expect-error - es5 Error.stack missing undefined
       newError.stack = err.stack;
     }
     throw newError;

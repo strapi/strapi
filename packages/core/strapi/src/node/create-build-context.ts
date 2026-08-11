@@ -24,7 +24,7 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
    * The customisations defined by the user in their app.js file
    */
-  customisations?: AppFile;
+  customisations: AppFile | undefined;
   /**
    * Features object with future flags
    */

@@ -9,7 +9,7 @@ import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
 interface CmdOptions {
-  email?: string;
+  email: string | undefined;
 }
 
 const emailValidator = yup.string().email('Invalid email address').lowercase();
@@ -69,7 +69,7 @@ async function deleteAdmin({ email }: CmdOptions) {
 /**
  * Delete an admin user
  */
-const action = async (cmdOptions: CmdOptions = {}) => {
+const action = async (cmdOptions: CmdOptions) => {
   let { email } = cmdOptions;
 
   if (_.isEmpty(email) && process.stdin.isTTY) {

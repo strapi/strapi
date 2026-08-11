@@ -32,7 +32,7 @@ export interface IProvider {
 }
 
 export interface ISourceProvider extends IProvider {
-  results?: ISourceProviderTransferResults;
+  results?: ISourceProviderTransferResults | undefined;
 
   /**
    * Optional totals for a stage. Called by the engine after the stage read stream is created and before `stage::start`.
@@ -48,7 +48,7 @@ export interface ISourceProvider extends IProvider {
 }
 
 export interface IDestinationProvider extends IProvider {
-  results?: IDestinationProviderTransferResults;
+  results?: IDestinationProviderTransferResults | undefined;
 
   /**
    * Optional rollback implementation
@@ -57,7 +57,7 @@ export interface IDestinationProvider extends IProvider {
   rollback?<T extends Error = Error>(e: T): MaybePromise<void>;
 
   setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
-  onWarning?: (message: string) => void;
+  onWarning?: ((message: string) => void) | undefined;
 
   createEntitiesWriteStream?(): MaybePromise<Writable>;
   createLinksWriteStream?(): MaybePromise<Writable>;

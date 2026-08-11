@@ -14,24 +14,24 @@ export interface FocalPoint {
 export interface File {
   id: number;
   name: string;
-  alternativeText?: string | null;
-  caption?: string | null;
-  focalPoint?: FocalPoint | null;
-  width?: number;
-  height?: number;
+  alternativeText?: string | null | undefined;
+  caption?: string | null | undefined;
+  focalPoint?: FocalPoint | null | undefined;
+  width?: number | undefined;
+  height?: number | undefined;
   formats?: Record<string, unknown>;
   hash: string;
-  ext?: string;
-  mime?: string;
+  ext?: string | undefined;
+  mime?: string | undefined;
   size?: number;
-  sizeInBytes?: number;
+  sizeInBytes?: number | undefined;
   url?: string;
   previewUrl?: string;
   path?: string | null;
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   isUrlSigned?: boolean;
-  folder?: number | null;
+  folder?: number | null | undefined;
   folderPath?: string;
   related?: {
     id: string | number;

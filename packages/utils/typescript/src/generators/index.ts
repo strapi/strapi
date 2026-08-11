@@ -14,7 +14,7 @@ const GENERATORS = {
 export interface GenerateConfig {
   strapi: any;
   pwd: string;
-  rootDir?: string;
+  rootDir: string | undefined;
   artifacts?: {
     contentTypes?: boolean;
     components?: boolean;

@@ -50,6 +50,7 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
+    "@strapi/types": "5.51.2",
     "@strapi/utils": "5.51.2",
     "axios": "1.19.0",
     "boxen": "5.1.2",

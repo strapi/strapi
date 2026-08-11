@@ -22,7 +22,7 @@ import { ProviderTransferError } from '../../../errors/providers';
 export interface ILocalFileDestinationProviderOptions {
   encryption: {
     enabled: boolean; // if the file should be encrypted
-    key?: string; // the key to use when encryption.enabled is true
+    key?: string | undefined; // the key to use when encryption.enabled is true
   };
 
   compression: {
@@ -31,8 +31,8 @@ export interface ILocalFileDestinationProviderOptions {
 
   file: {
     path: string; // the filename to create
-    maxSize?: number; // the max size of a single backup file
-    maxSizeJsonl?: number; // the max lines of each jsonl file before creating the next file
+    maxSize?: number | undefined; // the max size of a single backup file
+    maxSizeJsonl?: number | undefined; // the max lines of each jsonl file before creating the next file
   };
 }
 

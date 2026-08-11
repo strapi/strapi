@@ -36,7 +36,7 @@ export interface ILocalFileSourceProviderOptions {
 
   encryption: {
     enabled: boolean; // if the file is encrypted (and should be decrypted)
-    key?: string; // the key to decrypt the file
+    key?: string | undefined; // the key to decrypt the file
   };
 
   compression: {

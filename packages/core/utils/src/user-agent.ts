@@ -7,10 +7,10 @@
  */
 
 export interface ParsedUserAgent {
-  browser?: string;
-  os?: string;
+  browser?: string | undefined;
+  os?: string | undefined;
   /** Human-readable label combining browser and OS, e.g. "Chrome on macOS". */
-  deviceName?: string;
+  deviceName?: string | undefined;
 }
 
 /**

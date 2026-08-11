@@ -164,7 +164,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const {
-    options: { minify, sourcemaps },
+    options: { minify = false, sourcemaps = false },
   } = ctx;
 
   const baseConfig = await resolveBaseConfig(ctx);
@@ -209,7 +209,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
        */
       allowedHosts: true,
       middlewareMode: true,
-      open: ctx.options.open,
+      open: ctx.options.open ?? false,
       hmr: {
         overlay: false,
         /**

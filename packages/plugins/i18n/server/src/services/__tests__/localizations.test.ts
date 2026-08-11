@@ -1,3 +1,4 @@
+import { Schema } from '@strapi/types';
 import localizationsService from '../localizations';
 import localesService from '../locales';
 import contentTypesService from '../content-types';
@@ -26,7 +27,7 @@ const model = {
       type: 'integer',
     },
   },
-};
+} as unknown as Schema.ContentType;
 
 const allLocalizedModel = {
   uid: 'test-model',
@@ -53,7 +54,7 @@ const allLocalizedModel = {
       },
     },
   },
-};
+} as unknown as Schema.ContentType;
 
 global.strapi = {
   plugins: {

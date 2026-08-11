@@ -7,14 +7,14 @@ export interface RunCodemodsOptions {
   logger: Logger;
   confirm?: ConfirmationCallback;
   selectCodemods: SelectCodemodsCallback;
-  cwd?: string;
+  cwd: string | undefined;
   dry?: boolean;
   target: Version.ReleaseType | Version.LiteralSemVer | Version.Range;
-  uid?: string;
+  uid: string | undefined;
 }
 
 export interface ListCodemodsOptions {
   logger: Logger;
-  cwd?: string;
+  cwd: string | undefined;
   target: Version.ReleaseType | Version.LiteralSemVer | Version.Range;
 }

@@ -16,7 +16,7 @@ export interface Path {
 }
 
 export interface Parent {
-  attribute?: Attribute;
+  attribute?: Attribute | undefined;
   key: string | null;
   path: Path;
   schema: Model;
@@ -24,8 +24,8 @@ export interface Parent {
 
 export interface TraverseOptions {
   schema: Model;
-  path?: Path;
-  parent?: Parent;
+  path?: Path | undefined;
+  parent?: Parent | undefined;
   getModel(uid: string): Model;
 }
 
@@ -34,9 +34,9 @@ export interface VisitorOptions {
   value: unknown;
   schema: Model;
   key: string;
-  attribute?: AnyAttribute;
+  attribute?: AnyAttribute | undefined;
   path: Path;
-  parent?: Parent;
+  parent?: Parent | undefined;
   getModel(uid: string): Model;
 }
 
@@ -100,7 +100,7 @@ interface Context<AttributeType = Attribute> {
   path: Path;
   data: unknown;
   visitor: Visitor;
-  parent?: Parent;
+  parent?: Parent | undefined;
   getModel(uid: string): Model;
 }
 
