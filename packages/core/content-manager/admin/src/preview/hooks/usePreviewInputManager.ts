@@ -38,7 +38,7 @@ export function usePreviewInputManager(
      */
     if (!['component', 'dynamiczone'].includes(type)) {
       const sendMessage = getSendMessage(iframe);
-      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value });
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value, type });
     }
   }, [name, value, iframe, type]);
 

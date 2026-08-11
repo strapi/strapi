@@ -101,6 +101,8 @@ function previewScript(config) {
   };
 
   /**
+   * Returns true when value looks like a Strapi blocks AST. Inlined here because
+   * this script is serialised and injected into iframes where imports are unavailable.
    * @param {unknown} value
    * @returns {boolean}
    */
@@ -655,32 +657,38 @@ function previewScript(config) {
      * top-level block elements) and find which of its children contains the
      * clicked element.
      * @param {HTMLElement} anchor - stega span that was clicked
-     * @param {HighlightGroup} group - stega group for the field
      * @returns {number} 0-based block index, or -1 if it cannot be determined
      */
-    const findBlockIndex = (anchor, group) => {
-      const allElements = [...group.elements];
-      // NCA is reliable for 2+ spans; single-span groups (plain text block)
-      // need the BLOCK_LEVEL_TAGS walk-up fallback.
-      let fieldContainer = allElements.length >= 2 ? findNearestCommonAncestor(allElements) : null;
-      if (!fieldContainer) {
-        let el = anchor.parentElement;
-        while (el && el !== document.documentElement) {
-          if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
-            fieldContainer = el;
-            break;
-          }
-          el = el.parentElement;
+    const findBlockIndex = (anchor) => {
+      // Walk up from the clicked anchor to find the field container — the
+      // nearest ancestor whose direct children include block-level tags.
+      // NCA across the full group.elements set was previously used here but
+      // caused incorrect results when the NCA landed on a high-level ancestor
+      // (e.g. <main> or <article>) that has many non-blocks children.
+      let fieldContainer = null;
+      let el = anchor.parentElement;
+      while (el && el !== document.body && el !== document.documentElement) {
+        if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
+          fieldContainer = el;
+          break;
         }
+        el = el.parentElement;
       }
       if (!fieldContainer) return -1;
+
+      // Walk up from anchor to its direct-child-of-container ancestor
       let blockEl = anchor;
       while (blockEl.parentElement && blockEl.parentElement !== fieldContainer) {
         blockEl = /** @type {HTMLElement} */ (blockEl.parentElement);
       }
-      return blockEl.parentElement === fieldContainer
-        ? Array.from(fieldContainer.children).indexOf(blockEl)
-        : -1;
+      if (blockEl.parentElement !== fieldContainer) return -1;
+
+      // Use the full children list (not just block-level tags) so that every
+      // Slate block maps to its correct DOM position. Empty paragraphs render
+      // as <br> and images may render as <img> or custom elements — filtering
+      // by tag name would make the index drift whenever one of these appears
+      // before the clicked block.
+      return Array.from(fieldContainer.children).indexOf(blockEl);
     };
 
     /**
@@ -914,7 +922,7 @@ function previewScript(config) {
           rect = computeGroupRect(group);
         }
         if (!rect) return;
-        const blockIndex = isBlocksField ? findBlockIndex(anchor, group) : -1;
+        const blockIndex = isBlocksField ? findBlockIndex(anchor) : -1;
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
           path,
           position: {
@@ -1487,13 +1495,15 @@ function previewScript(config) {
 
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
-        const { field, value } = event.data.payload;
+        const { field, value, type } = event.data.payload;
         if (!field) return;
 
-        // Blocks fields ship as an array of nodes. Live updates are delegated
-        // to the host frontend — we re-dispatch as a CustomEvent so integrators
-        // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
-        if (isBlocksValue(value)) {
+        // Blocks fields are identified by the `type` key in the payload (set by
+        // usePreviewInputManager). isBlocksValue is a fallback for any value that
+        // looks like a blocks AST without an explicit type. Both paths delegate to
+        // the host frontend so that null/[] clears are forwarded correctly instead
+        // of falling through to DOM text patching.
+        if (type === 'blocks' || isBlocksValue(value)) {
           forwardBlocksFieldChange(field, value);
           return;
         }
