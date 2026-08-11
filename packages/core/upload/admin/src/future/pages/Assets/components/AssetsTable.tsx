@@ -17,6 +17,7 @@ import { Folder as FolderIcon, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { TruncatedText } from '../../../components/TruncatedText';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
@@ -345,9 +346,9 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
             )}
             <Flex direction="column" alignItems="flex-start" minWidth={0}>
               <NameButton type="button" onClick={handleNameClick}>
-                <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+                <TruncatedText textColor="neutral800" fontWeight="semiBold">
                   {asset.name}
-                </Typography>
+                </TruncatedText>
               </NameButton>
               {!isDesktop && (
                 <Typography textColor="neutral600" variant="pi">
@@ -523,9 +524,9 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           >
             <FolderIcon width={20} height={20} />
           </Flex>
-          <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+          <TruncatedText textColor="neutral800" fontWeight="semiBold">
             {folder.name}
-          </Typography>
+          </TruncatedText>
         </Flex>
       </StyledTd>
       {isDesktop && (

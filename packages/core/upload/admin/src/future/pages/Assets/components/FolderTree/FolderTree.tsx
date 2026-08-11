@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
 import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
 
+import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
@@ -182,50 +183,6 @@ const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: numb
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TruncatedFolderName — tooltip when the label is ellipsized
- * -----------------------------------------------------------------------------------------------*/
-
-const TruncatedFolderName = ({ name, isActive }: { name: string; isActive: boolean }) => {
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-
-  useLayoutEffect(() => {
-    const el = textRef.current;
-    if (!el) {
-      return;
-    }
-
-    const checkTruncation = () => {
-      setIsTruncated(el.scrollWidth > el.clientWidth);
-    };
-
-    checkTruncation();
-
-    const observer = new ResizeObserver(checkTruncation);
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, [name]);
-
-  const label = (
-    <Typography
-      ref={textRef}
-      variant="omega"
-      fontWeight={isActive ? 'semiBold' : 'regular'}
-      ellipsis
-    >
-      {name}
-    </Typography>
-  );
-
-  if (isTruncated) {
-    return <Tooltip label={name}>{label}</Tooltip>;
-  }
-
-  return label;
-};
-
-/* -------------------------------------------------------------------------------------------------
  * NavList — unstyled list for tree rows
  * -----------------------------------------------------------------------------------------------*/
 
@@ -233,6 +190,22 @@ const NavList = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
+
+  /* Grid rather than block, and load-bearing despite rendering a single column:
+     a minmax(0, 1fr) track contributes a minimum of 0, which is what stops each
+     row propagating the min-content width of its own label.
+
+     Folder names ellipsize, and text-overflow needs white-space: nowrap — so a
+     label's min-content width is the entire name, and no box lays out narrower
+     than its min-content. In block flow that floor travels up to the SubNav
+     ScrollArea, which widens the rail and shows a horizontal scrollbar instead of
+     truncating the name. Nesting makes it worse: the indent is spent before the
+     label is measured, so shorter names trigger it the deeper you go.
+
+     Measured in Chromium — dropping either declaration brings the scrollbar
+     back, and neither min-width nor overflow on the row is a substitute. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -343,7 +316,9 @@ const FolderTreeItemInner = ({
             data-testid={`folder-tree-node-${id}`}
             data-folder-id={id}
           >
-            <TruncatedFolderName name={name} isActive={isActive} />
+            <TruncatedText variant="omega" fontWeight={isActive ? 'semiBold' : 'regular'}>
+              {name}
+            </TruncatedText>
           </RowButton>
         </Box>
       </TreeRow>
