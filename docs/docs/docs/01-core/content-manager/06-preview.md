@@ -114,7 +114,7 @@ The server-side content-source-maps service (`packages/core/core/src/services/co
 - `image` nodes: the `url` and `alternativeText` string fields.
 - `code` blocks are **skipped** — encoding their content would corrupt the syntax.
 
-All markers within one blocks field share the same `fieldPath` metadata key (e.g., `fieldPath=content`), which distinguishes them from regular string-field markers. The individual `path` key still varies per leaf (each leaf has a unique AST position), but the preview script uses `fieldPath` as the group key to cluster all markers into one highlight.
+All markers within one blocks field share both the same `fieldPath` key (e.g., `fieldPath=content`) and the same `path` key — `blocksFieldMetadata` sets `path = fieldPath` for every marker. The presence of `fieldPath` in the source attribute is what distinguishes blocks markers from regular string-field markers, and the preview script uses it as the group key to cluster all markers into one highlight.
 
 ### Highlight grouping
 
