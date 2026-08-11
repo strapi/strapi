@@ -233,6 +233,8 @@ const NavList = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 `;
 
 /* -------------------------------------------------------------------------------------------------
