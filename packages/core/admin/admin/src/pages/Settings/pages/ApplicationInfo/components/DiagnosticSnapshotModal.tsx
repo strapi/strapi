@@ -104,12 +104,26 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
                   defaultMessage: 'payload',
                 })}
               </Typography>
-              <Box background="neutral800" hasRadius padding={4} maxHeight="26rem" overflow="auto">
+              <Box
+                hasRadius
+                padding={4}
+                maxHeight="26rem"
+                overflow="auto"
+                // A code surface that stays dark in BOTH themes. The design-system neutrals invert
+                // between themes (`neutral800` is #32324d in light but #ffffff in dark, and
+                // `neutral0` inverts with it), so tokens here flip the block to white on dark.
+                // These are the same fixed values the WYSIWYG preview uses for its code surface.
+                style={{ backgroundColor: '#32324d' }}
+              >
                 <Typography
                   tag="pre"
                   variant="pi"
-                  textColor="neutral0"
-                  style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}
+                  style={{
+                    color: '#ffffff',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    margin: 0,
+                  }}
                 >
                   {serialized}
                 </Typography>
