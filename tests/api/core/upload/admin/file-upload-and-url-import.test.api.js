@@ -92,7 +92,7 @@ const makeRawRequest = (strapi, options) => {
   });
 };
 
-describe('Upload SSE Streaming', () => {
+describe('File upload and URL import', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -102,12 +102,12 @@ describe('Upload SSE Streaming', () => {
     await strapi.destroy();
   });
 
-  describe('POST /upload/unstable/upload-file - Single file upload', () => {
+  describe('POST /upload/files - Single file upload', () => {
     describe('Authentication', () => {
       test('Rejects unauthenticated requests', async () => {
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/upload-file',
+          path: '/upload/files',
           headers: {},
           formData: true,
         });
@@ -120,7 +120,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when no files are provided', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {},
         });
 
@@ -132,7 +132,7 @@ describe('Upload SSE Streaming', () => {
       test('Uploads a single file and returns the created File', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
@@ -154,7 +154,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
             fileInfo: JSON.stringify(fileInfo),
@@ -178,7 +178,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/upload-file',
+          url: '/upload/files',
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
@@ -189,12 +189,12 @@ describe('Upload SSE Streaming', () => {
     });
   });
 
-  describe('POST /upload/unstable/stream-from-urls - URL import', () => {
+  describe('POST /upload/actions/upload-from-urls - URL import', () => {
     describe('Authentication', () => {
       test('Rejects unauthenticated requests', async () => {
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
+          path: '/upload/actions/upload-from-urls',
           headers: {},
           body: { urls: ['https://example.com/image.jpg'] },
         });
@@ -207,7 +207,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when no URLs are provided', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: {},
         });
 
@@ -217,7 +217,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when URLs is empty array', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls: [] },
         });
 
@@ -227,7 +227,7 @@ describe('Upload SSE Streaming', () => {
       test('Rejects when URLs is not an array', async () => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls: 'https://example.com/image.jpg' },
         });
 
@@ -239,7 +239,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream-from-urls',
+          url: '/upload/actions/upload-from-urls',
           body: { urls },
         });
 
@@ -273,7 +273,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ describe('Upload SSE Streaming', () => {
 
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
+          path: '/upload/actions/upload-from-urls',
           headers: {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -418,7 +418,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -481,7 +481,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -532,7 +532,7 @@ describe('Upload SSE Streaming', () => {
           async () => {
             const res = await makeRawRequest(strapi, {
               method: 'POST',
-              path: '/upload/unstable/stream-from-urls',
+              path: '/upload/actions/upload-from-urls',
               headers: {
                 Authorization: `Bearer ${authToken}`,
                 'Content-Type': 'application/json',
@@ -553,6 +553,109 @@ describe('Upload SSE Streaming', () => {
           }
         );
       });
+    });
+  });
+
+  describe('PUT /upload/files/:id - Update file info', () => {
+    let fileId;
+
+    beforeAll(async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+      fileId = res.body.id;
+    });
+
+    test('Updates the editable metadata of a file', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/files/${fileId}`,
+        formData: {
+          fileInfo: JSON.stringify({
+            name: 'renamed',
+            caption: 'Updated caption',
+            alternativeText: 'Updated alt text',
+          }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.id).toBe(fileId);
+      expect(res.body.caption).toBe('Updated caption');
+      expect(res.body.alternativeText).toBe('Updated alt text');
+    });
+
+    test('Returns 404 for an unknown file id', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/upload/files/999999',
+        formData: {
+          fileInfo: JSON.stringify({ caption: 'nope' }),
+        },
+      });
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('POST /upload/files/:id/replace - Replace file', () => {
+    let fileId;
+
+    beforeAll(async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+      fileId = res.body.id;
+    });
+
+    test('Replaces the binary content of a file, keeping its id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/upload/files/${fileId}/replace`,
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.id).toBe(fileId);
+      expect(res.body.name).toBe('strapi.jpg');
+    });
+
+    test('Rejects replacing with multiple files', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/upload/files/${fileId}/replace`,
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe('Cannot replace a file with multiple ones');
+    });
+
+    test('Returns 404 for an unknown file id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/files/999999/replace',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(404);
     });
   });
 });
