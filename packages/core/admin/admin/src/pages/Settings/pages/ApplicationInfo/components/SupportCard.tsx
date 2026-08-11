@@ -2,10 +2,9 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
 import { Book, ExternalLink, PaperPlane } from '@strapi/icons';
-// Brand marks are self-contained full-colour badges: their inner shapes carry hardcoded fills, so
-// they keep their own colours (and stay legible in both themes) and ignore any `fill` we pass.
 import { Discord, GitHub } from '@strapi/icons/symbols';
 import { useIntl, type MessageDescriptor } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useRBAC } from '../../../../../hooks/useRBAC';
@@ -23,6 +22,21 @@ interface SupportLinkTileConfig {
   title: MessageDescriptor;
   description: MessageDescriptor;
 }
+
+/**
+ * Tints every tile icon with the same brand-neutral colour, including the GitHub and Discord
+ * marks. Those two are single-path glyphs carrying a hardcoded brand fill (`#24292F`, `#5865F2`),
+ * and a `fill` prop only reaches the `<svg>`, which the path's own attribute overrides — but a CSS
+ * declaration outranks that presentation attribute, so this wins for all icons uniformly.
+ */
+const TileIcon = styled.span`
+  display: inline-flex;
+
+  svg,
+  svg path {
+    fill: ${({ theme }) => theme.colors.primary600};
+  }
+`;
 
 const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTileConfig) => {
   const { formatMessage } = useIntl();
@@ -43,9 +57,9 @@ const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTi
       style={{ textDecoration: 'none' }}
     >
       <Flex justifyContent="space-between" alignItems="center">
-        {/* Monochrome icons take the primary colour they had before (they were only blue by
-            inheriting the anchor's link colour); the full-colour brand marks ignore `fill`. */}
-        <Icon width="2rem" height="2rem" fill="primary600" aria-hidden />
+        <TileIcon>
+          <Icon width="2rem" height="2rem" aria-hidden />
+        </TileIcon>
         <ExternalLink fill="neutral400" aria-hidden />
       </Flex>
       <Flex direction="column" alignItems="start" gap={1} paddingTop={3}>
