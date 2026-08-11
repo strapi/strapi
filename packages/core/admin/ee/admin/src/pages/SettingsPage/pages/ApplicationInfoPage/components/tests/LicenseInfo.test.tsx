@@ -69,7 +69,7 @@ describe('LicenseInfoEE', () => {
     // Enterprise puts the renewal date in the left column, next to the current plan — the
     // Growth-specific layout (admin seats / AI usage) is covered by AdminSeatInfo/AIUsage's
     // own tests, not here.
-    window.strapi.projectType = 'Enterprise';
+    window.strapi.licensedPlan = 'Enterprise';
   });
 
   it('renders the Active badge, the last check-in line, and entitlement rows with a tick and a limit', async () => {
@@ -97,6 +97,21 @@ describe('LicenseInfoEE', () => {
     render(<LicenseInfoEE />);
 
     expect(await screen.findByText('Expired')).toBeInTheDocument();
+  });
+
+  it('shows the retained plan as the current plan for an expired license, even though isEE is false', async () => {
+    // Mirrors what the Plan card feeds this component once a license expires: `isEE` stays
+    // false (this is display-only, not a feature unlock) while `licensedPlan` still names the
+    // plan that was licensed, from the retained snapshot.
+    window.strapi.isEE = false;
+    window.strapi.licensedPlan = 'Enterprise';
+    licenseData = { ...structuredClone(baseLicense), licenseStatus: 'expired' };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Expired')).toBeInTheDocument();
+    expect(screen.getByText('Enterprise')).toBeInTheDocument();
+    expect(screen.queryByText('Community')).not.toBeInTheDocument();
+    expect(window.strapi.isEE).toBe(false);
   });
 
   it('shows the Unknown badge when licenseStatus is "unknown"', async () => {

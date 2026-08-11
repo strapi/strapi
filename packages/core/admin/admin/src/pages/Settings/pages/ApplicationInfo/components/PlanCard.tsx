@@ -4,8 +4,6 @@ import { Flex, Grid, LinkButton, Typography } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
-import { useEnterprise } from '../../../../../hooks/useEnterprise';
-
 import type { ProjectType } from '../../../../../../../shared/utils/get-project-type';
 
 /* -------------------------------------------------------------------------------------------------
@@ -75,22 +73,39 @@ const PlanCardBodyCE = () => (
 const PlanCard = () => {
   const { formatMessage } = useIntl();
 
-  const PlanCardBody = useEnterprise(
-    PlanCardBodyCE,
-    async () =>
-      (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo'
-        )
-      ).LicenseInfoEE
-  );
+  // `useEnterprise`'s `enabled` option only ANDs with `isEE` - it can never force the EE body
+  // on for a non-EE instance. An expired/unknown license still needs to show its retained
+  // details even though `isEE` is (correctly) false, so the license body is loaded manually
+  // here instead, gated on this wider predicate.
+  const shouldShowLicenseDetails = window.strapi.isEE || window.strapi.licenseStatus !== 'none';
+  const [LicenseBody, setLicenseBody] = React.useState<React.ComponentType | null>(null);
 
-  // block rendering until the EE component is fully loaded
-  if (!PlanCardBody) {
-    return null;
-  }
+  React.useEffect(() => {
+    if (!shouldShowLicenseDetails) {
+      return undefined;
+    }
 
-  const { label, href } = PLAN_LINK[window.strapi.projectType];
+    let active = true;
+
+    import(
+      '../../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo'
+    ).then((mod) => {
+      if (active) {
+        setLicenseBody(() => mod.LicenseInfoEE);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [shouldShowLicenseDetails]);
+
+  // Render nothing for the body while the EE module is still loading (rather than the CE
+  // body) so the card never briefly shows "Community" before swapping to the actual license
+  // details. Once we know for certain there is no license to show, fall back to the CE body.
+  const PlanCardBody = LicenseBody ?? (shouldShowLicenseDetails ? null : PlanCardBodyCE);
+
+  const { label, href } = PLAN_LINK[window.strapi.licensedPlan] ?? PLAN_LINK.Community;
 
   return (
     <Flex
@@ -119,7 +134,7 @@ const PlanCard = () => {
           {formatMessage(label)}
         </LinkButton>
       </Flex>
-      <PlanCardBody />
+      {PlanCardBody && <PlanCardBody />}
     </Flex>
   );
 };

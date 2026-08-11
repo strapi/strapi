@@ -13,6 +13,11 @@ const createStrapiMock = (overrides: any = {}) => {
   const stored = overrides.stored ?? null;
   global.strapi = {
     EE: true,
+    config: {
+      // Mirrors the real config provider's `get(key, defaultValue)` signature: with no
+      // config set up, it just echoes back the caller's default.
+      get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
+    },
     ee: {
       seats: 10,
       type: 'gold',
@@ -48,6 +53,85 @@ const stubUserServices = () => {
     getDisabledUserList: async () => [],
   });
 };
+
+describe('getProjectType', () => {
+  const OLD_ENV = process.env;
+  beforeEach(() => {
+    process.env = { ...OLD_ENV };
+  });
+  afterEach(() => {
+    process.env = OLD_ENV;
+  });
+
+  it('reports licenseStatus/licensedPlan alongside isEE for an active license', async () => {
+    createStrapiMock({
+      ee: {
+        planPriceId: 'enterprise-plan',
+      },
+    });
+
+    const data = (await adminController.getProjectType()).data as any;
+
+    expect(data.isEE).toBe(true);
+    expect(data.licenseStatus).toBe('active');
+    expect(data.licensedPlan).toBe('Enterprise');
+  });
+
+  it('reports a Growth licensedPlan when the planPriceId names the Growth plan', async () => {
+    createStrapiMock({
+      ee: {
+        planPriceId: 'strapi-growth-plan',
+      },
+    });
+
+    const data = (await adminController.getProjectType()).data as any;
+
+    expect(data.licensedPlan).toBe('Growth');
+  });
+
+  it('an expired license: isEE stays false, but licensedPlan is resolved from the retained planPriceId', async () => {
+    createStrapiMock({
+      // `disable()` flips `strapi.EE`/`ee.enabled` to false once a license is no longer usable
+      // - mirrored here rather than left at the mock's default `true`.
+      strapi: { EE: false },
+      ee: {
+        type: null,
+        planPriceId: null,
+        licenseStatus: 'expired',
+        retainedLicense: {
+          type: 'gold',
+          planPriceId: 'enterprise-plan',
+        },
+      },
+    });
+
+    const data = (await adminController.getProjectType()).data as any;
+
+    // The important assertion: an expired license must never flip isEE on. licensedPlan is
+    // display-only and is allowed to still say "Enterprise".
+    expect(data.isEE).toBe(false);
+    expect(data.licenseStatus).toBe('expired');
+    expect(data.licensedPlan).toBe('Enterprise');
+  });
+
+  it('reports licenseStatus "none" and licensedPlan "Community" when there is no license at all', async () => {
+    createStrapiMock({
+      strapi: { EE: false },
+      ee: {
+        type: null,
+        planPriceId: null,
+        licenseStatus: 'none',
+        retainedLicense: null,
+      },
+    });
+
+    const data = (await adminController.getProjectType()).data as any;
+
+    expect(data.isEE).toBe(false);
+    expect(data.licenseStatus).toBe('none');
+    expect(data.licensedPlan).toBe('Community');
+  });
+});
 
 describe('licenseLimitInformation (extended fields)', () => {
   const OLD_ENV = process.env;

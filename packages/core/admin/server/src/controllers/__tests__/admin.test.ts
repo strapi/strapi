@@ -1,6 +1,29 @@
 import adminController from '../admin';
 
 describe('Admin Controller', () => {
+  describe('getProjectType', () => {
+    beforeAll(() => {
+      global.strapi = {
+        config: {
+          get: jest.fn((_key: string, defaultValue: unknown) => defaultValue),
+        },
+      } as any;
+    });
+
+    test('Reports no license: isEE false, licenseStatus "none", licensedPlan "Community"', async () => {
+      const result = await adminController.getProjectType();
+
+      expect(result.data).toStrictEqual({
+        isEE: false,
+        features: [],
+        flags: {},
+        licenseStatus: 'none',
+        licensedPlan: 'Community',
+        ai: { enabled: false },
+      });
+    });
+  });
+
   describe('init', () => {
     beforeAll(() => {
       global.strapi = {

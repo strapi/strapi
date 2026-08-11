@@ -49,7 +49,16 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+    return {
+      data: {
+        isEE: false,
+        features: [],
+        flags,
+        licenseStatus: 'none' as const,
+        licensedPlan: 'Community' as const,
+        ai: { enabled: false },
+      },
+    };
   },
 
   async init() {

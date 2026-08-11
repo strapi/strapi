@@ -134,7 +134,7 @@ const LicenseInfoEE = () => {
     planEntitlements,
   } = license;
 
-  const isGrowth = window.strapi.projectType === 'Growth';
+  const isGrowth = window.strapi.licensedPlan === 'Growth';
 
   // Retention is shown in days (the design lists "30 days retention" / "90 days
   // retention"); only sentinel-sized values collapse to years, so a licence with
@@ -188,8 +188,8 @@ const LicenseInfoEE = () => {
 
   const currentPlanValue =
     licenseMode === 'offline'
-      ? `${window.strapi.projectType} - offline`
-      : window.strapi.projectType;
+      ? `${window.strapi.licensedPlan} - offline`
+      : window.strapi.licensedPlan;
 
   const dateLabel: MessageDescriptor = isTrial
     ? { id: 'Settings.license.trial-end-date', defaultMessage: 'trial end date' }
