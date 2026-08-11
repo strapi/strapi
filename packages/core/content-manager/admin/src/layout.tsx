@@ -100,6 +100,23 @@ const Layout = () => {
 
         return <NavigateWithLocaleWarning to={{ pathname, search }} />;
       }
+    } else if (accessibleLocales.length > 0) {
+      /**
+       * No locale was specified in the URL, but the user has locale-scoped
+       * permissions. The default-locale resolution fails because the user's
+       * role cannot access the content type's default locale. Redirect to the
+       * first accessible locale with a warning instead of showing a generic
+       * 403 error page.
+       */
+      const search = stringify({
+        ...query,
+        plugins: {
+          ...query.plugins,
+          i18n: { ...query.plugins?.i18n, locale: accessibleLocales[0] },
+        },
+      });
+
+      return <NavigateWithLocaleWarning to={{ pathname, search }} />;
     } else {
       return <Navigate to="/content-manager/403" replace />;
     }

@@ -247,4 +247,30 @@ describe('Content Manager | Layout', () => {
     expect(await screen.findByText('No permissions page')).toBeInTheDocument();
     expect(screen.queryByText('List page')).not.toBeInTheDocument();
   });
+
+  it('redirects to an accessible locale when no locale is specified in the URL and the default locale is not authorised', async () => {
+    // When a user's role has locale-scoped permissions that exclude the content
+    // type's default locale, landing on the page with no locale in the URL must
+    // redirect to the first accessible locale with a warning instead of showing
+    // a generic 403 error page.
+    const FR_ONLY_READ_PERMISSION = {
+      ...EN_ONLY_READ_PERMISSION,
+      properties: { locales: ['fr'] },
+    };
+
+    mockInitData({ models: [ARTICLE_MODEL] });
+
+    renderLayout('/content-manager/collection-types/api::article.article/1', [
+      FR_ONLY_READ_PERMISSION,
+    ]);
+
+    expect(await screen.findByText('Edit page')).toBeInTheDocument();
+    expect(screen.getByTestId('search')).toHaveTextContent('plugins[i18n][locale]=fr');
+    expect(
+      screen.getByText(
+        "You don't have the permissions to access this content for the requested locale"
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('No permissions page')).not.toBeInTheDocument();
+  });
 });
