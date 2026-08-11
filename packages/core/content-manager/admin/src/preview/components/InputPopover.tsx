@@ -97,15 +97,15 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           });
 
           // We're able to handle the field, set it in context so the popover can pick it up
+          const resolvedBlockIndex =
+            typeof event.data.payload.blockIndex === 'number' && event.data.payload.blockIndex >= 0
+              ? event.data.payload.blockIndex
+              : null;
           setPopoverField({
             ...fieldMetaData,
             position: event.data.payload.position,
             attribute,
-            blockIndex:
-              typeof event.data.payload.blockIndex === 'number' &&
-              event.data.payload.blockIndex >= 0
-                ? event.data.payload.blockIndex
-                : null,
+            blockIndex: resolvedBlockIndex,
           });
         } catch (error) {
           if (error instanceof PreviewFieldError) {
