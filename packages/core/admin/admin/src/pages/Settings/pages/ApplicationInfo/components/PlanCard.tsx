@@ -77,7 +77,13 @@ const PlanCard = () => {
   // on for a non-EE instance. An expired/unknown license still needs to show its retained
   // details even though `isEE` is (correctly) false, so the license body is loaded manually
   // here instead, gated on this wider predicate.
-  const shouldShowLicenseDetails = window.strapi.isEE || window.strapi.licenseStatus !== 'none';
+  // Deliberately an allowlist rather than `!== 'none'`: if `licenseStatus` is ever missing
+  // (an older bundle, a consumer building `window.strapi` itself), this must fall back to the
+  // Community body instead of loading the license section.
+  const shouldShowLicenseDetails =
+    window.strapi.isEE ||
+    window.strapi.licenseStatus === 'expired' ||
+    window.strapi.licenseStatus === 'unknown';
   const [LicenseBody, setLicenseBody] = React.useState<React.ComponentType | null>(null);
 
   React.useEffect(() => {
