@@ -1,18 +1,20 @@
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
+
 import path from 'node:path';
 import process from 'node:process';
 import { readFile, remove, stat } from 'fs-extra';
-import * as strapiGenerators from '../../index';
+import * as strapiGenerators from '../../../dist/index.js';
 
 describe('Content Type Generator', () => {
   const outputDirectory = path.join(__dirname, 'output');
 
   beforeAll(() => {
-    const spy = jest.spyOn(process, 'cwd');
+    const spy = vi.spyOn(process, 'cwd');
     spy.mockReturnValue(outputDirectory);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterEach(async () => {
@@ -32,7 +34,7 @@ describe('Content Type Generator', () => {
         bootstrapApi: false,
         attributes: [],
       },
-      { dir: outputDirectory, plopFile: 'plopfile.ts' }
+      { dir: outputDirectory }
     );
 
     const generatedSchemaPath = path.join(
@@ -77,7 +79,7 @@ describe('Content Type Generator', () => {
         bootstrapApi: true,
         attributes: [],
       },
-      { dir: outputDirectory, plopFile: 'plopfile.ts' }
+      { dir: outputDirectory }
     );
     const generatedApiPath = path.join(outputDirectory, 'src/api/testContentType');
 
@@ -158,7 +160,7 @@ describe('Content Type Generator', () => {
           },
         ],
       },
-      { dir: outputDirectory, plopFile: 'plopfile.ts' }
+      { dir: outputDirectory }
     );
 
     const generatedSchemaPath = path.join(
