@@ -1,7 +1,7 @@
 import { join, basename } from 'node:path';
 import os from 'node:os';
 import chalk from 'chalk';
-import commander from 'commander';
+import { Command, Option } from 'commander';
 import crypto from 'crypto';
 import fse from 'fs-extra';
 
@@ -19,7 +19,7 @@ import { logger } from './utils/logger';
 
 const { version } = fse.readJSONSync(join(__dirname, '..', 'package.json'));
 
-const command = new commander.Command('create-strapi-app')
+const command = new Command('create-strapi-app')
   .version(version)
   .arguments('[directory]')
   .usage('[directory] [options]')
@@ -51,8 +51,8 @@ const command = new commander.Command('create-strapi-app')
   .option('--no-git-init', 'Do no initialize a git repository')
 
   // Legacy no-ops (hidden from --help): accept old flags so existing CI/scripts keep working
-  .addOption(new commander.Option('--enable-ab-tests', 'ignored').hideHelp())
-  .addOption(new commander.Option('--no-enable-ab-tests', 'ignored').hideHelp())
+  .addOption(new Option('--enable-ab-tests', 'ignored').hideHelp())
+  .addOption(new Option('--no-enable-ab-tests', 'ignored').hideHelp())
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')

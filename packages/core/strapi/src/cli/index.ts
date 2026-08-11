@@ -9,11 +9,11 @@ import { version } from '../../package.json';
 
 const createCLI = async (argv: string[], command = new Command()) => {
   // Initial program setup
-  command.storeOptionsAsProperties(false).allowUnknownOption(true);
+  command.allowUnknownOption(true);
 
   // Help command
   command.helpOption('-h, --help', 'Display help for command');
-  command.addHelpCommand('help [command]', 'Display help for command');
+  command.helpCommand('help [command]', 'Display help for command');
 
   command.version(version, '-v, --version', 'Output the version number');
 

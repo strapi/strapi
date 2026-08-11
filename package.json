@@ -155,7 +155,6 @@
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
     "coffee": "5.5.1",
-    "commander": "8.3.0",
     "core-js": "3.36.0",
     "create-strapi-app": "workspace:*",
     "cross-env": "7.0.3",
