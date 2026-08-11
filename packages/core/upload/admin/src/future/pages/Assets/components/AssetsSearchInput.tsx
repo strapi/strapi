@@ -5,6 +5,7 @@ import { Box, Searchbar, SearchForm } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSearch } from '../hooks/useAssetSearch';
 
@@ -29,6 +30,7 @@ const StyledSearchForm = styled(SearchForm)`
 export const AssetsSearchInput = () => {
   const { formatMessage } = useIntl();
   const { searchQuery, setSearchQuery } = useAssetSearch();
+  const { trackUsage } = useTracking();
   const isMobile = useIsMobile();
 
   const [value, setValue] = useState(searchQuery);
@@ -52,8 +54,13 @@ export const AssetsSearchInput = () => {
     }
 
     lastCommittedRef.current = debouncedValue;
+    // Only a real query counts as a search — clearing the box (empty value) is
+    // a reset, not a `didSearch`.
+    if (debouncedValue) {
+      trackUsage('didSearchMediaLibraryElements', { location: MEDIA_LIBRARY_LOCATION });
+    }
     setSearchQuery(debouncedValue);
-  }, [debouncedValue, setSearchQuery]);
+  }, [debouncedValue, setSearchQuery, trackUsage]);
 
   // Re-sync on external changes — back/forward, or "Clear search" in the empty
   // state.

@@ -4,6 +4,13 @@ import { FilterMenu } from '../components/FilterMenu';
 
 import type { ListFilter, ListFilters } from '../hooks/useListFilters';
 
+const mockTrackUsage = jest.fn();
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
 const makeListFilters = (
   filters: ListFilter[] = [],
   overrides: Partial<ListFilters> = {}
@@ -18,6 +25,10 @@ const makeListFilters = (
 });
 
 describe('FilterMenu', () => {
+  beforeEach(() => {
+    mockTrackUsage.mockClear();
+  });
+
   it('shows the three field submenus (file size stays out)', async () => {
     const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
 
@@ -170,5 +181,44 @@ describe('FilterMenu', () => {
 
     expect(await screen.findByRole('menuitemradio', { name: '1 year ago' })).toBeInTheDocument();
     expect(screen.queryByText('Select date range')).not.toBeInTheDocument();
+  });
+
+  describe('tracking', () => {
+    it('fires didFilterMediaLibraryElements with the type facet when checking a Type value', async () => {
+      const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+      await user.click(screen.getByRole('button', { name: 'Filter' }));
+      await user.click(screen.getByText('Type'));
+      await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didFilterMediaLibraryElements', {
+        location: 'upload',
+        filter: 'type',
+      });
+    });
+
+    it('fires didFilterMediaLibraryElements with the createdAt facet when picking a Creation date preset', async () => {
+      const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+      await user.click(screen.getByRole('button', { name: 'Filter' }));
+      await user.click(screen.getByText('Creation date'));
+      await user.click(await screen.findByRole('menuitemradio', { name: '1 week ago' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didFilterMediaLibraryElements', {
+        location: 'upload',
+        filter: 'createdAt',
+      });
+    });
+
+    it('does not fire when unchecking an already-checked Type value', async () => {
+      const existing: ListFilter = { kind: 'type', condition: 'is', values: ['picture'] };
+      const { user } = render(<FilterMenu listFilters={makeListFilters([existing])} />);
+
+      await user.click(screen.getByRole('button', { name: /Filter/ }));
+      await user.click(screen.getByText('Type'));
+      await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
+
+      expect(mockTrackUsage).not.toHaveBeenCalled();
+    });
   });
 });

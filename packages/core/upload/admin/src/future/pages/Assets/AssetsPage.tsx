@@ -22,9 +22,11 @@ import {
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { typeFromMime } from '../../../utils/typeFromMime';
 import { BetaNotice } from '../../components/BetaNotice';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../hooks/useTracking';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { useGetUploadSettingsQuery } from '../../services/settings';
@@ -590,9 +592,22 @@ export const AssetsPage = () => {
   // dialog. No mime argument: the files are not known until they are picked,
   // and the server filters the batch on the same allowlist anyway.
   const isAiMetadataEnabled = useAIMetadataEnabled();
+  const { trackUsage } = useTracking();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
+
+    // Mirror the legacy `willAddMediaLibraryAssets` payload: the count of files
+    // about to upload, broken down by asset type.
+    const assetsCountByType = files.reduce<Record<string, number>>((acc, file) => {
+      const type = typeFromMime(file.type);
+      acc[type] = (acc[type] ?? 0) + 1;
+      return acc;
+    }, {});
+    trackUsage('willAddMediaLibraryAssets', {
+      location: MEDIA_LIBRARY_LOCATION,
+      ...assetsCountByType,
+    });
 
     const formData = new FormData();
     const fileInfoArray: UploadFileInfo[] = [];
@@ -627,6 +642,7 @@ export const AssetsPage = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
+      trackUsage('didSelectFile', { source: 'computer', location: MEDIA_LIBRARY_LOCATION });
       await uploadFilesToFolder(Array.from(files), currentFolderId);
     }
     e.target.value = '';
@@ -636,10 +652,15 @@ export const AssetsPage = () => {
     // Defence in depth: the provider is `disabled` without `assets.create`
     // (so onDrop won't fire), but guard here too in case it's ever wired live.
     if (!canCreate) return;
+    trackUsage('didSelectFile', { source: 'computer', location: MEDIA_LIBRARY_LOCATION });
     await uploadFilesToFolder(files, currentFolderId);
   };
 
   const handleUrlUpload = async (urls: string[]) => {
+    trackUsage('didSelectFile', { source: 'url', location: MEDIA_LIBRARY_LOCATION });
+    // Counts-by-type aren't available client-side for the URL flow (the server
+    // fetches the files), so this fires the event with location only.
+    trackUsage('willAddMediaLibraryAssets', { location: MEDIA_LIBRARY_LOCATION });
     try {
       await uploadFromUrls({
         urls,

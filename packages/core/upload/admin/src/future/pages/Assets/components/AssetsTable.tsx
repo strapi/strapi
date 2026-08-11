@@ -18,6 +18,7 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -580,6 +581,7 @@ export const AssetsTable = ({
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const { trackUsage } = useTracking();
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
   // the date/size columns don't fit; size moves under the name as a subtitle.
@@ -611,6 +613,7 @@ export const AssetsTable = ({
     if (allSelected) {
       clear();
     } else {
+      trackUsage('didSelectAllMediaLibraryElements');
       selectAll(orderedItemKeys);
     }
   };

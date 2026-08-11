@@ -4,10 +4,16 @@ import { AssetsSearchInput } from '../AssetsSearchInput';
 
 const mockSetQuery = jest.fn();
 const mockUseQueryParams = jest.fn();
+const mockTrackUsage = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: (...args: unknown[]) => mockUseQueryParams(...args),
+}));
+
+jest.mock('../../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
 }));
 
 const DEBOUNCE_MS = 300;
@@ -171,5 +177,35 @@ describe('AssetsSearchInput', () => {
     await user.type(searchbox, 'kit{Enter}');
 
     expect(onSubmit.mock.calls.every(([event]) => event.defaultPrevented)).toBe(true);
+  });
+
+  describe('tracking', () => {
+    it('fires didSearchMediaLibraryElements once the debounce commits a real query', async () => {
+      const { user } = renderInput();
+
+      await user.type(screen.getByRole('searchbox'), 'kit');
+
+      act(() => {
+        jest.advanceTimersByTime(DEBOUNCE_MS);
+      });
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSearchMediaLibraryElements', {
+        location: 'upload',
+      });
+    });
+
+    it('does not fire didSearchMediaLibraryElements when the box is cleared to empty', async () => {
+      mockUseQueryParams.mockReturnValue([{ query: { _q: 'kitten' } }, mockSetQuery]);
+
+      const { user } = renderInput();
+
+      await user.click(screen.getByRole('button', { name: 'Clear' }));
+
+      act(() => {
+        jest.advanceTimersByTime(DEBOUNCE_MS);
+      });
+
+      expect(mockTrackUsage).not.toHaveBeenCalled();
+    });
   });
 });

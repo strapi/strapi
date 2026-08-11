@@ -13,6 +13,7 @@ const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
 const mockUseAIAvailability = jest.fn(() => true);
+const mockTrackUsage = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -22,6 +23,11 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useAIAvailability: () => mockUseAIAvailability(),
+}));
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
 }));
 
 jest.mock('../hooks/useFolderNavigation', () => ({
@@ -581,6 +587,30 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
       expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
       expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    });
+  });
+
+  describe('tracking', () => {
+    it('fires didSelectAllMediaLibraryElements when the select-all header checkbox selects everything', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select all' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements');
+    });
+
+    it('does not fire didSelectAllMediaLibraryElements when the header checkbox clears the selection', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      const selectAll = await screen.findByRole('checkbox', { name: 'Select all' });
+
+      // First click selects everything → fires once.
+      await user.click(selectAll);
+      expect(mockTrackUsage).toHaveBeenCalledTimes(1);
+
+      // Second click clears the selection → must not fire again.
+      await user.click(selectAll);
+      expect(mockTrackUsage).toHaveBeenCalledTimes(1);
     });
   });
 
