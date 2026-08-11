@@ -15,6 +15,7 @@ import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { PlanCard } from './components/PlanCard';
+import { SupportCard } from './components/SupportCard';
 import { DIMENSION, SIZE } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
@@ -232,6 +233,7 @@ const ApplicationInfoPage = () => {
                   </Grid.Root>
                 </Box>
               )}
+              <SupportCard />
             </Flex>
           </Layouts.Content>
         </form>
