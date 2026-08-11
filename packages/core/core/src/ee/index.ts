@@ -381,6 +381,10 @@ export default Object.freeze({
 
   entitlements: Object.freeze({
     register: entitlements.register,
-    list: entitlements.list,
+    // Resolvers are registered during `register()`, before the license is validated, and each
+    // falls back to a built-in default when the feature is absent. Without this gate an
+    // instance whose license was disabled would still report generous limits, which reads as
+    // "these are your granted limits". No license, no entitlements.
+    list: () => (ee.enabled ? entitlements.list() : []),
   }),
 });

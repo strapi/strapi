@@ -263,7 +263,9 @@ const LicenseInfoEE = () => {
           {isGrowth && (
             <>
               <AdminSeatInfoEE />
-              <AIUsage />
+              {/* Preserves the `ai.enabled` gate this block had before it moved onto the Plan
+                  card: without it an instance with AI disabled requests usage it cannot have. */}
+              {window.strapi.ai?.enabled !== false && <AIUsage />}
             </>
           )}
         </Flex>

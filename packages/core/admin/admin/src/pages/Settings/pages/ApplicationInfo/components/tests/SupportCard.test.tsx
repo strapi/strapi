@@ -16,6 +16,9 @@ jest.mock('../../../../../../services/admin', () => ({
  */
 const withDebugDumpPermission = () => {
   const preloadedState = initialState();
+  // `initialState()` infers `settings` from the literal it ships, which has no `debug-dump`
+  // key, so the spread needs the cast. The key IS part of `PermissionMap['settings']`
+  // (admin/src/types/permissions.ts), which is what the reducer and the card actually use.
   preloadedState.admin_app.permissions = {
     ...preloadedState.admin_app.permissions,
     settings: {
@@ -24,7 +27,7 @@ const withDebugDumpPermission = () => {
         main: [{ action: 'admin::debug-dump.read', subject: null }],
         read: [{ action: 'admin::debug-dump.read', subject: null }],
       },
-    },
+    } as typeof preloadedState.admin_app.permissions.settings,
   };
 
   return {
@@ -56,9 +59,11 @@ describe('SupportCard', () => {
     expect(screen.queryByRole('link', { name: /support portal/i })).not.toBeInTheDocument();
   });
 
-  it('renders the Support portal tile and not GitHub discussions on EE', async () => {
+  it('renders the Support portal tile and not GitHub discussions on a paid plan', async () => {
     const original = window.strapi.isEE;
+    const originalPlan = window.strapi.licensedPlan;
     window.strapi.isEE = true;
+    window.strapi.licensedPlan = 'Enterprise';
 
     try {
       render(<SupportCard />);
@@ -82,6 +87,26 @@ describe('SupportCard', () => {
       expect(screen.queryByRole('link', { name: /github discussions/i })).not.toBeInTheDocument();
     } finally {
       window.strapi.isEE = original;
+      window.strapi.licensedPlan = originalPlan;
+    }
+  });
+
+  it('keeps the Support portal tile for a lapsed paid plan, even though isEE is false', async () => {
+    // A customer whose license expired still needs to reach Strapi support, so the tiles follow
+    // the licensed plan rather than isEE. This swaps links only; it unlocks nothing.
+    const original = window.strapi.isEE;
+    const originalPlan = window.strapi.licensedPlan;
+    window.strapi.isEE = false;
+    window.strapi.licensedPlan = 'Enterprise';
+
+    try {
+      render(<SupportCard />);
+
+      expect(await screen.findByRole('link', { name: /support portal/i })).toBeInTheDocument();
+      expect(window.strapi.isEE).toBe(false);
+    } finally {
+      window.strapi.isEE = original;
+      window.strapi.licensedPlan = originalPlan;
     }
   });
 

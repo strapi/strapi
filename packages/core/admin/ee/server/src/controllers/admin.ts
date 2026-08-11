@@ -69,8 +69,15 @@ export default {
           // Display-only: names the licensed plan even once the license is unusable, so the
           // admin can show "Enterprise / Expired" instead of silently reading as Community.
           // Never used for feature gating - isEE stays false.
+          //
+          // Deliberately an allowlist plus a known-plan requirement rather than
+          // `licenseStatus !== 'none'`: a missing status (mixed-version install) must not read
+          // as licensed, and an unreadable or corrupt license file leaves no plan behind at
+          // all, so it must say Community rather than defaulting to Enterprise.
           licensedPlan: getProjectType({
-            isEE: strapi.ee.licenseStatus !== 'none',
+            isEE:
+              Boolean(strapi.ee.type ?? strapi.ee.retainedLicense?.type) &&
+              ['active', 'expired', 'unknown'].includes(strapi.ee.licenseStatus),
             planPriceId: strapi.ee.planPriceId ?? strapi.ee.retainedLicense?.planPriceId,
           }),
           ai: {

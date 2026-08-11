@@ -146,8 +146,11 @@ const SupportCard = () => {
     allowedActions: { canRead },
   } = useRBAC(debugDumpPermissions);
 
-  const isEnterprise = window.strapi.isEE;
-  const tiles = isEnterprise ? EE_TILES : CE_TILES;
+  // Keyed on the licensed plan rather than `isEE` so a customer whose license has lapsed keeps
+  // the Strapi support portal link, which is exactly what they need at that moment. This only
+  // ever swaps which support links are shown; it gates no feature.
+  const isPaidPlan = window.strapi.licensedPlan !== 'Community';
+  const tiles = isPaidPlan ? EE_TILES : CE_TILES;
 
   return (
     <>
@@ -169,7 +172,7 @@ const SupportCard = () => {
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {formatMessage(
-              isEnterprise
+              isPaidPlan
                 ? {
                     id: 'Settings.application.support.subtitle.enterprise',
                     defaultMessage:
@@ -205,7 +208,7 @@ const SupportCard = () => {
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
                   {formatMessage(
-                    isEnterprise
+                    isPaidPlan
                       ? {
                           id: 'Settings.application.support.diagnostic-snapshot.description.enterprise',
                           defaultMessage:
