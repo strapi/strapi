@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
 import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
 
+import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
@@ -182,50 +183,6 @@ const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: numb
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TruncatedFolderName — tooltip when the label is ellipsized
- * -----------------------------------------------------------------------------------------------*/
-
-const TruncatedFolderName = ({ name, isActive }: { name: string; isActive: boolean }) => {
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-
-  useLayoutEffect(() => {
-    const el = textRef.current;
-    if (!el) {
-      return;
-    }
-
-    const checkTruncation = () => {
-      setIsTruncated(el.scrollWidth > el.clientWidth);
-    };
-
-    checkTruncation();
-
-    const observer = new ResizeObserver(checkTruncation);
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, [name]);
-
-  const label = (
-    <Typography
-      ref={textRef}
-      variant="omega"
-      fontWeight={isActive ? 'semiBold' : 'regular'}
-      ellipsis
-    >
-      {name}
-    </Typography>
-  );
-
-  if (isTruncated) {
-    return <Tooltip label={name}>{label}</Tooltip>;
-  }
-
-  return label;
-};
-
-/* -------------------------------------------------------------------------------------------------
  * NavList — unstyled list for tree rows
  * -----------------------------------------------------------------------------------------------*/
 
@@ -345,7 +302,9 @@ const FolderTreeItemInner = ({
             data-testid={`folder-tree-node-${id}`}
             data-folder-id={id}
           >
-            <TruncatedFolderName name={name} isActive={isActive} />
+            <TruncatedText variant="omega" fontWeight={isActive ? 'semiBold' : 'regular'}>
+              {name}
+            </TruncatedText>
           </RowButton>
         </Box>
       </TreeRow>
