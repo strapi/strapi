@@ -1,15 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import {
-  Box,
-  Flex,
-  IconButton,
-  Loader,
-  Searchbar,
-  Tooltip,
-  Typography,
-  useFilter,
-} from '@strapi/design-system';
+import { SubNav } from '@strapi/admin/strapi-admin';
+import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
 import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
@@ -19,7 +11,6 @@ import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
 
-import { filterFolderTree } from './filterFolderTree';
 import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
 import type { FolderNode } from '../../../../../../../shared/contracts/folders';
@@ -398,28 +389,6 @@ const FolderTreeItem = ({ node, ...props }: FolderTreeItemProps) => {
  * FolderTree — public sidebar component
  * -----------------------------------------------------------------------------------------------*/
 
-const SidebarNav = styled(Flex)`
-  /* TODO: reconcile 25.6rem (Figma) with admin WIDTH_SIDE_NAVIGATION (23.2rem) */
-  width: 25.6rem;
-  height: 100%;
-  min-height: 100%;
-  background: ${({ theme }) => theme.colors.neutral0};
-  flex-shrink: 0;
-  flex-direction: column;
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const SidebarHeader = styled(Box)`
-  flex-shrink: 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const SidebarBody = styled(Flex)`
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-`;
-
 interface FolderTreeProps {
   currentFolderId: number | null;
   /**
@@ -452,32 +421,13 @@ export const FolderTree = ({
   showActiveFolder = true,
   onSelectFolder,
 }: FolderTreeProps) => {
-  const { formatMessage, locale } = useIntl();
+  const { formatMessage } = useIntl();
   const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
   const { isExpanded, toggleExpanded, expandFolder } = useExpandedFolders(
     folderStructure,
     currentFolderId
   );
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-
-  const [treeFilter, setTreeFilter] = useState('');
-  const { contains } = useFilter(locale, { sensitivity: 'base' });
-  const trimmedFilter = treeFilter.trim();
-
-  const { nodes: visibleNodes, expandedIds: filterExpandedIds } = useMemo(
-    () =>
-      trimmedFilter
-        ? filterFolderTree(folderStructure, (name) => contains(name, trimmedFilter))
-        : { nodes: folderStructure, expandedIds: [] },
-    [folderStructure, trimmedFilter, contains]
-  );
-
-  // An override layered on top of the user's own expansion rather than written
-  // into it, so clearing the filter restores exactly what they had open.
-  const isExpandedForRender = useCallback(
-    (id: number) => filterExpandedIds.includes(id) || isExpanded(id),
-    [filterExpandedIds, isExpanded]
-  );
 
   const isHomeActive = showActiveFolder && currentFolderId == null;
   const homeLabel = formatMessage({
@@ -492,145 +442,112 @@ export const FolderTree = ({
   } = useFolderTreeDroppable({ id: null, name: homeLabel });
 
   return (
-    <SidebarNav
-      direction="column"
-      alignItems="stretch"
-      tag="nav"
+    <SubNav.Main
       aria-label={formatMessage({
         id: getTranslationKey('sidebar.tree.aria-label'),
         defaultMessage: 'Media library folders',
       })}
     >
-      <SidebarHeader paddingTop={4} paddingBottom={4} paddingLeft={5} paddingRight={5}>
-        <Flex direction="column" alignItems="stretch" gap={4}>
-          <Typography variant="beta" tag="h2">
-            {formatMessage({
-              id: getTranslationKey('sidebar.title'),
-              defaultMessage: 'Media library',
-            })}
-          </Typography>
+      <SubNav.Header
+        label={formatMessage({
+          id: getTranslationKey('sidebar.title'),
+          defaultMessage: 'Media library',
+        })}
+      />
 
-          <Searchbar
-            name="search-folders"
-            value={treeFilter}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setTreeFilter(event.target.value)
-            }
-            onClear={() => setTreeFilter('')}
-            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-            placeholder={formatMessage({
-              id: getTranslationKey('sidebar.search.placeholder'),
-              defaultMessage: 'Search folders',
-            })}
-            size="S"
+      <SubNav.Content>
+        <Flex direction="column" alignItems="stretch" gap={1} padding={3}>
+          <RowButton
+            ref={setHomeDropRef}
+            type="button"
+            $isActive={isHomeActive}
+            $isValidDropTarget={showHomeValidDropHighlight}
+            $isInvalidDropCursor={showHomeInvalidDropCursor}
+            $isMovePending={isMovePending}
+            aria-current={isHomeActive ? 'page' : undefined}
+            onClick={() => onSelectFolder(null)}
+            data-testid="folder-tree-home"
           >
-            {formatMessage({
-              id: getTranslationKey('sidebar.search.label'),
-              defaultMessage: 'Search folders',
-            })}
-          </Searchbar>
-        </Flex>
-      </SidebarHeader>
-
-      <SidebarBody direction="column" alignItems="stretch" gap={1} padding={3}>
-        <RowButton
-          ref={setHomeDropRef}
-          type="button"
-          $isActive={isHomeActive}
-          $isValidDropTarget={showHomeValidDropHighlight}
-          $isInvalidDropCursor={showHomeInvalidDropCursor}
-          $isMovePending={isMovePending}
-          aria-current={isHomeActive ? 'page' : undefined}
-          onClick={() => onSelectFolder(null)}
-          data-testid="folder-tree-home"
-        >
-          <House aria-hidden width="1.6rem" height="1.6rem" />
-          <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
-            {homeLabel}
-          </Typography>
-        </RowButton>
-
-        <Box marginTop={4}>
-          <Flex
-            alignItems="center"
-            gap={1}
-            paddingTop={1}
-            paddingBottom={1}
-            paddingLeft={2}
-            paddingRight={2}
-            marginBottom={2}
-          >
-            <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
-            <Typography
-              variant="sigma"
-              textColor="neutral600"
-              style={{ textTransform: 'uppercase' }}
-            >
-              {formatMessage({
-                id: getTranslationKey('sidebar.folders'),
-                defaultMessage: 'Folders',
-              })}
+            <House aria-hidden width="1.6rem" height="1.6rem" />
+            <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
+              {homeLabel}
             </Typography>
-          </Flex>
+          </RowButton>
 
-          {isLoading ? (
-            // TODO: revisit loading state before revamp GA
-            <Flex justifyContent="center" padding={1} paddingTop={2}>
-              <Loader>
+          <Box marginTop={4}>
+            <Flex
+              alignItems="center"
+              gap={1}
+              paddingTop={1}
+              paddingBottom={1}
+              paddingLeft={2}
+              paddingRight={2}
+              marginBottom={2}
+            >
+              <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+              <Typography
+                variant="sigma"
+                textColor="neutral600"
+                style={{ textTransform: 'uppercase' }}
+              >
                 {formatMessage({
-                  id: getTranslationKey('sidebar.tree.loading'),
-                  defaultMessage: 'Loading folders...',
+                  id: getTranslationKey('sidebar.folders'),
+                  defaultMessage: 'Folders',
                 })}
-              </Loader>
+              </Typography>
             </Flex>
-          ) : isError ? (
-            // TODO: revisit error state before revamp GA
-            <Box padding={1} paddingTop={2}>
-              <Typography variant="pi" textColor="danger600">
-                {formatMessage({
-                  id: getTranslationKey('sidebar.tree.error'),
-                  defaultMessage: 'Could not load folders.',
-                })}
-              </Typography>
-            </Box>
-          ) : visibleNodes.length === 0 ? (
-            // TODO: revisit empty state before revamp GA
-            <Box padding={1} paddingTop={2}>
-              <Typography variant="pi" textColor="neutral500">
-                {trimmedFilter
-                  ? formatMessage(
-                      {
-                        id: getTranslationKey('sidebar.tree.no-results'),
-                        defaultMessage: 'No folders match "{query}"',
-                      },
-                      { query: trimmedFilter }
-                    )
-                  : formatMessage({
-                      id: getTranslationKey('sidebar.tree.empty'),
-                      defaultMessage: 'No folders yet',
-                    })}
-              </Typography>
-            </Box>
-          ) : (
-            <NavList>
-              {visibleNodes.map((node) => (
-                <FolderTreeItem
-                  key={node.id ?? node.name}
-                  node={node}
-                  level={0}
-                  currentFolderId={currentFolderId}
-                  showActiveFolder={showActiveFolder}
-                  isExpanded={isExpandedForRender}
-                  onToggle={toggleExpanded}
-                  onExpand={expandFolder}
-                  onSelect={onSelectFolder}
-                  isMovePending={isMovePending}
-                />
-              ))}
-            </NavList>
-          )}
-        </Box>
-      </SidebarBody>
-    </SidebarNav>
+
+            {isLoading ? (
+              // TODO: revisit loading state before revamp GA
+              <Flex justifyContent="center" padding={1} paddingTop={2}>
+                <Loader>
+                  {formatMessage({
+                    id: getTranslationKey('sidebar.tree.loading'),
+                    defaultMessage: 'Loading folders...',
+                  })}
+                </Loader>
+              </Flex>
+            ) : isError ? (
+              // TODO: revisit error state before revamp GA
+              <Box padding={1} paddingTop={2}>
+                <Typography variant="pi" textColor="danger600">
+                  {formatMessage({
+                    id: getTranslationKey('sidebar.tree.error'),
+                    defaultMessage: 'Could not load folders.',
+                  })}
+                </Typography>
+              </Box>
+            ) : folderStructure.length === 0 ? (
+              // TODO: revisit empty state before revamp GA
+              <Box padding={1} paddingTop={2}>
+                <Typography variant="pi" textColor="neutral500">
+                  {formatMessage({
+                    id: getTranslationKey('sidebar.tree.empty'),
+                    defaultMessage: 'No folders yet',
+                  })}
+                </Typography>
+              </Box>
+            ) : (
+              <NavList>
+                {folderStructure.map((node) => (
+                  <FolderTreeItem
+                    key={node.id ?? node.name}
+                    node={node}
+                    level={0}
+                    currentFolderId={currentFolderId}
+                    showActiveFolder={showActiveFolder}
+                    isExpanded={isExpanded}
+                    onToggle={toggleExpanded}
+                    onExpand={expandFolder}
+                    onSelect={onSelectFolder}
+                    isMovePending={isMovePending}
+                  />
+                ))}
+              </NavList>
+            )}
+          </Box>
+        </Flex>
+      </SubNav.Content>
+    </SubNav.Main>
   );
 };

@@ -161,17 +161,25 @@ const FocalPointHandle = styled.button`
   }
 `;
 
+// Hidden on mobile — the panel (title/hint + numeric crop & focal inputs) is
+// too large for a phone; touch users set the crop by dragging the rectangle and
+// focal handle directly on the image. Shown from tablet up.
 const InfoBox = styled(Box)`
-  position: absolute;
-  right: ${({ theme }) => theme.spaces[1]};
-  bottom: ${({ theme }) => theme.spaces[1]};
-  width: 100%;
-  max-width: 32rem;
-  padding: ${({ theme }) => theme.spaces[3]};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ theme }) =>
-    theme.colorScheme === 'dark' ? theme.colors.neutral150 : theme.colors.neutral900};
-  z-index: 20;
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: block;
+    position: absolute;
+    right: ${({ theme }) => theme.spaces[1]};
+    bottom: ${({ theme }) => theme.spaces[1]};
+    width: 100%;
+    max-width: 32rem;
+    padding: ${({ theme }) => theme.spaces[3]};
+    border-radius: ${({ theme }) => theme.borderRadius};
+    background: ${({ theme }) =>
+      theme.colorScheme === 'dark' ? theme.colors.neutral150 : theme.colors.neutral900};
+    z-index: 20;
+  }
 `;
 
 const FooterBar = styled(Flex)`

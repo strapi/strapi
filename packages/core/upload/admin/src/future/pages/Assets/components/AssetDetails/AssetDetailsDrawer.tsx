@@ -1077,26 +1077,24 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                         folders={folders}
                         disabled={!canUpdate}
                       />
-                      {isImage && (
-                        <>
-                          <DetailField
-                            name="caption"
-                            label={formatMessage({
-                              id: getTranslationKey('asset-details.caption'),
-                              defaultMessage: 'Caption',
-                            })}
-                            disabled={!canUpdate}
-                          />
-                          <DetailField
-                            name="alternativeText"
-                            label={formatMessage({
-                              id: getTranslationKey('asset-details.alternativeText'),
-                              defaultMessage: 'Alternative text',
-                            })}
-                            disabled={!canUpdate}
-                          />
-                        </>
-                      )}
+                      {/* Caption and alternative text apply to every file type
+                          (matches the legacy Media Library), not images only. */}
+                      <DetailField
+                        name="caption"
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.caption'),
+                          defaultMessage: 'Caption',
+                        })}
+                        disabled={!canUpdate}
+                      />
+                      <DetailField
+                        name="alternativeText"
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.alternativeText'),
+                          defaultMessage: 'Alternative text',
+                        })}
+                        disabled={!canUpdate}
+                      />
                     </Flex>
                   </Drawer.ScrollableContent>
                   {/* Every footer action is permission-gated — when none survive,
