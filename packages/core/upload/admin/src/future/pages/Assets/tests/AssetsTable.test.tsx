@@ -1,5 +1,5 @@
 import { userEvent } from '@testing-library/user-event';
-import { render, screen, waitFor, server } from '@tests/utils';
+import { act, fireEvent, render, screen, waitFor, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { AssetsTable } from '../components/AssetsTable';
@@ -12,14 +12,15 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
-const mockUseAIAvailability = jest.fn(() => ({ status: 'success' as const, isEnabled: true }));
+const mockUseAIAvailability = jest.fn(() => true);
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
 
-jest.mock('../../../../hooks/useAiAvailability', () => ({
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useAIAvailability: () => mockUseAIAvailability(),
 }));
 
@@ -31,13 +32,15 @@ jest.mock('../hooks/useFolderNavigation', () => ({
 }));
 
 jest.mock('../components/Dnd/useAssetDnd', () => ({
-  useFileDraggable: () => ({
+  useFileDraggable: (asset: { id: number; name: string }) => ({
     attributes: {},
     listeners: {},
     setNodeRef: jest.fn(),
     isDragging: false,
+    dragData: { kind: 'file', id: asset.id, name: asset.name, folderId: null },
   }),
-  useFolderDraggableDroppable: () => ({
+  useFolderDraggableDroppable: (folder: { id: number; name: string }) => ({
+    dragData: { kind: 'folder', id: folder.id, name: folder.name, parentId: null },
     draggable: {
       attributes: {},
       listeners: {},
@@ -109,7 +112,7 @@ describe('AssetsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: true });
+    mockUseAIAvailability.mockReturnValue(true);
   });
 
   describe('Table rendering', () => {
@@ -256,6 +259,176 @@ describe('AssetsTable', () => {
       setup({ folders, assets: [] });
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
+    });
+
+    it('opens the folder actions menu without navigating into the folder', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Copy link to folder' })).toBeInTheDocument();
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate into the folder when Enter is pressed on the actions menu', () => {
+      setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      // The row handles Enter as "open this folder", so the actions cell has to
+      // swallow the keydown as well as the click. Dispatched directly rather
+      // than through a real key press: the DS grid cell moves focus around on
+      // its own, which jsdom doesn't reproduce faithfully.
+      fireEvent.keyDown(screen.getByRole('button', { name: 'More actions' }), { key: 'Enter' });
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Asset actions menu', () => {
+    it('opens the asset actions menu without opening the details drawer', async () => {
+      const { user } = setup({ assets: [createMockAsset(1, 'photo.png')], folders: [] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('does not open the details drawer when Enter is pressed on the actions menu', () => {
+      setup({ assets: [createMockAsset(1, 'photo.png')], folders: [] });
+
+      // The row handles Enter as "open this asset", so the actions cell has to
+      // swallow the keydown as well as the click. Dispatched directly rather
+      // than through a real key press: the DS grid cell moves focus around on
+      // its own, which jsdom doesn't reproduce faithfully.
+      fireEvent.keyDown(screen.getByRole('button', { name: 'More actions' }), { key: 'Enter' });
+
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Asset actions menu dismissal', () => {
+    const setupAssetRow = () => setup({ assets: [createMockAsset(7, 'photo.png')], folders: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setup>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupAssetRow();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+
+    it('does not open the details drawer when the open dialog is clicked', async () => {
+      const { user } = setupAssetRow();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+    });
+  });
+
+  // The dialogs the actions menu opens are portaled to the body but are React
+  // children of the row, so the row's handlers see their events. The shield the
+  // actions cell puts up must therefore be scoped to its own DOM subtree —
+  // `stopPropagation` would kill the native event before it reaches `document`,
+  // where Radix listens in order to dismiss its layers.
+  describe('Folder actions menu dismissal', () => {
+    // Folder 5 sits outside the default `/upload/folder-structure` fixture, so
+    // the move dialog has somewhere to offer moving it to.
+    const setupFolderRow = () => setup({ folders: [createMockFolder(5, 'Photos')], assets: [] });
+
+    const openMoveDialog = async (user: ReturnType<typeof setup>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Move to folder' }));
+      expect(await screen.findByText('Move elements to')).toBeInTheDocument();
+    };
+
+    // `disableOutsidePointerEvents` puts `pointer-events: none` on the body, so
+    // user-event refuses to click there — the document element is where a real
+    // browser lands the click anyway. Radix attaches its document listener on a
+    // `setTimeout(…, 0)` once the layer mounts, so let that land first.
+    const pointerDownOutside = async () => {
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      });
+
+      fireEvent.pointerDown(document.documentElement);
+    };
+
+    it('closes the Location select, then the dialog, on successive outside clicks', async () => {
+      const { user } = setupFolderRow();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+
+      const options = screen.getAllByRole('option');
+      expect(options.length).toBeGreaterThan(0);
+
+      // A pointerdown inside the listbox used to leave Radix's "the pointer is
+      // inside my layer" flag stuck, so the next outside click was swallowed.
+      fireEvent.pointerDown(options[0]);
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+
+      await pointerDownOutside();
+
+      await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
+    });
+
+    it('closes the Location select on Escape', async () => {
+      const { user } = setupFolderRow();
+
+      await openMoveDialog(user);
+      await user.click(await screen.findByRole('combobox'));
+      expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
+
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+      expect(screen.getByText('Move elements to')).toBeInTheDocument();
+    });
+
+    it('does not navigate into the folder when the open dialog is clicked', async () => {
+      const { user } = setupFolderRow();
+
+      await openMoveDialog(user);
+      await user.click(screen.getByText('Location'));
+
+      expect(mockNavigateToFolder).not.toHaveBeenCalled();
     });
   });
 
@@ -810,8 +983,8 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
-    it('hides Create metadata when AI metadata is unavailable', async () => {
-      mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: false });
+    it('hides Create metadata when the license has no AI', async () => {
+      mockUseAIAvailability.mockReturnValue(false);
 
       const { user } = setup();
 
@@ -820,6 +993,25 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    });
+
+    // The other half of the gate: the license allows AI but the setting is off.
+    // Both conditions are required, so either one alone hides the action.
+    it('hides Create metadata when the aiMetadata setting is off', async () => {
+      server.use(
+        http.get('/upload/settings', () =>
+          HttpResponse.json({ data: { aiMetadata: false, concurrentUploadRequests: 1 } })
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument()
+      );
+      expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
     });
   });
 });

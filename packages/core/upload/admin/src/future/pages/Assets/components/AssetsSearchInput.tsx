@@ -3,11 +3,24 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { useDebounce, useIsMobile, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Box, Searchbar, SearchForm } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSearch } from '../hooks/useAssetSearch';
 
 const DEBOUNCE_MS = 300;
+
+// The DS Searchbar nests two bordered boxes: its own shell (neutral150) wrapping
+// the field (neutral200). Side by side they read as a single 2px, two-tone
+// border, which sits oddly next to the 1px neutral200 on the Filter button in the
+// same toolbar. Dropping the shell's border leaves the field's own — same width
+// and colour as the button — and costs nothing, since the focus ring lives on the
+// field too.
+const StyledSearchForm = styled(SearchForm)`
+  > div {
+    border: none;
+  }
+`;
 
 /**
  * Keyword search over the whole Media Library. Owns the typing state and the
@@ -67,7 +80,7 @@ export const AssetsSearchInput = () => {
   }, [folderParam, searchQuery]);
 
   const searchForm = (
-    <SearchForm onSubmit={(event: FormEvent<HTMLFormElement>) => event.preventDefault()}>
+    <StyledSearchForm onSubmit={(event: FormEvent<HTMLFormElement>) => event.preventDefault()}>
       <Searchbar
         name="search-assets"
         value={value}
@@ -85,11 +98,11 @@ export const AssetsSearchInput = () => {
           defaultMessage: 'Search for an asset',
         })}
       </Searchbar>
-    </SearchForm>
+    </StyledSearchForm>
   );
 
-  // TODO: (design question)The input stays visible at every breakpoint; on mobile it takes the full
-  // width of the toolbar instead of its intrinsic size.
+  // Mobile: fills the toolbar row (own line). Desktop: keeps its intrinsic size,
+  // with empty space between it and the right-aligned Sort/Toggle group.
   if (isMobile) {
     return <Box width="100%">{searchForm}</Box>;
   }

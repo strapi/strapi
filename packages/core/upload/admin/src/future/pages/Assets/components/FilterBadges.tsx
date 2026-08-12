@@ -43,10 +43,13 @@ const Segment = styled.button<{ $interactive?: boolean }>`
   border: none;
   background: transparent;
   font: inherit;
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
   cursor: ${({ $interactive }) => ($interactive ? 'pointer' : 'default')};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  }
   ${({ $interactive, theme }) =>
     $interactive && `&:hover { background: ${theme.colors.primary100}; }`}
 
@@ -386,11 +389,20 @@ const FilterBadge = ({
   );
 };
 
+// Tighten the gap above the badges when the sticky header is in its compact
+// (scrolled) state, matching the header's own shrink.
+const BadgesRoot = styled(Flex)<{ $compact: boolean }>`
+  padding-top: ${({ theme, $compact }) => ($compact ? theme.spaces[1] : theme.spaces[6])};
+  transition: padding-top 0.2s ease;
+`;
+
 interface FilterBadgesProps {
   listFilters: ListFilters;
+  /** Sticky header is scrolled/compact — reduce the space above the badges. */
+  compact?: boolean;
 }
 
-export const FilterBadges = ({ listFilters }: FilterBadgesProps) => {
+export const FilterBadges = ({ listFilters, compact = false }: FilterBadgesProps) => {
   const { filters, updateFilter, removeFilter } = listFilters;
 
   if (filters.length === 0) {
@@ -398,7 +410,7 @@ export const FilterBadges = ({ listFilters }: FilterBadgesProps) => {
   }
 
   return (
-    <Flex gap={2} wrap="wrap" paddingTop={2} data-testid="filter-badges">
+    <BadgesRoot $compact={compact} gap={2} wrap="wrap" data-testid="filter-badges">
       {filters.map((filter, index) => (
         <FilterBadge
           // Position is identity: badges are edited/removed by index.
@@ -408,6 +420,6 @@ export const FilterBadges = ({ listFilters }: FilterBadgesProps) => {
           onRemove={() => removeFilter(index)}
         />
       ))}
-    </Flex>
+    </BadgesRoot>
   );
 };
