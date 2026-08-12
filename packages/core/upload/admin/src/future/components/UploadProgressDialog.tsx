@@ -593,7 +593,20 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
     return (
       <FileRow icon={<CrossCircle fill="danger500" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
-          {file.error}
+          {file.error
+            ? /**
+               * The server may return a machine-readable code (e.g. `FileTooBig` from the
+               * body middleware) or an already human-readable sentence (e.g. the upload
+               * plugin's size-limit message). Translate the former, fall back to the latter.
+               */
+              formatMessage({
+                id: getTranslationKey(`apiError.${file.error}`),
+                defaultMessage: file.error,
+              })
+            : formatMessage({
+                id: getTranslationKey('upload.generic-error'),
+                defaultMessage: 'An error occurred while uploading the file.',
+              })}
         </Typography>
       </FileRow>
     );
