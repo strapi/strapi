@@ -58,6 +58,7 @@ import {
   getFileExtension,
   prefixFileUrlWithBackendUrl,
 } from '../../../../utils/files';
+import { getApiErrorMessage } from '../../../../utils/getApiErrorMessage';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
@@ -784,15 +785,16 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     async (file: globalThis.File) => {
       const res = await replaceMutation({ id: asset.id, file });
       if ('error' in res) {
-        const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-        const message =
-          error?.data?.error?.message ??
-          error?.data?.message ??
-          formatMessage({
-            id: getTranslationKey('asset-details.replace.error'),
-            defaultMessage: 'Failed to replace the file.',
-          });
-        notify({ type: 'danger', message });
+        notify({
+          type: 'danger',
+          message: getApiErrorMessage(
+            res.error,
+            formatMessage({
+              id: getTranslationKey('asset-details.replace.error'),
+              defaultMessage: 'Failed to replace the file.',
+            })
+          ),
+        });
         return;
       }
       trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
@@ -812,15 +814,16 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const handleDelete = React.useCallback(async () => {
     const res = await deleteMutation(asset.id);
     if ('error' in res) {
-      const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-      const message =
-        error?.data?.error?.message ??
-        error?.data?.message ??
-        formatMessage({
-          id: getTranslationKey('asset-details.delete.error'),
-          defaultMessage: 'Failed to delete the asset.',
-        });
-      notify({ type: 'danger', message });
+      notify({
+        type: 'danger',
+        message: getApiErrorMessage(
+          res.error,
+          formatMessage({
+            id: getTranslationKey('asset-details.delete.error'),
+            defaultMessage: 'Failed to delete the asset.',
+          })
+        ),
+      });
       return;
     }
     toggleNotification({
@@ -844,13 +847,16 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     toggleNotification,
   ]);
 
-  const notifyCropError = () => {
+  const notifyCropError = (error?: unknown) => {
     notify({
       type: 'danger',
-      message: formatMessage({
-        id: getTranslationKey('asset-details.crop.error'),
-        defaultMessage: 'Failed to crop the file.',
-      }),
+      message: getApiErrorMessage(
+        error,
+        formatMessage({
+          id: getTranslationKey('asset-details.crop.error'),
+          defaultMessage: 'Failed to crop the file.',
+        })
+      ),
     });
   };
 
@@ -865,7 +871,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       fileInfo: { focalPoint },
     });
     if ('error' in res) {
-      notifyCropError();
+      notifyCropError(res.error);
       return;
     }
     trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
@@ -894,7 +900,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       },
     });
     if ('error' in res) {
-      notifyCropError();
+      notifyCropError(res.error);
       return;
     }
     trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });

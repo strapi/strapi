@@ -250,8 +250,11 @@ describe('AssetDetails (asset details drawer body)', () => {
   it('keeps the drawer open and surfaces the error message when the delete request fails', async () => {
     const closeDetails = jest.fn();
     server.use(
-      http.delete('/upload/files/:id', () =>
-        HttpResponse.json({ error: { message: 'Asset locked' } }, { status: 400 })
+      http.delete('*/upload/files/:id', () =>
+        HttpResponse.json(
+          { error: { message: 'This file is used by 3 entries.' } },
+          { status: 400 }
+        )
       )
     );
 
@@ -262,7 +265,32 @@ describe('AssetDetails (asset details drawer body)', () => {
     await screen.findByText(/This file cannot be recovered/i);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
+    await screen.findByText('This file is used by 3 entries.');
     await waitFor(() => expect(closeDetails).not.toHaveBeenCalled());
+  });
+
+  it('surfaces the server error message when the replace request fails', async () => {
+    server.use(
+      http.post('*/upload/files/:id/replace', () =>
+        HttpResponse.json(
+          { error: { message: 'photo.png exceeds size limit of 100 KB.' } },
+          { status: 413 }
+        )
+      )
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+    await screen.findByText(/Replace this media file\?/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['hello'], 'photo.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await screen.findByText('photo.png exceeds size limit of 100 KB.');
   });
 
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
