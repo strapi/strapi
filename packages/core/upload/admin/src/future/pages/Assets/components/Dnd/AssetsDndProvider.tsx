@@ -27,7 +27,7 @@ import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../../ser
 import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
-import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
+import { getApiErrorMessage } from '../../../../utils/getApiErrorMessage';
 import { getFolderLabel } from '../../../../utils/getFolderLabel';
 import { emptyItemLocations, type ItemLocations } from '../../../../utils/itemLocations';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -273,7 +273,7 @@ export const AssetsDndProvider = ({
           message: successMessage,
         });
       } catch (error) {
-        const errorMessage = getBulkMoveErrorMessage(error, errorFallback);
+        const errorMessage = getApiErrorMessage(error, errorFallback);
 
         announceToLiveRegion(
           formatMessage(

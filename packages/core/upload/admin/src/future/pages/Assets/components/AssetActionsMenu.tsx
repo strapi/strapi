@@ -18,6 +18,7 @@ import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermis
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
@@ -115,17 +116,15 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
     }
 
     if ('error' in res) {
-      // `fetchBaseQuery` already unwraps the API envelope, so a server-sent
-      // reason (file too large, unsupported type) lands directly on `message`.
-      const { message } = res.error as { message?: string };
       toggleNotification({
         type: 'danger',
-        message:
-          message ??
+        message: getApiErrorMessage(
+          res.error,
           formatMessage({
             id: getTranslationKey('asset-details.replace.error'),
             defaultMessage: 'Failed to replace the file.',
-          }),
+          })
+        ),
       });
       return;
     }

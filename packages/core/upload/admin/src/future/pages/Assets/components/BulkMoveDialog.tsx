@@ -21,7 +21,7 @@ import {
 import { canDropItemOnFolder } from '../../../utils/canDropItemOnFolder';
 import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
 import { formatMoveSuccessMessage } from '../../../utils/formatMoveSuccessMessage';
-import { getBulkMoveErrorMessage } from '../../../utils/getBulkMoveErrorMessage';
+import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import { hasUniformSource, uniformSourceFolderId } from '../../../utils/itemSource';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -157,7 +157,7 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
       // folder into its own descendant or a name collision in the destination.
       toggleNotification({
         type: 'danger',
-        message: getBulkMoveErrorMessage(
+        message: getApiErrorMessage(
           error,
           formatMessage({
             id: getTranslationKey('list.bulk-actions.move.error'),
