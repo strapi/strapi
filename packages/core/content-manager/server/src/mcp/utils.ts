@@ -13,7 +13,7 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
   const parts = modelName.split('.').map((part) => part.toLowerCase());
 
   if (namespace === 'api') {
-    return parts[0];
+    return parts[0] === parts[1] ? parts[0] : parts.join('_');
   }
 
   return `${namespace.toLowerCase()}-${parts.join('_')}`;
