@@ -356,6 +356,79 @@ describe('Permissions Engine', () => {
     );
   });
 
+  it('skips an unregistered condition and denies access instead of throwing', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: ['plugin::test.doesNotExist'],
+      },
+    ];
+    const engineProviders = {
+      action: providerFactory(),
+      condition: providerFactory(),
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'article', 'title')).toBeFalsy();
+  });
+
+  it('skips an unregistered condition but still grants via a valid one in the same permission', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [allowedCondition, 'plugin::test.doesNotExist'],
+      },
+    ];
+
+    const conditionProvider = providerFactory();
+    await conditionProvider.register(
+      allowedCondition,
+      conditions.find((c) => c.name === allowedCondition)!
+    );
+
+    const engineProviders = {
+      action: providerFactory(),
+      condition: conditionProvider,
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article', 'title')).toBeTruthy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
+  });
+
+  it('skips a condition whose handler is not a function and denies access instead of throwing', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [allowedCondition, 'plugin::test.malformedHandler'],
+      },
+    ];
+
+    const conditionProvider = providerFactory();
+    await conditionProvider.register('plugin::test.malformedHandler', {
+      name: 'plugin::test.malformedHandler',
+      handler: 'not a function',
+    });
+
+    const engineProviders = {
+      action: providerFactory(),
+      condition: conditionProvider,
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article', 'title')).toBeFalsy();
+  });
+
   describe('hooks', () => {
     describe('format.permission', () => {
       it('modifies permissions correctly', async () => {

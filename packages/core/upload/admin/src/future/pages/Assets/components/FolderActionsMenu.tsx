@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { folderKey } from '../utils/selection';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
@@ -28,16 +29,17 @@ interface FolderActionsMenuProps {
  * affordance). It reuses the shared move and delete dialogs, which mount only
  * while open.
  *
- * A successful move or delete clears the whole selection: they only invalidate
- * RTK tags, so without it a `folder:<id>` key for a folder that no longer lives
- * where the selection thinks it does would linger. A rename leaves the id
- * valid, so it deliberately keeps the selection.
+ * A successful move or delete deselects this one folder and leaves the rest of
+ * the selection intact: they only invalidate RTK tags, so without it a
+ * `folder:<id>` key for a folder that no longer lives where the selection thinks
+ * it does would linger. A rename leaves the id valid and the folder in place, so
+ * it touches the selection not at all.
  */
 export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) => {
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
-  const { clear } = useAssetSelection();
+  const { deselect } = useAssetSelection();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -133,7 +135,7 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
           open
           onClose={() => setIsMoveOpen(false)}
           items={moveItems}
-          onSuccess={clear}
+          onSuccess={() => deselect(folderKey(folder.id))}
         />
       )}
       {isDeleteOpen && (
@@ -141,7 +143,7 @@ export const FolderActionsMenu = ({ folder, dragData }: FolderActionsMenuProps) 
           open
           onClose={() => setIsDeleteOpen(false)}
           target={{ fileIds: [], folderIds: [folder.id] }}
-          onSuccess={clear}
+          onSuccess={() => deselect(folderKey(folder.id))}
         />
       )}
     </>

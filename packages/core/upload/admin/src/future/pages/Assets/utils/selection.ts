@@ -59,6 +59,25 @@ export const toggleSelection = (state: SelectionState, key: ItemKey): SelectionS
 };
 
 /**
+ * Subtractive counterpart to {@link toggleSelection} — removes a key without the
+ * add-if-absent ambiguity, leaving the rest of the selection alone. Used when a
+ * single-item affordance (a row's "..." menu) makes exactly one key stale.
+ *
+ * Idempotent: removing a key that was never selected is a no-op. The anchor is
+ * dropped only when it is the removed key, so a Shift+click range built around
+ * other rows survives.
+ */
+export const deselect = (state: SelectionState, key: ItemKey): SelectionState => {
+  const selectedKeys = new Set(state.selectedKeys);
+  selectedKeys.delete(key);
+
+  return {
+    selectedKeys,
+    anchorKey: state.anchorKey === key ? null : state.anchorKey,
+  };
+};
+
+/**
  * Shift+click — selects the contiguous range between the current anchor and the
  * target in render order, replacing the current selection. The anchor stays put.
  *
