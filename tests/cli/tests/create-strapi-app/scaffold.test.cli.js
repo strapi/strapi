@@ -22,6 +22,17 @@ function mkProjectDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-csa-cli-test-'));
 }
 
+function expectGeneratedUploadPolicy(pluginsConfig) {
+  const allowedMediaTypes = pluginsConfig.match(/const allowedMediaTypes = \[([\s\S]*?)\];/);
+  const deniedTypes = pluginsConfig.match(/const deniedTypes = \[([\s\S]*?)\];/);
+
+  expect(allowedMediaTypes?.[1]).toContain("'image/*'");
+  expect(deniedTypes?.[1]).toContain("'image/svg+xml'");
+  expect(pluginsConfig).toContain(`security: {
+        allowedTypes: allowedMediaTypes,
+        deniedTypes,`);
+}
+
 describe('create-strapi-app', () => {
   beforeAll(() => {
     if (!fs.existsSync(bin)) {
@@ -54,6 +65,7 @@ describe('create-strapi-app', () => {
       expect(pluginsConfig).toContain('httpOnly: true');
       expect(pluginsConfig).toContain('allowedTypes:');
       expect(pluginsConfig).toContain('application/x-executable');
+      expectGeneratedUploadPolicy(pluginsConfig);
 
       const envFile = fs.readFileSync(path.join(projectDir, '.env'), 'utf8');
       expect(envFile).toMatch(/^JWT_SECRET=.+/m);
@@ -72,6 +84,9 @@ describe('create-strapi-app', () => {
       expect(fs.existsSync(path.join(projectDir, 'config', 'database.js'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'src', 'index.js'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'tsconfig.json'))).toBe(false);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.js'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
@@ -86,6 +101,26 @@ describe('create-strapi-app', () => {
 
       expect(fs.existsSync(path.join(projectDir, 'data', 'data.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectDir, 'package.json'))).toBe(true);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.ts'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('scaffolds the JavaScript example template with --example --javascript', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--example', '--javascript'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, 'data', 'data.json'))).toBe(true);
+      expect(fs.existsSync(path.join(projectDir, 'config', 'plugins.js'))).toBe(true);
+
+      const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.js'), 'utf8');
+      expectGeneratedUploadPolicy(pluginsConfig);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
