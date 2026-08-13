@@ -27,7 +27,36 @@ const allowedOperations = [
 
 const operations = pick(allowedOperations, sift);
 
+const allowedOperationLookup: Record<string, true> = Object.fromEntries(
+  allowedOperations.map((operation) => [operation, true])
+);
+
+/**
+ * Reject condition operators sift can't match in memory (e.g. `$startsWith`),
+ */
+const assertSupportedOperators = (conditions: unknown): void => {
+  if (Array.isArray(conditions)) {
+    conditions.forEach(assertSupportedOperators);
+    return;
+  }
+
+  if (isObject(conditions)) {
+    for (const [key, value] of Object.entries(conditions as Record<string, unknown>)) {
+      if (key.startsWith('$') && !allowedOperationLookup[key]) {
+        throw new Error(
+          `RBAC condition uses unsupported operator "${key}". Conditions are matched in memory and support only: ${allowedOperations.join(
+            ', '
+          )}.`
+        );
+      }
+
+      assertSupportedOperators(value);
+    }
+  }
+};
+
 const conditionsMatcher = (conditions: unknown) => {
+  assertSupportedOperators(conditions);
   return sift.createQueryTester(conditions, { operations });
 };
 

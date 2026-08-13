@@ -47,6 +47,13 @@ describe('Permissions Engine', () => {
         return { id: 200 };
       },
     },
+    {
+      name: 'unsupportedOperator',
+      category: 'default',
+      async handler() {
+        return { title: { $startsWith: 'Test' } };
+      },
+    },
   ];
 
   const providers = {
@@ -330,6 +337,23 @@ describe('Permissions Engine', () => {
 
     expect(createRegisterFunction).toBeCalledTimes(1);
     expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
+  });
+
+  it('shows correct error messages on unsupported operators instead of crashing with 500', async () => {
+    const permissions: Permission[] = [
+      {
+        action: 'read',
+        subject: 'article',
+        conditions: ['unsupportedOperator'],
+      },
+    ];
+
+    const { ability } = await buildEngineWithAbility({ permissions });
+
+    // sift only matches a concrete entity, so the throw fires here (write path).
+    expect(() => ability.can('read', subject('article', { title: 'Testing' }))).toThrow(
+      /unsupported operator "\$startsWith"/i
+    );
   });
 
   describe('hooks', () => {
