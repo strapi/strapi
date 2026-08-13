@@ -77,6 +77,7 @@
   "Providers.status": "ステータス",
   "Roles.empty": "ロールがまだありません。",
   "Roles.empty.search": "検索に一致するロールがありません。",
+  "Settings.roles.created": "ロールを作成しました",
   "Settings.roles.deleted": "ロールを削除しました",
   "Settings.roles.edited": "ロールを編集しました",
   "Settings.section-label": "ユーザーと権限プラグイン"
