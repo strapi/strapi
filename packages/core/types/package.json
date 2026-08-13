@@ -52,7 +52,7 @@
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:ts": "run -T tsc -p tsconfig.json",
+    "test:ts": "run -T tsc -p tsconfig.json && run -T tsc -p tests/tsconfig.json",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
