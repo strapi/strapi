@@ -588,6 +588,66 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
       expect(screen.getByText('3 items selected')).toBeInTheDocument();
     });
+
+    it("keeps the selection when an unselected asset's row menu deletes it", async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+
+      // The third row's own menu — image1 and image2 stay selected around it.
+      await user.click(screen.getAllByRole('button', { name: 'More actions' })[2]);
+      await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
+      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ fileIds: [3], folderIds: [] }));
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+    });
+
+    it("keeps the selection when an unselected folder's row menu deletes it", async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')] });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+
+      // Folders render before assets, so the folder's trigger is the first one.
+      await user.click(screen.getAllByRole('button', { name: 'More actions' })[0]);
+      await user.click(screen.getByRole('menuitem', { name: 'Delete folder' }));
+      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ fileIds: [], folderIds: [1] }));
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+    });
   });
 
   describe('tracking', () => {
