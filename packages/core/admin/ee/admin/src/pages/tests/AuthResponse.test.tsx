@@ -65,7 +65,7 @@ describe('<AuthResponse />', () => {
     );
   });
 
-  it('dispatches login and redirects on success with token', () => {
+  it('establishes an admin session and redirects on success with token', () => {
     (useMatch as jest.Mock).mockReturnValue({ params: { authResponse: 'success' } });
     (useNavigate as jest.Mock).mockReturnValue(navigateMock);
     (getCookieValue as jest.Mock).mockReturnValue('fake-token');

@@ -166,5 +166,6 @@ describe('AuthProvider session identity', () => {
     await user.click(screen.getByRole('button', { name: 'establish-session-b' }));
 
     await waitForUserB();
+    expect(window.localStorage.getItem('jwtToken')).toBe(null);
   });
 });

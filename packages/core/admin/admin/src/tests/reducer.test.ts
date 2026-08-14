@@ -131,7 +131,7 @@ describe('admin_app reducer', () => {
       expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
     });
 
-    it('login persist=false should not touch localStorage token', () => {
+    it('login persist=false should not persist a token in localStorage', () => {
       reducer(undefined, login({ token: 'abcd', persist: false }));
       expect(localStorage.getItem('jwtToken')).toBe(null);
     });
