@@ -22,7 +22,7 @@ describe('Dimensions are populated when uploading an image', () => {
     await builder.cleanup();
   });
 
-  test.each([['.jpg'], ['.png'], ['.webp'], ['.tiff'], ['.svg'], ['.gif']])(
+  test.each([['.jpg'], ['.png'], ['.webp'], ['.tiff'], ['.gif']])(
     'Dimensions are populated for %s',
     async (ext) => {
       const res = await rq({
@@ -39,4 +39,36 @@ describe('Dimensions are populated when uploading an image', () => {
       });
     }
   );
+
+  test('SVG uploads are rejected by the default security policy', async () => {
+    const res = await rq({
+      method: 'POST',
+      url: '/upload',
+      formData: { files: fs.createReadStream(path.join(__dirname, '../utils/strapi.svg')) },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('Dimensions are populated for SVG when explicitly allowed', async () => {
+    const originalSecurityConfig = strapi.config.get('plugin::upload.security');
+
+    try {
+      strapi.config.set('plugin::upload.security', { allowedTypes: ['image/*'] });
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: { files: fs.createReadStream(path.join(__dirname, '../utils/strapi.svg')) },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body[0]).toMatchObject({
+        width: 256,
+        height: 256,
+        ext: '.svg',
+      });
+    } finally {
+      strapi.config.set('plugin::upload.security', originalSecurityConfig);
+    }
+  });
 });
