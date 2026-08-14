@@ -109,8 +109,6 @@ export interface QueryBuilder {
 
   shouldUseSubQuery(): boolean;
 
-  hasJoins(): boolean;
-
   runSubQuery(): any;
 
   processState(): void;
@@ -437,21 +435,19 @@ const createQueryBuilder = (
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
     },
 
-    hasJoins() {
-      return state.joins.length > 0;
-    },
-
     runSubQuery() {
       const originalType = state.type;
 
-      this.select('id');
-      const subQB = this.getKnexQuery();
+      // Build the inner SELECT from a clone that stays `select`, so the outer write
+      // state is never mutated. clone() shallow-merges state (shared where/joins,
+      // new alias) — preserve the original alias because joins were already baked
+      // against it. The clone inherits processed: true and must only read shared arrays.
+      const sub = this.clone();
+      sub.alias = this.alias;
+      const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const qb = db.getConnection(tableName);
-
-      // Restore type mutated by select('id') so execute() returns the write row count.
-      state.type = originalType;
 
       if (originalType === 'update') {
         return qb.update(state.data).whereIn('id', nestedSubQuery);
@@ -480,6 +476,14 @@ const createQueryBuilder = (
       }
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+
+      // processWhere emits bare root columns while type is still update/delete
+      // (mustUseAlias is false). Qualify them now that joins from the relation
+      // predicate are known, so overlapping names (published_at, locale, id) are not ambiguous.
+      if (this.shouldUseSubQuery()) {
+        state.where = helpers.qualifyRootColumns(state.where, this.alias);
+      }
+
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
 
       state.data = helpers.toRow(meta, state.data);

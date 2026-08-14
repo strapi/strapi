@@ -16,6 +16,9 @@ const testCT = {
     name: {
       type: 'string',
     },
+    locale: {
+      type: 'string',
+    },
     related: {
       type: 'relation',
       relation: 'manyToOne',
@@ -33,6 +36,9 @@ const relatedCT = {
     title: {
       type: 'string',
     },
+    locale: {
+      type: 'string',
+    },
   },
 };
 
@@ -41,14 +47,17 @@ const fixtures = {
     return [
       {
         name: 'Hugo LLORIS',
+        locale: 'en',
         related: related[0].id,
       },
       {
         name: 'Samuel UMTITI',
+        locale: 'fr',
         related: related[1].id,
       },
       {
         name: 'Lucas HERNANDEZ',
+        locale: 'fr',
         related: related[0].id,
       },
     ];
@@ -56,9 +65,11 @@ const fixtures = {
   related: [
     {
       title: 'Category A',
+      locale: 'en',
     },
     {
       title: 'Category B',
+      locale: 'fr',
     },
   ],
 };
@@ -93,6 +104,12 @@ const deleteManyFilterCases = [
     params: { where: { related: { title: 'Category B' } } },
     deletedCount: 1,
     remaining: ['Hugo LLORIS', 'Lucas HERNANDEZ'],
+  },
+  {
+    label: 'where: relation + overlapping locale',
+    params: { where: { related: { title: 'Category A' }, locale: 'en' } },
+    deletedCount: 1,
+    remaining: ['Lucas HERNANDEZ', 'Samuel UMTITI'],
   },
   {
     label: 'where: $or across scalars',
@@ -562,6 +579,18 @@ describe('updateMany relation filters', () => {
 
     const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
     expect(names).toEqual(['Samuel UMTITI', 'UPDATED', 'UPDATED']);
+  });
+
+  test('updateMany: relation + overlapping locale applies the root predicate', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      where: { related: { title: 'Category A' }, locale: 'en' },
+      data: { name: 'UPDATED LOCALE' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['Lucas HERNANDEZ', 'Samuel UMTITI', 'UPDATED LOCALE']);
   });
 
   test('updateMany: scalar relation id shorthand', async () => {

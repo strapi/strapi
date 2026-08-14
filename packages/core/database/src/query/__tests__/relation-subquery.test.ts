@@ -5,6 +5,9 @@ import { createMetadata } from '../../metadata';
 const TEST_UID = 'api::test.test';
 const RELATED_UID = 'api::related.related';
 
+const PUBLISHED_A = '2020-01-01T00:00:00.000Z';
+const PUBLISHED_B = '2021-01-01T00:00:00.000Z';
+
 const models = [
   {
     uid: RELATED_UID,
@@ -14,6 +17,10 @@ const models = [
     attributes: {
       id: { type: 'increments' },
       title: { type: 'string' },
+      locale: { type: 'string' },
+      // Same column name as the root model (draftAndPublish-style overlap); string avoids
+      // dialect datetime binding mismatches while still exercising ambiguous-column SQL.
+      publishedAt: { type: 'string' },
     },
   },
   {
@@ -24,6 +31,8 @@ const models = [
     attributes: {
       id: { type: 'increments' },
       name: { type: 'string' },
+      locale: { type: 'string' },
+      publishedAt: { type: 'string' },
       related: {
         type: 'relation',
         relation: 'manyToOne',
@@ -65,21 +74,28 @@ const setupTables = async (connection: knex.Knex) => {
   await connection.schema.createTable('relateds', (t) => {
     t.increments('id');
     t.string('title');
+    t.string('locale');
+    t.string('published_at');
   });
   await connection.schema.createTable('tests', (t) => {
     t.increments('id');
     t.string('name');
+    t.string('locale');
+    t.string('published_at');
   });
   await connection.schema.createTable('tests_related_lnk', (t) => {
     t.increments('id');
     t.integer('test_id');
     t.integer('related_id');
   });
-  await connection('relateds').insert([{ title: 'Category A' }, { title: 'Category B' }]);
+  await connection('relateds').insert([
+    { title: 'Category A', locale: 'en', published_at: PUBLISHED_A },
+    { title: 'Category B', locale: 'fr', published_at: PUBLISHED_B },
+  ]);
   await connection('tests').insert([
-    { id: 1, name: 'Hugo LLORIS' },
-    { id: 2, name: 'Samuel UMTITI' },
-    { id: 3, name: 'Lucas HERNANDEZ' },
+    { id: 1, name: 'Hugo LLORIS', locale: 'en', published_at: PUBLISHED_A },
+    { id: 2, name: 'Samuel UMTITI', locale: 'fr', published_at: PUBLISHED_A },
+    { id: 3, name: 'Lucas HERNANDEZ', locale: 'fr', published_at: PUBLISHED_B },
   ]);
   await connection('tests_related_lnk').insert([
     { test_id: 1, related_id: 1 },
@@ -100,6 +116,18 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
     [
       '_q + relation where',
       { _q: 'LLORIS', where: { related: { title: 'Category A' } } },
+      1,
+      ['Samuel UMTITI', 'Lucas HERNANDEZ'],
+    ],
+    [
+      'relation + overlapping locale',
+      { where: { related: { title: 'Category A' }, locale: 'en' } },
+      1,
+      ['Samuel UMTITI', 'Lucas HERNANDEZ'],
+    ],
+    [
+      'relation + overlapping publishedAt',
+      { where: { related: { title: 'Category A' }, publishedAt: PUBLISHED_A } },
       1,
       ['Samuel UMTITI', 'Lucas HERNANDEZ'],
     ],
@@ -132,6 +160,24 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
       },
       1,
       { updated: ['UPDATED HUGO'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
+    ],
+    [
+      'relation + overlapping locale',
+      {
+        where: { related: { title: 'Category A' }, locale: 'en' },
+        data: { name: 'UPDATED LOCALE' },
+      },
+      1,
+      { updated: ['UPDATED LOCALE'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
+    ],
+    [
+      'relation + overlapping publishedAt',
+      {
+        where: { related: { title: 'Category A' }, publishedAt: PUBLISHED_A },
+        data: { name: 'UPDATED PUBLISHED' },
+      },
+      1,
+      { updated: ['UPDATED PUBLISHED'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
     ],
   ])('updateMany: %s', async (_label, params, expectedUpdated, { updated, untouched }) => {
     const { db, connection } = makeDb();
