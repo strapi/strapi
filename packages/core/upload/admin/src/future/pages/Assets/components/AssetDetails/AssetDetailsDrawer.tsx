@@ -61,6 +61,7 @@ import {
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
+import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
 
 import { AssetCropEditor } from './AssetCropEditor';
@@ -70,9 +71,6 @@ import type {
   AssetWithPopulatedCreatedBy,
   FocalPoint,
 } from '../../../../../../../shared/contracts/files';
-
-// Name of the parameter to look for in the URL to open the drawer
-const URL_PARAM = 'assetId';
 
 interface DrawerToast {
   type: 'success' | 'danger';
@@ -120,15 +118,14 @@ const useAssetOperation = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useAssetDetailsParam - sync drawer visibility with URL ?{URL_PARAM}={id}
+ * useAssetDetailsParam - sync drawer visibility with URL ?{ASSET_DETAILS_URL_PARAM}={id}
  * -----------------------------------------------------------------------------------------------*/
 
 export const useAssetDetailsParam = () => {
-  const [{ query }, setQuery] = useQueryParams<{ [URL_PARAM]?: string }>();
+  const [{ query }, setQuery] = useQueryParams<{ [ASSET_DETAILS_URL_PARAM]?: string }>();
 
-  const detailsId = query?.[URL_PARAM];
-  const assetId = detailsId ? parseInt(detailsId, 10) : null;
-  const hasValidId = assetId !== null && !Number.isNaN(assetId);
+  const assetId = parseAssetDetailsId(query?.[ASSET_DETAILS_URL_PARAM]);
+  const hasValidId = assetId !== null;
 
   // Closing is driven by removing the URL param (a navigation), so navigation
   // guards like <Blocker> can intercept it. `isMounted` keeps the drawer in the
@@ -157,13 +154,13 @@ export const useAssetDetailsParam = () => {
 
   const openDetails = React.useCallback(
     (id: number) => {
-      setQuery({ [URL_PARAM]: String(id) }, 'push', true);
+      setQuery({ [ASSET_DETAILS_URL_PARAM]: String(id) }, 'push', true);
     },
     [setQuery]
   );
 
   const closeDetails = React.useCallback(() => {
-    setQuery({ [URL_PARAM]: undefined }, 'remove', true);
+    setQuery({ [ASSET_DETAILS_URL_PARAM]: undefined }, 'remove', true);
   }, [setQuery]);
 
   return {
