@@ -1,4 +1,5 @@
-import type { CustomFieldOptionInput, CustomFieldOptionName } from '../CustomFields';
+// Public admin barrel — fails if these types are not re-exported from `@strapi/admin/strapi-admin`.
+import type { CustomFieldOptionInput, CustomFieldOptionName } from '../../../index';
 
 const builtInInput: CustomFieldOptionInput = 'checkbox';
 const builtInTextareaEnumInput: CustomFieldOptionInput = 'textarea-enum';

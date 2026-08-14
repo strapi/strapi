@@ -1,3 +1,5 @@
+// Augment the declaration site. Consumers merge via `@strapi/admin/strapi-admin`;
+// these fixtures still compile against source, not the published package specifier.
 import type {} from '../CustomFields';
 
 declare module '../CustomFields' {
