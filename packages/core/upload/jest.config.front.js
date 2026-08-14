@@ -7,4 +7,8 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/admin/tests/$1',
   },
   setupFilesAfterEnv: ['./admin/tests/setup.ts'],
+  // file-type (and its tokenizer stack) is ESM-only; Jest must transform it to sniff bytes in admin tests.
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing|msw|@mswjs|until-async|outvariant|strict-event-emitter|headers-polyfill|rettime|@open-draft|is-node-process|file-type|strtok3|token-types|uint8array-extras|@tokenizer|@borewit)/)',
+  ],
 };

@@ -94,10 +94,17 @@ const FILE_10 = {
   ...COMMON_PROPERTIES,
 };
 
-// Windows browsers often report .mov as application/octet-stream (GitHub #23788)
-const FILE_MOV_OCTET_STREAM = {
+const FILE_MOV_STORED_OCTET_STREAM = {
   id: 11,
   mime: 'application/octet-stream',
+  name: 'sample_960x400_ocean_with_audio.mov',
+  url: '/uploads/sample.mov',
+  ...COMMON_PROPERTIES,
+};
+
+const FILE_MOV_STORED_QUICKTIME = {
+  id: 12,
+  mime: 'video/quicktime',
   name: 'sample_960x400_ocean_with_audio.mov',
   url: '/uploads/sample.mov',
   ...COMMON_PROPERTIES,
@@ -166,15 +173,10 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     expect(results).toEqual([...files, FILE_10]);
   });
 
-  it('allows a .mov file reported as application/octet-stream when videos are allowed (#23788)', () => {
-    const results = getAllowedFiles(['videos'], [FILE_MOV_OCTET_STREAM]);
-
-    expect(results).toEqual([FILE_MOV_OCTET_STREAM]);
-  });
-
-  it('rejects a .mov file reported as application/octet-stream when only images are allowed', () => {
-    const results = getAllowedFiles(['images'], [FILE_MOV_OCTET_STREAM]);
-
-    expect(results).toEqual([]);
+  it('uses the stored MIME for library assets, not the filename', () => {
+    expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_OCTET_STREAM])).toEqual([]);
+    expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_QUICKTIME])).toEqual([
+      FILE_MOV_STORED_QUICKTIME,
+    ]);
   });
 });

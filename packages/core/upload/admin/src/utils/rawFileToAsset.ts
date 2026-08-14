@@ -5,8 +5,8 @@ import { typeFromMime } from './typeFromMime';
 
 import type { RawFile } from '../../../shared/contracts/files';
 
-export const rawFileToAsset = (rawFile: RawFile, assetSource: AssetSource) => {
-  const mime = resolveFileMime(rawFile.type, rawFile.name);
+export const rawFileToAsset = async (rawFile: RawFile, assetSource: AssetSource) => {
+  const mime = await resolveFileMime(rawFile.type, rawFile);
 
   return {
     size: rawFile.size / 1000,

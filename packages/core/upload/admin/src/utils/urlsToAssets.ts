@@ -27,19 +27,21 @@ export const urlsToAssets = async (urls: string[]): Promise<FileWithRawFile[]> =
   // Retrieve the assets metadata
   const assetsResults = await Promise.all(assetPromises);
 
-  const assets = assetsResults.map<FileWithRawFile>((fullFilledAsset) => {
-    const mime = resolveFileMime(fullFilledAsset.mime, fullFilledAsset.name);
+  const assets = await Promise.all(
+    assetsResults.map(async (fullFilledAsset) => {
+      const mime = await resolveFileMime(fullFilledAsset.mime, fullFilledAsset.rawFile);
 
-    return {
-      source: 'url' as const,
-      name: fullFilledAsset.name,
-      type: typeFromMime(mime),
-      url: fullFilledAsset.url,
-      ext: fullFilledAsset.url.split('.').pop(),
-      mime: mime || undefined,
-      rawFile: fullFilledAsset.rawFile,
-    };
-  });
+      return {
+        source: 'url' as const,
+        name: fullFilledAsset.name,
+        type: typeFromMime(mime),
+        url: fullFilledAsset.url,
+        ext: fullFilledAsset.url.split('.').pop(),
+        mime: mime || undefined,
+        rawFile: fullFilledAsset.rawFile,
+      };
+    })
+  );
 
   return assets;
 };

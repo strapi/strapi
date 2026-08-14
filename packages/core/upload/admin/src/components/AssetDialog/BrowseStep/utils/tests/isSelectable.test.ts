@@ -21,11 +21,8 @@ describe('TableList | isSelectable', () => {
     expect(isSelectable(['image', 'file', 'video', 'audio'])).toEqual(false);
   });
 
-  it('should treat a .mov file with application/octet-stream as a video (#23788)', () => {
-    expect(isSelectable(['video'], 'application/octet-stream', 'clip.mov')).toEqual(true);
-  });
-
-  it('should not treat a .mov file with application/octet-stream as an image', () => {
-    expect(isSelectable(['image'], 'application/octet-stream', 'clip.mov')).toEqual(false);
+  it('uses the stored MIME for library assets, not the filename', () => {
+    expect(isSelectable(['video'], 'application/octet-stream')).toEqual(false);
+    expect(isSelectable(['video'], 'video/quicktime')).toEqual(true);
   });
 });
