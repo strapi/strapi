@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { Book, ExternalLink, PaperPlane } from '@strapi/icons';
 import { Discord, GitHub } from '@strapi/icons/symbols';
 import { useIntl, type MessageDescriptor } from 'react-intl';
@@ -40,6 +40,28 @@ const TileIcon = styled.span`
   }
 `;
 
+/**
+ * The tiles share the card with the diagnostic-snapshot panel, so they only get about half the
+ * card's width. A viewport breakpoint therefore fires far too late — the tiles are already
+ * cramped while the window is still "large". Sizing off the tile panel itself instead means the
+ * 2 -> 1 column switch happens when *these* tiles run out of room, whatever the window is doing.
+ */
+const TileGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spaces[4]};
+
+  /* The 50% basis caps the row at two tiles however wide the card gets, and min-width is what
+     forces the wrap to a single column. Both are measured against this element, so the switch is
+     driven by the space the tiles actually have rather than by the viewport. A container query
+     would say the same thing more directly, but jsdom cannot parse @container and it breaks the
+     admin suite's stylesheet parse (same reason FormLayout in content-manager avoids it). */
+  > * {
+    flex: 1 1 calc(50% - ${({ theme }) => theme.spaces[4]} / 2);
+    min-width: 16rem;
+  }
+`;
+
 const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTileConfig) => {
   const { formatMessage } = useIntl();
 
@@ -61,7 +83,6 @@ const SupportLinkTile = ({ href, icon: Icon, title, description }: SupportLinkTi
       )}
       display="block"
       hasRadius
-      background="neutral100"
       borderColor="neutral200"
       padding={4}
       // The tile is the link, so the anchor's own underline and link colour must not bleed onto
@@ -230,13 +251,11 @@ const SupportCard = () => {
         </Flex>
         <Flex alignItems="stretch" gap={7}>
           <Box flex="1 1 0%">
-            <Grid.Root gap={4}>
+            <TileGrid>
               {tiles.map((tile) => (
-                <Grid.Item key={tile.id} col={6} xs={12} direction="column" alignItems="stretch">
-                  <SupportLinkTile {...tile} />
-                </Grid.Item>
+                <SupportLinkTile key={tile.id} {...tile} />
               ))}
-            </Grid.Root>
+            </TileGrid>
           </Box>
           {canRead && (
             <>
@@ -248,7 +267,7 @@ const SupportCard = () => {
                     defaultMessage: 'diagnostic snapshot',
                   })}
                 </Typography>
-                <Typography variant="pi" textColor="neutral600">
+                <Typography>
                   {formatMessage(
                     isPaidPlan
                       ? {
