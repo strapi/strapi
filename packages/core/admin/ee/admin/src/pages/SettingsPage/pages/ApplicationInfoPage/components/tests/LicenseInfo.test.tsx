@@ -92,6 +92,23 @@ describe('LicenseInfoEE', () => {
     expect(screen.queryByText(/Last license validity check/)).not.toBeInTheDocument();
   });
 
+  // `baseLicense` is deliberately an Enterprise plan id. Seats used to be gated on Growth, which
+  // hid the seat count from every Enterprise licence that carries a seat limit.
+  it('shows the admin seat count for a non-Growth plan that has a seat limit', async () => {
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Admin seats')).toBeInTheDocument();
+  });
+
+  it('omits the admin seat count when the licence carries no seat limit', async () => {
+    // A licence the registry has not re-issued yet comes back with a null `permittedSeats`.
+    licenseData = { ...structuredClone(baseLicense), permittedSeats: null, seats: null };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText('Admin seats')).not.toBeInTheDocument();
+  });
+
   it('shows the Expired badge when licenseStatus is "expired"', async () => {
     licenseData = { ...structuredClone(baseLicense), licenseStatus: 'expired' };
     render(<LicenseInfoEE />);

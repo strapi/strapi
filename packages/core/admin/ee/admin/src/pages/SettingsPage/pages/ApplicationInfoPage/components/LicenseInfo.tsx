@@ -262,14 +262,14 @@ const LicenseInfoEE = () => {
             value={currentPlanValue}
           />
           {!isGrowth && formattedDate && <PlanDetail label={dateLabel} value={formattedDate} />}
-          {isGrowth && (
-            <>
-              <AdminSeatInfoEE />
-              {/* Preserves the `ai.enabled` gate this block had before it moved onto the Plan
-                  card: without it an instance with AI disabled requests usage it cannot have. */}
-              {window.strapi.ai?.enabled !== false && <AIUsage />}
-            </>
-          )}
+          {/* Not gated on Growth: Enterprise licences can carry a seat limit too. A licence
+              without one (including an older licence the registry has not re-issued yet) has a
+              null `permittedSeats`, and the component already renders nothing in that case. */}
+          <AdminSeatInfoEE />
+          {/* AI usage stays Growth-only. The `ai.enabled` gate is preserved from before this
+              block moved onto the Plan card: without it an instance with AI disabled requests
+              usage it cannot have. */}
+          {isGrowth && window.strapi.ai?.enabled !== false && <AIUsage />}
         </Flex>
         <Flex direction="column" alignItems="stretch" gap={5} flex="1">
           <Flex direction="column" alignItems="start" gap={2}>
