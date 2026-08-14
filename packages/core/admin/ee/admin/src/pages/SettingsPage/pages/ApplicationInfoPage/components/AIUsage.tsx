@@ -18,7 +18,12 @@ const StyledProgressBar = styled(ProgressBar)<{ $variant?: 'neutral' | 'danger' 
   }
 `;
 
-export const AIUsage = () => {
+interface AIUsageProps {
+  /** Trials are not billed for overages, so the rate line is meaningless to them. */
+  isTrial?: boolean;
+}
+
+export const AIUsage = ({ isTrial = false }: AIUsageProps) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetAiUsageQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -90,12 +95,14 @@ export const AIUsage = () => {
             </Flex>
           </>
         )}
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: 'Settings.application.ai-usage.overage-rate',
-            defaultMessage: '+$1.50 per 100 credits above plan limit',
-          })}
-        </Typography>
+        {!isTrial && (
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage({
+              id: 'Settings.application.ai-usage.overage-rate',
+              defaultMessage: '+$1.50 per 100 credits above plan limit',
+            })}
+          </Typography>
+        )}
       </Flex>
     </Flex>
   );

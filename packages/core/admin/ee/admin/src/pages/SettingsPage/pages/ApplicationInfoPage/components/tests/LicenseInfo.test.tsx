@@ -109,6 +109,58 @@ describe('LicenseInfoEE', () => {
     expect(screen.queryByText('Admin seats')).not.toBeInTheDocument();
   });
 
+  it('shows the In Trial badge instead of Active while a trial is running', async () => {
+    licenseData = { ...structuredClone(baseLicense), isTrial: true };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('In Trial')).toBeInTheDocument();
+    expect(screen.queryByText('Active')).not.toBeInTheDocument();
+  });
+
+  it('does not claim In Trial once the licence stops validating', async () => {
+    // A lapsed trial reports isTrial false precisely so the trial-ended prompts elsewhere in the
+    // admin can fire; the badge must follow the licence state, not the plan it used to be on.
+    licenseData = { ...structuredClone(baseLicense), licenseStatus: 'unknown', isTrial: false };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Unknown')).toBeInTheDocument();
+    expect(screen.queryByText('In Trial')).not.toBeInTheDocument();
+  });
+
+  it('says the registry was unreachable when running on a cached licence', async () => {
+    licenseData = {
+      ...structuredClone(baseLicense),
+      licenseStatus: 'unknown',
+      usingCachedLicense: true,
+      registrySyncError: 'Could not proceed to the online validation of your license.',
+    };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText(/Couldn't reach the license registry/)).toBeInTheDocument();
+    expect(screen.queryByText(/could not validate this license/)).not.toBeInTheDocument();
+  });
+
+  it('says the licence was rejected when the registry answered and refused it', async () => {
+    licenseData = {
+      ...structuredClone(baseLicense),
+      licenseStatus: 'unknown',
+      usingCachedLicense: false,
+      registrySyncError: 'The associated subscription is cancelled.',
+    };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText(/could not validate this license/)).toBeInTheDocument();
+    expect(screen.queryByText(/Couldn't reach the license registry/)).not.toBeInTheDocument();
+  });
+
+  it('shows no registry notice on a healthy licence', async () => {
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText(/Couldn't reach the license registry/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/could not validate this license/)).not.toBeInTheDocument();
+  });
+
   it('shows the Expired badge when licenseStatus is "expired"', async () => {
     licenseData = { ...structuredClone(baseLicense), licenseStatus: 'expired' };
     render(<LicenseInfoEE />);

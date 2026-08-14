@@ -12,7 +12,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Check, ClockCounterClockwise, Cross, Information } from '@strapi/icons';
+import { Check, ClockCounterClockwise, Cross, Information, WarningCircle } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { PlanDetail } from '../../../../../../../../admin/src/pages/Settings/pages/ApplicationInfo/components/PlanCard';
@@ -67,10 +67,22 @@ type License = NonNullable<GetLicenseLimitInformation.Response['data']>;
 type PlanEntitlement = License['planEntitlements'][number];
 type Limit = PlanEntitlement['limits'][number];
 
-const STATUS_BADGE: Record<
-  License['licenseStatus'],
-  { variant: 'success' | 'danger' | 'warning'; label: MessageDescriptor }
-> = {
+type StatusBadge = {
+  variant: 'success' | 'danger' | 'warning' | 'alternative';
+  label: MessageDescriptor;
+};
+
+/**
+ * Shown instead of `Active` while a trial is running. Deliberately keyed on an active
+ * licence: once a trial lapses the licence stops validating and `isTrial` goes false, so
+ * "In Trial" would be claiming a subscription the instance no longer has.
+ */
+const TRIAL_BADGE: StatusBadge = {
+  variant: 'alternative',
+  label: { id: 'Settings.license.status.in-trial', defaultMessage: 'In Trial' },
+};
+
+const STATUS_BADGE: Record<License['licenseStatus'], StatusBadge> = {
   active: {
     variant: 'success',
     label: { id: 'Settings.license.status.active', defaultMessage: 'Active' },
@@ -133,6 +145,8 @@ const LicenseInfoEE = () => {
     expireAt,
     isTrial,
     planEntitlements,
+    usingCachedLicense,
+    registrySyncError,
   } = license;
 
   const licensedPlan = getProjectType({
@@ -201,7 +215,27 @@ const LicenseInfoEE = () => {
 
   const formattedDate = rawDateValue ? formatAbsoluteDate(rawDateValue) : null;
 
-  const statusBadge = STATUS_BADGE[licenseStatus];
+  const statusBadge =
+    licenseStatus === 'active' && isTrial ? TRIAL_BADGE : STATUS_BADGE[licenseStatus];
+
+  /**
+   * `unknown` covers two very different situations that used to render identically: we could
+   * not reach the registry (the licence is probably fine, we are running on the cached copy),
+   * or the registry answered and refused the licence. Only the second one needs the customer
+   * to do something, so say which it is.
+   */
+  const registryNotice: MessageDescriptor | null = usingCachedLicense
+    ? {
+        id: 'Settings.license.registry.cached',
+        defaultMessage:
+          "Couldn't reach the license registry. Showing the last license we retrieved.",
+      }
+    : registrySyncError && licenseStatus !== 'active'
+      ? {
+          id: 'Settings.license.registry.rejected',
+          defaultMessage: 'The license registry could not validate this license.',
+        }
+      : null;
 
   const checkinLine =
     licenseMode === 'offline'
@@ -269,7 +303,7 @@ const LicenseInfoEE = () => {
           {/* AI usage stays Growth-only. The `ai.enabled` gate is preserved from before this
               block moved onto the Plan card: without it an instance with AI disabled requests
               usage it cannot have. */}
-          {isGrowth && window.strapi.ai?.enabled !== false && <AIUsage />}
+          {isGrowth && window.strapi.ai?.enabled !== false && <AIUsage isTrial={isTrial} />}
         </Flex>
         <Flex direction="column" alignItems="stretch" gap={5} flex="1">
           <Flex direction="column" alignItems="start" gap={2}>
@@ -301,6 +335,14 @@ const LicenseInfoEE = () => {
                   <ClockCounterClockwise width="1.2rem" height="1.2rem" fill="neutral500" />
                   <Typography variant="pi" textColor="neutral500">
                     {checkinLine}
+                  </Typography>
+                </Flex>
+              )}
+              {registryNotice && (
+                <Flex gap={1} alignItems="center">
+                  <WarningCircle width="1.2rem" height="1.2rem" fill="warning600" />
+                  <Typography variant="pi" textColor="warning600">
+                    {formatMessage(registryNotice)}
                   </Typography>
                 </Flex>
               )}
