@@ -335,6 +335,7 @@
   "list.table.header.sort": "Sort on {label}",
   "list.table.header.select-all": "Select all",
   "list.table.row.select": "Select {name}",
+  "list.table.row.metadata-missing": "This asset is missing metadata (caption or alternative text).",
   "list.table.content.empty-label": "This field is empty",
   "list.bulk-actions.label": "Bulk actions",
   "list.bulk-actions.selected-count": "{count, plural, =1 {# item selected} other {# items selected}}",
@@ -385,9 +386,6 @@
   "sidebar.tree.expand": "Expand {name}",
   "sidebar.tree.collapse": "Collapse {name}",
   "sidebar.tree.empty": "No folders yet",
-  "sidebar.tree.no-results": "No folders match \"{query}\"",
   "sidebar.tree.loading": "Loading folders...",
-  "sidebar.tree.error": "Could not load folders.",
-  "sidebar.search.label": "Search folders",
-  "sidebar.search.placeholder": "Search folders"
+  "sidebar.tree.error": "Could not load folders."
 }

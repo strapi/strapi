@@ -8,7 +8,7 @@ import type { DragFolderData } from '../../../../types/dnd';
 
 const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
-const mockClear = jest.fn();
+const mockDeselect = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -18,7 +18,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 
 jest.mock('../../hooks/useAssetSelection', () => ({
   useAssetSelection: () => ({
-    clear: mockClear,
+    deselect: mockDeselect,
     selectedIds: new Set<number>([9, 10]),
     selectedFolderIds: new Set<number>([8]),
   }),
@@ -202,7 +202,7 @@ describe('FolderActionsMenu', () => {
           message: 'Folder has been renamed',
         })
       );
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
 
     it('closes the dialog on cancel without renaming anything', async () => {
@@ -220,7 +220,7 @@ describe('FolderActionsMenu', () => {
   });
 
   describe('Move to folder', () => {
-    it('moves only this folder, whatever else is selected, then clears the selection', async () => {
+    it('moves only this folder, whatever else is selected, then deselects only this folder', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -248,7 +248,7 @@ describe('FolderActionsMenu', () => {
         // The menu never carries the selected assets (9, 10) or folder (8).
         expect(requestBody).toEqual({ fileIds: [], folderIds: [5], destinationFolderId: 1 })
       );
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('folder:5');
       await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
     });
 
@@ -319,12 +319,12 @@ describe('FolderActionsMenu', () => {
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 
   describe('Delete folder', () => {
-    it('deletes only this folder on confirm, toasts, and clears the selection', async () => {
+    it('deletes only this folder on confirm, toasts, and deselects only this folder', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -352,7 +352,7 @@ describe('FolderActionsMenu', () => {
         type: 'success',
         message: '1 item has been deleted',
       });
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('folder:5');
     });
 
     it('closes the confirm on cancel without deleting anything', async () => {
@@ -366,7 +366,7 @@ describe('FolderActionsMenu', () => {
 
       expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
       expect(mockToggleNotification).not.toHaveBeenCalled();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 });

@@ -89,9 +89,8 @@ const assetsApi = uploadApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: 'Asset' as const, id }],
     }),
     /**
-     * Update the editable metadata of an existing asset.
-     * Hits the legacy `POST /upload?id=<id>` endpoint which dispatches to
-     * `admin-upload.updateFileInfo`.
+     * Update the editable metadata of an existing asset, through
+     * `PUT /upload/files/<id>` (`admin-upload.updateFileInfo`).
      */
     updateAsset: builder.mutation<AssetWithPopulatedCreatedBy, UpdateAssetArgs>({
       query: ({ id, fileInfo }) => {
@@ -99,10 +98,9 @@ const assetsApi = uploadApi.injectEndpoints({
         formData.append('fileInfo', JSON.stringify(fileInfo));
 
         return {
-          url: '/upload',
-          method: 'POST',
+          url: `/upload/files/${id}`,
+          method: 'PUT',
           data: formData,
-          config: { params: { id } },
         };
       },
       invalidatesTags: (_result, _error, { id }) => [
@@ -114,11 +112,10 @@ const assetsApi = uploadApi.injectEndpoints({
       ],
     }),
     /**
-     * Replace the binary content of an existing asset.
-     * Hits `POST /upload?id=<id>` with a multipart body — the controller
-     * dispatches to `admin-upload.replaceFile` when a `files` part is present.
-     * Uses the standard axios baseQuery (no streaming) since we only ever
-     * replace one file at a time and don't need per-byte progress here.
+     * Replace the binary content of an existing asset, through
+     * `POST /upload/files/<id>/replace` (`admin-upload.replaceFile`) with a
+     * multipart body. Uses the standard axios baseQuery (no streaming) since we
+     * only ever replace one file at a time and don't need per-byte progress here.
      */
     replaceAsset: builder.mutation<AssetWithPopulatedCreatedBy, ReplaceAssetArgs>({
       query: ({ id, file, fileInfo }) => {
@@ -128,10 +125,9 @@ const assetsApi = uploadApi.injectEndpoints({
           formData.append('fileInfo', JSON.stringify(fileInfo));
         }
         return {
-          url: '/upload',
+          url: `/upload/files/${id}/replace`,
           method: 'POST',
           data: formData,
-          config: { params: { id } },
         };
       },
       invalidatesTags: (_result, _error, { id }) => [

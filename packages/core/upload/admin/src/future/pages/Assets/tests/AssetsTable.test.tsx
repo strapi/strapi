@@ -13,6 +13,7 @@ const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
 const mockUseAIAvailability = jest.fn(() => true);
+const mockTrackUsage = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -22,6 +23,11 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useAIAvailability: () => mockUseAIAvailability(),
+}));
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
 }));
 
 jest.mock('../hooks/useFolderNavigation', () => ({
@@ -582,6 +588,90 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image3.png' })).not.toBeChecked();
       expect(screen.getByText('3 items selected')).toBeInTheDocument();
     });
+
+    it("keeps the selection when an unselected asset's row menu deletes it", async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+
+      // The third row's own menu — image1 and image2 stay selected around it.
+      await user.click(screen.getAllByRole('button', { name: 'More actions' })[2]);
+      await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
+      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ fileIds: [3], folderIds: [] }));
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+    });
+
+    it("keeps the selection when an unselected folder's row menu deletes it", async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')] });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+
+      // Folders render before assets, so the folder's trigger is the first one.
+      await user.click(screen.getAllByRole('button', { name: 'More actions' })[0]);
+      await user.click(screen.getByRole('menuitem', { name: 'Delete folder' }));
+      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ fileIds: [], folderIds: [1] }));
+      expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+    });
+  });
+
+  describe('tracking', () => {
+    it('fires didSelectAllMediaLibraryElements when the select-all header checkbox selects everything', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select all' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements');
+    });
+
+    it('does not fire didSelectAllMediaLibraryElements when the header checkbox clears the selection', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      const selectAll = await screen.findByRole('checkbox', { name: 'Select all' });
+
+      // First click selects everything → fires once.
+      await user.click(selectAll);
+      expect(mockTrackUsage).toHaveBeenCalledTimes(1);
+
+      // Second click clears the selection → must not fire again.
+      await user.click(selectAll);
+      expect(mockTrackUsage).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('BulkActionsBar', () => {
@@ -621,7 +711,7 @@ describe('AssetsTable', () => {
       let requestBody: unknown;
       server.use(
         http.post(
-          '*/upload/unstable/generate-ai-metadata',
+          '*/upload/actions/generate-ai-metadata',
           async ({ request }) => {
             requestBody = await request.json();
             return HttpResponse.json({
@@ -655,7 +745,7 @@ describe('AssetsTable', () => {
     it('summarises a partial metadata result in a warning toast', async () => {
       server.use(
         http.post(
-          '*/upload/unstable/generate-ai-metadata',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json({
               data: [
@@ -713,7 +803,7 @@ describe('AssetsTable', () => {
     it('reports folders in the selection as ignored rather than silently dropping them', async () => {
       server.use(
         http.post(
-          '*/upload/unstable/generate-ai-metadata',
+          '*/upload/actions/generate-ai-metadata',
           () => HttpResponse.json({ data: [{ id: 1, status: 'success' }] }),
           { once: true }
         )
@@ -738,7 +828,7 @@ describe('AssetsTable', () => {
     it('keeps the selection and shows an error toast when metadata generation fails', async () => {
       server.use(
         http.post(
-          '*/upload/unstable/generate-ai-metadata',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json(
               { error: { message: 'AI Metadata service is not enabled' } },
@@ -766,7 +856,7 @@ describe('AssetsTable', () => {
     it('keeps the selection and shows an error toast when every file fails server-side', async () => {
       server.use(
         http.post(
-          '*/upload/unstable/generate-ai-metadata',
+          '*/upload/actions/generate-ai-metadata',
           () =>
             HttpResponse.json({
               data: [
