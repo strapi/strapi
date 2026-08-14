@@ -1,36 +1,46 @@
 import path from 'path';
 
+import { lookup as lookupMimeType } from 'mime-types';
 import { file as fileUtils } from '@strapi/utils';
 
 import type { IFile } from '../types';
 
 const { bytesToKbytes } = fileUtils;
 
-const MIME_BY_EXT: Record<string, string> = {
-  '.avif': 'image/avif',
-  '.gif': 'image/gif',
-  '.jpeg': 'image/jpeg',
-  '.jpg': 'image/jpeg',
-  '.png': 'image/png',
-  '.svg': 'image/svg+xml',
-  '.tif': 'image/tiff',
-  '.tiff': 'image/tiff',
-  '.webp': 'image/webp',
-  '.pdf': 'application/pdf',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-  '.mp3': 'audio/mpeg',
-  '.wav': 'audio/wav',
-};
+/**
+ * Default upload responsive format prefixes (`thumbnail` plus DEFAULT_BREAKPOINTS).
+ * Custom breakpoints cannot be known at fallback time (no Strapi config on the source).
+ */
+const RESPONSIVE_FORMAT_PREFIXES = ['thumbnail', 'large', 'medium', 'small'] as const;
 
-const guessMimeFromExt = (ext: string): string => {
-  const normalized = ext.toLowerCase();
-  return MIME_BY_EXT[normalized] ?? 'application/octet-stream';
+export class MissingArchiveEntryError extends Error {
+  readonly filePath: string;
+
+  constructor(filePath: string) {
+    super(`File "${filePath}" not found`);
+    this.name = 'MissingArchiveEntryError';
+    this.filePath = filePath;
+  }
+}
+
+const parseResponsiveFormatFromHash = (
+  hash: string
+): { type: (typeof RESPONSIVE_FORMAT_PREFIXES)[number]; mainHash: string } | undefined => {
+  for (const format of RESPONSIVE_FORMAT_PREFIXES) {
+    const prefix = `${format}_`;
+    if (hash.startsWith(prefix) && hash.length > prefix.length) {
+      return { type: format, mainHash: hash.slice(prefix.length) };
+    }
+  }
+
+  return undefined;
 };
 
 /**
  * Build minimal upload metadata when an export sidecar JSON is missing.
  * Strapi export uploads are named `{hash}{ext}`; bytes are still transferred unchanged.
+ * Responsive variants are named `{format}_{parentHash}{ext}` — recover `type`/`mainHash`
+ * so the destination can update the parent media-library row.
  */
 export const buildFallbackAssetMetadataFromFilename = (
   filename: string,
@@ -38,15 +48,17 @@ export const buildFallbackAssetMetadataFromFilename = (
 ): IFile => {
   const ext = path.extname(filename);
   const hash = ext ? filename.slice(0, -ext.length) : filename;
+  const format = parseResponsiveFormatFromHash(hash);
 
   return {
     id: 0,
     name: filename,
     hash,
     ext: ext || undefined,
-    mime: guessMimeFromExt(ext),
+    mime: lookupMimeType(filename) || 'application/octet-stream',
     size: bytesToKbytes(stats.size),
     url: ext ? `/${hash}${ext}` : `/${hash}`,
+    ...(format ? { type: format.type, mainHash: format.mainHash } : {}),
   };
 };
 
@@ -55,7 +67,7 @@ export const missingAssetMetadataSidecarMessage = (filename: string): string =>
 
 /**
  * True when asset metadata sidecar loading failed because the sidecar is absent.
- * Directory sources surface `ENOENT`; tar/file sources reject with `File "…" not found`.
+ * Directory sources surface `ENOENT`; tar/file sources reject with `MissingArchiveEntryError`.
  * Other failures (malformed JSON, permissions, I/O) must abort the transfer.
  */
 export const isMissingAssetMetadataSidecarError = (error: unknown): boolean => {
@@ -67,5 +79,5 @@ export const isMissingAssetMetadataSidecarError = (error: unknown): boolean => {
     return true;
   }
 
-  return error instanceof Error && /^File ".+" not found$/.test(error.message);
+  return error instanceof MissingArchiveEntryError;
 };

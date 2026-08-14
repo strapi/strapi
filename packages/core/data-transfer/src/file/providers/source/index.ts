@@ -19,6 +19,7 @@ import { write } from '../../../utils/writable-async-write';
 import {
   buildFallbackAssetMetadataFromFilename,
   isMissingAssetMetadataSidecarError,
+  MissingArchiveEntryError,
   missingAssetMetadataSidecarMessage,
 } from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -105,11 +106,17 @@ class LocalFileSourceProvider implements ISourceProvider {
     activeAsyncEntries: () => number,
     err?: Error | null
   ) {
+    if (outStream.destroyed) {
+      return;
+    }
     if (err) {
       outStream.destroy(err);
       return;
     }
     const tick = () => {
+      if (outStream.destroyed) {
+        return;
+      }
       if (activeAsyncEntries() === 0) {
         outStream.end();
       } else {
@@ -213,6 +220,9 @@ class LocalFileSourceProvider implements ISourceProvider {
       activeAsyncEntries += 1;
       try {
         await fn();
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        outStream.destroy(err);
       } finally {
         activeAsyncEntries -= 1;
       }
@@ -394,10 +404,11 @@ class LocalFileSourceProvider implements ISourceProvider {
             },
           }),
         ],
-        () => {
-          // If the promise hasn't been resolved and we've parsed all
-          // the archive entries, then the file doesn't exist
-          reject(new Error(`File "${filePath}" not found`));
+        (err) => {
+          // Propagate archive/I/O failures. A genuine miss is an exhausted
+          // search with no pipeline error — use a typed sentinel so callers
+          // do not treat corrupt gzip, EMFILE, or decrypt failures as absence.
+          reject(err ?? new MissingArchiveEntryError(filePath));
         }
       );
     });

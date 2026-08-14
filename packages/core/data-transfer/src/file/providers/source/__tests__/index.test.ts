@@ -2,6 +2,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import tarStream from 'tar-stream';
+import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
@@ -174,6 +175,156 @@ describe('File source provider', () => {
 
       expect(sourcePaused).toBe(true);
       expect(chunks.length).toBe(25);
+    }, 8000);
+  });
+
+  describe('asset metadata sidecar', () => {
+    const createTar = async (
+      entries: Array<{ name: string; content: string | Buffer }>
+    ): Promise<string> => {
+      const tarPath = path.join(
+        os.tmpdir(),
+        `strapi-dt-sidecar-${Date.now()}-${Math.random()}.tar`
+      );
+      const pack = tarStream.pack();
+      for (const entry of entries) {
+        pack.entry({ name: entry.name }, entry.content);
+      }
+      pack.finalize();
+      await pipeline(pack, fs.createWriteStream(tarPath));
+      return tarPath;
+    };
+
+    const collectAssets = async (stream: NodeJS.ReadableStream) => {
+      const assets: Array<{ filename?: string; metadata?: { hash?: string; mime?: string } }> = [];
+      for await (const chunk of stream as AsyncIterable<{
+        filename?: string;
+        metadata?: { hash?: string; mime?: string };
+        stream?: NodeJS.ReadableStream;
+      }>) {
+        assets.push(chunk);
+        chunk.stream?.resume();
+      }
+      return assets;
+    };
+
+    test('uses filename fallback when the sidecar entry is missing', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+      ]);
+
+      const report = jest.fn();
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report } as never);
+
+      const assets = await collectAssets(
+        provider.createAssetsReadStream() as NodeJS.ReadableStream
+      );
+
+      await fs.remove(tarPath).catch(() => {});
+
+      expect(assets).toHaveLength(1);
+      expect(assets[0].metadata).toMatchObject({ hash: 'photo', mime: 'image/jpeg' });
+      expect(report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'warning',
+          details: expect.objectContaining({
+            message: expect.stringContaining('Missing asset metadata sidecar'),
+          }),
+        })
+      );
+    }, 8000);
+
+    test('aborts the assets stream when sidecar JSON is malformed', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+        { name: 'assets/metadata/photo.jpg.json', content: '{not valid json!!!' },
+      ]);
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report: jest.fn() } as never);
+
+      const stream = provider.createAssetsReadStream();
+      await expect(collectAssets(stream as NodeJS.ReadableStream)).rejects.toThrow(SyntaxError);
+
+      await fs.remove(tarPath).catch(() => {});
+    }, 8000);
+
+    test('aborts the assets stream when the sidecar archive re-scan fails', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+        {
+          name: 'assets/metadata/photo.jpg.json',
+          content: JSON.stringify({
+            id: 1,
+            hash: 'photo',
+            name: 'photo.jpg',
+            mime: 'image/jpeg',
+            size: 1,
+            url: '/photo.jpg',
+          }),
+        },
+      ]);
+
+      const originalCreateReadStream = fs.createReadStream.bind(fs);
+      let opens = 0;
+      const spy = jest.spyOn(fs, 'createReadStream').mockImplementation((filePath, options) => {
+        opens += 1;
+        if (opens >= 3) {
+          const failed = new PassThrough();
+          process.nextTick(() => {
+            failed.destroy(
+              Object.assign(new Error('EMFILE: too many open files'), { code: 'EMFILE' })
+            );
+          });
+          return failed;
+        }
+        return originalCreateReadStream(filePath, options);
+      });
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report: jest.fn() } as never);
+
+      const stream = provider.createAssetsReadStream();
+      await expect(collectAssets(stream as NodeJS.ReadableStream)).rejects.toMatchObject({
+        code: 'EMFILE',
+      });
+
+      spy.mockRestore();
+      await fs.remove(tarPath).catch(() => {});
     }, 8000);
   });
 });

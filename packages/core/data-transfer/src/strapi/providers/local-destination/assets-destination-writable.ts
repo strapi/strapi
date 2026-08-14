@@ -3,6 +3,30 @@ import type { Core } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../types';
 import type { Transaction } from '../../../types/utils';
+import { createCappedWarningReporter } from '../../../utils/capped-warnings';
+
+type HashIndexEntry = number | 'ambiguous';
+type UploadHashIndex = Map<string, HashIndexEntry>;
+
+const loadUploadHashIndex = async (strapi: Core.Strapi): Promise<UploadHashIndex> => {
+  const entries = await strapi.db.query('plugin::upload.file').findMany({
+    select: ['id', 'hash'],
+  });
+
+  const index: UploadHashIndex = new Map();
+  for (const entry of entries) {
+    if (!entry?.hash || entry.id == null) {
+      continue;
+    }
+    const existing = index.get(entry.hash);
+    if (existing !== undefined && existing !== entry.id) {
+      index.set(entry.hash, 'ambiguous');
+    } else if (existing === undefined) {
+      index.set(entry.hash, entry.id);
+    }
+  }
+  return index;
+};
 
 export interface CreateAssetsDestinationWritableOptions {
   strapi: Core.Strapi;
@@ -14,10 +38,11 @@ export interface CreateAssetsDestinationWritableOptions {
 }
 
 const resolveUploadFileIdWithHashFallback = async (
-  strapi: Core.Strapi,
   uploadData: IFile,
   resolveUploadFileId: (metadata: { id: number }) => number | undefined,
-  onWarning?: (message: string) => void
+  getHashIndex: () => Promise<UploadHashIndex>,
+  warn: (message: string) => void,
+  counts: { resolved: number; ambiguous: number }
 ): Promise<number | undefined> => {
   const mappedId = resolveUploadFileId(uploadData);
   if (mappedId) {
@@ -31,25 +56,23 @@ const resolveUploadFileIdWithHashFallback = async (
     return undefined;
   }
 
-  // `hash` is required but not unique on plugin::upload.file — refuse to guess.
-  const entries = await strapi.db.query('plugin::upload.file').findMany({
-    where: { hash: lookupHash },
-    select: ['id'],
-  });
+  const index = await getHashIndex();
+  const match = index.get(lookupHash);
 
-  if (entries.length > 1) {
-    onWarning?.(
-      `[Data transfer] Ambiguous hash "${lookupHash}" matched ${entries.length} media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
+  if (match === 'ambiguous') {
+    counts.ambiguous += 1;
+    warn(
+      `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
     );
     return undefined;
   }
 
-  const entry = entries[0];
-  if (entry?.id) {
-    onWarning?.(
+  if (typeof match === 'number') {
+    counts.resolved += 1;
+    warn(
       `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
     );
-    return entry.id;
+    return match;
   }
 
   return undefined;
@@ -80,6 +103,16 @@ export function createAssetsDestinationWritable(
   } = options;
 
   let pendingUploads = 0;
+  let hashIndexPromise: Promise<UploadHashIndex> | undefined;
+  const hashFallbackCounts = { resolved: 0, ambiguous: 0, unmatched: 0 };
+  const warnings = createCappedWarningReporter(onWarning);
+
+  const getHashIndex = () => {
+    if (!hashIndexPromise) {
+      hashIndexPromise = loadUploadHashIndex(strapi);
+    }
+    return hashIndexPromise;
+  };
 
   return new Writable({
     objectMode: true,
@@ -88,6 +121,12 @@ export function createAssetsDestinationWritable(
         await new Promise<void>((resolve) => {
           setImmediate(resolve);
         });
+      }
+      const { resolved, ambiguous, unmatched } = hashFallbackCounts;
+      if (resolved + ambiguous + unmatched > 0) {
+        onWarning?.(
+          `[Data transfer] Asset hash fallback summary: ${resolved} resolved, ${ambiguous} ambiguous, ${unmatched} unmatched.`
+        );
       }
       await removeAssetsBackup();
       next();
@@ -119,10 +158,11 @@ export function createAssetsDestinationWritable(
               // With --only files, restoreMediaEntitiesContent is false: upload bytes only.
               const fileId = restoreMediaEntitiesContent
                 ? await resolveUploadFileIdWithHashFallback(
-                    strapi,
                     uploadData,
                     resolveUploadFileId,
-                    onWarning
+                    getHashIndex,
+                    (message) => warnings.warn(message),
+                    hashFallbackCounts
                   )
                 : resolveUploadFileId(uploadData);
 
@@ -133,7 +173,8 @@ export function createAssetsDestinationWritable(
               }
 
               if (!fileId) {
-                onWarning?.(
+                hashFallbackCounts.unmatched += 1;
+                warnings.warn(
                   `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
                 );
                 return;
@@ -144,14 +185,14 @@ export function createAssetsDestinationWritable(
                   where: { id: fileId },
                 });
                 if (!entry) {
-                  onWarning?.(
+                  warnings.warn(
                     `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but parent file record was not found.`
                   );
                   return;
                 }
                 const specificFormat = entry?.formats?.[uploadData.type];
                 if (!specificFormat) {
-                  onWarning?.(
+                  warnings.warn(
                     `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but no matching format entry exists in the database.`
                   );
                   return;
@@ -171,7 +212,7 @@ export function createAssetsDestinationWritable(
                 where: { id: fileId },
               });
               if (!entry) {
-                onWarning?.(
+                warnings.warn(
                   `[Data transfer] Uploaded asset "${chunk.filename}" but file record was not found for URL update.`
                 );
                 return;

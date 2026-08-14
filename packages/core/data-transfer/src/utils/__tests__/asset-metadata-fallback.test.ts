@@ -1,6 +1,7 @@
 import {
   buildFallbackAssetMetadataFromFilename,
   isMissingAssetMetadataSidecarError,
+  MissingArchiveEntryError,
 } from '../asset-metadata-fallback';
 
 describe('buildFallbackAssetMetadataFromFilename', () => {
@@ -16,14 +17,36 @@ describe('buildFallbackAssetMetadataFromFilename', () => {
       url: '/abc123_def.jpeg',
     });
     expect(metadata.size).toBeGreaterThan(0);
+    expect(metadata.mainHash).toBeUndefined();
+    expect(metadata.type).toBeUndefined();
   });
 
-  test('uses octet-stream when extension is unknown', () => {
-    const metadata = buildFallbackAssetMetadataFromFilename('file.bin', { size: 100 });
+  test('uses mime-types lookup and reserves octet-stream for unknown extensions', () => {
+    expect(buildFallbackAssetMetadataFromFilename('clip.mov', { size: 100 }).mime).toBe(
+      'video/quicktime'
+    );
+    expect(buildFallbackAssetMetadataFromFilename('archive.zip', { size: 100 }).mime).toBe(
+      'application/zip'
+    );
+    expect(buildFallbackAssetMetadataFromFilename('file.bin', { size: 100 }).mime).toBe(
+      'application/octet-stream'
+    );
+    expect(buildFallbackAssetMetadataFromFilename('file.unknownextxyz', { size: 100 }).mime).toBe(
+      'application/octet-stream'
+    );
+  });
 
-    expect(metadata.hash).toBe('file');
-    expect(metadata.ext).toBe('.bin');
-    expect(metadata.mime).toBe('application/octet-stream');
+  test('recovers type and mainHash for default responsive-format prefixes', () => {
+    const metadata = buildFallbackAssetMetadataFromFilename('thumbnail_we_love_pizza_abc123.jpeg', {
+      size: 512,
+    });
+
+    expect(metadata).toMatchObject({
+      hash: 'thumbnail_we_love_pizza_abc123',
+      type: 'thumbnail',
+      mainHash: 'we_love_pizza_abc123',
+      mime: 'image/jpeg',
+    });
   });
 });
 
@@ -33,14 +56,22 @@ describe('isMissingAssetMetadataSidecarError', () => {
     expect(isMissingAssetMetadataSidecarError(error)).toBe(true);
   });
 
-  test('accepts tar/file missing-entry errors', () => {
+  test('accepts typed tar missing-entry errors', () => {
     expect(
-      isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))
+      isMissingAssetMetadataSidecarError(new MissingArchiveEntryError('assets/metadata/x.json'))
     ).toBe(true);
   });
 
-  test('rejects malformed JSON and other failures', () => {
+  test('rejects message-only "not found" errors and other failures', () => {
+    expect(
+      isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))
+    ).toBe(false);
     expect(isMissingAssetMetadataSidecarError(new SyntaxError('Unexpected token'))).toBe(false);
     expect(isMissingAssetMetadataSidecarError(new Error('EACCES: permission denied'))).toBe(false);
+    expect(
+      isMissingAssetMetadataSidecarError(
+        Object.assign(new Error('too many files'), { code: 'EMFILE' })
+      )
+    ).toBe(false);
   });
 });

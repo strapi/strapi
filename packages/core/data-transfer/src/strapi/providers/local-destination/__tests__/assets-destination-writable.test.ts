@@ -355,7 +355,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   test('uploads asset when entity ID mapping is missing but hash matches an existing record', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42 }]);
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42, hash: 'photo_hash' }]);
     const mockFindOne = jest.fn().mockResolvedValue({ id: 42, url: 'old.jpg', formats: {} });
     const mockUpdate = jest.fn().mockResolvedValue(null);
     const onWarning = jest.fn();
@@ -397,9 +397,10 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { hash: 'photo_hash' },
+        select: ['id', 'hash'],
       })
     );
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
     expect(onWarning).toHaveBeenCalledWith(
       expect.stringContaining('Resolved upload file ID via hash')
     );
@@ -461,7 +462,10 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   test('uploads bytes and skips DB update when hash matches multiple records', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindMany = jest.fn().mockResolvedValue([{ id: 10 }, { id: 20 }]);
+    const mockFindMany = jest.fn().mockResolvedValue([
+      { id: 10, hash: 'dup_hash' },
+      { id: 20, hash: 'dup_hash' },
+    ]);
     const mockUpdate = jest.fn().mockResolvedValue(null);
     const onWarning = jest.fn();
 
@@ -567,7 +571,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
   test('resolves parent file via mainHash for responsive format variants', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);
-    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42 }]);
+    const mockFindMany = jest.fn().mockResolvedValue([{ id: 42, hash: 'photo_hash' }]);
     const mockFindOne = jest.fn().mockResolvedValue({
       id: 42,
       url: 'photo.jpg',
@@ -615,7 +619,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { hash: 'photo_hash' },
+        select: ['id', 'hash'],
       })
     );
     expect(onWarning).toHaveBeenCalledWith(
@@ -625,6 +629,96 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
     await new Promise<void>((resolve, reject) => {
       stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
     });
+    transaction.end();
+  });
+
+  test('builds a stage-scoped hash index once and emits an end-of-stage summary', async () => {
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindMany = jest.fn().mockResolvedValue([
+      { id: 1, hash: 'hash_a' },
+      { id: 2, hash: 'hash_b' },
+    ]);
+    const mockFindOne = jest
+      .fn()
+      .mockImplementation(({ where: { id } }) =>
+        Promise.resolve({ id, url: 'old.jpg', formats: {} })
+      );
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    const first = new PassThrough();
+    const second = new PassThrough();
+
+    await writeAsset(stream, {
+      filename: 'a.jpg',
+      filepath: '/a.jpg',
+      stats: { size: 10 },
+      stream: first,
+      metadata: {
+        hash: 'hash_a',
+        name: 'a.jpg',
+        id: 10,
+        url: 'a.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+    await writeAsset(stream, {
+      filename: 'b.jpg',
+      filepath: '/b.jpg',
+      stats: { size: 10 },
+      stream: second,
+      metadata: {
+        hash: 'hash_b',
+        name: 'b.jpg',
+        id: 11,
+        url: 'b.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    first.end(Buffer.from('a'));
+    second.end(Buffer.from('b'));
+
+    await waitForUploadStream(uploadStream);
+    await new Promise<void>((resolve) => {
+      const startedAt = Date.now();
+      const poll = () => {
+        if (uploadStream.mock.calls.length >= 2 || Date.now() - startedAt >= 500) {
+          resolve();
+          return;
+        }
+        setImmediate(poll);
+      };
+      poll();
+    });
+
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Asset hash fallback summary: 2 resolved, 0 ambiguous, 0 unmatched')
+    );
     transaction.end();
   });
 });
