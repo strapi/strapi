@@ -211,9 +211,12 @@ const SupportCard = () => {
   const { data: licenseLimitsData } = useGetLicenseLimitsQuery();
   const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
   const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
+  const isTrial = licenseLimitsData?.data?.isTrial ?? false;
   const licensedPlan = getProjectType({ isEE: licenseStatus !== 'none', planPriceId });
-  const isPaidPlan = licensedPlan !== 'Community';
-  const tiles = isPaidPlan ? EE_TILES : CE_TILES;
+  // A trial resolves to a paid plan name, but a trial does not come with Strapi support, so
+  // it gets the community channels instead of the support portal.
+  const hasStrapiSupport = licensedPlan !== 'Community' && !isTrial;
+  const tiles = hasStrapiSupport ? EE_TILES : CE_TILES;
 
   return (
     <>
@@ -235,7 +238,7 @@ const SupportCard = () => {
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {formatMessage(
-              isPaidPlan
+              hasStrapiSupport
                 ? {
                     id: 'Settings.application.support.subtitle.enterprise',
                     defaultMessage:
@@ -269,7 +272,7 @@ const SupportCard = () => {
                 </Typography>
                 <Typography>
                   {formatMessage(
-                    isPaidPlan
+                    hasStrapiSupport
                       ? {
                           id: 'Settings.application.support.diagnostic-snapshot.description.enterprise',
                           defaultMessage:

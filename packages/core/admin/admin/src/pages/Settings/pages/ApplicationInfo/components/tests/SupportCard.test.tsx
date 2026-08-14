@@ -6,7 +6,9 @@ import { SupportCard } from '../SupportCard';
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
 
 interface MockLicenseLimitsQueryResult {
-  data: { data: { licenseStatus: LicenseStatus; planPriceId: string | null } } | undefined;
+  data:
+    | { data: { licenseStatus: LicenseStatus; planPriceId: string | null; isTrial: boolean } }
+    | undefined;
 }
 
 /**
@@ -17,9 +19,13 @@ interface MockLicenseLimitsQueryResult {
  */
 let mockLicenseLimitsResult: MockLicenseLimitsQueryResult = { data: undefined };
 
-const setLicenseLimits = (licenseStatus?: LicenseStatus, planPriceId: string | null = null) => {
+const setLicenseLimits = (
+  licenseStatus?: LicenseStatus,
+  planPriceId: string | null = null,
+  isTrial = false
+) => {
   mockLicenseLimitsResult = licenseStatus
-    ? { data: { data: { licenseStatus, planPriceId } } }
+    ? { data: { data: { licenseStatus, planPriceId, isTrial } } }
     : { data: undefined };
 };
 
@@ -109,6 +115,26 @@ describe('SupportCard', () => {
         'https://discord.strapi.io'
       );
       expect(screen.queryByRole('link', { name: /github discussions/i })).not.toBeInTheDocument();
+    } finally {
+      window.strapi.isEE = original;
+    }
+  });
+
+  it('shows the community tiles on a trial, which does not include Strapi support', async () => {
+    // A trial resolves to a paid plan name, so without the trial check it would pick up the
+    // Support portal tile for support the customer does not actually have.
+    const original = window.strapi.isEE;
+    window.strapi.isEE = true;
+    setLicenseLimits('active', 'growth-plan', true);
+
+    try {
+      render(<SupportCard />);
+
+      expect(await screen.findByRole('link', { name: /github discussions/i })).toHaveAttribute(
+        'href',
+        'https://github.com/strapi/strapi/discussions'
+      );
+      expect(screen.queryByRole('link', { name: /support portal/i })).not.toBeInTheDocument();
     } finally {
       window.strapi.isEE = original;
     }
