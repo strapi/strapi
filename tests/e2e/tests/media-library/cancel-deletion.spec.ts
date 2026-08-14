@@ -25,9 +25,9 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY !== 'true')('Media Library', 
       await navToHeader(page, ['Media Library'], 'Media Library');
 
       // Upload one asset so we have something to open and attempt to delete
-      await page.getByRole('button', { name: 'Add new assets' }).first().click();
+      await page.getByRole('button', { name: 'Add assets' }).first().click();
       await expect(
-        page.getByRole('dialog').getByRole('heading', { name: 'Add new assets' })
+        page.getByRole('dialog').getByRole('heading', { name: 'Add assets' })
       ).toBeVisible();
 
       const fileInput = page.getByRole('dialog').locator('input[type="file"]');
@@ -41,7 +41,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY !== 'true')('Media Library', 
 
       // Stable media library does not show a toast on upload success; the dialog just closes
       await expect(
-        page.getByRole('dialog').getByRole('heading', { name: 'Add new assets' })
+        page.getByRole('dialog').getByRole('heading', { name: 'Add assets' })
       ).not.toBeVisible({ timeout: 15000 });
 
       // Open the first asset (the one we just uploaded) by clicking its card

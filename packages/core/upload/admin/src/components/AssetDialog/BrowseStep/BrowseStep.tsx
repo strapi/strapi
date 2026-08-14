@@ -284,7 +284,7 @@ export const BrowseStep = ({
                 <Button variant="secondary" startIcon={<Plus />} onClick={onAddAsset}>
                   {formatMessage({
                     id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
+                    defaultMessage: 'Add assets',
                   })}
                 </Button>
               )

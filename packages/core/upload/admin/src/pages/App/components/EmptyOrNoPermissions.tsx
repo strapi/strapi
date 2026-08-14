@@ -63,7 +63,7 @@ export const EmptyOrNoPermissions = ({
           <Button variant="secondary" startIcon={<Plus />} onClick={onActionClick}>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
-              defaultMessage: 'Add new assets',
+              defaultMessage: 'Add assets',
             })}
           </Button>
         )

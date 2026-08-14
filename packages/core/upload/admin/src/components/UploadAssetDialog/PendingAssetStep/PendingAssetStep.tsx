@@ -109,7 +109,7 @@ export const PendingAssetStep = ({
         <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
-            defaultMessage: 'Add new assets',
+            defaultMessage: 'Add assets',
           })}
         </Modal.Title>
       </Modal.Header>
@@ -138,7 +138,7 @@ export const PendingAssetStep = ({
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
-                defaultMessage: 'Add new assets',
+                defaultMessage: 'Add assets',
               })}
             </Button>
           </Flex>
