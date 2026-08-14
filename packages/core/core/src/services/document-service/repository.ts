@@ -504,12 +504,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           await applyPostCloneRelationUpdates(
             strapi,
             uid,
+            sourceEntryId,
             doc.id,
             {
               ...(clonedEntry as Record<string, unknown>),
               documentId: doc.documentId,
               locale: entryToClone.locale ?? queryParams.locale ?? queryParams.data?.locale,
             },
+            originalData,
             postCloneUpdates
           );
         }

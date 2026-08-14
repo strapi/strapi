@@ -4,7 +4,8 @@ import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
 import { transactionCtx } from '@strapi/database';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
-import { isLocalizedContentType } from '../transform/relations/utils/i18n';
+import { getRelationTargetLocale } from '../transform/relations/utils/i18n';
+import { getRelationTargetStatus } from '../transform/relations/utils/dp';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
 type TraversableData = Parameters<typeof traverseEntity>[2];
@@ -473,6 +474,12 @@ const copyFkColumnRelation = async (
     return;
   }
 
+  // Inverse/non-owning joinColumn.name is this table's `id`, not an FK. Copying it
+  // attaches an unrelated row whose numeric id happens to match the source id.
+  if (!('owner' in attribute) || attribute.owner !== true) {
+    return;
+  }
+
   const joinColumnName = attribute.joinColumn.name;
   const trx = transactionCtx.get();
   const sourceRow = await strapi.db
@@ -636,16 +643,16 @@ const pickInlineRelationTargetRef = (
     return undefined;
   }
 
-  const disconnect = value.disconnect;
-  if (Array.isArray(disconnect) && disconnect.length > 0) {
-    return null;
-  }
-
   return undefined;
+};
+
+const toRelationStatus = (value: unknown): 'draft' | 'published' | undefined => {
+  return value === 'draft' || value === 'published' ? value : undefined;
 };
 
 const resolveEntryIdByRef = async (
   strapi: Core.Strapi,
+  sourceUid: UID.Schema,
   targetUid: UID.Schema,
   ref: Record<string, unknown>,
   opts: { locale?: string }
@@ -658,35 +665,212 @@ const resolveEntryIdByRef = async (
     return undefined;
   }
 
-  const model = strapi.getModel(targetUid);
-  const where: Record<string, unknown> = { documentId: ref.documentId };
+  const relation = {
+    documentId: ref.documentId,
+    locale: typeof ref.locale === 'string' ? ref.locale : undefined,
+    status: toRelationStatus(ref.status),
+  };
 
-  // Clone always produces drafts; prefer the draft row when the target uses D&P.
-  if (contentTypes.hasDraftAndPublish(model)) {
-    where.publishedAt = null;
-  }
-
-  if (opts.locale && isLocalizedContentType(targetUid)) {
-    where.locale = opts.locale;
-  }
-
-  const row = await strapi.db.query(targetUid).findOne({
-    where,
-    select: ['id'],
+  const targetLocale = getRelationTargetLocale(relation, {
+    targetUid,
+    sourceUid,
+    sourceLocale: opts.locale,
   });
 
-  return typeof row?.id === 'number' ? row.id : undefined;
+  const sourceHasDP = contentTypes.hasDraftAndPublish(strapi.getModel(sourceUid));
+  const statuses = getRelationTargetStatus(relation, {
+    targetUid,
+    sourceUid,
+    sourceStatus: sourceHasDP ? 'draft' : undefined,
+  });
+
+  const model = strapi.getModel(targetUid);
+  const targetHasDP = contentTypes.hasDraftAndPublish(model);
+
+  // Single-column FK/morph storage can keep only one id; match entity-manager and
+  // keep the last resolved status when the standard resolver returns both.
+  let resolvedId: number | undefined;
+
+  for (const status of statuses) {
+    const where: Record<string, unknown> = { documentId: ref.documentId };
+
+    if (targetHasDP) {
+      where.publishedAt = status === 'draft' ? null : { $ne: null };
+    }
+
+    if (targetLocale) {
+      where.locale = targetLocale;
+    }
+
+    const row = await strapi.db.query(targetUid).findOne({
+      where,
+      select: ['id'],
+    });
+
+    if (typeof row?.id === 'number') {
+      resolvedId = row.id;
+    }
+  }
+
+  return resolvedId;
+};
+
+const getMorphTypeField = (attribute: CloneRelationAttribute) => {
+  const morphColumn =
+    'morphColumn' in attribute
+      ? (attribute as { morphColumn?: { typeField?: string } }).morphColumn
+      : undefined;
+
+  return morphColumn?.typeField ?? '__type';
+};
+
+const hasRelationTarget = (
+  attribute: CloneRelationAttribute
+): attribute is CloneRelationAttribute & { target: string } => {
+  return 'target' in attribute && typeof (attribute as { target?: unknown }).target === 'string';
+};
+
+const currentAssociationId = (current: unknown): number | undefined => {
+  if (typeof current === 'number') {
+    return current;
+  }
+
+  if (isRecord(current) && typeof current.id === 'number') {
+    return current.id;
+  }
+
+  return undefined;
+};
+
+const disconnectMatchesCurrent = async (
+  strapi: Core.Strapi,
+  sourceUid: UID.Schema,
+  attribute: CloneRelationAttribute,
+  disconnect: unknown[],
+  current: unknown,
+  opts: { locale?: string }
+): Promise<boolean> => {
+  const currentId = currentAssociationId(current);
+
+  if (currentId == null) {
+    return false;
+  }
+
+  const typeField = getMorphTypeField(attribute);
+  const currentType =
+    isMorphToOneAttribute(attribute) && isRecord(current) && typeof current[typeField] === 'string'
+      ? current[typeField]
+      : undefined;
+
+  for (const item of disconnect) {
+    let ref: Record<string, unknown> | null = null;
+    if (isRecord(item)) {
+      ref = item;
+    } else if (typeof item === 'number' || typeof item === 'string') {
+      ref = { id: item };
+    }
+
+    if (!ref) {
+      continue;
+    }
+
+    if (isMorphToOneAttribute(attribute)) {
+      const targetUid = ref[typeField];
+      if (typeof targetUid !== 'string') {
+        continue;
+      }
+
+      if (currentType != null && currentType !== targetUid) {
+        continue;
+      }
+
+      const id = await resolveEntryIdByRef(strapi, sourceUid, targetUid as UID.Schema, ref, opts);
+      if (id === currentId) {
+        return true;
+      }
+
+      continue;
+    }
+
+    if (!hasRelationTarget(attribute)) {
+      continue;
+    }
+
+    const id = await resolveEntryIdByRef(
+      strapi,
+      sourceUid,
+      attribute.target as UID.Schema,
+      ref,
+      opts
+    );
+    if (id === currentId) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 const resolveInlineRelationAssignment = async (
   strapi: Core.Strapi,
   attribute: CloneRelationAttribute,
   value: Record<string, unknown>,
-  opts: { locale?: string }
+  opts: {
+    locale?: string;
+    sourceUid: UID.Schema;
+    originalValue?: unknown;
+    sourceOwnerId?: number;
+    targetOwnerId: number;
+    attributeName: string;
+  }
 ): Promise<unknown> => {
   const targetRef = pickInlineRelationTargetRef(value);
 
   if (targetRef === undefined) {
+    const disconnect = value.disconnect;
+    if (!Array.isArray(disconnect) || disconnect.length === 0) {
+      return undefined;
+    }
+
+    const matches = await disconnectMatchesCurrent(
+      strapi,
+      opts.sourceUid,
+      attribute,
+      disconnect,
+      opts.originalValue,
+      { locale: opts.locale }
+    );
+
+    if (matches) {
+      return null;
+    }
+
+    // Unmatched disconnect must keep the original association. The clone was
+    // created without the relation (stripped from create data), so copy it now.
+    if (opts.sourceOwnerId == null) {
+      throw new Error(
+        `Unable to restore clone relation "${opts.attributeName}" after unmatched disconnect`
+      );
+    }
+
+    if (isMorphToOneAttribute(attribute)) {
+      await copyMorphToOneRelation(
+        strapi,
+        opts.sourceUid,
+        opts.attributeName,
+        opts.sourceOwnerId,
+        opts.targetOwnerId
+      );
+    } else {
+      await copyFkColumnRelation(
+        strapi,
+        opts.sourceUid,
+        opts.attributeName,
+        opts.sourceOwnerId,
+        opts.targetOwnerId
+      );
+    }
+
     return undefined;
   }
 
@@ -695,18 +879,20 @@ const resolveInlineRelationAssignment = async (
   }
 
   if (isMorphToOneAttribute(attribute)) {
-    const morphColumn =
-      'morphColumn' in attribute
-        ? (attribute as { morphColumn?: { typeField?: string } }).morphColumn
-        : undefined;
-    const typeField = morphColumn?.typeField ?? '__type';
+    const typeField = getMorphTypeField(attribute);
     const targetUid = targetRef[typeField];
 
     if (typeof targetUid !== 'string') {
       throw new Error(`Inline morphToOne clone update requires ${typeField}`);
     }
 
-    const id = await resolveEntryIdByRef(strapi, targetUid as UID.Schema, targetRef, opts);
+    const id = await resolveEntryIdByRef(
+      strapi,
+      opts.sourceUid,
+      targetUid as UID.Schema,
+      targetRef,
+      opts
+    );
 
     if (id == null) {
       throw new Error(`Unable to resolve morphToOne target for clone relation update`);
@@ -715,11 +901,17 @@ const resolveInlineRelationAssignment = async (
     return { id, [typeField]: targetUid };
   }
 
-  if (typeof attribute.target !== 'string') {
+  if (!hasRelationTarget(attribute)) {
     throw new Error('Inline FK clone update requires a relation target');
   }
 
-  const id = await resolveEntryIdByRef(strapi, attribute.target as UID.Schema, targetRef, opts);
+  const id = await resolveEntryIdByRef(
+    strapi,
+    opts.sourceUid,
+    attribute.target as UID.Schema,
+    targetRef,
+    opts
+  );
 
   if (id == null) {
     throw new Error(`Unable to resolve relation target for clone relation update`);
@@ -731,8 +923,10 @@ const resolveInlineRelationAssignment = async (
 export const applyPostCloneRelationUpdates = async (
   strapi: Core.Strapi,
   _rootUid: UID.ContentType,
+  sourceRootId: number,
   clonedEntryId: number,
   clonedData: Record<string, unknown>,
+  originalData: Record<string, unknown>,
   postCloneUpdates: PostCloneRelationUpdate[]
 ) => {
   if (postCloneUpdates.length === 0) {
@@ -744,6 +938,7 @@ export const applyPostCloneRelationUpdates = async (
   for (const update of postCloneUpdates) {
     const attributeName = update.dataPath.split('.').pop()!;
     const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
+    const sourceOwnerId = resolveOwnerEntryId(originalData, update.ownerPath, sourceRootId);
 
     if (ownerEntryId == null) {
       throw new Error(
@@ -763,6 +958,11 @@ export const applyPostCloneRelationUpdates = async (
 
     const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
       locale,
+      sourceUid: update.schemaUid,
+      originalValue: get(update.dataPath, originalData),
+      sourceOwnerId,
+      targetOwnerId: ownerEntryId,
+      attributeName,
     });
 
     if (assignment === undefined) {

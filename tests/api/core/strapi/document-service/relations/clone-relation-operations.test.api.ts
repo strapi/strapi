@@ -16,6 +16,9 @@ const PRODUCT_UID = 'api::product.product' as UID.ContentType;
 const TAG_UID = 'api::tag.tag' as UID.ContentType;
 const CATEGORY_UID = 'api::clone-category.clone-category' as UID.ContentType;
 const MORPH_BOX_UID = 'api::clone-morph-box.clone-morph-box' as UID.ContentType;
+const PLAIN_UID = 'api::clone-plain.clone-plain' as UID.ContentType;
+const FK_OWNER_UID = 'api::clone-fk-owner.clone-fk-owner' as UID.ContentType;
+const FK_INVERSE_UID = 'api::clone-fk-inverse.clone-fk-inverse' as UID.ContentType;
 
 type ProductWithTags = {
   tag?: {
@@ -106,6 +109,62 @@ const morphBoxModel = {
   collectionName: '',
 };
 
+const plainModel = {
+  attributes: {
+    name: { type: 'string' },
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: TAG_UID,
+      useJoinTable: false,
+    },
+  },
+  draftAndPublish: false,
+  displayName: 'Clone plain',
+  singularName: 'clone-plain',
+  pluralName: 'clone-plains',
+  description: '',
+  collectionName: '',
+};
+
+const fkOwnerModel = {
+  attributes: {
+    name: { type: 'string' },
+    inverse: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: FK_INVERSE_UID,
+      inversedBy: 'owner',
+      useJoinTable: false,
+    },
+  },
+  draftAndPublish: false,
+  displayName: 'Clone FK owner',
+  singularName: 'clone-fk-owner',
+  pluralName: 'clone-fk-owners',
+  description: '',
+  collectionName: '',
+};
+
+const fkInverseModel = {
+  attributes: {
+    name: { type: 'string' },
+    owner: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: FK_OWNER_UID,
+      mappedBy: 'inverse',
+      useJoinTable: false,
+    },
+  },
+  draftAndPublish: false,
+  displayName: 'Clone FK inverse',
+  singularName: 'clone-fk-inverse',
+  pluralName: 'clone-fk-inverses',
+  description: '',
+  collectionName: '',
+};
+
 const createTag = (name: string) => strapi.documents(TAG_UID).create({ data: { name } });
 
 const relationDocumentId = (
@@ -156,7 +215,17 @@ const findProductWithTags = (documentId: string) =>
 
 describe('Document Service clone relation operation payloads', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([tagModel, productModel, categoryModel, morphBoxModel]).build();
+    await builder
+      .addContentTypes([
+        tagModel,
+        productModel,
+        categoryModel,
+        morphBoxModel,
+        plainModel,
+        fkOwnerModel,
+        fkInverseModel,
+      ])
+      .build();
 
     strapi = await createStrapiInstance();
   });
@@ -581,4 +650,219 @@ describe('Document Service clone relation operation payloads', () => {
       originalMorphTarget: targetA.documentId,
     });
   });
+
+  testInTransaction(
+    'clone does not copy an inverse useJoinTable:false joinColumn as an FK',
+    async () => {
+      const inverse = await strapi.documents(FK_INVERSE_UID).create({
+        data: { name: 'Inverse source' },
+      });
+      const owner = await strapi.documents(FK_OWNER_UID).create({
+        data: {
+          name: 'Owner source',
+          inverse: inverse.id,
+        },
+        populate: { inverse: true },
+      });
+
+      const decoy = await strapi.documents(FK_OWNER_UID).create({
+        data: { name: 'Decoy owner' },
+      });
+
+      const result = await strapi.documents(FK_INVERSE_UID).clone({
+        documentId: inverse.documentId,
+        data: { name: 'Inverse clone' },
+        populate: { owner: true },
+      });
+
+      const original = await strapi.documents(FK_INVERSE_UID).findOne({
+        documentId: inverse.documentId,
+        populate: { owner: true },
+      });
+      const clone = result.entries[0] as { owner?: { documentId?: string } | null };
+
+      expect({
+        cloneOwnerDocumentId: clone?.owner?.documentId ?? null,
+        originalOwnerDocumentId: (original as { owner?: { documentId?: string } | null })?.owner
+          ?.documentId,
+        decoyStillUnrelated: decoy.documentId,
+      }).toEqual({
+        cloneOwnerDocumentId: null,
+        originalOwnerDocumentId: owner.documentId,
+        decoyStillUnrelated: decoy.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone copies an owning useJoinTable:false FK to keep the original target',
+    async () => {
+      const inverse = await strapi.documents(FK_INVERSE_UID).create({
+        data: { name: 'Owned inverse' },
+      });
+      const owner = await strapi.documents(FK_OWNER_UID).create({
+        data: {
+          name: 'Owning source',
+          inverse: inverse.id,
+        },
+        populate: { inverse: true },
+      });
+
+      const result = await strapi.documents(FK_OWNER_UID).clone({
+        documentId: owner.documentId,
+        data: { name: 'Owning clone' },
+        populate: { inverse: true },
+      });
+
+      const original = await strapi.documents(FK_OWNER_UID).findOne({
+        documentId: owner.documentId,
+        populate: { inverse: true },
+      });
+      const clone = result.entries[0] as { inverse?: { documentId?: string } | null };
+
+      expect({
+        cloneInverseDocumentId: clone?.inverse?.documentId ?? null,
+        originalInverseDocumentId: (original as { inverse?: { documentId?: string } | null })
+          ?.inverse?.documentId,
+      }).toEqual({
+        cloneInverseDocumentId: inverse.documentId,
+        originalInverseDocumentId: inverse.documentId,
+      });
+    }
+  );
+
+  testInTransaction('clone honors connect status:published for an inline D&P target', async () => {
+    const tag = await createTag('Published connect target');
+    await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
+
+    const draftRow = await strapi.db.query(TAG_UID).findOne({
+      where: { documentId: tag.documentId, publishedAt: null },
+    });
+    const publishedRow = await strapi.db.query(TAG_UID).findOne({
+      where: { documentId: tag.documentId, publishedAt: { $ne: null } },
+    });
+
+    expect(draftRow?.id).not.toBe(publishedRow?.id);
+
+    const source = await strapi.documents(PLAIN_UID).create({
+      data: { name: 'Plain source', tag: draftRow!.id },
+    });
+
+    const result = await strapi.documents(PLAIN_UID).clone({
+      documentId: source.documentId,
+      data: {
+        name: 'Plain clone',
+        tag: {
+          connect: [{ documentId: tag.documentId, status: 'published' }],
+        },
+      },
+      populate: { tag: true },
+    });
+
+    const cloneRow = await strapi.db.query(PLAIN_UID).findOne({
+      where: { documentId: result.documentId },
+    });
+    const clone = result.entries[0] as { tag?: { id?: number; publishedAt?: unknown } | null };
+
+    expect({
+      storedTagId: (cloneRow as { tag?: number } | null)?.tag ?? clone?.tag?.id ?? null,
+      publishedTagId: publishedRow?.id ?? null,
+      draftTagId: draftRow?.id ?? null,
+    }).toEqual({
+      storedTagId: publishedRow?.id,
+      publishedTagId: publishedRow?.id,
+      draftTagId: draftRow?.id,
+    });
+  });
+
+  testInTransaction(
+    'clone keeps the current useJoinTable:false target when disconnect does not match',
+    async () => {
+      const { product, tag: originalTag } = await createLegacyTaggedProduct(
+        'Unmatched disconnect source',
+        'Unmatched disconnect original'
+      );
+      const unrelatedTag = await createTag('Unmatched disconnect other');
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Unmatched disconnect clone',
+          legacyTag: {
+            disconnect: [{ documentId: unrelatedTag.documentId }],
+          },
+        },
+        populate: { legacyTag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneLegacyTagDocumentId: relationDocumentId(
+          result.entries[0] as ProductWithTags,
+          'legacyTag'
+        ),
+        originalLegacyTagDocumentId: relationDocumentId(
+          originalProduct as ProductWithTags,
+          'legacyTag'
+        ),
+      }).toEqual({
+        cloneLegacyTagDocumentId: originalTag.documentId,
+        originalLegacyTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone keeps the current morphToOne target when disconnect does not match',
+    async () => {
+      const targetA = await strapi.documents(MORPH_BOX_UID).create({
+        data: { name: 'Morph keep A' },
+      });
+      const targetB = await strapi.documents(MORPH_BOX_UID).create({
+        data: { name: 'Morph other B' },
+      });
+      const targetARow = await strapi.db.query(MORPH_BOX_UID).findOne({
+        where: { documentId: targetA.documentId, publishedAt: null },
+      });
+      const targetBRow = await strapi.db.query(MORPH_BOX_UID).findOne({
+        where: { documentId: targetB.documentId, publishedAt: null },
+      });
+
+      const source = await strapi.documents(MORPH_BOX_UID).create({
+        data: {
+          name: 'Morph unmatched source',
+          mto: { id: targetARow!.id, __type: MORPH_BOX_UID },
+        },
+        populate: { mto: true },
+      });
+
+      const result = await strapi.documents(MORPH_BOX_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Morph unmatched clone',
+          mto: {
+            disconnect: [{ id: targetBRow!.id, __type: MORPH_BOX_UID }],
+          },
+        },
+        populate: { mto: true },
+      });
+
+      const original = await strapi.documents(MORPH_BOX_UID).findOne({
+        documentId: source.documentId,
+        populate: { mto: true },
+      });
+      const clone = result.entries[0] as { mto?: { documentId?: string } | null };
+
+      expect({
+        cloneMorphTarget: clone?.mto?.documentId ?? null,
+        originalMorphTarget: (original as { mto?: { documentId?: string } | null })?.mto
+          ?.documentId,
+      }).toEqual({
+        cloneMorphTarget: targetA.documentId,
+        originalMorphTarget: targetA.documentId,
+      });
+    }
+  );
 });
