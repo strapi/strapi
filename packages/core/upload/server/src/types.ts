@@ -69,7 +69,14 @@ export interface Config {
     cache?: boolean;
     concurrency?: number;
   };
+  /** Server-side ceiling: files processed in parallel within a single request. */
   concurrentUploadSize?: number;
+  /** Client-side parallelism: how many upload requests the admin fires at once. */
+  concurrentUploadRequests?: number;
+  security?: {
+    allowedTypes?: string[];
+    deniedTypes?: string[];
+  };
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {

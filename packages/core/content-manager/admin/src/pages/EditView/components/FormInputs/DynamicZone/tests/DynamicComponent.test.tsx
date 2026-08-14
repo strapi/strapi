@@ -210,16 +210,16 @@ describe('DynamicComponent', () => {
 
       await user.click(screen.getByRole('menuitem', { name: 'Add component above' }));
 
-      expect(screen.getByText('blog')).toBeInTheDocument();
-      expect(screen.getByText('seo')).toBeInTheDocument();
+      expect(screen.getByText('Blog')).toBeInTheDocument();
+      expect(screen.getByText('Seo')).toBeInTheDocument();
 
       expect(screen.getByRole('menuitem', { name: 'component' })).toBeInTheDocument();
       expect(screen.getByRole('menuitem', { name: 'metadata' })).toBeInTheDocument();
 
       await user.click(screen.getByRole('menuitem', { name: 'Add component below' }));
 
-      expect(screen.getByText('blog')).toBeInTheDocument();
-      expect(screen.getByText('seo')).toBeInTheDocument();
+      expect(screen.getByText('Blog')).toBeInTheDocument();
+      expect(screen.getByText('Seo')).toBeInTheDocument();
 
       expect(screen.getByRole('menuitem', { name: 'component' })).toBeInTheDocument();
       expect(screen.getByRole('menuitem', { name: 'metadata' })).toBeInTheDocument();

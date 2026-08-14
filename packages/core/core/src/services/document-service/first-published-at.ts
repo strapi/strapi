@@ -25,11 +25,19 @@ const addFirstPublishedAtToDraft = async (
   // strip media, components, dynamic zones and relations from the draft that
   // downstream publishEntry relies on. Instead we carry forward the already
   // populated draft from repository.publish's findMany with the field merged in.
-  await update(draft, {
+  const updatedDraft = await update(draft, {
     data: { firstPublishedAt: now },
   });
 
-  return { ...draft, firstPublishedAt: now };
+  return {
+    ...draft,
+    firstPublishedAt: now,
+    // Propagate the server-side updatedAt so the entry's updatedAt is not
+    // earlier than firstPublishedAt. Without this the entry will appear
+    // "modified" after its first publish (updatedAt < firstPublishedAt),
+    // even though the only change was stamping firstPublishedAt.
+    ...(updatedDraft.updatedAt && { updatedAt: updatedDraft.updatedAt }),
+  };
 };
 
 const filterDataFirstPublishedAt: ParamsTransform = (params) => {

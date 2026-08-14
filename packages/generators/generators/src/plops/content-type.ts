@@ -3,10 +3,10 @@ import type { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
 import fs from 'fs-extra';
 import { strings } from '@strapi/utils';
-import tsUtils from '@strapi/typescript-utils';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';
 import getFilePath from './utils/get-file-path';
+import getGeneratorLanguage from './utils/get-generator-language';
 import ctNamesPrompts from './prompts/ct-names-prompts';
 import kindPrompts from './prompts/kind-prompts';
 import getAttributesPrompts from './prompts/get-attributes-prompts';
@@ -81,19 +81,7 @@ export default (plop: NodePlopAPI) => {
       }, {});
 
       const filePath = getFilePath(answers.destination);
-      const currentDir = process.cwd();
-      let language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
-
-      if (answers.plugin) {
-        // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
-        const pluginServerDir = join(
-          currentDir,
-          'src',
-          filePath.replace('{{ plugin }}', answers.plugin),
-          '../'
-        );
-        language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
-      }
+      const language = getGeneratorLanguage({ plugin: answers.plugin, filePath }, plop);
 
       const baseActions: Array<ActionType> = [
         {

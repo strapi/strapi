@@ -1,5 +1,8 @@
+import type { MouseEvent } from 'react';
+
 import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
@@ -8,25 +11,56 @@ import { RelationMultiple, RelationSingle } from './Relations';
 
 import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Schema, Data } from '@strapi/types';
+import type { To } from 'react-router-dom';
 
 interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
   content: Schema.Attribute.Value<Schema.Attribute.AnyAttribute>;
   rowId: Data.ID;
+  /**
+   * When set, the cell renders its value as a navigational link to the entry.
+   * Used for the primary (first scalar) column so users can open an entry in a
+   * new tab via right-click / cmd+click / middle-click, while a plain click
+   * still navigates within the SPA. Only passed for non-interactive cell types.
+   */
+  linkTo?: To;
 }
 
-const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
+const CellContent = ({ content, mainField, attribute, rowId, name, linkTo }: CellContentProps) => {
   const isIdColumn = name === 'id';
 
   if (!hasContent(content, mainField, attribute)) {
     return (
       <Typography
         textColor="neutral800"
-        paddingLeft={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
-        paddingRight={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
+        paddingLeft={attribute.type === 'relation' || attribute.type === 'component' ? '1.6rem' : 0}
+        paddingRight={
+          attribute.type === 'relation' || attribute.type === 'component' ? '1.6rem' : 0
+        }
       >
         -
       </Typography>
     );
+  }
+
+  // Primary scalar column: render the value as a link to the entry so it gets
+  // native open-in-new-tab semantics. stopPropagation prevents the row's own
+  // onClick from firing a second navigation; React Router's Link still handles
+  // the click (stopPropagation does not preventDefault).
+  if (linkTo) {
+    const link = (
+      <Typography
+        tag={ReactRouterLink}
+        to={linkTo}
+        onClick={(e: MouseEvent) => e.stopPropagation()}
+        maxWidth="30rem"
+        ellipsis
+        textColor="neutral800"
+      >
+        <CellValue isIdColumn={isIdColumn} type={attribute.type} value={content} />
+      </Typography>
+    );
+
+    return attribute.type === 'string' ? <Tooltip label={content}>{link}</Tooltip> : link;
   }
 
   switch (attribute.type) {
@@ -123,5 +157,5 @@ const isSingleRelation = (
   type: Extract<CellContentProps['attribute'], { type: 'relation' }>['relation']
 ) => ['oneToOne', 'manyToOne', 'oneToOneMorph'].includes(type);
 
-export { CellContent };
+export { CellContent, hasContent };
 export type { CellContentProps };

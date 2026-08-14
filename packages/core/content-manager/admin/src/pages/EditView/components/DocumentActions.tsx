@@ -24,10 +24,6 @@ import {
   IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
-import mapValues from 'lodash/fp/mapValues';
-import get from 'lodash/get';
-import merge from 'lodash/merge';
-import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -45,14 +41,31 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { getIn, isObject, setIn } from '../../../utils/objects';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
+import {
+  countLocalDraftRelations,
+  EMPTY_DRAFT_RELATION_COUNTS,
+  getDraftRelationsPublishState,
+  normalizeDraftRelationCounts,
+  resolveDraftRelationCounts,
+  type DraftRelationCounts,
+} from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
-import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
+
+type PublishConfirmDialogScope = 'panel' | 'preview' | 'relation-modal';
+
+const publishConfirmDialogOpeners = new Map<PublishConfirmDialogScope, () => void>();
+
+const openPublishConfirmDialog = (scope: PublishConfirmDialogScope) => {
+  publishConfirmDialogOpeners.get(scope)?.();
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -78,13 +91,22 @@ interface DocumentActionDescription {
    */
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
+  /**
+   * When set on a publish action with a dialog, registers an opener for the keyboard shortcut.
+   */
+  publishConfirmScope?: PublishConfirmDialogScope;
 }
 
 interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
+  /**
+   * When set, centers a warning icon above the dialog body (bulk publish / delete pattern).
+   */
+  bodyIcon?: 'danger' | 'default';
   variant?: ButtonProps['variant'];
+  confirmLabel?: string;
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -124,47 +146,61 @@ interface DocumentActionsProps {
 }
 
 const connectRelationToParent = (
-  parentDataToUpdate: AnyData | undefined,
+  parentDataToUpdate: AnyData,
   fieldToConnect: string,
   data: Create.Response['data'] | Publish.Response['data'],
   fieldToConnectUID?: string
 ) => {
+  const relationToConnect = {
+    id: data.documentId,
+    documentId: data.documentId,
+    locale: data.locale,
+  };
   /*
    * Check if the fieldToConnect is already present in the parentDataToUpdate.
    * This happens in particular when in the parentDocument you have created
    * a new component without saving.
    */
-  const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
-  const fieldToConnectPath = isFieldPresent
-    ? fieldToConnect
-    : // Compute the path to the parent object
-      fieldToConnect.split('.').slice(0, -1).join('.');
-  const fieldToConnectValue = isFieldPresent
+  const fieldValue = getIn<unknown>(parentDataToUpdate, fieldToConnect);
+  const relationFieldValue = isObject(fieldValue) ? fieldValue : undefined;
+  const isFieldPresent = relationFieldValue !== undefined;
+  const fieldPath = fieldToConnect.split('.');
+  const fieldName = fieldPath.at(-1);
+
+  if (!fieldName) {
+    return parentDataToUpdate;
+  }
+
+  const parentPath = fieldPath.slice(0, -1).join('.');
+  const existingConnect: Array<typeof relationToConnect> = Array.isArray(
+    relationFieldValue?.connect
+  )
+    ? (relationFieldValue.connect as Array<typeof relationToConnect>)
+    : [];
+  // A relation is identified by documentId and locale; numeric ids are not stable across locales.
+  const connect = existingConnect.some(
+    (relation) =>
+      relation.documentId === relationToConnect.documentId &&
+      relation.locale === relationToConnect.locale
+  )
+    ? existingConnect
+    : [...existingConnect, relationToConnect];
+  const relationValue = isFieldPresent
     ? {
-        connect: [
-          {
-            id: data.documentId,
-            documentId: data.documentId,
-            locale: data.locale,
-          },
-        ],
+        ...relationFieldValue,
+        connect,
       }
     : {
-        [fieldToConnect.split('.').pop()!]: {
-          connect: [
-            {
-              id: data.documentId,
-              documentId: data.documentId,
-              locale: data.locale,
-            },
-          ],
-          disconnect: [],
-        },
-        // In case the object was not present you need to pass the componentUID of the parent document
-        __component: fieldToConnectUID,
+        connect,
+        disconnect: [],
       };
-  const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
-  return merge(parentDataToUpdate, objectToConnect);
+  const dataWithRelation = setIn(parentDataToUpdate, fieldToConnect, relationValue);
+
+  if (!isFieldPresent && fieldToConnectUID && parentPath) {
+    return setIn(dataWithRelation, `${parentPath}.__component`, fieldToConnectUID);
+  }
+
+  return dataWithRelation;
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
@@ -277,6 +313,23 @@ const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActi
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
+  React.useEffect(() => {
+    const scope = action.publishConfirmScope;
+
+    if (action.type !== 'publish' || !action.dialog || !scope) {
+      return;
+    }
+
+    const open = () => setDialogId(action.id);
+    publishConfirmDialogOpeners.set(scope, open);
+
+    return () => {
+      if (publishConfirmDialogOpeners.get(scope) === open) {
+        publishConfirmDialogOpeners.delete(scope);
+      }
+    };
+  }, [action.type, action.dialog, action.id, action.publishConfirmScope]);
+
   const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
 
@@ -360,7 +413,7 @@ const DocumentActionsMenu = ({
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
+  const isDisabled = actions.every((action) => action.disabled);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
@@ -476,6 +529,8 @@ const DocumentActionConfirmDialog = ({
   onConfirm,
   title,
   content,
+  bodyIcon,
+  confirmLabel,
   isOpen,
   variant = 'secondary',
   loading,
@@ -498,11 +553,28 @@ const DocumentActionConfirmDialog = ({
     onClose();
   };
 
+  const dialogBody = bodyIcon ? (
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Flex justifyContent="center">
+        <WarningCircle
+          width="24px"
+          height="24px"
+          fill={bodyIcon === 'danger' ? 'danger600' : 'primary600'}
+        />
+      </Flex>
+      <Typography id="confirm-description" tag="p" variant="omega" textAlign="center">
+        {content}
+      </Typography>
+    </Flex>
+  ) : (
+    content
+  );
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleClose}>
       <Dialog.Content>
         <Dialog.Header>{title}</Dialog.Header>
-        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Body>{dialogBody}</Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button variant="tertiary" fullWidth>
@@ -513,10 +585,11 @@ const DocumentActionConfirmDialog = ({
             </Button>
           </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
-            {formatMessage({
-              id: 'app.components.Button.confirm',
-              defaultMessage: 'Confirm',
-            })}
+            {confirmLabel ??
+              formatMessage({
+                id: 'app.components.Button.confirm',
+                defaultMessage: 'Confirm',
+              })}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>
@@ -566,9 +639,9 @@ const DocumentActionModal = ({
   );
 };
 
-const transformData = (data: Record<string, any>): any => {
+const transformData = (data: unknown): unknown => {
   if (Array.isArray(data)) {
-    return data.map(transformData);
+    return data.map((value) => transformData(value));
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -576,8 +649,32 @@ const transformData = (data: Record<string, any>): any => {
       return data.apiData;
     }
 
-    return mapValues(transformData)(data);
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, transformData(value)])
+    );
   }
+
+  return data;
+};
+
+const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
+
+const prepareParentDataForRelationUpdate = (
+  parentFormValues: AnyData | undefined,
+  fallbackParentFormValues: AnyData | undefined,
+  options: Parameters<typeof handleInvisibleAttributes>[1]
+) => {
+  const parentDataToUpdate = parentFormValues ?? fallbackParentFormValues;
+
+  if (!parentDataToUpdate) {
+    return parentDataToUpdate;
+  }
+
+  const { data } = handleInvisibleAttributes(transformDocumentData(parentDataToUpdate), {
+    ...options,
+    // The live snapshot can omit saved invisible fields, so retain the parent's saved initial values.
+    initialValues: fallbackParentFormValues,
+  });
 
   return data;
 };
@@ -610,13 +707,13 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
   );
   const { publish, isLoading } = useDocumentActions();
-  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
-  const [
-    countDraftRelations,
-    { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
-  ] = useGetDraftRelationCountQuery();
-  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
-  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+  const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
+  const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
+  const [localDraftRelationCounts, setLocalDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [serverDraftRelationCounts, setServerDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [isFetchingDraftRelations, setIsFetchingDraftRelations] = React.useState(false);
 
   const [{ rawQuery }] = useQueryParams();
 
@@ -635,6 +732,16 @@ const PublishAction: DocumentActionComponent = ({
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
   const fromRelationModal = relationContext != undefined;
+  const isRelationModalOpen = useRelationModal(
+    'PublishAction',
+    (state) => state.state.isModalOpen,
+    false
+  );
+  const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
+    ? 'relation-modal'
+    : onPreview
+      ? 'preview'
+      : 'panel';
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
   const fieldToConnect = useRelationModal(
@@ -645,6 +752,11 @@ const PublishAction: DocumentActionComponent = ({
   const fieldToConnectUID = useRelationModal(
     'PublishAction',
     (state) => state.state.fieldToConnectUID,
+    false
+  );
+  const getParentFormValues = useRelationModal(
+    'PublishAction',
+    (state) => state.state.getParentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -675,49 +787,19 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    const localDraftRelations = new Set();
+    setLocalDraftRelationCounts(
+      countLocalDraftRelations(formValues as AnyData, schema, components, model)
+    );
+  }, [components, formValues, model, schema]);
 
-    /**
-     * Extracts draft relations from the provided data object.
-     * It checks for a connect array of relations.
-     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
-     */
-    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
-      const relations = data.connect || [];
-      relations.forEach((relation) => {
-        if (relation.status === 'draft') {
-          localDraftRelations.add(relation.id);
-        }
-      });
-    };
-
-    /**
-     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
-     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
-     * It recursively calls itself for any non-null objects it contains.
-     */
-    const traverseAndExtract = (data: { [field: string]: any }) => {
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'connect' && Array.isArray(value)) {
-          extractDraftRelations({ connect: value });
-        } else if (typeof value === 'object' && value !== null) {
-          traverseAndExtract(value);
-        }
-      });
-    };
-
-    if (!documentId || modified) {
-      traverseAndExtract(formValues);
-      setLocalCountOfDraftRelations(localDraftRelations.size);
-    }
-  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
-
-  React.useEffect(() => {
-    if (!document || !document.documentId || isListView) {
+  const fetchDraftRelationsCount = React.useCallback(async () => {
+    if (!document?.documentId || isListView) {
       return;
     }
 
-    const fetchDraftRelationsCount = async () => {
+    setIsFetchingDraftRelations(true);
+
+    try {
       const { data, error } = await countDraftRelations({
         collectionType,
         model,
@@ -730,20 +812,36 @@ const PublishAction: DocumentActionComponent = ({
       }
 
       if (data) {
-        setServerCountOfDraftRelations(data.data);
+        setServerDraftRelationCounts(normalizeDraftRelationCounts(data));
       }
+    } finally {
+      setIsFetchingDraftRelations(false);
+    }
+  }, [
+    collectionType,
+    countDraftRelations,
+    currentDocumentMeta.params,
+    document?.documentId,
+    documentId,
+    isListView,
+    model,
+  ]);
+
+  React.useEffect(() => {
+    fetchDraftRelationsCount();
+  }, [fetchDraftRelationsCount, document?.updatedAt]);
+
+  React.useEffect(() => {
+    const handleWindowFocus = () => {
+      fetchDraftRelationsCount();
     };
 
-    fetchDraftRelationsCount();
-  }, [
-    isListView,
-    document,
-    documentId,
-    countDraftRelations,
-    collectionType,
-    model,
-    currentDocumentMeta.params,
-  ]);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [fetchDraftRelationsCount]);
   const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
   const parentDocumentData = useDocument(
     {
@@ -816,7 +914,7 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      const { data } = handleInvisibleAttributes(transformData(getValues()), {
+      const { data } = handleInvisibleAttributes(transformDocumentData(getValues()), {
         schema,
         components,
       });
@@ -867,45 +965,55 @@ const PublishAction: DocumentActionComponent = ({
             (parentDocumentMetaToUpdate.documentId ||
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
           ) {
-            const parentDataToUpdate =
+            const fallbackParentFormValues =
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                 ? getInitialFormValues()
                 : parentDocumentData.getInitialFormValues();
+            const parentDataToUpdate = prepareParentDataForRelationUpdate(
+              getParentFormValues?.(),
+              fallbackParentFormValues,
+              {
+                schema: parentDocumentData.schema,
+                components: parentDocumentData.components,
+              }
+            );
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            const dataToUpdate = connectRelationToParent(
-              parentDataToUpdate,
-              fieldToConnect,
-              res.data,
-              fieldToConnectUID
-            );
+            if (parentDataToUpdate) {
+              const dataToUpdate = connectRelationToParent(
+                parentDataToUpdate,
+                fieldToConnect,
+                res.data,
+                fieldToConnectUID
+              );
 
-            try {
-              const updateRes = await updateDocumentMutation({
-                collectionType: metaDocumentToUpdate.collectionType,
-                model: metaDocumentToUpdate.model,
-                documentId:
-                  metaDocumentToUpdate.collectionType !== SINGLE_TYPES
-                    ? metaDocumentToUpdate.documentId
-                    : undefined,
-                params: metaDocumentToUpdate.params,
-                data: dataToUpdate,
-              });
+              try {
+                const updateRes = await updateDocumentMutation({
+                  collectionType: metaDocumentToUpdate.collectionType,
+                  model: metaDocumentToUpdate.model,
+                  documentId:
+                    metaDocumentToUpdate.collectionType !== SINGLE_TYPES
+                      ? metaDocumentToUpdate.documentId
+                      : undefined,
+                  params: metaDocumentToUpdate.params,
+                  data: dataToUpdate,
+                });
 
-              if ('error' in updateRes) {
-                toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                return;
+                if ('error' in updateRes) {
+                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
+                  return;
+                }
+              } catch (err) {
+                toggleNotification({
+                  type: 'danger',
+                  message: formatMessage({
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  }),
+                });
+
+                throw err;
               }
-            } catch (err) {
-              toggleNotification({
-                type: 'danger',
-                message: formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                }),
-              });
-
-              throw err;
             }
           }
 
@@ -929,11 +1037,27 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
-  // see RFC "Count draft relations" in Notion
-  const enableDraftRelationsCount = false;
-  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
+  const getFreshDraftRelationCounts = React.useCallback(
+    (): DraftRelationCounts =>
+      resolveDraftRelationCounts(
+        documentId,
+        modified,
+        countLocalDraftRelations(getValues() as AnyData, schema, components, model),
+        serverDraftRelationCounts
+      ),
+    [components, documentId, getValues, model, modified, schema, serverDraftRelationCounts]
+  );
+
+  const draftRelationCounts = resolveDraftRelationCounts(
+    documentId,
+    modified,
+    localDraftRelationCounts,
+    serverDraftRelationCounts
+  );
+  const { hasUnpublishedRelations, hasDraftM2mLinks, dialogVariant, bodyIcon, confirmLabel } =
+    getDraftRelationsPublishState(draftRelationCounts);
+
+  const supportsDraftRelationWarning = Boolean(schema?.options?.draftAndPublish);
 
   /**
    * Disabled when:
@@ -947,7 +1071,7 @@ const PublishAction: DocumentActionComponent = ({
   const isDisabled =
     isCloning ||
     isSubmitting ||
-    isLoadingDraftRelations ||
+    isFetchingDraftRelations ||
     activeTab === 'published' ||
     (!modified && isDocumentPublished) ||
     (!modified && !document?.documentId) ||
@@ -967,9 +1091,20 @@ const PublishAction: DocumentActionComponent = ({
 
       e.preventDefault();
 
-      if (!isDisabled && !hasDraftRelations) {
-        performPublish();
+      if (!fromRelationModal && isRelationModalOpen) {
+        return;
       }
+
+      if (isDisabled) {
+        return;
+      }
+
+      if (getDraftRelationsPublishState(getFreshDraftRelationCounts()).hasDraftRelations) {
+        openPublishConfirmDialog(publishConfirmScope);
+        return;
+      }
+
+      performPublish();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -977,7 +1112,15 @@ const PublishAction: DocumentActionComponent = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasDraftRelations, isDisabled, performPublish, schema?.options?.draftAndPublish]);
+  }, [
+    fromRelationModal,
+    getFreshDraftRelationCounts,
+    isDisabled,
+    isRelationModalOpen,
+    performPublish,
+    publishConfirmScope,
+    schema?.options?.draftAndPublish,
+  ]);
 
   if (!schema?.options?.draftAndPublish) {
     return null;
@@ -988,38 +1131,82 @@ const PublishAction: DocumentActionComponent = ({
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
+    publishConfirmScope: supportsDraftRelationWarning ? publishConfirmScope : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      if (hasDraftRelations) {
-        // In this case we need to show the user a confirmation dialog.
-        // Return from the onClick and let the dialog handle the process.
+      if (getDraftRelationsPublishState(getFreshDraftRelationCounts()).hasDraftRelations) {
+        // Let DocumentActionButton open the confirmation dialog.
         return;
       }
 
       await performPublish();
+
+      // Skip the registered dialog when publishing directly.
+      return true;
     },
-    dialog: hasDraftRelations
+    dialog: supportsDraftRelationWarning
       ? {
           type: 'dialog',
-          variant: 'danger',
-          footer: null,
+          variant: dialogVariant,
+          bodyIcon,
           title: formatMessage({
-            id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.title`),
+            id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
           }),
-          content: formatMessage(
-            {
-              id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
-              defaultMessage:
-                'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
-            },
-            {
-              count: totalDraftRelations,
-            }
+          content: (
+            <>
+              {hasUnpublishedRelations
+                ? formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
+                      defaultMessage:
+                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
+                    },
+                    {
+                      count: draftRelationCounts.unpublishedRelations,
+                    }
+                  )
+                : formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
+                      defaultMessage:
+                        '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
+                    },
+                    {
+                      count: draftRelationCounts.draftM2mLinks,
+                    }
+                  )}
+              {hasUnpublishedRelations && hasDraftM2mLinks
+                ? ` ${formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.additional'),
+                      defaultMessage:
+                        '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
+                    },
+                    {
+                      count: draftRelationCounts.draftM2mLinks,
+                    }
+                  )}`
+                : null}{' '}
+              {formatMessage({
+                id: getTranslation('popUpWarning.warning.publish-question'),
+                defaultMessage: 'Do you still want to publish?',
+              })}
+            </>
           ),
+          confirmLabel:
+            confirmLabel === 'publish'
+              ? formatMessage({
+                  id: 'app.utils.publish',
+                  defaultMessage: 'Publish',
+                })
+              : formatMessage({
+                  id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                  defaultMessage: 'Publish without relations',
+                }),
           onConfirm: async () => {
             await performPublish();
           },
@@ -1078,6 +1265,11 @@ const UpdateAction: DocumentActionComponent = ({
   const fieldToConnectUID = useRelationModal(
     'PublishAction',
     (state) => state.state.fieldToConnectUID,
+    false
+  );
+  const getParentFormValues = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.getParentFormValues,
     false
   );
   const documentHistory = useRelationModal(
@@ -1160,7 +1352,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId: cloneMatch.params.origin!,
             params: currentDocumentMeta.params,
           },
-          transformData(latestValues)
+          transformDocumentData(latestValues)
         );
 
         if ('data' in res) {
@@ -1179,7 +1371,7 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
@@ -1200,7 +1392,7 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm(latestValues);
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
@@ -1232,45 +1424,58 @@ const UpdateAction: DocumentActionComponent = ({
               (parentDocumentMetaToUpdate.documentId ||
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
             ) {
-              const parentDataToUpdate =
+              const fallbackParentFormValues =
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
-
-              const dataToUpdate = connectRelationToParent(
-                parentDataToUpdate,
-                fieldToConnect,
-                res.data,
-                fieldToConnectUID
+              const parentDataToUpdate = prepareParentDataForRelationUpdate(
+                getParentFormValues?.(),
+                fallbackParentFormValues,
+                {
+                  schema: parentDocumentData.schema,
+                  components: parentDocumentData.components,
+                }
               );
 
-              try {
-                const updateRes = await updateDocumentMutation({
-                  collectionType: parentDocumentMetaToUpdate.collectionType,
-                  model: parentDocumentMetaToUpdate.model,
-                  documentId:
-                    parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
-                      ? parentDocumentMetaToUpdate.documentId
-                      : undefined,
-                  params: parentDocumentMetaToUpdate.params,
-                  data: {
-                    ...dataToUpdate,
-                  },
-                });
-                if ('error' in updateRes) {
-                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                  return;
-                }
-              } catch (err) {
-                toggleNotification({
-                  type: 'danger',
-                  message: formatMessage({
-                    id: 'notification.error',
-                    defaultMessage: 'An error occurred',
-                  }),
-                });
+              if (parentDataToUpdate) {
+                const dataToUpdate = connectRelationToParent(
+                  parentDataToUpdate,
+                  fieldToConnect,
+                  res.data,
+                  fieldToConnectUID
+                );
 
-                throw err;
+                try {
+                  const updateRes = await updateDocumentMutation({
+                    collectionType: parentDocumentMetaToUpdate.collectionType,
+                    model: parentDocumentMetaToUpdate.model,
+                    documentId:
+                      parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
+                        ? parentDocumentMetaToUpdate.documentId
+                        : undefined,
+                    params: parentDocumentMetaToUpdate.params,
+                    data: {
+                      ...dataToUpdate,
+                    },
+                  });
+                  if ('error' in updateRes) {
+                    toggleNotification({
+                      type: 'danger',
+                      message: formatAPIError(updateRes.error),
+                    });
+                    return;
+                  }
+                } catch (err) {
+                  toggleNotification({
+                    type: 'danger',
+                    message: formatMessage({
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    }),
+                  });
+
+                  throw err;
+                }
               }
             }
 
@@ -1564,7 +1769,15 @@ DiscardAction.position = 'panel';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
+export {
+  DocumentActions,
+  DocumentActionsMenu,
+  DocumentActionButton,
+  PublishAction,
+  UpdateAction,
+  DEFAULT_ACTIONS,
+  openPublishConfirmDialog,
+};
 export type {
   DocumentActionDescription,
   DocumentActionPosition,
