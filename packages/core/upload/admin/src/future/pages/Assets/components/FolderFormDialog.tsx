@@ -5,6 +5,7 @@ import { Button, Field, Flex, Modal, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { useCreateFolderMutation, useUpdateFolderMutation } from '../../../services/folders';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -31,6 +32,7 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const { trackUsage } = useTracking();
   const [name, setName] = useState(initialName);
   const [fieldError, setFieldError] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,8 +76,16 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
           name: trimmedName,
           parent: parentFolderId,
         }).unwrap();
+        // Matches the legacy folder-edit payload. This dialog only renames
+        // (parent is fixed), so the location never changes here.
+        trackUsage('didEditMediaLibraryElements', {
+          location: MEDIA_LIBRARY_LOCATION,
+          type: 'folder',
+          changeLocation: false,
+        });
       } else {
         await createFolder({ name: trimmedName, parent: parentFolderId }).unwrap();
+        trackUsage('didAddMediaLibraryFolders', { location: MEDIA_LIBRARY_LOCATION });
       }
 
       toggleNotification({

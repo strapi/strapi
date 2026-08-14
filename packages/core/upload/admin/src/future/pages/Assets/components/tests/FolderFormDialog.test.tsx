@@ -7,6 +7,7 @@ const mockUnwrap = jest.fn();
 const mockCreateFolder = jest.fn().mockReturnValue({ unwrap: mockUnwrap });
 const mockUpdateUnwrap = jest.fn();
 const mockUpdateFolder = jest.fn().mockReturnValue({ unwrap: mockUpdateUnwrap });
+const mockTrackUsage = jest.fn();
 
 jest.mock('../../../../services/folders', () => ({
   useCreateFolderMutation: () => [mockCreateFolder, { isLoading: false }],
@@ -16,6 +17,11 @@ jest.mock('../../../../services/folders', () => ({
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
+}));
+
+jest.mock('../../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
 }));
 
 const createProps = {
@@ -304,6 +310,36 @@ describe('FolderFormDialog', () => {
         expect(screen.getByText('Name is required')).toBeInTheDocument();
       });
       expect(mockUpdateFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('tracking', () => {
+    it('fires didAddMediaLibraryFolders with the upload location after a successful create', async () => {
+      render(<FolderFormDialog {...createProps} />);
+
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'New Folder' } });
+      fireEvent.click(screen.getByRole('button', { name: /create folder/i }));
+
+      await waitFor(() => {
+        expect(mockTrackUsage).toHaveBeenCalledWith('didAddMediaLibraryFolders', {
+          location: 'upload',
+        });
+      });
+    });
+
+    it('fires didEditMediaLibraryElements with the upload location after a successful rename', async () => {
+      render(<FolderFormDialog {...renameProps} />);
+
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Pictures' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => {
+        expect(mockTrackUsage).toHaveBeenCalledWith('didEditMediaLibraryElements', {
+          location: 'upload',
+          type: 'folder',
+          changeLocation: false,
+        });
+      });
     });
   });
 });
