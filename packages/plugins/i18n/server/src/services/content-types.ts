@@ -124,6 +124,9 @@ const getLocalizedAttributes = (model: any) => {
   );
 };
 
+const isPresentObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Fill non localized fields of an entry if there are nil
  * @param {Object} entry entry to fill
@@ -132,21 +135,39 @@ const getLocalizedAttributes = (model: any) => {
  * @param {Object} options.model corresponding model
  */
 const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
-  if (isNil(relatedEntry)) {
+  if (isNil(relatedEntry) || isNil(entry)) {
     return;
   }
 
   const modelDef = strapi.getModel(model);
+  if (!modelDef) {
+    return;
+  }
+
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
   _.forEach(relatedEntryCopy, (value, field) => {
     // Empty arrays are the admin create-locale default for required repeatable
-    // components — treat them as unset so sibling data is inherited (#27182).
+    // components and dynamic zones — treat them as unset so sibling data is inherited.
     const isUnset =
       isNil(entry[field]) || (Array.isArray(entry[field]) && entry[field].length === 0);
 
     if (isUnset) {
       entry[field] = value;
+      return;
+    }
+
+    // A present-but-shallow non-repeatable component (nested keys omitted or [])
+    // must still inherit those nested values. Otherwise saving a secondary locale
+    // syncs the shallow object to every locale and wipes nested data.
+    const attr = modelDef.attributes?.[field];
+    if (
+      attr?.type === 'component' &&
+      !attr.repeatable &&
+      isPresentObject(entry[field]) &&
+      isPresentObject(value)
+    ) {
+      fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
     }
   });
 };

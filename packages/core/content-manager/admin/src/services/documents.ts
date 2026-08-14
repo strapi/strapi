@@ -542,6 +542,14 @@ const documentApi = contentManagerApi.injectEndpoints({
         'UpcomingReleasesList',
       ],
     }),
+    /**
+     * Used by field-lock on the create view, where document metadata (and
+     * `meta.defaultLocale`) is not fetched. Same payload as the i18n plugin's
+     * locales list — a separate slice so content-manager does not import `@strapi/i18n`.
+     */
+    getI18nLocales: builder.query<Array<{ code: string; isDefault: boolean }>, void>({
+      query: () => '/i18n/locales',
+    }),
   }),
 });
 
@@ -556,6 +564,7 @@ const {
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
+  useGetI18nLocalesQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
   usePublishDocumentMutation,
@@ -576,6 +585,7 @@ export {
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
+  useGetI18nLocalesQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
   usePublishDocumentMutation,

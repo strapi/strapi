@@ -4,6 +4,7 @@ import { useIsEditingDefaultLocale, useShouldLockNonLocalizedField } from '../us
 
 const mockUseQueryParams = jest.fn(() => [{ query: {} }]);
 const mockUseDocumentContext = jest.fn();
+const mockUseGetI18nLocalesQuery = jest.fn(() => ({ data: undefined }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -14,10 +15,15 @@ jest.mock('../useDocumentContext', () => ({
   useDocumentContext: () => mockUseDocumentContext(),
 }));
 
+jest.mock('../../services/documents', () => ({
+  useGetI18nLocalesQuery: (...args: unknown[]) => mockUseGetI18nLocalesQuery(...args),
+}));
+
 describe('useI18nFieldLock', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryParams.mockReturnValue([{ query: {} }]);
+    mockUseGetI18nLocalesQuery.mockReturnValue({ data: undefined });
     mockUseDocumentContext.mockReturnValue({
       currentDocument: {
         schema: { pluginOptions: { i18n: { localized: true } } },
@@ -71,7 +77,27 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(false);
     });
 
-    it('returns true when defaultLocale is missing from document meta', () => {
+    it('falls back to the locales list when defaultLocale is missing from document meta', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: {},
+          meta: { availableLocales: [] },
+        },
+      });
+      mockUseGetI18nLocalesQuery.mockReturnValue({
+        data: [
+          { code: 'en', isDefault: true },
+          { code: 'fr', isDefault: false },
+        ],
+      });
+
+      const { result } = renderHook(() => useIsEditingDefaultLocale());
+      expect(result.current).toBe(false);
+    });
+
+    it('returns true when defaultLocale cannot be determined from meta or locales', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
@@ -80,6 +106,7 @@ describe('useI18nFieldLock', () => {
           meta: { availableLocales: [{ locale: 'en' }] },
         },
       });
+      mockUseGetI18nLocalesQuery.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useIsEditingDefaultLocale());
       expect(result.current).toBe(true);
@@ -168,7 +195,7 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(false);
     });
 
-    it('does not lock relations, uids, or dynamic zones', () => {
+    it('does not lock relations or uids', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
@@ -184,16 +211,55 @@ describe('useI18nFieldLock', () => {
       const { result: uidResult } = renderHook(() =>
         useShouldLockNonLocalizedField({ type: 'uid' })
       );
-      const { result: dzResult } = renderHook(() =>
+
+      expect(relationResult.current).toBe(false);
+      expect(uidResult.current).toBe(false);
+    });
+
+    it('locks non-localized dynamic zones on a secondary locale', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() =>
         useShouldLockNonLocalizedField({
           type: 'dynamiczone',
           pluginOptions: { i18n: { localized: false } },
         })
       );
 
-      expect(relationResult.current).toBe(false);
-      expect(uidResult.current).toBe(false);
-      expect(dzResult.current).toBe(false);
+      expect(result.current).toBe(true);
+    });
+
+    it('locks shared fields on create when meta.defaultLocale is missing but locales list is known', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: {},
+          meta: undefined,
+        },
+      });
+      mockUseGetI18nLocalesQuery.mockReturnValue({
+        data: [
+          { code: 'en', isDefault: true },
+          { code: 'fr', isDefault: false },
+        ],
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(true);
     });
 
     it('does not lock when the attribute is undefined', () => {

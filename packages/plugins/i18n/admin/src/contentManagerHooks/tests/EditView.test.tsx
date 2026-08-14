@@ -186,7 +186,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     ).toBeInTheDocument();
   });
 
-  it('does not show a lock icon for non-localized dynamic zones', () => {
+  it('shows a locked tooltip for non-localized dynamic zones on a non-default locale', () => {
     const dzField = makeEditField({
       attribute: {
         type: 'dynamiczone',
@@ -209,7 +209,12 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     });
 
     const { layout: mutated } = mutateEditViewHook({ layout });
-    expect(mutated.layout[0][0][0].labelAction).toBeUndefined();
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(
+      screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
+    ).toBeInTheDocument();
   });
 
   it('does not stamp lock icons onto nested component fields', () => {
