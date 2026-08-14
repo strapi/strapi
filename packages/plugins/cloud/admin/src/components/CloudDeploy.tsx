@@ -132,7 +132,8 @@ const CloudDeploy = () => {
               <Typography variant="omega" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('Homepage.deploy.cli.subTitle'),
-                  defaultMessage: 'Use the command line to deploy your Strapi project directly',
+                  defaultMessage:
+                    'Use the command line to link your project to an existing Strapi Cloud project, and deploy your changes directly from the CLI.',
                 })}
               </Typography>
 

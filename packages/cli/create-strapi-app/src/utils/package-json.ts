@@ -3,6 +3,7 @@ import { kebabCase, mergeWith } from 'lodash';
 import fse from 'fs-extra';
 
 import { engines } from './engines';
+import { getPnpmOnlyBuiltDependencies, shouldUsePackageJsonPnpmConfig } from './pnpm-config';
 import type { Scope } from '../types';
 
 type PnpmPackageConfig = {
@@ -24,8 +25,8 @@ const mergePackageJson = (existingPkg: PackageJson, pkg: PackageJson) =>
     return undefined;
   });
 
-const getPnpmOnlyBuiltDependencies = (scope: Scope, existingPkg: PackageJson) => {
-  if (scope.packageManager !== 'pnpm' || scope.database.client !== 'sqlite') {
+const getPnpmPackageJsonConfig = (scope: Scope, existingPkg: PackageJson) => {
+  if (scope.packageManager !== 'pnpm' || !shouldUsePackageJsonPnpmConfig(scope.pnpmVersion)) {
     return {};
   }
 
@@ -35,10 +36,8 @@ const getPnpmOnlyBuiltDependencies = (scope: Scope, existingPkg: PackageJson) =>
 
   return {
     pnpm: {
-      ...(existingPkg.pnpm ?? {}),
-      onlyBuiltDependencies: Array.from(
-        new Set([...existingOnlyBuiltDependencies, 'better-sqlite3'])
-      ).sort(),
+      ...existingPkg.pnpm,
+      onlyBuiltDependencies: getPnpmOnlyBuiltDependencies(scope, existingOnlyBuiltDependencies),
     },
   };
 };
@@ -58,12 +57,12 @@ export async function createPackageJSON(scope: Scope) {
     devDependencies: scope.devDependencies ?? {},
     dependencies: scope.dependencies ?? {},
     strapi: {
-      ...(scope.packageJsonStrapi ?? {}),
+      ...scope.packageJsonStrapi,
       uuid: scope.uuid,
       installId: scope.installId,
     },
     engines,
-    ...getPnpmOnlyBuiltDependencies(scope, existingPkg),
+    ...getPnpmPackageJsonConfig(scope, existingPkg),
   };
 
   // copy templates

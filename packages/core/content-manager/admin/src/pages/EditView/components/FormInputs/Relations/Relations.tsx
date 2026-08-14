@@ -27,7 +27,6 @@ import {
 } from '@strapi/design-system';
 import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus, WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
-import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
@@ -53,6 +52,7 @@ import {
   RelationResult,
 } from '../../../../../services/relations';
 import { type MainField } from '../../../../../utils/attributes';
+import { setIn } from '../../../../../utils/objects';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -68,7 +68,7 @@ import type { Schema } from '@strapi/types';
  * because we sometimes need to remove a previous relation when selecting a new one.
  */
 function useHandleDisconnect(fieldName: string, consumerName: string) {
-  const field = useField(fieldName);
+  const field = useField<RelationsFormValue>(fieldName);
   const removeFieldRow = useForm(consumerName, (state) => state.removeFieldRow);
   const addFieldRow = useForm(consumerName, (state) => state.addFieldRow);
 
@@ -92,6 +92,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 
       addFieldRow(`${fieldName}.disconnect`, {
         id: relation.id,
+        status: relation.status,
         apiData: {
           id: relation.id,
           documentId: relation.documentId,
@@ -116,9 +117,11 @@ const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 type RelationPosition =
   | (Pick<RelationResult, 'status' | 'locale'> & {
       before: string;
+      start?: never;
       end?: never;
     })
-  | { end: boolean; before?: never; status?: never; locale?: never };
+  | { start: boolean; before?: never; end?: never; status?: never; locale?: never }
+  | { end: boolean; before?: never; start?: never; status?: never; locale?: never };
 
 interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
@@ -141,7 +144,7 @@ interface RelationsFieldProps
 
 export interface RelationsFormValue {
   connect?: Relation[];
-  disconnect?: Pick<Relation, 'id'>[];
+  disconnect?: Pick<Relation, 'id' | 'status'>[];
 }
 
 /**
@@ -241,7 +244,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       setCurrentPage((prev) => prev + 1);
     };
 
-    const field = useField(props.name);
+    const field = useField<RelationsFormValue>(props.name);
+    const onChangeRelationField = field.onChange as (eventOrPath: string, value?: unknown) => void;
     const serverData = data?.results ?? EMPTY_RELATION_RESULTS;
 
     const isFetchingMoreRelations = isLoading || isFetching;
@@ -275,13 +279,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       /**
        * Tidy up our data.
        */
-      const transformations = pipe(
-        removeConnected(ctx),
-        removeDisconnected(ctx),
-        addLabelAndHref(ctx)
-      );
-
-      const transformedRels = transformations([...serverData]);
+      const withoutConnected = removeConnected(ctx)([...serverData]);
+      const withoutDisconnected = removeDisconnected(ctx)(withoutConnected);
+      const transformedRels = addLabelAndHref(ctx)(withoutDisconnected);
 
       /**
        * Connect items (e.g. from fill-from-locale) may lack href/label. Ensure they have them
@@ -337,14 +337,15 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           field.value?.connect?.forEach(handleDisconnect);
           relations.forEach(handleDisconnect);
 
-          field.onChange(`${props.name}.connect`, [item]);
+          onChangeRelationField(`${props.name}.connect`, [item]);
         } else {
-          field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
+          onChangeRelationField(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
         }
       },
       [
         field,
         handleDisconnect,
+        onChangeRelationField,
         props.attribute.relation,
         props.mainField,
         props.name,
@@ -476,7 +477,7 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   isRelatedToCurrentDocument: boolean;
   onChange: (
     relation: Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> & {
-      [key: string]: any;
+      [key: string]: unknown;
     }
   ) => void;
 }
@@ -697,6 +698,10 @@ const RelationModalWithContext = ({
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
+  const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
+  const getParentFormValuesWithCurrentRelation = () => {
+    return setIn(getParentFormValues(), name, fieldValue);
+  };
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -737,6 +742,7 @@ const RelationModalWithContext = ({
                   shouldBypassConfirmation: false,
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
+                  getParentFormValues: getParentFormValuesWithCurrentRelation,
                 },
               });
             }
@@ -836,7 +842,8 @@ const RelationsList = ({
   const outerListRef = React.useRef<HTMLUListElement>(null);
   const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
   const [liveText, setLiveText] = React.useState('');
-  const field = useField(name);
+  const field = useField<RelationsFormValue>(name);
+  const onChangeRelationField = field.onChange as (eventOrPath: string, value?: unknown) => void;
 
   React.useEffect(() => {
     if (data.length <= RELATIONS_TO_DISPLAY) {
@@ -926,27 +933,28 @@ const RelationsList = ({
           const relationInFront = array[currentIndex + 1];
 
           if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
-            const position = relationInFront
-              ? {
-                  before: relationInFront.documentId,
-                  locale: relationInFront.locale,
-                  status:
-                    'publishedAt' in relationInFront && relationInFront.publishedAt
-                      ? ('published' as Relation['status'])
-                      : ('draft' as Relation['status']),
-                }
-              : { end: true };
+            const position =
+              currentIndex === 0
+                ? { start: true }
+                : relationInFront
+                  ? {
+                      before: relationInFront.documentId ?? relationInFront.apiData?.documentId,
+                      locale: relationInFront.locale,
+                      status:
+                        'publishedAt' in relationInFront && relationInFront.publishedAt
+                          ? ('published' as Relation['status'])
+                          : ('draft' as Relation['status']),
+                    }
+                  : { end: true };
 
             const relationWithPosition: Relation = {
               ...relation,
-              ...{
-                apiData: {
-                  id: relation.id,
-                  documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
-                  locale: relation.locale || relation.apiData?.locale,
-                  isTemporary: relation.apiData?.isTemporary,
-                  position,
-                },
+              apiData: {
+                id: relation.id,
+                documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
+                locale: relation.locale || relation.apiData?.locale,
+                isTemporary: relation.apiData?.isTemporary,
+                position,
               },
             };
 
@@ -957,9 +965,9 @@ const RelationsList = ({
         }, [])
         .toReversed();
 
-      field.onChange(`${name}.connect`, connectedRelations);
+      onChangeRelationField(`${name}.connect`, connectedRelations);
     },
-    [data, serverData, field, name, formatMessage, getItemPos]
+    [data, serverData, name, formatMessage, getItemPos, onChangeRelationField]
   );
 
   const handleGrabItem = React.useCallback<NonNullable<UseDragAndDropOptions['onGrabItem']>>(

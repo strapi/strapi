@@ -22,7 +22,7 @@ const allowedOperations = [
 const operations = pick(allowedOperations, sift);
 
 const conditionsMatcher = (conditions: any) => {
-  // @ts-expect-error
+  // @ts-expect-error sift operation map is intentionally narrowed for tests
   return sift.createQueryTester(conditions, { operations });
 };
 
@@ -131,7 +131,7 @@ describe('Permissions Manager - Validate', () => {
   describe('Validate Input', () => {
     it('Passes valid input', async () => {
       const data = { c: 'Bar' };
-      // @ts-expect-error
+      // @ts-expect-error helpers are assigned during test setup
       const result = await validateHelpers.validateInput(data, { subject: fooModel.uid });
 
       expect(result).toEqual({ c: 'Bar' });
@@ -140,7 +140,7 @@ describe('Permissions Manager - Validate', () => {
     it('Throws on hidden fields', async () => {
       const data = { a: 'Foo', c: 'Bar' };
       expect(async () => {
-        // @ts-expect-error
+        // @ts-expect-error helpers are assigned during test setup
         await validateHelpers.validateInput(data, { subject: fooModel.uid });
       }).rejects.toThrow('Invalid key a');
     });
@@ -153,7 +153,7 @@ describe('Permissions Manager - Validate', () => {
       ['fields', 'password', { fields: ['c', 'b'] }, 'b'],
     ])('Throws on %s with %s', async (key, type, data, invalidParam) => {
       expect(async () => {
-        // @ts-expect-error
+        // @ts-expect-error helpers are assigned during test setup
         await validateHelpers.validateQuery(data, { subject: fooModel.uid });
       }).rejects.toThrow(`Invalid key ${invalidParam}`);
     });

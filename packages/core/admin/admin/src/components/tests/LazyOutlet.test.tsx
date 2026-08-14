@@ -21,7 +21,17 @@ const idleNavigation = {
   text: undefined,
 };
 
-const loadingNavigation = { ...idleNavigation, state: 'loading' as const };
+const loadingNavigation = {
+  ...idleNavigation,
+  state: 'loading' as const,
+  location: {
+    pathname: '/',
+    search: '',
+    hash: '',
+    state: null,
+    key: 'default',
+  },
+};
 
 describe('LazyOutlet', () => {
   beforeEach(() => {

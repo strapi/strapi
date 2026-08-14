@@ -4,7 +4,7 @@ import { Box, Button, Flex, LinkButton, Modal, Typography } from '@strapi/design
 import { Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { useScopedPersistentState } from '../../../hooks/usePersistentState';

@@ -344,9 +344,9 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   type IdsToDelete = Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 
-  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
-      acc.push({ id, __component });
+  const idsToDelete = allIds.reduce((acc, { id, __component: componentUID }) => {
+    if (!idsToKeep.find((el) => el.id === id && el.__component === componentUID)) {
+      acc.push({ id, __component: componentUID });
     }
 
     return acc;
@@ -354,8 +354,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {
-      const { id, __component } = idToDelete;
-      await deleteComponent(__component, { id });
+      const { id, __component: componentUID } = idToDelete;
+      await deleteComponent(componentUID, { id });
     }
   }
 };

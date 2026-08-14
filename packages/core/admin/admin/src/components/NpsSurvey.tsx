@@ -149,7 +149,7 @@ const NpsSurvey = () => {
     comment: string;
     environment?: string;
     version?: string;
-    license: 'Enterprise' | 'Community';
+    license: 'Enterprise' | 'Growth' | 'Community';
   }
 
   // Only check on first render if the survey should be shown
@@ -223,7 +223,7 @@ const NpsSurvey = () => {
       setTimeout(() => {
         setSurveyIsShown(false);
       }, 3000);
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

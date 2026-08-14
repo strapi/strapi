@@ -311,7 +311,7 @@ describe('Content Type Builder | DataManager | reducer', () => {
       const action = actions.addCustomFieldAttribute({
         attributeToSet: {
           name: 'customField',
-          type: 'customField',
+          type: 'string',
           customField: 'test.custom-field',
         },
         forTarget: 'contentType',
@@ -323,7 +323,7 @@ describe('Content Type Builder | DataManager | reducer', () => {
       expect(state.current.contentTypes['api::test.test'].attributes).toHaveLength(1);
       expect(state.current.contentTypes['api::test.test'].attributes[0]).toMatchObject({
         name: 'customField',
-        type: 'customField',
+        type: 'string',
         customField: 'test.custom-field',
         status: 'NEW',
       });

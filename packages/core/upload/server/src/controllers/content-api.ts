@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { async, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -10,7 +10,7 @@ import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError } = utils.errors;
+const { ValidationError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -118,18 +118,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      // cannot replace with more than one file
+      if (Array.isArray(filesInput) && filesInput.length > 1) {
+        throw new ValidationError('Cannot replace a file with multiple ones');
+      }
+
+      const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
+
       const {
         validFiles,
         filteredBody,
         errors: validationErrors,
-      } = await prepareUploadRequest(filesInput, body, strapi);
+      } = await prepareUploadRequest(files, body, strapi);
       if (validFiles.length === 0) {
         throw new errors.ValidationError(validationErrors[0].message);
-      }
-
-      // cannot replace with more than one file
-      if (Array.isArray(filesInput)) {
-        throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
       if (!id || (typeof id !== 'string' && typeof id !== 'number')) {

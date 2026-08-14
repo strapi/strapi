@@ -75,7 +75,7 @@ const AdminLayout = () => {
     pluginsSectionLinks,
     topMobileNavigation,
     burgerMobileNavigation,
-  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
+  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), appInfo?.currentEnvironment);
 
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const projectId = appInfo?.projectId;

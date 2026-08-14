@@ -58,6 +58,7 @@
   "Providers.status": "Status",
   "Roles.empty": "You don't have any roles yet.",
   "Roles.empty.search": "No roles match the search.",
+  "Settings.roles.created": "Role created",
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "Users & Permissions plugin",
