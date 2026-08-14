@@ -10,6 +10,7 @@ import type {
   GetFolders,
   GetFolderStructure,
   BulkMoveFolders,
+  UpdateFolder,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -106,6 +107,22 @@ const foldersApi = uploadApi.injectEndpoints({
         { type: 'Folder', id: 'STRUCTURE' },
       ],
     }),
+    updateFolder: builder.mutation<
+      UpdateFolder.Response['data'],
+      { id: number } & UpdateFolder.Request['body']
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/upload/folders/${id}`,
+        method: 'PUT',
+        data: body,
+      }),
+      transformResponse: (response: UpdateFolder.Response) => response.data,
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
     /**
      * Hierarchical folder tree used by the FolderTree sidebar. Returned as a
      * single nested array — the server walks the folders table once and
@@ -197,6 +214,7 @@ const foldersApi = uploadApi.injectEndpoints({
 
 export const {
   useCreateFolderMutation,
+  useUpdateFolderMutation,
   useGetFoldersQuery,
   useGetFolderQuery,
   useGetAllFoldersQuery,

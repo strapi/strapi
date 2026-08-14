@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 import _ from 'lodash';
 import { subject } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
@@ -101,13 +103,13 @@ describe('Permissions Engine', () => {
     engineProviders?: { action: any; condition: any };
     abilityOptions?: Record<string, unknown>;
   }) => {
-    const registerFunctions: jest.Mock[] = [];
+    const registerFunctions: Mock[] = [];
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
     const engineCrf = engine.createRegisterFunction;
-    const createRegisterFunction = jest
+    const createRegisterFunction = vi
       .spyOn(engine, 'createRegisterFunction')
       .mockImplementation((can, options) => {
-        const registerFunction = jest.fn(engineCrf(can, options));
+        const registerFunction = vi.fn(engineCrf(can, options));
         registerFunctions.push(registerFunction);
         return registerFunction;
       });
@@ -330,6 +332,79 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
   });
 
+  it('skips an unregistered condition and denies access instead of throwing', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: ['plugin::test.doesNotExist'],
+      },
+    ];
+    const engineProviders = {
+      action: providerFactory(),
+      condition: providerFactory(),
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'article', 'title')).toBeFalsy();
+  });
+
+  it('skips an unregistered condition but still grants via a valid one in the same permission', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [allowedCondition, 'plugin::test.doesNotExist'],
+      },
+    ];
+
+    const conditionProvider = providerFactory();
+    await conditionProvider.register(
+      allowedCondition,
+      conditions.find((c) => c.name === allowedCondition)!
+    );
+
+    const engineProviders = {
+      action: providerFactory(),
+      condition: conditionProvider,
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article', 'title')).toBeTruthy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
+  });
+
+  it('skips a condition whose handler is not a function and denies access instead of throwing', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [allowedCondition, 'plugin::test.malformedHandler'],
+      },
+    ];
+
+    const conditionProvider = providerFactory();
+    await conditionProvider.register('plugin::test.malformedHandler', {
+      name: 'plugin::test.malformedHandler',
+      handler: 'not a function',
+    });
+
+    const engineProviders = {
+      action: providerFactory(),
+      condition: conditionProvider,
+    };
+
+    const { ability } = await buildEngineWithAbility({ permissions, engineProviders });
+
+    expect(ability.can('read', 'article', 'title')).toBeFalsy();
+  });
+
   describe('hooks', () => {
     describe('format.permission', () => {
       it('modifies permissions correctly', async () => {
@@ -536,10 +611,10 @@ describe('Permissions Engine', () => {
   describe('before-* hooks', () => {
     it('execute in the correct order', async () => {
       let called = '';
-      const beforeEvaluateFn = jest.fn(() => {
+      const beforeEvaluateFn = vi.fn(() => {
         called = 'beforeEvaluate';
       });
-      const beforeRegisterFn = jest.fn(() => {
+      const beforeRegisterFn = vi.fn(() => {
         expect(called).toEqual('beforeEvaluate');
         called = 'beforeRegister';
       });
