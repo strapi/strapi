@@ -91,14 +91,14 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
         <Modal.Body>
           {isReady ? (
             <Flex direction="column" alignItems="stretch" gap={4}>
-              <Typography textColor="neutral600">
+              <Typography>
                 {formatMessage({
                   id: 'Settings.debug-dump.snapshot-modal.description',
                   defaultMessage:
                     "This snapshot describes how your project is built so a third party can reproduce the bug locally. It does not contain any of your app's content and no credentials.",
                 })}
               </Typography>
-              <Typography variant="sigma" textColor="neutral600">
+              <Typography variant="sigma">
                 {formatMessage({
                   id: 'Settings.debug-dump.payload-label',
                   defaultMessage: 'payload',
@@ -136,17 +136,26 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="tertiary"
-            onClick={handleCopy}
-            startIcon={<Duplicate />}
-            disabled={!isReady}
-          >
-            {formatMessage({ id: 'Settings.debug-dump.copy', defaultMessage: 'Copy' })}
-          </Button>
-          <Button onClick={handleDownload} startIcon={<Download />} disabled={!isReady}>
-            {formatMessage({ id: 'Settings.debug-dump.download', defaultMessage: 'Download' })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Modal.Close>
+          {/* Grouped so Copy and Download stay together on the right rather than being pushed to
+              opposite edges by the footer's `space-between`. */}
+          <Flex gap={2}>
+            <Button
+              variant="secondary"
+              onClick={handleCopy}
+              startIcon={<Duplicate />}
+              disabled={!isReady}
+            >
+              {formatMessage({ id: 'Settings.debug-dump.copy', defaultMessage: 'Copy' })}
+            </Button>
+            <Button onClick={handleDownload} startIcon={<Download />} disabled={!isReady}>
+              {formatMessage({ id: 'Settings.debug-dump.download', defaultMessage: 'Download' })}
+            </Button>
+          </Flex>
         </Modal.Footer>
       </Modal.Content>
     </Modal.Root>
