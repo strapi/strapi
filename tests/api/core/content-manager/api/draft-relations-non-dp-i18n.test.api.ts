@@ -9,6 +9,7 @@ let rq: any;
 const UID_PAGE = 'api::page.page';
 const UID_MENU = 'api::menu.menu';
 const UID_HOMEPAGE = 'api::homepage.homepage';
+const UID_SETTINGS = 'api::settings.settings';
 
 const nonDefaultLocale = 'fr';
 
@@ -66,9 +67,29 @@ const homepageModel = {
   },
 };
 
+// Settings: single type, dedicated to the "only exists in a non-default locale" case
+// (Homepage already gets an 'en' version created by an earlier test in this file)
+const settingsModel = {
+  kind: 'singleType',
+  displayName: 'Settings',
+  singularName: 'settings',
+  pluralName: 'settings-entries',
+  draftAndPublish: false,
+  pluginOptions: {
+    i18n: { localized: true },
+  },
+  attributes: {
+    page: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: UID_PAGE,
+    },
+  },
+};
+
 describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26897)', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([pageModel, menuModel, homepageModel]).build();
+    await builder.addContentTypes([pageModel, menuModel, homepageModel, settingsModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -171,6 +192,51 @@ describe('CM API - countDraftRelations on a non-D&P i18n content type (issue #26
       method: 'GET',
       url: `/content-manager/single-types/${UID_HOMEPAGE}/actions/countDraftRelations`,
       qs: { locale: nonDefaultLocale },
+    });
+
+    expect(countRes.statusCode).toBe(200);
+    expect(countRes.body.data).toMatchObject({ unpublishedRelations: 0, draftM2mLinks: 0 });
+  });
+
+  test('returns 200 with zero counts when the document exists only in a non-default locale', async () => {
+    // Menu created directly in fr, skipping the default 'en' locale entirely
+    const {
+      body: { data: menuFr },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_MENU}`,
+      qs: { locale: nonDefaultLocale },
+      body: {},
+    });
+
+    // Requesting the DEFAULT locale (en), which was never created for this document.
+    // The document DOES exist (in fr), so this should be 200 with zero counts, not 404.
+    const countRes = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${UID_MENU}/${menuFr.documentId}/actions/countDraftRelations`,
+      qs: { locale: 'en' },
+    });
+
+    expect(countRes.statusCode).toBe(200);
+    expect(countRes.body.data).toMatchObject({ unpublishedRelations: 0, draftM2mLinks: 0 });
+  });
+
+  test('returns 200 with zero counts for a single type that exists only in a non-default locale', async () => {
+    // Settings created directly in fr, skipping the default 'en' locale entirely
+    const createRes = await rq({
+      method: 'PUT',
+      url: `/content-manager/single-types/${UID_SETTINGS}`,
+      qs: { locale: nonDefaultLocale },
+      body: {},
+    });
+    expect(createRes.statusCode).toBe(200);
+
+    // Requesting the DEFAULT locale (en), which was never created for this single type.
+    // The document DOES exist (in fr), so this should be 200 with zero counts, not 404.
+    const countRes = await rq({
+      method: 'GET',
+      url: `/content-manager/single-types/${UID_SETTINGS}/actions/countDraftRelations`,
+      qs: { locale: 'en' },
     });
 
     expect(countRes.statusCode).toBe(200);

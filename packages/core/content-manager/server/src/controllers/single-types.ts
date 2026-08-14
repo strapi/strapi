@@ -329,22 +329,27 @@ export default {
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const { locale } = await getDocumentLocaleAndStatus(query, model);
-
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
 
-    const document = await findDocument({}, model, { locale });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    const { locale } = await getDocumentLocaleAndStatus(query, model);
+
+    const document = await findDocument(permissionQuery, model, { locale });
 
     if (!document) {
-      const documentInAnyLocale = await findDocument({}, model);
+      // The single type may simply not have a version in the requested locale yet.
+      // Check every existing locale/status version — findLocales returns one row
+      // per locale AND per publication state — before deciding it truly doesn't exist.
+      const populate = await buildPopulateFromQuery(permissionQuery, model);
+      const versions = await documentManager.findLocales(undefined, model, { populate });
 
-      if (!documentInAnyLocale) {
+      if (versions.length === 0) {
         return ctx.notFound();
       }
 
-      if (permissionChecker.cannot.read(documentInAnyLocale)) {
+      if (versions.every((version) => permissionChecker.cannot.read(version))) {
         return ctx.forbidden();
       }
 

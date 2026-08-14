@@ -1023,13 +1023,19 @@ export default {
       });
 
       if (!entity) {
-        const entityInAnyLocale = await documentManager.findOne(id, model, { populate });
+        // The document may simply not have a version in the requested locale yet.
+        // Check every existing locale/status version before deciding it truly doesn't exist —
+        // findLocales returns one row per locale AND per publication state.
+        const versions = await documentManager.findLocales(id, model, { populate });
 
-        if (!entityInAnyLocale) {
+        if (versions.length === 0) {
           return ctx.notFound();
         }
 
-        if (permissionChecker.cannot.read(entityInAnyLocale)) {
+        if (
+          permissionChecker.requiresEntity.read() &&
+          versions.every((version) => permissionChecker.cannot.read(version))
+        ) {
           return ctx.forbidden();
         }
 
