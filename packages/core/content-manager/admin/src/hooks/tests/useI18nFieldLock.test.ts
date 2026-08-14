@@ -2,9 +2,13 @@ import { renderHook } from '@testing-library/react';
 
 import { useIsEditingDefaultLocale, useShouldLockNonLocalizedField } from '../useI18nFieldLock';
 
+type I18nLocalesQueryResult = {
+  data: Array<{ code: string; isDefault: boolean }> | undefined;
+};
+
 const mockUseQueryParams = jest.fn(() => [{ query: {} }]);
 const mockUseDocumentContext = jest.fn();
-const mockUseGetI18nLocalesQuery = jest.fn(() => ({ data: undefined }));
+const mockUseGetI18nLocalesQuery = jest.fn((): I18nLocalesQueryResult => ({ data: undefined }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -16,7 +20,7 @@ jest.mock('../useDocumentContext', () => ({
 }));
 
 jest.mock('../../services/documents', () => ({
-  useGetI18nLocalesQuery: (...args: unknown[]) => mockUseGetI18nLocalesQuery(...args),
+  useGetI18nLocalesQuery: () => mockUseGetI18nLocalesQuery(),
 }));
 
 describe('useI18nFieldLock', () => {
