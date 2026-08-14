@@ -5,8 +5,8 @@ import { useNavigate, useMatch } from 'react-router-dom';
 
 import { Page } from '../../../../admin/src/components/PageHelpers';
 import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
-import { login } from '../../../../admin/src/reducer';
 import { AUTH_COOKIE_NAME, getCookieValue } from '../../../../admin/src/utils/cookies';
+import { establishAdminSession } from '../../../../admin/src/utils/establishAdminSession';
 
 const AuthResponse = () => {
   const match = useMatch('/auth/login/:authResponse');
@@ -35,11 +35,9 @@ const AuthResponse = () => {
       const jwtToken = getCookieValue(AUTH_COOKIE_NAME);
 
       if (jwtToken) {
-        dispatch(
-          login({
-            token: jwtToken,
-          })
-        );
+        establishAdminSession(dispatch, {
+          token: jwtToken,
+        });
 
         navigate('/auth/login');
       } else {
