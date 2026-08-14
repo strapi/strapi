@@ -1,16 +1,13 @@
 import type { ReactNode } from 'react';
 
-import { Flex, Tooltip, Typography, Link } from '@strapi/design-system';
-import { ExternalLink, WarningCircle } from '@strapi/icons';
+import { Flex, Tooltip, Typography } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
-
-const BILLING_SELF_HOSTED_URL = 'mailto:sales@strapi.io';
-const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -37,7 +34,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, type } = license;
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats } = license;
 
   if (!permittedSeats) {
     return null;
@@ -85,21 +82,6 @@ export const AdminSeatInfoEE = () => {
           </Tooltip>
         )}
       </Flex>
-      {type === 'gold' ? (
-        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.support',
-            defaultMessage: 'Contact sales',
-          })}
-        </Link>
-      ) : (
-        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.add-seats',
-            defaultMessage: 'Manage subscription',
-          })}
-        </Link>
-      )}
     </Flex>
   );
 };

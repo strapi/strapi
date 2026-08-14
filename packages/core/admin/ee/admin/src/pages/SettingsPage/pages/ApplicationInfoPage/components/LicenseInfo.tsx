@@ -299,7 +299,7 @@ const LicenseInfoEE = () => {
               {checkinLine && (
                 <Flex gap={1} alignItems="center">
                   <ClockCounterClockwise width="1.2rem" height="1.2rem" fill="neutral500" />
-                  <Typography variant="pi" textColor="neutral600">
+                  <Typography variant="pi" textColor="neutral500">
                     {checkinLine}
                   </Typography>
                 </Flex>
