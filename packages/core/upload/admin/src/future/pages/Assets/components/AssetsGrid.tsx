@@ -1,18 +1,10 @@
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Checkbox,
-  Flex,
-  Grid,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Card, CardBody, CardHeader, Checkbox, Flex, Grid } from '@strapi/design-system';
 import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { TruncatedText } from '../../../components/TruncatedText';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
@@ -143,7 +135,7 @@ const FolderIconContainer = styled(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-const FolderName = styled(Typography)`
+const FolderName = styled(TruncatedText)`
   flex: 1;
   min-width: 0;
 `;
@@ -257,9 +249,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
-      <FolderName textColor="neutral800" ellipsis>
-        {folder.name}
-      </FolderName>
+      <FolderName textColor="neutral800">{folder.name}</FolderName>
       <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
         <FolderActionsMenu folder={folder} dragData={dragData} />
       </Flex>
@@ -375,7 +365,7 @@ const FileTypeIcon = styled(Flex)`
   flex-shrink: 0;
 `;
 
-const FileName = styled(Typography)`
+const FileName = styled(TruncatedText)`
   flex: 1;
   min-width: 0;
 `;
@@ -521,9 +511,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
             <TypeIcon width={20} height={20} />
           </FileTypeIcon>
           <NameButton type="button" onClick={handleNameClick}>
-            <FileName textColor="primary800" ellipsis>
-              {asset.name}
-            </FileName>
+            <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
           <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
             <AssetActionsMenu asset={asset} dragData={dragData} />

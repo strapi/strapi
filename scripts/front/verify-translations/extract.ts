@@ -1,0 +1,719 @@
+import ts from 'typescript';
+
+import {
+  classifyDynamicPattern,
+  expandTemplateToJsonKeys,
+  resolveMessageId,
+  toJsonKey,
+  toMessageId,
+} from './patterns';
+import type { MessageExtraction, TranslationBundle } from './types';
+import { listSourceFiles, readJsonRecord } from './bundles';
+
+const TRANSLATION_HELPERS = new Set(['getTrad', 'getTranslation', 'getTranslationKey']);
+
+export type ResolvedId = {
+  messageId: string | null;
+  targetBundle?: 'core/admin' | 'self';
+  propertyName?: string;
+};
+
+const getLine = (sourceFile: ts.SourceFile, node: ts.Node) =>
+  sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+
+const getStringLiteralValue = (node: ts.Expression | undefined): string | null => {
+  if (!node) {
+    return null;
+  }
+
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+    return node.text;
+  }
+
+  if (ts.isTemplateExpression(node)) {
+    const head = node.head.text;
+    const spans = node.templateSpans.map((span) => span.literal.text);
+    const holes = node.templateSpans.map(() => '${…}');
+
+    return [head, ...holes.flatMap((hole, index) => [hole, spans[index] ?? ''])].join('');
+  }
+
+  if (ts.isParenthesizedExpression(node)) {
+    return getStringLiteralValue(node.expression);
+  }
+
+  return null;
+};
+
+/** When `getTrad('…')` is the `id` of a message descriptor, reuse sibling defaultMessage. */
+const defaultMessageFromEnclosingDescriptor = (call: ts.CallExpression): string | null => {
+  const parent = call.parent;
+
+  if (!parent || !ts.isPropertyAssignment(parent) || getPropertyName(parent.name) !== 'id') {
+    return null;
+  }
+
+  const objectLiteral = parent.parent;
+
+  if (!objectLiteral || !ts.isObjectLiteralExpression(objectLiteral)) {
+    return null;
+  }
+
+  for (const prop of objectLiteral.properties) {
+    if (!ts.isPropertyAssignment(prop) || getPropertyName(prop.name) !== 'defaultMessage') {
+      continue;
+    }
+
+    return getStringLiteralValue(prop.initializer);
+  }
+
+  return null;
+};
+
+const pushDescriptorExtraction = (
+  sourceFile: ts.SourceFile,
+  node: ts.Node,
+  descriptor: ts.ObjectLiteralExpression,
+  bundle: TranslationBundle,
+  enKeys: string[],
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  constants: Record<string, string>,
+  results: MessageExtraction[]
+) => {
+  const { messageId, targetBundle, defaultMessage, propertyName } = readObjectDescriptor(
+    descriptor,
+    bundle,
+    pluginEnKeys,
+    adminEnKeys,
+    constants
+  );
+  const extraction = buildExtraction(
+    sourceFile,
+    node,
+    bundle,
+    enKeys,
+    adminEnKeys,
+    messageId,
+    targetBundle,
+    defaultMessage,
+    propertyName
+  );
+
+  if (extraction) {
+    results.push(extraction);
+  }
+};
+
+const getPropertyName = (name: ts.PropertyName): string | null => {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
+    return name.text;
+  }
+
+  return null;
+};
+
+const loadPluginIdConstants = (bundle: TranslationBundle): Record<string, string> => {
+  const constants: Record<string, string> = {
+    PLUGIN_ID: bundle.pluginPrefix ?? '',
+    pluginId: bundle.pluginPrefix ?? '',
+  };
+
+  for (const sourceDir of bundle.sourceDirs) {
+    const candidates = ['constants/plugin.ts', 'pluginId.ts', 'constants.ts'];
+
+    for (const relativePath of candidates) {
+      const filePath = `${sourceDir}/${relativePath}`;
+
+      if (!ts.sys.fileExists(filePath)) {
+        continue;
+      }
+
+      const sourceFile = ts.createSourceFile(
+        filePath,
+        ts.sys.readFile(filePath)!,
+        ts.ScriptTarget.Latest,
+        true
+      );
+
+      sourceFile.forEachChild((node) => {
+        if (!ts.isVariableStatement(node)) {
+          return;
+        }
+
+        for (const decl of node.declarationList.declarations) {
+          if (!ts.isIdentifier(decl.name) || !decl.initializer) {
+            continue;
+          }
+
+          const value = getStringLiteralValue(decl.initializer);
+
+          if (value) {
+            constants[decl.name.text] = value;
+          }
+        }
+      });
+    }
+  }
+
+  return constants;
+};
+
+const foldTemplateSpanExpression = (
+  expr: ts.Expression,
+  constants: Record<string, string>
+): string[] | null => {
+  if (ts.isIdentifier(expr) && constants[expr.text] != null && constants[expr.text] !== '') {
+    return [constants[expr.text]];
+  }
+
+  if (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) {
+    return [expr.text];
+  }
+
+  if (ts.isConditionalExpression(expr)) {
+    const whenTrue = foldTemplateSpanExpression(expr.whenTrue, constants);
+    const whenFalse = foldTemplateSpanExpression(expr.whenFalse, constants);
+
+    if (whenTrue && whenFalse) {
+      return [...whenTrue, ...whenFalse];
+    }
+  }
+
+  if (ts.isParenthesizedExpression(expr)) {
+    return foldTemplateSpanExpression(expr.expression, constants);
+  }
+
+  return null;
+};
+
+const foldTemplateExpression = (
+  node: ts.TemplateExpression,
+  constants: Record<string, string>
+): string | null => {
+  let variants = [node.head.text];
+
+  for (const span of node.templateSpans) {
+    const alts = foldTemplateSpanExpression(span.expression, constants);
+    const literal = span.literal.text;
+
+    if (!alts) {
+      variants = variants.map((variant) => `${variant}\${…}${literal}`);
+      continue;
+    }
+
+    variants = variants.flatMap((variant) => alts.map((alt) => `${variant}${alt}${literal}`));
+  }
+
+  return variants.join('|');
+};
+
+const resolveHelperCall = (
+  node: ts.CallExpression,
+  constants: Record<string, string>
+): string | null => {
+  const callee = node.expression;
+
+  if (!ts.isIdentifier(callee) || !TRANSLATION_HELPERS.has(callee.text)) {
+    return null;
+  }
+
+  const arg = node.arguments[0];
+
+  if (!arg) {
+    return null;
+  }
+
+  if (ts.isTemplateExpression(arg)) {
+    return foldTemplateExpression(arg, constants) ?? getStringLiteralValue(arg);
+  }
+
+  return getStringLiteralValue(arg);
+};
+
+const resolvePossiblyBranchedId = (
+  rawId: string,
+  bundle: TranslationBundle,
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  fromHelper: boolean
+): ResolvedId => {
+  if (!rawId.includes('|')) {
+    return resolveMessageId(rawId, bundle.pluginPrefix, pluginEnKeys, adminEnKeys, fromHelper);
+  }
+
+  const parts = rawId
+    .split('|')
+    .map((part) =>
+      resolveMessageId(part, bundle.pluginPrefix, pluginEnKeys, adminEnKeys, fromHelper)
+    );
+
+  if (parts.some((part) => !part.messageId)) {
+    return { messageId: null };
+  }
+
+  return {
+    messageId: parts.map((part) => part.messageId).join('|'),
+    targetBundle: parts.some((part) => part.targetBundle === 'core/admin') ? 'core/admin' : 'self',
+  };
+};
+
+export const resolveIdExpression = (
+  expr: ts.Expression,
+  bundle: TranslationBundle,
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  constants: Record<string, string>
+): ResolvedId => {
+  if (ts.isStringLiteral(expr) || ts.isNoSubstitutionTemplateLiteral(expr)) {
+    const resolved = resolveMessageId(expr.text, bundle.pluginPrefix, pluginEnKeys, adminEnKeys);
+
+    return resolved;
+  }
+
+  if (ts.isTemplateExpression(expr)) {
+    const folded = foldTemplateExpression(expr, constants) ?? getStringLiteralValue(expr);
+
+    if (!folded) {
+      return { messageId: null };
+    }
+
+    return resolvePossiblyBranchedId(folded, bundle, pluginEnKeys, adminEnKeys, false);
+  }
+
+  if (ts.isCallExpression(expr)) {
+    const resolved = resolveHelperCall(expr, constants);
+
+    if (resolved) {
+      return resolvePossiblyBranchedId(resolved, bundle, pluginEnKeys, adminEnKeys, true);
+    }
+  }
+
+  if (ts.isIdentifier(expr)) {
+    return { messageId: null, propertyName: expr.text };
+  }
+
+  if (ts.isPropertyAccessExpression(expr)) {
+    return { messageId: null, propertyName: expr.getText() };
+  }
+
+  if (ts.isConditionalExpression(expr)) {
+    const whenTrue = resolveIdExpression(
+      expr.whenTrue,
+      bundle,
+      pluginEnKeys,
+      adminEnKeys,
+      constants
+    );
+    const whenFalse = resolveIdExpression(
+      expr.whenFalse,
+      bundle,
+      pluginEnKeys,
+      adminEnKeys,
+      constants
+    );
+
+    if (whenTrue.messageId && whenFalse.messageId) {
+      const targetBundle =
+        whenTrue.targetBundle === 'core/admin' || whenFalse.targetBundle === 'core/admin'
+          ? 'core/admin'
+          : 'self';
+
+      return {
+        messageId: `${whenTrue.messageId}|${whenFalse.messageId}`,
+        targetBundle,
+      };
+    }
+  }
+
+  return { messageId: null };
+};
+
+const readObjectDescriptor = (
+  node: ts.ObjectLiteralExpression,
+  bundle: TranslationBundle,
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  constants: Record<string, string>
+): {
+  messageId: string | null;
+  targetBundle?: 'core/admin' | 'self';
+  defaultMessage: string | null;
+  propertyName?: string;
+} => {
+  let defaultMessage: string | null = null;
+  let idNode: ts.Expression | undefined;
+
+  for (const prop of node.properties) {
+    if (!ts.isPropertyAssignment(prop)) {
+      continue;
+    }
+
+    const key = getPropertyName(prop.name);
+
+    if (key === 'id') {
+      idNode = prop.initializer;
+    }
+
+    if (key === 'defaultMessage') {
+      defaultMessage = getStringLiteralValue(prop.initializer);
+    }
+  }
+
+  if (!idNode) {
+    return { messageId: null, defaultMessage };
+  }
+
+  const resolved = resolveIdExpression(idNode, bundle, pluginEnKeys, adminEnKeys, constants);
+
+  return {
+    messageId: resolved.messageId,
+    targetBundle: resolved.targetBundle,
+    defaultMessage,
+    propertyName: resolved.propertyName,
+  };
+};
+
+const buildExtraction = (
+  sourceFile: ts.SourceFile,
+  node: ts.Node,
+  bundle: TranslationBundle,
+  enKeys: string[],
+  adminEnKeys: Set<string>,
+  messageId: string | null,
+  targetBundle: 'core/admin' | 'self' | undefined,
+  defaultMessage: string | null,
+  propertyName?: string
+): MessageExtraction | null => {
+  if (!messageId && propertyName) {
+    const classification = classifyDynamicPattern('', '', propertyName);
+
+    return {
+      file: sourceFile.fileName,
+      line: getLine(sourceFile, node),
+      kind: classification.kind,
+      jsonKey: null,
+      messageId: null,
+      defaultMessage,
+      note: classification.note,
+      targetBundle: 'self',
+    };
+  }
+
+  if (!messageId) {
+    return null;
+  }
+
+  if (targetBundle === 'core/admin') {
+    return {
+      file: sourceFile.fileName,
+      line: getLine(sourceFile, node),
+      kind: 'static',
+      jsonKey: null,
+      messageId,
+      defaultMessage,
+      targetBundle: 'core/admin',
+    };
+  }
+
+  const branches = messageId.includes('|') ? messageId.split('|') : [messageId];
+  const expandedJsonKeys = new Set<string>();
+  let kind: MessageExtraction['kind'] = 'static';
+  let note: string | undefined;
+
+  for (const branch of branches) {
+    const jsonKey = toJsonKey(branch, bundle.pluginPrefix);
+    const classification = classifyDynamicPattern(jsonKey, branch, propertyName);
+    kind = classification.kind;
+    note = classification.note;
+
+    if (classification.kind === 'schema-driven' || classification.kind === 'error-passthrough') {
+      return {
+        file: sourceFile.fileName,
+        line: getLine(sourceFile, node),
+        kind: classification.kind,
+        jsonKey: null,
+        messageId: null,
+        defaultMessage,
+        note,
+        targetBundle: 'self',
+      };
+    }
+
+    if (branch.includes('${')) {
+      kind = 'finite-enum';
+
+      for (const key of expandTemplateToJsonKeys(branch, enKeys, bundle.pluginPrefix)) {
+        expandedJsonKeys.add(key);
+      }
+
+      continue;
+    }
+
+    expandedJsonKeys.add(jsonKey);
+  }
+
+  const keys = [...expandedJsonKeys];
+
+  return {
+    file: sourceFile.fileName,
+    line: getLine(sourceFile, node),
+    kind: keys.length > 1 ? 'finite-enum' : kind,
+    jsonKey: keys.length === 1 ? keys[0] : null,
+    messageId: keys.length === 1 ? toMessageId(keys[0], bundle.pluginPrefix, adminEnKeys) : null,
+    defaultMessage,
+    expandedJsonKeys: keys.length > 1 ? keys : undefined,
+    note,
+    targetBundle: 'self',
+  };
+};
+
+const visitNode = (
+  sourceFile: ts.SourceFile,
+  node: ts.Node,
+  bundle: TranslationBundle,
+  enKeys: string[],
+  pluginEnKeys: Set<string>,
+  adminEnKeys: Set<string>,
+  constants: Record<string, string>,
+  results: MessageExtraction[]
+) => {
+  if (ts.isCallExpression(node)) {
+    const callee = node.expression;
+    const isFormatMessage =
+      (ts.isIdentifier(callee) && callee.text === 'formatMessage') ||
+      (ts.isPropertyAccessExpression(callee) && callee.name.text === 'formatMessage');
+
+    if (isFormatMessage) {
+      const arg = node.arguments[0];
+      const descriptors: ts.ObjectLiteralExpression[] = [];
+
+      if (arg && ts.isObjectLiteralExpression(arg)) {
+        descriptors.push(arg);
+      }
+
+      if (arg && ts.isConditionalExpression(arg)) {
+        if (ts.isObjectLiteralExpression(arg.whenTrue)) {
+          descriptors.push(arg.whenTrue);
+        }
+
+        if (ts.isObjectLiteralExpression(arg.whenFalse)) {
+          descriptors.push(arg.whenFalse);
+        }
+      }
+
+      for (const descriptor of descriptors) {
+        pushDescriptorExtraction(
+          sourceFile,
+          node,
+          descriptor,
+          bundle,
+          enKeys,
+          pluginEnKeys,
+          adminEnKeys,
+          constants,
+          results
+        );
+      }
+    }
+
+    if (ts.isIdentifier(callee) && TRANSLATION_HELPERS.has(callee.text)) {
+      const raw = resolveHelperCall(node, constants);
+
+      if (raw) {
+        const resolved = resolvePossiblyBranchedId(raw, bundle, pluginEnKeys, adminEnKeys, true);
+        const extraction = buildExtraction(
+          sourceFile,
+          node,
+          bundle,
+          enKeys,
+          adminEnKeys,
+          resolved.messageId,
+          resolved.targetBundle,
+          defaultMessageFromEnclosingDescriptor(node)
+        );
+
+        if (extraction) {
+          results.push(extraction);
+        }
+      }
+    }
+  }
+
+  if (ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) {
+    if (node.tagName.getText(sourceFile) === 'FormattedMessage') {
+      let messageId: string | null = null;
+      let targetBundle: 'core/admin' | 'self' | undefined;
+      let defaultMessage: string | null = null;
+      let propertyName: string | undefined;
+
+      for (const attr of node.attributes.properties) {
+        if (!ts.isJsxAttribute(attr) || !attr.initializer) {
+          continue;
+        }
+
+        const attrName = attr.name.getText(sourceFile);
+
+        if (attrName === 'id' && ts.isStringLiteral(attr.initializer)) {
+          const resolved = resolveMessageId(
+            attr.initializer.text,
+            bundle.pluginPrefix,
+            pluginEnKeys,
+            adminEnKeys
+          );
+          messageId = resolved.messageId;
+          targetBundle = resolved.targetBundle;
+        }
+
+        if (
+          attrName === 'id' &&
+          ts.isJsxExpression(attr.initializer) &&
+          attr.initializer.expression
+        ) {
+          const resolved = resolveIdExpression(
+            attr.initializer.expression,
+            bundle,
+            pluginEnKeys,
+            adminEnKeys,
+            constants
+          );
+          messageId = resolved.messageId;
+          targetBundle = resolved.targetBundle;
+          propertyName = resolved.propertyName;
+        }
+
+        if (attrName === 'defaultMessage' && ts.isStringLiteral(attr.initializer)) {
+          defaultMessage = attr.initializer.text;
+        }
+      }
+
+      const extraction = buildExtraction(
+        sourceFile,
+        node,
+        bundle,
+        enKeys,
+        adminEnKeys,
+        messageId,
+        targetBundle,
+        defaultMessage,
+        propertyName
+      );
+
+      if (extraction) {
+        results.push(extraction);
+      }
+    }
+  }
+
+  if (
+    ts.isPropertyAssignment(node) &&
+    getPropertyName(node.name) === 'intlLabel' &&
+    ts.isObjectLiteralExpression(node.initializer)
+  ) {
+    const { messageId, targetBundle, defaultMessage } = readObjectDescriptor(
+      node.initializer,
+      bundle,
+      pluginEnKeys,
+      adminEnKeys,
+      constants
+    );
+
+    if (messageId) {
+      const extraction = buildExtraction(
+        sourceFile,
+        node,
+        bundle,
+        enKeys,
+        adminEnKeys,
+        messageId,
+        targetBundle,
+        defaultMessage
+      );
+
+      if (extraction) {
+        results.push(extraction);
+      }
+    }
+  }
+
+  ts.forEachChild(node, (child) =>
+    visitNode(sourceFile, child, bundle, enKeys, pluginEnKeys, adminEnKeys, constants, results)
+  );
+};
+
+export const extractMessages = (
+  bundle: TranslationBundle,
+  adminEnKeys: Set<string>
+): MessageExtraction[] => {
+  const enJson = readJsonRecord(bundle.enJsonPath);
+  const enKeys = Object.keys(enJson);
+  const pluginEnKeys = new Set(enKeys);
+  const constants = loadPluginIdConstants(bundle);
+  const results: MessageExtraction[] = [];
+
+  for (const filePath of listSourceFiles(bundle)) {
+    const sourceText = ts.sys.readFile(filePath);
+
+    if (!sourceText) {
+      continue;
+    }
+
+    const sourceFile = ts.createSourceFile(
+      filePath,
+      sourceText,
+      ts.ScriptTarget.Latest,
+      true,
+      filePath.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+    );
+
+    visitNode(
+      sourceFile,
+      sourceFile,
+      bundle,
+      enKeys,
+      pluginEnKeys,
+      adminEnKeys,
+      constants,
+      results
+    );
+  }
+
+  return results;
+};
+
+export const extractValidationErrorKeys = (
+  bundle: TranslationBundle,
+  adminEnKeys: Set<string>
+): { local: string[]; admin: string[] } => {
+  const local = new Set<string>();
+  const admin = new Set<string>();
+  const localPattern = /^(error\.|validation\.)/;
+
+  for (const filePath of listSourceFiles(bundle)) {
+    const sourceText = ts.sys.readFile(filePath);
+
+    if (!sourceText) {
+      continue;
+    }
+
+    const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true);
+    const visit = (node: ts.Node) => {
+      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+        if (localPattern.test(node.text)) {
+          local.add(node.text);
+        } else if (node.text.startsWith('notification.')) {
+          admin.add(node.text);
+        }
+      }
+
+      ts.forEachChild(node, visit);
+    };
+
+    visit(sourceFile);
+  }
+
+  return {
+    local: [...local],
+    admin: [...admin].filter((key) => adminEnKeys.has(key) || key.startsWith('notification.')),
+  };
+};
