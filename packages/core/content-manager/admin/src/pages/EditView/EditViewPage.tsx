@@ -20,6 +20,7 @@ import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
+import { I18nSharedFieldsLock } from '../../features/I18nSharedFieldsLock';
 import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
@@ -160,118 +161,120 @@ const EditViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
-      {isSingleType && (
-        <tours.contentManager.Introduction>
-          {/* Invisible Anchor */}
-          <Box />
-        </tours.contentManager.Introduction>
-      )}
-      <Form
-        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
-        disabled={hasDraftAndPublished && status === 'published'}
-        initialValues={initialValues}
-        method={isCreatingDocument ? 'POST' : 'PUT'}
-        validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-          // removes hidden fields from the validation
-          // this is necessary because the yup schema doesn't know about the visibility conditions
-          // and we don't want to validate fields that are not visible
-          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
-            schema,
-            initialValues,
-            components,
-          });
+      <I18nSharedFieldsLock resetKey={`${id ?? 'create'}:${activeLocale ?? 'default'}`}>
+        {isSingleType && (
+          <tours.contentManager.Introduction>
+            {/* Invisible Anchor */}
+            <Box />
+          </tours.contentManager.Introduction>
+        )}
+        <Form
+          key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
+          disabled={hasDraftAndPublished && status === 'published'}
+          initialValues={initialValues}
+          method={isCreatingDocument ? 'POST' : 'PUT'}
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            // removes hidden fields from the validation
+            // this is necessary because the yup schema doesn't know about the visibility conditions
+            // and we don't want to validate fields that are not visible
+            const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+              schema,
+              initialValues,
+              components,
+            });
 
-          const yupSchema = createYupSchema(schema?.attributes, components, {
-            status,
-            removedAttributes,
-            ...options,
-          });
+            const yupSchema = createYupSchema(schema?.attributes, components, {
+              status,
+              removedAttributes,
+              ...options,
+            });
 
-          return yupSchema.validate(cleanedValues, { abortEarly: false });
-        }}
-        initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
-      >
-        <>
-          <Header
-            isCreating={isCreatingDocument}
-            status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-            title={pageTitle}
-          />
-          <Layouts.Content>
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root
-                paddingTop={{
-                  initial: 6,
-                  medium: 4,
-                  large: 8,
-                }}
-                gap={4}
-              >
-                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <tours.contentManager.Fields>
-                      <Box />
-                    </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                </Grid.Item>
-                {isDesktop && (
-                  <Grid.Item col={3} direction="column" alignItems="stretch">
-                    <Panels />
+            return yupSchema.validate(cleanedValues, { abortEarly: false });
+          }}
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+        >
+          <>
+            <Header
+              isCreating={isCreatingDocument}
+              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+              title={pageTitle}
+            />
+            <Layouts.Content>
+              <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+                <Tabs.List
+                  aria-label={formatMessage({
+                    id: getTranslation('containers.edit.tabs.label'),
+                    defaultMessage: 'Document status',
+                  })}
+                >
+                  {hasDraftAndPublished ? (
+                    <>
+                      <StatusTab value="draft">
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.draft'),
+                          defaultMessage: 'draft',
+                        })}
+                      </StatusTab>
+                      <StatusTab
+                        disabled={!meta || meta.availableStatus.length === 0}
+                        value="published"
+                      >
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.published'),
+                          defaultMessage: 'published',
+                        })}
+                      </StatusTab>
+                    </>
+                  ) : null}
+                </Tabs.List>
+                <Grid.Root
+                  paddingTop={{
+                    initial: 6,
+                    medium: 4,
+                    large: 8,
+                  }}
+                  gap={4}
+                >
+                  <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                    <Tabs.Content value="draft">
+                      <tours.contentManager.Fields>
+                        <Box />
+                      </tours.contentManager.Fields>
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
+                    <Tabs.Content value="published">
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
                   </Grid.Item>
-                )}
-              </Grid.Root>
-            </Tabs.Root>
-            {!isDesktop && (
-              <>
-                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
-                  <ActionsDrawer.Overlay />
-                  <ActionsDrawer.Header>
-                    <ActionsPanelContent />
-                  </ActionsDrawer.Header>
-                  <ActionsDrawer.Content>
-                    <Panels withActions={false} />
-                  </ActionsDrawer.Content>
-                </ActionsDrawer.Root>
-                {/* Adding a fixed height to the bottom of the page to prevent 
+                  {isDesktop && (
+                    <Grid.Item col={3} direction="column" alignItems="stretch">
+                      <Panels />
+                    </Grid.Item>
+                  )}
+                </Grid.Root>
+              </Tabs.Root>
+              {!isDesktop && (
+                <>
+                  <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                    <ActionsDrawer.Overlay />
+                    <ActionsDrawer.Header>
+                      <ActionsPanelContent />
+                    </ActionsDrawer.Header>
+                    <ActionsDrawer.Content>
+                      <Panels withActions={false} />
+                    </ActionsDrawer.Content>
+                  </ActionsDrawer.Root>
+                  {/* Adding a fixed height to the bottom of the page to prevent 
                 the actions drawer from covering the content
                 (40px button + 12px * 2 padding + 1px border) */}
-                <Box height="6.5rem" />
-              </>
-            )}
-          </Layouts.Content>
-          <Blocker />
-        </>
-      </Form>
+                  <Box height="6.5rem" />
+                </>
+              )}
+            </Layouts.Content>
+            <Blocker />
+          </>
+        </Form>
+      </I18nSharedFieldsLock>
     </Page.Main>
   );
 };

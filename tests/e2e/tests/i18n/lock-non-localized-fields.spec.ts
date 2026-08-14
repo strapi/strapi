@@ -83,6 +83,22 @@ test.describe('Lock non-localized fields on secondary locales', () => {
       })
     ).toBeVisible();
 
+    // Canceling the unlock warning leaves shared fields locked
+    await page.getByRole('button', { name: 'Edit shared fields' }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Edit fields common to all locales?' })
+    ).toBeVisible();
+    await expect(page.getByText(/Saving changes will update English \(en\)/i)).toBeVisible();
+    await page.getByRole('button', { name: 'No, cancel' }).click();
+    await expect(isAvailable).toBeDisabled();
+
+    // Accepting the warning unlocks shared fields for this locale until the editor leaves
+    await page.getByRole('button', { name: 'Edit shared fields' }).click();
+    await page.getByRole('button', { name: 'Yes, edit shared fields' }).click();
+    await expect(isAvailable).not.toBeDisabled();
+    await page.getByRole('button', { name: 'Keep shared fields locked' }).click();
+    await expect(isAvailable).toBeDisabled();
+
     // Saving only the localized field must not wipe the default-locale shared value
     await nameField.fill('Camiseta Nike Masculina 23/24');
     await page.getByRole('button', { name: 'Save' }).click();
