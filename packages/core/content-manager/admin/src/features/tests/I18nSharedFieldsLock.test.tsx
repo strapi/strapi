@@ -11,12 +11,13 @@ describe('I18nSharedFieldsLock', () => {
       <I18nSharedFieldsLock resetKey={resetKey}>{children}</I18nSharedFieldsLock>
     );
 
-  it('starts locked and unlocks until the reset key changes', () => {
+  it('starts locked and stays unlocked across rerenders', () => {
     const { result, rerender } = renderHook(
       () =>
         useI18nSharedFieldsLock('test', (state) => ({
           isUnlocked: state.isUnlocked,
           unlock: state.unlock,
+          relock: state.relock,
         })),
       { wrapper: wrapper('doc-a:fr') }
     );
@@ -30,6 +31,11 @@ describe('I18nSharedFieldsLock', () => {
 
     rerender();
     expect(result.current.isUnlocked).toBe(true);
+
+    act(() => {
+      result.current.relock();
+    });
+    expect(result.current.isUnlocked).toBe(false);
   });
 
   it('relocks when the document or locale reset key changes', () => {
