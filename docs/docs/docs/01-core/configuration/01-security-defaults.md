@@ -115,9 +115,10 @@ See [MIME type validation](/upload/mime-validation) for how allow/deny lists are
 ### SVG uploads and existing projects
 
 Although `image/*` matches SVG files, newly scaffolded projects explicitly deny `image/svg+xml`.
-This template default does not change existing projects, projects without an explicit upload policy,
-or objects that were already uploaded. If your project intentionally accepts SVG, you may modify its
-explicit `allowedTypes` and `deniedTypes` policy; entries in `deniedTypes` still take precedence.
+Existing projects can adopt this protection by adding `image/svg+xml` to
+`plugin::upload.security.deniedTypes`; entries in `deniedTypes` take precedence over the allowlist.
+This does not change existing projects, projects without an explicit upload policy, or objects that
+were already uploaded. Projects that intentionally accept SVG should sanitize it before serving it.
 
 SVG can embed scripts and pose an XSS risk when served from the same origin as your app. Serving
 uploads from a separate domain or CDN can reduce that risk, but remote providers and CDNs control

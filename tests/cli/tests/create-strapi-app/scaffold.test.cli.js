@@ -28,9 +28,9 @@ function expectGeneratedUploadPolicy(pluginsConfig) {
 
   expect(allowedMediaTypes?.[1]).toContain("'image/*'");
   expect(deniedTypes?.[1]).toContain("'image/svg+xml'");
-  expect(pluginsConfig).toContain(`security: {
-        allowedTypes: allowedMediaTypes,
-        deniedTypes,`);
+  expect(pluginsConfig).toMatch(
+    /security:\s*{\s*allowedTypes:\s*allowedMediaTypes,\s*deniedTypes,\s*}/
+  );
 }
 
 describe('create-strapi-app', () => {
