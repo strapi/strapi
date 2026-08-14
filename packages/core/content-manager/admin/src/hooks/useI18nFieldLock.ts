@@ -1,5 +1,7 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 
+import { useGetI18nLocalesQuery } from '../services/documents';
+
 import { useDocumentContext } from './useDocumentContext';
 
 /**
@@ -9,10 +11,14 @@ import { useDocumentContext } from './useDocumentContext';
  * Returns `true` when i18n is not enabled on the content type, when the active
  * or default locale cannot be determined yet, or when they match.
  *
- * Uses `meta.defaultLocale` from the document metadata response — NOT
+ * Prefers `meta.defaultLocale` from the document metadata response — NOT
  * `availableLocales[0]`. That list excludes the currently viewed locale, so
  * when editing the default locale `[0]` is a sibling and would incorrectly
  * report "not default" and lock shared fields.
+ *
+ * On create (`/create?locale=`), document metadata is not fetched, so
+ * `meta.defaultLocale` is missing. Fall back to the i18n locales list (same
+ * source as the Lock icon) so shared fields still disable on secondary locales.
  */
 const useIsEditingDefaultLocale = (): boolean => {
   const [{ query }] = useQueryParams<{
@@ -24,13 +30,22 @@ const useIsEditingDefaultLocale = (): boolean => {
     (currentDocument.schema?.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
       ?.localized === true;
 
+  const currentLocale = query?.plugins?.i18n?.locale ?? currentDocument.document?.locale;
+  const metaDefaultLocale = (currentDocument.meta as { defaultLocale?: string | null } | undefined)
+    ?.defaultLocale;
+
+  const { data: locales } = useGetI18nLocalesQuery(undefined, {
+    skip: !contentTypeLocalized || Boolean(metaDefaultLocale),
+  });
+
   if (!contentTypeLocalized) {
     return true;
   }
 
-  const currentLocale = query?.plugins?.i18n?.locale ?? currentDocument.document?.locale;
-  const defaultLocale = (currentDocument.meta as { defaultLocale?: string | null } | undefined)
-    ?.defaultLocale;
+  const localesDefault = Array.isArray(locales)
+    ? locales.find((locale) => locale.isDefault)?.code
+    : undefined;
+  const defaultLocale = metaDefaultLocale || localesDefault;
 
   if (!currentLocale || !defaultLocale) {
     return true;
@@ -61,13 +76,7 @@ const useShouldLockNonLocalizedField = (
 
   // Match server `isLocalizedAttribute`: relations and uids are always locale-specific
   // even when they omit `pluginOptions.i18n.localized` (CTB never offers that checkbox).
-  // Dynamic zones are also excluded: admin inheritance skips them (see useDocument), so
-  // locking an empty DZ on secondary locales is misleading.
-  if (
-    attribute.type === 'relation' ||
-    attribute.type === 'uid' ||
-    attribute.type === 'dynamiczone'
-  ) {
+  if (attribute.type === 'relation' || attribute.type === 'uid') {
     return false;
   }
 

@@ -46,6 +46,41 @@ const AVAILABLE_LOCALES_FIELDS = [
   'publishedAt',
 ];
 
+/**
+ * Convert dotted populate paths (`comp.mid.inners`) into a nested populate object
+ * the query-params transformer understands.
+ */
+const dottedPathsToPopulate = (paths: string[]): Record<string, unknown> => {
+  const root: Record<string, unknown> = {};
+
+  for (const path of paths) {
+    const parts = path.split('.').filter(Boolean);
+    let node: Record<string, unknown> = root;
+
+    for (const [i, part] of parts.entries()) {
+      const isLast = i === parts.length - 1;
+
+      if (isLast) {
+        if (node[part] === undefined) {
+          node[part] = true;
+        }
+        continue;
+      }
+
+      const current = node[part];
+      if (current === true || current === undefined) {
+        node[part] = { populate: {} };
+      } else if (typeof current === 'object' && current !== null && !('populate' in current)) {
+        (current as Record<string, unknown>).populate = {};
+      }
+
+      node = (node[part] as { populate: Record<string, unknown> }).populate;
+    }
+  }
+
+  return root;
+};
+
 /** Returns a DB filter that matches the opposite publish status. */
 const oppositePublishStatus = (publishedAt: unknown) =>
   publishedAt !== null ? { $null: true } : { $notNull: true };
@@ -95,7 +130,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * The result is sorted with the default locale (as defined by the i18n plugin)
    * at index 0 when present. This is the canonical-source invariant relied on by
    * `useDocument.getInitialFormValues` in the admin: when creating a new locale
-   * draft, non-localized scalar/media/component values are inherited from
+   * draft, non-localized scalar/media/component/dynamic-zone values are inherited from
    * `availableLocales[0]`. Putting the default locale first means inheritance
    * stays predictable when sibling locales have drifted on non-localized fields
    * (which can happen because the server only syncs non-localized fields at
@@ -328,10 +363,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // i18n is disabled
 
     // Include non-translatable fields in availableLocales for i18n prefilling
-    // (scalars + media + components; relations/DZ stay server-filled on create).
+    // (scalars + media + components + dynamic zones; relations stay server-filled).
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
-    let nonLocalizedComponentFields: string[] = [];
+    let nestedPopulate: Record<string, unknown> = {};
     try {
       const i18nPlugin = strapi.plugin('i18n');
       if (i18nPlugin) {
@@ -350,10 +385,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
             nonLocalizedMediaFields = allNonLocalized.filter(
               (field: string) => field in model.attributes && mediaAttrs.includes(field)
             );
-            nonLocalizedComponentFields = allNonLocalized.filter(
-              (field: string) =>
-                field in model.attributes && model.attributes[field]?.type === 'component'
-            );
+
+            if (typeof i18nService.getNestedPopulateOfNonLocalizedAttributes === 'function') {
+              nestedPopulate = dottedPathsToPopulate(
+                i18nService.getNestedPopulateOfNonLocalizedAttributes(uid)
+              );
+              // Dynamic zones are polymorphic: nested populate must be '*' rather
+              // than specific field paths (query-params validation).
+              for (const field of Object.keys(nestedPopulate)) {
+                if (model.attributes[field]?.type === 'dynamiczone') {
+                  nestedPopulate[field] = { populate: '*' };
+                }
+              }
+            } else {
+              const componentAndDzFields = allNonLocalized.filter(
+                (field: string) =>
+                  field in model.attributes &&
+                  (model.attributes[field]?.type === 'component' ||
+                    model.attributes[field]?.type === 'dynamiczone')
+              );
+              nestedPopulate = componentAndDzFields.reduce(
+                (acc: Record<string, true>, field: string) => {
+                  acc[field] = true;
+                  return acc;
+                },
+                {}
+              );
+            }
           }
         }
       }
@@ -361,7 +419,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       // i18n plugin might not be enabled or might error, ignore silently
     }
 
-    // Build populate object for non-localized media + component fields
+    // Build populate object for non-localized media + nested component/DZ fields
     const mediaPopulate = nonLocalizedMediaFields.reduce(
       (acc, field) => {
         acc[field] = {
@@ -374,18 +432,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       {} as Record<string, { populate: { folder: boolean } } | true>
     );
 
-    const componentPopulate = nonLocalizedComponentFields.reduce(
-      (acc, field) => {
-        acc[field] = true;
-        return acc;
-      },
-      {} as Record<string, true>
-    );
-
     const params = {
       populate: {
+        ...nestedPopulate,
         ...mediaPopulate,
-        ...componentPopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
       fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),

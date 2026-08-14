@@ -118,17 +118,6 @@ const addLabelActionToField = (
     return field;
   }
 
-  // Dynamic zones are excluded from admin non-localized inheritance (same as relations
-  // in useDocument) — a Lock icon would be misleading (empty + not locked in the UI).
-  if (
-    field.attribute &&
-    typeof field.attribute === 'object' &&
-    'type' in field.attribute &&
-    field.attribute.type === 'dynamiczone'
-  ) {
-    return field;
-  }
-
   return {
     ...field,
     labelAction: <NonLocalizedLabelAction />,

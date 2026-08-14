@@ -63,6 +63,25 @@ const categoryModel = {
         },
       },
     },
+    nestedProfile: {
+      component: 'default.outer',
+      type: 'component',
+      repeatable: false,
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
+    nonLocalizedDz: {
+      type: 'dynamiczone',
+      components: ['default.compo'],
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
   },
 };
 
@@ -120,6 +139,46 @@ const compo = (withRelations = false) => ({
         }),
   },
 });
+
+const innerCompo = {
+  displayName: 'inner',
+  category: 'default',
+  attributes: {
+    label: {
+      type: 'string',
+    },
+  },
+};
+
+const midCompo = {
+  displayName: 'mid',
+  category: 'default',
+  attributes: {
+    heading: {
+      type: 'string',
+    },
+    inners: {
+      type: 'component',
+      component: 'default.inner',
+      repeatable: true,
+    },
+  },
+};
+
+const outerCompo = {
+  displayName: 'outer',
+  category: 'default',
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    mid: {
+      type: 'component',
+      component: 'default.mid',
+      repeatable: false,
+    },
+  },
+};
 
 const data = {
   tags: [],
@@ -192,6 +251,9 @@ describe('i18n', () => {
 
   beforeAll(async () => {
     await builder
+      .addComponent(innerCompo)
+      .addComponent(midCompo)
+      .addComponent(outerCompo)
       .addComponent(compo(false))
       .addContentTypes([tagModel, categoryModel])
       .addFixtures('plugin::i18n.locale', [
@@ -556,12 +618,9 @@ describe('i18n', () => {
      * Regression for https://github.com/strapi/strapi/issues/27182
      *
      * Admin create-locale forms initialize required repeatable non-localized
-     * components as `[]` (see createDefaultForm) and do not inherit sibling
-     * component values into availableLocales / getInitialFormValues.
-     * useDocument comments claim the server fills those at save via
-     * copyNonLocalizedFields — but fillNonLocalizedAttributes only copies when
-     * the incoming value is nil, and `[]` is not nil. Saving the empty array
-     * then syncs it to every locale and wipes the default locale's data.
+     * components as `[]` (see createDefaultForm). fillNonLocalizedAttributes
+     * must treat empty arrays as unset so sibling data is inherited instead of
+     * syncing `[]` to every locale.
      */
     describe('Creating a locale with empty non-localized repeatable component (GH#27182)', () => {
       test('preserves default-locale component data when the new locale is saved with an empty array', async () => {
@@ -627,6 +686,180 @@ describe('i18n', () => {
 
         expect(enEntry.nonLocalizedRepeatableCompo).toEqual([
           expect.objectContaining({ name: 'from-sibling' }),
+        ]);
+      });
+    });
+
+    describe('Creating a locale with a shallow nested non-localized component', () => {
+      const nestedProfile = {
+        name: 'shared-name',
+        mid: {
+          heading: 'keep-heading',
+          inners: [{ label: 'keep-inner' }],
+        },
+      };
+
+      test('preserves nested component data when the new locale sends a shallow parent', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'nested default',
+          nestedProfile,
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        // Simulate availableLocales populate that only hydrated the parent component.
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'nested french',
+          nestedProfile: { name: 'shared-name' },
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        expect(frRes.body.data.nestedProfile).toEqual(
+          expect.objectContaining({
+            name: 'shared-name',
+            mid: expect.objectContaining({
+              heading: 'keep-heading',
+              inners: [expect.objectContaining({ label: 'keep-inner' })],
+            }),
+          })
+        );
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: {
+            documentId: docId,
+            publishedAt: null,
+            locale: 'en',
+          },
+          populate: ['nestedProfile.mid.inners'],
+        });
+
+        expect(enEntry.nestedProfile).toEqual(
+          expect.objectContaining({
+            name: 'shared-name',
+            mid: expect.objectContaining({
+              heading: 'keep-heading',
+              inners: [expect.objectContaining({ label: 'keep-inner' })],
+            }),
+          })
+        );
+      });
+
+      test('preserves nested repeatable data when the new locale sends an empty nested array', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'nested empty-array default',
+          nestedProfile,
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'nested empty-array french',
+          nestedProfile: { name: 'shared-name', mid: { heading: 'keep-heading', inners: [] } },
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: {
+            documentId: docId,
+            publishedAt: null,
+            locale: 'en',
+          },
+          populate: ['nestedProfile.mid.inners'],
+        });
+
+        expect(enEntry.nestedProfile.mid.inners).toEqual([
+          expect.objectContaining({ label: 'keep-inner' }),
+        ]);
+      });
+
+      test('includes nested component data in availableLocales when the locale is missing', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'nested metadata default',
+          nestedProfile,
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        const getRes = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${docId}`,
+          qs: { locale: 'fr' },
+        });
+        expect(getRes.statusCode).toBe(200);
+        expect(getRes.body.data).toEqual({});
+
+        const sibling = getRes.body.meta.availableLocales[0];
+        expect(sibling.nestedProfile).toEqual(
+          expect.objectContaining({
+            name: 'shared-name',
+            mid: expect.objectContaining({
+              heading: 'keep-heading',
+              inners: [expect.objectContaining({ label: 'keep-inner' })],
+            }),
+          })
+        );
+      });
+    });
+
+    describe('Creating a locale with an empty non-localized dynamic zone', () => {
+      test('preserves default-locale dynamic zone data when the new locale is saved with an empty array', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'dz default',
+          nonLocalizedDz: [{ __component: 'default.compo', name: 'hero' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'dz french',
+          nonLocalizedDz: [],
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        expect(frRes.body.data.nonLocalizedDz).toEqual([
+          expect.objectContaining({ __component: 'default.compo', name: 'hero' }),
+        ]);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: {
+            documentId: docId,
+            publishedAt: null,
+            locale: 'en',
+          },
+          populate: ['nonLocalizedDz'],
+        });
+
+        expect(enEntry.nonLocalizedDz).toEqual([
+          expect.objectContaining({ __component: 'default.compo', name: 'hero' }),
+        ]);
+      });
+
+      test('includes non-localized dynamic zone data in availableLocales when the locale is missing', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'dz metadata default',
+          nonLocalizedDz: [{ __component: 'default.compo', name: 'hero' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        const getRes = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${docId}`,
+          qs: { locale: 'fr' },
+        });
+        expect(getRes.statusCode).toBe(200);
+
+        const sibling = getRes.body.meta.availableLocales[0];
+        expect(sibling.nonLocalizedDz).toEqual([
+          expect.objectContaining({ __component: 'default.compo', name: 'hero' }),
         ]);
       });
     });

@@ -292,5 +292,81 @@ describe('document-metadata service', () => {
       expect(params.fields).toEqual(expect.arrayContaining(['sku']));
       expect(findMany).toHaveBeenCalled();
     });
+
+    it('deep-populates nested component and dynamic zone paths from i18n', async () => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const transform = jest.fn((uid, params) => params);
+      const getNonLocalizedAttributes = jest
+        .fn()
+        .mockReturnValue(['sku', 'profile', 'blocks', 'images']);
+      const getNestedPopulateOfNonLocalizedAttributes = jest
+        .fn()
+        .mockReturnValue([
+          'profile',
+          'profile.mid',
+          'profile.mid.inners',
+          'blocks',
+          'blocks.image',
+        ]);
+
+      const service = createService({
+        getModel: () => ({
+          uid: 'api::article.article',
+          options: { draftAndPublish: true },
+          pluginOptions: { i18n: { localized: true } },
+          attributes: {
+            sku: { type: 'string' },
+            profile: { type: 'component', component: 'shared.outer', repeatable: false },
+            blocks: { type: 'dynamiczone', components: ['shared.hero'] },
+            images: { type: 'media', multiple: true },
+            name: { type: 'string' },
+          },
+        }),
+        plugin(name: string) {
+          if (name === 'i18n') {
+            return {
+              service(serviceName: string) {
+                if (serviceName === 'locales') {
+                  return { getDefaultLocale: async () => 'en' };
+                }
+                if (serviceName === 'content-types') {
+                  return { getNonLocalizedAttributes, getNestedPopulateOfNonLocalizedAttributes };
+                }
+                return {};
+              },
+            };
+          }
+          return undefined;
+        },
+        get(key: string) {
+          if (key === 'query-params') {
+            return { transform };
+          }
+          return undefined;
+        },
+        db: {
+          query: () => ({ findMany }),
+        },
+      });
+
+      await service.getMetadata(
+        'api::article.article',
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+
+      const [, params] = transform.mock.calls[0];
+      expect(params.populate.profile).toEqual({
+        populate: {
+          mid: {
+            populate: {
+              inners: true,
+            },
+          },
+        },
+      });
+      expect(params.populate.blocks).toEqual({ populate: '*' });
+      expect(params.populate.images).toEqual({ populate: { folder: true } });
+    });
   });
 });

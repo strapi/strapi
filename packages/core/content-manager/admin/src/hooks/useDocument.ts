@@ -219,7 +219,7 @@ const useDocument: UseDocument = (args, opts) => {
    *     `pluginOptions.i18n.localized` is `undefined` count as non-localized
    *     (an attribute created without the i18n plugin has no i18n options at
    *     all but is still inherited at save by `copyNonLocalizedFields`).
-   *   - scalar, media, or component — relations / dynamic zones are excluded
+   *   - scalar, media, component, or dynamic zone — relations are excluded
    *     because the server doesn't populate them in `availableLocales` either.
    */
   const nonLocalizedFieldsToInherit = React.useMemo(() => {
@@ -234,7 +234,7 @@ const useDocument: UseDocument = (args, opts) => {
         return false;
       }
 
-      return attribute.type !== 'dynamiczone' && attribute.type !== 'relation';
+      return attribute.type !== 'relation';
     });
   }, [schema]);
 
@@ -246,11 +246,11 @@ const useDocument: UseDocument = (args, opts) => {
    *
    * We also prepare the form for new documents, so we need to:
    * - set default values on fields
-   * - inherit non-localized scalar/media/component values from a sibling locale.
+   * - inherit non-localized scalar/media/component/dynamic-zone values from a sibling locale.
    *   Scope matches what the server populates into `meta.availableLocales` (see
    *   `packages/core/content-manager/server/src/services/document-metadata.ts`).
-   *   Relations and dynamic zones are not in that payload; the server fills them
-   *   at save time via `copyNonLocalizedFields` (in
+   *   Relations are not in that payload; the server fills them at save time via
+   *   `copyNonLocalizedFields` (in
    *   `packages/core/core/src/services/document-service/internationalization.ts`)
    *   when the new locale row is first created.
    *   Baking the inheritance into `initialValues` here is what lets it survive
