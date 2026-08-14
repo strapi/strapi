@@ -21,7 +21,7 @@ import type {
   CreateFilesStream,
   CreateFilesStreamEvents,
   File as UploadedFile,
-  UnstableGenerateAIMetadata,
+  GenerateAIMetadata,
   UploadFileInfo,
 } from '../../../../shared/contracts/files';
 import type { FileMetadataResultStatus } from '../store/uploadProgress';
@@ -152,10 +152,7 @@ type UploadPoolResult =
   | { error: UploadError; data?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
-const METADATA_STATUS_BY_RESULT: Record<
-  UnstableGenerateAIMetadata.FileStatus,
-  FileMetadataResultStatus
-> = {
+const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
   success: 'generated',
   skipped: 'skipped',
   error: 'failed',
@@ -245,7 +242,7 @@ const runUploadPool = async ({
   concurrency?: number;
   generateAiMetadata: boolean;
 }): Promise<UploadPoolResult> => {
-  const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+  const url = `${window.strapi.backendURL}/upload/files`;
   const uploaded: UploadedFile[] = [];
 
   // Shared queue: each worker shifts the next index when it frees up, so N
@@ -390,7 +387,7 @@ const fetchUrlUploadStream = async ({
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(`${backendURL}/upload/unstable/stream-from-urls`, {
+  return fetch(`${backendURL}/upload/actions/upload-from-urls`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ urls, folderId }),
@@ -498,10 +495,9 @@ const uploadApi = adminApi
   .injectEndpoints({
     endpoints: (builder) => ({
       /**
-       * Upload files to `/upload/unstable/upload-file`, one request per file,
-       * through a worker pool of `concurrency` parallel requests (default 1 =
-       * sequential). Real per-file byte progress comes from
-       * `XHR.upload.onprogress`.
+       * Upload files to `/upload/files`, one request per file, through a worker
+       * pool of `concurrency` parallel requests (default 1 = sequential). Real
+       * per-file byte progress comes from `XHR.upload.onprogress`.
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
         queryFn: async (
@@ -552,7 +548,12 @@ const uploadApi = adminApi
             generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -565,7 +566,7 @@ const uploadApi = adminApi
       uploadFileSilently: builder.mutation<UploadedFile, UploadEntry>({
         queryFn: async ({ file, fileInfo }, { getState }) => {
           const token = (getState() as RootState).admin_app?.token;
-          const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+          const url = `${window.strapi.backendURL}/upload/files`;
 
           const formData = new FormData();
           formData.append('files', file);
@@ -585,7 +586,12 @@ const uploadApi = adminApi
             return { error: { name: 'UnknownError', message } };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -630,7 +636,12 @@ const uploadApi = adminApi
             generateAiMetadata: batch.generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -727,7 +738,12 @@ const uploadApi = adminApi
             };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -742,15 +758,15 @@ const uploadApi = adminApi
        * Re-exported from `assets.ts` for the components that consume the hook.
        */
       generateAiMetadata: builder.mutation<
-        UnstableGenerateAIMetadata.Response['data'],
+        GenerateAIMetadata.Response['data'],
         { fileIds: number[] }
       >({
         query: ({ fileIds }) => ({
-          url: '/upload/unstable/generate-ai-metadata',
+          url: '/upload/actions/generate-ai-metadata',
           method: 'POST',
           data: { fileIds },
         }),
-        transformResponse: (response: { data: UnstableGenerateAIMetadata.Response['data'] }) =>
+        transformResponse: (response: { data: GenerateAIMetadata.Response['data'] }) =>
           response.data,
         invalidatesTags: (_result, _error, { fileIds }) => [
           ...fileIds.map((id) => ({ type: 'Asset' as const, id })),
