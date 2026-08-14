@@ -19,6 +19,8 @@ type CustomFieldUID = Utils.String.Suffix<
  *
  * @example
  * ```ts
+ * import type {} from '@strapi/admin/strapi-admin';
+ *
  * declare module '@strapi/admin/strapi-admin' {
  *   export interface CustomFieldOptionInputRegistry {
  *     'my-slider': true;
@@ -34,6 +36,8 @@ export interface CustomFieldOptionInputRegistry {}
  *
  * @example
  * ```ts
+ * import type {} from '@strapi/admin/strapi-admin';
+ *
  * declare module '@strapi/admin/strapi-admin' {
  *   export interface CustomFieldOptionNameRegistry {
  *     'options.my-slider-label': true;
@@ -53,7 +57,7 @@ export type BuiltInCustomFieldOptionInput =
   | 'number'
   | 'boolean-radio-group'
   | 'select-date'
-  | 'text-area-enum'
+  | 'textarea-enum'
   | 'select-number'
   | 'radio-group';
 
