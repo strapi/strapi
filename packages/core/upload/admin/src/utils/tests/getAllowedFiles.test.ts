@@ -94,6 +94,15 @@ const FILE_10 = {
   ...COMMON_PROPERTIES,
 };
 
+// Windows browsers often report .mov as application/octet-stream (GitHub #23788)
+const FILE_MOV_OCTET_STREAM = {
+  id: 11,
+  mime: 'application/octet-stream',
+  name: 'sample_960x400_ocean_with_audio.mov',
+  url: '/uploads/sample.mov',
+  ...COMMON_PROPERTIES,
+};
+
 const files = [FILE_1, FILE_2, FILE_3, FILE_4, FILE_5, FILE_6, FILE_7, FILE_8, FILE_9];
 
 describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', () => {
@@ -155,5 +164,17 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], [...files, FILE_10]);
 
     expect(results).toEqual([...files, FILE_10]);
+  });
+
+  it('allows a .mov file reported as application/octet-stream when videos are allowed (#23788)', () => {
+    const results = getAllowedFiles(['videos'], [FILE_MOV_OCTET_STREAM]);
+
+    expect(results).toEqual([FILE_MOV_OCTET_STREAM]);
+  });
+
+  it('rejects a .mov file reported as application/octet-stream when only images are allowed', () => {
+    const results = getAllowedFiles(['images'], [FILE_MOV_OCTET_STREAM]);
+
+    expect(results).toEqual([]);
   });
 });

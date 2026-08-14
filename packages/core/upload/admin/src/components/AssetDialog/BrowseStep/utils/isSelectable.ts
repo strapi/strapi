@@ -1,7 +1,10 @@
-export const isSelectable = (allowedTypes: string[], mime = '') => {
-  if (!mime) return false;
+import { resolveFileMime } from '../../../../utils/resolveFileMime';
 
-  const fileType = mime.split('/')[0];
+export const isSelectable = (allowedTypes: string[], mime = '', filename = '') => {
+  const resolvedMime = resolveFileMime(mime, filename);
+  if (!resolvedMime) return false;
+
+  const fileType = resolvedMime.split('/')[0];
 
   return (
     allowedTypes.includes(fileType) ||

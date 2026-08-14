@@ -1,3 +1,4 @@
+import { resolveFileMime } from './resolveFileMime';
 import { toSingularTypes } from './toSingularTypes';
 
 import type { File } from '../../../shared/contracts/files';
@@ -23,7 +24,8 @@ export const getAllowedFiles = (pluralTypes: string[] | null, files: AllowedFile
   const singularTypes = toSingularTypes(pluralTypes);
 
   const allowedFiles = files.filter((file) => {
-    const fileType = file?.mime?.split('/')[0];
+    const mime = resolveFileMime(file?.mime, file?.name);
+    const fileType = mime.split('/')[0];
 
     if (!fileType) {
       return singularTypes.includes('file');

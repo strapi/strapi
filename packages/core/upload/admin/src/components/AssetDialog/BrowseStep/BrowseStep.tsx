@@ -163,7 +163,7 @@ export const BrowseStep = ({
   const singularTypes = toSingularTypes(allowedTypes);
   const assets = rawAssets.map((asset) => ({
     ...asset,
-    isSelectable: isSelectable(singularTypes, asset?.mime),
+    isSelectable: isSelectable(singularTypes, asset?.mime, asset?.name),
     type: 'asset',
   }));
 
