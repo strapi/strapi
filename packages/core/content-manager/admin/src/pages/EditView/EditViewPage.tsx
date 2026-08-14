@@ -134,6 +134,8 @@ const EditViewPage = () => {
     !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
+  // Remount (key) so unlock cannot flash on the next locale/document before the effect runs.
+  const sharedFieldsLockKey = `${id ?? 'create'}:${activeLocale ?? 'default'}`;
 
   if (isLoading && !document?.documentId) {
     return <Page.Loading />;
@@ -161,7 +163,7 @@ const EditViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
-      <I18nSharedFieldsLock resetKey={`${id ?? 'create'}:${activeLocale ?? 'default'}`}>
+      <I18nSharedFieldsLock key={sharedFieldsLockKey} resetKey={sharedFieldsLockKey}>
         {isSingleType && (
           <tours.contentManager.Introduction>
             {/* Invisible Anchor */}
