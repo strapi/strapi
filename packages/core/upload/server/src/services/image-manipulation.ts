@@ -194,8 +194,35 @@ const DEFAULT_BREAKPOINTS = {
   small: 500,
 };
 
+/**
+ * Breakpoint config entry: a number keeps the historical square `inside` box, or a sharp
+ * `ResizeOptions` object for width/height/fit control (#24221).
+ */
+type BreakpointValue = number | ResizeOptions;
+
+const isBreakpointObject = (value: unknown): value is ResizeOptions =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const resolveBreakpointResizeOptions = (breakpoint: BreakpointValue): ResizeOptions => {
+  if (typeof breakpoint === 'number') {
+    return {
+      width: breakpoint,
+      height: breakpoint,
+      fit: 'inside',
+    };
+  }
+
+  return {
+    fit: 'inside',
+    ...breakpoint,
+  };
+};
+
 const getBreakpoints = () =>
-  strapi.config.get<Record<string, number>>('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
+  strapi.config.get<Record<string, BreakpointValue>>(
+    'plugin::upload.breakpoints',
+    DEFAULT_BREAKPOINTS
+  );
 
 const generateResponsiveFormats = async (file: UploadableFile) => {
   const { responsiveDimensions = false } = (await getService('upload').getSettings()) ?? {};
@@ -210,7 +237,11 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   for (const key of Object.keys(breakpoints)) {
     const breakpoint = breakpoints[key];
 
-    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+    if (typeof breakpoint !== 'number' && !isBreakpointObject(breakpoint)) {
+      continue;
+    }
+
+    if (shouldGenerateBreakpoint(breakpoint, originalDimensions)) {
       results.push(await generateBreakpoint(key, { file, breakpoint }));
     }
   }
@@ -220,28 +251,43 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
 
 const generateBreakpoint = async (
   key: string,
-  { file, breakpoint }: { file: UploadableFile; breakpoint: number }
+  { file, breakpoint }: { file: UploadableFile; breakpoint: BreakpointValue }
 ) => {
-  const newFile = await resizeFileTo(
-    file,
-    {
-      width: breakpoint,
-      height: breakpoint,
-      fit: 'inside',
-    },
-    {
-      name: `${key}_${file.name}`,
-      hash: `${key}_${file.hash}`,
-    }
-  );
+  const newFile = await resizeFileTo(file, resolveBreakpointResizeOptions(breakpoint), {
+    name: `${key}_${file.name}`,
+    hash: `${key}_${file.hash}`,
+  });
   return {
     key,
     file: newFile,
   };
 };
 
-const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions) => {
-  return breakpoint < (width ?? 0) || breakpoint < (height ?? 0);
+/**
+ * Decide whether a responsive variant is needed for the given breakpoint and source size.
+ *
+ * - Numeric breakpoints (and objects with both width & height): generate when either side
+ *   exceeds the corresponding limit — same as the historical square-box behaviour.
+ * - Width-only / height-only objects: only compare that axis, so portrait images are not
+ *   forced through a max-height constraint when the user asked for max-width (#24221).
+ */
+const shouldGenerateBreakpoint = (breakpoint: BreakpointValue, dimensions: Dimensions): boolean => {
+  const { width, height } = dimensions;
+  const options = resolveBreakpointResizeOptions(breakpoint);
+
+  const exceedsWidth = typeof options.width === 'number' && width != null && options.width < width;
+  const exceedsHeight =
+    typeof options.height === 'number' && height != null && options.height < height;
+
+  if (typeof options.width === 'number' && options.height == null) {
+    return exceedsWidth;
+  }
+
+  if (typeof options.height === 'number' && options.width == null) {
+    return exceedsHeight;
+  }
+
+  return exceedsWidth || exceedsHeight;
 };
 
 /**
