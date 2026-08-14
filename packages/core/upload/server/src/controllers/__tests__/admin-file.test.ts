@@ -7,12 +7,12 @@ jest.mock('../../utils');
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
 
-describe('Admin File Controller - unstable_generateAIMetadata', () => {
+describe('Admin File Controller - generateAIMetadata', () => {
   let ctx: Partial<Context>;
   let pm: { isAllowed: boolean };
   let mockAiMetadataService: any;
 
-  const call = () => adminFileController.unstable_generateAIMetadata(ctx as Context);
+  const call = () => adminFileController.generateAIMetadata(ctx as Context);
 
   beforeEach(() => {
     jest.clearAllMocks();

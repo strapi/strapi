@@ -21,6 +21,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
+import { assetKey } from '../utils/selection';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
@@ -46,15 +47,17 @@ interface AssetActionsMenuProps {
  * drawer versions render as `IconButton`s and report through its in-drawer toast
  * slot, neither of which fits a menu item on a row.
  *
- * Any successful move or delete clears the whole selection: a delete only
- * invalidates RTK tags, so without it an `asset:<id>` key for a file that no
- * longer exists would linger in the selection.
+ * A successful move or delete deselects this one asset and leaves the rest of
+ * the selection intact: the mutations only invalidate RTK tags, so without it an
+ * `asset:<id>` key for a file that has been deleted — or has moved out of this
+ * list — would linger. The other selected rows are untouched, which is the whole
+ * point of the menu being a single-item affordance.
  */
 export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => {
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
-  const { clear } = useAssetSelection();
+  const { deselect } = useAssetSelection();
   // Absent in the asset picker and in unit tests: the replace still runs, it
   // just renders no row-level overlay.
   const markBusy = useBusyAssetsOptional()?.markBusy ?? (() => () => {});
@@ -330,7 +333,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           open
           onClose={() => setIsMoveOpen(false)}
           items={moveItems}
-          onSuccess={clear}
+          onSuccess={() => deselect(assetKey(asset.id))}
         />
       )}
       {/* Both dialogs live inside the row, so a background refetch that drops the
@@ -342,7 +345,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           open
           onClose={() => setIsDeleteOpen(false)}
           target={{ fileIds: [asset.id], folderIds: [] }}
-          onSuccess={clear}
+          onSuccess={() => deselect(assetKey(asset.id))}
         />
       )}
     </>

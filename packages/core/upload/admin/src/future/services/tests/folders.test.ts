@@ -270,7 +270,7 @@ describe('future folder header count invalidation', () => {
           data: { id: 1, name: 'My folder', files: { count: fileCount }, children: { count: 0 } },
         });
       }),
-      http.post('*/upload', () => {
+      http.put('*/upload/files/:id', () => {
         // The move dropped this folder's count on the server.
         fileCount = 2;
         return HttpResponse.json({ data: { id: 99 } });
