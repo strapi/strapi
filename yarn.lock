@@ -8600,7 +8600,6 @@ __metadata:
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
-    "@strapi/types": ^5.0.0
     "@testing-library/jest-dom": ^6.0.0
     jest-environment-jsdom: ^29.0.0
     styled-components: ^6.0.0

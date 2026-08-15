@@ -10,7 +10,13 @@ export default {
   async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
     const isAILicense = strapi.ee.features.isEnabled('cms-ai');
-    const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
+    /**
+     * Read the leaf rather than the `admin.ai` branch: a user config of
+     * `admin: { ai: {} }` satisfies the branch, so a default on it is never
+     * applied and `enabled` would be `undefined` — which the contract forbids.
+     * The leaf default matches the AI service (`admin.ai.enabled`, opt-out).
+     */
+    const isAIEnabledInConfig = strapi.config.get('admin.ai.enabled', true) === true;
 
     try {
       return {
@@ -23,7 +29,7 @@ export default {
           type: strapi.ee.type ?? undefined,
           planPriceId: strapi.ee.planPriceId ?? undefined,
           ai: {
-            enabled: isAILicense && isAIConfigured.enabled,
+            enabled: Boolean(isAILicense) && isAIEnabledInConfig,
           },
         },
       };
