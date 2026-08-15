@@ -53,7 +53,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // - The admin entry host (@strapi/strapi) MUST NOT be in optimizeDeps.exclude.
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
       // so changes are reflected without clearing node_modules/.strapi/vite cache.
-      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      // Also skip allowlisted / opt-in pre-built ESM plugin UI kits (see collectAdminOptimizeDepsExclude).
       ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,

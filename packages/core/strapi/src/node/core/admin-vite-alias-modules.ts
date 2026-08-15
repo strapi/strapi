@@ -18,6 +18,16 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   'lodash',
   'invariant',
   'prismjs',
+  // react-dnd holds its DndContext in module scope, and @strapi/admin and
+  // @strapi/content-manager each declare react-dnd@16.0.1 themselves. npm hoisting collapses
+  // those onto one copy, so the DndProvider rendered by @strapi/admin's AuthenticatedLayout and
+  // the useDragLayer call in the content-manager layout share a context only by accident of
+  // hoisting. Any tree that keeps the copies separate (pnpm's strict isolation,
+  // install-strategy=nested, a plugin pinning its own react-dnd) gives them two different
+  // contexts and the Content Manager crashes on mount with
+  // "Invariant Violation: Expected drag drop context" (#22392, #22792).
+  'react-dnd',
+  'react-dnd-html5-backend',
 ] as const;
 
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
@@ -42,4 +52,6 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   '@strapi/design-system',
   'lodash',
   'invariant',
+  'react-dnd',
+  'react-dnd-html5-backend',
 ] as const satisfies readonly AdminViteAliasModule[];

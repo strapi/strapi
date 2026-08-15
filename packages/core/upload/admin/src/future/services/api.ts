@@ -21,7 +21,7 @@ import type {
   CreateFilesStream,
   CreateFilesStreamEvents,
   File as UploadedFile,
-  UnstableGenerateAIMetadata,
+  GenerateAIMetadata,
   UploadFileInfo,
 } from '../../../../shared/contracts/files';
 import type { FileMetadataResultStatus } from '../store/uploadProgress';
@@ -29,6 +29,11 @@ import type { FileMetadataResultStatus } from '../store/uploadProgress';
 interface UploadFilesArgs {
   formData: FormData;
   totalFiles: number;
+  /**
+   * How many files to upload in parallel — the `concurrentUploadRequests`
+   * settings value. Defaults to 1 (sequential).
+   */
+  concurrency?: number;
   /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
   generateAiMetadata: boolean;
 }
@@ -67,13 +72,14 @@ interface UploadEntry {
 
 /**
  * Everything a batch needs to be replayed on retry: the original entries plus the
- * AI-metadata flag it was started with. The flag lives here rather than in Redux
- * because `retryCancelledFiles` takes no args and the page that owns the
- * `useAIAvailability` value is not involved in the retry.
+ * flags it was started with (AI-metadata and upload concurrency). These live here
+ * rather than in Redux because `retryCancelledFiles` takes no args and the page
+ * that owns `useAIAvailability` / the settings value is not involved in the retry.
  */
 interface UploadBatch {
   entries: UploadEntry[];
   generateAiMetadata: boolean;
+  concurrency: number;
 }
 
 /**
@@ -84,9 +90,10 @@ const uploadRegistry = new Map<number, UploadBatch>();
 const registerUploadEntries = (
   uploadId: number,
   entries: UploadEntry[],
-  generateAiMetadata: boolean
+  generateAiMetadata: boolean,
+  concurrency: number
 ) => {
-  uploadRegistry.set(uploadId, { entries, generateAiMetadata });
+  uploadRegistry.set(uploadId, { entries, generateAiMetadata, concurrency });
 };
 
 const getUploadEntries = (uploadId: number): UploadBatch | undefined => {
@@ -140,15 +147,12 @@ interface UploadError {
 type AppDispatch = Dispatch &
   (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
 
-type SequentialUploadResult =
+type UploadPoolResult =
   | { data: UploadedFile[]; error?: undefined }
   | { error: UploadError; data?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
-const METADATA_STATUS_BY_RESULT: Record<
-  UnstableGenerateAIMetadata.FileStatus,
-  FileMetadataResultStatus
-> = {
+const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
   success: 'generated',
   skipped: 'skipped',
   error: 'failed',
@@ -218,13 +222,14 @@ export const maybeGenerateMetadata = ({
  * "complete" or "error". Each file is wrapped in its own try/catch so one failure
  * does not stop the batch. An abort stops the loop without starting further files.
  */
-const runSequentialUpload = async ({
+const runUploadPool = async ({
   entries,
   indices,
   token,
   uploadId,
   abortController,
   dispatch,
+  concurrency = 1,
   generateAiMetadata,
 }: {
   entries: UploadEntry[];
@@ -233,20 +238,22 @@ const runSequentialUpload = async ({
   uploadId: number;
   abortController: AbortController;
   dispatch: Dispatch;
+  /** Parallel workers pulling from the queue. 1 (the default) = sequential. */
+  concurrency?: number;
   generateAiMetadata: boolean;
-}): Promise<SequentialUploadResult> => {
-  const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+}): Promise<UploadPoolResult> => {
+  const url = `${window.strapi.backendURL}/upload/files`;
   const uploaded: UploadedFile[] = [];
 
-  for (const index of indices) {
-    if (abortController.signal.aborted) {
-      break;
-    }
+  // Shared queue: each worker shifts the next index when it frees up, so N
+  // files are in flight at any moment (not N-sized waves). With concurrency 1
+  // this degenerates to the original strictly sequential loop.
+  const queue = [...indices];
 
+  const uploadOne = async (index: number) => {
     const entry = entries[index];
     if (!entry) {
-      // eslint-disable-next-line no-continue
-      continue;
+      return;
     }
 
     const fileName = entry.fileInfo?.name ?? entry.file.name;
@@ -282,15 +289,39 @@ const runSequentialUpload = async ({
       batcher.cancel();
 
       if (err instanceof UploadAbortedError) {
-        // Batch was cancelled — stop without starting further files.
+        // Batch was cancelled — the worker loop checks the signal and stops.
         // cancelUpload (dispatched from the dialog) marks the remaining rows.
-        break;
+        return;
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
       dispatch(setFileError({ index, name: fileName, message }));
     }
-  }
+  };
+
+  // Guard non-finite/invalid values (NaN, Infinity, <1): `Math.floor(NaN)`
+  // would propagate through Math.max to `Array.from({ length: NaN })` = zero
+  // workers, silently uploading nothing. Anything invalid falls back to 1.
+  const requested = Number.isFinite(concurrency) ? Math.floor(concurrency) : 1;
+  const workerCount = Math.min(Math.max(1, requested), queue.length);
+
+  const worker = async () => {
+    while (queue.length > 0) {
+      if (abortController.signal.aborted) {
+        break;
+      }
+
+      const index = queue.shift();
+      if (index === undefined) {
+        break;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await uploadOne(index);
+    }
+  };
+
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   unregisterAbortController(uploadId);
 
@@ -356,7 +387,7 @@ const fetchUrlUploadStream = async ({
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(`${backendURL}/upload/unstable/stream-from-urls`, {
+  return fetch(`${backendURL}/upload/actions/upload-from-urls`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ urls, folderId }),
@@ -464,11 +495,15 @@ const uploadApi = adminApi
   .injectEndpoints({
     endpoints: (builder) => ({
       /**
-       * Upload files sequentially, one request per file, to `/upload/unstable/upload-file`.
-       * Real per-file byte progress comes from `XHR.upload.onprogress`.
+       * Upload files to `/upload/files`, one request per file, through a worker
+       * pool of `concurrency` parallel requests (default 1 = sequential). Real
+       * per-file byte progress comes from `XHR.upload.onprogress`.
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
-        queryFn: async ({ formData, totalFiles, generateAiMetadata }, { dispatch, getState }) => {
+        queryFn: async (
+          { formData, totalFiles, concurrency = 1, generateAiMetadata },
+          { dispatch, getState }
+        ) => {
           const token = (getState() as RootState).admin_app?.token;
 
           // Extract the original files and their per-file fileInfo from the combined FormData.
@@ -496,23 +531,29 @@ const uploadApi = adminApi
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
 
           // Store original entries for retry functionality
-          registerUploadEntries(uploadId, entries, generateAiMetadata);
+          registerUploadEntries(uploadId, entries, generateAiMetadata, concurrency);
 
           // One AbortController per batch
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runSequentialUpload({
+          return runUploadPool({
             entries,
             indices: entries.map((_, index) => index),
             token,
             uploadId,
             abortController,
             dispatch,
+            concurrency,
             generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -525,7 +566,7 @@ const uploadApi = adminApi
       uploadFileSilently: builder.mutation<UploadedFile, UploadEntry>({
         queryFn: async ({ file, fileInfo }, { getState }) => {
           const token = (getState() as RootState).admin_app?.token;
-          const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+          const url = `${window.strapi.backendURL}/upload/files`;
 
           const formData = new FormData();
           formData.append('files', file);
@@ -545,16 +586,21 @@ const uploadApi = adminApi
             return { error: { name: 'UnknownError', message } };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
        * Retry uploading cancelled files.
        * Maps cancelled rows back to their original entries and re-runs only those
-       * through the same sequential loop with a fresh AbortController.
+       * through the same upload pool with a fresh AbortController.
        */
       retryCancelledFiles: builder.mutation<UploadedFile[], void>({
-        queryFn: async (_, { dispatch, getState }) => {
+        queryFn: async (_arg, { dispatch, getState }) => {
           const { uploadId, files: stateFiles } = (getState() as RootState).uploadProgress;
           const token = (getState() as RootState).admin_app?.token;
 
@@ -578,18 +624,24 @@ const uploadApi = adminApi
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runSequentialUpload({
+          return runUploadPool({
             entries: batch.entries,
             indices: cancelledIndices,
             token,
             uploadId,
             abortController,
             dispatch,
-            // Replay the retried rows with the flag the batch was started with.
+            // Replay the retried rows with the flags the batch was started with.
+            concurrency: batch.concurrency,
             generateAiMetadata: batch.generateAiMetadata,
           });
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -686,7 +738,12 @@ const uploadApi = adminApi
             };
           }
         },
-        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+        // `Folder, LIST` refreshes the folder header count, which changes when
+        // files are added to it.
+        invalidatesTags: [
+          { type: 'Asset', id: 'LIST' },
+          { type: 'Folder', id: 'LIST' },
+        ],
       }),
 
       /**
@@ -701,15 +758,15 @@ const uploadApi = adminApi
        * Re-exported from `assets.ts` for the components that consume the hook.
        */
       generateAiMetadata: builder.mutation<
-        UnstableGenerateAIMetadata.Response['data'],
+        GenerateAIMetadata.Response['data'],
         { fileIds: number[] }
       >({
         query: ({ fileIds }) => ({
-          url: '/upload/unstable/generate-ai-metadata',
+          url: '/upload/actions/generate-ai-metadata',
           method: 'POST',
           data: { fileIds },
         }),
-        transformResponse: (response: { data: UnstableGenerateAIMetadata.Response['data'] }) =>
+        transformResponse: (response: { data: GenerateAIMetadata.Response['data'] }) =>
           response.data,
         invalidatesTags: (_result, _error, { fileIds }) => [
           ...fileIds.map((id) => ({ type: 'Asset' as const, id })),

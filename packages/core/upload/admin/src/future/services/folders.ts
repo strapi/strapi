@@ -10,6 +10,7 @@ import type {
   GetFolders,
   GetFolderStructure,
   BulkMoveFolders,
+  UpdateFolder,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -52,6 +53,7 @@ const foldersApi = uploadApi.injectEndpoints({
         const queryParams: Record<string, unknown> = {
           // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
           sort: sort ?? 'name:ASC',
+          populate: { parent: true },
         };
 
         // List filters (dates) apply in BOTH modes — search composes with them,
@@ -101,6 +103,22 @@ const foldersApi = uploadApi.injectEndpoints({
       }),
       transformResponse: (response: CreateFolders.Response) => response.data,
       invalidatesTags: [
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
+    updateFolder: builder.mutation<
+      UpdateFolder.Response['data'],
+      { id: number } & UpdateFolder.Request['body']
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/upload/folders/${id}`,
+        method: 'PUT',
+        data: body,
+      }),
+      transformResponse: (response: UpdateFolder.Response) => response.data,
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
         { type: 'Folder', id: 'LIST' },
         { type: 'Folder', id: 'STRUCTURE' },
       ],
@@ -168,7 +186,15 @@ const foldersApi = uploadApi.injectEndpoints({
       }),
       transformResponse: (response: GetFolder.Response) =>
         response.data as unknown as FolderWithCounts,
-      providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
+      // Also carries the LIST tag so a mutation that changes a folder's file
+      // count (upload / delete into it) can refresh the header count by
+      // invalidating `{ Folder, LIST }`, without needing the folder id at the
+      // mutation site (it's buried in the upload FormData / not passed to the
+      // delete).
+      providesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
+        { type: 'Folder', id: 'LIST' },
+      ],
     }),
     bulkMove: builder.mutation<BulkMoveFolders.Response['data'], BulkMoveParams>({
       query: ({ fileIds = [], folderIds = [], destinationFolderId }) => ({
@@ -188,6 +214,7 @@ const foldersApi = uploadApi.injectEndpoints({
 
 export const {
   useCreateFolderMutation,
+  useUpdateFolderMutation,
   useGetFoldersQuery,
   useGetFolderQuery,
   useGetAllFoldersQuery,
