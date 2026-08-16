@@ -9041,7 +9041,7 @@ __metadata:
     "@types/stream-chain": "npm:2.0.1"
     "@types/stream-json": "npm:1.7.8"
     "@types/tar-stream": "npm:2.2.2"
-    "@types/ws": "npm:^8.5.4"
+    "@types/ws": "npm:^8.18.1"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
@@ -11631,12 +11631,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^8.5.4":
-  version: 8.5.4
-  resolution: "@types/ws@npm:8.5.4"
+"@types/ws@npm:^8.18.1":
+  version: 8.18.1
+  resolution: "@types/ws@npm:8.18.1"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/dd8bde7d69296037b5053d9c644ce3a86a988e6cb8a632e36f5040e9e274c8879a10c13ac7fe163e4eb11a85f5b8c46fe6ce5f257b80cc93118494336f4e26c6
+  checksum: 10c0/61aff1129143fcc4312f083bc9e9e168aa3026b7dd6e70796276dcfb2c8211c4292603f9c4864fae702f2ed86e4abd4d38aa421831c2fd7f856c931a481afbab
   languageName: node
   linkType: hard
 
