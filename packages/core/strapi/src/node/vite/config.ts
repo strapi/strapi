@@ -182,6 +182,15 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
         input: {
           strapi: ctx.entry,
         },
+        output: {
+          // Put everything from node_modules in one vendor chunk so local plugin chunks
+          // reference the shared copy instead of inlining their own.
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          },
+        },
       },
     },
   };
