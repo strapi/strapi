@@ -43,10 +43,9 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale = params.query.locale || defaultLocale;
       }
 
-      // NOTE: We get the IDs first before fetching the full versions, because sorting the whole
-      // snapshots runs MySQL/MariaDB out of sort memory
+      // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
       // See: https://github.com/strapi/strapi/issues/27393
-      const [{ results: versionIds, pagination }, localeDictionary] = await Promise.all([
+      const [{ results: versionRows, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params.query,
           select: ['id'],
@@ -62,7 +61,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         serviceUtils.getLocaleDictionary(),
       ]);
 
-      const ids = versionIds.map((version) => version.id);
+      const ids = versionRows.map((version) => version.id);
       const versions = ids.length
         ? await query.findMany({
             where: { id: { $in: ids } },
@@ -70,7 +69,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
         : [];
       const versionsById = new Map(versions.map((version) => [version.id, version]));
-      const results = ids.map((id) => versionsById.get(id));
+      const results = ids.map((id) => versionsById.get(id)).filter(Boolean);
 
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
