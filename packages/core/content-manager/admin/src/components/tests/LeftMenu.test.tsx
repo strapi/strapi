@@ -179,4 +179,83 @@ describe('LeftMenu', () => {
     expect(href).toContain('i18n');
     expect(href).toContain('fr');
   });
+
+  describe('folder collapse persistence', () => {
+    // The test /admin/init handler returns no uuid, so the scoped key suffix is `undefined`.
+    const storageKey = 'STRAPI_CM_COLLAPSED_FOLDERS:undefined';
+
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    afterEach(() => {
+      window.localStorage.clear();
+    });
+
+    it('restores the collapsed and expanded folder states across remounts', async () => {
+      mockInit(true);
+      const first = renderMenu();
+
+      const taxonomy = await screen.findByRole('button', { name: 'Taxonomy' });
+      expect(taxonomy).toHaveAttribute('aria-expanded', 'true');
+
+      await first.user.click(taxonomy);
+      expect(taxonomy).toHaveAttribute('aria-expanded', 'false');
+
+      expect(window.localStorage.getItem(storageKey)).toContain('collectionTypes/group-taxonomy');
+
+      first.unmount();
+      const second = renderMenu();
+
+      const restoredTaxonomy = await screen.findByRole('button', { name: 'Taxonomy' });
+      expect(restoredTaxonomy).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByRole('button', { name: 'Blog' })).toHaveAttribute('aria-expanded', 'true');
+
+      await second.user.click(restoredTaxonomy);
+      expect(restoredTaxonomy).toHaveAttribute('aria-expanded', 'true');
+
+      second.unmount();
+      renderMenu();
+
+      expect(await screen.findByRole('button', { name: 'Taxonomy' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+    });
+
+    it('falls back to all folders open when the stored value is corrupted', async () => {
+      mockInit(true);
+
+      window.localStorage.setItem(storageKey, '{"bogus":true}');
+
+      const { user } = renderMenu();
+
+      const taxonomy = await screen.findByRole('button', { name: 'Taxonomy' });
+      expect(taxonomy).toHaveAttribute('aria-expanded', 'true');
+
+      await user.click(taxonomy);
+      expect(taxonomy).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('hydrates from storage and prunes tokens of folders that no longer exist on toggle', async () => {
+      mockInit(true);
+
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify(['collectionTypes/group-deleted', 'collectionTypes/group-taxonomy'])
+      );
+
+      const { user } = renderMenu();
+
+      const taxonomy = await screen.findByRole('button', { name: 'Taxonomy' });
+      expect(taxonomy).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(screen.getByRole('button', { name: 'Blog' }));
+
+      const stored = window.localStorage.getItem(storageKey) ?? '';
+      expect(stored).toContain('collectionTypes/group-taxonomy');
+      expect(stored).toContain('collectionTypes/group-blog');
+      expect(stored).not.toContain('group-deleted');
+    });
+  });
 });
