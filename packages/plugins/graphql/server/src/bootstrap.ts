@@ -25,6 +25,39 @@ type StrapiGraphQLContext = BaseContext & {
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
 };
 
+type OperationLimitConfig = {
+  depthLimit?: unknown;
+  maxLimit?: unknown;
+  apolloServer?: {
+    validationRules?: unknown;
+  };
+};
+
+export const getOperationLimitsWarning = ({
+  depthLimit: configuredDepthLimit,
+  maxLimit,
+}: OperationLimitConfig): string | undefined => {
+  const unboundedKeys: string[] = [];
+
+  if (
+    typeof configuredDepthLimit !== 'number' ||
+    !Number.isFinite(configuredDepthLimit) ||
+    configuredDepthLimit <= 0
+  ) {
+    unboundedKeys.push('depthLimit');
+  }
+
+  if (maxLimit === -1) {
+    unboundedKeys.push('maxLimit');
+  }
+
+  if (unboundedKeys.length === 0) {
+    return undefined;
+  }
+
+  return `Built-in GraphQL operation limits are unbounded for: ${unboundedKeys.join(', ')}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
+};
+
 export const determineLandingPage = (
   strapi: Core.Strapi
 ): ApolloServerPlugin<StrapiGraphQLContext> => {
@@ -120,6 +153,16 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const { config } = strapi.plugin('graphql');
 
   const path: string = config('endpoint');
+  const configuredDepthLimit = config('depthLimit');
+  const maxLimit = config('maxLimit');
+  const operationLimitsWarning = getOperationLimitsWarning({
+    depthLimit: configuredDepthLimit,
+    maxLimit,
+  });
+
+  if (operationLimitsWarning) {
+    strapi.log.warn(operationLimitsWarning);
+  }
 
   const landingPage = determineLandingPage(strapi);
   /**
@@ -165,7 +208,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     schema,
 
     // Validation
-    validationRules: [depthLimit(config('depthLimit') as number) as any],
+    validationRules: [depthLimit(configuredDepthLimit as number) as any],
 
     // Errors
     formatError: formatGraphqlError,

@@ -70,6 +70,28 @@ Scaffolded `.env` files include a randomly generated `JWT_SECRET` alongside othe
 
 See [JWT management modes](https://docs.strapi.io/cms/features/users-permissions#jwt-management-modes) for client integration details.
 
+## Optional GraphQL plugin operation limits
+
+GraphQL is optional and is not configured in applications scaffolded by `create-strapi-app`. If your
+application exposes GraphQL, configure list and nesting limits in `config/plugins.js` or
+`config/plugins.ts`:
+
+```js
+module.exports = () => ({
+  graphql: {
+    config: {
+      defaultLimit: 25,
+      maxLimit: 100,
+      depthLimit: 10,
+    },
+  },
+});
+```
+
+Review these values against your client queries: `maxLimit` can cap list results and `depthLimit` can
+reject deeply nested operations. Use deployment-level rate limiting and timeouts as additional
+defense in depth; these limits are not a complete protection against expensive operations.
+
 ## Upload MIME restrictions
 
 Use an allowlist for common media and document types, plus a denylist for executables and shell scripts. When both are set, denied types take precedence over the allowlist.
