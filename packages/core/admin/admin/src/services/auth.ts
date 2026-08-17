@@ -46,6 +46,7 @@ const authService = adminApi
         transformResponse(res: GetOwnPermissions.Response) {
           return res.data;
         },
+        providesTags: ['Me'],
       }),
       updateMe: builder.mutation<UpdateMe.Response['data'], UpdateMe.Request['body']>({
         query: (body) => ({

@@ -4,11 +4,15 @@ import { adminApi } from '../services/api';
 import type { Dispatch } from '../core/store/configure';
 
 /**
- * Establish a new admin session and drop any cached API state from the
- * previous identity. Logout already calls `resetApiState`; login/register/
- * reset-password/SSO previously swapped the token without invalidating
- * `getMe` / `getMyPermissions`, so the panel kept rendering the prior
- * user's menus until a full reload.
+ * Establish a new admin session and refetch identity queries. `getMe` /
+ * `getMyPermissions` are keyed only by endpoint, not by token, so swapping
+ * the token without invalidating them keeps the previous user's menus until
+ * a full reload (see #27367).
+ *
+ * Do not call `resetApiState` here. That wipes `/admin/init` as well, so
+ * first-admin signup refetches `hasAdmin: true` while AuthPage is still
+ * mounted and redirects to Home instead of `/usecase`. Logout already resets
+ * the full API cache.
  *
  * @see https://github.com/strapi/strapi/issues/27367
  */
@@ -17,7 +21,7 @@ const establishAdminSession = (
   payload: { token: string; persist?: boolean }
 ): void => {
   dispatch(login(payload));
-  dispatch(adminApi.util.resetApiState());
+  dispatch(adminApi.util.invalidateTags(['Me']));
 };
 
 export { establishAdminSession };
