@@ -9,6 +9,7 @@ import { getTrad } from '../../../../utils/getTrad';
 export type DeleteFolderMode = 'only' | 'withContent';
 
 interface DeleteFolderDialogProps {
+  counts: { contentTypes: number; subfolders: number };
   onOpenChange: (open: boolean) => void;
   mode: DeleteFolderMode;
   onConfirm: () => void;
@@ -20,6 +21,7 @@ export const DeleteFolderDialog = ({
   onOpenChange,
   folderName,
   onConfirm,
+  counts,
   open,
   mode,
 }: DeleteFolderDialogProps) => {
@@ -27,17 +29,21 @@ export const DeleteFolderDialog = ({
 
   const title = useMemo(() => {
     if (mode === 'withContent') {
-      return formatMessage({
-        id: getTrad('nav.folder.delete-with-content.title'),
-        defaultMessage: 'Delete folder and content',
-      });
+      return formatMessage(
+        {
+          id: getTrad('nav.folder.delete-with-content.title'),
+          defaultMessage:
+            '{contentTypes, plural, =0 {Delete folder and {subfolders, plural, one {# subfolder} other {# subfolders}}} one {Delete folder and # content{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {Delete folder and # contents{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}',
+        },
+        counts
+      );
     }
 
     return formatMessage({
       id: getTrad('nav.folder.delete.title'),
       defaultMessage: 'Delete folder',
     });
-  }, [formatMessage, mode]);
+  }, [formatMessage, mode, counts]);
 
   const body = useMemo(() => {
     if (mode === 'withContent') {

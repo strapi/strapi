@@ -181,6 +181,46 @@ export function canNestFolderAt(folder: FolderNode, target: FolderNode | null): 
   return deepestResult <= MAX_FOLDER_DEPTH;
 }
 
+export function countSubtree(
+  section: ContentStructureSection,
+  folderId: string,
+  countableUids: ReadonlySet<UID.ContentType>
+): { contentTypes: number; subfolders: number } {
+  const groupById = new Map(section.groups.map((group) => [group.id, group]));
+
+  let contentTypes = 0;
+  let subfolders = 0;
+
+  const walk = (group: ContentStructureSection['groups'][number]) => {
+    for (const child of group.children) {
+      if (child.type === 'contentType') {
+        if (countableUids.has(child.uid)) {
+          contentTypes += 1;
+        }
+
+        continue;
+      }
+
+      const childGroup = groupById.get(child.id);
+
+      if (!childGroup) {
+        continue;
+      }
+
+      subfolders += 1;
+      walk(childGroup);
+    }
+  };
+
+  const root = groupById.get(folderId);
+
+  if (root) {
+    walk(root);
+  }
+
+  return { contentTypes, subfolders };
+}
+
 export function collectSubtreeContentTypeUids(
   section: ContentStructureSection,
   folderId: string

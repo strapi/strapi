@@ -1,4 +1,4 @@
-import { buildSectionTree } from '../lib/buildFolderTree';
+import { buildSectionTree, countSubtree } from '../lib/buildFolderTree';
 import {
   calculateFolderDropZone,
   folderSiblingDropTarget,
@@ -259,6 +259,95 @@ describe('folderSiblingDropTarget', () => {
     const flat = flattenTree(tree, new Set()); // [R, S, D, Act, Ac]
 
     expect(folderSiblingDropTarget(flat, 'folder:act', 'folder:d', 'after')).toBeNull();
+  });
+});
+
+describe('countSubtree', () => {
+  const uids = (...names: string[]) => new Set(names.map(uid));
+
+  it('counts content types and subfolders across the whole subtree', () => {
+    const groups = [
+      group({
+        id: 'root',
+        name: 'Root',
+        children: [
+          { type: 'contentType', uid: uid('a') },
+          { type: 'group', id: 'child' },
+        ],
+      }),
+      group({
+        id: 'child',
+        name: 'Child',
+        parent: 'root',
+        children: [
+          { type: 'contentType', uid: uid('b') },
+          { type: 'contentType', uid: uid('c') },
+          { type: 'group', id: 'grandchild' },
+        ],
+      }),
+      group({
+        id: 'grandchild',
+        name: 'Grandchild',
+        parent: 'child',
+        children: [{ type: 'contentType', uid: uid('d') }],
+      }),
+      group({ id: 'other', name: 'Other', children: [{ type: 'contentType', uid: uid('e') }] }),
+    ];
+
+    const all = uids('a', 'b', 'c', 'd', 'e');
+
+    expect(countSubtree(section(groups), 'root', all)).toEqual({ contentTypes: 4, subfolders: 2 });
+    expect(countSubtree(section(groups), 'child', all)).toEqual({ contentTypes: 3, subfolders: 1 });
+    expect(countSubtree(section(groups), 'other', all)).toEqual({ contentTypes: 1, subfolders: 0 });
+  });
+
+  it('returns zeros for an empty folder and for an unknown folder id', () => {
+    const groups = [group({ id: 'empty', name: 'Empty', children: [] })];
+
+    expect(countSubtree(section(groups), 'empty', uids())).toEqual({
+      contentTypes: 0,
+      subfolders: 0,
+    });
+    expect(countSubtree(section(groups), 'nope', uids())).toEqual({
+      contentTypes: 0,
+      subfolders: 0,
+    });
+  });
+
+  it('ignores dangling subfolder references', () => {
+    const groups = [
+      group({
+        id: 'root',
+        name: 'Root',
+        children: [
+          { type: 'group', id: 'missing' },
+          { type: 'contentType', uid: uid('a') },
+        ],
+      }),
+    ];
+
+    expect(countSubtree(section(groups), 'root', uids('a'))).toEqual({
+      contentTypes: 1,
+      subfolders: 0,
+    });
+  });
+
+  it('ignores content-type refs that no longer resolve to an existing content type', () => {
+    const groups = [
+      group({
+        id: 'root',
+        name: 'Root',
+        children: [
+          { type: 'contentType', uid: uid('ghost') },
+          { type: 'contentType', uid: uid('real') },
+        ],
+      }),
+    ];
+
+    expect(countSubtree(section(groups), 'root', uids('real'))).toEqual({
+      contentTypes: 1,
+      subfolders: 0,
+    });
   });
 });
 
