@@ -59,8 +59,8 @@ const MarkdownStyles = styled(Typography)`
     border-radius: ${({ theme }) => theme.borderRadius};
     border-color: ${({ theme }) => theme.colors.neutral150};
     border-style: solid;
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
-      monospace;
+    font-family:
+      'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
   }
 
   /* links */

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { join } from 'path';
-import sharp from 'sharp';
+import sharp, { type Metadata, type ResizeOptions } from 'sharp';
 import crypto from 'crypto';
 import { strings, file as fileUtils } from '@strapi/utils';
 
@@ -12,13 +12,6 @@ type Dimensions = {
   width: number | null;
   height: number | null;
 };
-
-// TODO: remove after upgrading sharp to >=0.34.2 (pageHeight added to OutputInfo types)
-declare module 'sharp' {
-  interface OutputInfo {
-    pageHeight?: number;
-  }
-}
 
 const { bytesToKbytes } = fileUtils;
 
@@ -41,7 +34,7 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
+const getMetadata = (file: UploadableFile): Promise<Metadata> => {
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
       const pipeline = sharp();
@@ -63,11 +56,11 @@ const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
   height: 156,
   fit: 'inside',
-} satisfies sharp.ResizeOptions;
+} satisfies ResizeOptions;
 
 const resizeFileTo = async (
   file: UploadableFile,
-  options: sharp.ResizeOptions,
+  options: ResizeOptions,
   {
     name,
     hash,

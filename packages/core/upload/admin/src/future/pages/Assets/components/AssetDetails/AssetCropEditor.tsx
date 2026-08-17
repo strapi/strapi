@@ -161,17 +161,25 @@ const FocalPointHandle = styled.button`
   }
 `;
 
+// Hidden on mobile — the panel (title/hint + numeric crop & focal inputs) is
+// too large for a phone; touch users set the crop by dragging the rectangle and
+// focal handle directly on the image. Shown from tablet up.
 const InfoBox = styled(Box)`
-  position: absolute;
-  right: ${({ theme }) => theme.spaces[1]};
-  bottom: ${({ theme }) => theme.spaces[1]};
-  width: 100%;
-  max-width: 32rem;
-  padding: ${({ theme }) => theme.spaces[3]};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ theme }) =>
-    theme.colorScheme === 'dark' ? theme.colors.neutral150 : theme.colors.neutral900};
-  z-index: 20;
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: block;
+    position: absolute;
+    right: ${({ theme }) => theme.spaces[1]};
+    bottom: ${({ theme }) => theme.spaces[1]};
+    width: 100%;
+    max-width: 32rem;
+    padding: ${({ theme }) => theme.spaces[3]};
+    border-radius: ${({ theme }) => theme.borderRadius};
+    background: ${({ theme }) =>
+      theme.colorScheme === 'dark' ? theme.colors.neutral150 : theme.colors.neutral900};
+    z-index: 20;
+  }
 `;
 
 const FooterBar = styled(Flex)`
@@ -288,14 +296,24 @@ export const AssetCropEditor = ({
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
 
-  // Append `updatedAt` as a cache-buster: a replaced asset is served at the same
-  // URL, so without this, reopening the editor shows the browser-cached old image
-  // (mirrors AssetPreview).
+  // The crop editor reads pixels from a canvas (useCropImg -> toBlob), so its
+  // <img> must be CORS-clean and always sets crossOrigin="anonymous" (see the
+  // img below) — even for unsigned URLs, which AssetPreview leaves unset because
+  // it only displays. That difference is why the crop URL is kept DISTINCT from
+  // the thumbnail's: identical URL + different crossOrigin collide in the HTTP
+  // cache (#26581), and the crop's anonymous request could otherwise reuse the
+  // thumbnail's non-CORS cached response and taint the canvas. So the buster
+  // uses `updatedAt` where AssetPreview uses `v`, giving each its own entry
+  // (mirrors the legacy PreviewBox fix).
+  // Signed URLs get no param at all — a presigned S3 URL breaks if you add one,
+  // and on the signed side AssetPreview also loads anonymous, so the identical
+  // URL there shares one CORS-consistent entry, which is fine.
   const rawImageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
-  const cacheKey = asset.updatedAt ? new Date(asset.updatedAt).getTime() : undefined;
+  const cacheKey =
+    asset.updatedAt && !asset.isUrlSigned ? new Date(asset.updatedAt).getTime() : undefined;
   const imageUrl =
     cacheKey !== undefined
-      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}v=${cacheKey}`
+      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}updatedAt=${cacheKey}`
       : rawImageUrl;
 
   const handleImageLoad = () => {
@@ -504,6 +522,10 @@ export const AssetCropEditor = ({
                 ref={imgRef}
                 src={imageUrl}
                 alt={asset.name}
+                // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:
+                // the editor reads pixels via canvas (useCropImg -> toBlob), which
+                // taints on a cross-origin image loaded without CORS, so every
+                // remote image must be fetched CORS-clean.
                 crossOrigin="anonymous"
                 onLoad={handleImageLoad}
                 draggable={false}

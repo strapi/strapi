@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@tests/utils';
 
 import { AssetCropEditor } from '../AssetCropEditor';
+import { AssetPreview } from '../AssetPreview';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
@@ -40,6 +41,18 @@ let restoreRect: () => void;
 let restoreNatural: () => void;
 
 beforeAll(() => {
+  // AssetPreview (rendered by the parity test below) observes its image with a
+  // ResizeObserver, which jsdom doesn't implement.
+  if (!('ResizeObserver' in globalThis)) {
+    (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    };
+  }
+
   const originalRect = Element.prototype.getBoundingClientRect;
   Element.prototype.getBoundingClientRect = () =>
     ({
@@ -88,10 +101,13 @@ afterAll(() => {
   restoreNatural();
 });
 
-const renderEditor = async ({ canSaveAsCopy = true }: { canSaveAsCopy?: boolean } = {}) => {
+const renderEditor = async ({
+  canSaveAsCopy = true,
+  asset: assetProp = asset,
+}: { canSaveAsCopy?: boolean; asset?: AssetWithPopulatedCreatedBy } = {}) => {
   const utils = render(
     <AssetCropEditor
-      asset={asset}
+      asset={assetProp}
       onClose={jest.fn()}
       onApply={jest.fn()}
       onSaveAsCopy={jest.fn()}
@@ -184,6 +200,82 @@ describe('AssetCropEditor save-as-copy gating', () => {
 
     expect(screen.queryByRole('button', { name: 'Save as copy' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
+  });
+});
+
+describe('AssetCropEditor cache-buster on signed URLs', () => {
+  const signedAsset = {
+    ...asset,
+    isUrlSigned: true,
+    // A presigned S3 URL already carries its signature as query params; a
+    // `&v=` cache-buster would invalidate it (403 SignatureDoesNotMatch).
+    url: 'https://cdn.example.com/photo.png?X-Amz-Signature=sig',
+  } as unknown as AssetWithPopulatedCreatedBy;
+
+  const unsignedAsset = {
+    ...asset,
+    isUrlSigned: false,
+    url: '/uploads/photo.png',
+    updatedAt: '2026-05-06T00:00:00.000Z',
+  } as unknown as AssetWithPopulatedCreatedBy;
+
+  it('does not append the cache-buster on a signed URL (preserves the signature)', async () => {
+    await renderEditor({ asset: signedAsset });
+
+    const src = document.querySelector('img')?.getAttribute('src') ?? '';
+    expect(src).toBe(signedAsset.url);
+    expect(src).not.toContain('v=');
+  });
+
+  it('busts an unsigned URL with a distinct `updatedAt` param (still refreshes after replace)', async () => {
+    await renderEditor({ asset: unsignedAsset });
+
+    const src = document.querySelector('img')?.getAttribute('src') ?? '';
+    expect(src).toContain(`updatedAt=${new Date(unsignedAsset.updatedAt as string).getTime()}`);
+  });
+
+  it('produces the same URL and crossOrigin as AssetPreview for a signed asset (one CORS-consistent cache entry)', async () => {
+    // AssetPreview is the sibling render site; for a signed asset both must drop
+    // the buster and opt into CORS, or the two loads would fight over the cache
+    // (the #26581 collision).
+    const preview = render(<AssetPreview asset={signedAsset} />);
+    // Select by alt (the real image), not the first <img> — AssetPreview also
+    // renders a loading-spinner SVG <img> until the media load fires.
+    const previewImg = preview.getByAltText(String(signedAsset.alternativeText));
+    const previewSrc = previewImg.getAttribute('src');
+    const previewCrossOrigin = previewImg.getAttribute('crossorigin');
+    preview.unmount();
+
+    await renderEditor({ asset: signedAsset });
+    const cropImg = screen.getByAltText(signedAsset.name) as HTMLImageElement;
+
+    expect(cropImg).toHaveAttribute('src', previewSrc as string);
+    expect(cropImg).toHaveAttribute('crossorigin', previewCrossOrigin as string);
+    expect(previewCrossOrigin).toBe('anonymous');
+  });
+
+  it('gives the crop image its own cache entry for an unsigned asset (distinct URL + anonymous)', async () => {
+    // The editor reads canvas pixels (useCropImg -> toBlob), so it must load
+    // CORS-clean (crossOrigin="anonymous"); AssetPreview only displays and leaves
+    // it unset. Same URL + different crossOrigin collide (#26581) — the anonymous
+    // crop request could reuse the thumbnail's non-CORS response and taint the
+    // canvas. So the crop URL must differ: it busts with `updatedAt`, the
+    // thumbnail with `v`.
+    const preview = render(<AssetPreview asset={unsignedAsset} />);
+    const previewImg = preview.getByAltText(String(unsignedAsset.alternativeText));
+    const previewSrc = previewImg.getAttribute('src') ?? '';
+    expect(previewImg).not.toHaveAttribute('crossorigin');
+    preview.unmount();
+
+    await renderEditor({ asset: unsignedAsset });
+    const cropImg = screen.getByAltText(unsignedAsset.name) as HTMLImageElement;
+    const cropSrc = cropImg.getAttribute('src') ?? '';
+
+    // Distinct cache entry: different URL, and the crop opts into CORS.
+    expect(cropSrc).not.toBe(previewSrc);
+    expect(cropSrc).toContain('updatedAt=');
+    expect(previewSrc).toContain('v=');
+    expect(cropImg).toHaveAttribute('crossorigin', 'anonymous');
   });
 });
 
