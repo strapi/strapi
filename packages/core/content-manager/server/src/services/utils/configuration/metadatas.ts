@@ -63,6 +63,7 @@ function createDefaultMetadata(schema: any, name: any) {
       'visible',
       'editable',
       'mainField',
+      'mediaField',
     ])
   );
 
@@ -115,27 +116,34 @@ async function syncMetadatas(configuration: any, schema: any) {
       _.set(acc, [key], updatedMeta);
     }
 
-    if (!_.has(edit, 'mainField')) return acc;
-
-    // remove mainField if the attribute is not a relation anymore
+    // remove mainField and mediaField if the attribute is not a relation anymore
     if (!isRelation(attr)) {
-      _.set(updatedMeta, 'edit', _.omit(edit, ['mainField']));
-      _.set(acc, [key], updatedMeta);
+      if (_.has(edit, 'mainField') || _.has(edit, 'mediaField')) {
+        _.set(updatedMeta, 'edit', _.omit(edit, ['mainField', 'mediaField']));
+        _.set(acc, [key], updatedMeta);
+      }
       return acc;
     }
+
+    const targetSchema = getTargetSchema(attr.targetModel);
+
+    if (!targetSchema) return acc;
+
+    // remove the mediaField if it does not point to a media attribute of the targetModel anymore
+    if (edit.mediaField && targetSchema.attributes?.[edit.mediaField]?.type !== 'media') {
+      _.set(updatedMeta, 'edit', _.omit(edit, ['mediaField']));
+      _.set(acc, [key], updatedMeta);
+    }
+
+    if (!_.has(edit, 'mainField')) return acc;
 
     // if the mainField is id you can keep it
     if (edit.mainField === 'id') return acc;
 
     // check the mainField in the targetModel
-    const targetSchema = getTargetSchema(attr.targetModel);
-
-    if (!targetSchema) return acc;
-
     if (!isSortable(targetSchema, edit.mainField) && !isListable(targetSchema, edit.mainField)) {
       _.set(updatedMeta, ['edit', 'mainField'], getDefaultMainField(targetSchema));
       _.set(acc, [key], updatedMeta);
-      return acc;
     }
 
     return acc;

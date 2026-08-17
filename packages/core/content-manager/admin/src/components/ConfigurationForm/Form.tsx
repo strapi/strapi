@@ -48,9 +48,11 @@ interface ConfigurationFormData extends Pick<EditLayout, 'settings'> {
   layout: Array<{
     __temp_key__: string;
     children: Array<
-      | (Pick<EditFieldLayout, 'label' | 'size' | 'name' | 'placeholder' | 'mainField'> & {
+      | (Pick<EditFieldLayout, 'label' | 'size' | 'name' | 'placeholder'> & {
           description: EditFieldLayout['hint'];
           editable: EditFieldLayout['disabled'];
+          mainField?: string;
+          mediaField?: string;
           __temp_key__: string;
         })
       | EditFieldSpacerLayout
@@ -233,6 +235,7 @@ const replaceMainFieldWithNameOnly = (layout: EditLayout['layout'][number]) =>
     row.map((field) => ({
       ...field,
       mainField: field.mainField?.name,
+      mediaField: field.mediaField?.name,
     }))
   );
 
@@ -244,11 +247,12 @@ const extractMetadata = (
   layout: EditLayout['layout'][number]
 ): Array<Exclude<ConfigurationFormData['layout'], { name: '_TEMP_' }>[number]['children']> => {
   return layout.map((row) =>
-    row.map(({ label, disabled, hint, placeholder, size, name, mainField }) => ({
+    row.map(({ label, disabled, hint, placeholder, size, name, mainField, mediaField }) => ({
       label,
       editable: !disabled,
       description: hint,
-      mainField,
+      mainField: mainField as string | undefined,
+      mediaField: mediaField as string | undefined,
       placeholder,
       size,
       name,
