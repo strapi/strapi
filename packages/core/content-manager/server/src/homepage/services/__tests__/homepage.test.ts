@@ -341,6 +341,93 @@ describe('homepage service', () => {
       expect(wire[0].publishedAt).not.toEqual({});
     });
 
+    it('omits documents without a parseable updatedAt instead of emitting "" (#27382)', async () => {
+      /**
+       * `updatedAt: toIsoDateString(...) ?? ''` produced empty strings on the wire.
+       * `new Date('')` is Invalid Date → RelativeTime throws RangeError: Start Date is invalid.
+       */
+      (strapiContentTypes.hasDraftAndPublish as jest.Mock).mockImplementation(() => false);
+
+      const contentTypes = {
+        'api::article.article': {
+          uid: 'api::article.article',
+          info: { displayName: 'Article' },
+          kind: 'collectionType',
+          options: { draftAndPublish: false },
+          attributes: {},
+        },
+      };
+
+      const findArticleDocuments = jest.fn(async () => [
+        {
+          documentId: 'article-bad',
+          title: 'Missing date',
+          updatedAt: null,
+        },
+        {
+          documentId: 'article-good',
+          title: 'Has date',
+          updatedAt: '2026-07-10T16:24:13.962Z',
+        },
+      ]);
+      const findConfigurations = jest.fn(async () => [
+        {
+          value: JSON.stringify({
+            uid: 'api::article.article',
+            settings: { mainField: 'title' },
+          }),
+        },
+      ]);
+
+      const strapi = {
+        admin: {
+          services: {
+            permission: {
+              findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
+            },
+          },
+        },
+        contentTypes,
+        requestContext: {
+          get: jest.fn(() => ({
+            state: {
+              user: { id: 1 },
+              userAbility: {},
+            },
+          })),
+        },
+        db: {
+          query: jest.fn(() => ({
+            findMany: findConfigurations,
+          })),
+        },
+        plugin: jest.fn(() => ({
+          service: jest.fn(() => ({
+            create: jest.fn(() => ({
+              cannot: {
+                read: jest.fn(() => false),
+              },
+              sanitizedQuery: {
+                read: jest.fn(async (query: unknown) => query),
+              },
+            })),
+          })),
+        })),
+        contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
+        documents: jest.fn(() => ({
+          findMany: findArticleDocuments,
+        })),
+      };
+
+      const service = createHomepageService({ strapi } as any);
+      const result = await service.queryLastDocuments({ sort: 'updatedAt:desc' }, false);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].documentId).toBe('article-good');
+      expect(result[0].updatedAt).toBe('2026-07-10T16:24:13.962Z');
+      expect(result[0].updatedAt).not.toBe('');
+    });
+
     it('converts Date timestamps to ISO strings and keeps them after populate spread', async () => {
       (strapiContentTypes.hasDraftAndPublish as jest.Mock).mockImplementation(() => true);
 

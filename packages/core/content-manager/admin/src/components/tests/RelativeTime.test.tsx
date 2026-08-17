@@ -48,4 +48,13 @@ describe('RelativeTime', () => {
 
     expect(screen.getByRole('time')).toHaveTextContent('now');
   });
+
+  it('renders a safe fallback for invalid dates instead of crashing (#27382)', () => {
+    render(<RelativeTime timestamp={new Date('')} />);
+
+    const timeElement = screen.getByRole('time');
+    expect(timeElement).toBeInTheDocument();
+    expect(timeElement).toHaveTextContent('-');
+    expect(timeElement).not.toHaveAttribute('datetime');
+  });
 });
