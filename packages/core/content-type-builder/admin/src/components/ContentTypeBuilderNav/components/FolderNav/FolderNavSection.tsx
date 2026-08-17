@@ -15,6 +15,7 @@ import { useSortableTree } from '../../hooks/useSortableTree';
 import {
   buildSectionTree,
   collectSubtreeContentTypeUids,
+  countSubtree,
   filterTree,
 } from '../../lib/buildFolderTree';
 import { flattenSortableTree } from '../../lib/flatModel';
@@ -79,6 +80,10 @@ export const FolderNavSection = ({
   const searchActive = searchValue.trim().length > 0;
   const canEdit = Boolean(isInDevelopmentMode);
 
+  const linkUids = useMemo(() => {
+    return new Set(links.map((link) => link.uid));
+  }, [links]);
+
   const tree = useMemo(() => {
     return buildSectionTree(sectionData, links, (a, b) => formatter.compare(a, b));
   }, [sectionData, links, formatter]);
@@ -133,7 +138,9 @@ export const FolderNavSection = ({
 
     if (deleteTarget.mode === 'withContent') {
       actions.deleteFolderAndContent({
-        contentTypeUids: collectSubtreeContentTypeUids(sectionData, deleteTarget.node.id),
+        contentTypeUids: collectSubtreeContentTypeUids(sectionData, deleteTarget.node.id).filter(
+          (uid) => linkUids.has(uid)
+        ),
         id: deleteTarget.node.id,
         section,
       });
@@ -213,6 +220,9 @@ export const FolderNavSection = ({
     },
     onDeleteFolderAndContent: (node) => {
       setDeleteTarget({ node, mode: 'withContent' });
+    },
+    countFolderSubtree: (id) => {
+      return countSubtree(sectionData, id, linkUids);
     },
   };
 
@@ -295,6 +305,7 @@ export const FolderNavSection = ({
 
       {deleteTarget && (
         <DeleteFolderDialog
+          counts={countSubtree(sectionData, deleteTarget.node.id, linkUids)}
           folderName={deleteTarget.node.name}
           onConfirm={confirmDelete}
           mode={deleteTarget.mode}
