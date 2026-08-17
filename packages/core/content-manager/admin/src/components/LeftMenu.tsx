@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { SubNav } from '@strapi/admin/strapi-admin';
+import { SubNav, useScopedPersistentState } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -25,9 +25,36 @@ import {
 import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+import type { Modules } from '@strapi/types';
+
+const COLLAPSED_FOLDERS_KEY = 'STRAPI_CM_COLLAPSED_FOLDERS';
+
+type SectionId = Modules.ContentStructure.ContentStructureSectionKey;
+
+const getFolderToken = (sectionId: SectionId, folderId: string) => `${sectionId}/${folderId}`;
+
+const collectFolderTokens = (
+  sectionId: SectionId,
+  groups: Modules.ContentStructure.ResolvedGroupNode[],
+  tokens: Set<string>
+) => {
+  for (const group of groups) {
+    tokens.add(getFolderToken(sectionId, group.id));
+
+    const childGroups = group.children.filter(
+      (child): child is Modules.ContentStructure.ResolvedGroupNode => child.type === 'group'
+    );
+
+    collectFolderTokens(sectionId, childGroups, tokens);
+  }
+};
 
 const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
+  const [storedCollapsedFolders, setStoredCollapsedFolders] = useScopedPersistentState<string[]>(
+    COLLAPSED_FOLDERS_KEY,
+    []
+  );
   const { formatMessage, locale } = useIntl();
   const { search: locationSearch } = useLocation();
   const i18nLocale = new URLSearchParams(locationSearch).get('plugins[i18n][locale]');
@@ -120,7 +147,50 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     search: i18nLocale ? `?plugins[i18n][locale]=${i18nLocale}` : '',
   });
 
-  const renderMenuItem = (node: LinkTreeNode, depth: number): React.ReactNode => {
+  const collapsedFolderTokens = Array.isArray(storedCollapsedFolders) ? storedCollapsedFolders : [];
+
+  const knownFolderTokens = React.useMemo(() => {
+    if (!contentStructure) {
+      return null;
+    }
+
+    try {
+      const tokens = new Set<string>();
+
+      collectFolderTokens('collectionTypes', contentStructure.collectionTypes, tokens);
+      collectFolderTokens('singleTypes', contentStructure.singleTypes, tokens);
+
+      return tokens;
+    } catch {
+      return null;
+    }
+  }, [contentStructure]);
+
+  const handleFolderToggle = (token: string, open: boolean) => {
+    setStoredCollapsedFolders((previous) => {
+      const collapsed = Array.isArray(previous) ? previous : [];
+
+      const pruned = knownFolderTokens
+        ? collapsed.filter((storedToken) => knownFolderTokens.has(storedToken))
+        : collapsed;
+
+      if (open) {
+        return pruned.filter((storedToken) => storedToken !== token);
+      }
+
+      if (pruned.includes(token)) {
+        return pruned;
+      }
+
+      return [...pruned, token];
+    });
+  };
+
+  const renderMenuItem = (
+    node: LinkTreeNode,
+    depth: number,
+    sectionId: SectionId
+  ): React.ReactNode => {
     if (node.type === 'link') {
       return (
         <SubNav.Link
@@ -132,9 +202,17 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       );
     }
 
+    const token = getFolderToken(sectionId, node.id);
+
     return (
-      <SubNav.Folder key={node.id} label={node.name} depth={depth} defaultOpen>
-        {node.children.map((child) => renderMenuItem(child, depth + 1))}
+      <SubNav.Folder
+        key={node.id}
+        label={node.name}
+        depth={depth}
+        open={!collapsedFolderTokens.includes(token)}
+        onToggle={(open) => handleFolderToggle(token, open)}
+      >
+        {node.children.map((child) => renderMenuItem(child, depth + 1, sectionId))}
       </SubNav.Folder>
     );
   };
@@ -232,7 +310,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                     }
                   />
                 ))
-              : section.tree.map((node) => renderMenuItem(node, 0));
+              : section.tree.map((node) => renderMenuItem(node, 0, section.id));
 
             return (
               <SubNav.Section key={section.id} label={section.title} badgeLabel={count.toString()}>

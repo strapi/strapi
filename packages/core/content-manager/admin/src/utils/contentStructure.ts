@@ -124,7 +124,7 @@ export function filterTreeLinks<TLink>({
 type BuildContentStructureSectionParams = {
   compareLinks: (a: ContentManagerLink, b: ContentManagerLink) => number;
   groups: Modules.ContentStructure.ResolvedGroupNode[];
-  id: 'collectionTypes' | 'singleTypes';
+  id: Modules.ContentStructure.ContentStructureSectionKey;
   links: ContentManagerLink[];
   title: string;
 };
@@ -137,7 +137,11 @@ export function buildContentStructureSection({
   links,
   title,
   id,
-}: BuildContentStructureSectionParams): { id: string; title: string; tree: LinkTreeNode[] } {
+}: BuildContentStructureSectionParams): {
+  id: Modules.ContentStructure.ContentStructureSectionKey;
+  title: string;
+  tree: LinkTreeNode[];
+} {
   try {
     return { id, title, tree: deriveVisibleTree(groups, links, compareLinks) };
   } catch {
