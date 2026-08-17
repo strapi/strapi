@@ -42,6 +42,7 @@ import { styled } from 'styled-components';
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
 import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../../hooks/useTracking';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
@@ -58,7 +59,6 @@ import {
   getFileExtension,
   prefixFileUrlWithBackendUrl,
 } from '../../../../utils/files';
-import { getApiErrorMessage } from '../../../../utils/getApiErrorMessage';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
@@ -702,6 +702,7 @@ interface AssetFormState {
 
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
@@ -750,10 +751,13 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     if ('error' in res) {
       notify({
         type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('asset-details.update.error'),
-          defaultMessage: 'Failed to update the file.',
-        }),
+        message: getErrorMessage(
+          res.error,
+          formatMessage({
+            id: getTranslationKey('asset-details.update.error'),
+            defaultMessage: 'Failed to update the file.',
+          })
+        ),
       });
       return;
     }
@@ -787,7 +791,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       if ('error' in res) {
         notify({
           type: 'danger',
-          message: getApiErrorMessage(
+          message: getErrorMessage(
             res.error,
             formatMessage({
               id: getTranslationKey('asset-details.replace.error'),
@@ -806,7 +810,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, notify, replaceMutation, trackUsage]
+    [asset.id, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -816,7 +820,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     if ('error' in res) {
       notify({
         type: 'danger',
-        message: getApiErrorMessage(
+        message: getErrorMessage(
           res.error,
           formatMessage({
             id: getTranslationKey('asset-details.delete.error'),
@@ -843,6 +847,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     deleteMutation,
     folderName,
     formatMessage,
+    getErrorMessage,
     notify,
     toggleNotification,
   ]);
@@ -850,7 +855,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const notifyCropError = (error?: unknown) => {
     notify({
       type: 'danger',
-      message: getApiErrorMessage(
+      message: getErrorMessage(
         error,
         formatMessage({
           id: getTranslationKey('asset-details.crop.error'),

@@ -14,11 +14,11 @@ import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from 
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
-import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
@@ -56,6 +56,7 @@ interface AssetActionsMenuProps {
  */
 export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { deselect } = useAssetSelection();
@@ -118,7 +119,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
     if ('error' in res) {
       toggleNotification({
         type: 'danger',
-        message: getApiErrorMessage(
+        message: getErrorMessage(
           res.error,
           formatMessage({
             id: getTranslationKey('asset-details.replace.error'),

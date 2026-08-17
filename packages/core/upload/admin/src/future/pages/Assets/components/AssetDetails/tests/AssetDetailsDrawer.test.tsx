@@ -143,6 +143,27 @@ describe('AssetDetails (asset details drawer body)', () => {
     });
   });
 
+  it('surfaces the server error message when the metadata save fails', async () => {
+    server.use(
+      http.put('*/upload/files/:id', () =>
+        HttpResponse.json({ error: { message: 'name must be unique' } }, { status: 400 })
+      )
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeEnabled());
+    await user.clear(nameInput);
+    await user.type(nameInput, 'taken.png');
+
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    await screen.findByText('name must be unique');
+  });
+
   it('renders the Media Library root option plus every folder returned by the API', async () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 

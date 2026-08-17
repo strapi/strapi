@@ -22,12 +22,12 @@ import { useNotification } from '@strapi/admin/strapi-admin';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../../services/folders';
 import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
-import { getApiErrorMessage } from '../../../../utils/getApiErrorMessage';
 import { getFolderLabel } from '../../../../utils/getFolderLabel';
 import { emptyItemLocations, type ItemLocations } from '../../../../utils/itemLocations';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -122,6 +122,7 @@ export const AssetsDndProvider = ({
   locations = emptyItemLocations,
 }: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { toggleNotification } = useNotification();
   const selection = useAssetSelectionOptional();
   const { currentFolderId } = useFolderNavigation();
@@ -273,7 +274,7 @@ export const AssetsDndProvider = ({
           message: successMessage,
         });
       } catch (error) {
-        const errorMessage = getApiErrorMessage(error, errorFallback);
+        const errorMessage = getErrorMessage(error, errorFallback);
 
         announceToLiveRegion(
           formatMessage(
@@ -297,6 +298,7 @@ export const AssetsDndProvider = ({
       clearDragState,
       folderStructure,
       formatMessage,
+      getErrorMessage,
       isMovePending,
       rootLabel,
       selection,

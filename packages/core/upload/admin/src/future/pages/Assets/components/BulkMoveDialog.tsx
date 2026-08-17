@@ -13,6 +13,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import {
   useBulkMoveMutation,
   useGetFolderQuery,
@@ -21,7 +22,6 @@ import {
 import { canDropItemOnFolder } from '../../../utils/canDropItemOnFolder';
 import { flattenFolderStructure } from '../../../utils/flattenFolderStructure';
 import { formatMoveSuccessMessage } from '../../../utils/formatMoveSuccessMessage';
-import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import { hasUniformSource, uniformSourceFolderId } from '../../../utils/itemSource';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -55,6 +55,7 @@ interface BulkMoveDialogProps {
  */
 export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDialogProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { toggleNotification } = useNotification();
   const {
     data: folderStructure = [],
@@ -157,7 +158,7 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
       // folder into its own descendant or a name collision in the destination.
       toggleNotification({
         type: 'danger',
-        message: getApiErrorMessage(
+        message: getErrorMessage(
           error,
           formatMessage({
             id: getTranslationKey('list.bulk-actions.move.error'),
