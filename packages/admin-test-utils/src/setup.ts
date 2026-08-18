@@ -1,5 +1,6 @@
 import { format } from 'util';
 import { ResizeObserver } from '@juggle/resize-observer';
+// eslint-disable-next-line node/no-unpublished-import
 import type { Admin } from '@strapi/types/_internal';
 
 /* -------------------------------------------------------------------------------------------------
