@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   sanitize,
   validate,
@@ -194,13 +193,9 @@ const createContentAPI = (strapi: Core.Strapi) => {
     const routesMap: Record<string, Core.Route[]> = {};
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
-      const routes = _.flatMap(api.routes, (route) => {
-        if ('routes' in route) {
-          return route.routes;
-        }
-
-        return route;
-      }).filter(filterContentAPI);
+      const routes = Object.values(api.routes)
+        .flatMap((route) => ('routes' in route ? route.routes : route))
+        .filter(filterContentAPI);
 
       if (routes.length === 0) {
         continue;
@@ -216,14 +211,11 @@ const createContentAPI = (strapi: Core.Strapi) => {
     for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      if (Array.isArray(plugin.routes)) {
-        plugin.routes.map(transformPrefix).filter(filterContentAPI);
-        continue;
-      }
+      const pluginRoutes = Array.isArray(plugin.routes)
+        ? plugin.routes
+        : Object.values(plugin.routes).flatMap((route) => route.routes);
 
-      const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
-        filterContentAPI
-      );
+      const routes = pluginRoutes.map(transformPrefix).filter(filterContentAPI);
 
       if (routes.length === 0) {
         continue;
