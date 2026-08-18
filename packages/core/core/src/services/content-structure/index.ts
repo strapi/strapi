@@ -124,12 +124,14 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
       warn(`Reparenting group "${group.id}" in section "${sectionKey}" to root: ${reason}`);
     };
 
+    // oxlint-disable-next-line - Duplicating is necessary because the original array is mutated inside the iterator.
     for (const group of [...groups]) {
       if (group.parent !== null && !seenGroupIds.has(group.parent)) {
         reparentToRoot(group, `parent "${group.parent}" does not exist`);
       }
     }
 
+    // oxlint-disable-next-line - Duplicating is necessary because the original array is mutated inside the iterator.
     for (const group of [...groups]) {
       const chain = new Set([group.id]);
       let current = group;
@@ -145,6 +147,7 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
       }
     }
 
+    // oxlint-disable-next-line - Duplicating is necessary because the original array is mutated inside the iterator.
     for (const group of [...groups]) {
       let current = group;
       let depth = 1;
