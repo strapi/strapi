@@ -83,6 +83,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
+    "eslint-config-custom": "5.52.1",
     "jest": "29.6.0",
     "koa": "2.16.4",
     "msw": "2.13.4",
@@ -90,7 +91,9 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.30.4",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "tsconfig": "5.52.1",
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

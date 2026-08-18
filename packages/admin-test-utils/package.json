@@ -87,6 +87,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
+    "@types/jest": "29.5.2",
     "eslint-config-custom": "5.52.1",
     "jest-environment-jsdom": "29.6.1",
     "react": "18.3.1",
