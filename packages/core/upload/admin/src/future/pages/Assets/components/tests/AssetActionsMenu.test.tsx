@@ -8,7 +8,7 @@ import type { DragFileData } from '../../../../types/dnd';
 
 const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
-const mockClear = jest.fn();
+const mockDeselect = jest.fn();
 const mockDownloadFile = jest.fn();
 const mockAIAvailability = jest.fn(() => true);
 
@@ -25,7 +25,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 
 jest.mock('../../hooks/useAssetSelection', () => ({
   useAssetSelection: () => ({
-    clear: mockClear,
+    deselect: mockDeselect,
     selectedIds: new Set<number>([9, 10]),
     selectedFolderIds: new Set<number>([8]),
   }),
@@ -229,10 +229,10 @@ describe('AssetActionsMenu', () => {
       let uploadedId: string | null = null;
       server.use(
         http.post(
-          '*/upload',
-          ({ request }) => {
-            uploadedId = new URL(request.url).searchParams.get('id');
-            return HttpResponse.json([{ id: 5, name: 'new.png' }]);
+          '*/upload/files/:id/replace',
+          ({ params }) => {
+            uploadedId = params.id as string;
+            return HttpResponse.json({ id: 5, name: 'new.png' });
           },
           { once: true }
         )
@@ -266,12 +266,12 @@ describe('AssetActionsMenu', () => {
       let releaseUpload: (() => void) | undefined;
       server.use(
         http.post(
-          '*/upload',
+          '*/upload/files/:id/replace',
           async () => {
             await new Promise<void>((resolve) => {
               releaseUpload = resolve;
             });
-            return HttpResponse.json([{ id: 5, name: 'new.png' }]);
+            return HttpResponse.json({ id: 5, name: 'new.png' });
           },
           { once: true }
         )
@@ -300,7 +300,7 @@ describe('AssetActionsMenu', () => {
     it('releases the busy flag when the replace fails', async () => {
       server.use(
         http.post(
-          '*/upload',
+          '*/upload/files/:id/replace',
           () => HttpResponse.json({ error: { message: 'Nope.' } }, { status: 500 }),
           {
             once: true,
@@ -390,7 +390,7 @@ describe('AssetActionsMenu', () => {
 
     it('surfaces the server message when the replace fails', async () => {
       server.use(
-        http.post('*/upload', () =>
+        http.post('*/upload/files/:id/replace', () =>
           HttpResponse.json({ error: { message: 'File too large' } }, { status: 413 })
         )
       );
@@ -414,7 +414,7 @@ describe('AssetActionsMenu', () => {
   });
 
   describe('Move to folder', () => {
-    it('moves only this asset, whatever else is selected, then clears the selection', async () => {
+    it('moves only this asset, whatever else is selected, then deselects only this asset', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -442,7 +442,7 @@ describe('AssetActionsMenu', () => {
         // The menu never carries the selected assets (9, 10) or folder (8).
         expect(requestBody).toEqual({ fileIds: [5], folderIds: [], destinationFolderId: 1 })
       );
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('asset:5');
       await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
     });
 
@@ -456,12 +456,12 @@ describe('AssetActionsMenu', () => {
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 
   describe('Delete', () => {
-    it('deletes only this asset on confirm, toasts, and clears the selection', async () => {
+    it('deletes only this asset on confirm, toasts, and deselects only this asset', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -489,7 +489,7 @@ describe('AssetActionsMenu', () => {
         type: 'success',
         message: '1 item has been deleted',
       });
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('asset:5');
     });
 
     it('closes the confirm on cancel without deleting anything', async () => {
@@ -503,7 +503,7 @@ describe('AssetActionsMenu', () => {
 
       expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
       expect(mockToggleNotification).not.toHaveBeenCalled();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 
