@@ -131,6 +131,31 @@ describe('Permissions Engine', () => {
   };
 
   /**
+   * build an ability from a single condition whose handler returns `query`,
+   * so operator-matching behaviour can be tested without a static fixture.
+   */
+  const abilityForQuery = async (query: unknown) => {
+    const condition = providerFactory();
+    await condition.register('test.dynamicCondition', {
+      name: 'test.dynamicCondition',
+      async handler() {
+        return query;
+      },
+    });
+
+    const permissions: Permission[] = [
+      { action: 'read', subject: 'article', conditions: ['test.dynamicCondition'] },
+    ];
+
+    const { ability } = await buildEngineWithAbility({
+      permissions,
+      engineProviders: { action: providerFactory(), condition },
+    });
+
+    return ability;
+  };
+
+  /**
    * map an array of permissions to expected ability object fields
    *
    * @param {permissions} permissions
@@ -339,7 +364,7 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
   });
 
-  it('shows correct error messages on unsupported operators instead of crashing with 500', async () => {
+  it('shows correct error messages on unsupported operators', async () => {
     const permissions: Permission[] = [
       {
         action: 'read',
@@ -354,6 +379,54 @@ describe('Permissions Engine', () => {
     expect(() => ability.can('read', subject('article', { title: 'Testing' }))).toThrow(
       /unsupported operator "\$startsWith"/i
     );
+  });
+
+  // Structural operators carry sub-queries, so the guard must keep validating inside
+  // every one of them — not just the example that happened to ship first.
+  it.each([
+    ['$or', { $or: [{ title: { $startsWith: 'x' } }] }],
+    ['$and', { $and: [{ title: { $startsWith: 'x' } }] }],
+    ['$elemMatch', { tags: { $elemMatch: { title: { $startsWith: 'x' } } } }],
+  ] as const)('rejects an unsupported operator nested inside %s', async (_op, query) => {
+    const ability = await abilityForQuery(query);
+
+    expect(() =>
+      ability.can('read', subject('article', { title: 'x', tags: [{ title: 'x' }] }))
+    ).toThrow(/unsupported operator "\$startsWith"/i);
+  });
+
+  // Value operators compare their operand as literal data, so a `$`-prefixed key sitting
+  // inside one is data, never an operator — the guard must leave every such operand alone.
+  it.each(['$eq', '$ne'] as const)('preserves a literal object operand under %s', async (op) => {
+    const ability = await abilityForQuery({ metadata: { [op]: { $custom: true } } });
+
+    expect(() =>
+      ability.can('read', subject('article', { metadata: { $custom: true } }))
+    ).not.toThrow();
+  });
+
+  it('accepts every operator on the supported whitelist', async () => {
+    const ability = await abilityForQuery({
+      $and: [
+        { $or: [{ id: { $eq: 1 } }, { id: { $ne: 2 } }] },
+        { id: { $in: [1] } },
+        { id: { $nin: [9] } },
+        { views: { $lt: 10 } },
+        { views: { $lte: 10 } },
+        { views: { $gt: 0 } },
+        { views: { $gte: 0 } },
+        { title: { $exists: true } },
+        { tags: { $elemMatch: { name: { $eq: 'x' } } } },
+      ],
+    });
+
+    // A typo dropping an operator from `allowedOperations` would make the guard throw here.
+    expect(() =>
+      ability.can(
+        'read',
+        subject('article', { id: 1, views: 5, title: 'X', tags: [{ name: 'x' }] })
+      )
+    ).not.toThrow();
   });
 
   it('skips an unregistered condition and denies access instead of throwing', async () => {
