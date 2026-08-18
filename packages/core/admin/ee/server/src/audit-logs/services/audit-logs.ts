@@ -52,7 +52,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
         select: ['id'],
       });
 
-      const ids = logRows.map((log: any) => log.id);
+      const ids = logRows.map((log) => log.id);
       const logs = ids.length
         ? await strapi.db.query('admin::audit-log').findMany({
             where: { id: { $in: ids } },
@@ -60,8 +60,8 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
             select: ['action', 'date', 'payload'],
           })
         : [];
-      const logsById = new Map(logs.map((log: any) => [log.id, log]));
-      const results = ids.map((id: any) => logsById.get(id)).filter(Boolean);
+      const logsById = new Map(logs.map((log) => [log.id, log]));
+      const results = ids.map((id) => logsById.get(id)).filter(Boolean);
 
       const sanitizedResults = results.map((result: any) => {
         const { user, ...rest } = result;

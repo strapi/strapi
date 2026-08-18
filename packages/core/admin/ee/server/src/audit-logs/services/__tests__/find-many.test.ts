@@ -36,7 +36,7 @@ describe('Audit logs service | findMany', () => {
       populate: ['user'],
       select: ['action', 'date', 'payload'],
     });
-    expect(result.results.map((log: any) => log.id)).toEqual([2, 1]);
+    expect(result.results.map((log) => log.id)).toEqual([2, 1]);
     expect(result.pagination).toMatchObject({ page: 1, pageCount: 1, total: 2 });
   });
 
@@ -47,6 +47,6 @@ describe('Audit logs service | findMany', () => {
 
     const result = await service.findMany({ page: 1, pageSize: 10 });
 
-    expect(result.results.map((log: any) => log.id)).toEqual([2]);
+    expect(result.results.map((log) => log.id)).toEqual([2]);
   });
 });
