@@ -27,94 +27,39 @@ function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
   return isSQLite ? Math.min(defaultSize, 250) : defaultSize;
 }
 
-interface Params {
-  joinColumn: string;
-  inverseJoinColumn: string;
-  tableName: string;
-  joinTableName: string;
-}
-
-const QUERIES = {
-  async postgres(knex: Knex, params: Params) {
-    const res = await knex.raw(
-      `
-    SELECT :tableName:.id as id, string_agg(DISTINCT :inverseJoinColumn:::character varying, ',') as other_ids
-    FROM :tableName:
-    LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE :tableName:.document_id IS NULL
-    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
-    LIMIT 1;
-  `,
-      params
-    );
-
-    return res.rows;
-  },
-  async mysql(knex: Knex, params: Params) {
-    const [res] = await knex.raw(
-      `
-    SELECT :tableName:.id as id, group_concat(DISTINCT :inverseJoinColumn:) as other_ids
-    FROM :tableName:
-    LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE :tableName:.document_id IS NULL
-    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
-    LIMIT 1;
-  `,
-      params
-    );
-
-    return res;
-  },
-  async sqlite(knex: Knex, params: Params) {
-    return knex.raw(
-      `
-    SELECT :tableName:.id as id, group_concat(DISTINCT :inverseJoinColumn:) as other_ids
-    FROM :tableName:
-    LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE :tableName:.document_id IS NULL
-    GROUP BY :joinTableName:.:joinColumn:
-    LIMIT 1;
-    `,
-      params
-    );
-  },
+// Union-find (disjoint-set) helpers used to cluster localization-linked rows in memory.
+// Path-compressing `find` keeps repeated lookups close to O(1) amortized.
+const find = (parent: Map<number, number>, start: number): number => {
+  let current = start;
+  while (parent.get(current) !== current) {
+    parent.set(current, parent.get(parent.get(current) as number) as number);
+    current = parent.get(current) as number;
+  }
+  return current;
 };
 
-const getNextIdsToCreateDocumentId = async (
-  db: Database,
-  knex: Knex,
-  {
-    joinColumn,
-    inverseJoinColumn,
-    tableName,
-    joinTableName,
-  }: {
-    joinColumn: string;
-    inverseJoinColumn: string;
-    tableName: string;
-    joinTableName: string;
+const union = (parent: Map<number, number>, a: number, b: number): void => {
+  const rootA = find(parent, a);
+  const rootB = find(parent, b);
+  if (rootA !== rootB) {
+    parent.set(rootA, rootB);
   }
-): Promise<number[]> => {
-  const res = await QUERIES[db.dialect.client as keyof typeof QUERIES](knex, {
-    joinColumn,
-    inverseJoinColumn,
-    tableName,
-    joinTableName,
-  });
-
-  if (res.length > 0) {
-    const row = res[0];
-    const otherIds = row.other_ids
-      ? row.other_ids.split(',').map((v: string) => parseInt(v, 10))
-      : [];
-
-    return [row.id, ...otherIds];
-  }
-
-  return [];
 };
 
 // Migrate document ids for tables that have localizations
+//
+// This clusters rows in memory (via union-find) instead of discovering one cluster at a
+// time through a `LIMIT 1` query. The previous implementation re-ran a query that scans
+// the whole table (filtered by `document_id IS NULL`, a column with no index at this point
+// in the migration) once per cluster, which is roughly O(n) discovery queries each doing
+// an O(n) scan — effectively O(n^2) for a table with n rows. For tables with many rows
+// and/or many locales this could take hours or longer without making visible progress.
+// See https://github.com/strapi/strapi/issues/23812, 23517, 25231.
+//
+// This also fixes a correctness gap: the original query only follows *direct* links
+// (one hop), so a chain of locale links (A<->B, B<->C, but no direct A<->C row) could be
+// split across two document ids instead of clustered together. Union-find naturally
+// follows transitive links. See https://github.com/strapi/strapi/issues/20948, 24544.
 const migrateDocumentIdsWithLocalizations = async (
   db: Database,
   knex: Knex,
@@ -124,27 +69,76 @@ const migrateDocumentIdsWithLocalizations = async (
   const singularName = meta.singularName.toLowerCase();
   const joinColumn = snakeCase(`${singularName}_id`);
   const inverseJoinColumn = snakeCase(`inv_${singularName}_id`);
-  let ids: number[];
-  let processed = 0;
+  const joinTableName = snakeCase(`${meta.tableName}_localizations_links`);
+  const batchSize = getBatchSize(knex);
 
-  do {
-    ids = await getNextIdsToCreateDocumentId(db, knex, {
-      joinColumn,
-      inverseJoinColumn,
-      tableName: meta.tableName,
-      joinTableName: snakeCase(`${meta.tableName}_localizations_links`),
-    });
+  const pendingIds: number[] = (
+    await knex(meta.tableName).select('id').whereNull('document_id')
+  ).map((row: { id: number }) => row.id);
 
-    if (ids.length > 0) {
-      await knex(meta.tableName).update({ document_id: createId() }).whereIn('id', ids);
-      processed += ids.length;
-      const rowsProcessed = processed;
-      heartbeat.tick(
-        (elapsedSeconds) =>
-          `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${rowsProcessed} rows processed`
-      );
+  if (pendingIds.length === 0) {
+    return;
+  }
+
+  const pendingIdSet = new Set(pendingIds);
+
+  // Fetch every relevant link in batches — passing all ids in a single `whereIn` can
+  // exceed the database driver's bound-parameter limit on large tables.
+  const links: Array<Record<string, number>> = [];
+  for (let i = 0; i < pendingIds.length; i += batchSize) {
+    const idChunk = pendingIds.slice(i, i + batchSize);
+    const chunkLinks = await knex(joinTableName)
+      .select(joinColumn, inverseJoinColumn)
+      .whereIn(joinColumn, idChunk);
+    links.push(...chunkLinks);
+  }
+
+  const parent = new Map<number, number>();
+  for (const id of pendingIds) {
+    parent.set(id, id);
+  }
+  for (const link of links) {
+    const a = link[joinColumn];
+    const b = link[inverseJoinColumn];
+    if (pendingIdSet.has(a) && pendingIdSet.has(b)) {
+      union(parent, a, b);
     }
-  } while (ids.length > 0);
+  }
+
+  const clusters = new Map<number, number[]>();
+  for (const id of pendingIds) {
+    const root = find(parent, id);
+    const cluster = clusters.get(root);
+    if (cluster) {
+      cluster.push(id);
+    } else {
+      clusters.set(root, [id]);
+    }
+  }
+
+  const updates: Array<{ id: number; documentId: string }> = [];
+  for (const ids of clusters.values()) {
+    const documentId = createId();
+    for (const id of ids) {
+      updates.push({ id, documentId });
+    }
+  }
+
+  let processed = 0;
+  for (let i = 0; i < updates.length; i += batchSize) {
+    const batch = updates.slice(i, i + batchSize);
+    await Promise.all(
+      batch.map(({ id, documentId }) =>
+        knex(meta.tableName).where('id', id).update({ document_id: documentId })
+      )
+    );
+    processed += batch.length;
+    const rowsProcessed = processed;
+    heartbeat.tick(
+      (elapsedSeconds) =>
+        `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${rowsProcessed}/${updates.length} rows processed`
+    );
+  }
 };
 
 // Migrate document ids for tables that don't have localizations
