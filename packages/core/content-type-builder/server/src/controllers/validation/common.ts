@@ -95,7 +95,7 @@ export const isValidDefaultJSON: CommonTestConfig = {
       JSON.parse(val as string);
 
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   },

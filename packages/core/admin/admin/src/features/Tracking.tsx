@@ -581,7 +581,7 @@ const useTracking = (): UseTrackingReturn => {
 
           return res;
         }
-      } catch (err) {
+      } catch {
         // Silence is golden
       }
 

@@ -107,7 +107,9 @@ export const NavUser = ({
               {user?.email}
             </StyledTypography>
             <BadgeWrapper>
-              {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+              {user?.roles?.map((role) => (
+                <Badge key={role.id}>{role.name}</Badge>
+              ))}
             </BadgeWrapper>
           </UserInfo>
 

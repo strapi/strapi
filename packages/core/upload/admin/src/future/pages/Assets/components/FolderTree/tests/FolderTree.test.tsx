@@ -225,4 +225,27 @@ describe('FolderTree', () => {
 
     expect(onSelectFolder).not.toHaveBeenCalled();
   });
+
+  describe('showActiveFolder', () => {
+    it('removes aria-current from every row when false', () => {
+      renderTree({ currentFolderId: 3, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Home' })).not.toHaveAttribute('aria-current');
+      expect(screen.getByRole('button', { name: 'Top A' })).not.toHaveAttribute('aria-current');
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).not.toHaveAttribute('aria-current');
+    });
+
+    it('removes aria-current from Home when false at the root', () => {
+      renderTree({ currentFolderId: null, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Home' })).not.toHaveAttribute('aria-current');
+    });
+
+    it('still expands the ancestor chain so the tree does not collapse', () => {
+      renderTree({ currentFolderId: 3, showActiveFolder: false });
+
+      expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Leaf A1a' })).toBeInTheDocument();
+    });
+  });
 });

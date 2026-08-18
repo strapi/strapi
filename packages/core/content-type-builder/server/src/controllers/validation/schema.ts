@@ -291,6 +291,7 @@ const baseRelationSchema = z.object({
     'morphToMany',
   ]),
   configurable: z.boolean().nullish(),
+  required: requiredSchema,
   private: z.boolean().nullish(),
   pluginOptions: z.record(z.unknown()).optional(),
   conditions: z.preprocess((val) => {
@@ -422,7 +423,7 @@ const jsonSchema = basePropertiesSchema.extend({
         JSON.parse(value as string);
 
         return true;
-      } catch (err) {
+      } catch {
         return false;
       }
     }),

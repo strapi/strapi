@@ -75,7 +75,7 @@ describe('Vite admin configuration', () => {
       overlay: false,
       server: mockHttpServer,
     });
-    expect((config.server?.hmr as { clientPort?: number }).clientPort).toBeUndefined();
+    expect((config.server?.hmr as { clientPort?: number } | undefined)?.clientPort).toBeUndefined();
 
     // CJS-only deps imported by @strapi/admin must stay pre-bundled in dev (#26944, #26964, #27014).
     expect(config.optimizeDeps?.include).toEqual(

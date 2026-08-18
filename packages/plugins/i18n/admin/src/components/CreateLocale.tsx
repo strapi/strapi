@@ -137,7 +137,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
 
       refetchPermissions();
       onClose();
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

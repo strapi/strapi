@@ -22,7 +22,7 @@ const assertCwdContainsStrapiProject = (name: string) => {
     ) {
       logErrorAndExit();
     }
-  } catch (err) {
+  } catch {
     logErrorAndExit();
   }
 };
