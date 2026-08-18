@@ -1,16 +1,13 @@
 import { buildSectionTree, countSubtree } from '../lib/buildFolderTree';
-import {
-  calculateFolderDropZone,
-  folderSiblingDropTarget,
-  getDropTarget,
-} from '../lib/dropProjection';
-import { flattenSortableTree as flattenTree, itemId } from '../lib/flatModel';
+import { calculateFolderDropZone, resolveDropTarget } from '../lib/dropProjection';
+import { flattenSortableTree as flattenTree, itemId, removeSubtree } from '../lib/flatModel';
 
 import type {
   ContentStructureGroup,
   ContentStructureSection,
 } from '../../DataManager/utils/contentStructure';
 import type { ContentTypeLink } from '../lib/buildFolderTree';
+import type { FlatItem } from '../lib/flatModel';
 import type { UID } from '@strapi/types';
 
 const uid = (name: string) => `api::${name}.${name}` as UID.ContentType;
@@ -35,7 +32,6 @@ const section = (groups: ContentStructureGroup[]): ContentStructureSection => ({
 
 const compare = (a: string, b: string) => a.localeCompare(b);
 
-// A: { x }, then B — flattens to [A(0), x(1), B(0)].
 const buildFlat = () => {
   const groups = [
     group({ id: 'a', name: 'A', children: [{ type: 'contentType', uid: uid('x') }] }),
@@ -45,13 +41,34 @@ const buildFlat = () => {
   return flattenTree(tree, new Set());
 };
 
-describe('getDropTarget', () => {
-  it('reorders a root folder to the top with no horizontal shift', () => {
-    const flat = buildFlat(); // [A, x, B]
-    const target = getDropTarget(flat, itemId(flat[2].node), itemId(flat[0].node), 0);
+const overRect = { top: 100, height: 30 };
 
-    // Dropping B above A → line at the top edge of A, at root depth.
+const TOP_ZONE_Y = 101;
+const BOTTOM_ZONE_Y = 125;
+
+const project = (
+  flat: FlatItem[],
+  activeId: string,
+  overId: string,
+  options: { offsetX?: number; pointerY?: number } = {}
+) => {
+  const { offsetX = 0, pointerY } = options;
+
+  return resolveDropTarget(removeSubtree(flat, activeId), {
+    activeId,
+    overId,
+    offsetX,
+    ...(pointerY === undefined ? {} : { pointer: { x: 0, y: pointerY }, overRect }),
+  });
+};
+
+describe('resolveDropTarget — between rows', () => {
+  it('reorders a root folder to the top with no horizontal shift', () => {
+    const flat = buildFlat();
+    const target = project(flat, itemId(flat[2].node), itemId(flat[0].node));
+
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 0,
       depth: 0,
@@ -60,11 +77,11 @@ describe('getDropTarget', () => {
   });
 
   it('draws the line at the bottom of the last row when dropping at the end', () => {
-    const flat = buildFlat(); // [A, x, B]
-    // Drag A to the very end (onto B, no horizontal shift) → after B at root.
-    const target = getDropTarget(flat, itemId(flat[0].node), itemId(flat[2].node), 0);
+    const flat = buildFlat();
+    const target = project(flat, itemId(flat[0].node), itemId(flat[2].node));
 
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 1,
       depth: 0,
@@ -74,13 +91,15 @@ describe('getDropTarget', () => {
 
   it('nests a folder into an open folder when dragged right onto its child', () => {
     const flat = buildFlat();
-    // Drag B (root) onto x (child of A) nudged one level right → into A.
-    const target = getDropTarget(flat, itemId(flat[2].node), itemId(flat[1].node), 24);
+    const target = project(flat, itemId(flat[2].node), itemId(flat[1].node), { offsetX: 24 });
 
-    expect(target?.parentId).toBe('a');
-    // The line sits at the top of x (B becomes A's first child, above x), indented one level.
-    expect(target?.depth).toBe(1);
-    expect(target?.line).toEqual({ anchorId: itemId(flat[1].node), edge: 'top' });
+    expect(target).toEqual({
+      kind: 'insert',
+      parentId: 'a',
+      index: 0,
+      depth: 1,
+      line: { anchorId: itemId(flat[1].node), edge: 'top' },
+    });
   });
 
   it('treats a collapsed folder as a sibling boundary (drop stays at root)', () => {
@@ -88,15 +107,21 @@ describe('getDropTarget', () => {
       group({ id: 'a', name: 'A', children: [{ type: 'contentType', uid: uid('x') }] }),
     ];
     const tree = buildSectionTree(section(groups), [link('x'), link('loose')], compare);
-    // Collapse A so its child is hidden: flattens to [loose(0), A(0)].
+
     const flat = flattenTree(tree, new Set(['a']));
 
-    const target = getDropTarget(flat, itemId(flat[0].node), itemId(flat[1].node), 0);
+    const target = project(flat, itemId(flat[0].node), itemId(flat[1].node));
 
-    expect(target?.parentId).toBeNull();
+    expect(target).toEqual({
+      kind: 'insert',
+      parentId: null,
+      index: 1,
+      depth: 0,
+      line: { anchorId: itemId(flat[1].node), edge: 'bottom' },
+    });
   });
 
-  it('the `side` argument overrides drag direction (pointer decides before/after)', () => {
+  it('the pointer position decides before/after when hovering a non-folder row', () => {
     const groups = [
       group({
         id: 'p',
@@ -108,38 +133,43 @@ describe('getDropTarget', () => {
       }),
     ];
     const tree = buildSectionTree(section(groups), [link('c1'), link('c2'), link('top')], compare);
-    const flat = flattenTree(tree, new Set()); // [top(0), P(1), c1(2), c2(3)]
+    const flat = flattenTree(tree, new Set());
 
-    // `top` starts ABOVE c1, so the direction-based (no-side) placement lands it
-    // AFTER c1 — the line sits at the top of c2.
-    const directionBased = getDropTarget(flat, itemId(flat[0].node), itemId(flat[2].node), 0);
-    expect(directionBased?.line).toEqual({ anchorId: itemId(flat[3].node), edge: 'top' });
+    const directionBased = project(flat, itemId(flat[0].node), itemId(flat[2].node));
+    expect(directionBased).toEqual({
+      kind: 'insert',
+      parentId: 'p',
+      index: 1,
+      depth: 1,
+      line: { anchorId: itemId(flat[3].node), edge: 'top' },
+    });
 
-    // With side='before' the line sits above c1 regardless of where the drag
-    // started — this is what makes the "between a folder and its first child"
-    // slot reachable when dragging downward.
-    const before = getDropTarget(flat, itemId(flat[0].node), itemId(flat[2].node), 0, 'before');
-    expect(before?.line).toEqual({ anchorId: itemId(flat[2].node), edge: 'top' });
+    const before = project(flat, itemId(flat[0].node), itemId(flat[2].node), {
+      pointerY: TOP_ZONE_Y,
+    });
+    expect(before).toEqual({
+      kind: 'insert',
+      parentId: 'p',
+      index: 0,
+      depth: 1,
+      line: { anchorId: itemId(flat[2].node), edge: 'top' },
+    });
   });
 });
 
-describe('getDropTarget — root content types have no reorderable slot', () => {
-  // Root layout is [...ungrouped content types (alphabetical), ...root folders],
-  // and root content-type order is never stored, so a drop among the ungrouped
-  // block snaps to the one real root position: below the last un-foldered item.
+describe('resolveDropTarget — root content types have no reorderable slot', () => {
   it('snaps a reorder within the ungrouped block to the boundary above the first root folder', () => {
     const tree = buildSectionTree(
       section([group({ id: 'f', name: 'F', children: [] })]),
       [link('a'), link('b'), link('c')],
       compare
     );
-    const flat = flattenTree(tree, new Set()); // [a(0), b(0), c(0), F(0)]
+    const flat = flattenTree(tree, new Set());
 
-    // Drag c up between a and b — a content-type reorder, which isn't persisted.
-    const target = getDropTarget(flat, itemId(flat[2].node), itemId(flat[0].node), 0);
+    const target = project(flat, itemId(flat[2].node), itemId(flat[0].node));
 
-    // Snaps to the boundary: line at the first root folder's top edge.
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 0,
       depth: 0,
@@ -149,13 +179,12 @@ describe('getDropTarget — root content types have no reorderable slot', () => 
 
   it('snaps to below the last un-foldered item when there are no root folders', () => {
     const tree = buildSectionTree(section([]), [link('a'), link('b'), link('c')], compare);
-    const flat = flattenTree(tree, new Set()); // [a(0), b(0), c(0)]
+    const flat = flattenTree(tree, new Set());
 
-    // Drag c up between a and b; with no folders the boundary is below the last
-    // un-foldered item once the dragged row (c) is excluded — i.e. b's bottom.
-    const target = getDropTarget(flat, itemId(flat[2].node), itemId(flat[0].node), 0);
+    const target = project(flat, itemId(flat[2].node), itemId(flat[0].node));
 
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 0,
       depth: 0,
@@ -172,12 +201,12 @@ describe('getDropTarget — root content types have no reorderable slot', () => 
       [link('a')],
       compare
     );
-    const flat = flattenTree(tree, new Set()); // [a(0), F(0), G(0)]
+    const flat = flattenTree(tree, new Set());
 
-    // Drag G above F — a real, persisted folder reorder. The line stays on F.
-    const target = getDropTarget(flat, itemId(flat[2].node), itemId(flat[1].node), 0);
+    const target = project(flat, itemId(flat[2].node), itemId(flat[1].node));
 
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 0,
       depth: 0,
@@ -186,17 +215,15 @@ describe('getDropTarget — root content types have no reorderable slot', () => 
   });
 });
 
-describe('folderSiblingDropTarget', () => {
-  it('drops before a folder (top third) — line at its top edge, index before it', () => {
-    const flat = buildFlat(); // [A, x, B]
-    const target = folderSiblingDropTarget(
-      flat,
-      itemId(flat[2].node),
-      itemId(flat[0].node),
-      'before'
-    );
+describe('resolveDropTarget — folder rows (pointer zones)', () => {
+  it('drops before a folder from its top zone — line at its top edge, index before it', () => {
+    const flat = buildFlat();
+    const target = project(flat, itemId(flat[2].node), itemId(flat[0].node), {
+      pointerY: TOP_ZONE_Y,
+    });
 
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 0,
       depth: 0,
@@ -204,40 +231,28 @@ describe('folderSiblingDropTarget', () => {
     });
   });
 
-  it('drops after an open folder (bottom third) — line below its whole subtree', () => {
-    const flat = buildFlat(); // [A, x, B]; A is open with child x
-    const target = folderSiblingDropTarget(
-      flat,
-      itemId(flat[2].node),
-      itemId(flat[0].node),
-      'after'
-    );
-
-    // B lands after A at the root, and the line sits at the bottom of x (A's last
-    // visible descendant) so it reads as "below the folder", not inside it.
-    expect(target).toEqual({
-      parentId: null,
-      index: 1,
-      depth: 0,
-      line: { anchorId: itemId(flat[1].node), edge: 'bottom' },
+  it('nests from the bottom zone when the folder shows children (no after slot)', () => {
+    const flat = buildFlat();
+    const target = project(flat, itemId(flat[2].node), itemId(flat[0].node), {
+      pointerY: BOTTOM_ZONE_Y,
     });
+
+    expect(target).toEqual({ kind: 'nest', folderId: 'a', depth: 1 });
   });
 
-  it('drops after a collapsed folder — line at the folder row itself', () => {
+  it('drops after a collapsed folder from its bottom zone — line at the folder row itself', () => {
     const groups = [
       group({ id: 'a', name: 'A', children: [{ type: 'contentType', uid: uid('x') }] }),
     ];
     const tree = buildSectionTree(section(groups), [link('x'), link('loose')], compare);
-    const flat = flattenTree(tree, new Set(['a'])); // [loose(0), A(0)] — A closed
+    const flat = flattenTree(tree, new Set(['a']));
 
-    const target = folderSiblingDropTarget(
-      flat,
-      itemId(flat[0].node),
-      itemId(flat[1].node),
-      'after'
-    );
+    const target = project(flat, itemId(flat[0].node), itemId(flat[1].node), {
+      pointerY: BOTTOM_ZONE_Y,
+    });
 
     expect(target).toEqual({
+      kind: 'insert',
       parentId: null,
       index: 1,
       depth: 0,
@@ -245,9 +260,7 @@ describe('folderSiblingDropTarget', () => {
     });
   });
 
-  it('returns null when an active folder is too tall to sit at the target depth', () => {
-    // Target D is at render depth 2 (the deepest a folder can be); the active
-    // folder is two levels tall, so a sibling of D would breach MAX_FOLDER_DEPTH.
+  it('falls back to a legal shallower slot when the active folder is too tall for the sibling slot', () => {
     const groups = [
       group({ id: 'r', name: 'R', children: [{ type: 'group', id: 's' }] }),
       group({ id: 's', name: 'S', parent: 'r', children: [{ type: 'group', id: 'd' }] }),
@@ -256,9 +269,38 @@ describe('folderSiblingDropTarget', () => {
       group({ id: 'ac', name: 'Ac', parent: 'act', children: [] }),
     ];
     const tree = buildSectionTree(section(groups), [], compare);
-    const flat = flattenTree(tree, new Set()); // [R, S, D, Act, Ac]
+    const flat = flattenTree(tree, new Set());
 
-    expect(folderSiblingDropTarget(flat, 'folder:act', 'folder:d', 'after')).toBeNull();
+    const target = project(flat, 'folder:act', 'folder:d', { pointerY: BOTTOM_ZONE_Y });
+
+    expect(target).toEqual({
+      kind: 'insert',
+      parentId: null,
+      index: 1,
+      depth: 0,
+      line: { anchorId: 'folder:d', edge: 'bottom' },
+    });
+  });
+
+  it('returns null when a too-tall folder has no legal slot at the boundary', () => {
+    const groups = [
+      group({
+        id: 'p',
+        name: 'P',
+        children: [
+          { type: 'group', id: 'q' },
+          { type: 'contentType', uid: uid('c1') },
+        ],
+      }),
+      group({ id: 'q', name: 'Q', parent: 'p', children: [] }),
+      group({ id: 't1', name: 'T1', children: [{ type: 'group', id: 't2' }] }),
+      group({ id: 't2', name: 'T2', parent: 't1', children: [{ type: 'group', id: 't3' }] }),
+      group({ id: 't3', name: 'T3', parent: 't2', children: [] }),
+    ];
+    const tree = buildSectionTree(section(groups), [link('c1')], compare);
+    const flat = flattenTree(tree, new Set());
+
+    expect(project(flat, 'folder:t1', 'folder:q', { pointerY: BOTTOM_ZONE_Y })).toBeNull();
   });
 });
 
@@ -358,7 +400,7 @@ const folderDropZone = (
 ) => calculateFolderDropZone({ pointerY, itemBoundingBox: rect, hasVisibleChildren });
 
 describe('folderDropZone', () => {
-  const rect = { top: 100, height: 30 }; // thirds split at y=110 and y=120
+  const rect = { top: 100, height: 30 };
 
   it('is "before" in the top third, whatever the folder holds', () => {
     expect(folderDropZone(105, rect, false)).toBe('before');
@@ -375,9 +417,6 @@ describe('folderDropZone', () => {
   });
 
   it('nests in the bottom third when the folder is showing children (no "after" blip)', () => {
-    // Regression: an expanded folder must not offer "after the whole subtree" at
-    // its header — that fought the first child's "before" zone at the same
-    // boundary and made the indicator oscillate between the two positions.
     expect(folderDropZone(125, rect, true)).toBe('nest');
   });
 });
