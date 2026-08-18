@@ -45,11 +45,23 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     async findMany(query: unknown) {
-      const { results, pagination } = await strapi.db.query('admin::audit-log').findPage({
-        populate: ['user'],
-        select: ['action', 'date', 'payload'],
+      // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
+      // See: https://github.com/strapi/strapi/issues/27399
+      const { results: logRows, pagination } = await strapi.db.query('admin::audit-log').findPage({
         ...strapi.get('query-params').transform('admin::audit-log', query),
+        select: ['id'],
       });
+
+      const ids = logRows.map((log: any) => log.id);
+      const logs = ids.length
+        ? await strapi.db.query('admin::audit-log').findMany({
+            where: { id: { $in: ids } },
+            populate: ['user'],
+            select: ['action', 'date', 'payload'],
+          })
+        : [];
+      const logsById = new Map(logs.map((log: any) => [log.id, log]));
+      const results = ids.map((id: any) => logsById.get(id)).filter(Boolean);
 
       const sanitizedResults = results.map((result: any) => {
         const { user, ...rest } = result;
