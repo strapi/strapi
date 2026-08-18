@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
@@ -79,7 +78,7 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
 
   removeId(entry);
 
-  _.forEach(model.attributes, (attr, attrName) => {
+  for (const [attrName, attr] of Object.entries(model.attributes)) {
     const value = entry[attrName];
     if (attr.type === 'dynamiczone' && isArray(value)) {
       value.forEach((compo) => {
@@ -96,7 +95,7 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
         removeIdsMut(model, value);
       }
     }
-  });
+  }
 
   return entry;
 };
@@ -139,11 +138,11 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
   const modelDef = strapi.getModel(model);
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
-  _.forEach(relatedEntryCopy, (value, field) => {
+  for (const [field, value] of Object.entries(relatedEntryCopy)) {
     if (isNil(entry[field])) {
       entry[field] = value;
     }
-  });
+  }
 };
 
 /**

@@ -193,7 +193,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
+    for (const [apiName, api] of Object.entries(strapi.apis)) {
       const routes = _.flatMap(api.routes, (route) => {
         if ('routes' in route) {
           return route.routes;
@@ -203,7 +203,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       }).filter(filterContentAPI);
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -211,13 +211,14 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
       if (Array.isArray(plugin.routes)) {
-        return plugin.routes.map(transformPrefix).filter(filterContentAPI);
+        plugin.routes.map(transformPrefix).filter(filterContentAPI);
+        continue;
       }
 
       const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
@@ -225,7 +226,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       );
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -233,7 +234,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
     return sanitizeRoutesMapForSerialization(routesMap);
   };

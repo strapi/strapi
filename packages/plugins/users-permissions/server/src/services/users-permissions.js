@@ -50,7 +50,7 @@ module.exports = ({ strapi }) => ({
       return action[Symbol.for('__type__')].includes('content-api');
     };
 
-    _.forEach(strapi.apis, (api, apiName) => {
+    for (const [apiName, api] of Object.entries(strapi.apis)) {
       const controllers = _.reduce(
         api.controllers,
         (acc, controller, controllerName) => {
@@ -75,9 +75,9 @@ module.exports = ({ strapi }) => ({
       if (!_.isEmpty(controllers)) {
         actionMap[`api::${apiName}`] = { controllers };
       }
-    });
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const controllers = _.reduce(
         plugin.controllers,
         (acc, controller, controllerName) => {
@@ -102,7 +102,7 @@ module.exports = ({ strapi }) => ({
       if (!_.isEmpty(controllers)) {
         actionMap[`plugin::${pluginName}`] = { controllers };
       }
-    });
+    }
 
     // Return a deeply cloned version to avoid circular references
     return _.cloneDeep(actionMap);
@@ -111,7 +111,7 @@ module.exports = ({ strapi }) => ({
   async getRoutes() {
     const routesMap = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
+    for (const [apiName, api] of Object.entries(strapi.apis)) {
       const routes = _.flatMap(api.routes, (route) => {
         if (_.has(route, 'routes')) {
           return route.routes;
@@ -121,7 +121,7 @@ module.exports = ({ strapi }) => ({
       }).filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -129,9 +129,9 @@ module.exports = ({ strapi }) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
       }));
-    });
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
       const routes = _.flatMap(plugin.routes, (route) => {
@@ -143,7 +143,7 @@ module.exports = ({ strapi }) => ({
       }).filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -151,7 +151,7 @@ module.exports = ({ strapi }) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
       }));
-    });
+    }
 
     return sanitizeRoutesMapForSerialization(routesMap);
   },

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -135,7 +134,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
   const declaredPlugins: PluginMetas = {};
   const userPluginsConfig = await getUserPluginsConfig();
 
-  _.forEach(userPluginsConfig, (declaration, pluginName) => {
+  for (const [pluginName, declaration] of Object.entries(userPluginsConfig)) {
     validatePluginName(pluginName);
 
     declaredPlugins[pluginName] = {
@@ -155,7 +154,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
         declaredPlugins[pluginName].packageInfo = packageInfo;
       }
     }
-  });
+  }
 
   const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);
   const installedPluginsNotAlreadyUsed = pickBy(
