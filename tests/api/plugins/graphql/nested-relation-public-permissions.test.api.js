@@ -1,7 +1,5 @@
 'use strict';
 
-const { performance } = require('node:perf_hooks');
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createRequest } = require('api-tests/request');
@@ -97,39 +95,14 @@ const setEnabledActions = async (actions) => {
   await roleService.updateRole(publicRole.id, { permissions });
 };
 
-const measureAnonymousQuery = async (query) => {
-  let queryCount = 0;
-  const onQuery = () => {
-    queryCount += 1;
-  };
-  const startHeapUsed = process.memoryUsage().heapUsed;
-  const start = performance.now();
+const executeAnonymousQuery = (query) =>
+  publicRequest({
+    url: '/graphql',
+    method: 'POST',
+    body: { query },
+  });
 
-  strapi.db.connection.on('query', onQuery);
-  try {
-    const response = await publicRequest({
-      url: '/graphql',
-      method: 'POST',
-      body: { query },
-    });
-    const elapsedMs = performance.now() - start;
-    const heapUsedDelta = process.memoryUsage().heapUsed - startHeapUsed;
-
-    return {
-      response,
-      metrics: {
-        queryCount,
-        responseBytes: Buffer.byteLength(JSON.stringify(response.body)),
-        elapsedMs,
-        heapUsedDelta,
-      },
-    };
-  } finally {
-    strapi.db.connection.removeListener('query', onQuery);
-  }
-};
-
-describe('GraphQL operation-limit reachability', () => {
+describe('GraphQL nested-relation public permission reachability', () => {
   beforeAll(async () => {
     await builder.addContentTypes([memberModel, groupModel]).build();
 
@@ -187,7 +160,7 @@ describe('GraphQL operation-limit reachability', () => {
   });
 
   test('requires a public root find scope before the operation is reachable', async () => {
-    const { response } = await measureAnonymousQuery(shallowQuery);
+    const response = await executeAnonymousQuery(shallowQuery);
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toMatchObject({
@@ -198,7 +171,7 @@ describe('GraphQL operation-limit reachability', () => {
 
   test('requires a public find scope for each nested relation target', async () => {
     await setEnabledActions([groupFindAction]);
-    const { response } = await measureAnonymousQuery(nestedQuery);
+    const response = await executeAnonymousQuery(nestedQuery);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toEqual({ operationLimitGroups: [null, null] });
@@ -215,35 +188,17 @@ describe('GraphQL operation-limit reachability', () => {
   test('allows bounded direct-v5 nested selections when every public find scope is granted', async () => {
     await setEnabledActions([groupFindAction, memberFindAction]);
 
-    const shallow = await measureAnonymousQuery(shallowQuery);
-    const nested = await measureAnonymousQuery(nestedQuery);
+    const shallow = await executeAnonymousQuery(shallowQuery);
+    const nested = await executeAnonymousQuery(nestedQuery);
 
-    expect(shallow.response.statusCode).toBe(200);
-    expect(shallow.response.body.errors).toBeUndefined();
-    expect(shallow.response.body.data.operationLimitGroups).toHaveLength(2);
-    expect(shallow.metrics).toEqual({
-      queryCount: expect.any(Number),
-      responseBytes: expect.any(Number),
-      elapsedMs: expect.any(Number),
-      heapUsedDelta: expect.any(Number),
-    });
+    expect(shallow.statusCode).toBe(200);
+    expect(shallow.body.errors).toBeUndefined();
+    expect(shallow.body.data.operationLimitGroups).toHaveLength(2);
 
-    expect(nested.response.statusCode).toBe(200);
-    expect(nested.response.body.errors).toBeUndefined();
-    expect(nested.response.body.data.operationLimitGroups).toHaveLength(2);
-    expect(nested.response.body.data.operationLimitGroups[0].members).toHaveLength(2);
-    expect(nested.response.body.data.operationLimitGroups[0].members[0].groups).toHaveLength(2);
-    expect(nested.metrics).toEqual({
-      queryCount: expect.any(Number),
-      responseBytes: expect.any(Number),
-      elapsedMs: expect.any(Number),
-      heapUsedDelta: expect.any(Number),
-    });
-
-    // Diagnostic output is intentional: values are evidence, not performance thresholds.
-    console.info('CMS-1206 bounded anonymous GraphQL metrics', {
-      shallow: shallow.metrics,
-      nested: nested.metrics,
-    });
+    expect(nested.statusCode).toBe(200);
+    expect(nested.body.errors).toBeUndefined();
+    expect(nested.body.data.operationLimitGroups).toHaveLength(2);
+    expect(nested.body.data.operationLimitGroups[0].members).toHaveLength(2);
+    expect(nested.body.data.operationLimitGroups[0].members[0].groups).toHaveLength(2);
   });
 });

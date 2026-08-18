@@ -28,34 +28,31 @@ type StrapiGraphQLContext = BaseContext & {
 type OperationLimitConfig = {
   depthLimit?: unknown;
   maxLimit?: unknown;
-  apolloServer?: {
-    validationRules?: unknown;
-  };
 };
 
 export const getOperationLimitsWarning = ({
   depthLimit: configuredDepthLimit,
   maxLimit,
 }: OperationLimitConfig): string | undefined => {
-  const unboundedKeys: string[] = [];
+  const unboundedOrInvalidKeys: string[] = [];
 
   if (
     typeof configuredDepthLimit !== 'number' ||
     !Number.isFinite(configuredDepthLimit) ||
     configuredDepthLimit <= 0
   ) {
-    unboundedKeys.push('depthLimit');
+    unboundedOrInvalidKeys.push('depthLimit');
   }
 
-  if (maxLimit === -1) {
-    unboundedKeys.push('maxLimit');
+  if (typeof maxLimit !== 'number' || !Number.isFinite(maxLimit) || maxLimit <= 0) {
+    unboundedOrInvalidKeys.push('maxLimit');
   }
 
-  if (unboundedKeys.length === 0) {
+  if (unboundedOrInvalidKeys.length === 0) {
     return undefined;
   }
 
-  return `Built-in GraphQL operation limits are unbounded for: ${unboundedKeys.join(', ')}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
+  return `Built-in GraphQL operation limits are unbounded or invalid for: ${unboundedOrInvalidKeys.join(', ')}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
 };
 
 export const determineLandingPage = (
@@ -208,6 +205,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     schema,
 
     // Validation
+    // Keep v5 compatibility: depthLimit is passed through unchanged, so an unset or invalid value
+    // does not become an enforced finite limit during an upgrade.
     validationRules: [depthLimit(configuredDepthLimit as number) as any],
 
     // Errors
