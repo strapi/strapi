@@ -79,6 +79,7 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
+    "@strapi/admin": "5.52.0",
     "@strapi/strapi": "5.52.0",
     "@strapi/types": "5.52.0",
     "@types/graphql-depth-limit": "1.1.5",
@@ -98,6 +99,7 @@
     "typescript": "5.9.3"
   },
   "peerDependencies": {
+    "@strapi/admin": "^5.0.0",
     "@strapi/strapi": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
