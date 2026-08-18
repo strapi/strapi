@@ -17,6 +17,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -1022,7 +1023,23 @@ export default {
       });
 
       if (!entity) {
-        return ctx.notFound();
+        // The document may simply not have a version in the requested locale yet.
+        // Check every existing locale/status version before deciding it truly doesn't exist —
+        // findLocales returns one row per locale AND per publication state.
+        const versions = await documentManager.findLocales(id, model, { populate });
+
+        if (versions.length === 0) {
+          return ctx.notFound();
+        }
+
+        if (
+          permissionChecker.requiresEntity.read() &&
+          versions.every((version) => permissionChecker.cannot.read(version))
+        ) {
+          return ctx.forbidden();
+        }
+
+        return { data: EMPTY_DRAFT_RELATION_COUNTS };
       }
 
       if (permissionChecker.cannot.read(entity)) {

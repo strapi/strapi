@@ -26,11 +26,15 @@ export const useFileDraggable = (asset: {
     [asset.folder, asset.id, asset.name]
   );
 
-  return useDraggable({
+  const draggable = useDraggable({
     id: toFileDraggableId(asset.id),
     data,
     disabled: isMovePending,
   });
+
+  // `dragData` is re-exposed (like `useFolderDraggableDroppable` does) so the
+  // row's actions menu can hand the move dialog the asset's real folder.
+  return { ...draggable, dragData: data };
 };
 
 export const useFolderDraggableDroppable = (folder: {

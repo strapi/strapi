@@ -1,6 +1,6 @@
 {
   "name": "oxlint-config",
-  "version": "5.51.2",
+  "version": "5.52.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "type": "module",
@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "oxlint": "1.72.0",
-    "tsconfig": "5.51.2"
+    "tsconfig": "5.52.0"
   },
   "scripts": {
     "test:ts": "run -T tsc --noEmit"

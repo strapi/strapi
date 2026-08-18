@@ -371,7 +371,11 @@ module.exports = ({ strapi }) => ({
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-      ctx.cookies.set(cookieName, '', { expires: new Date(0) });
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      const { maxAge, ...cookieOptions } = buildRefreshCookieOptions(upSessions, isProduction);
+
+      ctx.cookies.set(cookieName, '', { ...cookieOptions, expires: new Date(0) });
     }
     return ctx.send({ ok: true });
   },

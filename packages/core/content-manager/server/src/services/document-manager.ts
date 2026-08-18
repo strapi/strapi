@@ -1,16 +1,16 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, errors, pagination } from '@strapi/utils';
+import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
-const { ApplicationError } = errors;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -244,14 +244,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return { unpublishedRelations: 0, draftM2mLinks: 0 };
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
-        throw new ApplicationError(
-          `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
-        );
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       return sumDraftCounts(strapi, document, uid);
