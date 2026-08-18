@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
+import { DEFAULT_MAX_IMAGE_RESOLUTION } from '../constants';
 
 import type { UploadableFile } from '../types';
 
@@ -34,6 +35,20 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
     writeStream.on('error', reject);
   });
 
+// Read once per call site rather than cached, so config changes (e.g. in tests) take effect.
+const getPixelLimit = () =>
+  strapi.config.get<number>(
+    'plugin::upload.security.maxImageResolution',
+    DEFAULT_MAX_IMAGE_RESOLUTION
+  );
+
+// Passed to every sharp() decode so oversized images throw a catchable error instead of
+// exhausting memory. metadata() reads only the header and ignores this option.
+const sharpOptions = () => ({ limitInputPixels: getPixelLimit(), animated: true }) as const;
+
+// No limitInputPixels here: metadata() only reads the header, so this stays cheap regardless
+// of image size, and callers (e.g. the pixel-limit guard in upload.ts) need real dimensions
+// back to make an accurate, informative rejection decision.
 const getMetadata = (file: UploadableFile): Promise<Metadata> => {
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
@@ -73,7 +88,7 @@ const resizeFileTo = async (
 
   let newInfo;
   if (!file.filepath) {
-    const transform = sharp({ animated: true })
+    const transform = sharp(sharpOptions())
       .resize(options)
       .on('info', (info) => {
         newInfo = info;
@@ -81,7 +96,7 @@ const resizeFileTo = async (
 
     await writeStreamToFile(file.getStream().pipe(transform), filePath);
   } else {
-    newInfo = await sharp(file.filepath, { animated: true }).resize(options).toFile(filePath);
+    newInfo = await sharp(file.filepath, sharpOptions()).resize(options).toFile(filePath);
   }
 
   const { width, height, size, pageHeight } = newInfo ?? {};
@@ -135,9 +150,9 @@ const optimize = async (file: UploadableFile) => {
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
     if (!file.filepath) {
-      transformer = sharp({ animated: true });
+      transformer = sharp(sharpOptions());
     } else {
-      transformer = sharp(file.filepath, { animated: true });
+      transformer = sharp(file.filepath, sharpOptions());
     }
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
@@ -250,14 +265,14 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
 const isFaultyImage = async (file: UploadableFile) => {
   if (!file.filepath) {
     return new Promise((resolve, reject) => {
-      const pipeline = sharp();
+      const pipeline = sharp({ limitInputPixels: getPixelLimit() });
       pipeline.stats().then(resolve).catch(reject);
       file.getStream().pipe(pipeline);
     });
   }
 
   try {
-    await sharp(file.filepath).stats();
+    await sharp(file.filepath, { limitInputPixels: getPixelLimit() }).stats();
     return false;
   } catch {
     return true;

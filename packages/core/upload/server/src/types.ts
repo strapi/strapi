@@ -76,6 +76,8 @@ export interface Config {
   security?: {
     allowedTypes?: string[];
     deniedTypes?: string[];
+    /** Max width*height (pixels) allowed before sharp decodes an image. Defaults to sharp's own limit. */
+    maxImageResolution?: number;
   };
 }
 

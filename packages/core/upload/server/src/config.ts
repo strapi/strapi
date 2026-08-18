@@ -11,7 +11,11 @@ export const config = {
     concurrentUploadSize: 1,
     concurrentUploadRequests: 1,
   },
-  validator(config: { concurrentUploadSize?: unknown; concurrentUploadRequests?: unknown }) {
+  validator(config: {
+    concurrentUploadSize?: unknown;
+    concurrentUploadRequests?: unknown;
+    security?: { maxImageResolution?: unknown };
+  }) {
     const assertPositiveInteger = (key: string, value: unknown) => {
       if (value === undefined) {
         return;
@@ -27,5 +31,7 @@ export const config = {
     assertPositiveInteger('concurrentUploadSize', config.concurrentUploadSize);
     // Client-side parallelism: upload requests the admin fires at once.
     assertPositiveInteger('concurrentUploadRequests', config.concurrentUploadRequests);
+    // Max width*height accepted before sharp decodes an image.
+    assertPositiveInteger('security.maxImageResolution', config.security?.maxImageResolution);
   },
 };

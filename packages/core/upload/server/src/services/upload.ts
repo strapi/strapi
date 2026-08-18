@@ -16,7 +16,7 @@ import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
+import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS, DEFAULT_MAX_IMAGE_RESOLUTION } from '../constants';
 import { getService } from '../utils';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
@@ -213,11 +213,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     currentFile.filepath = file.filepath;
     currentFile.getStream = () => fs.createReadStream(file.filepath);
 
-    const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
+    const { optimize, isImage, isFaultyImage, isOptimizableImage, getDimensions } = strapi
       .plugin('upload')
       .service('image-manipulation');
 
     if (await isImage(currentFile)) {
+      // Reject oversized images before any sharp decode (resize/optimize/stats), which is
+      // where memory-constrained hosts (e.g. low-RAM cloud tiers) OOM on large uploads.
+      const { width, height } = await getDimensions(currentFile);
+      const maxImageResolution = strapi.config.get<number>(
+        'plugin::upload.security.maxImageResolution',
+        DEFAULT_MAX_IMAGE_RESOLUTION
+      );
+      if (width && height && width * height > maxImageResolution) {
+        throw new ApplicationError(
+          `File "${currentFile.name}" is too large to process (${width}x${height} exceeds the ${maxImageResolution}px limit). Reduce the image size or raise plugin::upload.security.maxImageResolution.`
+        );
+      }
+
       if (await isFaultyImage(currentFile)) {
         throw new ApplicationError('File is not a valid image');
       }
@@ -769,5 +782,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    _enhanceAndValidateFile: enhanceAndValidateFile,
   };
 };
