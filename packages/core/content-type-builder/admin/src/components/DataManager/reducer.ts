@@ -1299,10 +1299,18 @@ const slice = createUndoRedoSlice(
                 };
               } else {
                 const contentType = state.contentTypes[uid];
+                const previousKind = contentType?.kind;
+
                 state.contentTypes[uid] = {
                   ...schema,
                   status: contentType?.status === 'NEW' ? 'NEW' : schema.status,
                 };
+
+                if (previousKind && schema.kind && schema.kind !== previousKind) {
+                  const oldSection =
+                    state.contentStructure.sections[sectionKeyForKind(previousKind)];
+                  removeContentTypeChild(oldSection.groups, uid);
+                }
               }
             }
             break;
@@ -1334,6 +1342,10 @@ const slice = createUndoRedoSlice(
               } else {
                 state.contentTypes[uid].status = 'REMOVED';
               }
+
+              Object.values(state.contentStructure.sections).forEach((section) => {
+                removeContentTypeChild(section.groups, uid);
+              });
             }
 
             break;
