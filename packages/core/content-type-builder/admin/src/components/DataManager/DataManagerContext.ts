@@ -86,7 +86,6 @@ export interface DataManagerContextValue {
     index?: number;
   }) => void;
   deleteFolderOnly: (opts: { section: SectionKey; id: string }) => void;
-  deleteFolderAndSubtree: (opts: { section: SectionKey; id: string }) => void;
   deleteFolderAndContent: (opts: {
     section: SectionKey;
     id: string;

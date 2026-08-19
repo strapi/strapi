@@ -85,7 +85,7 @@ const mockDataManager = ({
   renameFolder() {},
   moveFolder() {},
   deleteFolderOnly() {},
-  deleteFolderAndSubtree() {},
+  deleteFolderAndContent() {},
   assignContentTypeToFolder() {},
   reorderFolderChildren() {},
   ...overrides,
