@@ -8,9 +8,9 @@ import { CONTENT_TYPE_UID_REGEX } from './common';
 const GROUP_ID_REGEX = /^grp_[a-z0-9]{4,32}$/;
 
 // eslint-disable-next-line no-control-regex
-const CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
+const CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/;
 // eslint-disable-next-line no-control-regex
-const ANSI_ESCAPE_REGEX = /\x1B\[[0-9;]*[A-Za-z]/g;
+const ANSI_ESCAPE_REGEX = /\x1B\[[0-9;]*[A-Za-z]/;
 
 const GROUP_NAME_MAX_LENGTH = 255;
 
