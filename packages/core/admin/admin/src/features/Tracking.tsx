@@ -197,7 +197,8 @@ export interface EventWithoutProperties {
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
     | 'didEditAIAlternativeText'
-    | 'didGenerateMetadataRetroactively';
+    | 'didGenerateMetadataRetroactively'
+    | 'didActOnFolders';
 
   properties?: never;
 }
