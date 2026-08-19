@@ -9,7 +9,10 @@ import type { Internal, Schema } from '@strapi/types';
  * A content structure with a single root folder in `section` holding `uid`.
  * Used to assert that mutations keep the folder tree in sync.
  */
-const folderedStructure = (section: 'collectionTypes' | 'singleTypes', uid: string) => {
+const folderedStructure = (
+  section: 'collectionTypes' | 'singleTypes',
+  uid: Internal.UID.ContentType
+) => {
   const groups: ContentStructure['sections']['collectionTypes']['groups'] = [
     {
       id: 'group-1',
