@@ -374,7 +374,9 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
  * This is rendered in place of the actual row when it is being dragged.
  */
 export const RowOverlay = ({ item }: { item: FlatItem }) => {
+  const { formatMessage } = useIntl();
   const node = item.node;
+  const name = node.type === 'folder' ? node.name : node.title;
 
   return (
     <Row
@@ -390,7 +392,12 @@ export const RowOverlay = ({ item }: { item: FlatItem }) => {
       <Label tag="span" fontWeight={node.type === 'folder' ? 'semiBold' : 'regular'}>
         {node.type === 'folder' ? node.name : node.title}
       </Label>
-      <VisuallyHidden>dragging</VisuallyHidden>
+      <VisuallyHidden>
+        {formatMessage(
+          { id: getTrad('nav.folder.dragging'), defaultMessage: 'Dragging {name}' },
+          { name }
+        )}
+      </VisuallyHidden>
     </Row>
   );
 };
