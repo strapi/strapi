@@ -1,6 +1,6 @@
 import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
-import { Struct } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const {
