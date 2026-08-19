@@ -367,6 +367,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
     let nestedPopulate: Record<string, unknown> = {};
+    const dynamicZonePopulate: Record<string, unknown> = {};
     try {
       const i18nPlugin = strapi.plugin('i18n');
       if (i18nPlugin) {
@@ -390,11 +391,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
               nestedPopulate = dottedPathsToPopulate(
                 i18nService.getNestedPopulateOfNonLocalizedAttributes(uid)
               );
-              // Dynamic zones are polymorphic: nested populate must be '*' rather
-              // than specific field paths (query-params validation).
+              // Dynamic zones are polymorphic, so each component needs its own
+              // deep-populate fragment. A wildcard only populates the immediate
+              // attributes and can omit nested shared component data.
               for (const field of Object.keys(nestedPopulate)) {
-                if (model.attributes[field]?.type === 'dynamiczone') {
-                  nestedPopulate[field] = { populate: '*' };
+                const attribute = model.attributes[field];
+                if (attribute?.type === 'dynamiczone') {
+                  dynamicZonePopulate[field] = {
+                    on: attribute.components.reduce<Record<string, { populate: object }>>(
+                      (acc, componentUID) => {
+                        acc[componentUID] = {
+                          populate: dottedPathsToPopulate(
+                            i18nService.getNestedPopulateOfNonLocalizedAttributes(componentUID)
+                          ),
+                        };
+                        return acc;
+                      },
+                      {}
+                    ),
+                  };
                 }
               }
             } else {
@@ -436,6 +451,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: {
         ...nestedPopulate,
         ...mediaPopulate,
+        ...dynamicZonePopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
       fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),

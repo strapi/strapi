@@ -301,27 +301,55 @@ describe('document-metadata service', () => {
         .mockReturnValue(['sku', 'profile', 'blocks', 'images']);
       const getNestedPopulateOfNonLocalizedAttributes = jest
         .fn()
-        .mockReturnValue([
-          'profile',
-          'profile.mid',
-          'profile.mid.inners',
-          'blocks',
-          'blocks.image',
-        ]);
+        .mockImplementation((uid: string) =>
+          uid === 'shared.hero'
+            ? ['image', 'body', 'body.items']
+            : [
+                'profile',
+                'profile.mid',
+                'profile.mid.inners',
+                'blocks',
+                'blocks.image',
+                'blocks.body',
+                'blocks.body.items',
+              ]
+        );
 
       const service = createService({
-        getModel: () => ({
-          uid: 'api::article.article',
-          options: { draftAndPublish: true },
-          pluginOptions: { i18n: { localized: true } },
-          attributes: {
-            sku: { type: 'string' },
-            profile: { type: 'component', component: 'shared.outer', repeatable: false },
-            blocks: { type: 'dynamiczone', components: ['shared.hero'] },
-            images: { type: 'media', multiple: true },
-            name: { type: 'string' },
-          },
-        }),
+        getModel: (uid: string) =>
+          ({
+            'api::article.article': {
+              uid: 'api::article.article',
+              options: { draftAndPublish: true },
+              pluginOptions: { i18n: { localized: true } },
+              attributes: {
+                sku: { type: 'string' },
+                profile: { type: 'component', component: 'shared.outer', repeatable: false },
+                blocks: { type: 'dynamiczone', components: ['shared.hero'] },
+                images: { type: 'media', multiple: true },
+                name: { type: 'string' },
+              },
+            },
+            'shared.hero': {
+              uid: 'shared.hero',
+              attributes: {
+                image: { type: 'media', multiple: false },
+                body: { type: 'component', component: 'shared.body', repeatable: false },
+              },
+            },
+            'shared.body': {
+              uid: 'shared.body',
+              attributes: {
+                items: { type: 'component', component: 'shared.item', repeatable: true },
+              },
+            },
+            'shared.item': {
+              uid: 'shared.item',
+              attributes: {
+                label: { type: 'string' },
+              },
+            },
+          })[uid],
         plugin(name: string) {
           if (name === 'i18n') {
             return {
@@ -365,7 +393,20 @@ describe('document-metadata service', () => {
           },
         },
       });
-      expect(params.populate.blocks).toEqual({ populate: '*' });
+      expect(params.populate.blocks).toEqual({
+        on: {
+          'shared.hero': {
+            populate: {
+              image: true,
+              body: {
+                populate: {
+                  items: true,
+                },
+              },
+            },
+          },
+        },
+      });
       expect(params.populate.images).toEqual({ populate: { folder: true } });
     });
   });

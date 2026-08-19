@@ -75,7 +75,7 @@ const categoryModel = {
     },
     nonLocalizedDz: {
       type: 'dynamiczone',
-      components: ['default.compo'],
+      components: ['default.compo', 'default.outer'],
       pluginOptions: {
         i18n: {
           localized: false,
@@ -688,6 +688,53 @@ describe('i18n', () => {
           expect.objectContaining({ name: 'from-sibling' }),
         ]);
       });
+
+      test('copies the current default-locale draft instead of an older published value', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'draft source default',
+          nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+        const publishRes = await publish('api::category.category', docId, {
+          nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+        });
+        expect(publishRes.statusCode).toBe(200);
+
+        const updateRes = await update('api::category.category', docId, {
+          nonLocalizedRepeatableCompo: [{ name: 'draft-value' }],
+        });
+        expect(updateRes.statusCode).toBe(200);
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'draft source french',
+          nonLocalizedRepeatableCompo: [],
+        });
+        expect(frRes.statusCode).toBe(200);
+        expect(frRes.body.data.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+
+        const [enDraft, enPublished] = await Promise.all([
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'en', publishedAt: null },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'en', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+        ]);
+
+        expect(enDraft.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+        expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+      });
     });
 
     describe('Creating a locale with a shallow nested non-localized component', () => {
@@ -860,6 +907,59 @@ describe('i18n', () => {
         const sibling = getRes.body.meta.availableLocales[0];
         expect(sibling.nonLocalizedDz).toEqual([
           expect.objectContaining({ __component: 'default.compo', name: 'hero' }),
+        ]);
+      });
+
+      test('preserves nested data in a non-empty shallow dynamic-zone payload', async () => {
+        const nestedBlock = {
+          __component: 'default.outer',
+          name: 'shared-name',
+          mid: {
+            heading: 'keep-heading',
+            inners: [{ label: 'keep-inner' }],
+          },
+        };
+        const createRes = await create('api::category.category', {
+          name: 'nested dz default',
+          nonLocalizedDz: [nestedBlock],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+        const getRes = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${docId}`,
+          qs: { locale: 'fr' },
+        });
+        expect(getRes.statusCode).toBe(200);
+        expect(getRes.body.meta.availableLocales[0].nonLocalizedDz[0].mid.inners).toEqual([
+          expect.objectContaining({ label: 'keep-inner' }),
+        ]);
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'nested dz french',
+          nonLocalizedDz: [{ __component: 'default.outer', name: 'shared-name' }],
+        });
+        expect(frRes.statusCode).toBe(200);
+        expect(frRes.body.data.nonLocalizedDz[0].mid.inners).toEqual([
+          expect.objectContaining({ label: 'keep-inner' }),
+        ]);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: { documentId: docId, locale: 'en', publishedAt: null },
+          populate: {
+            nonLocalizedDz: {
+              on: {
+                'default.outer': {
+                  populate: ['mid.inners'],
+                },
+              },
+            },
+          },
+        });
+        expect(enEntry.nonLocalizedDz[0].mid.inners).toEqual([
+          expect.objectContaining({ label: 'keep-inner' }),
         ]);
       });
     });
