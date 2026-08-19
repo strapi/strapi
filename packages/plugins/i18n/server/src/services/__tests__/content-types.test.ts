@@ -612,6 +612,140 @@ describe('content-types service', () => {
       expect(entry.blocks).toEqual([{ __component: 'default.compo', name: 'hero' }]);
       expect(entry.title).toBe('fr');
     });
+
+    it('deep-fills matching items in a non-empty repeatable component', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const outerModel = {
+        attributes: {
+          name: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          profiles: {
+            type: 'component',
+            component: 'default.outer',
+            repeatable: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: (uid: string) =>
+          ({
+            model: modelDef,
+            'default.outer': outerModel,
+            'default.inner': innerModel,
+          })[uid],
+        components: {
+          'default.outer': outerModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        profiles: [{ name: 'keep-parent', inners: [] }],
+      };
+      const relatedEntry = {
+        profiles: [
+          { name: 'old-parent', inners: [{ label: 'keep-inner' }] },
+          { name: 'intentionally-removed', inners: [{ label: 'do-not-restore' }] },
+        ],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.profiles).toEqual([{ name: 'keep-parent', inners: [{ label: 'keep-inner' }] }]);
+    });
+
+    it('deep-fills matching component types in a non-empty dynamic zone', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const heroModel = {
+        attributes: {
+          name: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const otherModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          blocks: {
+            type: 'dynamiczone',
+            components: ['default.hero', 'default.other'],
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: (uid: string) =>
+          ({
+            model: modelDef,
+            'default.hero': heroModel,
+            'default.other': otherModel,
+            'default.inner': innerModel,
+          })[uid],
+        components: {
+          'default.hero': heroModel,
+          'default.other': otherModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        blocks: [
+          { __component: 'default.hero', name: 'keep-parent', inners: [] },
+          { __component: 'default.other', name: 'replacement' },
+        ],
+      };
+      const relatedEntry = {
+        blocks: [
+          {
+            __component: 'default.hero',
+            name: 'old-parent',
+            inners: [{ label: 'keep-inner' }],
+          },
+          {
+            __component: 'default.hero',
+            name: 'different-component',
+            inners: [{ label: 'do-not-copy' }],
+          },
+        ],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.blocks).toEqual([
+        {
+          __component: 'default.hero',
+          name: 'keep-parent',
+          inners: [{ label: 'keep-inner' }],
+        },
+        { __component: 'default.other', name: 'replacement' },
+      ]);
+    });
   });
 
   describe('getNestedPopulateOfNonLocalizedAttributes', () => {

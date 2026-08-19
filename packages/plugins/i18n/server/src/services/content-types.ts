@@ -168,6 +168,43 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
       isPresentObject(value)
     ) {
       fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
+      return;
+    }
+
+    // A non-empty repeatable component can also be shallow when it comes from a
+    // partially populated sibling. Preserve omitted nested values item-by-item
+    // without restoring items that the request intentionally removed.
+    if (
+      attr?.type === 'component' &&
+      attr.repeatable &&
+      Array.isArray(entry[field]) &&
+      Array.isArray(value)
+    ) {
+      entry[field].forEach((component: unknown, index: number) => {
+        const relatedComponent = value[index];
+        if (isPresentObject(component) && isPresentObject(relatedComponent)) {
+          fillNonLocalizedAttributes(component, relatedComponent, { model: attr.component });
+        }
+      });
+      return;
+    }
+
+    // Dynamic-zone items need the same repair, but only when the item at the
+    // matching position has the same component type.
+    if (attr?.type === 'dynamiczone' && Array.isArray(entry[field]) && Array.isArray(value)) {
+      entry[field].forEach((component: unknown, index: number) => {
+        const relatedComponent = value[index];
+        if (
+          isPresentObject(component) &&
+          isPresentObject(relatedComponent) &&
+          component.__component === relatedComponent.__component &&
+          typeof component.__component === 'string'
+        ) {
+          fillNonLocalizedAttributes(component, relatedComponent, {
+            model: component.__component,
+          });
+        }
+      });
     }
   });
 };
