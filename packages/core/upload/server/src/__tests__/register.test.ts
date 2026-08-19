@@ -58,7 +58,7 @@ describe('Upload plugin register', () => {
           get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
           set: jest.fn(),
         },
-        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+        get: jest.fn().mockReturnValue({ add: jest.fn(), extend: jest.fn() }),
       } as any;
 
       await register({ strapi });
@@ -78,7 +78,7 @@ describe('Upload plugin register', () => {
           get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
           set: setConfig,
         },
-        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+        get: jest.fn().mockReturnValue({ add: jest.fn(), extend: jest.fn() }),
       } as any;
 
       await register({ strapi });
@@ -104,7 +104,7 @@ describe('Upload plugin register', () => {
           get: jest.fn().mockReturnValue({ provider: 'local' }),
           set: jest.fn(),
         },
-        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+        get: jest.fn().mockReturnValue({ add: jest.fn(), extend: jest.fn() }),
       } as any;
 
       await register({ strapi });
@@ -127,7 +127,7 @@ describe('Upload plugin register', () => {
             .mockReturnValue({ provider: 'local', sharp: { cache: true, concurrency: 4 } }),
           set: jest.fn(),
         },
-        get: jest.fn().mockReturnValue({ add: jest.fn() }),
+        get: jest.fn().mockReturnValue({ add: jest.fn(), extend: jest.fn() }),
       } as any;
 
       await register({ strapi });
@@ -153,7 +153,7 @@ describe('Upload plugin register', () => {
             get: jest.fn().mockReturnValue(uploadFromConfig as any),
             set: jest.fn(),
           },
-          get: jest.fn().mockReturnValue({ add: jest.fn() }),
+          get: jest.fn().mockReturnValue({ add: jest.fn(), extend: jest.fn() }),
         } as any;
 
         await expect(register({ strapi })).resolves.toBeUndefined();
