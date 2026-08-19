@@ -7,15 +7,31 @@ import { CONTENT_TYPE_UID_REGEX } from './common';
  */
 const GROUP_ID_REGEX = /^grp_[a-z0-9]{4,32}$/;
 
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
+// eslint-disable-next-line no-control-regex
+const ANSI_ESCAPE_REGEX = /\x1B\[[0-9;]*[A-Za-z]/g;
+
+const GROUP_NAME_MAX_LENGTH = 255;
+
 const groupIdSchema = z.string().regex(GROUP_ID_REGEX, 'Invalid group id');
 
 const groupNameSchema = z
   .string()
   .min(1, 'Group name must not be empty')
+  .max(GROUP_NAME_MAX_LENGTH, `Group name must be at most ${GROUP_NAME_MAX_LENGTH} characters`)
   .refine((value) => value.trim().length > 0, 'Group name must not be empty')
   .refine(
     (value) => value === value.trim(),
     'Group name must not have leading or trailing whitespace'
+  )
+  .refine(
+    (value) => !CONTROL_CHARS_REGEX.test(value),
+    'Group name must not contain control characters'
+  )
+  .refine(
+    (value) => !ANSI_ESCAPE_REGEX.test(value),
+    'Group name must not contain ANSI escape characters'
   );
 
 export const contentStructureChildSchema = z.discriminatedUnion('type', [
