@@ -1,6 +1,7 @@
 /**
- * This service handles context-dependent validation against the content-type registry + persistFromUpdate's
- * prune and persist functions. General validation rules are handled by the CTB's contentStructure controller.
+ * This service handles context-dependent validation against the content-type registry, plus the
+ * split validateFromUpdate (prune + validate, no I/O) and commitFromUpdate (prune + persist) steps.
+ * General validation rules are handled by the CTB's contentStructure controller.
  */
 import { errors } from '@strapi/utils';
 
@@ -170,7 +171,149 @@ describe('CTB content-structure service', () => {
     });
   });
 
-  describe('persistFromUpdate()', () => {
+  describe('validateFromUpdate()', () => {
+    it('does not throw for a valid structure and never touches disk', () => {
+      const strapi = buildStrapi({
+        'api::article.article': { kind: 'collectionType' },
+        'api::category.category': { kind: 'collectionType' },
+        'api::author.author': { kind: 'collectionType' },
+      });
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          incomingStructure: validExample(),
+          upsertedUids: new Map(),
+          deletedUids: new Set(),
+        })
+      ).not.toThrow();
+
+      expect(coreServiceMock.getCleanedFile).not.toHaveBeenCalled();
+      expect(coreServiceMock.write).not.toHaveBeenCalled();
+    });
+
+    it('does not throw for a reference to a uid deleted in the same batch (pruned first)', () => {
+      const strapi = buildStrapi({
+        'api::article.article': { kind: 'collectionType' },
+        'api::category.category': { kind: 'collectionType' },
+        'api::author.author': { kind: 'collectionType' },
+      });
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          incomingStructure: validExample(),
+          upsertedUids: new Map(),
+          deletedUids: new Set(['api::category.category']),
+        })
+      ).not.toThrow();
+    });
+
+    it('throws when the incoming structure references a nonexistent content type', () => {
+      const strapi = buildStrapi({ 'api::article.article': { kind: 'collectionType' } });
+
+      const incoming = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'grp_a',
+                name: 'A',
+                parent: null,
+                children: [{ type: 'contentType', uid: 'api::ghost.ghost' }],
+              },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          incomingStructure: incoming,
+          upsertedUids: new Map(),
+          deletedUids: new Set(),
+        })
+      ).toThrow(/api::ghost.ghost.*does not exist/);
+
+      expect(coreServiceMock.write).not.toHaveBeenCalled();
+    });
+
+    it('accepts a kind switched in the same batch when filed under the new section', () => {
+      const strapi = buildStrapi({ 'api::article.article': { kind: 'collectionType' } });
+
+      const incoming = {
+        version: 1,
+        sections: {
+          collectionTypes: { groups: [] },
+          singleTypes: {
+            groups: [
+              {
+                id: 'grp_s',
+                name: 'S',
+                parent: null,
+                children: [{ type: 'contentType', uid: 'api::article.article' }],
+              },
+            ],
+          },
+        },
+      };
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          incomingStructure: incoming,
+          upsertedUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
+          deletedUids: new Set(),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a kind-mismatched reference instead of silently pruning it', () => {
+      const strapi = buildStrapi({ 'api::article.article': { kind: 'singleType' } });
+
+      const incoming = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'grp_marketing',
+                name: 'Marketing',
+                parent: null,
+                children: [{ type: 'contentType', uid: 'api::article.article' }],
+              },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          incomingStructure: incoming,
+          upsertedUids: new Map(),
+          deletedUids: new Set(),
+        })
+      ).toThrow(/cannot be placed in section "collectionTypes"/);
+
+      expect(coreServiceMock.write).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when no incoming structure is provided', () => {
+      const strapi = buildStrapi();
+
+      expect(() =>
+        createContentStructureService(strapi).validateFromUpdate({
+          upsertedUids: new Map(),
+          deletedUids: new Set(['api::category.category']),
+        })
+      ).not.toThrow();
+
+      expect(coreServiceMock.getCleanedFile).not.toHaveBeenCalled();
+      expect(coreServiceMock.write).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('commitFromUpdate()', () => {
     it('persists a valid structure unchanged when there are no deletions', async () => {
       const strapi = buildStrapi({
         'api::article.article': { kind: 'collectionType' },
@@ -178,9 +321,8 @@ describe('CTB content-structure service', () => {
         'api::author.author': { kind: 'collectionType' },
       });
 
-      const result = await createContentStructureService(strapi).persistFromUpdate({
+      const result = await createContentStructureService(strapi).commitFromUpdate({
         incomingStructure: validExample(),
-        upsertedUids: new Map(),
         deletedUids: new Set(),
       });
 
@@ -205,9 +347,8 @@ describe('CTB content-structure service', () => {
         'api::author.author': { kind: 'collectionType' },
       });
 
-      const result = await createContentStructureService(strapi).persistFromUpdate({
+      const result = await createContentStructureService(strapi).commitFromUpdate({
         incomingStructure: validExample(),
-        upsertedUids: new Map(),
         deletedUids: new Set(['api::category.category']),
       });
 
@@ -226,7 +367,43 @@ describe('CTB content-structure service', () => {
       });
     });
 
-    it('throws when the incoming structure references a nonexistent content type', async () => {
+    it('with no incoming structure but batch deletions: prunes the current file and writes', async () => {
+      coreServiceMock.getCleanedFile.mockResolvedValue(validExample());
+
+      const strapi = buildStrapi({
+        'api::article.article': { kind: 'collectionType' },
+        'api::category.category': { kind: 'collectionType' },
+        'api::author.author': { kind: 'collectionType' },
+      });
+
+      const result = await createContentStructureService(strapi).commitFromUpdate({
+        deletedUids: new Set(['api::category.category']),
+      });
+
+      expect(result).toBe(true);
+      expect(coreServiceMock.getCleanedFile).toHaveBeenCalledTimes(1);
+      expect(coreServiceMock.write).toHaveBeenCalledTimes(1);
+
+      const written = coreServiceMock.write.mock.calls[0][0];
+      expect(written.sections.collectionTypes.groups[0].children).not.toContainEqual({
+        type: 'contentType',
+        uid: 'api::category.category',
+      });
+    });
+
+    it('with no incoming structure and no deletions returns false', async () => {
+      const strapi = buildStrapi();
+
+      const result = await createContentStructureService(strapi).commitFromUpdate({
+        deletedUids: new Set(),
+      });
+
+      expect(result).toBe(false);
+      expect(coreServiceMock.getCleanedFile).not.toHaveBeenCalled();
+      expect(coreServiceMock.write).not.toHaveBeenCalled();
+    });
+
+    it('does not re-validate — it trusts that validateFromUpdate already ran', async () => {
       const strapi = buildStrapi({ 'api::article.article': { kind: 'collectionType' } });
 
       const incoming = {
@@ -246,120 +423,16 @@ describe('CTB content-structure service', () => {
         },
       };
 
+      // A reference validateFromUpdate would have rejected still writes here: commit is a pure
+      // persist step, so validation must gate it upstream (which updateSchema does).
       await expect(
-        createContentStructureService(strapi).persistFromUpdate({
+        createContentStructureService(strapi).commitFromUpdate({
           incomingStructure: incoming,
-          upsertedUids: new Map(),
           deletedUids: new Set(),
         })
-      ).rejects.toThrow(/api::ghost.ghost.*does not exist/);
+      ).resolves.toBe(true);
 
-      expect(coreServiceMock.write).not.toHaveBeenCalled();
-    });
-
-    it('with no incoming structure but batch deletions: prunes the current file and writes', async () => {
-      coreServiceMock.getCleanedFile.mockResolvedValue(validExample());
-
-      const strapi = buildStrapi({
-        'api::article.article': { kind: 'collectionType' },
-        'api::category.category': { kind: 'collectionType' },
-        'api::author.author': { kind: 'collectionType' },
-      });
-
-      const result = await createContentStructureService(strapi).persistFromUpdate({
-        upsertedUids: new Map(),
-        deletedUids: new Set(['api::category.category']),
-      });
-
-      expect(result).toBe(true);
-      expect(coreServiceMock.getCleanedFile).toHaveBeenCalledTimes(1);
       expect(coreServiceMock.write).toHaveBeenCalledTimes(1);
-
-      const written = coreServiceMock.write.mock.calls[0][0];
-      expect(written.sections.collectionTypes.groups[0].children).not.toContainEqual({
-        type: 'contentType',
-        uid: 'api::category.category',
-      });
-    });
-
-    it('with no incoming structure and no deletions returns false', async () => {
-      const strapi = buildStrapi();
-
-      const result = await createContentStructureService(strapi).persistFromUpdate({
-        upsertedUids: new Map(),
-        deletedUids: new Set(),
-      });
-
-      expect(result).toBe(false);
-      expect(coreServiceMock.getCleanedFile).not.toHaveBeenCalled();
-      expect(coreServiceMock.write).not.toHaveBeenCalled();
-    });
-
-    it('accepts a kind switched in the same batch when filed under the new section', async () => {
-      const strapi = buildStrapi({ 'api::article.article': { kind: 'collectionType' } });
-
-      const incoming = {
-        version: 1,
-        sections: {
-          collectionTypes: { groups: [] },
-          singleTypes: {
-            groups: [
-              {
-                id: 'grp_s',
-                name: 'S',
-                parent: null,
-                children: [{ type: 'contentType', uid: 'api::article.article' }],
-              },
-            ],
-          },
-        },
-      };
-
-      const result = await createContentStructureService(strapi).persistFromUpdate({
-        incomingStructure: incoming,
-        upsertedUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
-        deletedUids: new Set(),
-      });
-
-      expect(result).toBe(true);
-      expect(coreServiceMock.write).toHaveBeenCalledTimes(1);
-
-      const written = coreServiceMock.write.mock.calls[0][0];
-      expect(written.sections.singleTypes.groups[0].children).toContainEqual({
-        type: 'contentType',
-        uid: 'api::article.article',
-      });
-    });
-
-    it('rejects a kind-mismatched reference instead of silently pruning it', async () => {
-      const strapi = buildStrapi({ 'api::article.article': { kind: 'singleType' } });
-
-      const incoming = {
-        version: 1,
-        sections: {
-          collectionTypes: {
-            groups: [
-              {
-                id: 'grp_marketing',
-                name: 'Marketing',
-                parent: null,
-                children: [{ type: 'contentType', uid: 'api::article.article' }],
-              },
-            ],
-          },
-          singleTypes: { groups: [] },
-        },
-      };
-
-      await expect(
-        createContentStructureService(strapi).persistFromUpdate({
-          incomingStructure: incoming,
-          upsertedUids: new Map(),
-          deletedUids: new Set(),
-        })
-      ).rejects.toThrow(/cannot be placed in section "collectionTypes"/);
-
-      expect(coreServiceMock.write).not.toHaveBeenCalled();
     });
 
     it('never calls strapi.reload (restart policy belongs to the controller)', async () => {
@@ -371,9 +444,8 @@ describe('CTB content-structure service', () => {
         'api::author.author': { kind: 'collectionType' },
       });
 
-      await createContentStructureService(strapi).persistFromUpdate({
+      await createContentStructureService(strapi).commitFromUpdate({
         incomingStructure: validExample(),
-        upsertedUids: new Map(),
         deletedUids: new Set(['api::category.category']),
       });
 

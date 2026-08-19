@@ -156,6 +156,28 @@ export const updateSchema = async (schema: CTBSchema) => {
   removeEmptyDefaultsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
 
+  const upsertedUids = new Map<string, ContentTypeKind>();
+  const deletedUids = new Set<string>();
+
+  for (const contentType of contentTypes) {
+    if (contentType.action === 'create') {
+      upsertedUids.set(contentType.uid, contentType.kind ?? 'collectionType');
+    } else if (contentType.action === 'update' && contentType.kind) {
+      // A kind switch in the same save must override the registry's stale kind,
+      // otherwise a folder assignment into the new section fails validation.
+      upsertedUids.set(contentType.uid, contentType.kind);
+    } else if (contentType.action === 'delete') {
+      deletedUids.add(contentType.uid);
+    }
+  }
+
+  // Validate folder references before anything is written. This will throw if invalid.
+  getService('content-structure').validateFromUpdate({
+    incomingStructure: contentStructure,
+    upsertedUids,
+    deletedUids,
+  });
+
   // we pre create empty typesk
   for (const contentType of contentTypes) {
     if (contentType.action === 'create') {
@@ -252,27 +274,6 @@ export const updateSchema = async (schema: CTBSchema) => {
     }
   }
 
-  const upsertedUids = new Map<string, ContentTypeKind>();
-  const deletedUids = new Set<string>();
-
-  for (const contentType of contentTypes) {
-    if (contentType.action === 'create') {
-      upsertedUids.set(contentType.uid, contentType.kind ?? 'collectionType');
-    } else if (contentType.action === 'update' && contentType.kind) {
-      // A kind switch in the same save must override the registry's stale kind,
-      // otherwise a folder assignment into the new section fails validation.
-      upsertedUids.set(contentType.uid, contentType.kind);
-    } else if (contentType.action === 'delete') {
-      deletedUids.add(contentType.uid);
-    }
-  }
-
-  await getService('content-structure').persistFromUpdate({
-    incomingStructure: contentStructure,
-    upsertedUids,
-    deletedUids,
-  });
-
   // run sanity checks on the schema
   // Relations target existing types
   // Bidirectional relation have their counterpart in the schema
@@ -285,6 +286,11 @@ export const updateSchema = async (schema: CTBSchema) => {
     .map((ct: any) => ct.uid);
 
   await builder.writeFiles();
+
+  await getService('content-structure').commitFromUpdate({
+    incomingStructure: contentStructure,
+    deletedUids,
+  });
 
   try {
     for (const uid of APIsToDelete) {
