@@ -1,5 +1,6 @@
 import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
+import { Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const {
@@ -69,9 +70,13 @@ const removeId = (value: any) => {
   }
 };
 
-const removeIds = (model: any) => (entry: any) => removeIdsMut(model, cloneDeep(entry));
+const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
+  removeIdsMut(model, cloneDeep(entry));
 
-const removeIdsMut = (model: any, entry: any): Record<string, any> => {
+const removeIdsMut = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+): Record<string, any> => {
   if (isNil(entry)) {
     return entry as unknown as Record<string, any>;
   }
@@ -106,7 +111,10 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
  * @param {object} entry
  * @returns {object}
  */
-const copyNonLocalizedAttributes = (model: any, entry: any) => {
+const copyNonLocalizedAttributes = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
   return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
