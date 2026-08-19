@@ -26,6 +26,10 @@ export type DropLine = { anchorId: string; edge: 'top' | 'bottom'; depth: number
 interface UseSortableTreeOptions {
   /** Commit a drop. Called only for a real move, with the node and its resolved target. */
   onDrop: (activeNode: FolderTreeNode, target: DropTarget) => void;
+  /**
+   * Function which determines whether the dragged node may land on the resolved target.
+   */
+  canDrop?: (activeNode: FolderTreeNode, target: DropTarget) => boolean;
   /** Spring-open a closed folder held under the pointer, so the user can drop deeper. */
   onExpandFolder: (folderId: string) => void;
   /** Ids of collapsed folders — used to tell a closed folder (springs open) from an empty one. */
@@ -95,6 +99,7 @@ export const useSortableTree = ({
   collapsed,
   disabled,
   onDrop,
+  canDrop = () => true,
   items,
 }: UseSortableTreeOptions): UseSortableTreeResult => {
   const [projected, setProjected] = useState<DropTarget | null>(null);
@@ -151,6 +156,12 @@ export const useSortableTree = ({
       offsetX: event.delta.x,
       activeId,
     });
+
+    if (target && activeItem && !canDrop(activeItem.node, target)) {
+      setProjected(null);
+      cancelFolderOpen();
+      return;
+    }
 
     setProjected(target);
 

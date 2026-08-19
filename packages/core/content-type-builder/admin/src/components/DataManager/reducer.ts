@@ -1057,6 +1057,11 @@ const slice = createUndoRedoSlice(
           return;
         }
 
+        // Refuse a move that would collide with an identically named sibling.
+        if (isFolderNameTakenBySibling(groups, newParentId, group.name, id)) {
+          return;
+        }
+
         if (group.parent) {
           const oldParent = findGroup(groups, group.parent);
 
