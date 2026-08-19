@@ -86,6 +86,14 @@ const isGroupChild = (child: any): boolean => {
   return isRecord(child) && child.type === 'group' && typeof child.id === 'string';
 };
 
+/**
+ * A group is an effective root when it has no parent, or its parent id points
+ * at a group that no longer exists.
+ */
+const isEffectivelyRoot = (group: any, knownIds: Set<string>): boolean => {
+  return group.parent === null || !knownIds.has(group.parent);
+};
+
 export const listFolderChoices = (groups: any[]): FolderChoice[] => {
   const wellFormed = groups.filter(isWellFormedGroup);
 
@@ -98,6 +106,8 @@ export const listFolderChoices = (groups: any[]): FolderChoice[] => {
     if (byId.has(group.id)) continue;
     byId.set(group.id, group);
   }
+
+  const knownIds = new Set(byId.keys());
 
   const childGroupsOf = (parent: any): any[] => {
     const listed = parent.children
@@ -123,7 +133,7 @@ export const listFolderChoices = (groups: any[]): FolderChoice[] => {
       }
 
       return wellFormed.filter((group) => {
-        return group.parent === null;
+        return isEffectivelyRoot(group, knownIds);
       });
     })();
 
@@ -163,9 +173,7 @@ export const findRootFolderByName = (groups: any[], name: string): any => {
       return false;
     }
 
-    const isEffectivelyRoot = group.parent === null || !knownIds.has(group.parent);
-
-    if (!isEffectivelyRoot) {
+    if (!isEffectivelyRoot(group, knownIds)) {
       return false;
     }
 

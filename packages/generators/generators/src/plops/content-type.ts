@@ -1,6 +1,7 @@
 import { join } from 'path';
 import type { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
+import handlebars from 'handlebars';
 import fs from 'fs-extra';
 import { strings } from '@strapi/utils';
 
@@ -93,6 +94,8 @@ export default (plop: NodePlopAPI) => {
 
       const { singularName } = answers;
 
+      const schemaActionPath = `${filePath}/content-types/{{ singularName }}/schema.json`;
+
       let uid;
       if (answers.destination === 'new') {
         uid = `api::${answers.id}.${singularName}`;
@@ -105,7 +108,7 @@ export default (plop: NodePlopAPI) => {
       const baseActions: Array<ActionType> = [
         {
           type: 'add',
-          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
+          path: schemaActionPath,
           templateFile: `templates/${language}/content-type.schema.json.hbs`,
           data: {
             collectionName: slugify(answers.pluralName, { separator: '_' }),
@@ -116,7 +119,7 @@ export default (plop: NodePlopAPI) => {
       if (Object.entries(attributes).length > 0) {
         baseActions.push({
           type: 'modify',
-          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
+          path: schemaActionPath,
           transform(template: string) {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;
@@ -255,6 +258,16 @@ export default (plop: NodePlopAPI) => {
         if (!uid) {
           throw new Error(
             'Cannot assign a folder: could not determine the content type uid from the given destination.'
+          );
+        }
+
+        const contentTypeAlreadyExists = fs.existsSync(
+          join(plop.getDestBasePath(), handlebars.compile(schemaActionPath)(answers))
+        );
+
+        if (contentTypeAlreadyExists) {
+          throw new Error(
+            `Content type "${uid}" already exists — refusing to reassign its folder from the generator.`
           );
         }
 

@@ -183,4 +183,53 @@ describe('getFolderPrompts', () => {
 
     expect(result).toEqual({ folder: { newFolderName: 'Blog' } });
   });
+
+  test('surfaces a dangling-parent folder as a root in the picker', async () => {
+    // Core reparents this to root on boot; the picker must show it so a typed name
+    // can never resolve to a folder the list never offered.
+    const seeded = seededFile();
+    seeded.sections.collectionTypes.groups.push({
+      parent: 'grp_deleted1',
+      name: 'Orphaned',
+      id: 'grp_orphan1',
+      children: [],
+    });
+    await outputJSON(groupsPath, seeded);
+    const inquirer = makeInquirer(
+      { addToFolder: true },
+      { folderChoice: { kind: 'existing', id: 'grp_orphan1' } }
+    );
+
+    const result = await getFolderPrompts(inquirer, plop, { kind: 'collectionType' });
+
+    const [questions] = inquirer.prompt.mock.calls[1];
+    expect(questions[0].choices.map((choice: { name: string }) => choice.name)).toEqual([
+      'Create a new folder',
+      'Shop',
+      'Shop / Second in array',
+      'Shop / First in array',
+      'Orphaned',
+    ]);
+    expect(result).toEqual({ folder: { targetGroupId: 'grp_orphan1' } });
+  });
+
+  test('typing the name of a dangling-parent folder reuses the folder now shown in the picker', async () => {
+    const seeded = seededFile();
+    seeded.sections.collectionTypes.groups.push({
+      parent: 'grp_deleted1',
+      name: 'Orphaned',
+      id: 'grp_orphan1',
+      children: [],
+    });
+    await outputJSON(groupsPath, seeded);
+    const inquirer = makeInquirer(
+      { addToFolder: true },
+      { folderChoice: { kind: 'new' } },
+      { folderName: 'orphaned' }
+    );
+
+    const result = await getFolderPrompts(inquirer, plop, { kind: 'collectionType' });
+
+    expect(result).toEqual({ folder: { targetGroupId: 'grp_orphan1' } });
+  });
 });
