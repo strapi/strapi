@@ -137,6 +137,21 @@ const FolderView = ({
     resizeObserverRef.current.observe(node);
   }, []);
 
+  const applyInertWhenClosed = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (!node) {
+        return;
+      }
+
+      if (open) {
+        node.removeAttribute('inert');
+      } else {
+        node.setAttribute('inert', '');
+      }
+    },
+    [open]
+  );
+
   const labelTypography = (
     <Typography
       textColor="neutral800"
@@ -177,7 +192,7 @@ const FolderView = ({
         )}
       </FolderRow>
       <Collapsible $open={open} id={listId}>
-        <CollapsibleInner>{children}</CollapsibleInner>
+        <CollapsibleInner ref={applyInertWhenClosed}>{children}</CollapsibleInner>
       </Collapsible>
     </Box>
   );
