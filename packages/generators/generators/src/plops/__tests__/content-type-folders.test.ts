@@ -336,4 +336,28 @@ describe('Content Type Generator — folder assignment', () => {
 
     expect(await readFile(groupsPath, 'utf-8')).toBe(before);
   });
+
+  test('refuses to reassign the folder of a content type that already exists on disk', async () => {
+    // The article content type already exists and is filed in Products. Re-running
+    // the generator would fail at the schema write, so the folder move must not persist.
+    const schemaPath = path.join(
+      outputDirectory,
+      'src/api/article/content-types/article/schema.json'
+    );
+    await outputFile(schemaPath, '{}');
+
+    const seeded = seededFile();
+    seeded.sections.collectionTypes.groups[1].children.push({
+      type: 'contentType',
+      uid: 'api::article.article',
+    });
+    await outputJSON(groupsPath, seeded, { spaces: 2 });
+    const before = await readFile(groupsPath, 'utf-8');
+
+    await expect(generate({ folder: { newFolderName: 'Blog' } })).rejects.toThrow(
+      'Content type "api::article.article" already exists'
+    );
+
+    expect(await readFile(groupsPath, 'utf-8')).toBe(before);
+  });
 });
