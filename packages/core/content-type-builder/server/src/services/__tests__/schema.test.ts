@@ -31,7 +31,8 @@ const contentTypeServiceMock = {
 };
 
 const contentStructureServiceMock = {
-  persistFromUpdate: jest.fn().mockResolvedValue(false),
+  validateFromUpdate: jest.fn(),
+  commitFromUpdate: jest.fn().mockResolvedValue(false),
   validateContentTypeUidReferences: jest.fn(),
 };
 
@@ -571,7 +572,7 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
     });
 
-    it('forwards a kind changed on update to persistFromUpdate', async () => {
+    it('forwards a kind changed on update to the folder validate + commit steps', async () => {
       const contentTypeUid = 'api::test.test';
       const mockContentType = {
         uid: contentTypeUid,
@@ -618,11 +619,113 @@ describe('Content Type Builder - Schema service', () => {
 
       await updateSchema(schema);
 
-      expect(contentStructureServiceMock.persistFromUpdate).toHaveBeenCalledWith({
+      expect(contentStructureServiceMock.validateFromUpdate).toHaveBeenCalledWith({
         incomingStructure: contentStructure,
         upsertedUids: new Map([[contentTypeUid, 'singleType']]),
         deletedUids: new Set(),
       });
+
+      expect(contentStructureServiceMock.commitFromUpdate).toHaveBeenCalledWith({
+        incomingStructure: contentStructure,
+        deletedUids: new Set(),
+      });
+    });
+
+    it('validates folder references before scaffolding and commits them after writeFiles', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await updateSchema(schema);
+
+      // validate runs before the API is scaffolded; commit runs after schema files are written.
+      const validateOrder =
+        contentStructureServiceMock.validateFromUpdate.mock.invocationCallOrder[0];
+      const generateApiOrder = contentTypeServiceMock.generateAPI.mock.invocationCallOrder[0];
+      const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
+        .invocationCallOrder[0];
+      const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+
+      expect(validateOrder).toBeLessThan(generateApiOrder);
+      expect(writeFilesOrder).toBeLessThan(commitOrder);
+    });
+
+    it('does not commit the folder file when folder validation rejects the payload', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      contentStructureServiceMock.validateFromUpdate.mockImplementationOnce(() => {
+        throw new Error('invalid folder reference');
+      });
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('invalid folder reference');
+
+      // Nothing touched disk: no API scaffolded, no schema files written, no folder file committed.
+      expect(contentTypeServiceMock.generateAPI).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+      expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
     });
 
     it('should handle attribute deletion during component update', async () => {

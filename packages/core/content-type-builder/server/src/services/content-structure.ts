@@ -41,23 +41,14 @@ export interface ContentTypeBuilderContentStructureService {
     contentTypeUids: Map<string, ContentTypeKind>
   ): void;
 
-  /**
-   * Attempts to persist the provided `incomingStructure` to the `groups.json` file (via the
-   * core content-structure service). Prior to invoking the core service, this method:
-   * - Prunes references to content types that are deleted in the same save operation.
-   * - Validates the pruned structure's references against the effective set of content types
-   *   (produced from `upsertedUids`, `deletedUids`, and the pre-existing registry). Any reference
-   *   to a non-existent content type (or one whose kind does not match its section)throws an ApplicationError.
-   * Returns true if a file write occurred, false if a write was not necessary.
-   * Invokes `validateContentTypeUidReferences()`, which throws an ApplicationError if a
-   * referenced contentTypeUid is invalid.
-   *
-   * `upsertedUids` maps each content type created — or whose kind is changed — in the same save
-   * operation to its (new) kind, taking precedence over the pre-transaction registry.
-   */
-  persistFromUpdate(input: {
+  validateFromUpdate(input: {
     incomingStructure?: unknown;
     upsertedUids: Map<string, ContentTypeKind>;
+    deletedUids: Set<string>;
+  }): void;
+
+  commitFromUpdate(input: {
+    incomingStructure?: unknown;
     deletedUids: Set<string>;
   }): Promise<boolean>;
 }
@@ -234,7 +225,7 @@ export function createContentStructureService(
     }
   };
 
-  const persistFromUpdate = async ({
+  const validateFromUpdate = ({
     incomingStructure,
     upsertedUids,
     deletedUids,
@@ -242,16 +233,32 @@ export function createContentStructureService(
     incomingStructure?: unknown;
     upsertedUids: Map<string, ContentTypeKind>;
     deletedUids: Set<string>;
-  }): Promise<boolean> => {
-    const effectiveKinds = buildEffectiveUidKindSet(upsertedUids, deletedUids);
+  }): void => {
+    if (incomingStructure === undefined || incomingStructure === null) {
+      return;
+    }
 
+    const effectiveKinds = buildEffectiveUidKindSet(upsertedUids, deletedUids);
+    const pruned = pruneStructure(
+      formatContentStructureObjectAsFile(incomingStructure),
+      deletedUids
+    );
+
+    validateContentTypeUidReferences(pruned, effectiveKinds);
+  };
+
+  const commitFromUpdate = async ({
+    incomingStructure,
+    deletedUids,
+  }: {
+    incomingStructure?: unknown;
+    deletedUids: Set<string>;
+  }): Promise<boolean> => {
     if (incomingStructure !== undefined && incomingStructure !== null) {
       const pruned = pruneStructure(
         formatContentStructureObjectAsFile(incomingStructure),
         deletedUids
       );
-
-      validateContentTypeUidReferences(pruned, effectiveKinds);
 
       await contentStructureService.write(pruned);
       return true;
@@ -275,6 +282,7 @@ export function createContentStructureService(
 
   return {
     validateContentTypeUidReferences,
-    persistFromUpdate,
+    validateFromUpdate,
+    commitFromUpdate,
   };
 }
