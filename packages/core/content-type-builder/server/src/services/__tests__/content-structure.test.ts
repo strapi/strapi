@@ -180,7 +180,7 @@ describe('CTB content-structure service', () => {
 
       const result = await createContentStructureService(strapi).persistFromUpdate({
         incomingStructure: validExample(),
-        createdUids: new Map(),
+        upsertedUids: new Map(),
         deletedUids: new Set(),
       });
 
@@ -207,7 +207,7 @@ describe('CTB content-structure service', () => {
 
       const result = await createContentStructureService(strapi).persistFromUpdate({
         incomingStructure: validExample(),
-        createdUids: new Map(),
+        upsertedUids: new Map(),
         deletedUids: new Set(['api::category.category']),
       });
 
@@ -249,7 +249,7 @@ describe('CTB content-structure service', () => {
       await expect(
         createContentStructureService(strapi).persistFromUpdate({
           incomingStructure: incoming,
-          createdUids: new Map(),
+          upsertedUids: new Map(),
           deletedUids: new Set(),
         })
       ).rejects.toThrow(/api::ghost.ghost.*does not exist/);
@@ -267,7 +267,7 @@ describe('CTB content-structure service', () => {
       });
 
       const result = await createContentStructureService(strapi).persistFromUpdate({
-        createdUids: new Map(),
+        upsertedUids: new Map(),
         deletedUids: new Set(['api::category.category']),
       });
 
@@ -286,7 +286,7 @@ describe('CTB content-structure service', () => {
       const strapi = buildStrapi();
 
       const result = await createContentStructureService(strapi).persistFromUpdate({
-        createdUids: new Map(),
+        upsertedUids: new Map(),
         deletedUids: new Set(),
       });
 
@@ -317,7 +317,7 @@ describe('CTB content-structure service', () => {
 
       const result = await createContentStructureService(strapi).persistFromUpdate({
         incomingStructure: incoming,
-        createdUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
+        upsertedUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
         deletedUids: new Set(),
       });
 
@@ -354,7 +354,7 @@ describe('CTB content-structure service', () => {
       await expect(
         createContentStructureService(strapi).persistFromUpdate({
           incomingStructure: incoming,
-          createdUids: new Map(),
+          upsertedUids: new Map(),
           deletedUids: new Set(),
         })
       ).rejects.toThrow(/cannot be placed in section "collectionTypes"/);
@@ -373,7 +373,7 @@ describe('CTB content-structure service', () => {
 
       await createContentStructureService(strapi).persistFromUpdate({
         incomingStructure: validExample(),
-        createdUids: new Map(),
+        upsertedUids: new Map(),
         deletedUids: new Set(['api::category.category']),
       });
 

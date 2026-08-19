@@ -620,7 +620,7 @@ describe('Content Type Builder - Schema service', () => {
 
       expect(contentStructureServiceMock.persistFromUpdate).toHaveBeenCalledWith({
         incomingStructure: contentStructure,
-        createdUids: new Map([[contentTypeUid, 'singleType']]),
+        upsertedUids: new Map([[contentTypeUid, 'singleType']]),
         deletedUids: new Set(),
       });
     });

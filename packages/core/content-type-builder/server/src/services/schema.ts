@@ -252,16 +252,16 @@ export const updateSchema = async (schema: CTBSchema) => {
     }
   }
 
-  const createdUids = new Map<string, ContentTypeKind>();
+  const upsertedUids = new Map<string, ContentTypeKind>();
   const deletedUids = new Set<string>();
 
   for (const contentType of contentTypes) {
     if (contentType.action === 'create') {
-      createdUids.set(contentType.uid, contentType.kind ?? 'collectionType');
+      upsertedUids.set(contentType.uid, contentType.kind ?? 'collectionType');
     } else if (contentType.action === 'update' && contentType.kind) {
       // A kind switch in the same save must override the registry's stale kind,
       // otherwise a folder assignment into the new section fails validation.
-      createdUids.set(contentType.uid, contentType.kind);
+      upsertedUids.set(contentType.uid, contentType.kind);
     } else if (contentType.action === 'delete') {
       deletedUids.add(contentType.uid);
     }
@@ -269,7 +269,7 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   await getService('content-structure').persistFromUpdate({
     incomingStructure: contentStructure,
-    createdUids,
+    upsertedUids,
     deletedUids,
   });
 
