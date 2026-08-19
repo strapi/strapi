@@ -221,6 +221,8 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
   const depth = item.depth;
   const node = item.node;
 
+  const canToggle = Boolean(handlers.canToggle);
+
   const dropLine =
     handlers.dropLine && handlers.dropLine.anchorId === item.id ? handlers.dropLine : null;
 
@@ -335,9 +337,11 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
     >
       {node.type === 'folder' ? (
         <GrabArea
-          type="button"
-          onClick={handlers.canToggle ? () => handlers.onToggle(node.id) : undefined}
-          style={handlers.canToggle ? undefined : { cursor: 'default' }}
+          aria-expanded={canToggle ? !handlers.isCollapsed(node.id) : undefined}
+          onClick={canToggle ? () => handlers.onToggle(node.id) : undefined}
+          style={canToggle ? undefined : { cursor: 'default' }}
+          type={canToggle ? 'button' : undefined}
+          as={canToggle ? 'button' : 'span'}
         >
           <Glyph aria-hidden>
             <ChevronDown
