@@ -295,6 +295,42 @@ describe('CTB content-structure service', () => {
       expect(coreServiceMock.write).not.toHaveBeenCalled();
     });
 
+    it('accepts a kind switched in the same batch when filed under the new section', async () => {
+      const strapi = buildStrapi({ 'api::article.article': { kind: 'collectionType' } });
+
+      const incoming = {
+        version: 1,
+        sections: {
+          collectionTypes: { groups: [] },
+          singleTypes: {
+            groups: [
+              {
+                id: 'grp_s',
+                name: 'S',
+                parent: null,
+                children: [{ type: 'contentType', uid: 'api::article.article' }],
+              },
+            ],
+          },
+        },
+      };
+
+      const result = await createContentStructureService(strapi).persistFromUpdate({
+        incomingStructure: incoming,
+        createdUids: new Map<string, Kind>([['api::article.article', 'singleType']]),
+        deletedUids: new Set(),
+      });
+
+      expect(result).toBe(true);
+      expect(coreServiceMock.write).toHaveBeenCalledTimes(1);
+
+      const written = coreServiceMock.write.mock.calls[0][0];
+      expect(written.sections.singleTypes.groups[0].children).toContainEqual({
+        type: 'contentType',
+        uid: 'api::article.article',
+      });
+    });
+
     it('rejects a kind-mismatched reference instead of silently pruning it', async () => {
       const strapi = buildStrapi({ 'api::article.article': { kind: 'singleType' } });
 

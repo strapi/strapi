@@ -206,6 +206,7 @@ export const FolderSelect = ({
     <Field.Root error={errorMessage} name={name}>
       <Field.Label>{label}</Field.Label>
       <Combobox
+        key={section} // This forces the input to regenerate its defaultTextValue when the kind changes.
         defaultTextValue={selectedLabel || undefined}
         onCreateOption={handleCreateOption}
         value={selectedValue || undefined}

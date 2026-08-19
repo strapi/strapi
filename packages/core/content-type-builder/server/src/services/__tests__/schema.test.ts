@@ -571,6 +571,60 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
     });
 
+    it('forwards a kind changed on update to persistFromUpdate', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'singleType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+
+      const contentStructure: CTBSchema['contentStructure'] = {
+        version: 1,
+        sections: {
+          collectionTypes: { groups: [] },
+          singleTypes: {
+            groups: [
+              {
+                id: 'grp_s',
+                name: 'S',
+                parent: null,
+                children: [{ type: 'contentType', uid: contentTypeUid }],
+              },
+            ],
+          },
+        },
+      };
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'update',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            kind: 'singleType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure,
+      };
+
+      await updateSchema(schema);
+
+      expect(contentStructureServiceMock.persistFromUpdate).toHaveBeenCalledWith({
+        incomingStructure: contentStructure,
+        createdUids: new Map([[contentTypeUid, 'singleType']]),
+        deletedUids: new Set(),
+      });
+    });
+
     it('should handle attribute deletion during component update', async () => {
       const componentUid = 'component.test';
       const mockComponent = {
