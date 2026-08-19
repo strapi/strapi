@@ -24,28 +24,36 @@ const renderDialog = ({
 };
 
 describe('DeleteFolderDialog', () => {
-  it('pluralizes the content count in the title', () => {
+  it('shows a static title when deleting the folder and its contents', () => {
+    renderDialog({ counts: { contentTypes: 2, subfolders: 1 } });
+
+    expect(screen.getByText('Delete folder and contents')).toBeInTheDocument();
+  });
+
+  it('pluralizes the content count in the body', () => {
     renderDialog({ counts: { contentTypes: 1, subfolders: 0 } });
 
-    expect(screen.getByText('Delete folder and 1 content')).toBeInTheDocument();
+    expect(screen.getByText(/and all its contents \(1 content type\)/)).toBeInTheDocument();
   });
 
   it('shows the content count without a subfolder segment when there are no subfolders', () => {
     renderDialog({ counts: { contentTypes: 3, subfolders: 0 } });
 
-    expect(screen.getByText('Delete folder and 3 contents')).toBeInTheDocument();
+    expect(screen.getByText(/and all its contents \(3 content types\)/)).toBeInTheDocument();
   });
 
   it('shows both counts when the folder holds subfolders', () => {
     renderDialog({ counts: { contentTypes: 2, subfolders: 1 } });
 
-    expect(screen.getByText('Delete folder and 2 contents, 1 subfolder')).toBeInTheDocument();
+    expect(
+      screen.getByText(/and all its contents \(2 content types, 1 subfolder\)/)
+    ).toBeInTheDocument();
   });
 
   it('drops the content segment when the subtree holds no content types', () => {
     renderDialog({ counts: { contentTypes: 0, subfolders: 2 } });
 
-    expect(screen.getByText('Delete folder and 2 subfolders')).toBeInTheDocument();
+    expect(screen.getByText(/and all its contents \(2 subfolders\)/)).toBeInTheDocument();
   });
 
   it('keeps the plain title when deleting the folder only', () => {

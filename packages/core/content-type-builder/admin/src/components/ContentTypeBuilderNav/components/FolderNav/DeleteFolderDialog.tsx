@@ -29,21 +29,17 @@ export const DeleteFolderDialog = ({
 
   const title = useMemo(() => {
     if (mode === 'withContent') {
-      return formatMessage(
-        {
-          id: getTrad('nav.folder.delete-with-content.title'),
-          defaultMessage:
-            '{contentTypes, plural, =0 {Delete folder and {subfolders, plural, one {# subfolder} other {# subfolders}}} one {Delete folder and # content{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {Delete folder and # contents{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}',
-        },
-        counts
-      );
+      return formatMessage({
+        id: getTrad('nav.folder.delete-with-content.title'),
+        defaultMessage: 'Delete folder and contents',
+      });
     }
 
     return formatMessage({
       id: getTrad('nav.folder.delete.title'),
       defaultMessage: 'Delete folder',
     });
-  }, [formatMessage, mode, counts]);
+  }, [formatMessage, mode]);
 
   const body = useMemo(() => {
     if (mode === 'withContent') {
@@ -51,9 +47,9 @@ export const DeleteFolderDialog = ({
         {
           id: getTrad('nav.folder.delete-with-content.body'),
           defaultMessage:
-            'You are about to delete the folder named {name} and all of its content. Are you sure you want to proceed?',
+            'You are about to delete the folder named {name} and all its contents ({contentTypes, plural, =0 {{subfolders, plural, one {# subfolder} other {# subfolders}}} one {# content type{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {# content types{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}). Are you sure you want to proceed?',
         },
-        { name: <Typography fontWeight="bold">{folderName}</Typography> }
+        { name: <Typography fontWeight="bold">{folderName}</Typography>, ...counts }
       );
     }
 
@@ -65,7 +61,7 @@ export const DeleteFolderDialog = ({
       },
       { name: <Typography fontWeight="bold">{folderName}</Typography> }
     );
-  }, [formatMessage, folderName, mode]);
+  }, [formatMessage, folderName, mode, counts]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

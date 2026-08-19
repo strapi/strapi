@@ -194,7 +194,6 @@ export interface TreeHandlers {
   onCancelRename: () => void;
   onDeleteFolder: (node: FolderNode) => void;
   onDeleteFolderAndContent: (node: FolderNode) => void;
-  countFolderSubtree: (id: string) => { contentTypes: number; subfolders: number };
   validateFolderName: (params: {
     name: string;
     parentId: string | null;
@@ -311,14 +310,10 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
                 onSelect={() => handlers.onDeleteFolderAndContent(node)}
                 startIcon={<Trash />}
               >
-                {formatMessage(
-                  {
-                    id: getTrad('nav.folder.delete-with-content'),
-                    defaultMessage:
-                      '{contentTypes, plural, =0 {Delete folder and {subfolders, plural, one {# subfolder} other {# subfolders}}} one {Delete folder and # content{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {Delete folder and # contents{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}',
-                  },
-                  handlers.countFolderSubtree(node.id)
-                )}
+                {formatMessage({
+                  id: getTrad('nav.folder.delete-with-content'),
+                  defaultMessage: 'Delete folder and contents',
+                })}
               </Menu.Item>
             )}
           </Menu.Content>
