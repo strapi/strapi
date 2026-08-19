@@ -268,6 +268,10 @@ type DragState = {
 export function resolveDropTarget(items: FlatItem[], dragState: DragState): DropTarget | null {
   const { activeId, overId, offsetX, pointer, overRect } = dragState;
 
+  if (overId === activeId) {
+    return null;
+  }
+
   const itemHoveredByCursor = items.find((item) => item.id === overId);
 
   // If item is valid FoldeRNode
@@ -285,10 +289,6 @@ export function resolveDropTarget(items: FlatItem[], dragState: DragState): Drop
     });
 
     if (zone === 'nest') {
-      if (overId === activeId) {
-        return null;
-      }
-
       const activeNode = items.find(({ id }) => id === activeId)?.node;
       const nestIsValid =
         activeNode == null ||
