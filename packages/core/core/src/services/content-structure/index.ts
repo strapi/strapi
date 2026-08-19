@@ -57,10 +57,6 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
    */
   let cache: ContentStructureCache | undefined;
 
-  const getFilePath = () => {
-    return join(strapi.dirs.app.contentStructure, CONTENT_STRUCTURE_FILE_NAME);
-  };
-
   const warn = (message: string) => {
     strapi.log.warn(`[content-structure] ${message}`);
   };
@@ -287,7 +283,7 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
   };
 
   async function read(): Promise<Modules.ContentStructure.ContentStructureFile | null> {
-    const filePath = getFilePath();
+    const filePath = join(strapi.dirs.dist.contentStructure, CONTENT_STRUCTURE_FILE_NAME);
 
     if (!(await fse.pathExists(filePath))) {
       return null;

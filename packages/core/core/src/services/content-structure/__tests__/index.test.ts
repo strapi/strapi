@@ -14,6 +14,7 @@ jest.mock('fs-extra', () => ({
 const fseMock = fse as jest.Mocked<typeof fse>;
 
 const CONTENT_STRUCTURE_DIR = '/app/src/content-structure';
+const DIST_CONTENT_STRUCTURE_DIR = '/app/dist/src/content-structure';
 const FILE_PATH = path.join(CONTENT_STRUCTURE_DIR, CONTENT_STRUCTURE_FILE_NAME);
 
 type MockContentTypes = Record<string, { kind?: string }>;
@@ -40,7 +41,10 @@ const setup = (
   const error = jest.fn();
 
   const strapi = {
-    dirs: { app: { contentStructure: CONTENT_STRUCTURE_DIR } },
+    dirs: {
+      app: { contentStructure: CONTENT_STRUCTURE_DIR },
+      dist: { contentStructure: DIST_CONTENT_STRUCTURE_DIR },
+    },
     log: { warn, error },
     contentTypes,
   } as unknown as Core.Strapi;

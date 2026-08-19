@@ -1,7 +1,33 @@
 import { actions, reducer, initialState } from '../reducer';
+import { CONTENT_STRUCTURE_VERSION } from '../utils/contentStructure';
 
 import type { AnyAttribute, ContentType, Component } from '../../../types';
+import type { ContentStructure } from '../utils/contentStructure';
 import type { Internal, Schema } from '@strapi/types';
+
+/**
+ * A content structure with a single root folder in `section` holding `uid`.
+ * Used to assert that mutations keep the folder tree in sync.
+ */
+const folderedStructure = (section: 'collectionTypes' | 'singleTypes', uid: string) => {
+  const groups: ContentStructure['sections']['collectionTypes']['groups'] = [
+    {
+      id: 'group-1',
+      name: 'Folder',
+      parent: null,
+      status: 'UNCHANGED',
+      children: [{ type: 'contentType', uid }],
+    },
+  ];
+
+  return {
+    version: CONTENT_STRUCTURE_VERSION,
+    sections: {
+      collectionTypes: { groups: section === 'collectionTypes' ? groups : [] },
+      singleTypes: { groups: section === 'singleTypes' ? groups : [] },
+    },
+  } satisfies ContentStructure;
+};
 
 const testContentType: ContentType = {
   uid: 'api::test.test',
@@ -841,6 +867,64 @@ describe('Content Type Builder | DataManager | reducer', () => {
       const state = reducer(initializedState, action);
       expect(state.current.components['test.component']).toBeDefined();
       expect(state.current.components['test.component'].status).toBe('NEW');
+    });
+
+    it('should relocate a foldered content type out of its old section when the kind changes', () => {
+      const initializedState = reducer(
+        undefined,
+        actions.init({
+          components: {},
+          contentTypes: {
+            'api::test.test': { ...testContentType, kind: 'collectionType' },
+          },
+          reservedNames: { models: [], attributes: [] },
+          contentStructure: folderedStructure('collectionTypes', 'api::test.test'),
+        })
+      );
+
+      const action = actions.applyChange({
+        action: 'update',
+        schema: { ...testContentType, kind: 'singleType' },
+      });
+
+      const state = reducer(initializedState, action);
+
+      // The stale reference must be gone from the old section, or the next
+      // folder edit would send a structure the server's kind-vs-section rejects.
+      expect(state.current.contentStructure.sections.collectionTypes.groups[0].children).toEqual(
+        []
+      );
+      expect(state.current.contentTypes['api::test.test'].kind).toBe('singleType');
+    });
+
+    it('should drop a deleted unsaved content type from the folder tree', () => {
+      const newContentType: ContentType = { ...testContentType, status: 'NEW' };
+
+      const initializedState = reducer(
+        undefined,
+        actions.init({
+          components: {},
+          contentTypes: {
+            'api::test.test': newContentType,
+          },
+          reservedNames: { models: [], attributes: [] },
+          contentStructure: folderedStructure('collectionTypes', 'api::test.test'),
+        })
+      );
+
+      const action = actions.applyChange({
+        action: 'delete',
+        schema: newContentType,
+      });
+
+      const state = reducer(initializedState, action);
+
+      // The unsaved type is dropped from the payload, so pruneStructure never
+      // strips it server-side — the reducer must remove the dangling reference.
+      expect(state.current.contentTypes['api::test.test']).toBeUndefined();
+      expect(state.current.contentStructure.sections.collectionTypes.groups[0].children).toEqual(
+        []
+      );
     });
   });
 
