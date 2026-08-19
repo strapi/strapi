@@ -186,6 +186,8 @@ const Label = styled(Typography)`
 export interface TreeHandlers {
   section: SectionKey;
   canEdit: boolean;
+  /** Whether a folder can be collapsed / uncollapsed. */
+  canToggle?: boolean;
   editingId: string | null;
   isCollapsed: (id: string) => boolean;
   onToggle: (id: string) => void;
@@ -332,7 +334,11 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
       $depth={depth}
     >
       {node.type === 'folder' ? (
-        <GrabArea type="button" onClick={() => handlers.onToggle(node.id)}>
+        <GrabArea
+          type="button"
+          onClick={handlers.canToggle ? () => handlers.onToggle(node.id) : undefined}
+          style={handlers.canToggle ? undefined : { cursor: 'default' }}
+        >
           <Glyph aria-hidden>
             <ChevronDown
               fill="neutral500"

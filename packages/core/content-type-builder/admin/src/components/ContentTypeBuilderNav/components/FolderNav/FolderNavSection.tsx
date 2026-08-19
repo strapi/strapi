@@ -52,6 +52,8 @@ interface FolderNavSectionProps {
   links: ContentTypeLink[];
 }
 
+const EMPTY_COLLAPSED: Set<string> = new Set(); // Empty set to uncollapse all items while searching
+
 export const FolderNavSection = ({
   onCreateContentType,
   createTypeLabel,
@@ -68,6 +70,7 @@ export const FolderNavSection = ({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isDrafting, setIsDrafting] = useState(false);
+
   const [deleteTarget, setDeleteTarget] = useState<{
     mode: DeleteFolderMode;
     node: FolderNode;
@@ -88,19 +91,21 @@ export const FolderNavSection = ({
     return buildSectionTree(sectionData, links, (a, b) => formatter.compare(a, b));
   }, [sectionData, links, formatter]);
 
+  const effectiveCollapsed = searchActive ? EMPTY_COLLAPSED : collapsed;
+
   const visibleTree = useMemo(() => {
     return searchActive ? filterTree(tree, (text) => contains(text, searchValue)) : tree;
   }, [searchActive, tree, contains, searchValue]);
 
   const flatItems = useMemo(() => {
-    return flattenSortableTree(visibleTree, collapsed);
-  }, [visibleTree, collapsed]);
+    return flattenSortableTree(visibleTree, effectiveCollapsed);
+  }, [visibleTree, effectiveCollapsed]);
 
   // This hook supplies the CTB contentStructure dnd engine.
   const dnd = useSortableTree({
+    collapsed: effectiveCollapsed,
     disabled: !canEdit,
     items: flatItems,
-    collapsed,
     onDrop: (activeNode, target) => {
       const parentId = target.kind === 'nest' ? target.folderId : target.parentId;
       const index = target.kind === 'nest' ? 0 : target.index;
@@ -186,8 +191,10 @@ export const FolderNavSection = ({
     canEdit,
 
     isCollapsed: (id) => {
-      return collapsed.has(id);
+      return effectiveCollapsed.has(id);
     },
+    // Search forces the tree open; a collapse toggle then can't take effect, so don't present one.
+    canToggle: !searchActive,
     onToggle: (id) => {
       setCollapsed((prev) => {
         const next = new Set(prev);
