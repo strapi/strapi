@@ -4,7 +4,7 @@ import { statSync, existsSync } from 'fs';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
-import { getUserPluginsConfig } from './get-user-plugins-config';
+import { getUserPluginsConfig, PluginDeclaration } from './get-user-plugins-config';
 
 interface PluginMeta {
   enabled: boolean;
@@ -18,12 +18,6 @@ type PluginMetas = Record<string, PluginMeta>;
 interface PluginInfo {
   name: string;
   kind: string;
-}
-
-interface PluginDeclaration {
-  enabled: boolean;
-  resolve: string;
-  isModule: boolean;
 }
 
 /**
