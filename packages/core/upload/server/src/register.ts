@@ -5,6 +5,7 @@ import { errors, file } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import registerUploadMiddleware from './middlewares/upload';
+import registerSizeLimitMiddleware from './middlewares/size-limit';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
@@ -36,6 +37,10 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   strapi.plugin('upload').provider = createProvider(uploadConfig);
 
   await registerUploadMiddleware({ strapi });
+
+  // Reject oversized single-file uploads from `Content-Length`, before the body
+  // middleware streams them to temp disk.
+  registerSizeLimitMiddleware({ strapi });
 
   if (strapi.plugin('graphql')) {
     const { installGraphqlExtension } = await import('./graphql.js');
