@@ -157,6 +157,29 @@ describe('resolveDropTarget — between rows', () => {
   });
 });
 
+describe('resolveDropTarget — a row released over itself is a no-op', () => {
+  it('does not unfile a nested content type dropped on itself (top zone, no line)', () => {
+    const flat = buildFlat();
+    const selfId = itemId(flat[1].node);
+
+    expect(project(flat, selfId, selfId, { pointerY: TOP_ZONE_Y })).toBeNull();
+  });
+
+  it('does not unfile a nested content type dropped on itself (bottom zone)', () => {
+    const flat = buildFlat();
+    const selfId = itemId(flat[1].node);
+
+    expect(project(flat, selfId, selfId, { pointerY: BOTTOM_ZONE_Y })).toBeNull();
+  });
+
+  it('does not fabricate a move when a folder is dropped on itself', () => {
+    const flat = buildFlat();
+    const selfId = itemId(flat[0].node);
+
+    expect(project(flat, selfId, selfId, { pointerY: TOP_ZONE_Y })).toBeNull();
+  });
+});
+
 describe('resolveDropTarget — root content types have no reorderable slot', () => {
   it('snaps a reorder within the ungrouped block to the boundary above the first root folder', () => {
     const tree = buildSectionTree(
