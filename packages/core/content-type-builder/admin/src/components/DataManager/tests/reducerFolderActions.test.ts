@@ -1,6 +1,7 @@
 import { actions, initialState, reducer } from '../reducer';
 import { CONTENT_STRUCTURE_VERSION } from '../utils/contentStructure';
 
+import type { ContentType, Status } from '../../../types';
 import type {
   ContentStructure,
   ContentStructureChild,
@@ -21,6 +22,19 @@ const groupChild = (id: string): ContentStructureChild => ({ type: 'group', id }
 const ctChild = (uid: string): ContentStructureChild => ({
   type: 'contentType',
   uid: uid as UID.ContentType,
+});
+
+const ct = (uid: string, status: Status = 'NEW'): ContentType => ({
+  uid: uid as UID.ContentType,
+  attributes: [],
+  modelType: 'contentType',
+  kind: 'collectionType',
+  info: { displayName: uid, singularName: uid, pluralName: uid },
+  globalId: uid,
+  modelName: uid,
+  status,
+  visible: true,
+  restrictRelationsTo: [],
 });
 
 type WrappedState = { current: { contentStructure: ContentStructure } };
@@ -377,6 +391,41 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         ctChild('api::x.x'),
         ctChild('api::q.q'),
       ]);
+    });
+  });
+
+  describe('deleteContentType', () => {
+    it('detaches a deleted NEW content type from its folder and marks it CHANGED', () => {
+      const uid = 'api::foo.foo';
+      const state = stateWith([grp('grp_a', 'A', null, [ctChild(uid), ctChild('api::bar.bar')])]);
+      state.current.contentTypes = { [uid]: ct(uid, 'NEW') };
+
+      const next = reducer(state, actions.deleteContentType(uid as UID.ContentType));
+
+      expect(findGroup(next, 'grp_a')?.children).toEqual([ctChild('api::bar.bar')]);
+      expect(findGroup(next, 'grp_a')?.status).toBe('CHANGED');
+      expect(next.current.contentTypes[uid]).toBeUndefined();
+    });
+
+    it('detaches a deleted saved content type from its folder', () => {
+      const uid = 'api::foo.foo';
+      const state = stateWith([grp('grp_a', 'A', null, [ctChild(uid)])]);
+      state.current.contentTypes = { [uid]: ct(uid, 'UNCHANGED') };
+
+      const next = reducer(state, actions.deleteContentType(uid as UID.ContentType));
+
+      expect(findGroup(next, 'grp_a')?.children).toEqual([]);
+      expect(next.current.contentTypes[uid]?.status).toBe('REMOVED');
+    });
+
+    it('leaves the tree untouched when the deleted type is in no folder', () => {
+      const uid = 'api::foo.foo';
+      const before = stateWith([grp('grp_a', 'A', null)]);
+      before.current.contentTypes = { [uid]: ct(uid, 'NEW') };
+
+      const next = reducer(before, actions.deleteContentType(uid as UID.ContentType));
+
+      expect(groupsOf(next)).toEqual(groupsOf(before));
     });
   });
 
