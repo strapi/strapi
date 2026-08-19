@@ -266,21 +266,3 @@ export function indexFolders(nodes: FolderTreeNode[]): Map<string, FolderNode> {
 
   return index;
 }
-
-/**
- * Whether `maybeAncestorId` is `folder` itself or one of its ancestors.
- * This is used to prevent a folder from being dropped into its own subtree.
- */
-export function isSelfOrDescendant(folder: FolderNode, maybeDescendantId: string): boolean {
-  if (folder.id === maybeDescendantId) {
-    return true;
-  }
-
-  for (const child of folder.children) {
-    if (child.type === 'folder' && isSelfOrDescendant(child, maybeDescendantId)) {
-      return true;
-    }
-  }
-
-  return false;
-}
