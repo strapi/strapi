@@ -3,10 +3,12 @@
  * original entry's populated relation data.
  */
 import type { Core, UID } from '@strapi/types';
+import type { Knex } from 'knex';
 
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
+const modelsUtils = require('api-tests/models');
 const { createStrapiInstance } = require('api-tests/strapi');
 
 let strapi: Core.Strapi;
@@ -165,6 +167,24 @@ const fkInverseModel = {
   collectionName: '',
 };
 
+const fkInverseBaseModel = {
+  ...fkInverseModel,
+  attributes: {
+    name: { type: 'string' },
+  },
+};
+
+const fkOwnerBaseModel = {
+  ...fkOwnerModel,
+  attributes: {
+    ...fkOwnerModel.attributes,
+    inverse: {
+      ...fkOwnerModel.attributes.inverse,
+      inversedBy: undefined,
+    },
+  },
+};
+
 const createTag = (name: string) => strapi.documents(TAG_UID).create({ data: { name } });
 
 const relationDocumentId = (
@@ -222,10 +242,13 @@ describe('Document Service clone relation operation payloads', () => {
         categoryModel,
         morphBoxModel,
         plainModel,
-        fkOwnerModel,
-        fkInverseModel,
+        fkInverseBaseModel,
+        fkOwnerBaseModel,
       ])
       .build();
+
+    await modelsUtils.modifyContentType(fkInverseModel);
+    await modelsUtils.modifyContentType(fkOwnerModel);
 
     strapi = await createStrapiInstance();
   });
@@ -731,49 +754,59 @@ describe('Document Service clone relation operation payloads', () => {
     }
   );
 
-  testInTransaction('clone honors connect status:published for an inline D&P target', async () => {
-    const tag = await createTag('Published connect target');
-    await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
+  testInTransaction(
+    'clone honors connect status:published for an inline D&P target',
+    async (trx: Knex.Transaction) => {
+      const tag = await createTag('Published connect target');
+      await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
 
-    const draftRow = await strapi.db.query(TAG_UID).findOne({
-      where: { documentId: tag.documentId, publishedAt: null },
-    });
-    const publishedRow = await strapi.db.query(TAG_UID).findOne({
-      where: { documentId: tag.documentId, publishedAt: { $ne: null } },
-    });
+      const draftRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: null },
+      });
+      const publishedRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: { $ne: null } },
+      });
 
-    expect(draftRow?.id).not.toBe(publishedRow?.id);
+      expect(draftRow?.id).not.toBe(publishedRow?.id);
 
-    const source = await strapi.documents(PLAIN_UID).create({
-      data: { name: 'Plain source', tag: draftRow!.id },
-    });
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Plain source', tag: draftRow!.id },
+      });
 
-    const result = await strapi.documents(PLAIN_UID).clone({
-      documentId: source.documentId,
-      data: {
-        name: 'Plain clone',
-        tag: {
-          connect: [{ documentId: tag.documentId, status: 'published' }],
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Plain clone',
+          tag: {
+            connect: [{ documentId: tag.documentId, status: 'published' }],
+          },
         },
-      },
-      populate: { tag: true },
-    });
+        populate: { tag: true },
+      });
 
-    const cloneRow = await strapi.db.query(PLAIN_UID).findOne({
-      where: { documentId: result.documentId },
-    });
-    const clone = result.entries[0] as { tag?: { id?: number; publishedAt?: unknown } | null };
+      const plainMeta = strapi.db.metadata.get(PLAIN_UID);
+      const tagColumn = (plainMeta.attributes.tag as { joinColumn?: { name?: string } } | undefined)
+        ?.joinColumn?.name;
+      expect(tagColumn).toBeDefined();
 
-    expect({
-      storedTagId: (cloneRow as { tag?: number } | null)?.tag ?? clone?.tag?.id ?? null,
-      publishedTagId: publishedRow?.id ?? null,
-      draftTagId: draftRow?.id ?? null,
-    }).toEqual({
-      storedTagId: publishedRow?.id,
-      publishedTagId: publishedRow?.id,
-      draftTagId: draftRow?.id,
-    });
-  });
+      const cloneRow = await strapi.db
+        .connection(plainMeta.tableName)
+        .where({ id: result.entries[0].id })
+        .select([tagColumn!])
+        .transacting(trx)
+        .first();
+
+      expect({
+        storedTagId: cloneRow?.[tagColumn!] ?? null,
+        publishedTagId: publishedRow?.id ?? null,
+        draftTagId: draftRow?.id ?? null,
+      }).toEqual({
+        storedTagId: publishedRow?.id,
+        publishedTagId: publishedRow?.id,
+        draftTagId: draftRow?.id,
+      });
+    }
+  );
 
   testInTransaction(
     'clone keeps the current useJoinTable:false target when disconnect does not match',
