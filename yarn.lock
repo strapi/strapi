@@ -9454,7 +9454,6 @@ __metadata:
     "@strapi/types": "npm:5.52.0"
     "@strapi/utils": "npm:5.52.0"
     "@types/graphql-depth-limit": "npm:1.1.5"
-    "@types/jest": "npm:29.5.2"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
     "@types/node": "npm:20.19.41"
@@ -9464,7 +9463,6 @@ __metadata:
     graphql-depth-limit: "npm:^1.1.0"
     graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
-    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:^4.1.0"
@@ -9477,6 +9475,8 @@ __metadata:
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.52.0"
     typescript: "npm:5.9.3"
+    vitest: "catalog:"
+    vitest-config: "npm:5.52.0"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
