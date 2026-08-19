@@ -3,6 +3,8 @@ import { adminApi } from '@strapi/admin/strapi-admin';
 
 import {
   openUploadProgress,
+  appendUploadFiles,
+  isUploadInFlight,
   setFileUploading,
   setFileProgress,
   setFileComplete,
@@ -128,6 +130,31 @@ export const abortUpload = (uploadId: number) => {
     controller.abort();
     unregisterAbortController(uploadId);
   }
+};
+
+/**
+ * The last pool run queued for a batch, so a merge can wait for it.
+ *
+ * A second drop must not spin up its own worker pool next to the one already
+ * draining — that would double the files in flight and make `concurrency` stop
+ * meaning anything. Instead each run chains onto the previous one, and the merged
+ * files sit `pending` (which is the truth) until their turn.
+ */
+const poolTails = new Map<number, Promise<unknown>>();
+
+const trackPoolRun = (uploadId: number, run: Promise<unknown>) => {
+  // Swallow here only so the chain keeps going; the real result still surfaces
+  // through the promise the caller returns.
+  const tail = run.catch(() => undefined);
+
+  poolTails.set(uploadId, tail);
+
+  tail.then(() => {
+    // Leave the entry alone if another run has queued behind us in the meantime.
+    if (poolTails.get(uploadId) === tail) {
+      poolTails.delete(uploadId);
+    }
+  });
 };
 
 /**
@@ -258,7 +285,7 @@ const runUploadPool = async ({
 
     const fileName = entry.fileInfo?.name ?? entry.file.name;
 
-    dispatch(setFileUploading({ name: fileName, index, size: entry.file.size }));
+    dispatch(setFileUploading({ name: fileName, index, size: entry.file.size, uploadId }));
 
     const formData = new FormData();
     formData.append('files', entry.file);
@@ -266,7 +293,7 @@ const runUploadPool = async ({
 
     // Coalesce high-frequency progress events into one dispatch per frame.
     const batcher = createRafBatcher<number>((bytes) => {
-      dispatch(setFileProgress({ index, bytes }));
+      dispatch(setFileProgress({ index, bytes, uploadId }));
     });
 
     try {
@@ -275,7 +302,7 @@ const runUploadPool = async ({
       );
       batcher.cancel();
       uploaded.push(file);
-      dispatch(setFileComplete({ index, file }));
+      dispatch(setFileComplete({ index, file, uploadId }));
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -295,7 +322,7 @@ const runUploadPool = async ({
       }
 
       const message = err instanceof Error ? err.message : 'Upload failed';
-      dispatch(setFileError({ index, name: fileName, message }));
+      dispatch(setFileError({ index, name: fileName, message, uploadId }));
     }
   };
 
@@ -326,6 +353,59 @@ const runUploadPool = async ({
   unregisterAbortController(uploadId);
 
   return { data: uploaded };
+};
+
+/**
+ * Runs the files from a merged drop once the pool already draining this batch is
+ * done, rather than alongside it.
+ *
+ * The batch's AbortController is reused rather than replaced, so a single Cancel
+ * stops both drops — including files still queued here. `runUploadPool`
+ * unregisters the controller when it finishes, so it is registered again for this
+ * leg; and if Cancel landed while we were waiting there is nothing left to do,
+ * because `cancelUpload` has already marked the appended rows cancelled.
+ */
+const runMergedUploadPool = async ({
+  entries,
+  indices,
+  token,
+  uploadId,
+  dispatch,
+  concurrency,
+  generateAiMetadata,
+}: {
+  entries: UploadEntry[];
+  indices: number[];
+  token: string | null | undefined;
+  uploadId: number;
+  dispatch: Dispatch;
+  concurrency: number;
+  generateAiMetadata: boolean;
+}): Promise<UploadPoolResult> => {
+  const abortController = abortControllers.get(uploadId) ?? new AbortController();
+
+  const run = (poolTails.get(uploadId) ?? Promise.resolve()).then(() => {
+    if (abortController.signal.aborted) {
+      return { data: [] as UploadedFile[] };
+    }
+
+    registerAbortController(uploadId, abortController);
+
+    return runUploadPool({
+      entries,
+      indices,
+      token,
+      uploadId,
+      abortController,
+      dispatch,
+      concurrency,
+      generateAiMetadata,
+    });
+  });
+
+  trackPoolRun(uploadId, run);
+
+  return run;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -444,17 +524,17 @@ const processSSEStream = async ({
       switch (event) {
         case 'file:fetching': {
           // URL is being fetched server-side - mark as uploading (processing)
-          dispatch(setFileUploading({ name: parsed.url as string, index, size: 0 }));
+          dispatch(setFileUploading({ name: parsed.url as string, index, size: 0, uploadId }));
           break;
         }
         case 'file:uploading': {
           const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
-          dispatch(setFileUploading({ name: payload.name, index, size: payload.size }));
+          dispatch(setFileUploading({ name: payload.name, index, size: payload.size, uploadId }));
           break;
         }
         case 'file:complete': {
           const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
-          dispatch(setFileComplete({ index, file: payload.file }));
+          dispatch(setFileComplete({ index, file: payload.file, uploadId }));
 
           // Same fire-and-forget semantics as the file flow.
           maybeGenerateMetadata({
@@ -468,7 +548,7 @@ const processSSEStream = async ({
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(setFileError({ index, name: payload.name, message: payload.message }));
+          dispatch(setFileError({ index, name: payload.name, message: payload.message, uploadId }));
           break;
         }
         case 'stream:complete': {
@@ -524,6 +604,44 @@ const uploadApi = adminApi
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
           const fileSizes = entries.map((entry) => entry.file.size);
 
+          // A drop that lands while the batch is still uploading joins it instead
+          // of replacing it: one dialog, one running total. Once the previous
+          // batch has settled — including settling with errors — the next drop
+          // starts fresh. That is the rule design asked for, and it is also what
+          // keeps the earlier drop's in-flight rows addressable.
+          const isMerge = isUploadInFlight((getState() as RootState).uploadProgress.files);
+
+          if (isMerge) {
+            const uploadId = (getState() as RootState).uploadProgress.uploadId;
+            const batch = getUploadEntries(uploadId);
+            const offset = batch?.entries.length ?? 0;
+
+            dispatch(appendUploadFiles({ uploadId, fileNames, fileSizes }));
+
+            const mergedEntries = [...(batch?.entries ?? []), ...entries];
+
+            // Retry replays a row with the flags its batch was started under, so
+            // the batch keeps its original ones. Concurrency in particular has to
+            // stay the batch's, or merging would raise the ceiling it exists to
+            // impose.
+            registerUploadEntries(
+              uploadId,
+              mergedEntries,
+              batch?.generateAiMetadata ?? generateAiMetadata,
+              batch?.concurrency ?? concurrency
+            );
+
+            return runMergedUploadPool({
+              entries: mergedEntries,
+              indices: entries.map((_, index) => offset + index),
+              token,
+              uploadId,
+              dispatch,
+              concurrency: batch?.concurrency ?? concurrency,
+              generateAiMetadata,
+            });
+          }
+
           // Open the progress dialog
           dispatch(openUploadProgress({ totalFiles, fileNames, fileSizes }));
 
@@ -537,7 +655,7 @@ const uploadApi = adminApi
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runUploadPool({
+          const run = runUploadPool({
             entries,
             indices: entries.map((_, index) => index),
             token,
@@ -547,6 +665,10 @@ const uploadApi = adminApi
             concurrency,
             generateAiMetadata,
           });
+
+          trackPoolRun(uploadId, run);
+
+          return run;
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
         // files are added to it.

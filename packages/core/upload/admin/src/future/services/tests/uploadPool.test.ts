@@ -73,6 +73,18 @@ const setup = (count: number, concurrency?: number) => {
   return { inFlight, result };
 };
 
+/** A second drop through the same mutation hook, i.e. the merge path. */
+const drop = (result: { current: [(arg: unknown) => void, unknown] }, count: number) => {
+  act(() => {
+    result.current[0]({
+      formData: buildFormData(count),
+      totalFiles: count,
+      concurrency: undefined,
+      generateAiMetadata: false,
+    });
+  });
+};
+
 const settle = async (inFlight: Deferred[], upTo: number) => {
   for (let i = 0; i < upTo; i += 1) {
     if (inFlight[i]) {
@@ -176,5 +188,53 @@ describe('uploadFiles worker pool', () => {
     });
 
     expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+  });
+
+  describe('a second drop while the first is still uploading', () => {
+    it('does not start a second pool alongside the first', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      drop(result as never, 2);
+
+      // Flush, rather than asserting straight away: `waitFor` passes on its first
+      // check when the condition already holds, so it would report success before
+      // a second pool had a chance to start.
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      // The merged files queue behind the running pool. A second pool would have
+      // taken this to 2, and `concurrency` would stop being a ceiling.
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1);
+
+      // Draining the first drop eventually reaches the merged files: 3 + 2 = 5.
+      await settle(inFlight, 5);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
+    });
+
+    it('cancelling the batch also cancels the files that were merged in', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      drop(result as never, 2);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      // One Cancel covers both drops: the merged leg reuses the batch's controller.
+      act(() => {
+        abortUpload(1);
+      });
+
+      await act(async () => {
+        inFlight[0].reject(new UploadAbortedError());
+      });
+
+      // Nothing further is attempted — not the rest of the first drop, and not the
+      // merged files waiting behind it.
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    });
   });
 });
