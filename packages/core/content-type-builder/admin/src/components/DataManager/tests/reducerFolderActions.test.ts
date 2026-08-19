@@ -268,6 +268,22 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
 
       expect(groupsOf(next)).toEqual(groupsOf(before));
     });
+
+    it('refuses a move that would collide with an identically named sibling', () => {
+      const before = stateWith([
+        grp('grp_p', 'P', null, [groupChild('grp_blog')]),
+        grp('grp_blog', 'Blog', 'grp_p'),
+        grp('grp_q', 'Q', null, [groupChild('grp_other_blog')]),
+        grp('grp_other_blog', 'blog', 'grp_q'),
+      ]);
+
+      const next = reducer(
+        before,
+        actions.moveFolder({ section, id: 'grp_blog', newParentId: 'grp_q' })
+      );
+
+      expect(groupsOf(next)).toEqual(groupsOf(before));
+    });
   });
 
   describe('deleteFolderOnly', () => {

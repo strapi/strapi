@@ -103,9 +103,24 @@ export const FolderNavSection = ({
 
   // This hook supplies the CTB contentStructure dnd engine.
   const dnd = useSortableTree({
+    disabled: !canEdit || searchActive,
     collapsed: effectiveCollapsed,
-    disabled: !canEdit,
     items: flatItems,
+    canDrop: (activeNode, target) => {
+      if (activeNode.type !== 'folder') {
+        return true;
+      }
+
+      const parentId = target.kind === 'nest' ? target.folderId : target.parentId;
+
+      if (
+        isFolderNameTakenBySibling(sectionData.groups, parentId, activeNode.name, activeNode.id)
+      ) {
+        return false;
+      }
+
+      return true;
+    },
     onDrop: (activeNode, target) => {
       const parentId = target.kind === 'nest' ? target.folderId : target.parentId;
       const index = target.kind === 'nest' ? 0 : target.index;
@@ -113,9 +128,9 @@ export const FolderNavSection = ({
       if (activeNode.type === 'folder') {
         actions.moveFolder({
           newParentId: parentId,
-          index,
           id: activeNode.id,
           section,
+          index,
         });
 
         return;
@@ -123,9 +138,9 @@ export const FolderNavSection = ({
 
       actions.assignContentTypeToFolder({
         targetGroupId: parentId,
-        index,
         uid: activeNode.uid,
         section,
+        index,
       });
     },
     onExpandFolder: (folderId) =>
@@ -174,8 +189,8 @@ export const FolderNavSection = ({
 
     if (folderNameTaken) {
       return formatMessage({
-        id: getTrad('nav.folder.name.duplicate'),
         defaultMessage: 'A folder with this name already exists in this location',
+        id: getTrad('nav.folder.name.duplicate'),
       });
     }
 
