@@ -957,6 +957,10 @@ const slice = createUndoRedoSlice(
         } else {
           setStatus(type, 'REMOVED');
         }
+        // remove the content type from the content structure tree
+        Object.values(state.contentStructure.sections).forEach((section) => {
+          removeContentTypeChild(section.groups, uid);
+        });
 
         // remove the content type from the components
         Object.keys(state.components).forEach((componentUid) => {
