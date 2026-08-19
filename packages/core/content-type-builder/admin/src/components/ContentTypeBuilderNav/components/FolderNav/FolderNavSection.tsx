@@ -221,9 +221,6 @@ export const FolderNavSection = ({
     onDeleteFolderAndContent: (node) => {
       setDeleteTarget({ node, mode: 'withContent' });
     },
-    countFolderSubtree: (id) => {
-      return countSubtree(sectionData, id, linkUids);
-    },
   };
 
   const sectionLink = {

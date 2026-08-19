@@ -258,6 +258,10 @@ export const updateSchema = async (schema: CTBSchema) => {
   for (const contentType of contentTypes) {
     if (contentType.action === 'create') {
       createdUids.set(contentType.uid, contentType.kind ?? 'collectionType');
+    } else if (contentType.action === 'update' && contentType.kind) {
+      // A kind switch in the same save must override the registry's stale kind,
+      // otherwise a folder assignment into the new section fails validation.
+      createdUids.set(contentType.uid, contentType.kind);
     } else if (contentType.action === 'delete') {
       deletedUids.add(contentType.uid);
     }
