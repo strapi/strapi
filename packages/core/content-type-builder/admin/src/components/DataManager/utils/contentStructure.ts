@@ -121,7 +121,19 @@ export function hasContentStructureChanged(
 }
 
 export function generateGroupId(): string {
-  const body = crypto.randomUUID().replace(/-/g, '').slice(0, 24);
+  const body = (() => {
+    if (crypto.randomUUID) {
+      return crypto.randomUUID().replace(/-/g, '').slice(0, 24);
+    }
+
+    const bytes = new Uint8Array(Math.ceil(24 / 2));
+    crypto.getRandomValues(bytes);
+
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 24);
+  })();
+
   return `grp_${body}`;
 }
 
