@@ -123,9 +123,10 @@ const Link = (
     handleClick?: () => void;
     label: React.ReactNode;
     depth?: number;
+    bulleted?: boolean;
   }
 ) => {
-  const { label, endAction, handleClick, depth, ...rest } = props;
+  const { label, endAction, handleClick, depth, bulleted = false, ...rest } = props;
 
   return (
     <StyledLink {...rest} $depth={depth} onClick={handleClick}>
@@ -138,7 +139,7 @@ const Link = (
       >
         <Flex justifyContent="space-between" width="100%" gap={{ initial: 2, large: 1 }}>
           <Flex gap={2} flex="1" minWidth="0" alignItems="center">
-            <LinkBullet aria-hidden />
+            {bulleted && <LinkBullet aria-hidden />}
             <Typography
               tag="div"
               lineHeight="32px"

@@ -198,6 +198,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
           to={linkTo(node.link)}
           key={node.link.uid}
           depth={depth}
+          bulleted
         />
       );
     }
@@ -301,6 +302,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                     label={formatLinkTitle(link)}
                     to={linkTo(link)}
                     key={link.uid}
+                    bulleted
                     endAction={
                       path.length > 0 ? (
                         <Typography variant="pi" textColor="neutral500">
