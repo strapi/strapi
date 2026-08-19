@@ -306,30 +306,6 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
     });
   });
 
-  describe('deleteFolderAndSubtree', () => {
-    it('removes the folder and every descendant', () => {
-      const next = reducer(
-        stateWith([
-          grp('grp_g', 'G', null, [groupChild('grp_p')]),
-          grp('grp_p', 'P', 'grp_g', [groupChild('grp_c')]),
-          grp('grp_c', 'C', 'grp_p', [ctChild('api::z.z')]),
-        ]),
-        actions.deleteFolderAndSubtree({ section, id: 'grp_p' })
-      );
-
-      expect(groupsOf(next).map((group) => group.id)).toEqual(['grp_g']);
-      expect(findGroup(next, 'grp_g')?.children).toEqual([]);
-      expect(findGroup(next, 'grp_g')?.status).toBe('CHANGED');
-    });
-
-    it('is a no-op for an unknown id', () => {
-      const before = stateWith([grp('grp_a', 'A', null)]);
-      const next = reducer(before, actions.deleteFolderAndSubtree({ section, id: 'grp_missing' }));
-
-      expect(groupsOf(next)).toEqual(groupsOf(before));
-    });
-  });
-
   describe('assignContentTypeToFolder', () => {
     it('adds a content type to a folder and marks it CHANGED', () => {
       const next = reducer(
@@ -426,6 +402,70 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       const next = reducer(before, actions.deleteContentType(uid as UID.ContentType));
 
       expect(groupsOf(next)).toEqual(groupsOf(before));
+    });
+  });
+
+  describe('deleteFolderAndContent', () => {
+    const folderWithContentState = () => {
+      const state = stateWith([
+        grp('grp_g', 'G', null, [groupChild('grp_p')]),
+        grp('grp_p', 'P', 'grp_g', [ctChild('api::a.a'), groupChild('grp_c')]),
+        grp('grp_c', 'C', 'grp_p', [ctChild('api::b.b')]),
+      ]);
+      state.current.contentTypes = {
+        'api::a.a': ct('api::a.a', 'UNCHANGED'),
+        'api::b.b': ct('api::b.b', 'UNCHANGED'),
+      };
+      return state;
+    };
+
+    const contentTypeUids = ['api::a.a', 'api::b.b'] as UID.ContentType[];
+
+    it('deletes the folder subtree and the content types filed within it', () => {
+      const next = reducer(
+        folderWithContentState(),
+        actions.deleteFolderAndContent({ section, id: 'grp_p', contentTypeUids })
+      );
+
+      expect(groupsOf(next).map((group) => group.id)).toEqual(['grp_g']);
+      expect(findGroup(next, 'grp_g')?.children).toEqual([]);
+      expect(next.current.contentTypes['api::a.a']?.status).toBe('REMOVED');
+      expect(next.current.contentTypes['api::b.b']?.status).toBe('REMOVED');
+    });
+
+    it('records the compound delete as a single undo entry', () => {
+      const next = reducer(
+        folderWithContentState(),
+        actions.deleteFolderAndContent({ section, id: 'grp_p', contentTypeUids })
+      );
+
+      expect(next.past).toHaveLength(1);
+    });
+
+    it('restores both the folder tree and the content types with a single undo', () => {
+      const before = folderWithContentState();
+
+      const deleted = reducer(
+        before,
+        actions.deleteFolderAndContent({ section, id: 'grp_p', contentTypeUids })
+      );
+      const undone = reducer(deleted, actions.undo());
+
+      expect(groupsOf(undone)).toEqual(groupsOf(before));
+
+      expect(undone.current.contentTypes['api::a.a']?.status).toBe('UNCHANGED');
+      expect(undone.current.contentTypes['api::b.b']?.status).toBe('UNCHANGED');
+    });
+
+    it('still deletes the listed content types when the folder id is unknown', () => {
+      const before = folderWithContentState();
+      const next = reducer(
+        before,
+        actions.deleteFolderAndContent({ section, id: 'grp_missing', contentTypeUids })
+      );
+
+      expect(next.current.contentTypes['api::a.a']?.status).toBe('REMOVED');
+      expect(next.current.contentTypes['api::b.b']?.status).toBe('REMOVED');
     });
   });
 

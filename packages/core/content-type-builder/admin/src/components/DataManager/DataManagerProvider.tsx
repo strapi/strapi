@@ -453,11 +453,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.deleteFolderOnly(payload));
     },
     deleteFolderAndContent({ section, id, contentTypeUids }) {
-      contentTypeUids.forEach((uid) => {
-        dispatch(actions.deleteContentType(uid));
-      });
-
-      dispatch(actions.deleteFolderAndSubtree({ section, id }));
+      dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
     },
     assignContentTypeToFolder(payload) {
       dispatch(actions.assignContentTypeToFolder(payload));
