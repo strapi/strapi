@@ -415,7 +415,7 @@ const applyFolderAssignment = (
       targetGroupId = existing.id;
     } else {
       groups.push({
-        name: folder.newFolderName,
+        name: folder.newFolderName.trim(),
         id: folder.newFolderId,
         parent: null,
         children: [],
@@ -994,7 +994,8 @@ const slice = createUndoRedoSlice(
       },
 
       createFolder: (state, action: PayloadAction<CreateFolderPayload>) => {
-        const { section, id, name, parentId } = action.payload;
+        const { section, id, name: rawName, parentId } = action.payload;
+        const name = rawName.trim();
         const { groups } = state.contentStructure.sections[section];
 
         if (parentId && getGroupDepth(groups, parentId) + 1 > MAX_FOLDER_DEPTH) {
@@ -1017,7 +1018,8 @@ const slice = createUndoRedoSlice(
         }
       },
       renameFolder: (state, action: PayloadAction<RenameFolderPayload>) => {
-        const { section, id, name } = action.payload;
+        const { section, id, name: rawName } = action.payload;
+        const name = rawName.trim();
 
         const { groups } = state.contentStructure.sections[section];
         const group = findGroup(groups, id);

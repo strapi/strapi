@@ -181,6 +181,7 @@
   "nav.folder.delete.cancel": "No, cancel",
   "nav.folder.delete.confirm": "Yes, delete",
   "nav.folder.delete.title": "Delete folder",
+  "nav.folder.dragging": "Dragging {name}",
   "nav.folder.empty": "Empty folder",
   "nav.folder.name-label": "Folder name",
   "nav.folder.name.duplicate": "A folder with this name already exists in this location",

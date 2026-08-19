@@ -120,14 +120,20 @@ export const FolderSelect = ({
   };
 
   const selectTypedName = (typed: string) => {
-    const existing = findSiblingFolderByName(groups, null, typed);
+    const trimmed = typed.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    const existing = findSiblingFolderByName(groups, null, trimmed);
 
     if (existing) {
       changeToFolderId(existing.id);
       return;
     }
 
-    change({ newFolderName: typed });
+    change({ newFolderName: trimmed });
   };
 
   const selectedValue = (() => {

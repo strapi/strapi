@@ -40,7 +40,7 @@ const NameInput = styled.input<{ $hasError: boolean }>`
 
 const ErrorBox = styled(Box)<{ $depth: number }>`
   padding-left: ${({ theme, $depth }) =>
-    `calc(${$depth} * (${theme.spaces[3]} + ${theme.spaces[6]} + ${theme.spaces[6]}))`};
+    `calc(${$depth} * ${theme.spaces[6]} + ${theme.spaces[3]} + ${theme.spaces[4]} + ${theme.spaces[2]})`};
 `;
 
 interface FolderNameFieldProps {
