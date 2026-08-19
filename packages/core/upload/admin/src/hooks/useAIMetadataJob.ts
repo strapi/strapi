@@ -16,7 +16,7 @@ const fetchLatestJob = async (
 ): Promise<AIMetadataJob | null> => {
   try {
     const { data } = await get<GetLatestAIMetadataJob.Response['data']>(
-      '/upload/actions/generate-ai-metadata/latest'
+      '/upload/ai-metadata-jobs/latest'
     );
     return data;
   } catch {

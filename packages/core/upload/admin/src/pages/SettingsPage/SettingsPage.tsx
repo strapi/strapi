@@ -29,7 +29,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
-import { GetAIMetadataCount, GenerateAIMetadata } from '../../../../shared/contracts/files';
+import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
 import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
@@ -165,13 +165,13 @@ export const SettingsPage = () => {
   const isAIAvailable = useAIAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataCount.Response['data'],
-    GetAIMetadataCount.Response['error']
+    GetAIMetadataPendingCount.Response['data'],
+    GetAIMetadataPendingCount.Response['error']
   >(
     ['ai-metadata-count'],
     async () => {
-      const { data } = await get<GetAIMetadataCount.Response['data']>(
-        '/upload/actions/generate-ai-metadata/count'
+      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+        '/upload/ai-metadata-jobs/pending-count'
       );
       return data;
     },
@@ -231,15 +231,15 @@ export const SettingsPage = () => {
   });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
-    GenerateAIMetadata.Response['data'],
-    GenerateAIMetadata.Response['error'],
+    CreateAIMetadataJob.Response['data'],
+    CreateAIMetadataJob.Response['error'],
     void
   >(
     async () => {
       const { data } = await post<
-        GenerateAIMetadata.Response['data'],
-        GenerateAIMetadata.Request['body']
-      >('/upload/actions/generate-ai-metadata', {});
+        CreateAIMetadataJob.Response['data'],
+        CreateAIMetadataJob.Request['body']
+      >('/upload/ai-metadata-jobs', {});
       return data;
     },
     {
