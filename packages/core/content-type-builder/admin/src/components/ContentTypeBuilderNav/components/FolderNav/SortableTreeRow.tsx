@@ -364,11 +364,7 @@ export const SortableTreeRow = ({ item, handlers }: { item: FlatItem; handlers: 
       )}
       {trailingContents}
       {dropLine && (
-        <DropIndicator
-          $indentDepth={dropLine.depth - item.depth}
-          $edge={dropLine.edge}
-          aria-hidden
-        />
+        <DropIndicator $indentDepth={dropLine.depth} $edge={dropLine.edge} aria-hidden />
       )}
     </Row>
   );
