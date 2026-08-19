@@ -2928,6 +2928,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@commitlint/types@npm:19.8.1":
+  version: 19.8.1
+  resolution: "@commitlint/types@npm:19.8.1"
+  dependencies:
+    "@types/conventional-commits-parser": "npm:^5.0.0"
+    chalk: "npm:^5.3.0"
+  checksum: 10c0/0507db111d1ffd7b60e7ad979b7f9e674d409fc4c64561dfe30737b2c5bfefca7a1b58116106fa4ecb480059cecb13f04fa18f999d2d4a7d665b5ab13a05a803
+  languageName: node
+  linkType: hard
+
 "@commitlint/types@npm:^19.0.3":
   version: 19.0.3
   resolution: "@commitlint/types@npm:19.0.3"
@@ -8588,6 +8598,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.52.0"
     jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
@@ -8616,6 +8627,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:5.52.0"
     "@strapi/data-transfer": "npm:5.52.0"
+    "@strapi/database": "npm:5.52.0"
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/permissions": "npm:5.52.0"
@@ -8626,22 +8638,25 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/bcryptjs": "npm:2.4.3"
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
+    "@types/formidable": "npm:2.0.6"
     "@types/fs-extra": "npm:11.0.4"
     "@types/invariant": "npm:2.2.37"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/jsonwebtoken": "npm:9.0.3"
+    "@types/koa": "npm:2.15.2"
+    "@types/koa-compose": "npm:3.2.5"
     "@types/koa-passport": "npm:6.0.1"
+    "@types/koa-static": "npm:4.0.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/markdown-it": "npm:13.0.7"
-    "@types/markdown-it-container": "npm:2.0.9"
-    "@types/markdown-it-emoji": "npm:2.0.4"
-    "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/node": "npm:20.19.41"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
+    "@types/qs": "npm:6.9.7"
     "@types/react-window": "npm:1.8.8"
+    "@types/semver": "npm:7.5.0"
     axios: "npm:1.19.0"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
@@ -8649,6 +8664,7 @@ __metadata:
     codemirror5: "npm:codemirror@^5.65.11"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.0"
     execa: "npm:5.1.1"
     fast-deep-equal: "npm:3.1.3"
     formik: "npm:2.4.9"
@@ -8693,6 +8709,7 @@ __metadata:
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
     typescript: "npm:5.9.3"
     use-context-selector: "npm:1.4.4"
     vite: "npm:5.4.21"
@@ -8725,6 +8742,9 @@ __metadata:
     "@strapi/utils": "npm:5.52.0"
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
+    "@types/inquirer": "npm:9.0.9"
+    "@types/jest": "npm:29.5.2"
+    "@types/jsonwebtoken": "npm:9.0.3"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     axios: "npm:1.19.0"
@@ -8775,13 +8795,19 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
+    "@types/markdown-it": "npm:13.0.7"
     "@types/node": "npm:20.19.41"
     "@types/prismjs": "npm:1.26.5"
+    "@types/qs": "npm:6.9.7"
+    "@types/react-window": "npm:1.8.8"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
     dompurify: "npm:3.4.13"
+    eslint-config-custom: "npm:5.52.0"
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
@@ -8816,6 +8842,9 @@ __metadata:
     slate-history: "npm:0.93.0"
     slate-react: "npm:0.98.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
+    typescript: "npm:5.9.3"
+    vite: "npm:5.4.21"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -8846,9 +8875,12 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/qs": "npm:6.9.7"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
+    eslint-config-custom: "npm:5.52.0"
     formik: "npm:2.4.9"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
@@ -8862,7 +8894,9 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
     typescript: "npm:5.9.3"
+    vite: "npm:5.4.21"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -8897,12 +8931,16 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/micromatch": "npm:^4.0.9"
     "@types/node": "npm:20.19.41"
     "@types/pluralize": "npm:0.0.32"
+    "@types/qs": "npm:6.9.7"
     "@types/react": "npm:18.3.2"
     ai: "npm:5.0.210"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.0"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
@@ -8922,6 +8960,8 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
+    vite: "npm:5.4.21"
     vitest: "catalog:"
     vitest-config: "npm:5.52.0"
     yup: "npm:0.32.9"
@@ -8950,28 +8990,36 @@ __metadata:
     "@strapi/logger": "npm:5.52.0"
     "@strapi/openapi": "npm:5.52.0"
     "@strapi/permissions": "npm:5.52.0"
+    "@strapi/strapi": "npm:5.52.0"
     "@strapi/types": "npm:5.52.0"
     "@strapi/typescript-utils": "npm:5.52.0"
     "@strapi/utils": "npm:5.52.0"
     "@swc/core": "npm:1.13.5"
     "@types/bcryptjs": "npm:2.4.3"
     "@types/configstore": "npm:5.0.1"
+    "@types/debug": "npm:^4"
     "@types/delegates": "npm:1.0.3"
     "@types/fs-extra": "npm:11.0.4"
     "@types/global-agent": "npm:3.0.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
+    "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa": "npm:2.15.2"
+    "@types/koa-compose": "npm:3.2.5"
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-static": "npm:4.0.2"
+    "@types/koa__cors": "npm:5.0.0"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:20.19.41"
     "@types/node-schedule": "npm:2.1.7"
+    "@types/qs": "npm:6.9.7"
+    "@types/semver": "npm:7.5.0"
     "@vercel/stega": "npm:0.1.2"
     bcryptjs: "npm:2.4.3"
+    better-sqlite3: "npm:12.8.0"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
     ci-info: "npm:4.0.0"
@@ -9045,6 +9093,7 @@ __metadata:
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
+    eslint-config-custom: "npm:5.52.0"
     fs-extra: "npm:11.3.4"
     inquirer: "npm:9.3.8"
     jest: "npm:29.6.0"
@@ -9060,6 +9109,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     tar: "npm:7.5.22"
     tar-stream: "npm:2.2.0"
+    tsconfig: "npm:5.52.0"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.52.0"
@@ -9073,10 +9123,13 @@ __metadata:
   dependencies:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/utils": "npm:5.52.0"
+    "@types/debug": "npm:^4"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     ajv: "npm:8.20.0"
+    better-sqlite3: "npm:12.8.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
     eslint-config-custom: "npm:5.52.0"
@@ -9149,6 +9202,7 @@ __metadata:
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
@@ -9160,6 +9214,7 @@ __metadata:
     react-query: "npm:3.39.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9213,6 +9268,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     copyfiles: "npm:2.4.1"
@@ -9247,7 +9303,11 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/qs": "npm:6.9.7"
+    eslint-config-custom: "npm:5.52.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
@@ -9260,6 +9320,9 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
+    typescript: "npm:5.9.3"
+    vite: "npm:5.4.21"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9302,10 +9365,14 @@ __metadata:
     "@strapi/types": "npm:5.52.0"
     "@types/debug": "npm:^4"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     debug: "npm:4.3.4"
+    eslint-config-custom: "npm:5.52.0"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
+    tsconfig: "npm:5.52.0"
     zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
@@ -9316,8 +9383,12 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.52.0"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/qs": "npm:6.9.7"
     eslint-config-custom: "npm:5.52.0"
+    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     qs: "npm:6.15.3"
     sift: "npm:16.0.1"
@@ -9366,6 +9437,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.0"
     jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
@@ -9373,6 +9445,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.52.0"
@@ -9402,13 +9475,17 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/bcryptjs": "npm:2.4.3"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/koa-static": "npm:4.0.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.2.0"
+    eslint-config-custom: "npm:5.52.0"
     formik: "npm:2.4.9"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
@@ -9424,9 +9501,12 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
+    react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
     swagger-ui-dist: "npm:4.19.0"
+    tsconfig: "npm:5.52.0"
+    typescript: "npm:5.9.3"
     yaml: "npm:1.10.3"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -9455,9 +9535,12 @@ __metadata:
     "@strapi/utils": "npm:5.52.0"
     "@types/graphql-depth-limit": "npm:1.1.5"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/pluralize": "npm:0.0.32"
     cross-env: "npm:^7.0.3"
     eslint-config-custom: "npm:5.52.0"
     graphql: "npm:^16.8.1"
@@ -9496,11 +9579,15 @@ __metadata:
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/strapi": "npm:5.52.0"
+    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.0"
+    jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
     vitest: "catalog:"
     vitest-config: "npm:5.52.0"
   peerDependencies:
@@ -9528,6 +9615,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     bcryptjs: "npm:2.4.3"
+    eslint-config-custom: "npm:5.52.0"
     formik: "npm:2.4.9"
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
@@ -9544,6 +9632,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    typescript: "npm:5.9.3"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
@@ -9634,6 +9723,8 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.52.0"
     lodash: "npm:4.18.1"
@@ -9663,6 +9754,8 @@ __metadata:
     "@strapi/types": "npm:5.52.0"
     "@strapi/utils": "npm:5.52.0"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.52.0"
     fs-extra: "npm:11.3.4"
@@ -9679,6 +9772,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.52.0"
     "@strapi/content-manager": "npm:5.52.0"
+    "@strapi/database": "npm:5.52.0"
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/types": "npm:5.52.0"
@@ -9687,8 +9781,11 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.0"
     fractional-indexing: "npm:3.2.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
@@ -9705,6 +9802,9 @@ __metadata:
     react-router-dom: "npm:6.30.4"
     semver: "npm:7.7.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
+    typescript: "npm:5.9.3"
+    vite: "npm:5.4.21"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -9741,12 +9841,15 @@ __metadata:
     "@strapi/typescript-utils": "npm:5.52.0"
     "@strapi/upload": "npm:5.52.0"
     "@strapi/utils": "npm:5.52.0"
+    "@types/cli-progress": "npm:3.11.5"
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     "@types/nodemon": "npm:1.19.6"
+    "@types/semver": "npm:7.5.0"
     "@types/webpack-bundle-analyzer": "npm:4.7.0"
     "@types/webpack-hot-middleware": "npm:2.25.12"
     "@vitejs/plugin-react-swc": "npm:3.11.0"
@@ -9762,6 +9865,7 @@ __metadata:
     concurrently: "npm:8.2.2"
     css-loader: "npm:6.11.0"
     dotenv: "npm:16.6.1"
+    esbuild: "npm:0.28.1"
     esbuild-loader: "npm:4.5.0"
     esbuild-register: "npm:3.6.0"
     eslint-config-custom: "npm:5.52.0"
@@ -9794,6 +9898,7 @@ __metadata:
     webpack-bundle-analyzer: "npm:5.3.0"
     webpack-dev-middleware: "npm:6.1.3"
     webpack-hot-middleware: "npm:2.26.1"
+    winston: "npm:3.10.0"
     yalc: "npm:1.0.0-pre.53"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -9822,6 +9927,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa__router": "npm:12.0.0"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
@@ -9838,6 +9944,13 @@ __metadata:
     typescript: "npm:5.9.3"
     undici: "npm:6.28.0"
     zod: "npm:3.25.76"
+  peerDependencies:
+    "@types/json-logic-js": ^2.0.0
+    "@types/koa": ^2.0.0
+    "@types/koa__router": ^12.0.0
+    "@types/lodash": ^4.0.0
+    "@types/node": ^20.0.0
+    "@types/node-schedule": ^2.0.0
   languageName: unknown
   linkType: soft
 
@@ -9901,10 +10014,14 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
+    "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/semver": "npm:7.5.0"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
+    esbuild: "npm:0.28.1"
     esbuild-register: "npm:3.6.0"
     eslint-config-custom: "npm:5.52.0"
     execa: "npm:5.1.1"
@@ -9919,6 +10036,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:3.36.0"
+    tsconfig: "npm:5.52.0"
     undici: "npm:6.28.0"
   bin:
     upgrade: ./bin/upgrade.js
@@ -9946,15 +10064,20 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/byte-size": "npm:8.1.2"
+    "@types/formidable": "npm:2.0.6"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
+    "@types/lodash": "npm:^4.14.191"
+    "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:20.19.41"
+    "@types/qs": "npm:6.9.7"
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.0"
     file-type: "npm:21.3.4"
     formidable: "npm:3.5.4"
     formik: "npm:2.4.9"
@@ -9980,6 +10103,8 @@ __metadata:
     react-select: "npm:5.8.0"
     sharp: "npm:0.35.3"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.0"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9999,6 +10124,7 @@ __metadata:
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.52.0"
@@ -10746,6 +10872,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/eslint@npm:8.56.12":
+  version: 8.56.12
+  resolution: "@types/eslint@npm:8.56.12"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/json-schema": "npm:*"
+  checksum: 10c0/e4ca426abe9d55f82b69a3250bec78b6d340ad1e567f91c97ecc59d3b2d6a1d8494955ac62ad0ea14b97519db580611c02be8277cbea370bdfb0f96aa2910504
+  languageName: node
+  linkType: hard
+
 "@types/estree-jsx@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree-jsx@npm:1.0.5"
@@ -10800,7 +10936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/formidable@npm:^2.0.5":
+"@types/formidable@npm:2.0.6, @types/formidable@npm:^2.0.5":
   version: 2.0.6
   resolution: "@types/formidable@npm:2.0.6"
   dependencies:
@@ -10985,7 +11121,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
@@ -11042,7 +11178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa-compose@npm:*":
+"@types/koa-compose@npm:*, @types/koa-compose@npm:3.2.5":
   version: 3.2.5
   resolution: "@types/koa-compose@npm:3.2.5"
   dependencies:
@@ -11164,34 +11300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/markdown-it-container@npm:2.0.9":
-  version: 2.0.9
-  resolution: "@types/markdown-it-container@npm:2.0.9"
-  dependencies:
-    "@types/markdown-it": "npm:*"
-  checksum: 10c0/8558c477408c2ecd3b9419e3ae6da3bddcd480f440d204fcc0912380037797f8823054eab9920c3a05310badbddece77d799bfb94efcfd6b64fd8a3e81960a44
-  languageName: node
-  linkType: hard
-
-"@types/markdown-it-emoji@npm:2.0.4":
-  version: 2.0.4
-  resolution: "@types/markdown-it-emoji@npm:2.0.4"
-  dependencies:
-    "@types/markdown-it": "npm:*"
-  checksum: 10c0/f8c9ae079d7fd89bcbb013684a59a565cd749848a1a7560ce6a2081d8ce9c43fe9fcff621082eca6f22fb68de6dc2bca70b24d1ac300b6c9ccffdbfe5eca6490
-  languageName: node
-  linkType: hard
-
-"@types/markdown-it-footnote@npm:3.0.3":
-  version: 3.0.3
-  resolution: "@types/markdown-it-footnote@npm:3.0.3"
-  dependencies:
-    "@types/markdown-it": "npm:*"
-  checksum: 10c0/d57c3df7e402d7ba2ac4326a907e4b19ae0843210381d36ebac675abfeb388ceb8fa3df20a83a9fb7b53238f741f1a43a57cb208d65de212d737baf95ded18e8
-  languageName: node
-  linkType: hard
-
-"@types/markdown-it@npm:*, @types/markdown-it@npm:13.0.7":
+"@types/markdown-it@npm:13.0.7":
   version: 13.0.7
   resolution: "@types/markdown-it@npm:13.0.7"
   dependencies:
@@ -11389,7 +11498,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/qs@npm:*":
+"@types/qs@npm:*, @types/qs@npm:6.9.7":
   version: 6.9.7
   resolution: "@types/qs@npm:6.9.7"
   checksum: 10c0/157eb05f4c75790b0ebdcf7b0547ff117feabc8cda03c3cac3d3ea82bb19a1912e76a411df3eb0bdd01026a9770f07bc0e7e3fbe39ebb31c1be4564c16be35f1
@@ -14182,6 +14291,7 @@ __metadata:
     "@actions/github": "npm:6.0.0"
     "@types/jest": "npm:29.5.2"
     "@vercel/ncc": "npm:0.38.2"
+    eslint-config-custom: "npm:5.52.0"
     jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
@@ -15066,7 +15176,10 @@ __metadata:
     "@types/async-retry": "npm:^1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    "@types/semver": "npm:7.5.0"
     async-retry: "npm:1.3.3"
     chalk: "npm:4.1.2"
     commander: "npm:8.3.0"
@@ -16396,6 +16509,95 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild@npm:0.28.1, esbuild@npm:^0.28.1, esbuild@npm:~0.28.0":
+  version: 0.28.1
+  resolution: "esbuild@npm:0.28.1"
+  dependencies:
+    "@esbuild/aix-ppc64": "npm:0.28.1"
+    "@esbuild/android-arm": "npm:0.28.1"
+    "@esbuild/android-arm64": "npm:0.28.1"
+    "@esbuild/android-x64": "npm:0.28.1"
+    "@esbuild/darwin-arm64": "npm:0.28.1"
+    "@esbuild/darwin-x64": "npm:0.28.1"
+    "@esbuild/freebsd-arm64": "npm:0.28.1"
+    "@esbuild/freebsd-x64": "npm:0.28.1"
+    "@esbuild/linux-arm": "npm:0.28.1"
+    "@esbuild/linux-arm64": "npm:0.28.1"
+    "@esbuild/linux-ia32": "npm:0.28.1"
+    "@esbuild/linux-loong64": "npm:0.28.1"
+    "@esbuild/linux-mips64el": "npm:0.28.1"
+    "@esbuild/linux-ppc64": "npm:0.28.1"
+    "@esbuild/linux-riscv64": "npm:0.28.1"
+    "@esbuild/linux-s390x": "npm:0.28.1"
+    "@esbuild/linux-x64": "npm:0.28.1"
+    "@esbuild/netbsd-arm64": "npm:0.28.1"
+    "@esbuild/netbsd-x64": "npm:0.28.1"
+    "@esbuild/openbsd-arm64": "npm:0.28.1"
+    "@esbuild/openbsd-x64": "npm:0.28.1"
+    "@esbuild/openharmony-arm64": "npm:0.28.1"
+    "@esbuild/sunos-x64": "npm:0.28.1"
+    "@esbuild/win32-arm64": "npm:0.28.1"
+    "@esbuild/win32-ia32": "npm:0.28.1"
+    "@esbuild/win32-x64": "npm:0.28.1"
+  dependenciesMeta:
+    "@esbuild/aix-ppc64":
+      optional: true
+    "@esbuild/android-arm":
+      optional: true
+    "@esbuild/android-arm64":
+      optional: true
+    "@esbuild/android-x64":
+      optional: true
+    "@esbuild/darwin-arm64":
+      optional: true
+    "@esbuild/darwin-x64":
+      optional: true
+    "@esbuild/freebsd-arm64":
+      optional: true
+    "@esbuild/freebsd-x64":
+      optional: true
+    "@esbuild/linux-arm":
+      optional: true
+    "@esbuild/linux-arm64":
+      optional: true
+    "@esbuild/linux-ia32":
+      optional: true
+    "@esbuild/linux-loong64":
+      optional: true
+    "@esbuild/linux-mips64el":
+      optional: true
+    "@esbuild/linux-ppc64":
+      optional: true
+    "@esbuild/linux-riscv64":
+      optional: true
+    "@esbuild/linux-s390x":
+      optional: true
+    "@esbuild/linux-x64":
+      optional: true
+    "@esbuild/netbsd-arm64":
+      optional: true
+    "@esbuild/netbsd-x64":
+      optional: true
+    "@esbuild/openbsd-arm64":
+      optional: true
+    "@esbuild/openbsd-x64":
+      optional: true
+    "@esbuild/openharmony-arm64":
+      optional: true
+    "@esbuild/sunos-x64":
+      optional: true
+    "@esbuild/win32-arm64":
+      optional: true
+    "@esbuild/win32-ia32":
+      optional: true
+    "@esbuild/win32-x64":
+      optional: true
+  bin:
+    esbuild: bin/esbuild
+  checksum: 10c0/29cd456a79ce35ac2c7e05fe871330416b2c395c045d849653f843e51378d6e0d6e774d6dcd01b35f4e83238a29bf8decd04fcd34b3780c589a250b21e5f92bb
+  languageName: node
+  linkType: hard
+
 "esbuild@npm:^0.21.3":
   version: 0.21.5
   resolution: "esbuild@npm:0.21.5"
@@ -16562,95 +16764,6 @@ __metadata:
   bin:
     esbuild: bin/esbuild
   checksum: 10c0/ccd51f0555708bc9ff4ec9dc3ac92d3daacd45ecaac949ca8645984c5c323bf8cefe98c2df307418685e0b4ce37f9a3bdbfe8e3651fe632a0059a436195a17d4
-  languageName: node
-  linkType: hard
-
-"esbuild@npm:^0.28.1, esbuild@npm:~0.28.0":
-  version: 0.28.1
-  resolution: "esbuild@npm:0.28.1"
-  dependencies:
-    "@esbuild/aix-ppc64": "npm:0.28.1"
-    "@esbuild/android-arm": "npm:0.28.1"
-    "@esbuild/android-arm64": "npm:0.28.1"
-    "@esbuild/android-x64": "npm:0.28.1"
-    "@esbuild/darwin-arm64": "npm:0.28.1"
-    "@esbuild/darwin-x64": "npm:0.28.1"
-    "@esbuild/freebsd-arm64": "npm:0.28.1"
-    "@esbuild/freebsd-x64": "npm:0.28.1"
-    "@esbuild/linux-arm": "npm:0.28.1"
-    "@esbuild/linux-arm64": "npm:0.28.1"
-    "@esbuild/linux-ia32": "npm:0.28.1"
-    "@esbuild/linux-loong64": "npm:0.28.1"
-    "@esbuild/linux-mips64el": "npm:0.28.1"
-    "@esbuild/linux-ppc64": "npm:0.28.1"
-    "@esbuild/linux-riscv64": "npm:0.28.1"
-    "@esbuild/linux-s390x": "npm:0.28.1"
-    "@esbuild/linux-x64": "npm:0.28.1"
-    "@esbuild/netbsd-arm64": "npm:0.28.1"
-    "@esbuild/netbsd-x64": "npm:0.28.1"
-    "@esbuild/openbsd-arm64": "npm:0.28.1"
-    "@esbuild/openbsd-x64": "npm:0.28.1"
-    "@esbuild/openharmony-arm64": "npm:0.28.1"
-    "@esbuild/sunos-x64": "npm:0.28.1"
-    "@esbuild/win32-arm64": "npm:0.28.1"
-    "@esbuild/win32-ia32": "npm:0.28.1"
-    "@esbuild/win32-x64": "npm:0.28.1"
-  dependenciesMeta:
-    "@esbuild/aix-ppc64":
-      optional: true
-    "@esbuild/android-arm":
-      optional: true
-    "@esbuild/android-arm64":
-      optional: true
-    "@esbuild/android-x64":
-      optional: true
-    "@esbuild/darwin-arm64":
-      optional: true
-    "@esbuild/darwin-x64":
-      optional: true
-    "@esbuild/freebsd-arm64":
-      optional: true
-    "@esbuild/freebsd-x64":
-      optional: true
-    "@esbuild/linux-arm":
-      optional: true
-    "@esbuild/linux-arm64":
-      optional: true
-    "@esbuild/linux-ia32":
-      optional: true
-    "@esbuild/linux-loong64":
-      optional: true
-    "@esbuild/linux-mips64el":
-      optional: true
-    "@esbuild/linux-ppc64":
-      optional: true
-    "@esbuild/linux-riscv64":
-      optional: true
-    "@esbuild/linux-s390x":
-      optional: true
-    "@esbuild/linux-x64":
-      optional: true
-    "@esbuild/netbsd-arm64":
-      optional: true
-    "@esbuild/netbsd-x64":
-      optional: true
-    "@esbuild/openbsd-arm64":
-      optional: true
-    "@esbuild/openbsd-x64":
-      optional: true
-    "@esbuild/openharmony-arm64":
-      optional: true
-    "@esbuild/sunos-x64":
-      optional: true
-    "@esbuild/win32-arm64":
-      optional: true
-    "@esbuild/win32-ia32":
-      optional: true
-    "@esbuild/win32-x64":
-      optional: true
-  bin:
-    esbuild: bin/esbuild
-  checksum: 10c0/29cd456a79ce35ac2c7e05fe871330416b2c395c045d849653f843e51378d6e0d6e774d6dcd01b35f4e83238a29bf8decd04fcd34b3780c589a250b21e5f92bb
   languageName: node
   linkType: hard
 
@@ -27917,6 +28030,7 @@ __metadata:
     "@commitlint/cli": "npm:19.2.0"
     "@commitlint/config-conventional": "npm:19.1.0"
     "@commitlint/prompt-cli": "npm:19.2.0"
+    "@commitlint/types": "npm:19.8.1"
     "@nx/js": "npm:20.8.4"
     "@playwright/test": "npm:1.56.1"
     "@rollup/plugin-commonjs": "npm:28.0.9"
@@ -27932,6 +28046,7 @@ __metadata:
     "@swc/core": "npm:1.13.5"
     "@swc/helpers": "npm:0.5.17"
     "@swc/jest": "npm:0.2.39"
+    "@types/eslint": "npm:8.56.12"
     "@types/fs-extra": "npm:11.0.4"
     "@types/git-url-parse": "npm:9.0.3"
     "@types/prompts": "npm:2.4.9"
