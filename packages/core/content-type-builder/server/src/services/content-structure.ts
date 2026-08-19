@@ -46,15 +46,18 @@ export interface ContentTypeBuilderContentStructureService {
    * core content-structure service). Prior to invoking the core service, this method:
    * - Prunes references to content types that are deleted in the same save operation.
    * - Validates the pruned structure's references against the effective set of content types
-   *   (produced from `createdUids`, `deletedUids`, and the pre-existing registry). Any reference
+   *   (produced from `upsertedUids`, `deletedUids`, and the pre-existing registry). Any reference
    *   to a non-existent content type (or one whose kind does not match its section)throws an ApplicationError.
    * Returns true if a file write occurred, false if a write was not necessary.
    * Invokes `validateContentTypeUidReferences()`, which throws an ApplicationError if a
    * referenced contentTypeUid is invalid.
+   *
+   * `upsertedUids` maps each content type created — or whose kind is changed — in the same save
+   * operation to its (new) kind, taking precedence over the pre-transaction registry.
    */
   persistFromUpdate(input: {
     incomingStructure?: unknown;
-    createdUids: Map<string, ContentTypeKind>;
+    upsertedUids: Map<string, ContentTypeKind>;
     deletedUids: Set<string>;
   }): Promise<boolean>;
 }
@@ -128,10 +131,10 @@ export function createContentStructureService(
   };
 
   /**
-   * Builds an effective set of content type uids and their kind by resolving the pre-transaction content type registry with the list of created and deleted uids.
+   * Builds an effective set of content type uids and their kind by resolving the pre-transaction content type registry with the list of upserted and deleted uids.
    */
   const buildEffectiveUidKindSet = (
-    createdUids: Map<string, ContentTypeKind>,
+    upsertedUids: Map<string, ContentTypeKind>,
     deletedUids: Set<string>
   ): Map<string, ContentTypeKind> => {
     const effective = new Map<string, ContentTypeKind>();
@@ -144,7 +147,7 @@ export function createContentStructureService(
       effective.delete(uid);
     }
 
-    for (const [uid, kind] of createdUids) {
+    for (const [uid, kind] of upsertedUids) {
       effective.set(uid, kind);
     }
 
@@ -233,14 +236,14 @@ export function createContentStructureService(
 
   const persistFromUpdate = async ({
     incomingStructure,
-    createdUids,
+    upsertedUids,
     deletedUids,
   }: {
     incomingStructure?: unknown;
-    createdUids: Map<string, ContentTypeKind>;
+    upsertedUids: Map<string, ContentTypeKind>;
     deletedUids: Set<string>;
   }): Promise<boolean> => {
-    const effectiveKinds = buildEffectiveUidKindSet(createdUids, deletedUids);
+    const effectiveKinds = buildEffectiveUidKindSet(upsertedUids, deletedUids);
 
     if (incomingStructure !== undefined && incomingStructure !== null) {
       const pruned = pruneStructure(
