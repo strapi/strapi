@@ -116,6 +116,10 @@ type DeleteFolderPayload = {
   id: string;
 };
 
+type DeleteFolderAndContentPayload = DeleteFolderPayload & {
+  contentTypeUids: Internal.UID.ContentType[];
+};
+
 type AssignContentTypeToFolderPayload = {
   targetGroupId: string | null;
   uid: UID.ContentType;
@@ -487,6 +491,44 @@ const getSubtreeHeight = (groups: ContentStructureGroup[], id: string): number =
   }
 
   return height;
+};
+
+const applyDeleteContentType = (state: DataManagerStateType, uid: Internal.UID.ContentType) => {
+  const type = state.contentTypes[uid];
+
+  // just drop new content types
+  if (type.status === 'NEW') {
+    delete state.contentTypes[uid];
+  } else {
+    setStatus(type, 'REMOVED');
+  }
+
+  // remove the content type from the content structure tree
+  Object.values(state.contentStructure.sections).forEach((section) => {
+    removeContentTypeChild(section.groups, uid);
+  });
+
+  // remove the content type from the components
+  Object.keys(state.components).forEach((componentUid) => {
+    const component = state.components[componentUid];
+
+    component.attributes.forEach((attribute) => {
+      if (attribute.type === 'relation' && attribute.target === uid) {
+        removeAttributeByName(component, attribute.name);
+      }
+    });
+  });
+
+  // remove the content type from the content types
+  Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+    const contentType = state.contentTypes[contentTypeUid];
+
+    contentType.attributes.forEach((attribute) => {
+      if (attribute.type === 'relation' && attribute.target === uid) {
+        removeAttributeByName(contentType, attribute.name);
+      }
+    });
+  });
 };
 
 const slice = createUndoRedoSlice(
@@ -948,41 +990,7 @@ const slice = createUndoRedoSlice(
         });
       },
       deleteContentType: (state, action: PayloadAction<Internal.UID.ContentType>) => {
-        const uid = action.payload;
-        const type = state.contentTypes[uid];
-
-        // just drop new content types
-        if (type.status === 'NEW') {
-          delete state.contentTypes[uid];
-        } else {
-          setStatus(type, 'REMOVED');
-        }
-        // remove the content type from the content structure tree
-        Object.values(state.contentStructure.sections).forEach((section) => {
-          removeContentTypeChild(section.groups, uid);
-        });
-
-        // remove the content type from the components
-        Object.keys(state.components).forEach((componentUid) => {
-          const component = state.components[componentUid];
-
-          component.attributes.forEach((attribute) => {
-            if (attribute.type === 'relation' && attribute.target === uid) {
-              removeAttributeByName(component, attribute.name);
-            }
-          });
-        });
-
-        // remove the content type from the content types
-        Object.keys(state.contentTypes).forEach((contentTypeUid) => {
-          const contentType = state.contentTypes[contentTypeUid];
-
-          contentType.attributes.forEach((attribute) => {
-            if (attribute.type === 'relation' && attribute.target === uid) {
-              removeAttributeByName(contentType, attribute.name);
-            }
-          });
-        });
+        applyDeleteContentType(state, action.payload);
       },
 
       createFolder: (state, action: PayloadAction<CreateFolderPayload>) => {
@@ -1156,8 +1164,13 @@ const slice = createUndoRedoSlice(
           groups.splice(groupIndex, 1);
         }
       },
-      deleteFolderAndSubtree: (state, action: PayloadAction<DeleteFolderPayload>) => {
-        const { section, id: groupToDeleteId } = action.payload;
+      deleteFolderAndContent: (state, action: PayloadAction<DeleteFolderAndContentPayload>) => {
+        const { section, id: groupToDeleteId, contentTypeUids } = action.payload;
+
+        contentTypeUids.forEach((uid) => {
+          applyDeleteContentType(state, uid);
+        });
+
         const { groups } = state.contentStructure.sections[section];
 
         const groupToDelete = findGroup(groups, groupToDeleteId);
