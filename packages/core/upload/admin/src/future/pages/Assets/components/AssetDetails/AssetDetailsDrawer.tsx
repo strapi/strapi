@@ -411,7 +411,7 @@ const DeleteAssetButton = () => {
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger>
-        <IconButton withTooltip={false} label={triggerLabel} variant="danger-light">
+        <IconButton label={triggerLabel} variant="danger-light">
           <Trash />
         </IconButton>
       </Dialog.Trigger>
@@ -482,7 +482,6 @@ const CopyLinkButton = ({ asset }: CopyLinkButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.copy-link.trigger'),
         defaultMessage: 'Copy link',
@@ -529,7 +528,6 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.download.trigger'),
         defaultMessage: 'Download',
@@ -594,7 +592,6 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         />
       </VisuallyHidden>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.replace.trigger'),
           defaultMessage: 'Replace this file',
@@ -671,7 +668,6 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
   return (
     <Flex direction="column" gap={2}>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.crop.trigger'),
           defaultMessage: 'Crop',

@@ -624,3 +624,38 @@ describe('AssetDetails RBAC gating', () => {
     });
   });
 });
+describe('icon button tooltips', () => {
+  // Every action in the drawer is icon-only, so the label is the only thing
+  // naming it. All were already wired for accessibility; they just passed
+  // `withTooltip={false}`, so a sighted user got no hover hint. Crop is in here
+  // too, even though it sits on the preview rather than in the footer — being
+  // the only icon button without a hint was the inconsistency.
+  it.each([['Replace this file'], ['Delete this file'], ['Copy link'], ['Download'], ['Crop']])(
+    'shows a tooltip on hover for %s',
+    async (label) => {
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+      const button = await screen.findByRole('button', { name: label });
+      await user.hover(button);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(label);
+    }
+  );
+
+  it('keeps the buttons reachable by their accessible name', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    // Enabling the tooltip must not move the accessible name onto the tooltip
+    // element and leave the button unnamed.
+    for (const label of [
+      'Replace this file',
+      'Delete this file',
+      'Copy link',
+      'Download',
+      'Crop',
+    ]) {
+      // eslint-disable-next-line no-await-in-loop
+      expect(await screen.findByRole('button', { name: label })).toBeInTheDocument();
+    }
+  });
+});
