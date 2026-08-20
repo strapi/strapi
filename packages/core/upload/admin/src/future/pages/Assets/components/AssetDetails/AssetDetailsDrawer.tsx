@@ -546,7 +546,10 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface ReplaceAssetButtonProps {
-  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  /**
+   * The asset's mime. Two jobs: the dialog only promises AI metadata when it
+   * applies, and the file picker only offers files of the same type.
+   */
   mime?: string | null;
 }
 
@@ -585,6 +588,7 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         <input
           ref={fileInputRef}
           type="file"
+          accept={mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden
