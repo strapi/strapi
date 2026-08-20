@@ -57,8 +57,7 @@
     "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
     "preferred-pm": "5.0.0",
-    "yup": "0.32.9",
-    "zod": "3.25.76"
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@types/http-errors": "2.0.4",
@@ -71,7 +70,11 @@
     "koa-body": "6.0.1",
     "tsconfig": "5.52.1",
     "vitest": "catalog:",
-    "vitest-config": "5.52.1"
+    "vitest-config": "5.52.1",
+    "zod": "4.4.3"
+  },
+  "peerDependencies": {
+    "zod": "^4.4.3"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

@@ -380,7 +380,9 @@ describe('Content API - Permissions', () => {
         contentAPI.addQueryParams({
           filter: { schema: z.object({ name: z.string() }) },
         })
-      ).toThrow(/contentAPI\.addQueryParams: param "filter" schema must be a scalar/);
+      ).toThrow(
+        'contentAPI.addQueryParams: param "filter" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ZodObject. Use addInputParams for nested objects.'
+      );
     });
 
     it('addQueryParams accepts array of scalars and merges into route', () => {
