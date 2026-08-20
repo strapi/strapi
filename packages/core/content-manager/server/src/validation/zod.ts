@@ -58,8 +58,7 @@ const validateZodAsync =
   <T extends z.Schema>(schema: T) =>
   async (data: unknown, errorMessage?: string): Promise<z.infer<T>> => {
     try {
-      const result = await schema.parseAsync(data);
-      return result;
+      return await schema.parseAsync(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const { message, errors: formattedErrors } = formatZodErrors(error);
