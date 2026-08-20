@@ -133,18 +133,14 @@ export const abortUpload = (uploadId: number) => {
 };
 
 /**
- * The last pool run queued for a batch, so a merge can wait for it.
- *
- * A second drop must not spin up its own worker pool next to the one already
- * draining — that would double the files in flight and make `concurrency` stop
- * meaning anything. Instead each run chains onto the previous one, and the merged
- * files sit `pending` (which is the truth) until their turn.
+ * Runs are chained per batch rather than started in parallel: a second pool
+ * alongside the first would double the files in flight and make `concurrency`
+ * stop meaning anything.
  */
 const poolTails = new Map<number, Promise<unknown>>();
 
 const trackPoolRun = (uploadId: number, run: Promise<unknown>) => {
-  // Swallow here only so the chain keeps going; the real result still surfaces
-  // through the promise the caller returns.
+  // Not swallowed: the caller still gets the real result from `run`.
   const tail = run.catch(() => undefined);
 
   poolTails.set(uploadId, tail);
@@ -356,14 +352,8 @@ const runUploadPool = async ({
 };
 
 /**
- * Runs the files from a merged drop once the pool already draining this batch is
- * done, rather than alongside it.
- *
- * The batch's AbortController is reused rather than replaced, so a single Cancel
- * stops both drops — including files still queued here. `runUploadPool`
- * unregisters the controller when it finishes, so it is registered again for this
- * leg; and if Cancel landed while we were waiting there is nothing left to do,
- * because `cancelUpload` has already marked the appended rows cancelled.
+ * Reuses the batch's AbortController so one Cancel stops both drops.
+ * `runUploadPool` unregisters it on finish, hence the re-register below.
  */
 const runMergedUploadPool = async ({
   entries,
@@ -604,31 +594,29 @@ const uploadApi = adminApi
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
           const fileSizes = entries.map((entry) => entry.file.size);
 
-          // A drop that lands while the batch is still uploading joins it instead
-          // of replacing it: one dialog, one running total. Once the previous
-          // batch has settled — including settling with errors — the next drop
-          // starts fresh. That is the rule design asked for, and it is also what
-          // keeps the earlier drop's in-flight rows addressable.
-          const isMerge = isUploadInFlight((getState() as RootState).uploadProgress.files);
+          // `uploadFromUrls` also leaves rows `pending`, but registers no batch —
+          // so an unregistered batch is not ours to merge into, and appending would
+          // land on top of its rows.
+          const progress = (getState() as RootState).uploadProgress;
+          const batch = getUploadEntries(progress.uploadId);
+          const isMerge = batch !== undefined && isUploadInFlight(progress.files);
 
           if (isMerge) {
-            const uploadId = (getState() as RootState).uploadProgress.uploadId;
-            const batch = getUploadEntries(uploadId);
-            const offset = batch?.entries.length ?? 0;
+            const { uploadId } = progress;
+            const offset = batch.entries.length;
 
+            // No `totalFiles`: the reducer derives it from the rows it appends.
             dispatch(appendUploadFiles({ uploadId, fileNames, fileSizes }));
 
-            const mergedEntries = [...(batch?.entries ?? []), ...entries];
+            const mergedEntries = [...batch.entries, ...entries];
 
-            // Retry replays a row with the flags its batch was started under, so
-            // the batch keeps its original ones. Concurrency in particular has to
-            // stay the batch's, or merging would raise the ceiling it exists to
-            // impose.
+            // Merged files adopt the batch's flags: a new concurrency would raise
+            // the ceiling it exists to impose.
             registerUploadEntries(
               uploadId,
               mergedEntries,
-              batch?.generateAiMetadata ?? generateAiMetadata,
-              batch?.concurrency ?? concurrency
+              batch.generateAiMetadata,
+              batch.concurrency
             );
 
             return runMergedUploadPool({
@@ -637,8 +625,8 @@ const uploadApi = adminApi
               token,
               uploadId,
               dispatch,
-              concurrency: batch?.concurrency ?? concurrency,
-              generateAiMetadata,
+              concurrency: batch.concurrency,
+              generateAiMetadata: batch.generateAiMetadata,
             });
           }
 

@@ -73,7 +73,6 @@ const setup = (count: number, concurrency?: number) => {
   return { inFlight, result };
 };
 
-/** A second drop through the same mutation hook, i.e. the merge path. */
 const drop = (result: { current: [(arg: unknown) => void, unknown] }, count: number) => {
   act(() => {
     result.current[0]({
@@ -198,19 +197,14 @@ describe('uploadFiles worker pool', () => {
 
       drop(result as never, 2);
 
-      // Flush, rather than asserting straight away: `waitFor` passes on its first
-      // check when the condition already holds, so it would report success before
-      // a second pool had a chance to start.
+      // Flush first: `waitFor` would pass before a second pool could even start.
       await act(async () => {
         await Promise.resolve();
         await Promise.resolve();
       });
 
-      // The merged files queue behind the running pool. A second pool would have
-      // taken this to 2, and `concurrency` would stop being a ceiling.
       expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1);
 
-      // Draining the first drop eventually reaches the merged files: 3 + 2 = 5.
       await settle(inFlight, 5);
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
     });
@@ -223,7 +217,6 @@ describe('uploadFiles worker pool', () => {
       drop(result as never, 2);
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
 
-      // One Cancel covers both drops: the merged leg reuses the batch's controller.
       act(() => {
         abortUpload(1);
       });
@@ -232,8 +225,6 @@ describe('uploadFiles worker pool', () => {
         inFlight[0].reject(new UploadAbortedError());
       });
 
-      // Nothing further is attempted — not the rest of the first drop, and not the
-      // merged files waiting behind it.
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
     });
   });

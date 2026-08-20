@@ -82,12 +82,9 @@ const uploadProgressSlice = createSlice({
       state.uploadId += 1;
     },
     /**
-     * Rows for a second drop that arrives while the batch is still uploading.
-     *
-     * The two drops become one batch: same `uploadId`, one running total, one
-     * dialog. Indices continue from the current length rather than restarting at
-     * zero, so the in-flight uploads from the earlier drop keep addressing their
-     * own rows.
+     * Rows for a second drop, joined to the batch already uploading. Indices
+     * continue from the current length so the earlier drop's in-flight uploads
+     * keep addressing their own rows.
      */
     appendUploadFiles(
       state,
@@ -114,8 +111,7 @@ const uploadProgressSlice = createSlice({
       );
 
       state.totalFiles += action.payload.fileNames.length;
-      // Re-open rather than assume it is still up: the user may have dismissed
-      // the dialog while the first drop was running.
+      // The dialog may have been dismissed while the first drop was running.
       state.isVisible = true;
       state.isMinimized = false;
     },
@@ -407,22 +403,10 @@ export const {
 } = uploadProgressSlice.actions;
 
 /**
- * Whether a batch still has work in flight.
- *
- * This is the merge/reset switch: a second drop joins the current batch while
- * this is true, and replaces it once it is false. Errored and cancelled rows
- * count as settled — such a batch is finished even though it did not fully
- * succeed, and its outcome stays on screen until the next drop.
- *
- * Takes the rows rather than the state so the upload service can apply the same
- * rule without depending on the full state shape.
+ * The merge/reset switch. Errored and cancelled rows count as settled, so a
+ * batch that finished badly is still replaced by the next drop.
  */
 export const isUploadInFlight = (files: ReadonlyArray<{ status: FileProgressStatus }>): boolean =>
   files.some((f) => f.status === 'pending' || f.status === 'uploading');
-
-export const selectIsUploadInFlight = createSelector(
-  (state: RootState) => state.uploadProgress.files,
-  isUploadInFlight
-);
 
 export const uploadProgressReducer = uploadProgressSlice.reducer;
