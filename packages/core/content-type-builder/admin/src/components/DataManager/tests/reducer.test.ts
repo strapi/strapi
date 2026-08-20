@@ -837,6 +837,54 @@ describe('Content Type Builder | DataManager | reducer', () => {
       // Content type should be completely removed
       expect(state2.current.contentTypes['api::new.new']).toBeUndefined();
     });
+
+    it('should remove every adjacent NEW relation targeting the deleted content type', () => {
+      // Two adjacent NEW relations both point at the type being deleted. NEW relations are
+      // spliced out of the attributes array; a naive forEach would shift indices mid-iteration
+      // and skip the second one, leaving a targetless relation behind.
+      const initializedState = reducer(
+        undefined,
+        actions.init({
+          components: {},
+          contentTypes: {
+            'api::test.test': {
+              ...testContentType,
+              status: 'CHANGED',
+            },
+            'api::related.related': {
+              ...relatedContentType,
+              attributes: [
+                {
+                  name: 'rel1',
+                  type: 'relation',
+                  relation: 'oneToOne',
+                  target: 'api::test.test',
+                  status: 'NEW',
+                } as AnyAttribute,
+                {
+                  name: 'rel2',
+                  type: 'relation',
+                  relation: 'oneToOne',
+                  target: 'api::test.test',
+                  status: 'NEW',
+                } as AnyAttribute,
+                { name: 'title', type: 'string', status: 'NEW' } as AnyAttribute,
+              ],
+            },
+          },
+          reservedNames: { models: [], attributes: [] },
+        })
+      );
+
+      const action = actions.deleteContentType('api::test.test' as Internal.UID.ContentType);
+      const state = reducer(initializedState, action);
+
+      // Both relations must be gone — only the unrelated attribute survives.
+      const remaining = state.current.contentTypes['api::related.related'].attributes.map(
+        (attribute) => attribute.name
+      );
+      expect(remaining).toEqual(['title']);
+    });
   });
 
   describe('applyChange', () => {
