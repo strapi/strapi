@@ -1,4 +1,3 @@
-import { schemaRegistry } from '@strapi/openapi';
 import { transformUidToValidOpenApiName } from '@strapi/utils';
 import type { Core, Internal } from '@strapi/types';
 import * as z from 'zod';
@@ -29,12 +28,13 @@ export const safeGlobalRegistrySet = (
   try {
     const transformedId = transformUidToValidOpenApiName(id);
 
-    const isReplacing = schemaRegistry.has(transformedId);
+    const schemaStore = strapi.contentAPISchemaRegistry;
+    const isReplacing = schemaStore.has(transformedId);
 
     strapi.log.debug(
       `${isReplacing ? 'Replacing' : 'Registering'} schema ${transformedId} in Strapi registry`
     );
-    schemaRegistry.set(transformedId, schema);
+    schemaStore.set(transformedId, schema);
   } catch (error) {
     strapi.log.error(
       `Schema registration failed: Failed to register schema ${id} in Strapi registry`
@@ -79,9 +79,10 @@ export const safeSchemaCreation = (
 ) => {
   try {
     const transformedId = transformUidToValidOpenApiName(id);
+    const schemaStore = strapi.contentAPISchemaRegistry;
 
     // Return existing schema if already registered
-    const existingSchema = schemaRegistry.getOrDefer(transformedId);
+    const existingSchema = schemaStore.getOrDefer(transformedId);
     if (existingSchema !== undefined) {
       return existingSchema;
     }
@@ -102,7 +103,7 @@ export const safeSchemaCreation = (
       strapi.log.debug(`📝 Generating validation schema for "${schemaName}"`);
     }
 
-    schemaRegistry.startPending(transformedId);
+    schemaStore.startPending(transformedId);
 
     try {
       // Temporary any placeholder before replacing with the actual schema type
@@ -129,7 +130,7 @@ export const safeSchemaCreation = (
 
       return schema;
     } finally {
-      schemaRegistry.finishPending(transformedId);
+      schemaStore.finishPending(transformedId);
     }
   } catch (error) {
     strapi.log.error(`Schema creation failed: Failed to create schema ${id}`);

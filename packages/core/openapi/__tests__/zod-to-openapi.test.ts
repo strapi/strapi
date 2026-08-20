@@ -3,23 +3,16 @@ import * as z from 'zod';
 
 import { DocumentContextFactory } from '../src/context';
 import { ComponentsWriter } from '../src/post-processor/component-writer';
-import { schemaRegistry } from '../src/utils/schema-registry';
 import {
   OPENAPI_SCHEMA_CONVERSION_OPTIONS,
   toComponentsPath,
   zodToOpenAPI,
 } from '../src/utils/zod';
-
-beforeEach(() => {
-  schemaRegistry.clear();
-});
-
-afterEach(() => {
-  schemaRegistry.clear();
-});
+import { createTestContentAPISchemaRegistry } from './helpers/content-api-schema-registry';
 
 describe('zodToOpenAPI', () => {
   it('strips the $id emitted by Zod 4.4.3 registry conversion with uri', () => {
+    const schemaStore = createTestContentAPISchemaRegistry();
     const zodSchema = z.object({ name: z.string() });
     const probeRegistry = z.registry<z.core.GlobalMeta>();
     probeRegistry.add(zodSchema, { id: 'Probe' });
@@ -28,7 +21,7 @@ describe('zodToOpenAPI', () => {
       ...OPENAPI_SCHEMA_CONVERSION_OPTIONS,
       uri: toComponentsPath,
     }).schemas.Probe;
-    const schema = zodToOpenAPI(zodSchema);
+    const schema = zodToOpenAPI(zodSchema, schemaStore);
 
     expect(rawSchema).toHaveProperty('$id', '#/components/schemas/Probe');
     expect(schema).not.toHaveProperty('$id');
@@ -42,10 +35,11 @@ describe('zodToOpenAPI', () => {
   });
 
   it('uses owned component IDs for references without generating __shared definitions', () => {
+    const schemaStore = createTestContentAPISchemaRegistry();
     const articleSchema = z.object({ title: z.string() });
-    schemaRegistry.set('Article', articleSchema);
+    schemaStore.set('Article', articleSchema);
 
-    const schema = zodToOpenAPI(z.object({ article: articleSchema }));
+    const schema = zodToOpenAPI(z.object({ article: articleSchema }), schemaStore);
 
     expect(schema).toMatchObject({
       properties: {
@@ -58,12 +52,14 @@ describe('zodToOpenAPI', () => {
 
 describe('ComponentsWriter', () => {
   it('strips $id from component schemas written from the Strapi-owned registry', () => {
+    const schemaStore = createTestContentAPISchemaRegistry();
     const registered = z.object({ title: z.string() });
-    schemaRegistry.set('CoverageProbeDocument', registered);
+    schemaStore.set('CoverageProbeDocument', registered);
 
     const context = new DocumentContextFactory().create({
       strapi: {
         config: { get: () => undefined },
+        contentAPISchemaRegistry: schemaStore,
       } as unknown as Core.Strapi,
       routes: [],
     });

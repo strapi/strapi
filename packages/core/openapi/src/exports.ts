@@ -17,8 +17,6 @@ import {
 import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
 
-export { schemaRegistry } from './utils/schema-registry';
-
 /**
  * Generates an in-memory OpenAPI specification for Strapi routes.
  *

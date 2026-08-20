@@ -1,7 +1,6 @@
 import { OpenAPIV3_1 } from 'openapi-types';
 import * as z from 'zod';
 import type { DocumentContext } from '../types';
-import { schemaRegistry } from '../utils/schema-registry';
 import {
   OPENAPI_SCHEMA_CONVERSION_OPTIONS,
   stripJsonSchemaId,
@@ -11,9 +10,14 @@ import type { PostProcessor } from './types';
 
 export class ComponentsWriter implements PostProcessor {
   postProcess(context: DocumentContext): void {
-    const { output } = context;
+    const { output, strapi } = context;
+    const registry = z.registry<{ id: string }>();
 
-    const { schemas } = z.toJSONSchema(schemaRegistry.getRegistry(), {
+    for (const [id, schema] of strapi.contentAPISchemaRegistry.entries()) {
+      registry.add(schema, { id });
+    }
+
+    const { schemas } = z.toJSONSchema(registry, {
       ...OPENAPI_SCHEMA_CONVERSION_OPTIONS,
       uri: toComponentsPath,
     }) as OpenAPIV3_1.ComponentsObject;

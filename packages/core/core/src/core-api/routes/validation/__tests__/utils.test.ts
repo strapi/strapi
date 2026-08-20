@@ -1,24 +1,24 @@
-import { schemaRegistry } from '@strapi/openapi';
 import type { Core } from '@strapi/types';
 import * as z from 'zod';
 
+import { createContentAPISchemaRegistry } from '../schema-registry';
 import { safeSchemaCreation } from '../utils';
 
 describe('safeSchemaCreation', () => {
-  const strapi = {
-    log: {
-      debug: jest.fn(),
-      error: jest.fn(),
-    },
-  } as unknown as Core.Strapi;
+  const createMockStrapi = (): Core.Strapi =>
+    ({
+      log: {
+        debug: jest.fn(),
+        error: jest.fn(),
+      },
+      contentAPISchemaRegistry: createContentAPISchemaRegistry(),
+    }) as unknown as Core.Strapi;
+
+  let strapi: Core.Strapi;
 
   beforeEach(() => {
-    schemaRegistry.clear();
+    strapi = createMockStrapi();
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    schemaRegistry.clear();
   });
 
   it('returns the registered schema without rebuilding it', () => {
@@ -43,7 +43,7 @@ describe('safeSchemaCreation', () => {
     });
 
     expect(cyclicalSchema?.safeParse({ title: 'Article' }).success).toBe(true);
-    expect(schemaRegistry.get('ApiArticleArticleDocument')).toBe(schema);
+    expect(strapi.contentAPISchemaRegistry.get('ApiArticleArticleDocument')).toBe(schema);
     expect(schema.safeParse({ title: 'Article' }).success).toBe(true);
   });
 });

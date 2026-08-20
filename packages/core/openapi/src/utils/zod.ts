@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import * as z from 'zod';
 
+import type { Core } from '@strapi/types';
 import type { OpenAPIV3_1 } from 'openapi-types';
-
-import { schemaRegistry } from './schema-registry';
 
 /**
  * OpenAPI 3.1 uses the JSON Schema 2020-12 dialect. Zod 4.4.3 has no `openapi-3.1`
@@ -36,6 +35,9 @@ export const stripJsonSchemaId = <T extends object>(schema: T): T => {
  * OpenAPI components.
  *
  * @param zodSchema - The Zod schema to convert to OpenAPI format. Can be any valid Zod schema.
+ * @param schemaStore - The application-owned content-API schema store to copy named
+ *   component definitions from. Conversion uses a local registry and does not read a
+ *   live Zod registry from the store.
  *
  * @returns An OpenAPI Schema Object representing the input Zod schema structure.
  * If the conversion cannot be completed, returns undefined.
@@ -52,11 +54,12 @@ export const stripJsonSchemaId = <T extends object>(schema: T): T => {
  * });
  *
  * // Convert to OpenAPI schema
- * const openAPISchema = zodToOpenAPI(userSchema);
+ * const openAPISchema = zodToOpenAPI(userSchema, strapi.contentAPISchemaRegistry);
  * ```
  */
 export const zodToOpenAPI = (
-  zodSchema: z.ZodType
+  zodSchema: z.ZodType,
+  schemaStore: Core.ContentAPISchemaRegistry
 ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject => {
   try {
     const id = randomUUID();
@@ -67,7 +70,7 @@ export const zodToOpenAPI = (
 
     // Copy Strapi-owned definitions into the local registry so references resolve without
     // generating "__shared" definitions.
-    for (const [key, value] of schemaRegistry.entries()) {
+    for (const [key, value] of schemaStore.entries()) {
       registry.add(value, { id: key });
     }
 
