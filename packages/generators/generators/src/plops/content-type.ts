@@ -14,7 +14,7 @@ import getAttributesPrompts from './prompts/get-attributes-prompts';
 import bootstrapApiPrompts from './prompts/bootstrap-api-prompts';
 import getFolderPrompts from './prompts/get-folder-prompts';
 import { appendToFile } from './utils/extend-plugin-index-files';
-import { assignContentTypeToFolder } from './utils/content-structure';
+import { planContentTypeToFolder } from './utils/content-structure';
 
 export default (plop: NodePlopAPI) => {
   // Model generator
@@ -271,11 +271,19 @@ export default (plop: NodePlopAPI) => {
           );
         }
 
-        assignContentTypeToFolder({
+        const assignedUid = uid;
+
+        const commitFolderAssignment = planContentTypeToFolder({
           destBasePath: plop.getDestBasePath(),
           folder: answers.folder,
           kind: answers.kind,
-          uid,
+          uid: assignedUid,
+        });
+
+        baseActions.push(() => {
+          commitFolderAssignment();
+
+          return `assigned "${assignedUid}" to folder`;
         });
       }
 
