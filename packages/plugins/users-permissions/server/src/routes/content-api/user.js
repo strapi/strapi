@@ -1,6 +1,6 @@
 'use strict';
 
-const z = require('zod');
+const z = require('zod/v4');
 const { UsersPermissionsRouteValidator } = require('./validation');
 
 module.exports = (strapi) => {

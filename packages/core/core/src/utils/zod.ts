@@ -1,17 +1,17 @@
-import type * as z from 'zod';
+import * as z4 from 'zod/v4/core';
 
 type ZodSchemaInspection =
-  | { type: 'array'; element: z.core.$ZodType }
-  | { type: 'optional' | 'default'; innerType: z.core.$ZodType }
-  | { type: 'object'; shape: z.core.$ZodShape }
+  | { type: 'array'; element: z4.$ZodType }
+  | { type: 'optional' | 'default'; innerType: z4.$ZodType }
+  | { type: 'object'; shape: z4.$ZodShape }
   | {
-      type: Exclude<z.core.$ZodTypeDef['type'], 'array' | 'optional' | 'default' | 'object'>;
+      type: Exclude<z4.$ZodTypeDef['type'], 'array' | 'optional' | 'default' | 'object'>;
     };
 
 /**
  * Checks whether an unknown value exposes the Zod 4 Core schema contract.
  */
-export const isZodType = (value: unknown): value is z.core.$ZodType => {
+export const isZodType = (value: unknown): value is z4.$ZodType => {
   if (typeof value !== 'object' || value === null || !('_zod' in value)) {
     return false;
   }
@@ -32,18 +32,18 @@ export const isZodType = (value: unknown): value is z.core.$ZodType => {
 /**
  * Reads the supported structural fields from a Zod 4 Core schema definition.
  */
-export const inspectZodSchema = <T extends z.core.$ZodType>(schema: T): ZodSchemaInspection => {
+export const inspectZodSchema = <T extends z4.$ZodType>(schema: T): ZodSchemaInspection => {
   const def = schema._zod.def;
 
   switch (def.type) {
     case 'array':
-      return { type: def.type, element: (def as z.core.$ZodArrayDef).element };
+      return { type: def.type, element: (def as z4.$ZodArrayDef).element };
     case 'optional':
-      return { type: def.type, innerType: (def as z.core.$ZodOptionalDef).innerType };
+      return { type: def.type, innerType: (def as z4.$ZodOptionalDef).innerType };
     case 'default':
-      return { type: def.type, innerType: (def as z.core.$ZodDefaultDef).innerType };
+      return { type: def.type, innerType: (def as z4.$ZodDefaultDef).innerType };
     case 'object':
-      return { type: def.type, shape: (def as z.core.$ZodObjectDef).shape };
+      return { type: def.type, shape: (def as z4.$ZodObjectDef).shape };
     default:
       return { type: def.type };
   }

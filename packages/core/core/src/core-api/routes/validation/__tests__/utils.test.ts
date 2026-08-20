@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import { createContentAPISchemaRegistry } from '../schema-registry';
 import { safeSchemaCreation } from '../utils';

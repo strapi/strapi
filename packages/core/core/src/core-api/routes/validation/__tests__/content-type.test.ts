@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import { CoreContentTypeRouteValidator } from '../content-type';
 

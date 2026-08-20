@@ -149,7 +149,7 @@ describe('Core API - Validate', () => {
   });
 
   describe('route.request.query (extra query params)', () => {
-    const z = require('zod');
+    const z = require('zod/v4');
 
     it('allows extra query param from route when strictParams: true and Zod parses', async () => {
       const route = { request: { query: { search: z.string() } } };

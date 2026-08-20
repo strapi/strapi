@@ -72,7 +72,7 @@ Create a context through the matching factory, run the assembler, and assert on 
 
 ```typescript
 import type { Core } from '@strapi/types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import { OperationParametersAssembler } from '../../src/assemblers/document/path/path-item/operation';
 import { OperationContextFactory } from '../../src/context';

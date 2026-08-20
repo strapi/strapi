@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import * as z from 'zod';
+import * as z from 'zod/v4';
 import {
   augmentSchema,
   maybeReadonly,

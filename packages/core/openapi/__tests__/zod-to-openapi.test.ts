@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import { OperationResponsesAssembler } from '../src/assemblers/document/path/path-item/operation';
 import { DocumentContextFactory, OperationContextFactory } from '../src/context';

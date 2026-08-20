@@ -242,7 +242,7 @@ describe('Core API - Sanitize Input', () => {
     });
 
     describe('route.request.body (extra body params)', () => {
-      const z = require('zod');
+      const z = require('zod/v4');
       let contentType;
 
       beforeEach(() => {

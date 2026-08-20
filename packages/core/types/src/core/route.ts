@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 import type { LiteralUnion } from '../utils/string';
 import type { MiddlewareHandler } from './middleware';
 

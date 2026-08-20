@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 type SchemaRegistryStore = {
   registry: ReturnType<typeof z.registry<z.core.GlobalMeta>>;

@@ -1,5 +1,5 @@
 import { OpenAPIV3_1 } from 'openapi-types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 import type { DocumentContext } from '../types';
 import {
   OPENAPI_SCHEMA_CONVERSION_OPTIONS,

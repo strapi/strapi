@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 import { createContentApiRoutesFactory } from '@strapi/utils';
 import { UploadRouteValidator } from './validation';
 

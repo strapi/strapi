@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 /**
  * Per-application store of named Zod schemas built for content-API validation.

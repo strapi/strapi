@@ -1,6 +1,6 @@
 import { transformUidToValidOpenApiName } from '@strapi/utils';
 import type { Core, Internal } from '@strapi/types';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import { inspectZodSchema } from '../../../utils/zod';
 

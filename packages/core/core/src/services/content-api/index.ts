@@ -5,7 +5,7 @@ import {
   ALLOWED_QUERY_PARAM_KEYS,
   RESERVED_INPUT_PARAM_KEYS,
 } from '@strapi/utils';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import type { Core, Modules, UID } from '@strapi/types';
 
