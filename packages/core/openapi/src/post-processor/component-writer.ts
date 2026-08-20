@@ -3,10 +3,14 @@ import * as z from 'zod';
 import type { DocumentContext } from '../types';
 import {
   OPENAPI_SCHEMA_CONVERSION_OPTIONS,
-  stripJsonSchemaId,
+  liftZodSharedDefinitions,
   toComponentsPath,
 } from '../utils/zod';
 import type { PostProcessor } from './types';
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && Array.isArray(value) === false;
+};
 
 export class ComponentsWriter implements PostProcessor {
   postProcess(context: DocumentContext): void {
@@ -20,19 +24,20 @@ export class ComponentsWriter implements PostProcessor {
     const { schemas } = z.toJSONSchema(registry, {
       ...OPENAPI_SCHEMA_CONVERSION_OPTIONS,
       uri: toComponentsPath,
-    }) as OpenAPIV3_1.ComponentsObject;
+    });
 
-    for (const schema of Object.values(schemas ?? {})) {
-      if (schema && typeof schema === 'object') {
-        stripJsonSchemaId(schema);
-      }
-    }
+    const converted: Record<string, unknown> = isPlainObject(schemas) ? schemas : {};
+    liftZodSharedDefinitions(converted);
 
     const existingComponents = output.data.components ?? {};
+    const extracted = context.registries.extractedComponentSchemas;
 
     output.data.components = {
       ...existingComponents,
-      schemas,
+      schemas: {
+        ...extracted,
+        ...(converted as Record<string, OpenAPIV3_1.SchemaObject>),
+      },
     };
   }
 }
