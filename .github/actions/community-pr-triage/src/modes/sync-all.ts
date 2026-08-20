@@ -55,7 +55,8 @@ export async function syncAll(inputs: ActionInputs): Promise<void> {
               analysis,
               inputs.cprTeamId,
               inputs.projectId,
-              labelMap
+              labelMap,
+              inputs.triageStateId
             );
             try {
               await github.postComment(

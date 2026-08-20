@@ -27,6 +27,7 @@
   "stage.notification.saved": "Review stage updated",
   "stage.notification.error": "An error occurred while updating the review stage",
   "stages.no-transition": "You don’t have the permission to update this stage.",
+  "stages.save-first": "Save this entry to assign a workflow stage.",
   "stages.single-stage": "This workflow only has one stage. Add more stages to be able to transition between them.",
   "stages.limit.title": "You have reached the limit of stages for this workflow in your plan",
   "stages.limit.body": "Try deleting some stages or contact Sales to enable more stages.",

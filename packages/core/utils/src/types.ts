@@ -1,4 +1,3 @@
-import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
 type ID = number | string;
@@ -86,33 +85,6 @@ export interface Model {
   };
   privateAttributes?: string[];
   attributes: Record<string, AnyAttribute>;
-}
-
-declare module 'koa' {
-  interface Request extends Koa.BaseRequest {
-    route: RouteInfo;
-  }
-
-  interface ExtendableContext {
-    ok: (response?: string | object, details?: object) => Koa.Context;
-    created: (response?: string | object, details?: object) => Koa.Context;
-    noContent: (response?: string | object, details?: object) => Koa.Context;
-    badRequest: (response?: string | object, details?: object) => Koa.Context;
-    unauthorized: (response?: string | object, details?: object) => Koa.Context;
-    forbidden: (response?: string | object, details?: object) => Koa.Context;
-    notFound: (response?: string | object, details?: object) => Koa.Context;
-    locked: (response?: string | object, details?: object) => Koa.Context;
-    internalServerError: (response?: string | object, details?: object) => Koa.Context;
-    notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
-  }
-}
-
-export interface RouteInfo {
-  endpoint: string;
-  controller: string;
-  action: string;
-  verb: string;
-  plugin: string;
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

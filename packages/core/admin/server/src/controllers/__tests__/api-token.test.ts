@@ -425,13 +425,9 @@ describe('API Token Controller', () => {
 
     const superAdmin = { id: 99, roles: [{ code: 'strapi-super-admin' }] };
 
-    test('Retrieve a content API token includes accessKey for any caller', async () => {
+    test('Retrieve a content API token calls getById once with includeDecryptedKey', async () => {
       const tokenWithKey = { ...legacyToken, accessKey: 'plaintext-key' };
-      // first call (no key), second call (with key)
-      const getById = jest
-        .fn()
-        .mockResolvedValueOnce(legacyToken)
-        .mockResolvedValueOnce(tokenWithKey);
+      const getById = jest.fn().mockResolvedValue(tokenWithKey);
       const send = jest.fn();
       const ctx = createContext(
         { params: { id: legacyToken.id } },
@@ -450,11 +446,12 @@ describe('API Token Controller', () => {
 
       await apiTokenController.get(ctx as any);
 
-      expect(getById).toHaveBeenCalledTimes(2);
+      expect(getById).toHaveBeenCalledTimes(1);
+      expect(getById).toHaveBeenCalledWith(legacyToken.id, { includeDecryptedKey: true });
       expect(send).toHaveBeenCalledWith({ data: tokenWithKey });
     });
 
-    test('Fails if the API token does not exist', async () => {
+    test('Returns 404 when the token does not exist', async () => {
       const getById = jest.fn().mockResolvedValue(null);
       const notFound = jest.fn();
       const ctx = createContext(
@@ -474,7 +471,7 @@ describe('API Token Controller', () => {
 
       await apiTokenController.get(ctx as any);
 
-      expect(getById).toHaveBeenCalledWith(legacyToken.id);
+      expect(getById).toHaveBeenCalledTimes(1);
       expect(notFound).toHaveBeenCalledWith('API Token not found');
     });
   });

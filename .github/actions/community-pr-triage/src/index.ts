@@ -29,6 +29,7 @@ function loadInputs(): ActionInputs {
     notionApiKey: core.getInput('notion-api-key') || null,
     notionDatabaseId: core.getInput('notion-database-id') || null,
     labelMap: parseLabels(core.getInput('linear-labels')),
+    triageStateId: core.getInput('linear-triage-state-id') || null,
   };
 }
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
-import type { Client, Server } from '../../../types/remote/protocol';
+import type { Client, Server } from '../../types/remote/protocol';
 
 import {
   ProviderError,

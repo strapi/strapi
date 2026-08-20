@@ -1,0 +1,15 @@
+# Strapi Security Policy
+# RFC 9116 — see https://www.rfc-editor.org/rfc/rfc9116
+#
+# All vulnerability reports are REQUIRED to be submitted through GitHub's
+# Security Advisory (GHSA) system. The mailto: contact below is a narrow
+# fallback for cases where GitHub is blocked or restricted in the reporter's
+# jurisdiction; see the full policy for details.
+
+Contact: https://github.com/strapi/strapi/security/advisories/new
+Contact: mailto:security@strapi.io
+Expires: 2027-05-20T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://strapi.io/.well-known/security.txt
+Policy: https://github.com/strapi/strapi/blob/main/SECURITY.md
+Acknowledgments: https://github.com/strapi/strapi/security/advisories

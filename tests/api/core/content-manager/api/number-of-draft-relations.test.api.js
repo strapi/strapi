@@ -271,7 +271,7 @@ describe('CM API - Number of draft relations', () => {
       url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(0);
+    expect(body.data.unpublishedRelations).toBe(0);
   });
 
   test('Return 0 for published relations only', async () => {
@@ -306,7 +306,7 @@ describe('CM API - Number of draft relations', () => {
       url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(0);
+    expect(body.data.unpublishedRelations).toBe(0);
   });
 
   test('Return 8 when there are 8 drafts (1 xToOne & 1 xToMany on ct, compo, comporep, dz)', async () => {
@@ -341,7 +341,7 @@ describe('CM API - Number of draft relations', () => {
       url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(8);
+    expect(body.data.unpublishedRelations).toBe(8);
   });
 
   test('Return 8 when there are 8 drafts (1 xToOne & 1/2 xToMany on ct, compo, comporep, dz)', async () => {
@@ -382,7 +382,7 @@ describe('CM API - Number of draft relations', () => {
       url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(8);
+    expect(body.data.unpublishedRelations).toBe(8);
   });
 
   test('Return 12 when there are 12 drafts (1 xToOne & 2 xToMany on ct, compo, comporep, dz)', async () => {
@@ -424,7 +424,7 @@ describe('CM API - Number of draft relations', () => {
       url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(12);
+    expect(body.data.unpublishedRelations).toBe(12);
   });
 
   test('Return 8 when there are 8 drafts in a non default locale', async () => {
@@ -498,7 +498,7 @@ describe('CM API - Number of draft relations', () => {
       qs: { locale: nonDefaultLocale },
     });
 
-    expect(body.data).toBe(8);
+    expect(body.data.unpublishedRelations).toBe(8);
   });
 
   test('Return 0 and not crash when product has a relation to a non-draftAndPublish type', async () => {
@@ -528,7 +528,7 @@ describe('CM API - Number of draft relations', () => {
     });
 
     expect(statusCode).toBe(200);
-    expect(body.data).toBe(0);
+    expect(body.data.unpublishedRelations).toBe(0);
   });
 
   test('Correctly count the number of draft relations across multiple locales and document IDs', async () => {
@@ -600,7 +600,10 @@ describe('CM API - Number of draft relations', () => {
       )
     );
 
-    const totalDraftRelations = counts.reduce((acc, { body }) => acc + body.data, 0);
+    const totalDraftRelations = counts.reduce(
+      (acc, { body }) => acc + body.data.unpublishedRelations,
+      0
+    );
 
     expect(totalDraftRelations).toBe(3);
   });
@@ -634,6 +637,9 @@ describe('CM API - Number of draft relations', () => {
     });
 
     expect(statusCode).toBe(200);
-    expect(typeof body.data).toBe('number');
+    expect(body.data).toMatchObject({
+      unpublishedRelations: expect.any(Number),
+      draftM2mLinks: expect.any(Number),
+    });
   });
 });

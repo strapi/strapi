@@ -1,6 +1,6 @@
 import * as tsUtils from '@strapi/typescript-utils';
 import type { CLIContext } from '../cli/types';
-import { checkRequiredDependencies } from './core/dependencies';
+import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
@@ -26,6 +26,12 @@ interface BuildOptions extends CLIContext {
    * Print stats for build
    */
   stats?: boolean;
+  /**
+   * Auto-install missing admin dependencies
+   *
+   * @default false
+   */
+  installDeps?: boolean;
 }
 
 /**
@@ -33,15 +39,16 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
+const build = async ({ logger, cwd, tsconfig, installDeps = false, ...options }: BuildOptions) => {
   const timer = getTimer();
 
-  const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-    logger.error(err.message);
-    process.exit(1);
+  const shouldContinue = await handleAdminDependencies({
+    cwd,
+    logger,
+    installIfMissing: installDeps,
   });
 
-  if (didInstall) {
+  if (!shouldContinue) {
     return;
   }
 

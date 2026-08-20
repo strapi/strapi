@@ -1,7 +1,7 @@
 # Strapi Monorepo — Agent Guide
 
 Strapi is an open-source headless CMS.
-Yarn workspaces + Nx monorepo. Node ≥20 ≤24, Yarn 4.
+Yarn workspaces + Nx monorepo. Node ≥22 ≤26, Yarn 4.
 Target branch: `develop` (not `main`). All PRs go to `develop`.
 
 ---
@@ -32,6 +32,22 @@ The following are the most important packages (not exhaustive — run `yarn work
 | `@strapi/permissions`              | RBAC engine                                               |
 | `@strapi/plugin-users-permissions` | JWT authentication                                        |
 
+### Skills directories
+
+**`.ai/skills/`** is the canonical source for committed repo skills. Each subdirectory containing a `SKILL.md` is a skill.
+
+The AI-tooling well-known locations are **symlink targets** maintained by `yarn ai:sync`: `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`.
+
+Run `yarn ai:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
+
+On **Windows**, the CLI creates directory **junctions** (no extra setup). Directory symlinks require Developer Mode or an elevated shell.
+
+```bash
+yarn ai:sync    # idempotent — create/prune .ai links in all 3 tool dirs
+yarn ai:unlink  # remove only .ai-sourced links (leaves brain links intact)
+yarn ai:status  # read-only report: linked / missing / conflict / stale
+```
+
 ---
 
 ## Architecture
@@ -52,8 +68,22 @@ The following are the most important packages (not exhaustive — run `yarn work
 ```bash
 # Initial setup (run once after cloning)
 yarn install
-yarn setup                    # clean + build all packages
+yarn setup                    # clean + build all packages; hints to run ai:sync if links are missing
+yarn ai:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
+
+### New worktree bootstrap
+
+- In a newly created worktree, check whether `.claude/skills/git-conventions` resolves to the
+  repository's `.ai/skills/git-conventions`. If the link is absent or stale, run
+  `yarn setup:worktree`.
+- If `.brain` exists, do not initialize or refresh it.
+- If `.brain` is absent, look for the user-level `brain-start` skill.
+  - If unavailable, continue silently; this is the normal external-contributor path.
+  - If available, read it, resolve the CMS Brain CLI from its canonical host checkout, and run
+    `"$BRAIN_CLI" refresh --project strapi/strapi`.
+- If CMS Brain is installed and refresh fails, report the failure and follow the bootstrap skill's
+  remediation. Only the absence of the optional skill is a clean no-op.
 
 ---
 
@@ -220,17 +250,13 @@ yarn prettier:check # check only
 - Branch from `develop`, target `develop` — never `main`.
 - Link the issue you're fixing in the description.
 - All tests must pass before merging.
-- PR description must use this template:
-  - **What does it do?** — technical changes made
-  - **Why is it needed?** — problem being solved
-  - **How to test it?** — steps to reproduce and verify
-  - **Related issue(s)/PR(s)** — links
+- PR description must follow [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) — do not invent your own sections.
 
 ---
 
 ## Notes for Agents
 
-- **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so.
+- **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so. **Exception:** `examples/complex` is the **migration test fixture** (schemas, seeds, `validate-migration.js`, DB tooling); CI runs `migration_v5` against it via `tests/migration/`. It may relocate under `tests/migration/` in the future.
 - **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.

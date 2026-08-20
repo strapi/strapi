@@ -59,7 +59,11 @@ export interface Parent {
   schema: Model;
 }
 
-const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
+const traverseEntity = async (
+  visitor: Visitor,
+  options: TraverseOptions,
+  entity: Data
+): Promise<Data> => {
   const {
     path = { raw: null, attribute: null, rawWithIndices: null },
     schema,
@@ -124,6 +128,14 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
+    // A dynamic zone array can contain a `null` entry (for example a relation
+    // created inline inside a dynamic zone component can leave a null item).
+    // Reading `__component` on it crashed traversal; pass nil entries through
+    // untouched, consistent with how `traverseEntity` ends recursion on nil. (#24303)
+    if (isNil(entry)) {
+      return entry;
+    }
+
     const targetSchema = getModel(entry.__component!);
     const traverseOptions: TraverseOptions = {
       schema: targetSchema,
@@ -174,7 +186,16 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       allowedExtraRootKeys,
     };
 
-    await visitor(visitorOptions, visitorUtils);
+    // Awaited only when the visitor actually returns something thenable. Most visitors
+    // finish synchronously for most keys — a scalar is not a relation, so the relation
+    // visitor returns immediately — and `await` on a non-thenable still allocates a
+    // promise and defers the rest of the loop to a microtask. Over every key of every
+    // node of every entity in a page that was the largest single source of promise churn.
+    const visited = visitor(visitorOptions, visitorUtils) as unknown;
+
+    if (visited != null && typeof (visited as PromiseLike<void>).then === 'function') {
+      await visited;
+    }
 
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];

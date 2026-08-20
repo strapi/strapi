@@ -23,11 +23,13 @@ export async function syncPR(
     linearTicketDbId: null,
   };
 
-  const labelMap = await linear.resolveTeamLabels(inputs.cprTeamId, inputs.labelMap);
   // Check CPR first, then CMS — avoids creating a duplicate if already picked up
-  const existing =
-    (await linear.findTicketByPRNumber(inputs.cprTeamId, prNumber)) ??
-    (await linear.findTicketByPRNumber(inputs.cmsTeamId, prNumber));
+  const cprTicket = await linear.findTicketByPRNumber(inputs.cprTeamId, prNumber);
+  const cmsTicket = cprTicket
+    ? null
+    : await linear.findTicketByPRNumber(inputs.cmsTeamId, prNumber);
+  const existing = cprTicket ?? cmsTicket;
+  const labelMap = await linear.resolveTeamLabels(inputs.cprTeamId, inputs.labelMap);
 
   if (!existing) {
     const ticket = await linear.createTicket(
@@ -35,7 +37,8 @@ export async function syncPR(
       analysis,
       inputs.cprTeamId,
       inputs.projectId,
-      labelMap
+      labelMap,
+      inputs.triageStateId
     );
     analysis.linearTicketId = ticket.identifier;
 
@@ -47,6 +50,10 @@ export async function syncPR(
   } else {
     analysis.linearTicketId = existing.identifier;
     analysis.linearTicketDbId = existing.id;
-    await linear.updateTicket(existing.id, pr, analysis, labelMap, inputs.cprTeamId);
+    if (cprTicket) {
+      await linear.updateTicket(existing.id, pr, analysis, labelMap, inputs.cprTeamId);
+    } else {
+      await linear.updateTicketMetadata(existing.id, pr, analysis);
+    }
   }
 }

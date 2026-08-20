@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
-import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../../types';
+import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
@@ -126,7 +126,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     this.#reportInfo('creating entities read stream');
     return chain([
       // Entities stream
-      createEntitiesStream(this.strapi),
+      createEntitiesStream(this.strapi, {
+        onWarning: (message) => {
+          this.strapi?.log.warn(message);
+          this.#reportWarning(message);
+        },
+      }),
 
       // Transform stream
       createEntitiesTransformStream(),
@@ -137,7 +142,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream links');
     this.#reportInfo('creating links read stream');
 
-    return createLinksStream(this.strapi);
+    return createLinksStream(this.strapi, {
+      onWarning: (message) => {
+        this.strapi?.log.warn(message);
+        this.#reportWarning(message);
+      },
+    });
   }
 
   createConfigurationReadStream(): Readable {

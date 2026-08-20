@@ -14,7 +14,13 @@ jest.mock('../../store/hooks', () => ({
 
 jest.mock('../../services/api', () => ({
   abortUpload: jest.fn(),
-  useRetryCancelledFilesStreamMutation: () => [mockRetryCancelledFiles],
+  useRetryCancelledFilesMutation: () => [mockRetryCancelledFiles],
+}));
+
+// Mocked because the api module above is fully mocked — the real settings
+// service would call `uploadApi.injectEndpoints` on the mock's undefined.
+jest.mock('../../services/settings', () => ({
+  useGetUploadSettingsQuery: () => ({ data: { data: { concurrentUploadRequests: 1 } } }),
 }));
 
 const { useTypedSelector } = jest.requireMock('../../store/hooks');
@@ -30,13 +36,14 @@ const createMockFile = (
   index,
   status,
   size: 1024,
+  // Completed files have fully transferred; this drives the byte-weighted aggregate.
+  uploadedBytes: status === 'complete' ? 1024 : 0,
   error,
 });
 
 const createMockState = (overrides: Partial<UploadProgressState> = {}): UploadProgressState => ({
   isVisible: true,
   isMinimized: false,
-  progress: 0,
   totalFiles: 3,
   files: [],
   errors: [],
@@ -73,7 +80,6 @@ describe('UploadProgressDialog', () => {
     it('displays uploading status with progress percentage', () => {
       setup(
         createMockState({
-          progress: 50,
           totalFiles: 4,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
@@ -86,29 +92,27 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText(/Uploading 4 items \(50%\)/)).toBeInTheDocument();
     });
 
-    it('shows Cancel button during upload', () => {
+    it('shows Cancel all button during upload', () => {
       setup(
         createMockState({
-          progress: 25,
           files: [
             createMockFile(0, 'file1.png', 'uploading'),
             createMockFile(1, 'file2.png', 'pending'),
           ],
         })
       );
-      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancel all' })).toBeInTheDocument();
     });
 
-    it('calls abortUpload and dispatch cancelUpload when Cancel is clicked', () => {
+    it('calls abortUpload and dispatch cancelUpload when Cancel all is clicked', () => {
       setup(
         createMockState({
           uploadId: 5,
-          progress: 25,
           files: [createMockFile(0, 'file1.png', 'uploading')],
         })
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel all' }));
 
       expect(abortUpload).toHaveBeenCalledWith(5);
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'uploadProgress/cancelUpload' });
@@ -119,7 +123,6 @@ describe('UploadProgressDialog', () => {
     it('displays success status when all files are uploaded', async () => {
       setup(
         createMockState({
-          progress: 100,
           totalFiles: 2,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
@@ -136,7 +139,6 @@ describe('UploadProgressDialog', () => {
     it('shows Close button when upload is complete', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'complete')],
         })
       );
@@ -148,7 +150,6 @@ describe('UploadProgressDialog', () => {
     it('dispatches closeUploadProgress when Close is clicked', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'complete')],
         })
       );
@@ -166,7 +167,6 @@ describe('UploadProgressDialog', () => {
     it('displays error status when all files have errors', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'error', 'File too large'),
             createMockFile(1, 'file2.png', 'error', 'Network error'),
@@ -184,7 +184,6 @@ describe('UploadProgressDialog', () => {
     it('displays canceled status when some files are cancelled', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
             createMockFile(1, 'file2.png', 'cancelled'),
@@ -198,7 +197,6 @@ describe('UploadProgressDialog', () => {
     it('shows Retry button when there are cancelled files', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'file1.png', 'complete'),
             createMockFile(1, 'file2.png', 'cancelled'),
@@ -213,7 +211,6 @@ describe('UploadProgressDialog', () => {
 
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'file1.png', 'cancelled')],
         })
       );
@@ -254,13 +251,66 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('uploading-file.png')).toBeInTheDocument();
       expect(screen.getByText('Uploading...')).toBeInTheDocument();
     });
+
+    it('reports byte progress on a determinate bar once bytes are flowing', () => {
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'uploading-file.png', 'uploading'),
+              size: 1000,
+              uploadedBytes: 250,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
+    });
+
+    it('falls back to an indeterminate bar while the size is still unknown', () => {
+      // The URL flow opens rows at size 0 during the server-side fetch; a determinate
+      // bar would sit at 0% for the whole phase and read as stalled.
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'https://example.com/photo.png', 'uploading'),
+              size: 0,
+              uploadedBytes: 0,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
+
+    it('stays indeterminate when the size is known but no bytes are reported', () => {
+      // The URL flow's `file:uploading` event carries the real size, but the server
+      // sends no incremental byte counts — the next event is `file:complete`. Keying the
+      // bar off `size` alone froze these rows at a determinate 0% for the whole upload
+      // (observed on a 512MB URL import that took ~10s).
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, '512MB.zip', 'uploading'),
+              size: 536870912,
+              uploadedBytes: 0,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
   });
 
   describe('FileRowRenderer - completed file', () => {
     it('displays completed files with uploaded indicator', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'completed-file.png', 'complete')],
         })
       );
@@ -271,11 +321,196 @@ describe('UploadProgressDialog', () => {
     });
   });
 
+  describe('FileRowRenderer - metadata phase', () => {
+    const completedWithMetadata = (metadataStatus: FileProgress['metadataStatus']) =>
+      createMockState({
+        totalFiles: 1,
+        files: [{ ...createMockFile(0, 'photo.png', 'complete'), metadataStatus }],
+      });
+
+    it('shows the generating subline with an indeterminate bar while metadata is in flight', () => {
+      setup(completedWithMetadata('generating'));
+
+      expect(screen.getByText('Uploaded • Generating metadata…')).toBeInTheDocument();
+      // Generation reports no fraction, so the bar carries no aria-valuenow.
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
+
+    it('shows no progress bar once the metadata phase has settled', () => {
+      setup(completedWithMetadata('generated'));
+
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+
+    it('shows the generated subline once metadata succeeds', () => {
+      setup(completedWithMetadata('generated'));
+
+      expect(screen.getByText('Uploaded • Metadata generated')).toBeInTheDocument();
+    });
+
+    it('shows the skipped subline when the server skipped the file', () => {
+      setup(completedWithMetadata('skipped'));
+
+      expect(screen.getByText('Upload complete • Metadata generation skipped')).toBeInTheDocument();
+    });
+
+    it('shows the failed subline when metadata generation fails', () => {
+      setup(completedWithMetadata('failed'));
+
+      expect(screen.getByText('Upload complete • Metadata generation failed')).toBeInTheDocument();
+    });
+
+    it('falls back to the plain uploaded subline for rows with no metadata phase', () => {
+      setup(completedWithMetadata(undefined));
+
+      expect(screen.getByText('Uploaded')).toBeInTheDocument();
+    });
+
+    it('still reports the upload as successful when metadata failed', () => {
+      setup(completedWithMetadata('failed'));
+
+      // Metadata is a per-row annotation — it must not affect header completion.
+      expect(screen.getByText('Upload successful!')).toBeInTheDocument();
+      expect(screen.getByText(/uploaded successfully/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+
+    it('still reports the upload as successful when metadata was skipped', () => {
+      setup(completedWithMetadata('skipped'));
+
+      expect(screen.getByText('Upload successful!')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+
+    it('does not block closing while metadata generation is still in flight', () => {
+      setup(completedWithMetadata('generating'));
+
+      expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    });
+  });
+
+  describe('HeaderStatus - metadata subtitle', () => {
+    it('shows count-based metadata progress while generation is in flight', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generating' },
+          ],
+        })
+      );
+
+      // 1 of 2 metadata rows settled → 50%
+      expect(screen.getByText('Generating metadata with AI (50%)')).toBeInTheDocument();
+    });
+
+    it('replaces the in-flight subtitle with the outcome once every row is terminal', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generated' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.getByText('Metadata successfully generated on 2 files')).toBeInTheDocument();
+    });
+
+    it('singularises the outcome message for a single generated file', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [{ ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' }],
+        })
+      );
+
+      expect(screen.getByText('Metadata successfully generated on 1 file')).toBeInTheDocument();
+    });
+
+    it('reports the failure count alongside the generated count', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'failed' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.getByText('1 generated, 1 failed')).toBeInTheDocument();
+    });
+
+    it('stays silent when nothing was generated', () => {
+      // An all-skipped batch of non-images: "generated on 0 files" would be worse than
+      // saying nothing, and the per-row sublines already report the skips.
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.pdf', 'complete'), metadataStatus: 'skipped' },
+            { ...createMockFile(1, 'b.pdf', 'complete'), metadataStatus: 'skipped' },
+          ],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Metadata successfully generated/)).not.toBeInTheDocument();
+    });
+
+    it('counts only generated rows, ignoring skipped ones', () => {
+      setup(
+        createMockState({
+          totalFiles: 3,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(1, 'b.png', 'complete'), metadataStatus: 'generated' },
+            { ...createMockFile(2, 'c.pdf', 'complete'), metadataStatus: 'skipped' },
+          ],
+        })
+      );
+
+      expect(screen.getByText('Metadata successfully generated on 2 files')).toBeInTheDocument();
+    });
+
+    it('keeps the subtitle up between files while later rows are still uploading', () => {
+      // Nothing is generating at this instant — file 0's generation beat file 1's upload
+      // — but the phase is not over, so the subtitle must not blink out.
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            { ...createMockFile(0, 'a.png', 'complete'), metadataStatus: 'generated' },
+            createMockFile(1, 'b.png', 'uploading'),
+          ],
+        })
+      );
+
+      // 1 settled of 2 expected, counting the row still uploading.
+      expect(screen.getByText('Generating metadata with AI (50%)')).toBeInTheDocument();
+    });
+
+    it('hides the subtitle when no row entered the metadata phase (AI disabled)', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [createMockFile(0, 'photo.png', 'complete')],
+        })
+      );
+
+      expect(screen.queryByText(/Generating metadata with AI/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('FileRowRenderer - error file', () => {
     it('displays error files with error message', async () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'error-file.png', 'error', 'File size exceeded')],
         })
       );
@@ -284,13 +519,42 @@ describe('UploadProgressDialog', () => {
       });
       expect(screen.getByText('File size exceeded')).toBeInTheDocument();
     });
+
+    it('translates machine-readable server error codes instead of showing them raw', async () => {
+      // `FileTooBig` is the code returned by the body middleware when koa-body's
+      // maxFileSize is exceeded; it has a matching `apiError.*` translation entry.
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'too-big.png', 'error', 'FileTooBig')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('too-big.png')).toBeInTheDocument();
+      });
+
+      const row = screen.getByText('too-big.png').closest('div')!;
+      expect(row).not.toHaveTextContent('FileTooBig');
+    });
+
+    it('falls back to a generic message when the server gives no error message', async () => {
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'mystery.png', 'error')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('mystery.png')).toBeInTheDocument();
+      });
+      expect(screen.getByText('An error occurred while uploading the file.')).toBeInTheDocument();
+    });
   });
 
   describe('FileRowRenderer - cancelled file', () => {
     it('displays cancelled files with canceled indicator', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [createMockFile(0, 'cancelled-file.png', 'cancelled')],
         })
       );
@@ -303,7 +567,6 @@ describe('UploadProgressDialog', () => {
     it('sorts completed files by priority: error > cancelled > complete', () => {
       setup(
         createMockState({
-          progress: 100,
           files: [
             createMockFile(0, 'complete-file.png', 'complete'),
             createMockFile(1, 'cancelled-file.png', 'cancelled'),
@@ -316,6 +579,28 @@ describe('UploadProgressDialog', () => {
       expect(fileNames[0]).toHaveTextContent('error-file.png');
       expect(fileNames[1]).toHaveTextContent('cancelled-file.png');
       expect(fileNames[2]).toHaveTextContent('complete-file.png');
+    });
+  });
+
+  describe('Concurrent uploads', () => {
+    it('renders a row for every file currently uploading, not just the first', () => {
+      // Concurrent uploads leave several files `uploading` at once; the dialog
+      // must show them all (regression: a `find` rendered only the first).
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            createMockFile(0, 'uploading-a.png', 'uploading'),
+            createMockFile(1, 'uploading-b.png', 'uploading'),
+            createMockFile(2, 'uploading-c.png', 'uploading'),
+            createMockFile(3, 'pending-d.png', 'pending'),
+          ],
+        })
+      );
+
+      expect(screen.getByText('uploading-a.png')).toBeInTheDocument();
+      expect(screen.getByText('uploading-b.png')).toBeInTheDocument();
+      expect(screen.getByText('uploading-c.png')).toBeInTheDocument();
     });
   });
 });

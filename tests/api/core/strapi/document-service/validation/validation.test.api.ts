@@ -18,6 +18,11 @@ describe('Document Service Validations', () => {
     await destroyTestSetup(testUtils);
   });
 
+  beforeEach(() => {
+    // app-template enables api.documents.strictParams; reset so "default mode" cases match opt-out behavior
+    strapi.config.set('api.documents.strictParams', undefined);
+  });
+
   const methods = [
     'findMany',
     'findFirst',
@@ -798,24 +803,31 @@ describe('Document Service Validations', () => {
         expect(Array.isArray(result)).toBe(true);
       });
 
-      it('should accept allowed params including hasPublishedVersion and strip extra unrecognized keys', async () => {
+      it('should accept allowed params including publicationFilter, hasPublishedVersion and strip extra unrecognized keys', async () => {
         strapi.config.set('api.documents.strictParams', true);
 
         const result = await strapi.documents(ARTICLE_UID).findMany({
           status: 'draft',
-          hasPublishedVersion: false,
+          publicationFilter: 'never-published',
         });
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
 
-        const resultWithExtra = await strapi.documents(ARTICLE_UID).findMany({
+        const resultLegacy = await strapi.documents(ARTICLE_UID).findMany({
           status: 'draft',
           hasPublishedVersion: false,
+        });
+        expect(resultLegacy).toBeDefined();
+        expect(Array.isArray(resultLegacy)).toBe(true);
+
+        const resultWithExtra = await strapi.documents(ARTICLE_UID).findMany({
+          status: 'draft',
+          publicationFilter: 'never-published',
           unrecognizedKey: 'value',
         } as any);
         expect(resultWithExtra).toBeDefined();
         expect(Array.isArray(resultWithExtra)).toBe(true);
-        // unrecognizedKey is stripped; query ran with status and hasPublishedVersion only
+        // unrecognizedKey is stripped; query ran with status and publicationFilter only
       });
 
       it('should accept create with data param when strictParams is true', async () => {

@@ -31,6 +31,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--silent', "Don't log anything", false)
     .option('--sourcemap', 'Produce sourcemaps', false)
     .option('--stats', 'Print build statistics to the console', false)
+    .option('--install-deps', 'Auto-install missing admin dependencies', false)
     .description('Build the strapi admin app')
     .action(async (options: BuildCLIOptions) => {
       return action({ ...options, ...ctx });

@@ -152,8 +152,6 @@ export type SettingsMenu = {
   global: SettingsMenuLink[];
 };
 
-const isAdminTokensFutureEnabled = () => window.strapi.future.isEnabled('adminTokens') === true;
-
 export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
     {
@@ -221,15 +219,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
     },
-    ...(isAdminTokensFutureEnabled() === true
-      ? [
-          {
-            intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
-            to: '/settings/admin-tokens',
-            id: 'admin-tokens',
-          },
-        ]
-      : []),
+    {
+      intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
+      to: '/settings/admin-tokens',
+      id: 'admin-tokens',
+    },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE
       ? [

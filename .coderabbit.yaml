@@ -1,0 +1,111 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit configuration for the Strapi monorepo.
+# Docs: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+early_access: false
+
+reviews:
+  # "chill" is less noisy than "assertive"; switch to assertive if you want more nits.
+  profile: chill
+  # Don't block merges via the GitHub "request changes" review state.
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  poem: false
+  review_status: false
+  collapse_walkthrough: false
+  # Surface a sequence diagram for non-trivial control-flow changes.
+  sequence_diagrams: true
+  changed_files_summary: true
+  # Conventional Commits are enforced via commitlint — keep titles aligned.
+  commit_status: true
+
+  auto_review:
+    enabled: true
+    # Only kick off an automatic review when the "coderabbit" label is applied.
+    labels:
+      - coderabbit
+    # Skip draft PRs even when labeled; mark ready for review first.
+    drafts: false
+    base_branches:
+      - develop
+      - 'releases/.*'
+
+  # Keep generated/vendored/large artifacts out of the review.
+  path_filters:
+    - '!**/node_modules/**'
+    - '!**/dist/**'
+    - '!**/build/**'
+    - '!**/coverage/**'
+    - '!**/.nx/**'
+    - '!**/.strapi/**'
+    - '!**/.cache/**'
+    - '!yarn.lock'
+    - '!**/*.snap'
+    - '!**/tests/e2e/data/**'
+    - '!**/tmp-dts-export/**'
+    - '!test-apps/**'
+
+  path_instructions:
+    - path: 'packages/**/*.{ts,tsx,js,jsx}'
+      instructions: >-
+        Follow the repo ESLint (@strapi/eslint-config / airbnb-typescript) and
+        Prettier rules: single quotes, semicolons, 2-space indent, trailing
+        commas (es5), 100-char print width, always wrap arrow params. Flag use of
+        `any`, unhandled promises, and missing input validation. Server-side code
+        receives `strapi` via dependency injection (factory pattern, e.g.
+        `createService(strapi)`); flag uses of `global.strapi`. New validation
+        should prefer Zod (validateZod/validateZodAsync); existing yup is being
+        migrated — don't flag it.
+    - path: '{packages/**,tests/**}/**/*.test.{ts,tsx,js,jsx}'
+      instructions: >-
+        Unit testing is migrating from Jest to Vitest — prefer Vitest for new
+        unit tests (for now). Jest still runs the bulk of the existing
+        unit/api/front suites. Prefer behavioural assertions over implementation
+        detail. Check that new logic has matching test coverage.
+    - path: '.github/workflows/**'
+      instructions: >-
+        Validate GitHub Actions workflows for pinned action versions, correct
+        permissions scoping, and shell-injection-safe use of `${{ }}` in run
+        steps.
+    - path: 'docs/**'
+      instructions: >-
+        Documentation files. Check for clarity, broken links, and consistent
+        terminology. Prose nits are low priority.
+
+  # Static analysis tools relevant to this repo.
+  tools:
+    eslint:
+      enabled: true
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    languagetool:
+      enabled: true
+      level: default
+    semgrep:
+      enabled: true
+
+chat:
+  # On a high-traffic repo, only respond when explicitly invoked
+  # (e.g. `@coderabbitai review` / `resolve` / `help`) rather than
+  # auto-replying to every comment in a thread.
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  pull_requests:
+    scope: auto

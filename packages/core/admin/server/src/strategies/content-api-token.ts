@@ -14,7 +14,7 @@ const isReadScope = (scope: string) => scope.endsWith('find') || scope.endsWith(
  * Authenticate a content-api token. Rejects tokens with kind !== 'content-api'.
  */
 export const authenticate = async (ctx: Context) => {
-  const apiTokenService = getService('api-token-admin');
+  const apiTokenService = getService('api-token-content-api');
   const token = extractToken(ctx);
 
   if (token === null) {

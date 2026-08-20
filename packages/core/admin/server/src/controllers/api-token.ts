@@ -85,14 +85,13 @@ export default {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token-content-api');
 
-    const token = await apiTokenService.getById(id);
+    const token = await apiTokenService.getById(id, { includeDecryptedKey: true });
     if (!token) {
       ctx.notFound('API Token not found');
       return;
     }
 
-    const withKey = await apiTokenService.getById(id, { includeDecryptedKey: true });
-    ctx.send({ data: withKey ?? token } satisfies Get.Response);
+    ctx.send({ data: token } satisfies Get.Response);
   },
 
   // -------------------------------------------------------------------------
