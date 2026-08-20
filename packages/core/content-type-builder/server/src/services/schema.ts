@@ -1,4 +1,4 @@
-import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
@@ -285,12 +285,21 @@ export const updateSchema = async (schema: CTBSchema) => {
     .filter((ct: any) => ct.action === 'delete')
     .map((ct: any) => ct.uid);
 
-  await builder.writeFiles();
+  const schemaFilesWritten = await builder.writeFiles();
 
-  await getService('content-structure').commitFromUpdate({
-    incomingStructure: contentStructure,
-    deletedUids,
-  });
+  if (!schemaFilesWritten) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
+
+  try {
+    await getService('content-structure').commitFromUpdate({
+      incomingStructure: contentStructure,
+      deletedUids,
+    });
+  } catch (error) {
+    await builder.rollback();
+    throw error;
+  }
 
   try {
     for (const uid of APIsToDelete) {

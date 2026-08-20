@@ -12,7 +12,8 @@ const builderServiceMock = {
   createComponentAttributes: jest.fn(),
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
-  writeFiles: jest.fn().mockResolvedValue(undefined),
+  writeFiles: jest.fn().mockResolvedValue(true),
+  rollback: jest.fn().mockResolvedValue(undefined),
   contentTypes: new Map(),
   components: new Map(),
 };
@@ -726,6 +727,103 @@ describe('Content Type Builder - Schema service', () => {
       expect(contentTypeServiceMock.generateAPI).not.toHaveBeenCalled();
       expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
       expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
+    });
+
+    it('rolls back the schema files when the folder commit fails after writeFiles', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
+        new Error('groups.json write failed')
+      );
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('groups.json write failed');
+
+      expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+
+      const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
+        .invocationCallOrder[0];
+      const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+      const rollbackOrder = jest.mocked(builderServiceMock.rollback).mock.invocationCallOrder[0];
+
+      expect(writeFilesOrder).toBeLessThan(commitOrder);
+      expect(commitOrder).toBeLessThan(rollbackOrder);
+    });
+
+    it('does not commit the folder file when writeFiles rolls the schema back', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      builderServiceMock.writeFiles.mockResolvedValueOnce(false);
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('Invalid schema edition');
+
+      expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
+      expect(builderServiceMock.rollback).not.toHaveBeenCalled();
     });
 
     it('should handle attribute deletion during component update', async () => {
