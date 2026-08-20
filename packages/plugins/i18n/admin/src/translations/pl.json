@@ -82,5 +82,6 @@
   "plugin.schema.i18n.localized.description-content-type": "Pozwala mieć treść w różnych językach",
   "plugin.schema.i18n.localized.description-field": "To pole może mieć różne wartości w zależności od różnych języków",
   "plugin.schema.i18n.localized.label-content-type": "Włącz lokalizację dla tego typu treści",
-  "plugin.schema.i18n.localized.label-field": "Włącz lokalizację dla tego pola"
+  "plugin.schema.i18n.localized.label-field": "Włącz lokalizację dla tego pola",
+  "list-view.table.header.label": "Dostępne w"
 }

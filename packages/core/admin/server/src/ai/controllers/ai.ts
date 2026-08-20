@@ -21,7 +21,7 @@ export default {
       ctx.body = {
         data: aiToken,
       } satisfies GetAiToken.Response;
-    } catch (error) {
+    } catch {
       return ctx.internalServerError('AI token request failed. Check server logs for details.');
     }
   },
@@ -34,7 +34,7 @@ export default {
     try {
       const usage = await strapi.ai.admin.getAiUsage();
       ctx.body = usage;
-    } catch (error) {
+    } catch {
       return ctx.internalServerError(
         'AI usage data request failed. Check server logs for details.'
       );

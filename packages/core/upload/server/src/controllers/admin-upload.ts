@@ -46,12 +46,20 @@ export default {
     ctx.body = results;
   },
 
+  /**
+   * `PUT /upload/files/:id`
+   *
+   * Update the editable metadata (`fileInfo`) of an existing file. Also reached
+   * through the `POST /upload` multiplexer, which delegates here with the id in
+   * `ctx.query` — hence the dual read below, route params winning.
+   */
   async updateFileInfo(ctx: Context) {
     const {
       state: { userAbility, user },
-      query: { id },
       request: { body },
     } = ctx;
+
+    const id = ctx.params?.id ?? ctx.query.id;
 
     if (typeof id !== 'string') {
       throw new errors.ValidationError('File id is required');
@@ -75,12 +83,20 @@ export default {
     ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
   },
 
+  /**
+   * `POST /upload/files/:id/replace`
+   *
+   * Replace the binary content of an existing file. Also reached through the
+   * `POST /upload` multiplexer, which delegates here with the id in `ctx.query`
+   * — hence the dual read below, route params winning.
+   */
   async replaceFile(ctx: Context) {
     const {
       state: { userAbility, user },
-      query: { id },
-      request: { body, files: { files } = {} },
+      request: { body, files: { files: filesInput } = {} },
     } = ctx;
+
+    const id = ctx.params?.id ?? ctx.query.id;
 
     if (typeof id !== 'string') {
       throw new errors.ValidationError('File id is required');
@@ -94,9 +110,11 @@ export default {
       id
     );
 
-    if (Array.isArray(files)) {
+    if (Array.isArray(filesInput) && filesInput.length > 1) {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
+
+    const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
 
     const {
       validFiles,
@@ -207,7 +225,8 @@ export default {
   },
 
   /**
-   * @experimental
+   * `POST /upload/files`
+   *
    * Upload a single file and return the created File.
    *
    * Accepts one file per request (multipart `files` + `fileInfo`) and returns a
@@ -215,7 +234,7 @@ export default {
    * generation inline — that responsibility is decoupled and will be handled by a
    * background job. Auth and permission checks mirror `POST /upload`.
    */
-  async unstable_uploadFile(ctx: Context) {
+  async uploadFile(ctx: Context) {
     const {
       state: { userAbility, user },
       request: { body, files: { files } = {} },
@@ -286,7 +305,8 @@ export default {
   },
 
   /**
-   * @experimental
+   * `POST /upload/actions/upload-from-urls`
+   *
    * Upload files from URLs with SSE streaming for per-file progress
    *
    * Accepts JSON body with URLs and fetches them server-side.
@@ -297,7 +317,7 @@ export default {
    * - file:error     — when a URL fetch or upload fails
    * - stream:complete — final summary with all results
    */
-  async unstable_uploadFromUrls(ctx: Context) {
+  async uploadFromUrls(ctx: Context) {
     const {
       state: { userAbility, user },
       request: { body },

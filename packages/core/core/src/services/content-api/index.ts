@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   sanitize,
   validate,
@@ -76,7 +75,7 @@ const mergeOneQueryParamIntoRoute = (
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
   if (matchRoute && !matchRoute(route)) return;
-  const query = { ...(route.request?.query ?? {}) };
+  const query = { ...route.request?.query };
   if (param in query) {
     throw new Error(
       `contentAPI.addQueryParams: param "${param}" already exists on route ${route.method} ${route.path}`
@@ -193,17 +192,13 @@ const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const routes = _.flatMap(api.routes, (route) => {
-        if ('routes' in route) {
-          return route.routes;
-        }
-
-        return route;
-      }).filter(filterContentAPI);
+    for (const [apiName, api] of Object.entries(strapi.apis)) {
+      const routes = Object.values(api.routes)
+        .flatMap((route) => ('routes' in route ? route.routes : route))
+        .filter(filterContentAPI);
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -211,21 +206,19 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      if (Array.isArray(plugin.routes)) {
-        return plugin.routes.map(transformPrefix).filter(filterContentAPI);
-      }
+      const pluginRoutes = Array.isArray(plugin.routes)
+        ? plugin.routes
+        : Object.values(plugin.routes).flatMap((route) => route.routes);
 
-      const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
-        filterContentAPI
-      );
+      const routes = pluginRoutes.map(transformPrefix).filter(filterContentAPI);
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -233,7 +226,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
     return sanitizeRoutesMapForSerialization(routesMap);
   };

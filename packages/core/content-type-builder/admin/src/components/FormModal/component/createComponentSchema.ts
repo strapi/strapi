@@ -57,7 +57,7 @@ export const createComponentSchema = (
       .required(errorsTrads.required.id),
     category: yup
       .string()
-      .matches(CATEGORY_NAME_REGEX, errorsTrads.regex.id)
+      .matches(CATEGORY_NAME_REGEX, getTrad('error.category.format'))
       .required(errorsTrads.required.id),
 
     icon: yup.string(),

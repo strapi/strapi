@@ -23,7 +23,6 @@ const defaultServerConfig = {
   port: Number(process.env.PORT) || 1337,
   proxy: false,
   cron: { enabled: false },
-  admin: { autoOpen: false },
   dirs: { public: './public' },
   transfer: {
     remote: {

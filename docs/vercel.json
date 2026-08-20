@@ -1,0 +1,3 @@
+{
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ../packages/core/strapi/ && exit 0 || exit 1"
+}

@@ -84,7 +84,11 @@ describe('AssigneeSelect', () => {
       readonly scrollMargin = '';
       readonly thresholds = [];
 
-      constructor(private callback: IntersectionObserverCallback) {}
+      private callback: IntersectionObserverCallback;
+
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback;
+      }
 
       disconnect = jest.fn();
       takeRecords = jest.fn(() => []);

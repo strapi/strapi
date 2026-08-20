@@ -1,7 +1,9 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor } from '@tests/utils';
 
 import { Form } from '../../Form';
 import { InputRenderer } from '../Renderer';
+
+import type { InputProps } from '../../Form';
 
 describe('Renderer', () => {
   [
@@ -151,5 +153,41 @@ describe('Renderer', () => {
     it.todo(`should render a hint for the ${field.type} input when the field has a hint`);
 
     it.todo(`should render an error for the ${field.type} input when the form has errors`);
+  });
+
+  describe('unsupported field type', () => {
+    // `media` is a valid schema kind but is intentionally not handled by this generic
+    // renderer, so it falls through to the NotSupportedField branch.
+    const unsupportedProps = {
+      label: 'media',
+      name: 'media',
+      type: 'media',
+    } as unknown as InputProps;
+
+    it('should render a disabled fallback input for an unsupported field type', () => {
+      render(<InputRenderer {...unsupportedProps} />, {
+        renderOptions: {
+          wrapper: ({ children }) => <Form method="PUT">{children}</Form>,
+        },
+      });
+
+      const input = screen.getByPlaceholderText('Unsupported field type: media');
+
+      expect(input).toBeInTheDocument();
+      expect(input).toBeDisabled();
+    });
+  });
+
+  describe('focus via the `field` query param', () => {
+    it('should focus a supported input when the `field` query param matches its name', async () => {
+      render(<InputRenderer label="string" name="string" type="string" />, {
+        initialEntries: ['/?field=string'],
+        renderOptions: {
+          wrapper: ({ children }) => <Form method="PUT">{children}</Form>,
+        },
+      });
+
+      await waitFor(() => expect(screen.getByRole('textbox')).toHaveFocus());
+    });
   });
 });

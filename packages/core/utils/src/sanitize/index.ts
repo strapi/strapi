@@ -18,6 +18,7 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import type { Model, Data } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+import { hasSort } from '../sort-query';
 
 export interface Options {
   auth?: unknown;
@@ -155,7 +156,7 @@ const createAPISanitizers = (opts: APIOptions) => {
       throw new Error('Missing schema in sanitizeOutput');
     }
     if (isArray(data)) {
-      const res = new Array(data.length);
+      const res: unknown[] = Array.from({ length: data.length });
       for (let i = 0; i < data.length; i += 1) {
         res[i] = await sanitizeOutput(data[i], schema, { auth });
       }
@@ -198,8 +199,10 @@ const createAPISanitizers = (opts: APIOptions) => {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });
     }
 
-    if (sort) {
+    if (hasSort(sort)) {
       Object.assign(sanitizedQuery, { sort: await sanitizeSort(sort, schema, { auth }) });
+    } else if ('sort' in sanitizedQuery) {
+      delete sanitizedQuery.sort;
     }
 
     if (fields) {
