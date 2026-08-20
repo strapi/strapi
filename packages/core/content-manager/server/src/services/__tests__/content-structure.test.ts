@@ -16,6 +16,11 @@ const visible = (uid: string) => ({ uid, kind: 'collectionType' });
 const hidden = (uid: string) => ({
   uid,
   kind: 'collectionType',
+  pluginOptions: { 'content-manager': { visible: false } },
+});
+const builderHidden = (uid: string) => ({
+  uid,
+  kind: 'collectionType',
   pluginOptions: { 'content-type-builder': { visible: false } },
 });
 
@@ -23,6 +28,7 @@ const contentTypes: Record<string, unknown> = {
   'api::article.article': visible('api::article.article'),
   'api::page.page': visible('api::page.page'),
   'api::secret.secret': hidden('api::secret.secret'),
+  'api::draft.draft': builderHidden('api::draft.draft'),
   'admin::user': visible('admin::user'),
   'admin::role': visible('admin::role'),
   'strapi::webhook': visible('strapi::webhook'),
@@ -99,6 +105,24 @@ describe('content-manager content-structure service', () => {
     await expect(service.getContentStructure()).resolves.toEqual({
       collectionTypes: [group('grp_c', 'Collections', [ct('api::article.article')])],
       singleTypes: [group('grp_s', 'Singles', [ct('api::page.page')])],
+    });
+  });
+
+  it('keeps a type hidden in the builder but visible in the content manager', async () => {
+    const resolved: ResolvedContentStructure = {
+      collectionTypes: [
+        group('grp_root', 'Root', [ct('api::article.article'), ct('api::draft.draft')]),
+      ],
+      singleTypes: [],
+    };
+
+    const { service } = makeService(resolved);
+
+    await expect(service.getContentStructure()).resolves.toEqual({
+      collectionTypes: [
+        group('grp_root', 'Root', [ct('api::article.article'), ct('api::draft.draft')]),
+      ],
+      singleTypes: [],
     });
   });
 });

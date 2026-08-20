@@ -16,7 +16,7 @@ const createContentStructureService = ({ strapi }: { strapi: Core.Strapi }) => {
   const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
 
   const isContentTypeVisible = (model: Struct.ContentTypeSchema) => {
-    return getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
+    return getOr(true, 'pluginOptions.content-manager.visible', model) === true;
   };
 
   /**
