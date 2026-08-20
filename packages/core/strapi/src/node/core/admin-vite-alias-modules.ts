@@ -49,16 +49,23 @@ export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
  * plugins (#22946).
  *
  * `@strapi/strapi` is the head of that chain — `@strapi/admin` and the core plugins are reached
- * *through* it — so deduping it alone collapses ~98% of the duplication. `react-intl` and
- * `@strapi/icons` are added because the SDK's plugin template imports them directly rather than
- * via `@strapi/strapi`, so they need their own entries.
+ * *through* it — so deduping it alone collapses ~98% of the duplication.
  *
- * These MUST NOT be added to {@link ADMIN_VITE_ALIAS_MODULES}: `resolve.alias` prefix-substitutes
- * to a filesystem path and so bypasses the package's `exports` map.
+ * Only packages the app itself declares belong here. `resolve.dedupe` forces resolution from the
+ * app root, so a package that lives solely inside `@strapi/admin`'s closure has no top-level
+ * `node_modules` entry under pnpm's strict isolation, and deduping it would turn a working (if
+ * duplicated) plugin import into an unresolved one. Every Strapi app depends on `@strapi/strapi`
+ * directly, so it is always resolvable from the root. `@strapi/icons` and `react-intl` — which the
+ * SDK plugin template imports directly — are `@strapi/admin` dependencies, so they are deliberately
+ * left out; their trees are the known residual of this fix.
+ *
+ * Entries here MUST NOT be added to {@link ADMIN_VITE_ALIAS_MODULES}: `resolve.alias`
+ * prefix-substitutes to a filesystem path and so bypasses the package's `exports` map.
  *   - `@strapi/strapi` exports `./admin` (real target `dist/admin/index.mjs`) — the exact subpath
  *     every plugin imports. Aliasing rewrites it to a non-existent `<pkgdir>/admin` and the build
  *     dies with "[vite:load-fallback] Could not load …/@strapi/strapi/admin".
- *   - `@strapi/icons` exports `./symbols` and fails the same way.
+ *   - `@strapi/icons` exports `./symbols` and would fail the same way, so aliasing the package
+ *     directory is no escape hatch for the modules excluded above either.
  *   - `@strapi/admin` publishes no `.` export at all, so `getModulePath()` would throw
  *     ERR_PACKAGE_PATH_NOT_EXPORTED at config time. It needs no entry here: deduping
  *     `@strapi/strapi` already collapses it.
@@ -66,11 +73,7 @@ export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
  *
  * @internal
  */
-export const ADMIN_VITE_DEDUPE_ONLY_MODULES = [
-  '@strapi/strapi',
-  '@strapi/icons',
-  'react-intl',
-] as const;
+export const ADMIN_VITE_DEDUPE_ONLY_MODULES = ['@strapi/strapi'] as const;
 
 export type AdminViteDedupeOnlyModule = (typeof ADMIN_VITE_DEDUPE_ONLY_MODULES)[number];
 

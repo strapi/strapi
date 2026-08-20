@@ -23,6 +23,15 @@ const PNPM_OPTIMIZE_ALIAS_MODULES = ['invariant', 'prismjs', 'lodash'] as const;
  */
 const DND_SINGLETON_MODULES = ['react-dnd', 'react-dnd-html5-backend'] as const;
 
+/**
+ * resolve.dedupe forces resolution from the app root, so only packages the app itself declares
+ * may be deduped. These two are @strapi/admin dependencies: under pnpm's strict isolation they
+ * have no top-level node_modules entry, so deduping them would turn a working (if duplicated)
+ * local-plugin import into an unresolved one. Aliasing the package directory is not an option
+ * either — resolve.alias bypasses their exports map (@strapi/icons publishes ./symbols).
+ */
+const PNPM_UNSAFE_DEDUPE_MODULES = ['@strapi/icons', 'react-intl'] as const;
+
 describe('ADMIN_VITE_ALIAS_MODULES contract', () => {
   it.each(PNPM_OPTIMIZE_ALIAS_MODULES)(
     'includes %s for pnpm optimizeDeps.include resolution (#27014)',
@@ -61,6 +70,14 @@ describe('ADMIN_VITE_DEDUPE_ONLY_MODULES contract (#22946)', () => {
   it.each(ADMIN_VITE_DEDUPE_ONLY_MODULES)(
     'keeps %s out of the alias list — aliasing bypasses its exports map and breaks the build',
     (mod) => {
+      expect(ADMIN_VITE_ALIAS_MODULES).not.toContain(mod);
+    }
+  );
+
+  it.each(PNPM_UNSAFE_DEDUPE_MODULES)(
+    'keeps %s out of the dedupe list — it is not an app dependency',
+    (mod) => {
+      expect(ADMIN_VITE_DEDUPE_MODULES).not.toContain(mod);
       expect(ADMIN_VITE_ALIAS_MODULES).not.toContain(mod);
     }
   );
