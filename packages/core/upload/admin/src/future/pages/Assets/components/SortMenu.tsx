@@ -3,6 +3,7 @@ import { Check, ChevronDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { getTranslationKey } from '../../../utils/translations';
 import {
   type FoldersPosition,
@@ -83,6 +84,7 @@ interface SortMenuProps {
  */
 export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const triggerLabel = formatMessage(
     { id: getTranslationKey('list.sort.trigger'), defaultMessage: 'Sort: {active}' },
@@ -116,6 +118,12 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             aria-checked={sort.sortBy === key}
             onSelect={(e: Event) => {
               e.preventDefault();
+              if (sort.sortBy !== key) {
+                trackUsage('didSortMediaLibraryElements', {
+                  location: MEDIA_LIBRARY_LOCATION,
+                  sort: key,
+                });
+              }
               sort.setSortBy(sort.sortBy === key ? null : key);
             }}
             endIcon={sort.sortBy === key ? checkmark : null}
@@ -130,6 +138,12 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             aria-checked={sort.direction === key}
             onSelect={(e: Event) => {
               e.preventDefault();
+              if (sort.direction !== key) {
+                trackUsage('didSortMediaLibraryElements', {
+                  location: MEDIA_LIBRARY_LOCATION,
+                  sort: key,
+                });
+              }
               sort.setDirection(sort.direction === key ? null : key);
             }}
             endIcon={sort.direction === key ? checkmark : null}

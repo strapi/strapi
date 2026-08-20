@@ -103,6 +103,35 @@ describe('Drawer', () => {
 
       expect(dialog).toHaveAttribute('data-animation-direction', 'left');
     });
+
+    // The panel is full-bleed on mobile and only takes `width` from the medium
+    // breakpoint up. Asserting the compiled rules because this is CSS-only —
+    // nothing else would notice the media query going missing.
+    it('is full width on mobile and takes the given width from medium up', () => {
+      render(
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body width="41.6rem">
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+
+      // Read the compiled CSS rather than using toHaveStyleRule: its `media`
+      // option can't parse the DS breakpoint, which is emitted as
+      // `@media(min-width: 768px)` with no space.
+      const css = Array.from(document.querySelectorAll('style'))
+        .map((style) => style.textContent ?? '')
+        .join('\n');
+      const mediumIndex = css.indexOf('@media(min-width: 768px)');
+
+      expect(mediumIndex).toBeGreaterThan(-1);
+      // The invariant: the fixed width is scoped to desktop. Absent before the
+      // breakpoint (so mobile keeps the full-bleed 100%), present after it.
+      expect(css.slice(0, mediumIndex)).not.toContain('41.6rem');
+      expect(css.slice(mediumIndex)).toContain('41.6rem');
+    });
   });
 
   describe('Drawer.CloseButton', () => {

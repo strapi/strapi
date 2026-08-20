@@ -169,6 +169,7 @@ Content-manager derives one MCP tool set per **displayed** content type at boots
 `slugifyUidForMcpToolName` (`packages/core/content-manager/server/src/mcp/utils.ts`) turns a content-type UID into a tool-name segment:
 
 - `api::article.article` → `article`
+- `api::writer.editor` → `writer_editor` (api name and content-type name differ, so both are kept)
 - `plugin::i18n.locale` → `plugin-i18n_locale`
 
 ### Collection types

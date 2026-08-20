@@ -19,7 +19,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, VisuallyHidden } from '@strapi/design-system';
+import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
@@ -382,7 +382,9 @@ export const AssetsDndProvider = ({
         <VisuallyHidden aria-live="polite" aria-atomic="true">
           {liveAnnouncement}
         </VisuallyHidden>
-        <Box position="relative">{children}</Box>
+        <Flex position="relative" alignItems="stretch" direction="column" height="100%">
+          {children}
+        </Flex>
         <DragOverlay dropAnimation={null}>
           {dragItems.length > 0 ? <DragOverlayChip items={dragItems} /> : null}
         </DragOverlay>

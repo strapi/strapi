@@ -10,7 +10,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 const FIXTURE_IMAGE_1 = path.join(__dirname, '../../../data/uploads/test-image-1.jpg');
 const FIXTURE_IMAGE_2 = path.join(__dirname, '../../../data/uploads/test-image-2.jpg');
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Bulk delete',
   () => {
     test.beforeEach(async ({ page }) => {
