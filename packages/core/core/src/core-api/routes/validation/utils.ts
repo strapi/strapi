@@ -1,7 +1,7 @@
 import { schemaRegistry } from '@strapi/openapi';
 import { transformUidToValidOpenApiName } from '@strapi/utils';
 import type { Core, Internal } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import { inspectZodSchema } from '../../../utils/zod';
 

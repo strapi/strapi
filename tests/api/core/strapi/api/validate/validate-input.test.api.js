@@ -155,7 +155,7 @@ describe('Core API - Validate', () => {
     });
 
     describe('route.request.body (extra body params)', () => {
-      const z = require('zod/v4');
+      const z = require('zod');
 
       let contentType;
 

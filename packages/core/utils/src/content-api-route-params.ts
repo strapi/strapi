@@ -1,4 +1,4 @@
-import type { z } from 'zod/v4';
+import type { z } from 'zod';
 
 import { ALLOWED_QUERY_PARAM_KEYS } from './content-api-constants';
 

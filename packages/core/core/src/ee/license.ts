@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';

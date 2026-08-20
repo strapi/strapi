@@ -1,5 +1,5 @@
 import { OpenAPIV3_1 } from 'openapi-types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import type { DocumentContext } from '../types';
 import { schemaRegistry } from '../utils/schema-registry';
 import {

@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 // widths must be one of 4, 6, 8, 12
 export const WidthSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(12)]);

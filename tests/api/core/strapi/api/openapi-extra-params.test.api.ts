@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { generate } from '@strapi/openapi';

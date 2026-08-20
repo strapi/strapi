@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 /**
  * Shared across CJS/ESM copies of this package. Zod uses the same pattern for

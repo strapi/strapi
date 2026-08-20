@@ -1,7 +1,7 @@
 'use strict';
 
 const { AbstractRouteValidator } = require('@strapi/utils');
-const z = require('zod/v4');
+const z = require('zod');
 
 // A single role relation entry, referenced by numeric `id` (legacy) or by
 // `documentId` (the v5 default), but must carry at least one of them. The

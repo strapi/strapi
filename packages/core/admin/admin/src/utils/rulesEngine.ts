@@ -1,5 +1,5 @@
 import jsonLogic from 'json-logic-js';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const ConditionSchema = z.object({
   dependsOn: z.string().min(1),

@@ -10,7 +10,7 @@
  * @example
  * ```typescript
  * import { AbstractRouteValidator, type QueryParam } from '@strapi/utils';
- * import * as z from 'zod/v4';
+ * import * as z from 'zod';
  *
  * export class MyPluginRouteValidator extends AbstractRouteValidator {
  *   constructor(strapi: Core.Strapi) {

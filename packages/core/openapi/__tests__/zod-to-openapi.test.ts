@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import { DocumentContextFactory } from '../src/context';
 import { ComponentsWriter } from '../src/post-processor/component-writer';

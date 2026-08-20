@@ -1,6 +1,6 @@
 import { schemaRegistry } from '@strapi/openapi';
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import { safeSchemaCreation } from '../utils';
 

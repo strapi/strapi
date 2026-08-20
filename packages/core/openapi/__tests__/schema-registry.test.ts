@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import { SCHEMA_REGISTRY_GLOBAL_KEY, schemaRegistry } from '../src/utils/schema-registry';
 import { OPENAPI_SCHEMA_CONVERSION_OPTIONS, toComponentsPath } from '../src/utils/zod';

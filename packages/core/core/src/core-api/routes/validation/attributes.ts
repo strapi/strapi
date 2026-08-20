@@ -15,7 +15,7 @@ import {
   maybeWithMinMax,
   augmentSchema,
 } from '@strapi/utils';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 import { BOOLEAN_LITERAL_VALUES } from './constants';
 

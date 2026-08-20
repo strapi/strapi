@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import { createAPIValidators } from '../validate';
 import { ValidationError } from '../errors';
 import { articleModel, getModel } from './test-fixtures';
