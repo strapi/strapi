@@ -4,25 +4,29 @@ import { useState } from 'react';
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
 
+import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import { useDataManager } from '../../DataManager/useDataManager';
 import { createEmptyContentStructure } from '../../DataManager/utils/contentStructure';
 import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
-import { mockData } from './mockData';
+import { mockFlatSections, mockFolderSections } from './mockData';
 
 import type { DataManagerContextValue } from '../../DataManager/DataManagerContext';
+import type { UID } from '@strapi/types';
 
 const mockSearchOnChange = jest.fn(); // Spy function
 
-jest.mock('../useContentTypeBuilderMenu.ts', () => {
+jest.mock('../hooks/useContentTypeBuilderMenu', () => {
   return {
     useContentTypeBuilderMenu: jest.fn(() => {
       const [searchValue, setSearchValue] = useState('');
 
       return {
-        menu: mockData,
+        flatSections: mockFlatSections,
+        folderSections: mockFolderSections,
         search: {
           value: searchValue,
+          clear: () => setSearchValue(''),
           onChange: (v: string) => {
             setSearchValue(v);
             mockSearchOnChange(v);
@@ -108,7 +112,11 @@ jest.mock('../../DataManager/useDataManager.ts', () => {
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const App = <ContentTypeBuilderNav />;
+const App = (
+  <CTBSessionProvider>
+    <ContentTypeBuilderNav />
+  </CTBSessionProvider>
+);
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
@@ -496,6 +504,87 @@ describe('<ContentTypeBuilderNav />', () => {
 
       expect(input).toHaveValue('');
       expect(mockSearchOnChange).toHaveBeenCalledTimes(5);
+    });
+  });
+
+  describe('folder navigation', () => {
+    // A collection-types structure where "category" is nested inside a "Blog"
+    // folder and "address" is left at the section root.
+    const withBlogFolder = (): DataManagerContextValue['contentStructure'] => {
+      const structure = createEmptyContentStructure();
+
+      structure.sections.collectionTypes.groups = [
+        {
+          id: 'grp_blog',
+          name: 'Blog',
+          parent: null,
+          status: 'UNCHANGED',
+          children: [{ type: 'contentType', uid: 'api::category.category' as UID.ContentType }],
+        },
+      ];
+
+      return structure;
+    };
+
+    it('renders each folder section with its content-type links', () => {
+      render(App);
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Homepage' })).toBeInTheDocument();
+    });
+
+    it('nests a content type inside its folder', () => {
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({ isModified: true, contentStructure: withBlogFolder() })
+      );
+
+      render(App);
+
+      // The folder row exposes a toggle button labelled with the folder name.
+      expect(screen.getByRole('button', { name: 'Blog' })).toBeInTheDocument();
+      // Grouped and ungrouped content types both render.
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+    });
+
+    it('collapses a folder, hiding its content types', async () => {
+      const user = userEvent.setup();
+
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({ isModified: true, contentStructure: withBlogFolder() })
+      );
+
+      render(App);
+
+      const folderToggle = screen.getByRole('button', { name: 'Blog' });
+      expect(folderToggle).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+
+      await user.click(folderToggle);
+
+      expect(screen.getByRole('button', { name: 'Blog' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      // The nested content type is gone; the ungrouped one stays.
+      expect(screen.queryByRole('link', { name: 'category' })).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+    });
+
+    it('filters the folder tree by the search value', async () => {
+      const user = userEvent.setup();
+
+      render(App);
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+
+      const input = screen.getByRole('searchbox', { name: /search/i });
+      await user.type(input, 'address');
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'category' })).not.toBeInTheDocument();
     });
   });
 });
