@@ -81,10 +81,9 @@ export const safeSchemaCreation = (
     const transformedId = transformUidToValidOpenApiName(id);
 
     // Return existing schema if already registered
-    const mapItem = schemaRegistry.get(transformedId);
-    if (mapItem !== undefined) {
-      // Schema already exists, return it silently
-      return mapItem;
+    const existingSchema = schemaRegistry.getOrDefer(transformedId);
+    if (existingSchema !== undefined) {
+      return existingSchema;
     }
 
     strapi.log.debug(`Schema ${transformedId} not found in registry, generating new schema`);
@@ -103,29 +102,35 @@ export const safeSchemaCreation = (
       strapi.log.debug(`📝 Generating validation schema for "${schemaName}"`);
     }
 
-    // Temporary any placeholder before replacing with the actual schema type
-    // Used to prevent infinite loops in cyclical data structures
-    safeGlobalRegistrySet(strapi, id, z.any());
+    schemaRegistry.startPending(transformedId);
 
-    // Generate the actual schema using the callback
-    const schema = callback();
+    try {
+      // Temporary any placeholder before replacing with the actual schema type
+      // Used to prevent infinite loops in cyclical data structures
+      safeGlobalRegistrySet(strapi, id, z.any());
 
-    // Replace the placeholder with the real schema
-    safeGlobalRegistrySet(strapi, id, schema);
+      // Generate the actual schema using the callback
+      const schema = callback();
 
-    // Show completion for user content only
-    if (!isBuiltInSchema) {
-      const inspection = inspectZodSchema(schema);
-      const fieldCount = inspection.type === 'object' ? Object.keys(inspection.shape).length : 0;
-      const schemaName = transformedId
-        .replace('Document', '')
-        .replace('Entry', '')
-        .replace(/([A-Z])/g, ' $1')
-        .trim();
-      strapi.log.debug(`   ✅ "${schemaName}" schema created with ${fieldCount} fields`);
+      // Replace the placeholder with the real schema
+      safeGlobalRegistrySet(strapi, id, schema);
+
+      // Show completion for user content only
+      if (!isBuiltInSchema) {
+        const inspection = inspectZodSchema(schema);
+        const fieldCount = inspection.type === 'object' ? Object.keys(inspection.shape).length : 0;
+        const schemaName = transformedId
+          .replace('Document', '')
+          .replace('Entry', '')
+          .replace(/([A-Z])/g, ' $1')
+          .trim();
+        strapi.log.debug(`   ✅ "${schemaName}" schema created with ${fieldCount} fields`);
+      }
+
+      return schema;
+    } finally {
+      schemaRegistry.finishPending(transformedId);
     }
-
-    return schema;
   } catch (error) {
     strapi.log.error(`Schema creation failed: Failed to create schema ${id}`);
 

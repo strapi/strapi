@@ -33,7 +33,7 @@ describe('safeSchemaCreation', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('exposes a temporary placeholder during cyclical schema creation then replaces it', () => {
+  it('defers cyclical lookups until the real schema replaces the placeholder', () => {
     let cyclicalSchema: z.ZodType | undefined;
 
     const schema = safeSchemaCreation(strapi, 'api::article.article', () => {
@@ -42,7 +42,7 @@ describe('safeSchemaCreation', () => {
       return z.object({ title: z.string() });
     });
 
-    expect(cyclicalSchema?.safeParse(Symbol('placeholder')).success).toBe(true);
+    expect(cyclicalSchema?.safeParse({ title: 'Article' }).success).toBe(true);
     expect(schemaRegistry.get('ApiArticleArticleDocument')).toBe(schema);
     expect(schema.safeParse({ title: 'Article' }).success).toBe(true);
   });
