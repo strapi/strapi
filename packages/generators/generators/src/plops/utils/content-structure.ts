@@ -273,12 +273,15 @@ export interface AssignContentTypeToFolderOptions {
 }
 
 /**
- * Adds a content type to a folder in `<destBasePath>/content-structure/groups.json`,
- * creating the file (or a new root folder) when needed.
+ * Validates the folder selection and stages the assignment of a content type in
+ * `<destBasePath>/content-structure/groups.json`, creating the file (or a new root
+ * folder) in memory when needed.
  *
- * Throws if the existing file is malformed.
+ * @return A commit function that writes the staged result to disk.
  */
-export const assignContentTypeToFolder = (options: AssignContentTypeToFolderOptions): void => {
+export const planContentTypeToFolder = (
+  options: AssignContentTypeToFolderOptions
+): (() => void) => {
   const { destBasePath, kind, uid, folder } = options;
   const filePath = getContentStructureFilePath(destBasePath);
 
@@ -306,5 +309,7 @@ export const assignContentTypeToFolder = (options: AssignContentTypeToFolderOpti
   removeContentTypeFromSection(groups, uid);
   targetGroup.children.push({ type: 'contentType', uid });
 
-  fs.outputJSONSync(filePath, file, { spaces: 2 });
+  return () => {
+    fs.outputJSONSync(filePath, file, { spaces: 2 });
+  };
 };

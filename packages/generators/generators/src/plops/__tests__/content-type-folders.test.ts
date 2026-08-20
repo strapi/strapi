@@ -337,6 +337,20 @@ describe('Content Type Generator — folder assignment', () => {
     expect(await readFile(groupsPath, 'utf-8')).toBe(before);
   });
 
+  test('generates no content type files when the folder selection is invalid', async () => {
+    await outputJSON(groupsPath, seededFile(), { spaces: 2 });
+    const schemaPath = path.join(
+      outputDirectory,
+      'src/api/article/content-types/article/schema.json'
+    );
+
+    await expect(generate({ folder: { targetGroupId: 'grp_missing1' } })).rejects.toThrow(
+      'No usable folder with id "grp_missing1"'
+    );
+
+    expect(await pathExists(schemaPath)).toBe(false);
+  });
+
   test('refuses to reassign the folder of a content type that already exists on disk', async () => {
     // The article content type already exists and is filed in Products. Re-running
     // the generator would fail at the schema write, so the folder move must not persist.
@@ -357,6 +371,27 @@ describe('Content Type Generator — folder assignment', () => {
     await expect(generate({ folder: { newFolderName: 'Blog' } })).rejects.toThrow(
       'Content type "api::article.article" already exists'
     );
+
+    expect(await readFile(groupsPath, 'utf-8')).toBe(before);
+  });
+
+  test('does not create groups.json when a generated file fails to write (new folder)', async () => {
+    const schemaDir = path.join(outputDirectory, 'src/api/article/content-types/article');
+    await outputFile(schemaDir, 'blocks the schema directory');
+
+    await expect(generate({ folder: { newFolderName: 'Newsroom' } })).rejects.toThrow();
+
+    expect(await pathExists(groupsPath)).toBe(false);
+  });
+
+  test('does not assign a folder when a generated file fails to write (existing folder)', async () => {
+    await outputJSON(groupsPath, seededFile(), { spaces: 2 });
+    const before = await readFile(groupsPath, 'utf-8');
+
+    const schemaDir = path.join(outputDirectory, 'src/api/article/content-types/article');
+    await outputFile(schemaDir, 'blocks the schema directory');
+
+    await expect(generate({ folder: { targetGroupId: 'grp_products1' } })).rejects.toThrow();
 
     expect(await readFile(groupsPath, 'utf-8')).toBe(before);
   });
