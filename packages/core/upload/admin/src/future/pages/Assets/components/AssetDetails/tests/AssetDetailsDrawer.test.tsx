@@ -597,4 +597,30 @@ describe('AssetDetails RBAC gating', () => {
     );
     expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
   });
+
+  describe('Replace media placement', () => {
+    const pdfAsset = {
+      ...baseAsset,
+      name: 'report.pdf',
+      ext: '.pdf',
+      mime: 'application/pdf',
+    } as AssetWithPopulatedCreatedBy;
+
+    // Replace used to live in the preview overlay, which is image-gated, so it was
+    // unavailable for anything that is not an image. In the footer it is gated on
+    // `canUpdate` alone.
+    it('offers Replace on a non-image asset, where Crop does not apply', async () => {
+      render(<AssetDetails asset={pdfAsset} closeDetails={jest.fn()} />);
+
+      expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
+    });
+
+    it('still offers Replace alongside Crop on an image', async () => {
+      render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+      expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Crop' })).toBeInTheDocument();
+    });
+  });
 });

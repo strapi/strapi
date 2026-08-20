@@ -653,14 +653,18 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetImageActions - crop and replace buttons overlaid on the image preview.
+ * AssetImageActions - image-editing controls overlaid on the preview.
+ *
+ * Crop only. Replace used to sit here too, directly beneath it, which put a
+ * file-level operation among the image-editing controls and read as if replacing
+ * were a kind of editing. It now lives in the footer with its peers.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps extends ReplaceAssetButtonProps {
+interface AssetImageActionsProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
@@ -678,7 +682,6 @@ const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -960,7 +963,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       asset={asset}
                       actions={
                         isImage && canUpdate ? (
-                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} />
                         ) : null
                       }
                     />
@@ -1126,6 +1129,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                         {canUpdate && <DeleteAssetButton />}
                         {canCopyLink && <CopyLinkButton asset={asset} />}
                         {canDownload && <DownloadAssetButton asset={asset} />}
+                        {canUpdate && <ReplaceAssetButton mime={asset.mime} />}
                       </Flex>
                       {canUpdate && (
                         <Button
