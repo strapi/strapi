@@ -339,6 +339,10 @@ const replaceAttributeAt = (
 const removeAttributeByName = (type: ContentType | Component, name: string) => {
   const idx = type.attributes.findIndex((attr) => attr.name === name);
 
+  if (idx === -1) {
+    return;
+  }
+
   const attr = type.attributes[idx];
 
   setStatus(type, 'CHANGED');
@@ -512,10 +516,12 @@ const applyDeleteContentType = (state: DataManagerStateType, uid: Internal.UID.C
   Object.keys(state.components).forEach((componentUid) => {
     const component = state.components[componentUid];
 
-    component.attributes.forEach((attribute) => {
-      if (attribute.type === 'relation' && attribute.target === uid) {
-        removeAttributeByName(component, attribute.name);
-      }
+    const namesToRemove = component.attributes
+      .filter((attribute) => attribute.type === 'relation' && attribute.target === uid)
+      .map((attribute) => attribute.name);
+
+    namesToRemove.forEach((name) => {
+      removeAttributeByName(component, name);
     });
   });
 
@@ -523,10 +529,12 @@ const applyDeleteContentType = (state: DataManagerStateType, uid: Internal.UID.C
   Object.keys(state.contentTypes).forEach((contentTypeUid) => {
     const contentType = state.contentTypes[contentTypeUid];
 
-    contentType.attributes.forEach((attribute) => {
-      if (attribute.type === 'relation' && attribute.target === uid) {
-        removeAttributeByName(contentType, attribute.name);
-      }
+    const namesToRemove = contentType.attributes
+      .filter((attribute) => attribute.type === 'relation' && attribute.target === uid)
+      .map((attribute) => attribute.name);
+
+    namesToRemove.forEach((name) => {
+      removeAttributeByName(contentType, name);
     });
   });
 };
@@ -971,10 +979,12 @@ const slice = createUndoRedoSlice(
             }
           });
 
-          contentType.attributes.forEach((attribute) => {
-            if (attribute.type === 'component' && attribute.component === uid) {
-              removeAttributeByName(contentType, attribute.name);
-            }
+          const namesToRemove = contentType.attributes
+            .filter((attribute) => attribute.type === 'component' && attribute.component === uid)
+            .map((attribute) => attribute.name);
+
+          namesToRemove.forEach((name) => {
+            removeAttributeByName(contentType, name);
           });
         });
 
@@ -982,10 +992,12 @@ const slice = createUndoRedoSlice(
         Object.keys(state.components).forEach((componentUid) => {
           const component = state.components[componentUid];
 
-          component.attributes.forEach((attribute) => {
-            if (attribute.type === 'component' && attribute.component === uid) {
-              removeAttributeByName(component, attribute.name);
-            }
+          const namesToRemove = component.attributes
+            .filter((attribute) => attribute.type === 'component' && attribute.component === uid)
+            .map((attribute) => attribute.name);
+
+          namesToRemove.forEach((name) => {
+            removeAttributeByName(component, name);
           });
         });
       },
