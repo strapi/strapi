@@ -405,6 +405,30 @@ describe('Permissions Engine', () => {
     ).not.toThrow();
   });
 
+  it('preserves object-literal equality carrying $-prefixed data keys', async () => {
+    const ability = await abilityForQuery({ meta: { flags: { $custom: 1 } } });
+
+    expect(() =>
+      ability.can('read', subject('article', { meta: { flags: { $custom: 1 } } }))
+    ).not.toThrow();
+    expect(ability.can('read', subject('article', { meta: { flags: { $custom: 1 } } }))).toBe(true);
+    expect(ability.can('read', subject('article', { meta: { flags: { $custom: 2 } } }))).toBe(
+      false
+    );
+  });
+
+  // The error must name the operator and list the supported set, so it is actionable.
+  it('names the offending operator and lists the supported set in the error', async () => {
+    const ability = await abilityForQuery({ title: { $startsWith: 'X' } });
+
+    expect(() => ability.can('read', subject('article', { title: 'X' }))).toThrow(
+      /unsupported operator "\$startsWith"/i
+    );
+    expect(() => ability.can('read', subject('article', { title: 'X' }))).toThrow(
+      /\$or, \$and, \$eq[\s\S]*\$elemMatch/
+    );
+  });
+
   it('accepts every operator on the supported whitelist', async () => {
     const ability = await abilityForQuery({
       $and: [
