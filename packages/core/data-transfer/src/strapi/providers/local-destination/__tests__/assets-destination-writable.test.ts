@@ -397,7 +397,7 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        select: ['id', 'hash'],
+        select: ['id', 'hash', 'formats'],
       })
     );
     expect(mockFindMany).toHaveBeenCalledTimes(1);
@@ -619,12 +619,148 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        select: ['id', 'hash'],
+        select: ['id', 'hash', 'formats'],
       })
     );
     expect(onWarning).toHaveBeenCalledWith(
       expect.stringContaining('Resolved upload file ID via hash "photo_hash"')
     );
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  // Filename-derived metadata reads `small_logo_abc123.png` as a `small` variant of
+  // `logo_abc123`, but the exact hash belongs to an original row.
+  test('updates the original row when its hash starts with a default format prefix', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const rows = [
+      { id: 7, hash: 'small_logo_abc123', formats: null },
+      {
+        id: 8,
+        hash: 'logo_abc123',
+        formats: { small: { hash: 'small_other_hash', url: 'old-small.png' } },
+      },
+    ];
+    const mockFindMany = jest.fn().mockResolvedValue(rows);
+    const mockFindOne = jest
+      .fn()
+      .mockImplementation(({ where: { id } }) =>
+        Promise.resolve(rows.find((row) => row.id === id) ?? null)
+      );
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'small_logo_abc123.png',
+      filepath: '/small_logo_abc123.png',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'small_logo_abc123',
+        mainHash: 'logo_abc123',
+        type: 'small',
+        name: 'small_logo_abc123.png',
+        id: 0,
+        url: '/small_logo_abc123.png',
+        size: 10,
+        mime: 'image/png',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 7 },
+      data: { url: '/small_logo_abc123.png', provider: 'local' },
+    });
+    expect(rows[1].formats.small.url).toBe('old-small.png');
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  // Custom breakpoints are unknown to filename parsing, so no `type`/`mainHash` is derived —
+  // the variant hash is only findable through the parent row's `formats`.
+  test('updates a custom responsive format resolved from the parent formats hashes', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const parent = {
+      id: 42,
+      hash: 'photo_abc123',
+      url: 'photo.png',
+      formats: { hero: { hash: 'hero_photo_abc123', url: 'old-hero.png' } },
+    };
+    const mockFindMany = jest.fn().mockResolvedValue([parent]);
+    const mockFindOne = jest.fn().mockResolvedValue(parent);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'hero_photo_abc123.png',
+      filepath: '/hero_photo_abc123.png',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'hero_photo_abc123',
+        name: 'hero_photo_abc123.png',
+        id: 0,
+        url: '/hero_photo_abc123.png',
+        size: 10,
+        mime: 'image/png',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 42 },
+      data: {
+        formats: { hero: { hash: 'hero_photo_abc123', url: '/hero_photo_abc123.png' } },
+        provider: 'local',
+      },
+    });
 
     await new Promise<void>((resolve, reject) => {
       stream.end((err?: Error | null) => (err ? reject(err) : resolve()));

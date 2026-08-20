@@ -5,26 +5,55 @@ import type { IAsset, IFile } from '../../../types';
 import type { Transaction } from '../../../types/utils';
 import { createCappedWarningReporter } from '../../../utils/capped-warnings';
 
-type HashIndexEntry = number | 'ambiguous';
+/** A media library row, or one of the responsive formats stored inside it. */
+interface UploadHashTarget {
+  id: number;
+  format?: string;
+}
+
+type HashIndexEntry = UploadHashTarget | 'ambiguous';
 type UploadHashIndex = Map<string, HashIndexEntry>;
 
+const isSameTarget = (a: UploadHashTarget, b: UploadHashTarget) =>
+  a.id === b.id && a.format === b.format;
+
+/**
+ * Index the exact hashes the destination knows about: the row hash for original files, plus
+ * every `formats[*].hash`. The hash alone then identifies both the row and the format it
+ * belongs to, which filename prefix parsing cannot do (custom breakpoints are unknown, and an
+ * original named `small_logo.png` looks like a `small` variant).
+ */
 const loadUploadHashIndex = async (strapi: Core.Strapi): Promise<UploadHashIndex> => {
-  const entries = await strapi.db.query('plugin::upload.file').findMany({
-    select: ['id', 'hash'],
+  const entries: IFile[] = await strapi.db.query('plugin::upload.file').findMany({
+    select: ['id', 'hash', 'formats'],
   });
 
   const index: UploadHashIndex = new Map();
+
+  const addHash = (hash: string | undefined, target: UploadHashTarget) => {
+    if (!hash) {
+      return;
+    }
+    const existing = index.get(hash);
+    if (existing === undefined) {
+      index.set(hash, target);
+      return;
+    }
+    if (existing !== 'ambiguous' && !isSameTarget(existing, target)) {
+      index.set(hash, 'ambiguous');
+    }
+  };
+
   for (const entry of entries) {
-    if (!entry?.hash || entry.id == null) {
+    if (entry?.id == null) {
       continue;
     }
-    const existing = index.get(entry.hash);
-    if (existing !== undefined && existing !== entry.id) {
-      index.set(entry.hash, 'ambiguous');
-    } else if (existing === undefined) {
-      index.set(entry.hash, entry.id);
+    addHash(entry.hash, { id: entry.id });
+    for (const [format, data] of Object.entries(entry.formats ?? {})) {
+      addHash(data?.hash, { id: entry.id, format });
     }
   }
+
   return index;
 };
 
@@ -37,42 +66,61 @@ export interface CreateAssetsDestinationWritableOptions {
   onWarning?: (message: string) => void;
 }
 
-const resolveUploadFileIdWithHashFallback = async (
+const resolveUploadTarget = async (
   uploadData: IFile,
   resolveUploadFileId: (metadata: { id: number }) => number | undefined,
   getHashIndex: () => Promise<UploadHashIndex>,
   warn: (message: string) => void,
   counts: { resolved: number; ambiguous: number }
-): Promise<number | undefined> => {
+): Promise<UploadHashTarget | undefined> => {
   const mappedId = resolveUploadFileId(uploadData);
   if (mappedId) {
-    return mappedId;
+    return { id: mappedId, format: uploadData.type };
   }
 
-  // Responsive variants store the variant hash in `hash`, but the parent media
-  // library row is keyed by the main file hash (provided as `mainHash`).
-  const lookupHash = uploadData.mainHash ?? uploadData.hash;
-  if (!lookupHash) {
+  // The asset's own hash is tried first because the index resolves it to an exact target.
+  // `mainHash` is the parent hash sent with responsive variants: a fallback for variants whose
+  // hash the destination does not know (formats regenerated with different hashes).
+  const lookupHashes = [uploadData.hash, uploadData.mainHash].filter(
+    (hash, position, all): hash is string => Boolean(hash) && all.indexOf(hash) === position
+  );
+
+  if (lookupHashes.length === 0) {
     return undefined;
   }
 
   const index = await getHashIndex();
-  const match = index.get(lookupHash);
+  let ambiguousHash: string | undefined;
 
-  if (match === 'ambiguous') {
-    counts.ambiguous += 1;
-    warn(
-      `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
-    );
-    return undefined;
+  for (const lookupHash of lookupHashes) {
+    const match = index.get(lookupHash);
+
+    if (match === 'ambiguous') {
+      ambiguousHash ??= lookupHash;
+      continue;
+    }
+
+    if (match) {
+      counts.resolved += 1;
+      warn(
+        `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
+      );
+
+      if (lookupHash === uploadData.hash) {
+        // The index knows whether this hash is an original file or one of its formats.
+        return { id: match.id, format: match.format };
+      }
+
+      // Matched through the parent hash, so this asset is a variant of the resolved row.
+      return { id: match.id, format: match.format ?? uploadData.type };
+    }
   }
 
-  if (typeof match === 'number') {
-    counts.resolved += 1;
+  if (ambiguousHash) {
+    counts.ambiguous += 1;
     warn(
-      `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
+      `[Data transfer] Ambiguous hash "${ambiguousHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
     );
-    return match;
   }
 
   return undefined;
@@ -156,15 +204,15 @@ export function createAssetsDestinationWritable(
             try {
               // Hash fallback is only useful when we will update media-library rows.
               // With --only files, restoreMediaEntitiesContent is false: upload bytes only.
-              const fileId = restoreMediaEntitiesContent
-                ? await resolveUploadFileIdWithHashFallback(
+              const target = restoreMediaEntitiesContent
+                ? await resolveUploadTarget(
                     uploadData,
                     resolveUploadFileId,
                     getHashIndex,
                     (message) => warnings.warn(message),
                     hashFallbackCounts
                   )
-                : resolveUploadFileId(uploadData);
+                : undefined;
 
               await strapi.plugin('upload').provider.uploadStream(uploadData);
 
@@ -172,7 +220,7 @@ export function createAssetsDestinationWritable(
                 return;
               }
 
-              if (!fileId) {
+              if (!target) {
                 hashFallbackCounts.unmatched += 1;
                 warnings.warn(
                   `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
@@ -180,20 +228,23 @@ export function createAssetsDestinationWritable(
                 return;
               }
 
-              if (uploadData?.type) {
-                const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                  where: { id: fileId },
-                });
-                if (!entry) {
-                  warnings.warn(
-                    `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but parent file record was not found.`
-                  );
-                  return;
-                }
-                const specificFormat = entry?.formats?.[uploadData.type];
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+                where: { id: target.id },
+              });
+              if (!entry) {
+                warnings.warn(
+                  target.format
+                    ? `[Data transfer] Uploaded format variant "${target.format}" for "${chunk.filename}" but parent file record was not found.`
+                    : `[Data transfer] Uploaded asset "${chunk.filename}" but file record was not found for URL update.`
+                );
+                return;
+              }
+
+              if (target.format) {
+                const specificFormat = entry.formats?.[target.format];
                 if (!specificFormat) {
                   warnings.warn(
-                    `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but no matching format entry exists in the database.`
+                    `[Data transfer] Uploaded format variant "${target.format}" for "${chunk.filename}" but no matching format entry exists in the database.`
                   );
                   return;
                 }
@@ -208,15 +259,6 @@ export function createAssetsDestinationWritable(
                 return;
               }
 
-              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { id: fileId },
-              });
-              if (!entry) {
-                warnings.warn(
-                  `[Data transfer] Uploaded asset "${chunk.filename}" but file record was not found for URL update.`
-                );
-                return;
-              }
               entry.url = uploadData.url;
               await strapi.db.query('plugin::upload.file').update({
                 where: { id: entry.id },
