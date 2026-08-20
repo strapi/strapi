@@ -3,6 +3,7 @@ import { Check, ChevronDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { getTranslationKey } from '../../../utils/translations';
 import {
   type FoldersPosition,
@@ -47,9 +48,7 @@ const FOLDERS_LABELS: Record<FoldersPosition, MessageDescriptor> = {
 
 // Stretch to the toolbar row height so the trigger matches the view toggle
 // (the parent Flex uses alignItems="stretch").
-const SortTrigger = styled(Menu.Trigger)`
-  height: auto;
-`;
+const SortTrigger = styled(Menu.Trigger)``;
 
 // Full-width section band, like the design mock (sits inside the Menu.Content
 // padding, so the band stops short of the panel edges).
@@ -85,6 +84,7 @@ interface SortMenuProps {
  */
 export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const triggerLabel = formatMessage(
     { id: getTranslationKey('list.sort.trigger'), defaultMessage: 'Sort: {active}' },
@@ -99,7 +99,7 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
 
   return (
     <Menu.Root>
-      <SortTrigger variant="tertiary" endIcon={<ChevronDown aria-hidden />}>
+      <SortTrigger variant="ghost" endIcon={<ChevronDown aria-hidden />}>
         {triggerLabel}
       </SortTrigger>
       {/* The DS default maxHeight (15rem) folds everything after the first
@@ -118,6 +118,12 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             aria-checked={sort.sortBy === key}
             onSelect={(e: Event) => {
               e.preventDefault();
+              if (sort.sortBy !== key) {
+                trackUsage('didSortMediaLibraryElements', {
+                  location: MEDIA_LIBRARY_LOCATION,
+                  sort: key,
+                });
+              }
               sort.setSortBy(sort.sortBy === key ? null : key);
             }}
             endIcon={sort.sortBy === key ? checkmark : null}
@@ -132,6 +138,12 @@ export const SortMenu = ({ sort, showFoldersGroup = true }: SortMenuProps) => {
             aria-checked={sort.direction === key}
             onSelect={(e: Event) => {
               e.preventDefault();
+              if (sort.direction !== key) {
+                trackUsage('didSortMediaLibraryElements', {
+                  location: MEDIA_LIBRARY_LOCATION,
+                  sort: key,
+                });
+              }
               sort.setDirection(sort.direction === key ? null : key);
             }}
             endIcon={sort.direction === key ? checkmark : null}

@@ -212,6 +212,42 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       });
     });
 
+    // `POST /upload/files/:id/replace` delivers the id in route params; the
+    // legacy `POST /upload` multiplexer delegates here with it in the query.
+    it('reads the id from route params, preferring them over the query', async () => {
+      const replacementFile = {
+        filepath: '/tmp/replacement.pdf',
+        originalFilename: 'replacement.pdf',
+        mimetype: 'application/pdf',
+      };
+
+      mockContext.params = { id: '9' } as any;
+      mockContext.query = { id: '1' } as any;
+      mockContext.request!.files = { files: replacementFile } as any;
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [replacementFile],
+        filteredBody: {},
+        errors: [],
+      });
+
+      uploadService.replace.mockResolvedValue({ id: 9, name: 'replacement.pdf' });
+
+      await adminUploadController.replaceFile(mockContext as Context);
+
+      expect(uploadService.replace).toHaveBeenCalledWith('9', expect.anything(), {
+        user: { id: 1 },
+      });
+    });
+
+    it('throws when neither params nor query carry an id', async () => {
+      mockContext.query = {} as any;
+
+      await expect(adminUploadController.replaceFile(mockContext as Context)).rejects.toThrow(
+        'File id is required'
+      );
+    });
+
     it('rejects multiple replacement files', async () => {
       mockContext.query = { id: '1' } as any;
       mockContext.request!.files = {
@@ -731,6 +767,42 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(fileService.signFileUrls).toHaveBeenCalledWith({ id: 7 });
       expect(mockContext.body).toEqual(expect.objectContaining({ id: 7, isUrlSigned: true }));
+    });
+
+    // `PUT /upload/files/:id` delivers the id in route params; the legacy
+    // `POST /upload` multiplexer delegates here with it in the query string.
+    it('reads the id from route params', async () => {
+      mockContext.params = { id: '9' } as any;
+      mockContext.query = {} as any;
+
+      uploadService.updateFileInfo.mockResolvedValue({ id: 9 });
+
+      await adminUploadController.updateFileInfo(mockContext as Context);
+
+      expect(uploadService.updateFileInfo).toHaveBeenCalledWith('9', expect.anything(), {
+        user: { id: 1 },
+      });
+    });
+
+    it('prefers route params over the query id when both are present', async () => {
+      mockContext.params = { id: '9' } as any;
+      mockContext.query = { id: '7' } as any;
+
+      uploadService.updateFileInfo.mockResolvedValue({ id: 9 });
+
+      await adminUploadController.updateFileInfo(mockContext as Context);
+
+      expect(uploadService.updateFileInfo).toHaveBeenCalledWith('9', expect.anything(), {
+        user: { id: 1 },
+      });
+    });
+
+    it('throws when neither params nor query carry an id', async () => {
+      mockContext.query = {} as any;
+
+      await expect(adminUploadController.updateFileInfo(mockContext as Context)).rejects.toThrow(
+        'File id is required'
+      );
     });
   });
 });

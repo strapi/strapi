@@ -162,6 +162,34 @@ describe('getFetchClient', () => {
     });
   });
 
+  describe('credentials', () => {
+    it('should send credentials for all HTTP methods', async () => {
+      const mockOk = () =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () => Promise.resolve({ data: 'success response' }),
+        });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk)
+        .mockImplementationOnce(mockOk);
+
+      const fetchClient = getFetchClient();
+
+      await fetchClient.get('/test');
+      await fetchClient.post('/test', {});
+      await fetchClient.put('/test', {});
+      await fetchClient.del('/test');
+
+      (window.fetch as jest.Mock).mock.calls.forEach(([, options]) => {
+        expect(options).toEqual(expect.objectContaining({ credentials: 'include' }));
+      });
+    });
+  });
+
   describe('responseType', () => {
     it('should return a Blob when responseType is blob', async () => {
       const blobContent = new Blob(['file content'], { type: 'application/zip' });

@@ -448,6 +448,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'GET',
+          credentials: 'include',
           headers,
         });
 
@@ -480,6 +481,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'POST',
+          credentials: 'include',
           headers,
           body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
         });
@@ -512,6 +514,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'PUT',
+          credentials: 'include',
           headers,
           body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
         });
@@ -533,6 +536,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         const response = await fetch(createRequestUrl(url), {
           signal: options?.signal ?? defaultOptions.signal,
           method: 'DELETE',
+          credentials: 'include',
           headers,
         });
         return responseInterceptor<TData>(response, options?.validateStatus);

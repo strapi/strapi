@@ -136,7 +136,81 @@ describe('Local Strapi Source Destination', () => {
       ).rejects.toThrow();
     });
 
-    test.todo('Should not delete entities that are not included');
+    test('Should not delete entities that are not included', async () => {
+      const query = jest.fn((uid) => ({
+        deleteMany: jest.fn(async () => ({ count: uid === 'foo' ? 3 : 0 })),
+        findMany: jest.fn(async () => []),
+      }));
+
+      const getModel = jest.fn((uid: string) => getContentTypes()[uid]);
+
+      const strapi = getStrapiFactory({
+        contentTypes: getContentTypes(),
+        query,
+        getModel,
+        get() {
+          return {
+            get() {
+              return getStrapiModels();
+            },
+          };
+        },
+        db: {
+          query,
+          transaction,
+          queryBuilder: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              stream: jest.fn().mockReturnValue([]),
+              transacting: jest.fn().mockReturnThis(),
+            }),
+          }),
+          lifecycles: {
+            enable: jest.fn(),
+            disable: jest.fn(),
+          },
+        },
+        ...strapiCommonProperties,
+      })();
+
+      setGlobalStrapi(strapi);
+
+      const provider = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        strategy: 'restore',
+        restore: {
+          entities: {
+            include: ['foo'],
+            exclude: [],
+          },
+          assets: false,
+          configuration: {
+            coreStore: false,
+            webhook: false,
+          },
+        },
+      });
+      const deleteAllSpy = jest.spyOn(restoreApi, 'deleteRecords');
+      const diagnostics = { report: jest.fn() };
+
+      await provider.bootstrap(diagnostics as any);
+      await provider.beforeTransfer();
+
+      expect(deleteAllSpy).toHaveBeenCalledTimes(1);
+      expect(deleteAllSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          entities: expect.objectContaining({
+            include: ['foo'],
+          }),
+        })
+      );
+      expect(diagnostics.report).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'info',
+          details: expect.objectContaining({ message: 'deleting all assets' }),
+        })
+      );
+    });
 
     test('Should delete all entities if it is a restore with only exclude property', async () => {
       const entities = [

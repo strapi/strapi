@@ -1,3 +1,5 @@
+import { locateItem, type ItemLocations } from './itemLocations';
+
 import type { DragItemData } from '../types/dnd';
 
 /**
@@ -5,23 +7,34 @@ import type { DragItemData } from '../types/dnd';
  * the exact same `DragItemData[]` into `computeValidDropTargets` / the canonical
  * `canDropItemOnFolder` predicate that pointer drag uses.
  *
- * Selection is page-scoped to the current folder, so every selected item shares
- * `currentFolderId` as its location (files → `folderId`, folders → `parentId`).
+ * Each item's location comes from the loaded row, not from the folder currently
+ * open: search results are global, so a selected item can live anywhere.
  * Names are irrelevant to drop validation, so they are left empty.
  */
 export const buildDragSetFromSelection = (
   selectedIds: ReadonlySet<number>,
   selectedFolderIds: ReadonlySet<number>,
-  currentFolderId: number | null
+  locations: ItemLocations,
+  fallbackFolderId: number | null
 ): DragItemData[] => {
   const items: DragItemData[] = [];
 
   selectedIds.forEach((id) => {
-    items.push({ kind: 'file', id, name: '', folderId: currentFolderId });
+    items.push({
+      kind: 'file',
+      id,
+      name: '',
+      folderId: locateItem(locations, 'file', id, fallbackFolderId),
+    });
   });
 
   selectedFolderIds.forEach((id) => {
-    items.push({ kind: 'folder', id, name: '', parentId: currentFolderId });
+    items.push({
+      kind: 'folder',
+      id,
+      name: '',
+      parentId: locateItem(locations, 'folder', id, fallbackFolderId),
+    });
   });
 
   return items;
