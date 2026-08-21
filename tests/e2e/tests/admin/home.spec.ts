@@ -201,7 +201,10 @@ test.describe('Home as super admin', () => {
       await page.getByRole('button', { name: /create new collection type/i }).click();
       await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
       await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
+      await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
+      await expect(page.getByLabel('API ID (Plural)')).toHaveValue('new-types');
       await page.getByRole('button', { name: /continue/i }).click();
+      await expect(page.getByRole('button', { name: 'Add new field' }).first()).toBeVisible();
 
       await page.getByRole('button', { name: /create new component/i }).click();
       await expect(page.getByRole('heading', { name: 'Create a component' })).toBeVisible();
