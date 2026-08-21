@@ -69,7 +69,7 @@ class MockXHR {
   }
 }
 
-const ENDPOINT = 'http://localhost:1337/upload/unstable/upload-file';
+const ENDPOINT = 'http://localhost:1337/upload/files';
 
 describe('uploadFileViaXHR', () => {
   let OriginalXHR: typeof XMLHttpRequest;

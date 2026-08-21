@@ -1,4 +1,4 @@
-import { render, screen, waitFor, server } from '@tests/utils';
+import { render, screen, waitFor, server, fireEvent } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { FolderActionsMenu } from '../FolderActionsMenu';
@@ -8,7 +8,7 @@ import type { DragFolderData } from '../../../../types/dnd';
 
 const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
-const mockClear = jest.fn();
+const mockDeselect = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -18,7 +18,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 
 jest.mock('../../hooks/useAssetSelection', () => ({
   useAssetSelection: () => ({
-    clear: mockClear,
+    deselect: mockDeselect,
     selectedIds: new Set<number>([9, 10]),
     selectedFolderIds: new Set<number>([8]),
   }),
@@ -50,7 +50,43 @@ describe('FolderActionsMenu', () => {
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
   });
 
-  it('opens the menu with the three actions, separated after the copy link', async () => {
+  // See AssetActionsMenu: Radix's default modal menu made a sibling trigger
+  // unclickable, so closing several opened menus took one click each.
+  it("closes an open menu when another row's menu is opened", async () => {
+    const otherFolder: Folder = {
+      id: 6,
+      name: 'Videos',
+      pathId: 6,
+      path: '/6',
+      parent: null,
+    };
+    const otherDragData: DragFolderData = {
+      kind: 'folder',
+      id: 6,
+      name: 'Videos',
+      parentId: null,
+    };
+
+    const { user } = render(
+      <>
+        <FolderActionsMenu folder={folder} dragData={dragData} />
+        <FolderActionsMenu folder={otherFolder} dragData={otherDragData} />
+      </>
+    );
+
+    const [firstTrigger, secondTrigger] = screen.getAllByRole('button', { name: 'More actions' });
+
+    await user.click(firstTrigger);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+
+    await user.click(secondTrigger);
+
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(1));
+    expect(secondTrigger).toHaveAttribute('aria-expanded', 'true');
+    expect(firstTrigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens the menu with the four actions, separated after the copy link', async () => {
     const { user } = setup();
 
     await openMenu(user);
@@ -58,6 +94,7 @@ describe('FolderActionsMenu', () => {
     const items = screen.getAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'Copy link to folder',
+      'Rename folder',
       'Move to folder',
       'Delete folder',
     ]);
@@ -98,8 +135,92 @@ describe('FolderActionsMenu', () => {
     });
   });
 
+  describe('Rename folder', () => {
+    it('does not mount the dialog until the action is selected', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+
+    it('opens a dialog prefilled with the folder name', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      expect(await screen.findByRole('textbox')).toHaveValue('Photos');
+    });
+
+    it('renames this folder, resending its existing parent so it does not move', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.put(
+          '*/upload/folders/:id',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { id: 5, name: 'Pictures' } });
+          },
+          { once: true }
+        )
+      );
+
+      // A nested folder: dropping `parent` from the payload would silently move
+      // it to the root, since the server reads the parent from the request body.
+      const { user } = setup({ dragData: { ...dragData, parentId: 1 } });
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      // The form is submitted with fireEvent: user-event's click does not run
+      // jsdom's submit-button activation behaviour inside the modal's portal.
+      fireEvent.change(await screen.findByRole('textbox'), { target: { value: 'Pictures' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(requestBody).toEqual({ name: 'Pictures', parent: 1 }));
+    });
+
+    it('keeps the selection, unlike move and delete', async () => {
+      server.use(
+        http.put('*/upload/folders/:id', () =>
+          HttpResponse.json({ data: { id: 5, name: 'Pictures' } })
+        )
+      );
+
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+
+      fireEvent.change(await screen.findByRole('textbox'), { target: { value: 'Pictures' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: 'Folder has been renamed',
+        })
+      );
+      expect(mockDeselect).not.toHaveBeenCalled();
+    });
+
+    it('closes the dialog on cancel without renaming anything', async () => {
+      const { user } = setup();
+
+      await openMenu(user);
+      await user.click(screen.getByRole('menuitem', { name: 'Rename folder' }));
+      expect(await screen.findByRole('textbox')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Move to folder', () => {
-    it('moves only this folder, whatever else is selected, then clears the selection', async () => {
+    it('moves only this folder, whatever else is selected, then deselects only this folder', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -127,7 +248,7 @@ describe('FolderActionsMenu', () => {
         // The menu never carries the selected assets (9, 10) or folder (8).
         expect(requestBody).toEqual({ fileIds: [], folderIds: [5], destinationFolderId: 1 })
       );
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('folder:5');
       await waitFor(() => expect(screen.queryByText('Move elements to')).not.toBeInTheDocument());
     });
 
@@ -198,12 +319,12 @@ describe('FolderActionsMenu', () => {
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(screen.queryByText('Move elements to')).not.toBeInTheDocument();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 
   describe('Delete folder', () => {
-    it('deletes only this folder on confirm, toasts, and clears the selection', async () => {
+    it('deletes only this folder on confirm, toasts, and deselects only this folder', async () => {
       let requestBody: unknown;
       server.use(
         http.post(
@@ -231,7 +352,7 @@ describe('FolderActionsMenu', () => {
         type: 'success',
         message: '1 item has been deleted',
       });
-      expect(mockClear).toHaveBeenCalledTimes(1);
+      expect(mockDeselect).toHaveBeenCalledWith('folder:5');
     });
 
     it('closes the confirm on cancel without deleting anything', async () => {
@@ -245,7 +366,7 @@ describe('FolderActionsMenu', () => {
 
       expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
       expect(mockToggleNotification).not.toHaveBeenCalled();
-      expect(mockClear).not.toHaveBeenCalled();
+      expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
 });

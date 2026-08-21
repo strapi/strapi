@@ -1,32 +1,37 @@
-import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
-  IconButton,
+  Loader,
   RawTable,
   RawTbody,
   RawTd,
   RawTh,
   RawThead,
   RawTr,
+  Tooltip,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Folder as FolderIcon, More } from '@strapi/icons';
+import { Folder as FolderIcon, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { TruncatedText } from '../../../components/TruncatedText';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
+import { AssetActionsMenu } from './AssetActionsMenu';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -41,6 +46,28 @@ const StyledTable = styled(RawTable)`
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: 4px;
   overflow: hidden;
+
+  /* Below desktop only the name column remains. A fixed layout makes a long
+     name ellipsize instead of widening the table past the viewport — the
+     checkbox (first) and actions (last) columns keep a fixed width and the name
+     takes the rest. Desktop keeps the content-sized auto layout. */
+  table-layout: fixed;
+
+  & td:last-child,
+  & th:last-child {
+    width: 5.6rem;
+    white-space: nowrap;
+  }
+
+  ${({ theme }) => theme.breakpoints.large} {
+    table-layout: auto;
+
+    & td:last-child,
+    & th:last-child {
+      width: auto;
+      white-space: normal;
+    }
+  }
 `;
 
 const StyledThead = styled(RawThead)`
@@ -65,6 +92,7 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled.tr<{
   $isDragging?: boolean;
   $isMovePending?: boolean;
+  $isBusy?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
   $isSelected?: boolean;
@@ -73,15 +101,15 @@ const StyledTr = styled.tr<{
   user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
-  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
-    if ($isMovePending) {
+  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget }) => {
+    if ($isMovePending || $isBusy) {
       return 'wait';
     }
 
     return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
   }};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
-  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  opacity: ${({ $isDragging, $isBusy }) => ($isDragging || $isBusy ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -107,16 +135,30 @@ const StyledTr = styled.tr<{
   }
 `;
 
-// Leading checkbox column. Narrow + centred so the control sits flush against the
-// row's left edge.
+// Leading checkbox column. Fixed narrow width so it holds its own column under
+// the mobile fixed table-layout (a 1% width would collapse and let the name
+// cell's preview overlap the control).
 const CheckboxTd = styled(StyledTd)`
-  width: 1%;
+  width: 5.6rem;
   white-space: nowrap;
 `;
 
 const CheckboxTh = styled(StyledTh)`
-  width: 1%;
+  width: 5.6rem;
   white-space: nowrap;
+`;
+
+// Flags an asset whose caption or alternative text is empty — mirrors the
+// per-field warning shown in the details drawer. Pushed to the far end of the
+// name cell (shrink 0 so a long name never crowds it out).
+const MetadataWarning = styled(WarningCircle)`
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+
+  path {
+    fill: ${({ theme }) => theme.colors.warning500};
+  }
 `;
 
 // The asset filename is its own interactive element: clicking it opens the
@@ -181,20 +223,37 @@ interface AssetRowProps {
 }
 
 const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
 
+  // Caption and alternative text apply to every file type — same "empty =
+  // falsy" rule as the drawer's per-field warning.
+  const isMetadataMissing = !asset.caption || !asset.alternativeText;
+  const metadataMissingLabel = formatMessage({
+    id: getTranslationKey('list.table.row.metadata-missing'),
+    defaultMessage: 'This asset is missing metadata (caption or alternative text).',
+  });
+
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
   // a range, cmd/ctrl toggles.
+  //
+  // The containment guard on this and the handler below is what keeps the
+  // actions menu's portaled dialogs — React children of this row — from
+  // opening the details drawer or toggling the selection.
   const handleRowClick = (e: React.MouseEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.shiftKey) {
       selectRange(orderedItemKeys, key);
     } else if (e.metaKey || e.ctrlKey) {
@@ -206,6 +265,10 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
 
   // Desktop: Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isEventFromWithin(e)) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
@@ -236,16 +299,22 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={(e: React.PointerEvent) => {
+        if (isEventFromWithin(e)) {
+          listeners?.onPointerDown?.(e);
+        }
+      }}
     >
-      {/* No checkbox column on mobile (multi-select deferred) or without the
-          update permission (nothing selectable can be acted on). */}
-      {!isMobile && canUpdate && (
+      {/* No checkbox without the update permission (nothing selectable can be
+          acted on). Shown at every viewport width otherwise. */}
+      {canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -263,23 +332,39 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
         </CheckboxTd>
       )}
       <StyledTd>
-        <Flex gap={3} alignItems="center">
-          <AssetPreviewCell asset={asset} />
-          <Flex direction="column" alignItems="flex-start" minWidth={0}>
-            <NameButton type="button" onClick={handleNameClick}>
-              <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
-                {asset.name}
-              </Typography>
-            </NameButton>
-            {isMobile && (
-              <Typography textColor="neutral600" variant="pi">
-                {asset.size ? formatBytes(asset.size, 1) : '-'}
-              </Typography>
+        <Flex alignItems="center" justifyContent="space-between" gap={2} minWidth={0}>
+          <Flex gap={3} alignItems="center" minWidth={0}>
+            {/* The row is dimmed and inert while busy; the spinner in place of the
+                thumbnail is what says so positively. Its label carries the reason
+                to screen readers — the row itself has no other announcement. */}
+            {busyMessage !== null ? (
+              <Flex justifyContent="center" width="3.2rem" height="3.2rem">
+                <Loader small>{busyMessage}</Loader>
+              </Flex>
+            ) : (
+              <AssetPreviewCell asset={asset} />
             )}
+            <Flex direction="column" alignItems="flex-start" minWidth={0}>
+              <NameButton type="button" onClick={handleNameClick}>
+                <TruncatedText textColor="neutral800" fontWeight="semiBold">
+                  {asset.name}
+                </TruncatedText>
+              </NameButton>
+              {!isDesktop && (
+                <Typography textColor="neutral600" variant="pi">
+                  {asset.size ? formatBytes(asset.size, 1) : '-'}
+                </Typography>
+              )}
+            </Flex>
           </Flex>
+          {isMetadataMissing && (
+            <Tooltip label={metadataMissingLabel}>
+              <MetadataWarning aria-label={metadataMissingLabel} role="img" />
+            </Tooltip>
+          )}
         </Flex>
       </StyledTd>
-      {!isMobile && (
+      {isDesktop && (
         <>
           <StyledTd>
             <Typography textColor="neutral600">
@@ -298,18 +383,11 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </StyledTd>
         </>
       )}
-      <StyledTd>
+      {/* The row owns click, Enter and Space; none of them should reach it from
+          the menu trigger (Enter would open the details drawer). */}
+      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
         <Flex justifyContent="flex-end">
-          <IconButton
-            label={formatMessage({
-              id: getTranslationKey('control-card.more-actions'),
-              defaultMessage: 'More actions',
-            })}
-            variant="ghost"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            <More />
-          </IconButton>
+          <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
       </StyledTd>
     </StyledTr>
@@ -328,7 +406,7 @@ interface FolderRowProps {
 }
 
 const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isSelected, toggle, selectRange } = useAssetSelection();
@@ -416,7 +494,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
         }
       }}
     >
-      {!isMobile && canUpdate && (
+      {canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -434,7 +512,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
         </CheckboxTd>
       )}
       <StyledTd>
-        <Flex gap={3} alignItems="center">
+        <Flex gap={3} alignItems="center" minWidth={0}>
           <Flex
             justifyContent="center"
             alignItems="center"
@@ -446,12 +524,12 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           >
             <FolderIcon width={20} height={20} />
           </Flex>
-          <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+          <TruncatedText textColor="neutral800" fontWeight="semiBold">
             {folder.name}
-          </Typography>
+          </TruncatedText>
         </Flex>
       </StyledTd>
-      {!isMobile && (
+      {isDesktop && (
         <>
           <StyledTd>
             <Typography textColor="neutral600">
@@ -500,20 +578,22 @@ export const AssetsTable = ({
   mixedItems = null,
   onAssetItemClick,
 }: AssetsTableProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const { trackUsage } = useTracking();
 
-  const visibleHeaders = isMobile
-    ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
-    : TABLE_HEADERS;
+  // Below the desktop breakpoint only the name (and actions) column is kept —
+  // the date/size columns don't fit; size moves under the name as a subtitle.
+  const visibleHeaders = isDesktop
+    ? TABLE_HEADERS
+    : TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions');
 
   // The checkbox column is a dedicated structural column (not part of
-  // TABLE_HEADERS). Hidden on mobile (multi-select deferred) and without the
-  // update permission — every bulk action needs `assets.update`, so a
-  // read-only user has nothing to select for.
-  const showCheckboxColumn = !isMobile && canUpdate;
+  // TABLE_HEADERS). Hidden only without the update permission — every bulk
+  // action needs `assets.update`, so a read-only user has nothing to select for.
+  const showCheckboxColumn = canUpdate;
   const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;
@@ -534,6 +614,7 @@ export const AssetsTable = ({
     if (allSelected) {
       clear();
     } else {
+      trackUsage('didSelectAllMediaLibraryElements');
       selectAll(orderedItemKeys);
     }
   };

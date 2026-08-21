@@ -519,6 +519,36 @@ describe('UploadProgressDialog', () => {
       });
       expect(screen.getByText('File size exceeded')).toBeInTheDocument();
     });
+
+    it('translates machine-readable server error codes instead of showing them raw', async () => {
+      // `FileTooBig` is the code returned by the body middleware when koa-body's
+      // maxFileSize is exceeded; it has a matching `apiError.*` translation entry.
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'too-big.png', 'error', 'FileTooBig')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('too-big.png')).toBeInTheDocument();
+      });
+
+      const row = screen.getByText('too-big.png').closest('div')!;
+      expect(row).not.toHaveTextContent('FileTooBig');
+    });
+
+    it('falls back to a generic message when the server gives no error message', async () => {
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'mystery.png', 'error')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('mystery.png')).toBeInTheDocument();
+      });
+      expect(screen.getByText('An error occurred while uploading the file.')).toBeInTheDocument();
+    });
   });
 
   describe('FileRowRenderer - cancelled file', () => {

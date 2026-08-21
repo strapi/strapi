@@ -10,7 +10,7 @@ import {
   AI_METADATA_MAX_FILES,
   isAIMetadataSupportedMime,
 } from '../../../../../../shared/constants';
-import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
@@ -25,22 +25,34 @@ import { DeleteItemsDialog } from './DeleteItemsDialog';
 import type { File } from '../../../../../../shared/contracts/files';
 
 /**
- * Floating bulk action bar for the future Media Library.
+ * Bulk action bar for the future Media Library. Mobile: docked full-bleed to the
+ * bottom edge (no radius, top border only). Desktop (medium+): a floating,
+ * centered pill.
  */
 const Bar = styled(Flex)`
   position: fixed;
-  bottom: ${({ theme }) => theme.spaces[4]};
-  left: 50%;
-  transform: translateX(-50%);
   z-index: ${({ theme }) => theme.zIndices.popover};
+  left: 0;
+  right: 0;
+  bottom: 0;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]};
   padding: ${({ theme }) =>
     `${theme.spaces[3]} ${theme.spaces[2]} ${theme.spaces[3]} ${theme.spaces[6]}`};
   background: ${({ theme }) => theme.colors.neutral0};
-  border: 1px solid ${({ theme }) => theme.colors.neutral150};
-  border-radius: ${({ theme }) => theme.borderRadius};
+  border: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+  border-radius: 0;
   box-shadow: ${({ theme }) => theme.shadows.popupShadow};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: 50%;
+    right: auto;
+    bottom: ${({ theme }) => theme.spaces[4]};
+    transform: translateX(-50%);
+    border: 1px solid ${({ theme }) => theme.colors.neutral150};
+    border-radius: ${({ theme }) => theme.borderRadius};
+  }
 `;
 
 const ActionCluster = styled(Flex)`
@@ -80,7 +92,9 @@ export const BulkActionsBar = ({
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
+  // No mime argument: the action is selection-scoped, so the per-asset
+  // allowlist check happens below in `eligibleCount`.
+  const isAiMetadataEnabled = useAIMetadataEnabled();
   // Every bulk action (move, delete, metadata) is an `assets.update` mutation
   // server-side — one flag gates the whole cluster.
   const { canUpdate } = useMediaLibraryPermissions();
