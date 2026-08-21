@@ -2816,6 +2816,82 @@ describe('relation populate: read handlers call populateDeep and withPopulateOve
   });
 });
 
+describe('relation populate: write handlers pass an explicit populate', () => {
+  const uid = 'api::article.article';
+  const model = baseModel({
+    uid,
+    attributes: { title: { type: 'string' } } as TestAttrs,
+    options: { draftAndPublish: true },
+  });
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+  const strapiForTest = makeMinimalGlobalStrapi();
+
+  const runHandler = async (toolName: string, args: Record<string, unknown> = {}) => {
+    jest.clearAllMocks();
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const tool = tools.find((t) => t.name === toolName)!;
+    const handler = tool.createHandler(strapiForTest, context);
+    await handler({ args, extra: mockExtra });
+  };
+
+  beforeEach(() => {
+    mockDocumentManager.findOne.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.exists.mockResolvedValue(true);
+    mockDocumentManager.publish.mockResolvedValue([{ documentId: 'doc-1' }]);
+    mockDocumentManager.unpublish.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.discardDraft.mockResolvedValue({ documentId: 'doc-1' });
+  });
+
+  it('create_article passes populate to documentManager.create', async () => {
+    await runHandler('create_article', { data: { title: 'New' } });
+
+    expect(mockDocumentManager.create).toHaveBeenCalledWith(
+      uid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('update_article passes populate to documentManager.update', async () => {
+    await runHandler('update_article', { documentId: 'doc-1', data: { title: 'Up' } });
+
+    expect(mockDocumentManager.update).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('publish_article passes populate to documentManager.publish', async () => {
+    await runHandler('publish_article', { documentId: 'doc-1' });
+
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('unpublish_article passes populate to documentManager.unpublish', async () => {
+    await runHandler('unpublish_article', { documentId: 'doc-1' });
+
+    expect(mockDocumentManager.unpublish).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('discard_article_draft passes populate to documentManager.discardDraft', async () => {
+    await runHandler('discard_article_draft', { documentId: 'doc-1' });
+
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+});
+
 describe('relation identity: shapeRelationsForMcp called on every op', () => {
   const { shapeRelationsForMcp: mockShapeRelations } = jest.requireMock(
     '../sanitizers/shape-relations'
