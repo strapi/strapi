@@ -10,7 +10,7 @@ tags:
 
 ## Summary
 
-Audit Logs provide a way to view the history of all user actions at Admin API level. This includes actions related to entries (including publish actions), media (including its folders), users, login & logout of admin users, components, roles, and permissions, you can see the list of all the default events [here](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/services/audit-logs.js#L9).
+Audit Logs provide a way to view the history of all user actions at Admin API level. This includes actions related to entries (including publish actions), media (including its folders), users, login & logout of admin users, components, roles, and permissions, you can see the list of all the default events [here](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/src/audit-logs/services/audit-logs.ts).
 
 ## Backend design
 
@@ -59,4 +59,4 @@ To understand how we obtain this information, we need to know how we emit an eve
 strapi.eventHub.emit(name: Pick<Event, 'name'>, payload: Pick<Event, 'payload'>);
 ```
 
-First, we check the event is coming from admin requests and it's on our [default events](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/services/audit-logs.js#L9) list, then when creating our Audit Log, we retrieve the action and payload from this emitted event, where the first argument is the action or event name, and the second one is the payload. We obtain the user from the requestContext.
+First, we check the event is coming from admin requests and it's on our [default events](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/src/audit-logs/services/audit-logs.ts) list, then when creating our Audit Log, we retrieve the action and payload from this emitted event, where the first argument is the action or event name, and the second one is the payload. We obtain the user from the requestContext.
