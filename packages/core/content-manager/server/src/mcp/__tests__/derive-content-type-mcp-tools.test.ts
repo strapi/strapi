@@ -2816,26 +2816,38 @@ describe('relation populate: read handlers call populateDeep and withPopulateOve
   });
 });
 
-describe('relation populate: write handlers pass an explicit populate', () => {
+describe('relation populate: write handlers pass a non-count populate', () => {
   const uid = 'api::article.article';
   const model = baseModel({
     uid,
     attributes: { title: { type: 'string' } } as TestAttrs,
     options: { draftAndPublish: true },
   });
+  const singleUid = 'api::global.global';
+  const singleModel = baseModel({
+    kind: 'singleType',
+    uid: singleUid,
+    apiID: 'global',
+    options: { draftAndPublish: true },
+  });
   const context = { userAbility: makeUserAbility(), user: mockUser };
-  const strapiForTest = makeMinimalGlobalStrapi();
+
+  const getBuilderFromMock = () => {
+    const { getService } = jest.requireMock('../../utils') as { getService: jest.Mock };
+    return getService('populate-builder')();
+  };
 
   const runHandler = async (toolName: string, args: Record<string, unknown> = {}) => {
     jest.clearAllMocks();
-    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model, singleModel]);
     const tool = tools.find((t) => t.name === toolName)!;
-    const handler = tool.createHandler(strapiForTest, context);
+    const handler = tool.createHandler(makeStrapiWithDb(), context);
     await handler({ args, extra: mockExtra });
   };
 
   beforeEach(() => {
     mockDocumentManager.findOne.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.findMany.mockResolvedValue([{ documentId: 'doc-1' }]);
     mockDocumentManager.exists.mockResolvedValue(true);
     mockDocumentManager.publish.mockResolvedValue([{ documentId: 'doc-1' }]);
     mockDocumentManager.unpublish.mockResolvedValue({ documentId: 'doc-1' });
@@ -2849,6 +2861,7 @@ describe('relation populate: write handlers pass an explicit populate', () => {
       uid,
       expect.objectContaining({ populate: {} })
     );
+    expect(getBuilderFromMock().countRelations).not.toHaveBeenCalled();
   });
 
   it('update_article passes populate to documentManager.update', async () => {
@@ -2859,6 +2872,7 @@ describe('relation populate: write handlers pass an explicit populate', () => {
       uid,
       expect.objectContaining({ populate: {} })
     );
+    expect(getBuilderFromMock().countRelations).not.toHaveBeenCalled();
   });
 
   it('publish_article passes populate to documentManager.publish', async () => {
@@ -2869,6 +2883,7 @@ describe('relation populate: write handlers pass an explicit populate', () => {
       uid,
       expect.objectContaining({ populate: {} })
     );
+    expect(getBuilderFromMock().countRelations).not.toHaveBeenCalled();
   });
 
   it('unpublish_article passes populate to documentManager.unpublish', async () => {
@@ -2879,6 +2894,7 @@ describe('relation populate: write handlers pass an explicit populate', () => {
       uid,
       expect.objectContaining({ populate: {} })
     );
+    expect(getBuilderFromMock().countRelations).not.toHaveBeenCalled();
   });
 
   it('discard_article_draft passes populate to documentManager.discardDraft', async () => {
@@ -2887,6 +2903,47 @@ describe('relation populate: write handlers pass an explicit populate', () => {
     expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
       'doc-1',
       uid,
+      expect.objectContaining({ populate: {} })
+    );
+    expect(getBuilderFromMock().countRelations).not.toHaveBeenCalled();
+  });
+
+  it('write_global passes populate to documentManager.create on the create branch', async () => {
+    mockDocumentManager.findMany.mockResolvedValue([]);
+    await runHandler('write_global', { data: { title: 'New' } });
+
+    expect(mockDocumentManager.create).toHaveBeenCalledWith(
+      singleUid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('publish_global passes populate to documentManager.publish', async () => {
+    await runHandler('publish_global', {});
+
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'doc-1',
+      singleUid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('unpublish_global passes populate to documentManager.unpublish', async () => {
+    await runHandler('unpublish_global', {});
+
+    expect(mockDocumentManager.unpublish).toHaveBeenCalledWith(
+      'doc-1',
+      singleUid,
+      expect.objectContaining({ populate: {} })
+    );
+  });
+
+  it('discard_global_draft passes populate to documentManager.discardDraft', async () => {
+    await runHandler('discard_global_draft', {});
+
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'doc-1',
+      singleUid,
       expect.objectContaining({ populate: {} })
     );
   });

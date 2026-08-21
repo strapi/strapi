@@ -8,7 +8,7 @@ import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
-import { ok, sanitizeFormatShape } from '../utils';
+import { buildWriteReplyPopulate, ok, sanitizeFormatShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -110,6 +110,7 @@ export const singleCreateOrUpdate = async (
       doc = await documentManager.create(typedUid, {
         data: sanitizedData,
         ...sanitizedQuery,
+        populate,
         locale: resolvedLocale,
       });
     } else {
@@ -310,6 +311,8 @@ export const createSinglePublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const writePopulate = await buildWriteReplyPopulate(typedUid);
+
     const publishedDocument = await strapi.db.transaction(async () => {
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish({ locale });
       const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
@@ -332,6 +335,7 @@ export const createSinglePublishHandler =
       }
 
       const publishResult = await documentManager.publish(document.documentId, typedUid, {
+        populate: writePopulate,
         locale: resolvedLocale,
       });
 
@@ -391,6 +395,8 @@ export const createSingleUnpublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const writePopulate = await buildWriteReplyPopulate(typedUid);
+
     const result = await strapi.db.transaction(async () => {
       if (discardDraft === true) {
         await documentManager.discardDraft(document.documentId, typedUid, {
@@ -400,7 +406,10 @@ export const createSingleUnpublishHandler =
 
       return asyncPipe.pipe(
         (doc: any) =>
-          documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
+          documentManager.unpublish(doc.documentId, typedUid, {
+            populate: writePopulate,
+            locale: resolvedLocale,
+          }),
         (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
       )(document);
     });
@@ -451,9 +460,14 @@ export const createSingleDiscardDraftHandler =
       throw new errors.ForbiddenError();
     }
 
+    const writePopulate = await buildWriteReplyPopulate(typedUid);
+
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
-        documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
+        documentManager.discardDraft(doc.documentId, typedUid, {
+          populate: writePopulate,
+          locale: resolvedLocale,
+        }),
       (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
     )(document);
 
