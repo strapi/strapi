@@ -1,5 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 import { z } from '@strapi/utils';
+import type { ServerContext } from '@modelcontextprotocol/server';
 import type { RegisteredCapability } from '../McpCapabilityRegistry';
 import { McpCapabilityDefinitionRegistry } from '../McpCapabilityDefinitionRegistry';
 import { createMcpServerWithRegistries } from '../McpServerFactory';
@@ -19,12 +20,25 @@ class MockRegisteredCapability implements RegisteredCapability {
   remove = jest.fn();
 }
 
+const mockServerContext = {
+  mcpReq: {
+    id: 'test-request-id',
+    method: 'tools/call',
+    signal: new AbortController().signal,
+    _meta: undefined,
+    requestState: () => undefined,
+    send: jest.fn(),
+    notify: jest.fn(),
+    log: jest.fn(),
+    elicitInput: jest.fn(),
+    requestSampling: jest.fn(),
+  },
+} satisfies ServerContext;
+
 // Mock the MCP SDK
-jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
+jest.mock('@modelcontextprotocol/server', () => ({
   McpServer: jest.fn().mockImplementation(() => ({
-    registerTool() {
-      return new MockRegisteredCapability();
-    },
+    registerTool: jest.fn(() => new MockRegisteredCapability()),
     registerPrompt() {
       return new MockRegisteredCapability();
     },
@@ -247,6 +261,76 @@ describe('createMcpServerWithRegistries', () => {
         user: mockUser,
       });
     }).not.toThrow();
+  });
+
+  test('should adapt input tool callbacks to the Strapi handler shape', async () => {
+    const handler = jest.fn().mockResolvedValue({
+      content: [],
+      structuredContent: { value: 'input' },
+    });
+    toolDefinitions.define({
+      name: 'input-tool',
+      title: 'Input Tool',
+      description: 'A tool with an input schema',
+      devModeOnly: true,
+      resolveInputSchema: () => z.object({ value: z.string() }),
+      resolveOutputSchema: () => z.object({ value: z.string() }),
+      createHandler: () => handler,
+    });
+
+    createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: true,
+      ability: mockAbility,
+      user: mockUser,
+    });
+
+    const { McpServer } = jest.requireMock('@modelcontextprotocol/server');
+    const sdkHandler = McpServer.mock.results.at(-1).value.registerTool.mock.calls[0][2];
+    await sdkHandler({ value: 'input' }, mockServerContext);
+
+    expect(handler).toHaveBeenCalledWith({
+      args: { value: 'input' },
+      extra: mockServerContext,
+    });
+  });
+
+  test('should adapt no-input tool callbacks to the Strapi handler shape', async () => {
+    const handler = jest.fn().mockResolvedValue({
+      content: [],
+      structuredContent: { ok: true },
+    });
+    toolDefinitions.define({
+      name: 'no-input-tool',
+      title: 'No Input Tool',
+      description: 'A tool without an input schema',
+      devModeOnly: true,
+      resolveOutputSchema: () => z.object({ ok: z.boolean() }),
+      createHandler: () => handler,
+    });
+
+    createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: true,
+      ability: mockAbility,
+      user: mockUser,
+    });
+
+    const { McpServer } = jest.requireMock('@modelcontextprotocol/server');
+    const sdkHandler = McpServer.mock.results.at(-1).value.registerTool.mock.calls[0][2];
+    await sdkHandler(mockServerContext);
+
+    expect(handler).toHaveBeenCalledWith({ extra: mockServerContext });
   });
 
   test('should pass auth subject when checking capabilities', () => {

@@ -2,7 +2,7 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAgent } from 'api-tests/agent';
 import { createAuthRequest } from 'api-tests/request';
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
+import { z } from '@strapi/utils';
 import { JSON_RPC_ERRORS } from '../../../../packages/core/core/src/services/mcp/utils/jsonRpcErrors';
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';

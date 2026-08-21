@@ -1,8 +1,4 @@
-import type {
-  McpServer,
-  RegisteredResource,
-  // eslint-disable-next-line import/extensions
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredResource } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {

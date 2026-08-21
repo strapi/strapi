@@ -278,7 +278,8 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
     const response = await callTool(token.accessKey, `delete_${SLUG}`, {
       documentId: seeded.documentId,
     });
-    expect(response.result?.isError).toBe(true);
+    expect(response.error).toMatchObject({ code: -32602 });
+    expect(response.error?.message).toMatch(/disabled/i);
 
     const surviving = await strapi.documents(MODEL_UID as UID.CollectionType).findMany({});
     expect(surviving).toHaveLength(1);

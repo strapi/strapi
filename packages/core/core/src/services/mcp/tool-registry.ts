@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredTool, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -117,27 +116,34 @@ export class McpToolRegistry
             resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
           const outputSchema = resolveOutputSchema(context);
 
-          // Adapt from our object-literal handler `({ args, extra })` to
-          // the MCP SDK's positional form `(args, extra)` / `(extra)`.
-          const baseHandler =
-            inputSchema !== undefined
-              ? (args: unknown, extra: unknown) =>
-                  safeHandler({ args, extra } as Parameters<typeof safeHandler>[0])
-              : (extra: unknown) => safeHandler({ extra } as Parameters<typeof safeHandler>[0]);
+          if (inputSchema !== undefined) {
+            // Adapt from Strapi's object parameter to the SDK's positional callback.
+            const sdkHandler = wrapCapabilityHandlerForMetrics(
+              strapi,
+              'tool',
+              name,
+              definition.telemetry,
+              (args: unknown, context: ServerContext) =>
+                safeHandler({ args, extra: context } as Parameters<typeof safeHandler>[0])
+            );
+
+            return mcpServer.registerTool(
+              name,
+              { title, description, inputSchema, outputSchema },
+              sdkHandler
+            );
+          }
 
           const sdkHandler = wrapCapabilityHandlerForMetrics(
             strapi,
             'tool',
             name,
             definition.telemetry,
-            baseHandler
+            (context: ServerContext) =>
+              safeHandler({ extra: context } as Parameters<typeof safeHandler>[0])
           );
 
-          return mcpServer.registerTool(
-            name,
-            { title, description, inputSchema, outputSchema },
-            sdkHandler
-          );
+          return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
         },
       });
     });

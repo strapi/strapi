@@ -1,17 +1,12 @@
 import type { Ability } from '@casl/ability';
 import { z } from '@strapi/utils';
-// eslint-disable-next-line import/extensions
-import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import type {
-  ServerNotification,
-  ServerRequest,
   ContentBlock,
   GetPromptResult,
   ReadResourceResult,
-  // eslint-disable-next-line import/extensions
-} from '@modelcontextprotocol/sdk/types.js';
-// eslint-disable-next-line import/extensions
-import type { ResourceMetadata } from '@modelcontextprotocol/sdk/server/mcp.js';
+  ResourceMetadata,
+  ServerContext,
+} from '@modelcontextprotocol/server';
 import type * as Core from '../core';
 
 /** A single CASL permission check: action + optional subject. */
@@ -80,7 +75,7 @@ export type McpToolHandler<
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
 > = (
   params: {
-    extra: RequestHandlerExtra<ServerRequest, ServerNotification>;
+    extra: ServerContext;
   } & (InputSchema extends z.ZodObject<z.ZodRawShape>
     ? { args: z.infer<InputSchema> }
     : { args?: never })
@@ -181,11 +176,8 @@ export interface McpToolBuilder {
  */
 export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined> =
   ArgsSchema extends z.ZodTypeAny
-    ? (
-        args: z.infer<ArgsSchema>,
-        extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-      ) => Promise<GetPromptResult>
-    : (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) => Promise<GetPromptResult>;
+    ? (args: z.infer<ArgsSchema>, extra: ServerContext) => Promise<GetPromptResult>
+    : (extra: ServerContext) => Promise<GetPromptResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP prompt definition.
@@ -246,10 +238,7 @@ export interface McpPromptBuilder {
 /**
  * Callback function for Strapi MCP resources
  */
-export type McpResourceCallback = (
-  uri: URL,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-) => Promise<ReadResourceResult>;
+export type McpResourceCallback = (uri: URL, extra: ServerContext) => Promise<ReadResourceResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP resource definition.

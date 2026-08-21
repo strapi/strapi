@@ -19,12 +19,12 @@ Source: `packages/core/core/src/services/mcp/`, `packages/core/core/src/provider
 | ------------- | -------------------------------------------------------------------------------------------------------------- |
 | Enable        | `server.mcp.enabled` (default `false`)                                                                         |
 | Endpoint      | `POST /mcp` (fixed path, not configurable)                                                                     |
-| Transport     | MCP SDK `StreamableHTTPServerTransport`, stateless (one server instance per request)                           |
+| Transport     | MCP SDK `NodeStreamableHTTPServerTransport`, stateless (one server instance per request)                       |
 | Auth          | Admin API token (`Authorization: Bearer <token>`) — same store as Settings → API Tokens (admin)                |
 | Authorization | Two layers: coarse session capability gate (CASL ability vs `auth.policies`) + fine-grained handler checks     |
 | Extensibility | Any plugin or app can register tools/prompts/resources via `strapi.ai.mcp.register*` during the register phase |
 | Built-in      | One dev-only `log` tool (core) + one CRUD tool set per displayed content type (content-manager)                |
-| SDK           | `@modelcontextprotocol/sdk@1.29.0`                                                                             |
+| SDK           | `@modelcontextprotocol/server@2.0.0` + `@modelcontextprotocol/node@2.0.0`                                      |
 
 ## Architecture
 
@@ -80,7 +80,7 @@ Routes (`packages/core/core/src/services/mcp/routes.ts`):
 
 All five routes set `config: { auth: false }` — Strapi's own admin/content-API authentication is bypassed at the router level because MCP performs its **own** authentication inside the handler (see below).
 
-The transport is the MCP SDK's `StreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
+The transport is the MCP SDK's `NodeStreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
 
 An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.
 
@@ -143,6 +143,22 @@ strapi.ai.mcp.registerTool(greet);
 ```
 
 `registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning a `GetPromptResult`, and `uri`/`metadata`/`createHandler` returning a `ReadResourceResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
+
+### SDK request context
+
+Capability handlers retain Strapi's existing positional or `{ args, extra }` API. The `extra` value is the SDK v2 [`ServerContext`](https://ts.sdk.modelcontextprotocol.io/v2/server/api/interfaces/server.ServerContext.html). SDK v1 request fields moved as follows:
+
+| SDK v1 `extra`               | SDK v2 `ServerContext`       |
+| ---------------------------- | ---------------------------- |
+| `signal`                     | `mcpReq.signal`              |
+| `requestId`                  | `mcpReq.id`                  |
+| `_meta`                      | `mcpReq._meta`               |
+| `sendNotification(...)`      | `mcpReq.notify(...)`         |
+| `sendRequest(...)`           | `mcpReq.send(...)`           |
+| `authInfo`                   | `http?.authInfo`             |
+| `requestInfo`                | `http?.req`                  |
+| `closeSSEStream()`           | `http?.closeSSE()`           |
+| `closeStandaloneSSEStream()` | `http?.closeStandaloneSSE()` |
 
 ### Fault isolation
 

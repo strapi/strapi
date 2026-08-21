@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import type { McpServer, RegisteredPrompt } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredPrompt } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
@@ -103,16 +102,8 @@ export class McpPromptRegistry
             safeHandler
           );
 
-          return mcpServer.registerPrompt(
-            name,
-            {
-              title,
-              description,
-              // @ts-expect-error - Internal handler type mismatch due to optional argsSchema
-              argsSchema,
-            },
-            sdkHandler
-          );
+          // @ts-expect-error - Internal handler type mismatch due to optional argsSchema
+          return mcpServer.registerPrompt(name, { title, description, argsSchema }, sdkHandler);
         },
       });
     });
