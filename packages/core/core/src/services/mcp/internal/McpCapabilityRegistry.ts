@@ -89,6 +89,11 @@ export class McpCapabilityRegistryBase<
     return 'undefined';
   }
 
+  /** @internal Returns the SDK-registered capability for a name; not part of the public registry API. */
+  getRegistered(name: string): Registered | undefined {
+    return this.#registered.get(name);
+  }
+
   /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   enable(name: string) {
     const registered = this.#registered.get(name);

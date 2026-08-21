@@ -1,6 +1,7 @@
 import { Ability, AbilityBuilder } from '@casl/ability';
 import type { Core } from '@strapi/types';
 import { z } from '@strapi/utils';
+import Ajv2020 from 'ajv/dist/2020';
 
 import {
   deriveDisplayedContentTypeMcpToolDefinitions,
@@ -633,6 +634,37 @@ describe('tool input schemas', () => {
 
     const getSchema = getTool.resolveInputSchema(mockContext);
     expect(getSchema.safeParse({ documentId: 'abc', locale: 'de' }).success).toBe(true);
+  });
+
+  // Regression for strapi/strapi#27395: the recursive (z.lazy) filters schema is the part of the
+  // derived tool schemas whose JSON Schema shape differs between draft-07 (`definitions`) and
+  // 2020-12 (`$defs`). Core re-emits every advertised tool schema with the 2020-12 target, so the
+  // real list input schema must convert cleanly and validate under a strict 2020-12 validator.
+  it('list tool input schema converts to JSON Schema 2020-12 and validates filters', () => {
+    const [listTool] = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+      baseModel({
+        options: { draftAndPublish: true },
+        attributes: { title: { type: 'string' }, views: { type: 'integer' } } as TestAttrs,
+      }),
+    ]).filter((t) => t.name === 'list_article');
+    const schema = listTool.resolveInputSchema(mockContext);
+
+    const jsonSchema = z.toJSONSchema(schema, { target: 'draft-2020-12', io: 'input' });
+
+    expect(jsonSchema.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
+    expect(jsonSchema).toHaveProperty('$defs');
+    expect(jsonSchema).not.toHaveProperty('definitions');
+
+    const ajv = new Ajv2020({ strict: true, strictTuples: false, allErrors: true });
+    const validate = ajv.compile(jsonSchema);
+
+    expect(
+      validate({
+        page: 1,
+        filters: { $and: [{ title: 'hello' }, { $not: { views: { $gt: 3 } } }] },
+      })
+    ).toBe(true);
+    expect(validate({ filters: { $and: [{ unknownField: 'x' }] } })).toBe(false);
   });
 });
 

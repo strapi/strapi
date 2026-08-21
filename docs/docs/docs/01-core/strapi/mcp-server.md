@@ -57,6 +57,12 @@ Strapi's `bootstrap()` phase runs plugin lifecycles **before** provider lifecycl
 Register tools, prompts, and resources from a plugin's `register()` phase (preferred) or `bootstrap()` phase (works, but only for plugins — app-level `bootstrap()` is too late). `strapi.ai.mcp.registerTool/Prompt/Resource` throw once the server has left the `idle` status.
 :::
 
+### JSON Schema dialect of `tools/list`
+
+MCP SEP-1613 makes JSON Schema 2020-12 the default dialect for `inputSchema` / `outputSchema`. `@modelcontextprotocol/sdk` (pinned `1.30.0`) still converts the Zod schemas given to `registerTool` with a draft-07 target inside its own `tools/list` handler and offers no option to change it ([typescript-sdk#2084](https://github.com/modelcontextprotocol/typescript-sdk/issues/2084)); strict clients reject the resulting tools ([#27395](https://github.com/strapi/strapi/issues/27395)).
+
+`packages/core/core/src/services/mcp/internal/jsonSchemaDialect.ts` wraps the SDK's `tools/list` handler after `McpToolRegistry.bind()` and re-emits only the two schema fields with `toJSONSchema(schema, { target: 'draft-2020-12', io })` — the exact call the upstream fix makes, so the advertised documents are identical to what the SDK will emit once fixed. It captures the SDK handler through the private `_requestHandlers` map; that access is feature-detected and degrades to a logged no-op (SDK default behaviour) if the SDK internals change, and a tool whose conversion throws keeps the SDK's document. Delete the shim, its call in `tool-registry.ts`, and keep its tests once the SDK emits 2020-12 by default.
+
 ## Configuration
 
 | Key                           | Default | Notes                                                  |
@@ -218,17 +224,18 @@ MCP emits its own server-side telemetry events (`didStartMcpServer`, `didUseMcpS
 
 ## Tests
 
-| Path                                                                                           | Covers                                                     |
-| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `packages/core/core/src/services/mcp/__tests__/`                                               | Route registration, disabled skip, service integration     |
-| `packages/core/core/src/services/mcp/__tests__/authentication.test.ts`                         | Bearer parsing, missing/invalid/valid token                |
-| `packages/core/core/src/services/mcp/handlers/__tests__/handlePost.test.ts`                    | Auth failure, timeouts, transport wiring                   |
-| `packages/core/core/src/services/mcp/internal/__tests__/`                                      | Configuration, server factory, capability sync, registries |
-| `packages/core/content-manager/server/src/mcp/__tests__/derive-content-type-mcp-tools.test.ts` | Tool derivation per content type                           |
-| `packages/core/content-manager/server/src/mcp/sanitizers/__tests__/shape-relations.test.ts`    | Relation shaping                                           |
-| `tests/api/core/mcp/mcp-auth.test.api.ts`                                                      | End-to-end admin-token auth + `tools/list`                 |
-| `tests/api/core/mcp/mcp-content-manager-rbac.test.api.ts`                                      | RBAC on derived tools                                      |
-| `tests/api/core/mcp/mcp-content-manager-shaping.test.api.ts`                                   | Relation shaping, end to end                               |
+| Path                                                                                           | Covers                                                       |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `packages/core/core/src/services/mcp/__tests__/`                                               | Route registration, disabled skip, service integration       |
+| `packages/core/core/src/services/mcp/__tests__/authentication.test.ts`                         | Bearer parsing, missing/invalid/valid token                  |
+| `packages/core/core/src/services/mcp/handlers/__tests__/handlePost.test.ts`                    | Auth failure, timeouts, transport wiring                     |
+| `packages/core/core/src/services/mcp/internal/__tests__/`                                      | Configuration, server factory, capability sync, registries   |
+| `packages/core/core/src/services/mcp/internal/__tests__/jsonSchemaDialect.test.ts`             | `tools/list` advertises JSON Schema 2020-12 (real SDK + Ajv) |
+| `packages/core/content-manager/server/src/mcp/__tests__/derive-content-type-mcp-tools.test.ts` | Tool derivation per content type                             |
+| `packages/core/content-manager/server/src/mcp/sanitizers/__tests__/shape-relations.test.ts`    | Relation shaping                                             |
+| `tests/api/core/mcp/mcp-auth.test.api.ts`                                                      | End-to-end admin-token auth + `tools/list`                   |
+| `tests/api/core/mcp/mcp-content-manager-rbac.test.api.ts`                                      | RBAC on derived tools                                        |
+| `tests/api/core/mcp/mcp-content-manager-shaping.test.api.ts`                                   | Relation shaping, end to end                                 |
 
 ## Alternatives
 

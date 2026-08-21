@@ -2,6 +2,7 @@
 import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
+import { installJsonSchemaDialectShim } from './internal/jsonSchemaDialect';
 import {
   type McpCapabilityRegistry,
   McpCapabilityRegistryBase,
@@ -140,6 +141,14 @@ export class McpToolRegistry
           );
         },
       });
+    });
+
+    // The SDK installs its tools/list handler on the first registerTool call, so the dialect shim
+    // can only wrap it once every tool is registered.
+    installJsonSchemaDialectShim({
+      strapi,
+      mcpServer,
+      getRegisteredTool: (name) => this.getRegistered(name),
     });
   }
 }
