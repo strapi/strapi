@@ -137,9 +137,9 @@ export const abortUpload = (uploadId: number) => {
  * alongside the first would double the files in flight and make `concurrency`
  * stop meaning anything.
  */
-const poolTails = new Map<number, Promise<unknown>>();
+const poolTails = new Map<number, Promise<UploadPoolResult | undefined>>();
 
-const trackPoolRun = (uploadId: number, run: Promise<unknown>) => {
+const trackPoolRun = (uploadId: number, run: Promise<UploadPoolResult>) => {
   // Not swallowed: the caller still gets the real result from `run`.
   const tail = run.catch(() => undefined);
 
@@ -354,6 +354,10 @@ const runUploadPool = async ({
 /**
  * Reuses the batch's AbortController so one Cancel stops both drops.
  * `runUploadPool` unregisters it on finish, hence the re-register below.
+ *
+ * Resolves with the whole batch's files, not just this leg's: the mutation
+ * models one drop, and after a merge the drop is the batch. The earlier leg's
+ * files come from the tail this run queued behind.
  */
 const runMergedUploadPool = async ({
   entries,
@@ -374,24 +378,30 @@ const runMergedUploadPool = async ({
 }): Promise<UploadPoolResult> => {
   const abortController = abortControllers.get(uploadId) ?? new AbortController();
 
-  const run = (poolTails.get(uploadId) ?? Promise.resolve()).then(() => {
-    if (abortController.signal.aborted) {
-      return { data: [] as UploadedFile[] };
+  const run = (poolTails.get(uploadId) ?? Promise.resolve(undefined)).then(
+    (previous): UploadPoolResult | Promise<UploadPoolResult> => {
+      // A failed earlier leg contributes no files; its error already reached the
+      // store, and this leg still has files of its own to upload.
+      const earlier = previous?.data ?? [];
+
+      if (abortController.signal.aborted) {
+        return { data: earlier };
+      }
+
+      registerAbortController(uploadId, abortController);
+
+      return runUploadPool({
+        entries,
+        indices,
+        token,
+        uploadId,
+        abortController,
+        dispatch,
+        concurrency,
+        generateAiMetadata,
+      }).then((result) => (result.error ? result : { data: [...earlier, ...(result.data ?? [])] }));
     }
-
-    registerAbortController(uploadId, abortController);
-
-    return runUploadPool({
-      entries,
-      indices,
-      token,
-      uploadId,
-      abortController,
-      dispatch,
-      concurrency,
-      generateAiMetadata,
-    });
-  });
+  );
 
   trackPoolRun(uploadId, run);
 

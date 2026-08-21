@@ -210,6 +210,31 @@ describe('uploadFiles worker pool', () => {
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
     });
 
+    it('resolves with the whole batch, not just the merged leg', async () => {
+      const { inFlight, result } = setup(2);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      // The merge call's promise is the one the caller awaits, so it is the one
+      // that has to carry all 3 files — 2 from the first drop plus 1 merged in.
+      let merged: Promise<{ data?: unknown[] }>;
+      act(() => {
+        merged = (result.current[0] as (arg: unknown) => Promise<{ data?: unknown[] }>)({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await settle(inFlight, 3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
+
+      await expect(merged!).resolves.toEqual(expect.objectContaining({ data: expect.any(Array) }));
+      await expect(merged!.then((r) => r.data?.length)).resolves.toBe(3);
+    });
+
     it('cancelling the batch also cancels the files that were merged in', async () => {
       const { inFlight, result } = setup(3);
 
