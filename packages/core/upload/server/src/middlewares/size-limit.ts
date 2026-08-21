@@ -159,13 +159,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const violation = shouldRejectOversizedUpload(ctx, strapi);
 
         if (violation) {
-          // Throwing before the body is read is what stops the upload: the
-          // request is never drained, so the sender stalls on backpressure
-          // almost immediately (measured <1% of a 200 MiB body).
+          // Signal that the connection is finished so the browser stops
+          // uploading. Throwing early does not stop it by itself: measured in
+          // Chrome with a 300 MiB body, the browser pushed 100% of the bytes
+          // before surfacing the 413 unless this header was set. With it, the
+          // upload stops at well under 1%.
           //
-          // Deliberately no `Connection: close` — it doesn't make the send stop
-          // any earlier, and it makes a fast sender hit EPIPE before the 413
-          // body flushes, costing the client the error message.
+          // See the matching comment in `strapi::body` for the Firefox
+          // trade-off this accepts.
+          ctx.set('Connection', 'close');
+
           throw new PayloadTooLargeError(
             `The file exceeds size limit of ${bytesToHumanReadable(violation.sizeLimit)}.`
           );

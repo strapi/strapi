@@ -76,16 +76,15 @@ describe('Body middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    test('does not force the connection closed', async () => {
-      // `Connection: close` makes a fast sender hit EPIPE before the 413 body
-      // flushes, which costs the client the translatable error message — and it
-      // doesn't make the upload stop any earlier. Not reading the body is what
-      // stalls the sender.
+    test('closes the connection so the browser stops uploading', async () => {
+      // Load-bearing, not cosmetic: without this header Chrome pushes the whole
+      // body before surfacing the early 413 (verified at 300 MiB), which is the
+      // bug this fast path exists to fix.
       const ctx = createCtx({ contentLength: String(DEFAULT_THRESHOLD + 1) });
 
       await run(ctx);
 
-      expect(ctx.set).not.toHaveBeenCalledWith('Connection', 'close');
+      expect(ctx.set).toHaveBeenCalledWith('Connection', 'close');
       expect(ctx.payloadTooLarge).toHaveBeenCalledWith('FileTooBig');
     });
 
