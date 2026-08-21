@@ -532,14 +532,14 @@ describe('Content-Type', () => {
 
       // User subject permissions should be cleaned as user fields
       expect(res[0].subject).toEqual('user');
-      expect(res[0].properties.fields).toContain('firstname');
+      expect(res[0].properties?.fields).toContain('firstname');
 
       expect(res[2].subject).toEqual('user');
-      expect(res[2].properties.fields).toEqual(['car.model']);
+      expect(res[2].properties?.fields).toEqual(['car.model']);
 
       // Country subject permission should be cleaned as country fields
       expect(res[1].subject).toEqual('country');
-      expect(res[1].properties.fields).toContain('name');
+      expect(res[1].properties?.fields).toContain('name');
     });
 
     test('should handle mixed permissions with multiple subjects and fields', () => {
