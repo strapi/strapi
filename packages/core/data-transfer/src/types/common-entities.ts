@@ -155,6 +155,7 @@ export interface IAsset {
   stream: Readable;
   stats: IAssetStats;
   metadata: IFile;
+  metadataFallback?: boolean;
   buffer?: Buffer;
 }
 

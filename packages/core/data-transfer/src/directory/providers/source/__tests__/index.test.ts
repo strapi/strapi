@@ -72,7 +72,10 @@ describe('Directory source provider', () => {
     const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
     await provider.bootstrap({ report } as never);
 
-    const assets: Array<{ metadata?: { hash?: string; ext?: string } }> = [];
+    const assets: Array<{
+      metadata?: { hash?: string; ext?: string };
+      metadataFallback?: boolean;
+    }> = [];
     const stream = provider.createAssetsReadStream();
     for await (const chunk of stream) {
       assets.push(chunk);
@@ -85,6 +88,7 @@ describe('Directory source provider', () => {
       ext: '.jpeg',
       mime: 'image/jpeg',
     });
+    expect(assets[0].metadataFallback).toBe(true);
     expect(report).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: 'warning',

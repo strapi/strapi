@@ -194,6 +194,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       const stat = await fs.stat(absUpload);
       if (stat.isFile()) {
         let metadata: IAsset['metadata'];
+        let metadataFallback = false;
         try {
           metadata = await this.#readAssetMetadata(name);
         } catch (error) {
@@ -202,11 +203,13 @@ class LocalDirectorySourceProvider implements ISourceProvider {
           }
           this.#reportWarning(missingAssetMetadataSidecarMessage(name));
           metadata = buildFallbackAssetMetadataFromFilename(name, { size: stat.size });
+          metadataFallback = true;
         }
 
         const normalizedPath = unknownPathToPosix(path.posix.join('assets', 'uploads', name));
         const asset: IAsset = {
           metadata,
+          ...(metadataFallback ? { metadataFallback: true } : {}),
           filename: name,
           filepath: normalizedPath,
           stats: { size: stat.size },

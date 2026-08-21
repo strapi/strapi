@@ -245,6 +245,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               const normalizedPath = unknownPathToPosix(filePath);
               const file = path.basename(normalizedPath);
               let metadata: IFile;
+              let metadataFallback = false;
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
               } catch (error) {
@@ -253,9 +254,11 @@ class LocalFileSourceProvider implements ISourceProvider {
                 }
                 reportWarning(missingAssetMetadataSidecarMessage(file));
                 metadata = buildFallbackAssetMetadataFromFilename(file, { size });
+                metadataFallback = true;
               }
               const asset: IAsset = {
                 metadata,
+                ...(metadataFallback ? { metadataFallback: true } : {}),
                 filename: file,
                 filepath: normalizedPath,
                 stats: { size },

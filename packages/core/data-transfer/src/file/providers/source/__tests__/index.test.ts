@@ -236,6 +236,7 @@ describe('File source provider', () => {
 
       expect(assets).toHaveLength(1);
       expect(assets[0].metadata).toMatchObject({ hash: 'photo', mime: 'image/jpeg' });
+      expect(assets[0].metadataFallback).toBe(true);
       expect(report).toHaveBeenCalledWith(
         expect.objectContaining({
           kind: 'warning',

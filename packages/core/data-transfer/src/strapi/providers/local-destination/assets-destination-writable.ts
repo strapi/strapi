@@ -68,11 +68,12 @@ export interface CreateAssetsDestinationWritableOptions {
 
 const resolveUploadTarget = async (
   uploadData: IFile,
+  metadataFallback: boolean,
   resolveUploadFileId: (metadata: { id: number }) => number | undefined,
   getHashIndex: () => Promise<UploadHashIndex>,
   warn: (message: string) => void,
   counts: { resolved: number; ambiguous: number }
-): Promise<UploadHashTarget | undefined> => {
+): Promise<UploadHashTarget | 'ambiguous' | undefined> => {
   const mappedId = resolveUploadFileId(uploadData);
   if (mappedId) {
     return { id: mappedId, format: uploadData.type };
@@ -80,8 +81,10 @@ const resolveUploadTarget = async (
 
   // The asset's own hash is tried first because the index resolves it to an exact target.
   // `mainHash` is the parent hash sent with responsive variants: a fallback for variants whose
-  // hash the destination does not know (formats regenerated with different hashes).
-  const lookupHashes = [uploadData.hash, uploadData.mainHash].filter(
+  // hash the destination does not know (formats regenerated with different hashes). A missing
+  // sidecar cannot prove that a filename prefix denotes a variant, so do not use its inferred
+  // `mainHash` to select a row.
+  const lookupHashes = [uploadData.hash, ...(metadataFallback ? [] : [uploadData.mainHash])].filter(
     (hash, position, all): hash is string => Boolean(hash) && all.indexOf(hash) === position
   );
 
@@ -90,14 +93,16 @@ const resolveUploadTarget = async (
   }
 
   const index = await getHashIndex();
-  let ambiguousHash: string | undefined;
 
   for (const lookupHash of lookupHashes) {
     const match = index.get(lookupHash);
 
     if (match === 'ambiguous') {
-      ambiguousHash ??= lookupHash;
-      continue;
+      counts.ambiguous += 1;
+      warn(
+        `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
+      );
+      return 'ambiguous';
     }
 
     if (match) {
@@ -114,13 +119,6 @@ const resolveUploadTarget = async (
       // Matched through the parent hash, so this asset is a variant of the resolved row.
       return { id: match.id, format: match.format ?? uploadData.type };
     }
-  }
-
-  if (ambiguousHash) {
-    counts.ambiguous += 1;
-    warn(
-      `[Data transfer] Ambiguous hash "${ambiguousHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
-    );
   }
 
   return undefined;
@@ -202,11 +200,19 @@ export function createAssetsDestinationWritable(
         transaction
           .attach(async () => {
             try {
+              if (!restoreMediaEntitiesContent && chunk.metadataFallback) {
+                warnings.warn(
+                  `[Data transfer] Skipped asset "${chunk.filename}" because its metadata sidecar is missing and a files-only restore cannot preserve provider path metadata.`
+                );
+                return;
+              }
+
               // Hash fallback is only useful when we will update media-library rows.
               // With --only files, restoreMediaEntitiesContent is false: upload bytes only.
               const target = restoreMediaEntitiesContent
                 ? await resolveUploadTarget(
                     uploadData,
+                    chunk.metadataFallback ?? false,
                     resolveUploadFileId,
                     getHashIndex,
                     (message) => warnings.warn(message),
@@ -217,6 +223,10 @@ export function createAssetsDestinationWritable(
               await strapi.plugin('upload').provider.uploadStream(uploadData);
 
               if (!restoreMediaEntitiesContent) {
+                return;
+              }
+
+              if (target === 'ambiguous') {
                 return;
               }
 
