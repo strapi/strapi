@@ -129,16 +129,23 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
       await next();
     } else {
       if (isOversizedMultipart(ctx, bodyConfig)) {
-        // Responding without reading the body is enough to stop the upload:
-        // Node never drains the request, so the sender stalls on backpressure
-        // and stops within a fraction of a percent of the body. Measured with a
-        // 200 MiB body: the client wrote <1% before settling on the response.
+        // Signal that the connection is finished so the browser stops uploading.
         //
-        // Deliberately NOT setting `Connection: close` here. It doesn't improve
-        // how early the send stops, and it makes a fast sender (LAN, localhost)
-        // hit EPIPE *before* the 413 body flushes — turning a translatable
-        // error into a bare network failure the admin can't render.
+        // Responding early is NOT enough on its own: measured in Chrome with a
+        // 300 MiB body, answering without this header still let the browser
+        // push 100% of the bytes before surfacing the 413 — the response sits
+        // unread while the upload drains, which is the whole bug. With the
+        // header, Chrome stops at ~0.3% and still parses the 413 body.
         //
+        // The trade-off is Firefox, which treats the early close as a network
+        // error (`onerror`, status 0) instead of reading the response, so it
+        // loses the message and reports a generic failure. That is accepted:
+        // stopping a multi-hundred-MB upload matters more than the wording of
+        // the error, and Firefox never exposes the response at all here — it
+        // does not even reach HEADERS_RECEIVED, so no client-side handling can
+        // recover it.
+        ctx.set('Connection', 'close');
+
         // Same error code as the post-parse path below, so the admin's
         // `apiError.FileTooBig` translation covers both.
         return ctx.payloadTooLarge('FileTooBig');

@@ -119,11 +119,12 @@ describe('Upload', () => {
       // Large enough to clear the envelope margin, so the request is refused from
       // the header alone — before the body is streamed to temp disk.
       //
-      // The server answers without draining the request, so the client's upload
-      // is cut off mid-send and supertest may surface that write as `EPIPE`
-      // before the 413 is read. Both orderings are correct behaviour; what must
-      // hold either way is that nothing was persisted. The unit tests pin the
-      // rejection itself deterministically.
+      // The server answers with `Connection: close` and never drains the
+      // request, so the client's upload is cut off mid-send — that is the point
+      // (browsers otherwise stream the whole body before surfacing the 413).
+      // supertest may surface the interrupted write as `EPIPE` before it reads
+      // the response, so accept either ordering and assert what holds in both:
+      // nothing was persisted. The unit tests pin the rejection deterministically.
       let res;
       try {
         res = await rq({
@@ -141,9 +142,8 @@ describe('Upload', () => {
       if (res) {
         expect(res.statusCode).toBe(413);
         expect(res.body.error.message).toMatch(/exceeds size limit of/);
-        // The rejection has to carry a usable message: an early response that
-        // arrives as a bare transport error (which forcing the connection closed
-        // would cause) leaves the admin nothing to display.
+        // When the response does win the race it must carry a usable message,
+        // not just a status, so the admin has something to display.
         expect(res.body.error.name).toBe('PayloadTooLargeError');
       }
 
@@ -218,12 +218,12 @@ describe('Upload', () => {
         // Well over the envelope margin, so the request is refused at headers
         // time rather than after the replacement has been streamed to disk.
         //
-        // Because the server answers without draining the request, the client's
-        // upload is interrupted mid-send. Whether the 413 or the aborted write
-        // settles first is a race, and supertest surfaces the write as an
-        // `EPIPE` error — so accept either outcome and assert the part that
-        // matters in both: the replacement never took effect. The unit tests
-        // cover the rejection itself deterministically.
+        // The connection is closed without draining the request, so the upload
+        // is interrupted mid-send — that is what stops a browser from streaming
+        // the whole file. Whether the 413 or the aborted write settles first is
+        // a race, and supertest surfaces the write as `EPIPE`, so accept either
+        // outcome and assert what matters in both: the replacement never took
+        // effect. The unit tests cover the rejection deterministically.
         let res;
         try {
           res = await rq({

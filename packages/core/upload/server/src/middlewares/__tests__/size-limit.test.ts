@@ -269,14 +269,14 @@ describe('Upload size-limit fast path', () => {
       await expect(handler(ctx, jest.fn())).rejects.toThrow('The file exceeds size limit of 1 MB.');
     });
 
-    test('does not force the connection closed', async () => {
-      // Forcing teardown makes a fast sender hit EPIPE before the 413 body
-      // flushes, losing the error message, and doesn't stop the send any sooner.
+    test('closes the connection so the browser stops uploading', async () => {
+      // Without this header Chrome streams the entire body before surfacing the
+      // early 413, defeating the point of the fast path.
       const { handler } = setup();
       const ctx = createCtx({ contentLength: String(THRESHOLD + 1) });
 
       await expect(handler(ctx, jest.fn())).rejects.toThrow(PayloadTooLargeError);
-      expect(ctx.set).not.toHaveBeenCalledWith('Connection', 'close');
+      expect(ctx.set).toHaveBeenCalledWith('Connection', 'close');
     });
 
     test('delegates to the wrapped body middleware otherwise', async () => {
