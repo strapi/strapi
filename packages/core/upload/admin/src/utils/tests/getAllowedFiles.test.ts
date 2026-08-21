@@ -173,7 +173,7 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     expect(results).toEqual([...files, FILE_10]);
   });
 
-  it('uses the stored MIME for library assets, not the filename', () => {
+  it('filters library assets by their stored MIME against a video-only field', () => {
     expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_OCTET_STREAM])).toEqual([]);
     expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_QUICKTIME])).toEqual([
       FILE_MOV_STORED_QUICKTIME,

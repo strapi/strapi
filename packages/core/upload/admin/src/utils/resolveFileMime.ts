@@ -1,7 +1,7 @@
 const GENERIC_MIMES = new Set(['', 'application/octet-stream']);
 
 /**
- * Same window the server uses in mime-validation (`readFileChunk(..., 4100)`).
+ * Same byte window currently used by server MIME validation (`readFileChunk(..., 4100)`).
  * Magic-number detection only needs the start of the file.
  */
 const FILE_TYPE_SNIFF_BYTES = 4100;
@@ -37,7 +37,8 @@ const readBlobBytes = async (blob: Blob): Promise<Uint8Array> => {
 };
 
 /**
- * Detect MIME from file bytes (file-type), matching the server.
+ * Detect MIME from file bytes with file-type.
+ * The admin normalizes declared MIME values more permissively; server validation remains authoritative.
  * Returns undefined when the blob cannot be read or the type is unknown.
  */
 export const detectMimeFromBlob = async (blob: Blob): Promise<string | undefined> => {

@@ -21,7 +21,7 @@ describe('TableList | isSelectable', () => {
     expect(isSelectable(['image', 'file', 'video', 'audio'])).toEqual(false);
   });
 
-  it('uses the stored MIME for library assets, not the filename', () => {
+  it('requires a video MIME for video-only fields', () => {
     expect(isSelectable(['video'], 'application/octet-stream')).toEqual(false);
     expect(isSelectable(['video'], 'video/quicktime')).toEqual(true);
   });
