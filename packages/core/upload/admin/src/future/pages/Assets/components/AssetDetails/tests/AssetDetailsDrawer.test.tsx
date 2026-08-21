@@ -598,3 +598,86 @@ describe('AssetDetails RBAC gating', () => {
     expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
   });
 });
+
+describe('Replace media placement', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  const pdfAsset = {
+    ...baseAsset,
+    name: 'report.pdf',
+    ext: '.pdf',
+    mime: 'application/pdf',
+  } as AssetWithPopulatedCreatedBy;
+
+  // Replace used to live in the preview overlay, which is image-gated, so it was
+  // unavailable for anything that is not an image. In the footer it is gated on
+  // `canUpdate` alone.
+  it('offers Replace on a non-image asset, where Crop does not apply', async () => {
+    render(<AssetDetails asset={pdfAsset} closeDetails={jest.fn()} />);
+
+    expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
+  });
+
+  it('still offers Replace alongside Crop on an image', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Crop' })).toBeInTheDocument();
+  });
+
+  it('offers only the same type in the file picker', async () => {
+    render(<AssetDetails asset={pdfAsset} closeDetails={jest.fn()} />);
+
+    await screen.findByRole('button', { name: 'Replace this file' });
+
+    // The server pins the replacement to the old extension, so a cross-type pick
+    // would leave the bytes and the URL disagreeing.
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(document.querySelector('input[type="file"]')).toHaveAttribute(
+      'accept',
+      'application/pdf'
+    );
+  });
+});
+
+describe('icon button tooltips', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  // Every action in the drawer is icon-only, so the label is the only thing
+  // naming it. All were already wired for accessibility; they just passed
+  // `withTooltip={false}`, so a sighted user got no hover hint. Crop is in here
+  // too, even though it sits on the preview rather than in the footer — being
+  // the only icon button without a hint was the inconsistency.
+  it.each([['Replace this file'], ['Delete this file'], ['Copy link'], ['Download'], ['Crop']])(
+    'shows a tooltip on hover for %s',
+    async (label) => {
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+      const button = await screen.findByRole('button', { name: label });
+      await user.hover(button);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(label);
+    }
+  );
+
+  it('keeps the buttons reachable by their accessible name', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    // Enabling the tooltip must not move the accessible name onto the tooltip
+    // element and leave the button unnamed.
+    for (const label of [
+      'Replace this file',
+      'Delete this file',
+      'Copy link',
+      'Download',
+      'Crop',
+    ]) {
+      expect(await screen.findByRole('button', { name: label })).toBeInTheDocument();
+    }
+  });
+});

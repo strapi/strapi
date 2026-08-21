@@ -408,7 +408,7 @@ const DeleteAssetButton = () => {
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger>
-        <IconButton withTooltip={false} label={triggerLabel} variant="danger-light">
+        <IconButton label={triggerLabel} variant="danger-light">
           <Trash />
         </IconButton>
       </Dialog.Trigger>
@@ -479,7 +479,6 @@ const CopyLinkButton = ({ asset }: CopyLinkButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.copy-link.trigger'),
         defaultMessage: 'Copy link',
@@ -526,7 +525,6 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.download.trigger'),
         defaultMessage: 'Download',
@@ -545,7 +543,10 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface ReplaceAssetButtonProps {
-  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  /**
+   * The asset's mime. Two jobs: the dialog only promises AI metadata when it
+   * applies, and the file picker only offers files of the same type.
+   */
   mime?: string | null;
 }
 
@@ -584,6 +585,7 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         <input
           ref={fileInputRef}
           type="file"
+          accept={mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden
@@ -591,7 +593,6 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         />
       </VisuallyHidden>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.replace.trigger'),
           defaultMessage: 'Replace this file',
@@ -650,21 +651,24 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetImageActions - crop and replace buttons overlaid on the image preview.
+ * AssetImageActions - image-editing controls overlaid on the preview.
+ *
+ * Crop only. Replace used to sit here too, directly beneath it, which put a
+ * file-level operation among the image-editing controls and read as if replacing
+ * were a kind of editing. It now lives in the footer with its peers.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps extends ReplaceAssetButtonProps {
+interface AssetImageActionsProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
   return (
     <Flex direction="column" gap={2}>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.crop.trigger'),
           defaultMessage: 'Crop',
@@ -675,7 +679,6 @@ const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -957,7 +960,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       asset={asset}
                       actions={
                         isImage && canUpdate ? (
-                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} />
                         ) : null
                       }
                     />
@@ -1123,6 +1126,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                         {canUpdate && <DeleteAssetButton />}
                         {canCopyLink && <CopyLinkButton asset={asset} />}
                         {canDownload && <DownloadAssetButton asset={asset} />}
+                        {canUpdate && <ReplaceAssetButton mime={asset.mime} />}
                       </Flex>
                       {canUpdate && (
                         <Button
