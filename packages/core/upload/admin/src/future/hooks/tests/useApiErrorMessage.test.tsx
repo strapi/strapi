@@ -35,6 +35,20 @@ describe('useApiErrorMessage', () => {
     );
   });
 
+  // A server message can contain braces — a validation error echoing a field
+  // name or user input. These must never reach the ICU parser: the parse failure
+  // routes through react-intl's `onError` (`console.error`), which the Jest setup
+  // patches to throw, so it would escape the caller's click handler.
+  it.each([
+    'Invalid value for {field}',
+    'Validation failed: {"name":"required"}',
+    'Unexpected { in input',
+  ])('passes a braced server message through without parsing it: %s', (message) => {
+    const { result } = renderHook(() => useApiErrorMessage(), { wrapper });
+
+    expect(result.current({ message }, 'Fallback')).toBe(message);
+  });
+
   it("returns the caller's fallback when the error carries nothing usable", () => {
     const { result } = renderHook(() => useApiErrorMessage(), { wrapper });
 

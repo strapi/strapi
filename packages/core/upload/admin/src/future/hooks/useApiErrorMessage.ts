@@ -12,17 +12,24 @@ import { getTranslationKey } from '../utils/translations';
  * The server speaks in two shapes, and the same button can produce either —
  * replacing an oversized file trips `body.ts`'s bare `FileTooBig` code or the
  * upload plugin's own ready-made sentence, depending on which size limit is
- * lower. Looking the message up as `upload.apiError.<message>` with itself as
- * `defaultMessage` covers both: codes with an entry resolve to the translation,
- * and anything else (a sentence, an unknown code) passes through verbatim,
- * since `@formatjs/intl` returns `defaultMessage` as-is when it cannot be
- * parsed as ICU.
+ * lower. Both are handled by looking the message up as `upload.apiError.<message>`
+ * against the loaded translations: a code with an entry resolves to it, and
+ * anything else (a sentence, an unknown code) is returned untouched.
+ *
+ * The lookup is deliberately a `messages` check rather than a `formatMessage`
+ * call with the server text as `defaultMessage`. Server text is untrusted, and
+ * `formatMessage` would hand it to the ICU parser, where a stray `{` — plausible
+ * in a validation message echoing a field name or user input — fails to parse.
+ * That failure goes to react-intl's `onError`, which is `console.error`: silent
+ * in production, but our Jest setup patches `console.error` to throw, so such a
+ * message would blow up out of the click handler under test. Not parsing server
+ * text at all sidesteps the question.
  *
  * Memoized because consumers hold the result in their own `useCallback`
  * dependency arrays.
  */
 export const useApiErrorMessage = () => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, messages } = useIntl();
 
   return React.useCallback(
     (error: unknown, fallback: string) => {
@@ -32,11 +39,10 @@ export const useApiErrorMessage = () => {
         return fallback;
       }
 
-      return formatMessage({
-        id: getTranslationKey(`apiError.${message}`),
-        defaultMessage: message,
-      });
+      const id = getTranslationKey(`apiError.${message}`);
+
+      return messages[id] ? formatMessage({ id }) : message;
     },
-    [formatMessage]
+    [formatMessage, messages]
   );
 };
