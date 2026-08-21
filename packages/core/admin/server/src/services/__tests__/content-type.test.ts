@@ -439,4 +439,152 @@ describe('Content-Type', () => {
       ]);
     });
   });
+
+  describe('cache behavior', () => {
+    test('should cache nested fields by subject to avoid redundant traversals', () => {
+      // Create three permissions on the same subject with different field sets
+      const permissions = toPermission([
+        {
+          action: 'foo',
+          subject: 'user',
+          properties: { fields: ['firstname', 'restaurant.address'] },
+        },
+        {
+          action: 'foo',
+          subject: 'user',
+          properties: { fields: ['car'] },
+        },
+        {
+          action: 'foo',
+          subject: 'user',
+          properties: { fields: ['firstname', 'restaurant.description'] },
+        },
+      ]);
+
+      // Clean all three permissions
+      const res = cleanPermissionFields(permissions);
+
+      // All three should be cleaned correctly
+      expect(res).toHaveLength(3);
+
+      // First permission
+      expect(res[0]).toEqual({
+        action: 'foo',
+        actionParameters: {},
+        subject: 'user',
+        properties: {
+          fields: [
+            'firstname',
+            'restaurant.address.city',
+            'restaurant.address.country',
+            'restaurant.address.gpsCoordinates.lat',
+            'restaurant.address.gpsCoordinates.long',
+          ],
+        },
+        conditions: [],
+      });
+
+      // Second permission
+      expect(res[1]).toEqual({
+        action: 'foo',
+        actionParameters: {},
+        subject: 'user',
+        properties: { fields: ['car.model'] },
+        conditions: [],
+      });
+
+      // Third permission
+      expect(res[2]).toEqual({
+        action: 'foo',
+        actionParameters: {},
+        subject: 'user',
+        properties: {
+          fields: ['firstname', 'restaurant.description'],
+        },
+        conditions: [],
+      });
+    });
+
+    test('should use separate cache entries for different subjects', () => {
+      // Create permissions for two different subjects
+      const permissions = toPermission([
+        {
+          action: 'foo',
+          subject: 'user',
+          properties: { fields: ['firstname'] },
+        },
+        {
+          action: 'foo',
+          subject: 'country',
+          properties: { fields: ['name'] },
+        },
+        {
+          action: 'foo',
+          subject: 'user',
+          properties: { fields: ['car'] },
+        },
+      ]);
+
+      const res = cleanPermissionFields(permissions);
+
+      // Should have three results
+      expect(res).toHaveLength(3);
+
+      // User subject permissions should be cleaned as user fields
+      expect(res[0].subject).toEqual('user');
+      expect(res[0].properties.fields).toContain('firstname');
+
+      expect(res[2].subject).toEqual('user');
+      expect(res[2].properties.fields).toEqual(['car.model']);
+
+      // Country subject permission should be cleaned as country fields
+      expect(res[1].subject).toEqual('country');
+      expect(res[1].properties.fields).toContain('name');
+    });
+
+    test('should handle mixed permissions with multiple subjects and fields', () => {
+      // Simulate a realistic scenario with many permissions on same subject
+      // This would be expensive without caching
+      const permissions = toPermission([
+        {
+          action: 'read',
+          subject: 'user',
+          properties: { fields: ['firstname', 'restaurant'] },
+        },
+        {
+          action: 'create',
+          subject: 'user',
+          properties: { fields: ['firstname'] },
+        },
+        {
+          action: 'update',
+          subject: 'user',
+          properties: { fields: ['restaurant.address.country', 'car'] },
+        },
+        {
+          action: 'delete',
+          subject: 'user',
+          properties: { fields: ['firstname', 'car.model'] },
+        },
+      ]);
+
+      const res = cleanPermissionFields(permissions);
+
+      // All permissions should be cleaned
+      expect(res).toHaveLength(4);
+
+      // Verify each is a valid permission object
+      res.forEach((perm) => {
+        expect(perm).toHaveProperty('action');
+        expect(perm).toHaveProperty('subject');
+        expect(perm).toHaveProperty('properties.fields');
+        expect(perm).toHaveProperty('conditions');
+      });
+
+      // All should be user subject
+      res.forEach((perm) => {
+        expect(perm.subject).toEqual('user');
+      });
+    });
+  });
 });
