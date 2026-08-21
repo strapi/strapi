@@ -1,8 +1,9 @@
 import { adminApi } from '@strapi/admin/strapi-admin';
 import { renderHook, act, waitFor } from '@tests/utils';
 
-import { uploadProgressReducer } from '../../store/uploadProgress';
-import { abortUpload, useUploadFilesMutation } from '../api';
+import { useTypedDispatch } from '../../store/hooks';
+import { cancelUpload, uploadProgressReducer } from '../../store/uploadProgress';
+import { abortUpload, useRetryCancelledFilesMutation, useUploadFilesMutation } from '../api';
 import { uploadFileViaXHR, UploadAbortedError } from '../uploadFileViaXHR';
 
 jest.mock('../uploadFileViaXHR', () => ({
@@ -226,6 +227,79 @@ describe('uploadFiles worker pool', () => {
       });
 
       await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('a drop while a retry is still running', () => {
+    it('queues behind the retry pool instead of running beside it', async () => {
+      const inFlight: Deferred[] = [];
+
+      mockUploadFileViaXHR.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            inFlight.push({
+              resolve: () => resolve({ id: inFlight.length, name: 'uploaded' } as never),
+              reject,
+            });
+          })
+      );
+
+      const { result } = renderHook(
+        () => ({
+          upload: useUploadFilesMutation()[0],
+          retry: useRetryCancelledFilesMutation()[0],
+          dispatch: useTypedDispatch(),
+        }),
+        { providerOptions: { storeConfig } }
+      );
+
+      act(() => {
+        result.current.upload({
+          formData: buildFormData(2),
+          totalFiles: 2,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      // Cancel is all-or-nothing, so this is the only way Retry becomes reachable.
+      await act(async () => {
+        abortUpload(1);
+        result.current.dispatch(cancelUpload());
+        inFlight[0].reject(new UploadAbortedError());
+      });
+
+      act(() => {
+        result.current.retry();
+      });
+
+      // The retry replays both cancelled rows, sequentially: one request in flight.
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      // Retried rows are `pending` again and the batch is still registered, so
+      // this drop merges. It must wait for the retry pool to drain.
+      act(() => {
+        result.current.upload({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+
+      // Draining the retry's two rows lets the merged file start: 1 cancelled +
+      // 2 retried + 1 merged.
+      await settle(inFlight, 3);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(4));
     });
   });
 });

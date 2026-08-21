@@ -734,7 +734,7 @@ const uploadApi = adminApi
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return runUploadPool({
+          const run = runUploadPool({
             entries: batch.entries,
             indices: cancelledIndices,
             token,
@@ -745,6 +745,13 @@ const uploadApi = adminApi
             concurrency: batch.concurrency,
             generateAiMetadata: batch.generateAiMetadata,
           });
+
+          // Retried rows are `pending` again, so a drop lands on the merge branch.
+          // Untracked, that merge would find no tail to queue behind and run its
+          // pool beside this one — two pools of `concurrency` each.
+          trackPoolRun(uploadId, run);
+
+          return run;
         },
         // `Folder, LIST` refreshes the folder header count, which changes when
         // files are added to it.
