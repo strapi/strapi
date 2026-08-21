@@ -9,21 +9,14 @@ import { getTranslationKey } from '../utils/translations';
  * Turns an API error into something displayable, falling back to the caller's
  * own localized copy when the error carries nothing usable.
  *
- * The server speaks in two shapes, and the same button can produce either —
- * replacing an oversized file trips `body.ts`'s bare `FileTooBig` code or the
- * upload plugin's own ready-made sentence, depending on which size limit is
- * lower. Both are handled by looking the message up as `upload.apiError.<message>`
- * against the loaded translations: a code with an entry resolves to it, and
- * anything else (a sentence, an unknown code) is returned untouched.
+ * The server sends either a bare code (`body.ts`'s `FileTooBig`) or a ready-made
+ * sentence, and the same button can produce either. A code with a
+ * `upload.apiError.*` entry resolves to it; anything else is returned untouched.
  *
- * The lookup is deliberately a `messages` check rather than a `formatMessage`
- * call with the server text as `defaultMessage`. Server text is untrusted, and
- * `formatMessage` would hand it to the ICU parser, where a stray `{` — plausible
- * in a validation message echoing a field name or user input — fails to parse.
- * That failure goes to react-intl's `onError`, which is `console.error`: silent
- * in production, but our Jest setup patches `console.error` to throw, so such a
- * message would blow up out of the click handler under test. Not parsing server
- * text at all sidesteps the question.
+ * Checking `messages` rather than passing the text as `defaultMessage` keeps
+ * untrusted server text away from the ICU parser, where a stray `{` (a
+ * validation message echoing a field name) fails to parse — silent in
+ * production, but a throw under Jest, which patches `console.error`.
  *
  * Memoized because consumers hold the result in their own `useCallback`
  * dependency arrays.
