@@ -1,17 +1,25 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+const keyStatisticsTestTitle = 'a super admin should see the key statistics widget';
 
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
+  });
+
+  test.afterEach(async ({}, testInfo) => {
+    if (testInfo.title === keyStatisticsTestTitle) {
+      await resetFiles();
+    }
   });
 
   test('a user should have a personalized homepage', async ({ page }) => {
@@ -49,7 +57,7 @@ test.describe('Home as super admin', () => {
     await expect(profileWidget.getByText('ted.lasso@afcrichmond.co.uk')).toBeVisible();
   });
 
-  test('a super admin should see the key statistics widget', async ({ page }) => {
+  test(keyStatisticsTestTitle, async ({ page }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).toBeVisible();
 
@@ -284,19 +292,6 @@ test.describe('Home as super admin', () => {
       await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText(
         String(initialApiTokensCount + 1)
       );
-
-      // Remove the collection type and component to reset the dataset
-      page.on('dialog', (dialog) => dialog.accept());
-      await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await page.getByRole('link', { name: 'NewType' }).click();
-      await page.getByRole('button', { name: /edit/i }).click();
-      await page.getByRole('button', { name: /delete/i }).click();
-      await page.getByRole('link', { name: 'NewComponent' }).click();
-      await page.getByRole('button', { name: /edit/i }).click();
-      await page.getByRole('button', { name: /delete/i }).click();
-
-      await page.getByRole('button', { name: /save/i }).click();
-      await waitForRestart(page);
     }
   });
 
