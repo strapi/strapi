@@ -235,11 +235,17 @@ export const createCollectionCreateHandler =
       await permissionChecker.sanitizeCreateInput(data)
     ) as Record<string, unknown>;
 
+    const populate = await getService('populate-builder')(uid)
+      .populateDeep(Infinity)
+      .withPopulateOverride(getPopulateForLocalizations(uid))
+      .build();
+
     const { locale: resolvedLocale, status } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const result = await strapi.db.transaction(async () => {
       const document = await documentManager.create(uid, {
         data: sanitizedData,
+        populate,
         locale: resolvedLocale,
         status,
       });
@@ -279,6 +285,8 @@ export const createCollectionUpdateHandler =
     const permissionQuery = await permissionChecker.sanitizedQuery.update({ locale });
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
@@ -318,7 +326,7 @@ export const createCollectionUpdateHandler =
       const updatedDocument = await documentManager.update(
         documentVersion?.documentId ?? documentId,
         uid,
-        { data: sanitizedData, locale: resolvedLocale }
+        { data: sanitizedData, populate, locale: resolvedLocale }
       );
 
       return sanitizeFormatShape(permissionChecker, uid, updatedDocument);
@@ -405,6 +413,11 @@ export const createCollectionPublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const populate = await getService('populate-builder')(uid)
+      .populateDeep(Infinity)
+      .withPopulateOverride(getPopulateForLocalizations(uid))
+      .build();
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const publishedDocument = await strapi.db.transaction(async () => {
@@ -427,6 +440,7 @@ export const createCollectionPublishHandler =
       }
 
       const publishResult = await documentManager.publish(document.documentId, uid, {
+        populate,
         locale: resolvedLocale,
       });
 
@@ -472,6 +486,8 @@ export const createCollectionUnpublishHandler =
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish({ locale });
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
@@ -499,7 +515,10 @@ export const createCollectionUnpublishHandler =
         await documentManager.discardDraft(document.documentId, uid, { locale: resolvedLocale });
       }
 
-      return documentManager.unpublish(document.documentId, uid, { locale: resolvedLocale });
+      return documentManager.unpublish(document.documentId, uid, {
+        populate,
+        locale: resolvedLocale,
+      });
     });
 
     const result = await sanitizeFormatShape(permissionChecker, uid, unpublishedDocument);
@@ -532,6 +551,8 @@ export const createCollectionDiscardDraftHandler =
     const permissionQuery = await permissionChecker.sanitizedQuery.discard({ locale });
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
@@ -551,7 +572,8 @@ export const createCollectionDiscardDraftHandler =
     }
 
     const discardedDocument = await asyncPipe.pipe(
-      (doc: any) => documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale }),
+      (doc: any) =>
+        documentManager.discardDraft(doc.documentId, uid, { populate, locale: resolvedLocale }),
       (doc: unknown) => sanitizeFormatShape(permissionChecker, uid, doc)
     )(document);
 
