@@ -52,9 +52,7 @@ describe('entity-manager updateRelations', () => {
     expect(deleteRelations).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, relIdsToDelete: 'all' })
     );
-    expect(deleteRelations).toHaveBeenCalledWith(
-      expect.not.objectContaining({ relIdsToNotDelete: expect.anything() })
-    );
+    expect((deleteRelations as jest.Mock).mock.calls[0][0]).not.toHaveProperty('relIdsToNotDelete');
   });
 
   it('deletes every relation when set is an empty array', async () => {
@@ -75,5 +73,13 @@ describe('entity-manager updateRelations', () => {
     expect(deleteRelations).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, relIdsToDelete: [2] })
     );
+  });
+
+  it('leaves the relations alone when set is undefined', async () => {
+    const em = createManager();
+
+    await em.updateRelations('api::shop.shop', 1, { products: { set: undefined } }, {});
+
+    expect(deleteRelations).not.toHaveBeenCalled();
   });
 });
