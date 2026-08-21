@@ -15,7 +15,7 @@ import {
 import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
 
-import { uploadFileViaXHR, UploadAbortedError } from './uploadFileViaXHR';
+import { uploadFileViaXHR, UploadAbortedError, UploadFileError } from './uploadFileViaXHR';
 
 import type {
   CreateFilesStream,
@@ -582,7 +582,12 @@ const uploadApi = adminApi
             );
             return { data: uploaded };
           } catch (err) {
-            const message = err instanceof Error ? err.message : 'Upload failed';
+            // Only pass on text the server actually sent. The XHR layer's own
+            // fallbacks are hardcoded English, and callers here (crop → "Save
+            // as copy") have a localized message of their own; an empty string
+            // reads as "nothing usable" and lets theirs win.
+            const message =
+              err instanceof UploadFileError && err.isServerMessage ? err.message : '';
             return { error: { name: 'UnknownError', message } };
           }
         },
