@@ -87,6 +87,7 @@
   "upload.progress.retry": "Retry",
   "upload.progress.file.uploading": "Uploading...",
   "upload.progress.file.canceled": "Canceled",
+  "upload.progress.file.queued": "Queued",
   "upload.progress.file.uploaded": "Uploaded",
   "upload.progress.file.generatingMetadata": "Uploaded • Generating metadata…",
   "upload.progress.file.metadataGenerated": "Uploaded • Metadata generated",
