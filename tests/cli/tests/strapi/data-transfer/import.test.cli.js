@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const coffee = require('coffee');
 const { spawnSync } = require('child_process');
@@ -330,6 +331,52 @@ describe('import', () => {
       expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
     }
   });
+  // The destination uploads folder is emptied before the assets stage, so a missing sidecar
+  // must not stop the bytes from being restored.
+  it('should restore asset bytes with --only files when a metadata sidecar is missing', async () => {
+    const dirExportName = 'cli-import-files-only-missing-sidecar';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--format',
+        'dir',
+        '-f',
+        dirExportName,
+        '--no-encrypt',
+      ],
+      { cwd: appPath, encoding: 'utf8', maxBuffer: 1024 * 1024 }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const exportDir = path.join(appPath, dirExportName);
+    const uploadNames = fs.readdirSync(path.join(exportDir, 'assets', 'uploads'));
+    expect(uploadNames.length).toBeGreaterThan(0);
+
+    const orphanedAsset = uploadNames[0];
+    fs.rmSync(path.join(exportDir, 'assets', 'metadata', `${orphanedAsset}.json`));
+
+    const uploadsDir = path.join(appPath, 'public', 'uploads');
+    const result = spawnSync(
+      'npm',
+      ['run', '-s', 'strapi', '--', 'import', '-f', exportDir, '--force', '--only', 'files'],
+      { cwd: appPath, encoding: 'utf8', maxBuffer: 1024 * 1024 }
+    );
+
+    expect(result.status).toBe(0);
+    expect(`${result.stdout || ''}${result.stderr || ''}`).toMatch(
+      /Missing asset metadata sidecar/
+    );
+
+    const restored = path.join(uploadsDir, orphanedAsset);
+    expect(fs.existsSync(restored)).toBe(true);
+    expect(fs.statSync(restored).size).toBeGreaterThan(0);
+  });
+
   test.todo(
     'import when schema differs (e.g. version mismatch) and verify diff handling / --force'
   );

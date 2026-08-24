@@ -66,9 +66,17 @@ export interface CreateAssetsDestinationWritableOptions {
   onWarning?: (message: string) => void;
 }
 
+/**
+ * Why a target is being resolved: to update its media-library row, or — in a files-only
+ * restore, which never mutates rows — only to recover the provider placement metadata that a
+ * missing sidecar could not supply.
+ */
+type ResolveIntent = 'update' | 'placement';
+
 const resolveUploadTarget = async (
   uploadData: IFile,
   metadataFallback: boolean,
+  intent: ResolveIntent,
   resolveUploadFileId: (metadata: { id: number }) => number | undefined,
   getHashIndex: () => Promise<UploadHashIndex>,
   warn: (message: string) => void,
@@ -100,7 +108,9 @@ const resolveUploadTarget = async (
     if (match === 'ambiguous') {
       counts.ambiguous += 1;
       warn(
-        `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
+        intent === 'update'
+          ? `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
+          : `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; uploading "${uploadData.name}" without its provider path metadata.`
       );
       return 'ambiguous';
     }
@@ -108,7 +118,9 @@ const resolveUploadTarget = async (
     if (match) {
       counts.resolved += 1;
       warn(
-        `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
+        intent === 'update'
+          ? `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
+          : `[Data transfer] Recovered provider path metadata via hash "${lookupHash}" for "${uploadData.name}" (media library records are left unchanged).`
       );
 
       if (lookupHash === uploadData.hash) {
@@ -122,6 +134,26 @@ const resolveUploadTarget = async (
   }
 
   return undefined;
+};
+
+/**
+ * Filename-derived metadata carries no `path` or `provider_metadata`, so a path-keyed provider
+ * (AWS S3 keys objects as `path/hash.ext`, Cloudinary uses `path` as the folder) would write an
+ * object that the stored URL does not name. Recover the placement from the destination row
+ * before the bytes are uploaded. `path` belongs to the row, while `provider_metadata` identifies
+ * one object, so the latter is only reused for the exact original or format being restored.
+ */
+const hydrateProviderPlacement = (uploadData: IFile, entry: IFile, format?: string) => {
+  const object = format ? entry.formats?.[format] : entry;
+  const placementPath = object?.path ?? entry.path;
+
+  if (uploadData.path === undefined && placementPath !== undefined) {
+    uploadData.path = placementPath;
+  }
+
+  if (uploadData.provider_metadata === undefined && object?.provider_metadata !== undefined) {
+    uploadData.provider_metadata = object.provider_metadata;
+  }
 };
 
 /**
@@ -200,29 +232,52 @@ export function createAssetsDestinationWritable(
         transaction
           .attach(async () => {
             try {
-              if (!restoreMediaEntitiesContent && chunk.metadataFallback) {
-                warnings.warn(
-                  `[Data transfer] Skipped asset "${chunk.filename}" because its metadata sidecar is missing and a files-only restore cannot preserve provider path metadata.`
-                );
-                return;
+              // A row is resolved to update its URL, and — with --only files, where rows are
+              // never touched — to recover the provider placement metadata that a missing
+              // sidecar could not supply.
+              const intent: ResolveIntent = restoreMediaEntitiesContent ? 'update' : 'placement';
+              const target =
+                restoreMediaEntitiesContent || chunk.metadataFallback
+                  ? await resolveUploadTarget(
+                      uploadData,
+                      chunk.metadataFallback ?? false,
+                      intent,
+                      resolveUploadFileId,
+                      getHashIndex,
+                      (message) => warnings.warn(message),
+                      hashFallbackCounts
+                    )
+                  : undefined;
+
+              const resolvedTarget = target && target !== 'ambiguous' ? target : undefined;
+              const entry: IFile | null = resolvedTarget
+                ? await strapi.db.query('plugin::upload.file').findOne({
+                    where: { id: resolvedTarget.id },
+                  })
+                : null;
+
+              if (chunk.metadataFallback && resolvedTarget && entry) {
+                hydrateProviderPlacement(uploadData, entry, resolvedTarget.format);
               }
 
-              // Hash fallback is only useful when we will update media-library rows.
-              // With --only files, restoreMediaEntitiesContent is false: upload bytes only.
-              const target = restoreMediaEntitiesContent
-                ? await resolveUploadTarget(
-                    uploadData,
-                    chunk.metadataFallback ?? false,
-                    resolveUploadFileId,
-                    getHashIndex,
-                    (message) => warnings.warn(message),
-                    hashFallbackCounts
-                  )
-                : undefined;
-
+              const sentProviderMetadata = uploadData.provider_metadata;
               await strapi.plugin('upload').provider.uploadStream(uploadData);
+              // Providers such as Cloudinary replace this with the identifiers of the object
+              // they just wrote; those have to be stored alongside the resulting URL.
+              const providerMetadata =
+                uploadData.provider_metadata === sentProviderMetadata
+                  ? undefined
+                  : uploadData.provider_metadata;
 
               if (!restoreMediaEntitiesContent) {
+                // Bytes are still restored: the destination assets were already deleted in
+                // beforeTransfer, so skipping the upload would lose the file entirely.
+                if (chunk.metadataFallback && !target) {
+                  hashFallbackCounts.unmatched += 1;
+                  warnings.warn(
+                    `[Data transfer] Uploaded "${chunk.filename}" without its provider path metadata (sidecar missing and no hash matched a media library record); on path-keyed providers the stored URL may not match the object that was written.`
+                  );
+                }
                 return;
               }
 
@@ -230,7 +285,7 @@ export function createAssetsDestinationWritable(
                 return;
               }
 
-              if (!target) {
+              if (!resolvedTarget) {
                 hashFallbackCounts.unmatched += 1;
                 warnings.warn(
                   `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
@@ -238,27 +293,27 @@ export function createAssetsDestinationWritable(
                 return;
               }
 
-              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { id: target.id },
-              });
               if (!entry) {
                 warnings.warn(
-                  target.format
-                    ? `[Data transfer] Uploaded format variant "${target.format}" for "${chunk.filename}" but parent file record was not found.`
+                  resolvedTarget.format
+                    ? `[Data transfer] Uploaded format variant "${resolvedTarget.format}" for "${chunk.filename}" but parent file record was not found.`
                     : `[Data transfer] Uploaded asset "${chunk.filename}" but file record was not found for URL update.`
                 );
                 return;
               }
 
-              if (target.format) {
-                const specificFormat = entry.formats?.[target.format];
+              if (resolvedTarget.format) {
+                const specificFormat = entry.formats?.[resolvedTarget.format];
                 if (!specificFormat) {
                   warnings.warn(
-                    `[Data transfer] Uploaded format variant "${target.format}" for "${chunk.filename}" but no matching format entry exists in the database.`
+                    `[Data transfer] Uploaded format variant "${resolvedTarget.format}" for "${chunk.filename}" but no matching format entry exists in the database.`
                   );
                   return;
                 }
                 specificFormat.url = uploadData.url;
+                if (providerMetadata !== undefined) {
+                  specificFormat.provider_metadata = providerMetadata;
+                }
                 await strapi.db.query('plugin::upload.file').update({
                   where: { id: entry.id },
                   data: {
@@ -275,6 +330,9 @@ export function createAssetsDestinationWritable(
                 data: {
                   url: entry.url,
                   provider,
+                  ...(providerMetadata !== undefined
+                    ? { provider_metadata: providerMetadata }
+                    : {}),
                 },
               });
             } catch (error) {
