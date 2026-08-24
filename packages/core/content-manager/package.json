@@ -108,7 +108,7 @@
     "slate-history": "0.93.0",
     "slate-react": "0.98.4",
     "yup": "0.32.9",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@strapi/admin": "5.52.1",
