@@ -146,6 +146,21 @@ describe('AssetsTable', () => {
       expect(itemRows).toHaveLength(2);
       itemRows.forEach((row) => expect(row).toHaveAttribute('data-native-context-menu'));
     });
+
+    // Folder rows are deliberately unmarked: opening a folder should close
+    // the drawer, not switch it.
+    it('marks asset rows — and only asset rows — as asset details triggers', () => {
+      setup({
+        assets: [createMockAsset(7, 'photo.png')],
+        folders: [createMockFolder(5, 'Photos')],
+      });
+
+      // [0] is the header row, then folders, then assets.
+      const [, folderRow, assetRow] = screen.getAllByRole('row');
+
+      expect(assetRow).toHaveAttribute('data-asset-details-trigger');
+      expect(folderRow).not.toHaveAttribute('data-asset-details-trigger');
+    });
   });
 
   describe('AssetPreviewCell', () => {

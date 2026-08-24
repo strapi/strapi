@@ -10,6 +10,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_PROPS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -472,6 +473,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      {...ASSET_DETAILS_TRIGGER_PROPS}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}

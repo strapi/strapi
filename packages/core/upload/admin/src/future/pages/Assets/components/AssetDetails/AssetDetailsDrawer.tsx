@@ -62,6 +62,7 @@ import {
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
@@ -1283,6 +1284,20 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * AssetDetailsDrawer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Whether a pointer press outside the panel should leave the drawer open.
+ *
+ * Two cases: the panel is already closing (`forceMount` keeps it listening
+ * through the animation, so dismissing again would re-trigger the
+ * unsaved-changes guard for nothing), or the press landed on another asset's
+ * card/row — its `click`, firing right after, switches the drawer instead of
+ * closing it, so closing here would just cause a close-then-reopen.
+ */
+const shouldKeepDrawerOpen = (event: { target: EventTarget | null }, isVisible: boolean) =>
+  !isVisible ||
+  (event.target instanceof Element &&
+    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null);
+
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
@@ -1321,6 +1336,13 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
+        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
+        // as the header's close button, so unsaved edits are still guarded.
+        onPointerDownOutside={(event) => {
+          if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
       >
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />
       </Drawer.Body>

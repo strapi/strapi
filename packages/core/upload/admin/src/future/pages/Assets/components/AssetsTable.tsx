@@ -24,7 +24,7 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
-import { TABLE_HEADERS } from '../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -320,6 +320,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      {...ASSET_DETAILS_TRIGGER_PROPS}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}

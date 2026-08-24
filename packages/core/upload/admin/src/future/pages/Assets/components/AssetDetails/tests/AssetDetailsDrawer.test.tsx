@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { AssetDetails, getBusyMessage } from '../AssetDetailsDrawer';
+import { ASSET_DETAILS_TRIGGER_PROPS } from '../../../constants';
+import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
@@ -735,5 +736,90 @@ describe('icon button tooltips', () => {
     ]) {
       expect(await screen.findByRole('button', { name: label })).toBeInTheDocument();
     }
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Outside-click dismissal
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer outside-click dismissal', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  // jsdom never runs the slide-out animation, so "closed" is read off the
+  // state attribute rather than the element disappearing.
+  const renderOpenDrawer = async () => {
+    const result = render(
+      <>
+        <button type="button" data-testid="page-background">
+          Background
+        </button>
+        {/* Stands in for a grid card/table row, whose click switches the drawer. */}
+        <button type="button" data-testid="other-asset" {...ASSET_DETAILS_TRIGGER_PROPS}>
+          Other asset
+        </button>
+        <AssetDetailsDrawer />
+      </>,
+      { initialEntries: ['/?assetId=1'] }
+    );
+
+    const drawer = await screen.findByRole('dialog');
+    expect(drawer).toHaveAttribute('data-state', 'open');
+
+    return { ...result, drawer };
+  };
+
+  it('closes when the pointer goes down outside the panel', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId('page-background'));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  it('stays open when the pointer goes down inside the panel', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // Dismissing on the pointerdown would turn switching assets into a
+  // close-then-reopen round trip.
+  it('stays open when the pointer goes down on another asset', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId('other-asset'));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // The delete confirmation is portaled to the body but rendered from inside
+  // the drawer, so Radix treats it as "inside".
+  it('stays open while interacting with a dialog opened from inside it', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // The press happened inside, so there's no outside pointerdown to act on.
+  it('stays open when a drag started inside the panel ends outside it', async () => {
+    const { drawer } = await renderOpenDrawer();
+
+    const title = await screen.findByRole('heading', { name: 'photo.png' });
+    fireEvent.pointerDown(title);
+    fireEvent.pointerUp(screen.getByTestId('page-background'));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
   });
 });

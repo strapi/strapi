@@ -194,6 +194,20 @@ describe('AssetsGrid', () => {
       expect(cards).toHaveLength(2);
       cards.forEach((card) => expect(card).toHaveAttribute('data-native-context-menu'));
     });
+
+    // Folder cards are deliberately unmarked: opening a folder should close
+    // the drawer, not switch it.
+    it('marks asset cards — and only asset cards — as asset details triggers', () => {
+      setup({
+        assets: [createMockAsset(7, 'photo.png')],
+        folders: [createMockFolder(5, 'Photos')],
+      });
+
+      const [folderCard, assetCard] = screen.getAllByRole('listitem');
+
+      expect(assetCard).toHaveAttribute('data-asset-details-trigger');
+      expect(folderCard).not.toHaveAttribute('data-asset-details-trigger');
+    });
   });
 
   describe('AssetCard', () => {
