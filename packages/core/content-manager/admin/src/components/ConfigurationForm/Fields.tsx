@@ -372,8 +372,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               // Default: insert a new row after the row being hovered (between that row and the
               // next). For row 0, use index 0 instead so fields that are not full-width can still
               // be moved above the first row—there is no separate drop area above it in the UI.
-
               const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
+
               /**
                * When inserting *after* the hovered row, reuse the following row if it only
                * contains spacers. Skip when inserting at index 0 — draft[0] is the hovered row.
@@ -398,12 +398,13 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
               const newContainerPrototype = draft[overContainerIndex];
 
-              // use draft.length without check may be cause key confilct and flicking.
-              let i = draft.length;
-              while (!!containersAsDictionary[`container-${i}`]) {
-                i++;
-              }
-              const newContainerId = `container-${i}`;
+              // Using draft.length directly can collide with an existing container id
+              // (e.g. after rows were removed), causing React key conflicts and flicker.
+              const findFreeContainerId = (i: number): string =>
+                containersAsDictionary[`container-${i}`]
+                  ? findFreeContainerId(i + 1)
+                  : `container-${i}`;
+              const newContainerId = findFreeContainerId(draft.length);
 
               draft.splice(insertIndex, 0, {
                 ...newContainerPrototype,
