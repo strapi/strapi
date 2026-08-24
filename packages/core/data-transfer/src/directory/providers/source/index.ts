@@ -16,6 +16,7 @@ import { write } from '../../../utils/writable-async-write';
 import {
   buildFallbackAssetMetadataFromFilename,
   missingAssetMetadataSidecarMessage,
+  parseAssetSidecar,
 } from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { unknownPathToPosix } from '../../../file/providers/source/utils';
@@ -195,7 +196,9 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         let metadata: IAsset['metadata'];
         let metadataFallback = false;
         try {
-          metadata = await this.#readAssetMetadata(name);
+          const sidecar = parseAssetSidecar(await this.#readAssetMetadata(name));
+          metadata = sidecar.metadata;
+          metadataFallback = sidecar.metadataFallback;
         } catch (error) {
           // Only a missing file is recoverable; malformed JSON, permissions and other I/O
           // failures must abort the transfer.

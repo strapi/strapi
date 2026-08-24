@@ -8,6 +8,13 @@ import type { IFile } from '../types';
 const { bytesToKbytes } = fileUtils;
 
 /**
+ * Sidecar JSON marker for filename-inferred metadata. Not a `plugin::upload.file`
+ * attribute; sources strip it onto `IAsset.metadataFallback` so a rewrite hop cannot
+ * treat inferred `type` / `mainHash` as trusted sidecar data.
+ */
+export const ASSET_SIDECAR_METADATA_FALLBACK_KEY = 'metadataFallback';
+
+/**
  * Default upload responsive format prefixes (`thumbnail` plus DEFAULT_BREAKPOINTS).
  * Custom breakpoints cannot be known at fallback time (no Strapi config on the source).
  */
@@ -64,3 +71,41 @@ export const buildFallbackAssetMetadataFromFilename = (
 
 export const missingAssetMetadataSidecarMessage = (filename: string): string =>
   `[Data transfer] Missing asset metadata sidecar for "${filename}"; using filename-derived fallback metadata. File bytes will still be transferred.`;
+
+const omitSidecarFallbackFlag = (metadata: IFile): IFile => {
+  if (!Object.prototype.hasOwnProperty.call(metadata, ASSET_SIDECAR_METADATA_FALLBACK_KEY)) {
+    return metadata;
+  }
+
+  const { [ASSET_SIDECAR_METADATA_FALLBACK_KEY]: _ignored, ...rest } = metadata as IFile & {
+    metadataFallback?: unknown;
+  };
+
+  return rest as IFile;
+};
+
+export const serializeAssetSidecar = (asset: {
+  metadata: IFile;
+  metadataFallback?: boolean;
+}): string => {
+  const metadata = omitSidecarFallbackFlag(asset.metadata);
+
+  if (asset.metadataFallback) {
+    return JSON.stringify({ ...metadata, [ASSET_SIDECAR_METADATA_FALLBACK_KEY]: true });
+  }
+
+  return JSON.stringify(metadata);
+};
+
+export const parseAssetSidecar = (raw: unknown): { metadata: IFile; metadataFallback: boolean } => {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new TypeError('Asset sidecar metadata must be a JSON object');
+  }
+
+  const record = raw as IFile & { metadataFallback?: unknown };
+
+  return {
+    metadata: omitSidecarFallbackFlag(record),
+    metadataFallback: record.metadataFallback === true,
+  };
+};

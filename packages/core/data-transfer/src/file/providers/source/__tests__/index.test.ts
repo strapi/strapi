@@ -196,10 +196,15 @@ describe('File source provider', () => {
     };
 
     const collectAssets = async (stream: NodeJS.ReadableStream) => {
-      const assets: Array<{ filename?: string; metadata?: { hash?: string; mime?: string } }> = [];
+      const assets: Array<{
+        filename?: string;
+        metadataFallback?: boolean;
+        metadata?: { hash?: string; mime?: string; mainHash?: string; metadataFallback?: boolean };
+      }> = [];
       for await (const chunk of stream as AsyncIterable<{
         filename?: string;
-        metadata?: { hash?: string; mime?: string };
+        metadataFallback?: boolean;
+        metadata?: { hash?: string; mime?: string; mainHash?: string; metadataFallback?: boolean };
         stream?: NodeJS.ReadableStream;
       }>) {
         assets.push(chunk);
@@ -245,6 +250,53 @@ describe('File source provider', () => {
           }),
         })
       );
+    }, 8000);
+
+    test('restores metadataFallback from a rewritten sidecar so inferred type/mainHash stay untrusted', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/small_launder.png', content: Buffer.from('png-bytes') },
+        {
+          name: 'assets/metadata/small_launder.png.json',
+          content: JSON.stringify({
+            id: 0,
+            hash: 'small_launder',
+            name: 'small_launder.png',
+            mime: 'image/png',
+            size: 1,
+            url: '/small_launder.png',
+            type: 'small',
+            mainHash: 'launder',
+            metadataFallback: true,
+          }),
+        },
+      ]);
+
+      const report = jest.fn();
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report } as never);
+
+      const assets = await collectAssets(
+        provider.createAssetsReadStream() as NodeJS.ReadableStream
+      );
+
+      await fs.remove(tarPath).catch(() => {});
+
+      expect(assets).toHaveLength(1);
+      expect(assets[0].metadataFallback).toBe(true);
+      expect(assets[0].metadata).toMatchObject({ hash: 'small_launder', mainHash: 'launder' });
+      expect(assets[0].metadata).not.toHaveProperty('metadataFallback');
+      expect(report).not.toHaveBeenCalledWith(expect.objectContaining({ kind: 'warning' }));
     }, 8000);
 
     test('aborts the assets stream when sidecar JSON is malformed', async () => {

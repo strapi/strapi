@@ -132,6 +132,38 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     expect(dispatcher.dispatchTransferStep).toHaveBeenCalled();
   }, 30_000);
 
+  test('forwards metadataFallback on the asset start payload', async () => {
+    const { streamBatches, dispatcher } = mockPushDispatcher();
+    const provider = createRemoteStrapiDestinationProvider(defaultOptions);
+    provider.dispatcher = dispatcher as unknown as typeof provider.dispatcher;
+
+    const writable = provider.createAssetsWriteStream();
+    if (writable instanceof Promise) {
+      throw new Error('Expected synchronous Writable');
+    }
+
+    const asset: IAsset = {
+      filename: 'small_launder.png',
+      filepath: '/tmp/small_launder.png',
+      stats: { size: 3 } as IAsset['stats'],
+      metadata: { id: 0, hash: 'small_launder', type: 'small', mainHash: 'launder' },
+      metadataFallback: true,
+      stream: Readable.from([Buffer.from('png')]),
+    };
+
+    await new Promise<void>((resolve, reject) => {
+      writable.write(asset, (err) => (err ? reject(err) : resolve()));
+    });
+    await new Promise<void>((resolve, reject) => {
+      writable.end((err) => (err ? reject(err) : resolve()));
+    });
+
+    const start = (
+      streamBatches.flat() as Array<{ action: string; data?: { metadataFallback?: boolean } }>
+    ).find((item) => item.action === 'start');
+    expect(start?.data?.metadataFallback).toBe(true);
+  });
+
   test('includes per-asset checksum in end row when verifyChecksums is enabled', async () => {
     const { streamBatches, dispatcher } = mockPushDispatcher();
     const provider = createRemoteStrapiDestinationProvider({

@@ -522,14 +522,20 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         hasStarted = true;
 
         const assetID = randomUUID();
-        const { filename, filepath, stats, stream, metadata } = asset;
+        const { filename, filepath, stats, stream, metadata, metadataFallback } = asset;
         const checksumHash = verifyChecksums ? createHash('sha256') : undefined;
 
         try {
           await safePush({
             action: 'start',
             assetID,
-            data: { filename, filepath, stats, metadata },
+            data: {
+              filename,
+              filepath,
+              stats,
+              metadata,
+              ...(metadataFallback ? { metadataFallback: true } : {}),
+            },
           });
 
           for await (const chunk of stream) {

@@ -20,6 +20,7 @@ import {
   buildFallbackAssetMetadataFromFilename,
   MissingArchiveEntryError,
   missingAssetMetadataSidecarMessage,
+  parseAssetSidecar,
 } from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
@@ -246,7 +247,11 @@ class LocalFileSourceProvider implements ISourceProvider {
               let metadata: IFile;
               let metadataFallback = false;
               try {
-                metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
+                const sidecar = parseAssetSidecar(
+                  await loadAssetMetadata(`assets/metadata/${file}.json`)
+                );
+                metadata = sidecar.metadata;
+                metadataFallback = sidecar.metadataFallback;
               } catch (error) {
                 // Absence in an archive is only ever the typed sentinel: each lookup reopens
                 // the archive, so a raw ENOENT means the archive itself became unreadable.
