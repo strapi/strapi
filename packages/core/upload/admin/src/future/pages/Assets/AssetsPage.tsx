@@ -60,6 +60,7 @@ import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 import { useInfiniteScrollSentinel } from './hooks/useInfiniteScrollSentinel';
 import { useListFilters } from './hooks/useListFilters';
+import { useListScrollRestoration } from './hooks/useListScrollRestoration';
 import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { buildAssetFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
@@ -693,6 +694,8 @@ export const AssetsPage = () => {
     filter: listFilters.serialized || null,
   });
 
+  const scrollAnchorRef = useListScrollRestoration(listQueryKey);
+
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop} disabled={!canCreate}>
@@ -718,6 +721,7 @@ export const AssetsPage = () => {
                     {/* Zero-height marker: leaves the viewport as soon as the list
                       scrolls, flipping the header into its compact state. */}
                     <Box ref={headerSentinelRef} height={0} aria-hidden />
+                    <Box ref={scrollAnchorRef} height={0} aria-hidden />
 
                     <StickyHeader $compact={isHeaderCompact}>
                       <TitleRow>
