@@ -9548,8 +9548,6 @@ __metadata:
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
     zod: "npm:4.4.3"
-  peerDependencies:
-    zod: ^4.4.3
   languageName: unknown
   linkType: soft
 
@@ -10082,8 +10080,6 @@ __metadata:
     typescript: "npm:5.9.3"
     undici: "npm:6.28.0"
     zod: "npm:4.4.3"
-  peerDependencies:
-    zod: ^4.4.3
   languageName: unknown
   linkType: soft
 
@@ -10262,8 +10258,6 @@ __metadata:
     vitest-config: "npm:5.52.1"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
-  peerDependencies:
-    zod: ^4.4.3
   languageName: unknown
   linkType: soft
 
