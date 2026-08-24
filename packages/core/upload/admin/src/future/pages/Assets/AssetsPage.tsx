@@ -246,7 +246,7 @@ const AssetsView = ({
           assets: the AI metadata action needs their mime types to know what
           the provider can handle. `position: fixed` keeps it visually anchored
           regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} locations={locations} />
+      <BulkActionsBar assets={assets} folders={folders} locations={locations} />
     </>
   );
 };

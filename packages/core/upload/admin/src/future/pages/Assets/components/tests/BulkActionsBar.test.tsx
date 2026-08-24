@@ -5,9 +5,11 @@ import { AssetSelectionProvider, useAssetSelection } from '../../hooks/useAssetS
 import { BulkActionsBar } from '../BulkActionsBar';
 
 import type { File } from '../../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../../shared/contracts/folders';
 
 const mockToggleNotification = jest.fn();
 const mockAIAvailability = jest.fn(() => false);
+const mockTrackUsage = jest.fn();
 let mockAiMetadataEnabled = false;
 
 jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
@@ -25,6 +27,11 @@ jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   useAIAvailability: () => mockAIAvailability(),
 }));
 
+jest.mock('../../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
 jest.mock('../../hooks/useFolderNavigation', () => ({
   useFolderNavigation: () => ({ currentFolderId: null }),
 }));
@@ -39,7 +46,9 @@ const mockAssets: File[] = [
  * "the selection survives" is genuinely asserted rather than faked by a
  * static mock.
  */
-const Harness = () => {
+const mockFolders = [{ id: 9, name: 'reports' }] as Folder[];
+
+const Harness = ({ folders = [] as Folder[] }: { folders?: Folder[] }) => {
   const { toggle } = useAssetSelection();
   const [, setQuery] = useQueryParams<{ assetId?: string }>();
 
@@ -49,15 +58,16 @@ const Harness = () => {
       <button onClick={() => toggle('asset:2')}>Toggle asset 2</button>
       <button onClick={() => setQuery({ assetId: '1' }, 'push', true)}>Open drawer</button>
       <button onClick={() => setQuery({ assetId: undefined }, 'remove', true)}>Close drawer</button>
-      <BulkActionsBar assets={mockAssets} />
+      <button onClick={() => toggle('folder:9')}>Toggle folder 9</button>
+      <BulkActionsBar assets={mockAssets} folders={folders} />
     </>
   );
 };
 
-const setup = (initialEntries?: string[]) =>
+const setup = (initialEntries?: string[], folders?: Folder[]) =>
   render(
     <AssetSelectionProvider>
-      <Harness />
+      <Harness folders={folders} />
     </AssetSelectionProvider>,
     { initialEntries }
   );
@@ -164,5 +174,52 @@ describe('BulkActionsBar', () => {
     await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
 
     expect(await screen.findByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+  });
+
+  describe('select all', () => {
+    it('selects every rendered item, folders included', async () => {
+      const { user } = setup(undefined, mockFolders);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      // 2 assets + 1 folder
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+    });
+
+    it('keeps reading Select all once everything is selected', async () => {
+      const { user } = setup(undefined, mockFolders);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Select all' })).toBeInTheDocument();
+    });
+
+    it('lets the clear button deselect a select-all selection', async () => {
+      const { user } = setup(undefined, mockFolders);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Clear selection' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument()
+      );
+    });
+
+    it('tracks the select-all action', async () => {
+      const { user } = setup(undefined, mockFolders);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      expect(mockTrackUsage).not.toHaveBeenCalled();
+
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements');
+    });
   });
 });

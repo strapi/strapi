@@ -1,7 +1,15 @@
 import { useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  TextButton,
+  Tooltip,
+  Typography,
+} from '@strapi/design-system';
 import { ArrowRight, Cross, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
@@ -12,6 +20,7 @@ import {
 } from '../../../../../../shared/constants';
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
@@ -19,11 +28,13 @@ import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { useIsAssetDetailsOpen } from '../hooks/useIsAssetDetailsOpen';
+import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../shared/contracts/folders';
 
 /**
  * Bulk action bar for the future Media Library. Mobile: docked full-bleed to the
@@ -141,11 +152,14 @@ interface BulkActionsBarProps {
    * everything, which falls back to the folder currently open.
    */
   locations?: ItemLocations;
+  /** Folders currently rendered, so select-all covers them as well as assets. */
+  folders?: Folder[];
 }
 
 export const BulkActionsBar = ({
   assets = [],
   locations = emptyItemLocations,
+  folders = [],
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -155,7 +169,8 @@ export const BulkActionsBar = ({
   // Every bulk action (move, delete, metadata) is an `assets.update` mutation
   // server-side — one flag gates the whole cluster.
   const { canUpdate } = useMediaLibraryPermissions();
-  const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
+  const { selectedIds, selectedFolderIds, selectAll, clear } = useAssetSelection();
+  const { trackUsage } = useTracking();
   const { currentFolderId } = useFolderNavigation();
   const isDetailsDrawerOpen = useIsAssetDetailsOpen();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
@@ -166,6 +181,18 @@ export const BulkActionsBar = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
+
+  // Order is irrelevant here — unlike range selection, select-all only needs the
+  // set — so folders and assets are enough, whichever way the view arranges them.
+  const renderedKeys: ItemKey[] = useMemo(
+    () => [...folders.map((folder) => folderKey(folder.id)), ...assets.map((a) => assetKey(a.id))],
+    [folders, assets]
+  );
+
+  const handleSelectAll = () => {
+    trackUsage('didSelectAllMediaLibraryElements');
+    selectAll(renderedKeys);
+  };
   const isBusy = isDeleting || isGeneratingMetadata;
 
   // Stable identity: the move dialog memoizes its destination walk on it. Each
@@ -333,6 +360,13 @@ export const BulkActionsBar = ({
           { count }
         )}
       </Typography>
+
+      <TextButton onClick={handleSelectAll} marginRight={4}>
+        {formatMessage({
+          id: getTranslationKey('list.bulk-actions.select-all'),
+          defaultMessage: 'Select all',
+        })}
+      </TextButton>
 
       {/* Past the early return the user always has `assets.update`, so the
           individual actions no longer re-check it. */}
