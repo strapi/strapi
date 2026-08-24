@@ -339,6 +339,7 @@
   "list.table.row.select": "Select {name}",
   "list.table.row.metadata-missing": "This asset is missing metadata (caption or alternative text).",
   "list.table.content.empty-label": "This field is empty",
+  "list.context-menu.label": "Media library actions",
   "list.bulk-actions.label": "Bulk actions",
   "list.bulk-actions.selected-count": "{count, plural, =1 {# item selected} other {# items selected}}",
   "list.bulk-actions.select-all": "Select all",

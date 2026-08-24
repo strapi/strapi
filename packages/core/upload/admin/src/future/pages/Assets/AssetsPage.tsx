@@ -50,6 +50,7 @@ import { FilterMenu } from './components/FilterMenu';
 import { FolderFormDialog } from './components/FolderFormDialog';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
+import { MainAreaContextMenu } from './components/MainAreaContextMenu';
 import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
 import { useAssetSearch } from './hooks/useAssetSearch';
@@ -459,6 +460,24 @@ const SearchSlot = styled(Box)`
   }
 `;
 
+// The main column normally ends with its content, which left the right-click
+// area stopping at the last row — the one place the gesture is most natural.
+// These two give the column a height to hand down to `MainAreaContextMenu`.
+// `min-height`, never `height`, so a long list still grows past the fold; and
+// if the percentage can't resolve, the chain degrades to `auto` and the layout
+// is exactly what it was.
+const FullHeightMain = styled(Page.Main)`
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+`;
+
+const PageBody = styled(Box)`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+`;
+
 // Toggle labels are hidden below desktop — icons only (buttons keep aria-label).
 const ToggleLabel = styled.span`
   display: none;
@@ -712,8 +731,8 @@ export const AssetsPage = () => {
                   />
                 }
               >
-                <Page.Main>
-                  <Box ref={uploadDropZoneRef}>
+                <FullHeightMain>
+                  <PageBody ref={uploadDropZoneRef}>
                     <VisuallyHidden>
                       <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
                     </VisuallyHidden>
@@ -828,41 +847,52 @@ export const AssetsPage = () => {
                       <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
                     </StickyHeader>
 
-                    <Layouts.Content>
-                      <BetaNotice />
-                      {/* Renders nothing — keeps every loaded page's query subscribed
-                      so a rename/delete refreshes the whole list. */}
-                      {assetPageSubscribers}
-                      <DropZoneWithOverlay>
-                        <DropFilesMessage
-                          uploadDropZoneRef={uploadDropZoneRef}
-                          folderName={title}
-                        />
-                        <AssetsView
-                          view={view}
-                          folders={folders}
-                          isLoadingFolders={isLoadingFolders}
-                          assets={assets}
-                          isLoadingAssets={isLoadingAssets}
-                          isFetchingMore={isFetchingMore}
-                          hasNextPage={hasNextPage}
-                          fetchNextPage={fetchNextPage}
-                          error={assetsError}
-                          locations={itemLocations}
-                          searchQuery={searchQuery}
-                          assetsSort={listSort.assetsSort}
-                          foldersPosition={listSort.foldersPosition}
-                          hasActiveFilters={listFilters.filters.length > 0}
-                          onClearFilters={listFilters.clearFilters}
-                          onAssetItemClick={openDetails}
-                          onAddAssets={handleFileSelect}
-                          canAddAssets={canCreate}
-                          onClearSearch={clearSearch}
-                        />
-                      </DropZoneWithOverlay>
-                    </Layouts.Content>
-                  </Box>
-                </Page.Main>
+                    {/* Right-clicking the empty parts of the list offers the same
+                        creation actions as the "New" menu above, acting on the
+                        folder currently open. Items keep the browser's own menu —
+                        see MainAreaContextMenu. */}
+                    <MainAreaContextMenu
+                      disabled={!canCreate}
+                      onCreateFolder={() => setIsCreateFolderDialogOpen(true)}
+                      onImportFiles={handleFileSelect}
+                      onImportFromUrl={() => setIsUrlDialogOpen(true)}
+                    >
+                      <Layouts.Content>
+                        <BetaNotice />
+                        {/* Renders nothing — keeps every loaded page's query subscribed
+                            so a rename/delete refreshes the whole list. */}
+                        {assetPageSubscribers}
+                        <DropZoneWithOverlay>
+                          <DropFilesMessage
+                            uploadDropZoneRef={uploadDropZoneRef}
+                            folderName={title}
+                          />
+                          <AssetsView
+                            view={view}
+                            folders={folders}
+                            isLoadingFolders={isLoadingFolders}
+                            assets={assets}
+                            isLoadingAssets={isLoadingAssets}
+                            isFetchingMore={isFetchingMore}
+                            hasNextPage={hasNextPage}
+                            fetchNextPage={fetchNextPage}
+                            error={assetsError}
+                            locations={itemLocations}
+                            searchQuery={searchQuery}
+                            assetsSort={listSort.assetsSort}
+                            foldersPosition={listSort.foldersPosition}
+                            hasActiveFilters={listFilters.filters.length > 0}
+                            onClearFilters={listFilters.clearFilters}
+                            onAssetItemClick={openDetails}
+                            onAddAssets={handleFileSelect}
+                            canAddAssets={canCreate}
+                            onClearSearch={clearSearch}
+                          />
+                        </DropZoneWithOverlay>
+                      </Layouts.Content>
+                    </MainAreaContextMenu>
+                  </PageBody>
+                </FullHeightMain>
               </Layouts.Root>
             </AssetsDndProvider>
           </BusyAssetsProvider>

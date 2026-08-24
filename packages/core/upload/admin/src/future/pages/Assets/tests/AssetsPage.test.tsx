@@ -1,4 +1,4 @@
-import { act, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -611,6 +611,105 @@ describe('AssetsPage search', () => {
       expect(await screen.findByRole('option', { name: 'Media Library' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('AssetsPage main-area context menu', () => {
+  const rightClickBackground = () =>
+    fireEvent.contextMenu(screen.getByTestId('assets-context-menu-area'), {
+      clientX: 200,
+      clientY: 300,
+    });
+
+  /**
+   * The menu is gated on `assets.create`, which is `false` until the RBAC check
+   * settles — the "New" menu appearing is the signal that it has.
+   */
+  const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
+
+  it('offers the same creation actions as the New menu', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    rightClickBackground();
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual([
+      'New folder',
+      'Import files',
+      'Import from URL',
+    ]);
+  });
+
+  it('creates the folder inside the folder currently open', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    respondWithFolders([]);
+    server.use(
+      http.get('*/upload/folders/:id', () =>
+        HttpResponse.json({ data: { id: 1, name: 'Photos', pathId: 1, path: '/1', parent: null } })
+      )
+    );
+
+    const { user } = renderPage('?folder=1');
+    await waitForCreatePermission();
+
+    rightClickBackground();
+    await user.click(await screen.findByRole('menuitem', { name: 'New folder' }));
+
+    expect(await screen.findByText('New folder in Photos')).toBeInTheDocument();
+  });
+
+  it('opens the file picker from Import files', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    // The hidden input the header "New > Import files" also clicks.
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const click = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
+
+    rightClickBackground();
+    await user.click(await screen.findByRole('menuitem', { name: 'Import files' }));
+
+    expect(click).toHaveBeenCalled();
+    click.mockRestore();
+  });
+
+  it('leaves an asset card to the browser', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    const event = fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+
+    // Nothing called preventDefault, so the browser's own menu still opens.
+    expect(event).toBe(true);
+    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
+  });
+
+  it('stays shut without assets.create', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    render(<AssetsPage />, {
+      initialEntries: ['/'],
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter((permission) => permission.action !== 'plugin::upload.assets.create'),
+      },
+    });
+    await findHeading();
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'New' })).not.toBeInTheDocument()
+    );
+
+    rightClickBackground();
+
+    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
   });
 });
 
