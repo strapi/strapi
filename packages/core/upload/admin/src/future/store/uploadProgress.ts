@@ -37,6 +37,12 @@ export interface UploadProgressState {
   files: FileProgress[];
   errors: FileUploadError[];
   uploadId: number;
+  /**
+   * Whether this batch reports transferred bytes at all. The direct-file flow streams
+   * byte counts from XHR; the URL flow leaves the fetch to the server and gets none back
+   * so its byte-weighted aggregate is stuck at 0%.
+   */
+  reportsByteProgress: boolean;
 }
 
 export interface RootState {
@@ -50,6 +56,7 @@ const initialState: UploadProgressState = {
   files: [],
   errors: [],
   uploadId: 0,
+  reportsByteProgress: false,
 };
 
 const uploadProgressSlice = createSlice({
@@ -80,6 +87,8 @@ const uploadProgressSlice = createSlice({
       state.totalFiles = action.payload.totalFiles;
       state.errors = [];
       state.uploadId += 1;
+      // Known sizes == the direct-file flow == the flow that streams bytes.
+      state.reportsByteProgress = action.payload.fileSizes !== undefined;
     },
     /**
      * Rows for a second drop, joined to the batch already uploading. Indices
@@ -214,6 +223,7 @@ const uploadProgressSlice = createSlice({
       state.totalFiles = 0;
       state.files = [];
       state.errors = [];
+      state.reportsByteProgress = false;
     },
     toggleMinimize(state) {
       state.isMinimized = !state.isMinimized;
@@ -282,6 +292,20 @@ export const selectAggregateProgress = createSelector(
     const uploadedBytes = files.reduce((sum, f) => sum + f.uploadedBytes, 0);
     return Math.round((uploadedBytes / totalSize) * 100);
   }
+);
+
+/**
+ * Whether `selectAggregateProgress` is worth showing as a percentage. A batch that never
+ * reports bytes stays pinned at 0%, so the header drops the percentage for it.
+ *
+ * Also checks the rows, not just the flag: any row reporting bytes proves the batch can,
+ * so if the URL flow starts emitting progress the percentage returns on its own.
+ */
+export const selectReportsByteProgress = createSelector(
+  (state: RootState) => state.uploadProgress.reportsByteProgress,
+  (state: RootState) => state.uploadProgress.files,
+  (reportsByteProgress, files): boolean =>
+    reportsByteProgress || files.some((f) => f.uploadedBytes > 0)
 );
 
 /**

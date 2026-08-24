@@ -48,6 +48,8 @@ const createMockState = (overrides: Partial<UploadProgressState> = {}): UploadPr
   files: [],
   errors: [],
   uploadId: 1,
+  // Direct-file flow by default; the URL flow opts out.
+  reportsByteProgress: true,
   ...overrides,
 });
 
@@ -90,6 +92,51 @@ describe('UploadProgressDialog', () => {
         })
       );
       expect(screen.getByText(/Uploading 4 items \(50%\)/)).toBeInTheDocument();
+    });
+
+    it('still shows the percentage while most rows of a concurrent batch are unstarted', () => {
+      // Worker-pool case: unstarted rows sit at `uploadedBytes: 0` but still count.
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            { ...createMockFile(0, 'file1.png', 'uploading'), uploadedBytes: 512 },
+            createMockFile(1, 'file2.png', 'uploading'),
+            createMockFile(2, 'file3.png', 'pending'),
+            createMockFile(3, 'file4.png', 'pending'),
+          ],
+        })
+      );
+
+      // 512 / 4096 = 12.5% → 13
+      expect(screen.getByText(/Uploading 4 items \(13%\)/)).toBeInTheDocument();
+    });
+
+    it('omits the percentage for a URL batch, which never reports bytes', () => {
+      // The server reports only the file's size, never incremental bytes, so any
+      // percentage would sit frozen at 0%.
+      setup(
+        createMockState({
+          totalFiles: 1,
+          reportsByteProgress: false,
+          files: [createMockFile(0, 'remote-file.png', 'uploading')],
+        })
+      );
+
+      expect(screen.getByText('Uploading 1 items')).toBeInTheDocument();
+      expect(screen.queryByText(/%\)/)).not.toBeInTheDocument();
+    });
+
+    it('brings the percentage back as soon as a URL batch does report bytes', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          reportsByteProgress: false,
+          files: [{ ...createMockFile(0, 'remote-file.png', 'uploading'), uploadedBytes: 256 }],
+        })
+      );
+
+      expect(screen.getByText(/Uploading 1 items \(25%\)/)).toBeInTheDocument();
     });
 
     it('shows Cancel all button during upload', () => {

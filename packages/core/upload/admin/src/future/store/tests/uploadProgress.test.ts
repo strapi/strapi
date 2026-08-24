@@ -10,9 +10,11 @@ import {
   setFileMetadataGenerating,
   setFileMetadataResult,
   cancelUpload,
+  closeUploadProgress,
   setUploadFailed,
   retryCancelledFiles,
   selectAggregateProgress,
+  selectReportsByteProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
   selectMetadataOutcome,
@@ -34,17 +36,26 @@ const makeFile = (
   uploadedBytes,
 });
 
-const makeState = (files: FileProgress[]): UploadProgressState => ({
+const makeState = (
+  files: FileProgress[],
+  overrides: Partial<UploadProgressState> = {}
+): UploadProgressState => ({
   isVisible: true,
   isMinimized: false,
   totalFiles: files.length,
   files,
   errors: [],
   uploadId: 1,
+  // Direct-file flow by default; the URL flow opts out.
+  reportsByteProgress: true,
+  ...overrides,
 });
 
 const aggregate = (state: UploadProgressState) =>
   selectAggregateProgress({ uploadProgress: state });
+
+const reportsBytes = (state: UploadProgressState) =>
+  selectReportsByteProgress({ uploadProgress: state });
 
 const metadataProgress = (state: UploadProgressState) =>
   selectMetadataProgress({ uploadProgress: state });
@@ -228,6 +239,79 @@ describe('uploadProgress slice', () => {
 
     it('returns 0 for an empty batch', () => {
       expect(aggregate(makeState([]))).toBe(0);
+    });
+  });
+
+  describe('selectReportsByteProgress', () => {
+    it('is set by whether the batch was opened with known sizes', () => {
+      const fileFlow = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'], fileSizes: [10] })
+      );
+      const urlFlow = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'] })
+      );
+
+      expect(reportsBytes(fileFlow)).toBe(true);
+      expect(reportsBytes(urlFlow)).toBe(false);
+    });
+
+    it('stays true for a direct-file batch whose rows have not started uploading yet', () => {
+      // Worker-pool case: most rows wait at `uploadedBytes: 0`, but the batch still reports bytes.
+      const state = makeState([
+        makeFile(0, 'uploading', 100, 40),
+        makeFile(1, 'pending', 100),
+        makeFile(2, 'pending', 100),
+      ]);
+
+      expect(reportsBytes(state)).toBe(true);
+    });
+
+    it('is false for a URL batch even once the server reports a real size', () => {
+      // Cause of the frozen 0%: a size arrives, so the aggregate weights bytes that never do.
+      const opened = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['remote.png'] })
+      );
+      const state = uploadProgressReducer(
+        opened,
+        setFileUploading({ uploadId: opened.uploadId, name: 'remote.png', index: 0, size: 5000 })
+      );
+
+      expect(aggregate(state)).toBe(0);
+      expect(reportsBytes(state)).toBe(false);
+    });
+
+    it('turns true once any row actually reports bytes, without a flag change', () => {
+      // Forward-compatible with CMS-1152: real bytes bring the percentage back, no revert needed.
+      const opened = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['remote.png'] })
+      );
+      const uploading = uploadProgressReducer(
+        opened,
+        setFileUploading({ uploadId: opened.uploadId, name: 'remote.png', index: 0, size: 1000 })
+      );
+      const progressed = uploadProgressReducer(
+        uploading,
+        setFileProgress({ index: 0, bytes: 250, uploadId: opened.uploadId })
+      );
+
+      expect(progressed.reportsByteProgress).toBe(false);
+      expect(reportsBytes(progressed)).toBe(true);
+      expect(aggregate(progressed)).toBe(25);
+    });
+
+    it('resets when the dialog is closed so the next batch decides for itself', () => {
+      const opened = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'], fileSizes: [10] })
+      );
+
+      const closed = uploadProgressReducer(opened, closeUploadProgress());
+
+      expect(closed.reportsByteProgress).toBe(false);
     });
   });
 
