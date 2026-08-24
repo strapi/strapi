@@ -834,6 +834,80 @@ describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
     transaction.end();
   });
 
+  test('stores provider metadata mutated in place on the hydrated object', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn(
+      async (file: { url?: string; provider_metadata?: Record<string, unknown> }) => {
+        file.url = '/cdn/library/photo_abc123.png';
+        if (!file.provider_metadata) {
+          file.provider_metadata = {};
+        }
+        file.provider_metadata.public_id = 'library/photo_abc123-restored';
+      }
+    );
+    const row = {
+      id: 42,
+      hash: 'photo_abc123',
+      ext: '.png',
+      url: '/uploads/library/photo_abc123.png',
+      path: 'library',
+      provider_metadata: { public_id: 'library/photo_abc123' },
+      formats: null,
+    };
+    const mockFindMany = jest.fn().mockResolvedValue([row]);
+    const mockFindOne = jest.fn().mockResolvedValue(row);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning: jest.fn(),
+    });
+
+    await writeAsset(stream, {
+      filename: 'photo_abc123.png',
+      filepath: '/photo_abc123.png',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadataFallback: true,
+      metadata: {
+        hash: 'photo_abc123',
+        name: 'photo_abc123.png',
+        ext: '.png',
+        id: 0,
+        url: '/photo_abc123.png',
+        size: 5,
+        mime: 'image/png',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+    await waitForUploadStream(uploadStream);
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 42 },
+      data: {
+        url: '/cdn/library/photo_abc123.png',
+        provider: 'local',
+        provider_metadata: { public_id: 'library/photo_abc123-restored' },
+      },
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
   test('uploads a missing-sidecar format at the row path and stores its returned provider metadata', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn(pathAwareUploadStream);

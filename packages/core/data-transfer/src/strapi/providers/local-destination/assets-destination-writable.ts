@@ -260,14 +260,11 @@ export function createAssetsDestinationWritable(
                 hydrateProviderPlacement(uploadData, entry, resolvedTarget.format);
               }
 
-              const sentProviderMetadata = uploadData.provider_metadata;
               await strapi.plugin('upload').provider.uploadStream(uploadData);
-              // Providers such as Cloudinary replace this with the identifiers of the object
-              // they just wrote; those have to be stored alongside the resulting URL.
-              const providerMetadata =
-                uploadData.provider_metadata === sentProviderMetadata
-                  ? undefined
-                  : uploadData.provider_metadata;
+              // Providers may replace provider_metadata (Cloudinary) or mutate it in place.
+              // Persisting any defined post-upload value covers both styles; rewriting an
+              // unchanged hydrated value is harmless.
+              const providerMetadata = uploadData.provider_metadata;
 
               if (!restoreMediaEntitiesContent) {
                 // Bytes are still restored: the destination assets were already deleted in
