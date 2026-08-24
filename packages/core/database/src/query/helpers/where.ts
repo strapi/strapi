@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isArray, castArray, isPlainObject } from 'lodash/fp';
+import { castArray, isPlainObject } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import { isOperator, isOperatorOfType } from '@strapi/utils';
@@ -60,7 +60,7 @@ const processSingleAttributeWhere = (
 };
 
 const processAttributeWhere = (attribute: Attribute | null, where: unknown, operator = '$eq') => {
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processSingleAttributeWhere(attribute, sub, operator));
   }
 
@@ -118,11 +118,11 @@ function processWhere(
   where: Record<string, unknown> | Record<string, unknown>[],
   ctx: WhereCtx
 ): Record<string, unknown> | Record<string, unknown>[] {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processWhere(sub, ctx));
   }
 
@@ -430,11 +430,11 @@ type Where =
   | Array<Where>;
 
 const applyWhere = (qb: Knex.QueryBuilder, where: Where): Knex.QueryBuilder | undefined => {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return qb.where((subQB: Knex.QueryBuilder) =>
       where.forEach((subWhere) => applyWhere(subQB, subWhere))
     );

@@ -1,6 +1,6 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import { isEmpty, has, isNil, isArray } from 'lodash/fp';
+import { isEmpty, has, isNil } from 'lodash/fp';
 import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
@@ -138,7 +138,7 @@ export const permission = yup
             return isNil(subject);
           }
 
-          if (isArray(action.subjects) && !isNil(subject)) {
+          if (Array.isArray(action.subjects) && !isNil(subject)) {
             return action.subjects.includes(subject);
           }
 
@@ -166,7 +166,7 @@ export const permission = yup
 
           const { applyToProperties } = action.options;
 
-          if (!isArray(applyToProperties)) {
+          if (!Array.isArray(applyToProperties)) {
             return false;
           }
 

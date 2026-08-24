@@ -4,7 +4,6 @@ import {
   difference,
   differenceWith,
   has,
-  isArray,
   isEmpty,
   isEqual,
   isInteger,
@@ -148,7 +147,7 @@ type Assocs =
 
 const toAssocs = (data: Assocs) => {
   if (
-    isArray(data) ||
+    Array.isArray(data) ||
     isString(data) ||
     isNumber(data) ||
     isNull(data) ||
@@ -379,7 +378,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!isArray(data)) {
+      if (!Array.isArray(data)) {
         throw new Error('CreateMany expects data to be an array');
       }
 

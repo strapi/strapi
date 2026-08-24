@@ -3,7 +3,7 @@
  * Module that will validate input data for entity creation or edition
  */
 
-import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
+import { uniqBy, castArray, isNil, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import jsonLogic from 'json-logic-js';
 import * as strapiUtils from '@strapi/utils';
@@ -710,7 +710,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: componentValue as Record<string, unknown>,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -733,7 +733,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: value,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }

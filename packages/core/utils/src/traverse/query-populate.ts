@@ -1,7 +1,6 @@
 import {
   curry,
   isString,
-  isArray,
   isEmpty,
   split,
   isObject,
@@ -26,7 +25,7 @@ const DEFAULT_QS_ARRAY_LIMIT = 100;
  * produces when indexed array notation exceeds `arrayLimit` (see #25632).
  */
 const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, string> => {
-  if (!isObject(value) || isArray(value)) {
+  if (!isObject(value) || Array.isArray(value)) {
     return false;
   }
 
@@ -65,7 +64,7 @@ const isPopulateString = (value: unknown): value is string => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 

@@ -2,7 +2,6 @@ import { subject as asSubject } from '@casl/ability';
 import {
   defaults,
   omit,
-  isArray,
   isEmpty,
   uniq,
   intersection,
@@ -202,7 +201,7 @@ export default ({ action, ability, model }: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
     const wrappedSanitize = async (data: unknown, options = {} as any): Promise<unknown> => {
-      if (isArray(data)) {
+      if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }
 
