@@ -2928,6 +2928,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@commitlint/types@npm:19.8.1":
+  version: 19.8.1
+  resolution: "@commitlint/types@npm:19.8.1"
+  dependencies:
+    "@types/conventional-commits-parser": "npm:^5.0.0"
+    chalk: "npm:^5.3.0"
+  checksum: 10c0/0507db111d1ffd7b60e7ad979b7f9e674d409fc4c64561dfe30737b2c5bfefca7a1b58116106fa4ecb480059cecb13f04fa18f999d2d4a7d665b5ab13a05a803
+  languageName: node
+  linkType: hard
+
 "@commitlint/types@npm:^19.0.3":
   version: 19.0.3
   resolution: "@commitlint/types@npm:19.0.3"
@@ -8829,6 +8839,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.52.1"
     jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
@@ -8890,6 +8901,7 @@ __metadata:
     codemirror5: "npm:codemirror@^5.65.11"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.1"
     execa: "npm:5.1.1"
     fast-deep-equal: "npm:3.1.3"
     formik: "npm:2.4.9"
@@ -8934,6 +8946,7 @@ __metadata:
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     typescript: "npm:5.9.3"
     use-context-selector: "npm:1.4.4"
     vite: "npm:5.4.21"
@@ -8966,6 +8979,7 @@ __metadata:
     "@strapi/utils": "npm:5.52.1"
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
+    "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     axios: "npm:1.19.0"
@@ -9023,6 +9037,7 @@ __metadata:
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
     dompurify: "npm:3.4.13"
+    eslint-config-custom: "npm:5.52.1"
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
@@ -9057,6 +9072,8 @@ __metadata:
     slate-history: "npm:0.93.0"
     slate-react: "npm:0.98.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9090,6 +9107,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
+    eslint-config-custom: "npm:5.52.1"
     formik: "npm:2.4.9"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
@@ -9103,6 +9121,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -9144,6 +9163,7 @@ __metadata:
     "@types/react": "npm:18.3.2"
     ai: "npm:5.0.210"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.1"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
@@ -9163,6 +9183,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     vitest: "catalog:"
     vitest-config: "npm:5.52.1"
     yup: "npm:0.32.9"
@@ -9286,6 +9307,7 @@ __metadata:
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
+    eslint-config-custom: "npm:5.52.1"
     fs-extra: "npm:11.3.4"
     inquirer: "npm:9.3.8"
     jest: "npm:29.6.0"
@@ -9301,6 +9323,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     tar: "npm:7.5.22"
     tar-stream: "npm:2.2.0"
+    tsconfig: "npm:5.52.1"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.52.1"
@@ -9390,6 +9413,7 @@ __metadata:
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.1"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
@@ -9401,6 +9425,7 @@ __metadata:
     react-query: "npm:3.39.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9489,6 +9514,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.1"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
@@ -9501,6 +9527,8 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -9545,8 +9573,10 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     debug: "npm:4.3.4"
+    eslint-config-custom: "npm:5.52.1"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
+    tsconfig: "npm:5.52.1"
     zod: "npm:3.25.76"
   languageName: unknown
   linkType: soft
@@ -9559,6 +9589,7 @@ __metadata:
     "@strapi/utils": "npm:5.52.1"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.52.1"
+    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     qs: "npm:6.15.3"
     sift: "npm:16.0.1"
@@ -9607,6 +9638,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.1"
     jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
@@ -9614,6 +9646,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.52.1"
@@ -9650,6 +9683,7 @@ __metadata:
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.2.0"
+    eslint-config-custom: "npm:5.52.1"
     formik: "npm:2.4.9"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
@@ -9668,6 +9702,8 @@ __metadata:
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
     swagger-ui-dist: "npm:4.19.0"
+    tsconfig: "npm:5.52.1"
+    typescript: "npm:5.9.3"
     yaml: "npm:1.10.3"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -9737,11 +9773,15 @@ __metadata:
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/strapi": "npm:5.52.1"
+    "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.52.1"
+    jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
     vitest: "catalog:"
     vitest-config: "npm:5.52.1"
   peerDependencies:
@@ -9769,6 +9809,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     bcryptjs: "npm:2.4.3"
+    eslint-config-custom: "npm:5.52.1"
     formik: "npm:2.4.9"
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
@@ -9785,6 +9826,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    typescript: "npm:5.9.3"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
@@ -9930,6 +9972,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.1"
     fractional-indexing: "npm:3.2.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
@@ -9946,6 +9989,8 @@ __metadata:
     react-router-dom: "npm:6.30.4"
     semver: "npm:7.7.4"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -10160,6 +10205,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:3.36.0"
+    tsconfig: "npm:5.52.1"
     undici: "npm:6.28.0"
   bin:
     upgrade: ./bin/upgrade.js
@@ -10196,6 +10242,7 @@ __metadata:
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
+    eslint-config-custom: "npm:5.52.1"
     file-type: "npm:21.3.4"
     formidable: "npm:3.5.4"
     formik: "npm:2.4.9"
@@ -10221,6 +10268,8 @@ __metadata:
     react-select: "npm:5.8.0"
     sharp: "npm:0.35.3"
     styled-components: "npm:6.4.1"
+    tsconfig: "npm:5.52.1"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
     zod: "npm:3.25.76"
   peerDependencies:
@@ -11391,6 +11440,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/linkify-it@npm:^5":
+  version: 5.0.0
+  resolution: "@types/linkify-it@npm:5.0.0"
+  checksum: 10c0/7bbbf45b9dde17bf3f184fee585aef0e7342f6954f0377a24e4ff42ab5a85d5b806aaa5c8d16e2faf2a6b87b2d94467a196b7d2b85c9c7de2f0eaac5487aaab8
+  languageName: node
+  linkType: hard
+
 "@types/lodash@npm:^4.14.149, @types/lodash@npm:^4.14.165, @types/lodash@npm:^4.14.191":
   version: 4.14.197
   resolution: "@types/lodash@npm:4.14.197"
@@ -11432,7 +11488,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/markdown-it@npm:*, @types/markdown-it@npm:13.0.7":
+"@types/markdown-it@npm:*":
+  version: 14.2.0
+  resolution: "@types/markdown-it@npm:14.2.0"
+  dependencies:
+    "@types/linkify-it": "npm:^5"
+    "@types/mdurl": "npm:^2"
+  checksum: 10c0/60ff1a0495ef303310744566342c49b4b3e76fbdca82c5ec28d88731fc934b0c63335d25bca6133903c877f2c41c59cdfddefb3626c6ee0780b9573ddf6aefe4
+  languageName: node
+  linkType: hard
+
+"@types/markdown-it@npm:13.0.7":
   version: 13.0.7
   resolution: "@types/markdown-it@npm:13.0.7"
   dependencies:
@@ -11455,6 +11521,13 @@ __metadata:
   version: 1.0.5
   resolution: "@types/mdurl@npm:1.0.5"
   checksum: 10c0/8991c781eb94fb3621e48e191251a94057908fc14be60f52bdd7c48684af923ffa77559ea979450a0475f85c08f8a472f99ff9c2ca4308961b9b9d35fd7584f7
+  languageName: node
+  linkType: hard
+
+"@types/mdurl@npm:^2":
+  version: 2.0.0
+  resolution: "@types/mdurl@npm:2.0.0"
+  checksum: 10c0/cde7bb571630ed1ceb3b92a28f7b59890bb38b8f34cd35326e2df43eebfc74985e6aa6fd4184e307393bad8a9e0783a519a3f9d13c8e03788c0f98e5ec869c5e
   languageName: node
   linkType: hard
 
@@ -14416,6 +14489,7 @@ __metadata:
     "@actions/github": "npm:6.0.0"
     "@types/jest": "npm:29.5.2"
     "@vercel/ncc": "npm:0.38.2"
+    eslint-config-custom: "npm:5.52.1"
     jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
@@ -28147,6 +28221,7 @@ __metadata:
     "@commitlint/cli": "npm:19.2.0"
     "@commitlint/config-conventional": "npm:19.1.0"
     "@commitlint/prompt-cli": "npm:19.2.0"
+    "@commitlint/types": "npm:19.8.1"
     "@nx/js": "npm:20.8.4"
     "@playwright/test": "npm:1.56.1"
     "@rollup/plugin-commonjs": "npm:28.0.9"
