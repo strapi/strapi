@@ -145,25 +145,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      // Check if user disabled AI features globally
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
-      if (!isAIEnabled) {
+      if (strapi.ai.admin.isEnabled() === false) {
         return false;
       }
-
-      // Check if the user's license grants access to AI features
-      const hasAccess = strapi.ee.features.isEnabled('cms-ai');
-      if (!hasAccess) {
-        return false;
-      }
-
       const settings = getService('settings');
       const aiSettings = await settings.getSettings();
-      if (!aiSettings?.aiLocalizations) {
-        return false;
-      }
-
-      return true;
+      return aiSettings?.aiLocalizations === true;
     },
 
     /**
@@ -273,7 +260,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let token: string;
       try {
-        const tokenData = await strapi.get('ai').getAiToken();
+        const tokenData = await strapi.ai.admin.getAiToken();
         token = tokenData.token;
       } catch (error) {
         await aiLocalizationJobsService.upsertJobForDocument({
@@ -283,7 +270,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           targetLocales,
           status: 'failed',
         });
-
         throw new Error('Failed to retrieve AI token', {
           cause: error instanceof Error ? error : undefined,
         });
@@ -304,11 +290,22 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             return isLocalized && isSupportedType;
           })
           .map(([key, attr]) => {
-            const minimalAttribute = { type: attr.type };
+            const minimalAttribute: Record<string, unknown> = { type: attr.type };
             if (attr.type === 'component') {
               (
                 minimalAttribute as Schema.Attribute.Component<`${string}.${string}`, boolean>
               ).repeatable = attr.repeatable ?? false;
+            }
+
+            const { maxLength, minLength } = attr as {
+              maxLength?: number;
+              minLength?: number;
+            };
+            if (typeof maxLength === 'number') {
+              minimalAttribute.maxLength = maxLength;
+            }
+            if (typeof minLength === 'number') {
+              minimalAttribute.minLength = minLength;
             }
             return [key, minimalAttribute];
           })
@@ -345,7 +342,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new Error(`AI Localizations request failed: ${response.statusText}`);
       }
 
-      const aiResult = await response.json();
+      const aiResult = (await response.json()) as {
+        localizations: Array<{ content: Record<string, unknown>; locale: string }>;
+      };
 
       // Use populate-builder service for deep populate to fetch all nested fields
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
@@ -360,57 +359,55 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         populate: deepPopulate,
       });
 
-      try {
-        await Promise.all(
-          aiResult.localizations.map(async (localization: any) => {
-            const { content, locale } = localization;
+      const results = await Promise.allSettled(
+        aiResult.localizations.map(async (localization) => {
+          const { content, locale } = localization;
 
-            // Fetch the existing derived locale document with all fields populated
-            const derivedDoc = await strapi.documents(model).findOne({
-              documentId,
-              locale,
-              populate: deepPopulate,
-            });
+          const derivedDoc = await strapi.documents(model).findOne({
+            documentId,
+            locale,
+            populate: deepPopulate,
+          });
 
-            // Start with AI-translated content
-            let mergedData = structuredClone(content);
+          let mergedData = structuredClone(content);
 
-            // Merge unsupported fields from existing derived doc (if exists) or source doc
-            // This preserves media, booleans, enumerations, and relations at all levels
-            const sourceForUnsupportedFields = derivedDoc || sourceDocWithAllFields;
-            mergedData = await mergeUnsupportedFields(
-              mergedData,
-              sourceForUnsupportedFields,
-              schema,
-              getModelBound
-            );
+          const sourceForUnsupportedFields = derivedDoc || sourceDocWithAllFields;
+          mergedData = await mergeUnsupportedFields(
+            mergedData,
+            sourceForUnsupportedFields,
+            schema,
+            getModelBound
+          );
 
-            await strapi.documents(model).update({
-              documentId,
-              locale,
-              fields: [],
-              data: mergedData,
-            });
+          await strapi.documents(model).update({
+            documentId,
+            locale,
+            fields: [],
+            data: mergedData,
+          });
+        })
+      );
 
-            await aiLocalizationJobsService.upsertJobForDocument({
-              documentId,
-              contentType: model,
-              sourceLocale: document.locale,
-              targetLocales,
-              status: 'completed',
-            });
-          })
-        );
-      } catch (error) {
-        await aiLocalizationJobsService.upsertJobForDocument({
-          documentId,
-          contentType: model,
-          sourceLocale: document.locale,
-          targetLocales,
-          status: 'failed',
-        });
-        strapi.log.error('AI Localizations generation failed', error);
-      }
+      const failedLocales: string[] = [];
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const locale = aiResult.localizations[index]?.locale;
+          failedLocales.push(locale);
+          const reason =
+            result.reason instanceof Error ? result.reason.message : String(result.reason);
+          strapi.log.error(
+            `AI Localizations: failed to save locale "${locale}" for ${model} document ${documentId}: ${reason}`
+          );
+        }
+      });
+
+      await aiLocalizationJobsService.upsertJobForDocument({
+        documentId,
+        contentType: model,
+        sourceLocale: document.locale,
+        targetLocales,
+        status: failedLocales.length > 0 ? 'failed' : 'completed',
+      });
     },
     setupMiddleware() {
       strapi.documents.use(async (context, next) => {

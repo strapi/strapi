@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   root: true,
   extends: ['@strapi/eslint-config/front/typescript'],
   overrides: [
@@ -51,3 +54,5 @@ module.exports = {
     'react/display-name': 'off',
   },
 };
+
+module.exports = config;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import {
@@ -31,10 +31,27 @@ describe('FromModalNavigationProvider', () => {
     });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
-    expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
+    // Asserted against explicit literals rather than the imported INITIAL_STATE_DATA constant:
+    // the lint cleanup flipped these defaults from `null` to concrete values, and comparing the
+    // state to the same constant it is built from could never catch a regression in those defaults.
+    expect(currentStateWithoutFunctions).toEqual({
+      actionType: 'create',
+      attributeName: '',
+      attributeType: '',
+      dynamicZoneTarget: '',
+      forTarget: 'contentType',
+      modalType: null,
+      isOpen: true,
+      showBackLink: false,
+      kind: 'collectionType',
+      step: null,
+      targetUid: '',
+      customFieldUid: '',
+      activeTab: 'basic',
+    });
   });
 
-  it('updates the state when selecting a custom field for a new attribute', async () => {
+  it('updates the state when selecting a custom field for a new attribute', () => {
     const Wrapper = ({ children }: { children?: React.ReactNode }) =>
       React.createElement(
         CTBSessionProvider,
@@ -46,12 +63,12 @@ describe('FromModalNavigationProvider', () => {
       wrapper: Wrapper,
     });
 
-    await waitFor(() =>
+    act(() => {
       result.current.onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
-      })
-    );
+      });
+    });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
     const expected = {
@@ -65,7 +82,7 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(expected);
   });
 
-  it('updates the state when editing a custom field attribute', async () => {
+  it('updates the state when editing a custom field attribute', () => {
     const Wrapper = ({ children }: { children?: React.ReactNode }) =>
       React.createElement(
         CTBSessionProvider,
@@ -77,7 +94,7 @@ describe('FromModalNavigationProvider', () => {
       wrapper: Wrapper,
     });
 
-    await waitFor(() => {
+    act(() => {
       result.current.onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { strings, validateZod } from '@strapi/utils';
+import { strings, validateZodSchema, contentTypes } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
 
@@ -84,6 +84,59 @@ const verifySingularAndPluralNames: z.SuperRefinement<Record<string, unknown>> =
       code: z.ZodIssueCode.custom,
       message: 'Singular and plural names must be different',
       path: ['singularName'],
+    });
+  }
+};
+
+type ContentTypeSchemaAction = {
+  action: 'create' | 'update' | 'delete';
+  draftAndPublish?: boolean;
+  uid?: UID.ContentType;
+  attributes?: Array<{ action: 'create' | 'update' | 'delete'; name: string }>;
+};
+
+const getEffectiveAttributeNames = (contentType: ContentTypeSchemaAction): string[] => {
+  if (contentType.action === 'create') {
+    return (contentType.attributes ?? [])
+      .filter((attribute) => attribute.action !== 'delete')
+      .map((attribute) => attribute.name);
+  }
+
+  if (contentType.action !== 'update' || !contentType.uid) {
+    return [];
+  }
+
+  const existingContentType = strapi.contentTypes[contentType.uid];
+  const names = new Set(existingContentType ? Object.keys(existingContentType.attributes) : []);
+
+  for (const attribute of contentType.attributes ?? []) {
+    if (attribute.action === 'delete') {
+      names.delete(attribute.name);
+    } else if (attribute.action === 'create') {
+      names.add(attribute.name);
+    }
+  }
+
+  return [...names];
+};
+
+export const verifyDraftAndPublishReservedAttributes: z.SuperRefinement<ContentTypeSchemaAction> = (
+  contentType,
+  ctx
+) => {
+  if (contentType.action === 'delete' || !contentType.draftAndPublish) {
+    return;
+  }
+
+  const reservedAttributeNames = contentTypes.findDraftAndPublishReservedAttributeNames(
+    getEffectiveAttributeNames(contentType)
+  );
+
+  if (reservedAttributeNames.length > 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: contentTypes.getDraftAndPublishEnableBlockedMessage(reservedAttributeNames),
+      path: ['draftAndPublish'],
     });
   }
 };
@@ -237,6 +290,7 @@ const baseRelationSchema = z.object({
     'morphToMany',
   ]),
   configurable: z.boolean().nullish(),
+  required: requiredSchema,
   private: z.boolean().nullish(),
   pluginOptions: z.record(z.unknown()).optional(),
   conditions: z.preprocess((val) => {
@@ -368,7 +422,7 @@ const jsonSchema = basePropertiesSchema.extend({
         JSON.parse(value as string);
 
         return true;
-      } catch (err) {
+      } catch {
         return false;
       }
     }),
@@ -682,6 +736,7 @@ const baseContentTypeSchema = z.object({
 
 const baseCreateContentTypeSchema = baseContentTypeSchema.extend({
   action: z.literal('create'),
+  plugin: z.string().min(1).optional(),
   collectionName: z.string().regex(COLLECTION_NAME_REGEX).optional(),
   singularName: z
     .string()
@@ -787,6 +842,7 @@ const schemaSchema = z.object({
           deleteContentTypeSchema,
         ])
         .superRefine(verifySingularAndPluralNames)
+        .superRefine(verifyDraftAndPublishReservedAttributes)
     )
     .optional()
     .default([]),
@@ -812,14 +868,19 @@ export type Schema = {
   >;
 };
 
-export const validateUpdateSchema = validateZod(
-  z.object(
-    {
-      data: schemaSchema,
-    },
-    {
-      invalid_type_error: 'Invalid schema, expected an object with a data property',
-      required_error: 'Schema is required',
-    }
-  )
+const updateSchemaInput = z.object(
+  {
+    data: schemaSchema,
+  },
+  {
+    invalid_type_error: 'Invalid schema, expected an object with a data property',
+    required_error: 'Schema is required',
+  }
+);
+
+// TODO: Remove cast when content-type-builder migrates to Zod 4
+export const validateUpdateSchema = validateZodSchema(
+  updateSchemaInput as unknown as import('@strapi/utils').z.ZodType<
+    z.infer<typeof updateSchemaInput>
+  >
 );

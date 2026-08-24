@@ -1,3 +1,5 @@
+import type { Ability } from '@casl/ability';
+
 import permissionCheckerService from '../permission-checker';
 
 const createStrapiMock = () => ({
@@ -24,7 +26,7 @@ describe('permission-checker', () => {
       rulesFor: jest.fn(() => [{ conditions: { locale: 'en' } }]),
       can: jest.fn(),
       cannot: jest.fn(),
-    };
+    } as unknown as Ability;
 
     const permissionChecker = permissionCheckerService({ strapi } as any).create({
       userAbility,
@@ -40,7 +42,7 @@ describe('permission-checker', () => {
       rulesFor: jest.fn(() => [{ conditions: {} }, {}]),
       can: jest.fn(),
       cannot: jest.fn(),
-    };
+    } as unknown as Ability;
 
     const permissionChecker = permissionCheckerService({ strapi } as any).create({
       userAbility,

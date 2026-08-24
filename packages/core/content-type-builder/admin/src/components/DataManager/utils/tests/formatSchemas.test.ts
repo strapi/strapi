@@ -6,7 +6,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils ', () 
       const attributes = {
         name: { type: 'string', pluginOptions: { i18n: { enabled: false } } },
         price: { type: 'integer' },
-      };
+      } as const;
 
       const expected = [
         { type: 'string', name: 'name', pluginOptions: { i18n: { enabled: false } } },
@@ -26,7 +26,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils ', () 
           name: { type: 'string', pluginOptions: { i18n: { enabled: false } } },
           price: { type: 'integer' },
         },
-      };
+      } as const;
 
       const expected = {
         uid: 'address',

@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { render, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { DeleteLocale } from '../DeleteLocale';
 
@@ -49,12 +49,12 @@ describe('DeleteLocale', () => {
 
   it('show an error if the deletion failed', async () => {
     server.use(
-      rest.delete('/i18n/locales/:id', (req, res, ctx) => {
-        return res(
-          ctx.status(500),
-          ctx.json({
+      http.delete('/i18n/locales/:id', () => {
+        return HttpResponse.json(
+          {
             error: new errors.ApplicationError('Could not delete locale'),
-          })
+          },
+          { status: 500 }
         );
       })
     );

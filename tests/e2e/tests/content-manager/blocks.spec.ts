@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { navToHeader } from '../../../utils/shared';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Blocks editor', () => {
   test.beforeEach(async ({ page }) => {
@@ -45,11 +45,35 @@ test.describe('Blocks editor', () => {
     await page.keyboard.press('Enter');
     await expect(page.getByText('Fortran')).not.toBeVisible();
 
-    // Save and reload to make sure the change is persisted
+    // Save and reload to make sure the change is persisted. Await the PUT — the toast can resolve before
+    // the request finishes on fast machines.
+    const savePut = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        response.url().includes('/content-manager/single-types/api::homepage.homepage') &&
+        response.ok()
+    );
     await page.getByRole('button', { name: 'Save' }).click();
+    await savePut;
+    await findAndClose(page, 'Saved document');
+
     await page.reload();
-    await expect(page.getByText(code)).toBeVisible();
-    await page.getByText(code).click();
-    await expect(page.getByText('Fortran')).toBeVisible();
+
+    await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
+    const textboxAfterReload = page.getByRole('textbox').filter({ hasText: 'Drag' });
+    await expect(textboxAfterReload).toBeVisible();
+    await expect(textboxAfterReload.getByText(code)).toBeVisible();
+
+    // Before save we moved the caret into a new block; after reload the toolbar reflects whichever
+    // block has focus (often not the code block). Click the saved code to focus that block again.
+    // The language combobox lives on the blocks toolbar (a sibling of the editable surface in the
+    // a11y tree), not inside the `textbox` node — scope to the draft tabpanel's toolbar.
+    // Focus the code block (click the `<code>` surface, not just the text node) so the blocks
+    // toolbar shows the language combobox.
+    await textboxAfterReload.locator('code').filter({ hasText: code }).click();
+    const draftPanel = page.getByRole('tabpanel', { name: 'draft' });
+    await expect(async () => {
+      await expect(draftPanel.getByRole('combobox').filter({ hasText: 'Fortran' })).toBeVisible();
+    }).toPass({ timeout: 15_000 });
   });
 });

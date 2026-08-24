@@ -1,5 +1,6 @@
 import * as z from 'zod/v4';
 import { createAPISanitizers } from '../sanitize';
+import { ValidationError } from '../errors';
 import { articleModel, getModel } from './test-fixtures';
 
 describe('sanitizeQuery', () => {
@@ -69,6 +70,27 @@ describe('sanitizeQuery', () => {
     });
   });
 
+  describe('publicationFilter (core query param)', () => {
+    it('throws ValidationError with details when publicationFilter is invalid', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'invalid-mode' };
+
+      try {
+        await sanitizers.query(query, schema, { strictParams: false });
+        expect.fail('expected throw');
+      } catch (e: any) {
+        expect(e).toBeInstanceOf(ValidationError);
+        expect(e.details?.source).toBe('query');
+        expect(e.details?.param).toBe('publicationFilter');
+      }
+    });
+
+    it('passes through valid publicationFilter', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'modified' };
+      const result = await sanitizers.query(query, schema, { strictParams: false });
+      expect(result).toMatchObject({ publicationFilter: 'modified' });
+    });
+  });
+
   it('removes invalid nested scalar filter keys next to operators', async () => {
     const query = {
       filters: {
@@ -89,5 +111,27 @@ describe('sanitizeQuery', () => {
       },
     });
     expect((result as any).filters.title).not.toHaveProperty('__invalidNestedFilterKey');
+  });
+
+  describe('sort', () => {
+    it.each([
+      ['empty array (GraphQL default)', []],
+      ['empty string', ''],
+      ['comma-only string', ','],
+      ['empty object', {}],
+      ['array of empty strings', ['']],
+      ['array with null (qs sort[])', [null]],
+    ])('removes meaningless sort: %s', async (_label, sort) => {
+      const result = await sanitizers.query({ sort, filters: { id: 1 } }, schema);
+
+      expect(result).not.toHaveProperty('sort');
+      expect(result).toHaveProperty('filters');
+    });
+
+    it('keeps meaningful sort', async () => {
+      const result = await sanitizers.query({ sort: 'title:asc', filters: { id: 1 } }, schema);
+
+      expect(result).toHaveProperty('sort', 'title:asc');
+    });
   });
 });

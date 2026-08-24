@@ -298,8 +298,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
       __component: v.__component,
     }));
 
-  idsToKeep.forEach(({ id, __component }) => {
-    if (!allIds.find((el) => el.id === id && el.__component === __component)) {
+  idsToKeep.forEach(({ id, __component: componentUID }) => {
+    if (!allIds.find((el) => el.id === id && el.__component === componentUID)) {
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
@@ -311,9 +311,9 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   type IdsToDelete = DynamicZoneValue;
 
-  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
-      acc.push({ id, __component });
+  const idsToDelete = allIds.reduce((acc, { id, __component: componentUID }) => {
+    if (!idsToKeep.find((el) => el.id === id && el.__component === componentUID)) {
+      acc.push({ id, __component: componentUID });
     }
 
     return acc;
@@ -321,8 +321,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {
-      const { id, __component } = idToDelete;
-      await deleteComponent(__component, { id });
+      const { id, __component: componentUID } = idToDelete;
+      await deleteComponent(componentUID, { id });
     }
   }
 };
@@ -373,7 +373,10 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(uid: TUID, data: Input<TUID>) => {
+const createComponent = async <TUID extends UID.Component>(
+  uid: TUID,
+  data: Input<TUID>
+): Promise<Data.Component<TUID>> => {
   const schema = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);

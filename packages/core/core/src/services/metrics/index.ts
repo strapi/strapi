@@ -9,6 +9,7 @@ import wrapWithRateLimit from './rate-limiter';
 import createSender from './sender';
 import createMiddleware from './middleware';
 import isTruthy from './is-truthy';
+import { MCP_LIMITED_TELEMETRY_EVENTS } from '../mcp/metrics/metrics';
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',
@@ -16,6 +17,7 @@ const LIMITED_EVENTS = [
   'didDisableResponsiveDimensions',
   'didEnableResponsiveDimensions',
   'didInitializePluginUpload',
+  ...Object.values(MCP_LIMITED_TELEMETRY_EVENTS),
 ];
 
 const createTelemetryInstance = (strapi: Core.Strapi) => {
@@ -24,8 +26,9 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
   const isDisabled =
     !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
-  const sender = createSender(strapi);
-  const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
+  // Skip the sender (and its tsUtils consumer) entirely when telemetry is off
+  const sender = isDisabled ? null : createSender(strapi);
+  const sendEvent = sender ? wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS }) : null;
 
   return {
     get isDisabled() {
@@ -33,7 +36,7 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
     },
 
     register() {
-      if (!isDisabled) {
+      if (!isDisabled && sendEvent) {
         strapi.cron.add({
           sendPingEvent: {
             task: () => sendEvent('ping'),
@@ -48,7 +51,7 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
     bootstrap() {},
 
     async send(event: string, payload: Record<string, unknown> = {}) {
-      if (isDisabled) return true;
+      if (isDisabled || !sendEvent) return true;
       return sendEvent(event, payload);
     },
 

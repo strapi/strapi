@@ -1,7 +1,5 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
-
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 const { createAuthRequest } = require('api-tests/request');
@@ -32,6 +30,22 @@ const product = {
   collectionName: '',
 };
 
+/** Isolated type for GH #26030 (many rows, identical created_at); keeps product tests on 5 rows. */
+const paginationTieUid = 'api::paginationtie.paginationtie';
+const paginationTie = {
+  attributes: {
+    name: {
+      type: 'string',
+      required: true,
+    },
+  },
+  displayName: 'PaginationTie',
+  singularName: 'paginationtie',
+  pluralName: 'paginationties',
+  description: '',
+  collectionName: '',
+};
+
 const createProduct = async (product) => {
   const res = await rq({
     method: 'POST',
@@ -57,7 +71,7 @@ const getProducts = async ({ page, pageSize }) => {
 
 describe('CM API - Pagination', () => {
   beforeAll(async () => {
-    await builder.addContentType(product).build();
+    await builder.addContentType(product).addContentType(paginationTie).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -69,7 +83,14 @@ describe('CM API - Pagination', () => {
       createProduct({ name: 'Product 4' }),
       createProduct({ name: 'Product 5' }),
     ]);
-  });
+
+    const tieCount = 100;
+    await strapi.db
+      .query(paginationTieUid)
+      .createMany({ data: Array.from({ length: tieCount }, (_, i) => ({ name: `row-${i}` })) });
+    const { tableName } = strapi.db.metadata.get(paginationTieUid);
+    await strapi.db.connection(tableName).update({ created_at: '2020-01-01 00:00:00.000' });
+  }, 120000);
 
   afterAll(async () => {
     await strapi.destroy();
@@ -114,5 +135,41 @@ describe('CM API - Pagination', () => {
     expect(products).toHaveLength(2);
     // Products should be Product 4, Product 5
     expect(products).toMatchObject([{ name: 'Product 4' }, { name: 'Product 5' }]);
+  });
+
+  // GH #26030: without a deterministic ORDER BY (e.g. MySQL), pages could repeat rows; SQL fix is covered in @strapi/database unit tests.
+  test('pagination across many documents does not repeat documentIds (no sort)', async () => {
+    const pageSize = 10;
+    const seen = new Set();
+    let page = 1;
+    let totalFromMeta = null;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/${paginationTieUid}`,
+        qs: { page, pageSize },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const { results, pagination } = res.body;
+
+      if (totalFromMeta === null) {
+        totalFromMeta = pagination.total;
+      }
+
+      for (const doc of results) {
+        expect(seen.has(doc.documentId)).toBe(false);
+        seen.add(doc.documentId);
+      }
+
+      if (page >= pagination.pageCount) {
+        break;
+      }
+      page += 1;
+    }
+
+    expect(seen.size).toBe(totalFromMeta);
   });
 });

@@ -1,5 +1,5 @@
 import { render, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { ProfilePage } from '../ProfilePage';
 
@@ -53,14 +53,12 @@ describe('Profile page', () => {
 
   it('should not display the change password section and all the fields if the user role is Locked', async () => {
     server.use(
-      rest.get('/admin/providers/isSSOLocked', (req, res, ctx) => {
-        return res.once(
-          ctx.json({
-            data: {
-              isSSOLocked: true,
-            },
-          })
-        );
+      http.get('/admin/providers/isSSOLocked', () => {
+        return HttpResponse.json({
+          data: {
+            isSSOLocked: true,
+          },
+        });
       })
     );
 

@@ -1,7 +1,7 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
@@ -27,14 +27,14 @@ jest.mock('@strapi/content-manager/strapi-admin', () => ({
 describe.skip('Releases details page', () => {
   it('renders the details page with no release-actions', async () => {
     server.use(
-      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.noActionsHeaderData))
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.noActionsHeaderData)
       )
     );
 
     server.use(
-      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.noActionsBodyData))
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.noActionsBodyData)
       )
     );
 
@@ -92,14 +92,14 @@ describe.skip('Releases details page', () => {
     }));
 
     server.use(
-      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.noActionsHeaderData))
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.noActionsHeaderData)
       )
     );
 
     server.use(
-      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.noActionsBodyData))
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.noActionsBodyData)
       )
     );
 
@@ -132,14 +132,14 @@ describe.skip('Releases details page', () => {
 
   it('renders as many tables as there are in the response', async () => {
     server.use(
-      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withActionsHeaderData)
       )
     );
 
     server.use(
-      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withMultipleActionsBodyData)
       )
     );
 
@@ -164,14 +164,14 @@ describe.skip('Releases details page', () => {
 
   it('shows the right status for unpublished release', async () => {
     server.use(
-      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withActionsHeaderData)
       )
     );
 
     server.use(
-      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withMultipleActionsBodyData)
       )
     );
 
@@ -209,14 +209,14 @@ describe.skip('Releases details page', () => {
 
   it('shows the right release status for published release', async () => {
     server.use(
-      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withActionsAndPublishedHeaderData))
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withActionsAndPublishedHeaderData)
       )
     );
 
     server.use(
-      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
-        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(mockReleaseDetailsPageData.withMultipleActionsBodyData)
       )
     );
 

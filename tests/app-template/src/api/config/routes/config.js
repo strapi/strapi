@@ -20,6 +20,14 @@ module.exports = {
     },
     {
       method: 'POST',
+      path: '/config/permissions/resync-super-admin',
+      handler: 'config.permissionsResyncSuperAdmin',
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'POST',
       path: '/config/resettransfertoken',
       handler: 'config.resetTransferToken',
       config: {

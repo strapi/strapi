@@ -1,20 +1,34 @@
 import { test, expect } from '@playwright/test';
 import { sharedSetup } from '../../../utils/setup';
 import { STRAPI_GUIDED_TOUR_CONFIG, setGuidedTourLocalStorage } from '../../../utils/global-setup';
-import { clickAndWait, describeOnCondition } from '../../../utils/shared';
+import {
+  clickAndWait,
+  clickGuidedTourDialogNext,
+  describeOnCondition,
+  waitForGuidedTourOverviewReady,
+  waitForGuidedTourCompletedInStorage,
+} from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+const GUIDED_TOUR_COLLECTION_DISPLAY_NAME = 'guided tour';
+
+/** Expected Content Manager URL for the collection type created in this spec (keep aligned with display name / CTB UID). */
+const GUIDED_TOUR_COLLECTION_CONTENT_MANAGER_URL =
+  /.*\/admin\/content-manager\/collection-types\/api::guided-tour\.guided-tour.*/;
+
 describeOnCondition(edition !== 'EE')('Guided tour', () => {
-  test.use({ viewport: { width: 1920, height: 1080 } });
+  // Explicit size + scale so local headed runs match CI; tour popovers sit near the bottom edge.
+  test.use({ deviceScaleFactor: 1, viewport: { width: 1920, height: 1200 } });
   test.beforeEach(async ({ page }) => {
     await setGuidedTourLocalStorage(page, { ...STRAPI_GUIDED_TOUR_CONFIG, enabled: true });
 
-    await sharedSetup('guided-tour', page, {
+    await sharedSetup('guided-tour-admin', page, {
       login: true,
       resetFiles: true,
       importData: 'with-admin',
+      resetAlways: true,
     });
   });
 
@@ -32,41 +46,39 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     /**
      * Content Type Builder
      */
-    await clickAndWait(
-      page,
-      page.getByRole('listitem', { name: 'Create your schema' }).getByRole('link', {
-        name: 'Start',
-      })
-    );
+    await waitForGuidedTourOverviewReady(page);
+    const startCtbTourLink = page
+      .getByRole('listitem', { name: 'Create your schema' })
+      .getByRole('link', { name: 'Start' });
+    await expect(startCtbTourLink).toBeEnabled();
+    // Avoid clickAndWait's networkidle here: the admin SPA often never reaches "idle" (polling),
+    // and the overview can mount after guided-tour-meta — wait for route + CTB dialog instead.
+    await Promise.all([
+      page.waitForURL(/\/plugins\/content-type-builder/, { timeout: 30_000 }),
+      startCtbTourLink.click(),
+    ]);
+    await expect(
+      page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
+    ).toBeVisible();
     const nextButton = page.getByRole('button', { name: 'Next' });
     const gotItButton = page.getByRole('button', { name: 'Got it' });
 
-    await page
-      .getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
-      .getByRole('button', { name: 'Next' })
-      .click();
-    await page
-      .getByRole('dialog', { name: 'Collection Types' })
-      .getByRole('button', { name: 'Next' })
-      .click();
-    await page
-      .getByRole('dialog', { name: 'Single Types' })
-      .getByRole('button', { name: 'Next' })
-      .click();
-    await page
-      .getByRole('dialog', { name: 'Components' })
-      .getByRole('button', { name: 'Next' })
-      .click();
-    await page
-      .getByRole('dialog', { name: 'Your turn — Build something!' })
-      .getByRole('button', { name: 'Next' })
-      .click();
+    await clickGuidedTourDialogNext(page, 'Welcome to the Content-Type Builder!');
+    await clickGuidedTourDialogNext(page, 'Collection Types');
+    await clickGuidedTourDialogNext(page, 'Single Types');
+    await clickGuidedTourDialogNext(page, 'Components');
+    await clickGuidedTourDialogNext(page, 'Your turn — Build something!');
 
-    // Create collection type
+    // Create collection type — Continue persists the type and moves to the schema editor; wait for network
+    // so the guided tour can attach the next step before we assert on the dialog (fast runners can race otherwise).
     await page.getByRole('button', { name: 'Create new collection type' }).click();
-    await page.getByRole('textbox', { name: 'Display name' }).fill('Test');
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page
+      .getByRole('textbox', { name: 'Display name' })
+      .fill(GUIDED_TOUR_COLLECTION_DISPLAY_NAME);
+    await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
+    // Empty schema list + tour anchor must mount before the popover dialog; meta/localStorage races otherwise.
+    await expect(page.getByRole('button', { name: 'Add new field' }).last()).toBeVisible();
     await expect(
       page.getByRole('dialog', { name: 'Add a field to bring it to life' })
     ).toBeVisible();
@@ -88,7 +100,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     await expect(page.getByRole('dialog', { name: 'First Step: Done! 🎉' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
-    await expect(page).toHaveURL(/.*\/admin\/content-manager\/collection-types\/api::test.test.*/);
+    await expect(page).toHaveURL(GUIDED_TOUR_COLLECTION_CONTENT_MANAGER_URL);
     await page.goto('/admin');
 
     await expect(
@@ -189,7 +201,10 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
         })
     );
 
-    await page.goto('/admin');
+    // Do not `page.goto('/admin')` here: we are already on the homepage after the API tokens step.
+    // A full reload rehydrates from localStorage; React can show "Done" before STRAPI_GUIDED_TOUR
+    // is flushed, so reload would wipe the Deploy row back to incomplete.
+    await waitForGuidedTourCompletedInStorage(page, 'strapiCloud');
 
     await expect(
       page

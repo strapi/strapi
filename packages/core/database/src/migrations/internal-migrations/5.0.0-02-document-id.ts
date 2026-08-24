@@ -19,6 +19,13 @@ import type { Migration } from '../common';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
 
+function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
+  const client = trx.client.config.client;
+  const isSQLite =
+    typeof client === 'string' && ['sqlite', 'sqlite3', 'better-sqlite3'].includes(client);
+  return isSQLite ? Math.min(defaultSize, 250) : defaultSize;
+}
+
 interface Params {
   joinColumn: string;
   inverseJoinColumn: string;
@@ -129,24 +136,39 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
 
 // Migrate document ids for tables that don't have localizations
 const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
-  let updatedRows: number;
+  const batchSize = getBatchSize(knex);
+  let recordsLeft = +(
+    await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id')
+  )[0].recordsLeft;
+  while (recordsLeft > 0) {
+    const currentBatchSize = recordsLeft < batchSize ? recordsLeft : batchSize;
+    const updateRecords = (
+      await knex(meta.tableName).select('id').whereNull('document_id').limit(currentBatchSize)
+    ).map((item) => ({ id: item.id, document_id: createId() }));
+    await knex(meta.tableName).insert(updateRecords).onConflict('id').merge();
+    recordsLeft -= updateRecords.length;
+  }
+};
 
-  do {
-    updatedRows = await knex(meta.tableName)
-      .update({ document_id: createId() })
-      .whereIn(
-        'id',
-        knex(meta.tableName)
-          .select('id')
-          .from(knex(meta.tableName).select('id').whereNull('document_id').limit(1).as('sub_query'))
-      );
-  } while (updatedRows > 0);
+const isDuplicateColumnError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const e = error as { code?: string; errno?: number; message?: string };
+  if (e.code === '42701') return true;
+  if (e.errno === 1060) return true;
+  if (typeof e.message === 'string' && /duplicate column/i.test(e.message)) return true;
+  return false;
 };
 
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
-  await knex.schema.alterTable(tableName, (table) => {
-    table.string('document_id');
-  });
+  try {
+    await knex.schema.alterTable(tableName, (table) => {
+      table.string('document_id');
+    });
+  } catch (error) {
+    if (!isDuplicateColumnError(error)) {
+      throw error;
+    }
+  }
 };
 
 const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
@@ -166,14 +188,11 @@ export const createdDocumentId: Migration = {
       }
 
       if ('documentId' in meta.attributes) {
-        // add column if doesn't exist
         const hasDocumentIdColumn = await knex.schema.hasColumn(meta.tableName, 'document_id');
 
-        if (hasDocumentIdColumn) {
-          continue;
+        if (!hasDocumentIdColumn) {
+          await createDocumentIdColumn(knex, meta.tableName);
         }
-
-        await createDocumentIdColumn(knex, meta.tableName);
 
         if (await hasLocalizationsJoinTable(knex, meta.tableName)) {
           await migrateDocumentIdsWithLocalizations(db, knex, meta);

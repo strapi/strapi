@@ -240,7 +240,7 @@ const EditPage = () => {
           navigate(`../${res.data.id}`, { replace: true });
         }
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -391,7 +391,7 @@ const EditPage = () => {
                     disabled={!modified || isSubmitting || values.stages.length === 0}
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already
-                    loading={!Boolean(Object.keys(savePrompts).length > 0) && isSubmitting}
+                    loading={Object.keys(savePrompts).length === 0 && isSubmitting}
                     fullWidth
                   >
                     {formatMessage({
@@ -479,14 +479,14 @@ const EditPage = () => {
       >
         <LimitsModal.Title>
           {formatMessage({
-            id: 'review-workflows.edit.page.workflows.limit.title',
+            id: 'review-workflows.workflows.limit.title',
             defaultMessage: 'You’ve reached the limit of workflows in your plan',
           })}
         </LimitsModal.Title>
 
         <LimitsModal.Body>
           {formatMessage({
-            id: 'review-workflows.edit.page.workflows.limit.body',
+            id: 'review-workflows.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
           })}
         </LimitsModal.Body>
@@ -498,14 +498,14 @@ const EditPage = () => {
       >
         <LimitsModal.Title>
           {formatMessage({
-            id: 'review-workflows.edit.page.stages.limit.title',
+            id: 'review-workflows.stages.limit.title',
             defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
           })}
         </LimitsModal.Title>
 
         <LimitsModal.Body>
           {formatMessage({
-            id: 'review-workflows.edit.page.stages.limit.body',
+            id: 'review-workflows.stages.limit.body',
             defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
         </LimitsModal.Body>

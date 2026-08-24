@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "Yüklenen dosya azami dosya boyutunu aşıyor.",
+  "apiError.FileTooBig": "Dosya yüklenemeyecek kadar büyük. Sunucunun izin verdiği en yüksek istek boyutunu aşıyor.",
   "upload.generic-error": "Dosyayı yüklerken bir hata oluştu.",
   "bulk.select.label": "Tüm dosyaları seçin",
   "button.next": "İleri",

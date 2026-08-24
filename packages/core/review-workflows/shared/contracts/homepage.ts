@@ -10,8 +10,8 @@ export interface RecentDocument {
   locale: string | null;
   status?: 'draft' | 'published' | 'modified';
   title: string;
-  updatedAt: Date;
-  publishedAt?: Date | null;
+  updatedAt: string;
+  publishedAt?: string | null;
   strapi_stage?: {
     color?: string;
     name: string;

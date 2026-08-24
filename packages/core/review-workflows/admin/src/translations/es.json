@@ -7,5 +7,6 @@
   "settings.not-available": "Flujos de revisión sólo está disponible como parte de la Edición Enterprise. Actualiza para crear y gestionar flujos.",
   "settings.review-workflows.workflow.stageRequiredToPublish.label": "Etapa necesaria para la publicación",
   "settings.review-workflows.workflow.stageRequiredToPublish.any": "Cualquier etapa",
-  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Impide que se publiquen las entradas si no están en la fase requerida."
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Impide que se publiquen las entradas si no están en la fase requerida.",
+  "stage.label": "Fase de revisión"
 }

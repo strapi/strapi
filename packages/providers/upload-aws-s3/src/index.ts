@@ -15,7 +15,7 @@ import {
   StorageClass,
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -87,7 +87,7 @@ export type UploadCommandOutput = (
   | CompleteMultipartUploadCommandOutput
   | AbortMultipartUploadCommandOutput
 ) & {
-  Location: string;
+  Location?: string;
   ETag?: string;
 };
 
@@ -140,8 +140,9 @@ export interface DefaultOptions extends S3ClientConfig {
   // TODO Remove this in V5
   accessKeyId?: AwsCredentialIdentity['accessKeyId'];
   secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
-  // Keep this for V5
-  credentials?: AwsCredentialIdentity;
+  // Keep this for V5. Accepts either static credentials or an AWS credential
+  // provider function, which the SDK resolves (and refreshes) at runtime.
+  credentials?: AwsCredentialIdentity | AwsCredentialIdentityProvider;
   params?: AWSParams;
   [k: string]: unknown;
 }
@@ -410,6 +411,14 @@ export default {
     /**
      * Constructs the correct file URL.
      * Handles S3-compatible providers that return incorrect Location formats.
+     *
+     * Some providers (IONOS, some MinIO configs) return malformed Location
+     * values like "bucket/key" without protocol or domain. For these, we
+     * fall back to constructing the URL from the endpoint config.
+     *
+     * Other providers (AWS, Scaleway, DigitalOcean, Backblaze) return
+     * correct Location URLs that should be trusted as-is, since they
+     * already use the correct URL style (virtual-hosted or path-style).
      */
     const constructFileUrl = (fileKey: string, uploadLocation: string): string => {
       // Priority 1: Use baseUrl if configured (CDN or custom domain)
@@ -418,9 +427,18 @@ export default {
         return `${cleanBase}/${fileKey}`;
       }
 
-      // Priority 2: Construct URL from endpoint if configured
-      // This fixes issues with S3-compatible providers (IONOS, MinIO, etc.)
-      // that return Location in incorrect format for multipart uploads
+      // Priority 2: Use the Location from S3 response if it's a valid URL.
+      // This preserves correct behavior for providers that return proper URLs
+      // (AWS, Scaleway, DigitalOcean, Backblaze, etc.), respecting their
+      // native URL format (virtual-hosted or path-style).
+      if (uploadLocation && assertUrlProtocol(uploadLocation)) {
+        return uploadLocation;
+      }
+
+      // Priority 3: Construct URL from endpoint if configured.
+      // This is a fallback for providers that return malformed Location values
+      // (e.g., IONOS returns "bucket/key" without protocol for multipart uploads,
+      // some MinIO configs return similar malformed values).
       const endpoint = config.endpoint?.toString();
       if (endpoint) {
         const endpointUrl = endpoint.startsWith('http') ? endpoint : `https://${endpoint}`;
@@ -428,13 +446,13 @@ export default {
         return `${cleanEndpoint}/${config.params.Bucket}/${fileKey}`;
       }
 
-      // Priority 3: Use the Location from S3 response
-      if (assertUrlProtocol(uploadLocation)) {
-        return uploadLocation;
+      // Priority 4: Prepend https if Location exists but lacks protocol
+      if (uploadLocation) {
+        return `https://${uploadLocation}`;
       }
 
-      // Priority 4: Prepend https if protocol is missing
-      return `https://${uploadLocation}`;
+      // Priority 5: Construct from AWS default pattern
+      return `https://${config.params.Bucket}.s3.amazonaws.com/${fileKey}`;
     };
 
     const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
@@ -468,10 +486,8 @@ export default {
       const uploadObj = new Upload(uploadOptions);
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
-      // Store ETag for potential future conditional updates
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');
       }
@@ -499,8 +515,7 @@ export default {
 
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');
@@ -596,6 +611,48 @@ export default {
        */
       upload(file: File, customParams = {}) {
         return upload(file, customParams);
+      },
+
+      /**
+       * Replaces an existing object in S3. Since `PutObject` with the same key
+       * overwrites the existing object, this is just an upload of the new file
+       * — and if the key changed, we delete the old object afterwards so we
+       * never leave the bucket in a state where the asset is missing.
+       */
+      async replaceStream(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
+      },
+
+      async replace(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
       },
 
       /**

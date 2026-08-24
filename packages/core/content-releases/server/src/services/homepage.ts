@@ -13,7 +13,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             $notNull: false,
           },
         },
-        orderBy: [{ scheduledAt: 'asc' }],
+        // `scheduledAt` is often null; tie-break by `id` so order is stable across DBs/engines.
+        // (E2E and the admin widget assume a predictable first row in that case — see with-admin seed.)
+        orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
         limit: MAX_DOCUMENTS,
       });
 

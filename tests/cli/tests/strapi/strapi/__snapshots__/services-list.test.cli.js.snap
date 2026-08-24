@@ -44,6 +44,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::i18n.ai-localizations                        │
 │ plugin::i18n.ai-localization-jobs                    │
 │ plugin::i18n.settings                                │
+│ plugin::i18n.fill-from-locale                        │
 │ plugin::documentation.documentation                  │
 │ plugin::documentation.override                       │
 │ plugin::graphql.builders                             │
@@ -70,6 +71,8 @@ exports[`services:list should output list of services 1`] = `
 │ api::country.country                                 │
 │ api::homepage.homepage                               │
 │ api::product.product                                 │
+│ api::relation-lab.relation-lab                       │
+│ api::relation-target.relation-target                 │
 │ api::shop.shop                                       │
 │ api::single-type-localized.single-type-localized     │
 │ api::single-type-non-local.single-type-non-local     │
@@ -89,6 +92,8 @@ exports[`services:list should output list of services 1`] = `
 │ admin::condition                                     │
 │ admin::action                                        │
 │ admin::api-token                                     │
+│ admin::api-token-content-api                         │
+│ admin::api-token-admin                               │
 │ admin::transfer                                      │
 │ admin::project-settings                              │
 │ admin::encryption                                    │

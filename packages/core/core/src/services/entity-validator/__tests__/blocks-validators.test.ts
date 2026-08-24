@@ -1,5 +1,7 @@
-import strapiUtils, { errors } from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import { Validators } from '../validators';
+
+const { errors } = strapiUtils;
 
 const validParagraph = [
   {
@@ -55,6 +57,16 @@ const validImage = [
       provider_metadata: null,
       createdAt: '2023-08-24T09:43:30.065Z',
       updatedAt: '2023-08-24T09:43:30.065Z',
+    },
+  },
+];
+const validImageWithNullFormats = [
+  {
+    type: 'image',
+    children: [{ type: 'text', text: '' }],
+    image: {
+      ...validImage[0].image,
+      formats: null,
     },
   },
 ];
@@ -182,7 +194,7 @@ const validLists = [
 const validCodeBlock = [
   {
     type: 'code',
-    syntax: 'javascript',
+    language: 'javascript',
     children: [{ type: 'text', text: 'const test = "whatever"' }],
   },
 ];
@@ -354,6 +366,17 @@ describe('Blocks validator', () => {
       );
       expect(await validator(validImage)).toEqual(validImage);
     });
+    it('Should accept an image with null formats (small image without responsive formats)', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
+          {
+            attr: { type: 'blocks' },
+          },
+          { isDraft: false }
+        )
+      );
+      expect(await validator(validImageWithNullFormats)).toEqual(validImageWithNullFormats);
+    });
     it('Should throw an error given an invalid image schema', async () => {
       const validator = strapiUtils.validateYupSchema(
         Validators.blocks(
@@ -404,7 +427,7 @@ describe('Blocks validator', () => {
         validator([
           {
             type: 'code',
-            syntax: 'javascript',
+            language: 'javascript',
             children: [{ type: 'link', text: 'const test = "whatever"' }],
           },
         ])

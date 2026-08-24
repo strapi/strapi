@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.41.1",
+  "version": "5.52.1",
   "description": "Strapi's permission layer.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -36,25 +36,28 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@casl/ability": "6.7.5",
-    "@strapi/utils": "5.41.1",
-    "lodash": "4.17.23",
-    "qs": "6.15.0",
+    "@strapi/utils": "5.52.1",
+    "lodash": "4.18.1",
+    "qs": "6.15.3",
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.41.1",
-    "tsconfig": "5.41.1"
+    "@types/node": "20.19.41",
+    "eslint-config-custom": "5.52.1",
+    "tsconfig": "5.52.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.52.1"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -31,7 +31,7 @@ export interface File {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   isUrlSigned?: boolean;
-  folder?: number;
+  folder?: number | null;
   folderPath?: string;
   related?: {
     id: string | number;
@@ -65,6 +65,18 @@ export interface Config {
   sizeLimit?: number;
   providerOptions: Record<string, unknown>;
   actionOptions: Record<string, unknown>;
+  sharp?: {
+    cache?: boolean;
+    concurrency?: number;
+  };
+  /** Server-side ceiling: files processed in parallel within a single request. */
+  concurrentUploadSize?: number;
+  /** Client-side parallelism: how many upload requests the admin fires at once. */
+  concurrentUploadRequests?: number;
+  security?: {
+    allowedTypes?: string[];
+    deniedTypes?: string[];
+  };
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
@@ -80,5 +92,5 @@ export type FileInfo = {
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;
-  folder?: number;
+  folder?: number | null;
 };

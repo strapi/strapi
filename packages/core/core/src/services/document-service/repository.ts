@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
+import { omit, assoc, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -24,9 +24,11 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
+import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -367,7 +369,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function deleteDocument(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    const query = await async.pipe(
+    const lookupQuery = await async.pipe(
       validateParams,
       omit('status'),
       i18n.defaultLocale(contentType),
@@ -376,15 +378,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
 
+    const selectionQuery = await async.pipe(
+      validateParams,
+      omit('status'),
+      pickSelectionParams,
+      transformParamsToQuery(uid)
+    )(params);
+
     if (hasDraftAndPublish && params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
-    const entriesToDelete = await strapi.db.query(uid).findMany(query);
+    const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
-    // Delete all matched entries and its components
     const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
-      entries.delete(entryToDelete.id)
+      entries.delete(entryToDelete.id, selectionQuery)
     );
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
@@ -393,7 +401,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function create(opts = {} as any) {
-    const { documentId, ...params } = opts;
+    const { documentId: _documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
       validateParams,
@@ -440,16 +448,42 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
+    const newDocumentId = createDocumentId();
+
     const clonedEntries = await async.map(
       entriesToClone,
-      async.pipe(
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
+      async (entryToClone: Record<string, unknown>) => {
+        const sourceEntryId = entryToClone.id as number;
+        const originalData = omit(['id', 'createdAt', 'updatedAt'], entryToClone) as Record<
+          string,
+          unknown
+        >;
+        const { data, relationsToCopy } = await prepareCloneData(
+          originalData,
+          queryParams.data,
+          contentType,
+          (modelUid) => strapi.getModel(modelUid as UID.Schema)
+        );
+        const dataWithDocumentId = assoc('documentId', newDocumentId, data);
+        const doc = await entries.create({
+          ...queryParams,
+          data: dataWithDocumentId,
+          status: 'draft',
+        });
+
+        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
+
+        if (relationsToCopy.length === 0) {
+          return doc;
+        }
+
+        const selectionQuery = transformParamsToQuery(
+          uid,
+          pickSelectionParams({ ...queryParams, status: 'draft' }) as any
+        );
+
+        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+      }
     );
 
     clonedEntries.forEach(emitEvent('entry.create'));
@@ -473,7 +507,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
+    const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
@@ -577,6 +611,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
+    const selfRelationsToSync = await selfReferentialRelations.load(
+      uid,
+      draftsToPublish,
+      'published'
+    );
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -601,6 +641,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldPublishedVersions, ...updatedDraft],
       publishedEntries,
       bidirectionalRelationsToSync
+    );
+
+    // Map both old published IDs and updated draft IDs to the new published entries.
+    await selfReferentialRelations.sync(
+      [...oldPublishedVersions, ...updatedDraft],
+      publishedEntries,
+      selfRelationsToSync
     );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
@@ -673,6 +720,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
+
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
@@ -692,6 +741,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldDrafts, ...versionsToDraft],
       draftEntries,
       bidirectionalRelationsToSync
+    );
+
+    // Map both old draft IDs and published source IDs to the new draft entries.
+    await selfReferentialRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      selfRelationsToSync
     );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
