@@ -81,23 +81,72 @@ const uploadProgressSlice = createSlice({
       state.errors = [];
       state.uploadId += 1;
     },
-    setFileUploading(state, action: PayloadAction<{ name: string; index: number; size: number }>) {
-      const { index, size } = action.payload;
+    /**
+     * Rows for a second drop, joined to the batch already uploading. Indices
+     * continue from the current length so the earlier drop's in-flight uploads
+     * keep addressing their own rows.
+     */
+    appendUploadFiles(
+      state,
+      action: PayloadAction<{
+        uploadId: number;
+        fileNames: string[];
+        fileSizes?: number[];
+      }>
+    ) {
+      if (action.payload.uploadId !== state.uploadId) {
+        return;
+      }
+
+      const offset = state.files.length;
+
+      state.files.push(
+        ...action.payload.fileNames.map((name, i) => ({
+          name,
+          index: offset + i,
+          status: 'pending' as FileProgressStatus,
+          size: action.payload.fileSizes?.[i] ?? 0,
+          uploadedBytes: 0,
+        }))
+      );
+
+      state.totalFiles += action.payload.fileNames.length;
+      // The dialog may have been dismissed while the first drop was running.
+      state.isVisible = true;
+      state.isMinimized = false;
+    },
+    setFileUploading(
+      state,
+      action: PayloadAction<{ name: string; index: number; size: number; uploadId: number }>
+    ) {
+      const { index, size, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
       if (state.files[index]) {
         state.files[index].status = 'uploading';
         state.files[index].size = size;
       }
     },
-    setFileProgress(state, action: PayloadAction<{ index: number; bytes: number }>) {
-      const { index, bytes } = action.payload;
+    setFileProgress(
+      state,
+      action: PayloadAction<{ index: number; bytes: number; uploadId: number }>
+    ) {
+      const { index, bytes, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
       const file = state.files[index];
       if (file) {
         // Clamp to the known file size so the aggregate can never exceed 100%.
         file.uploadedBytes = Math.min(bytes, file.size);
       }
     },
-    setFileComplete(state, action: PayloadAction<{ index: number; file: File }>) {
-      const { index, file } = action.payload;
+    setFileComplete(state, action: PayloadAction<{ index: number; file: File; uploadId: number }>) {
+      const { index, file, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
       if (state.files[index]) {
         state.files[index].status = 'complete';
         state.files[index].file = file;
@@ -105,8 +154,14 @@ const uploadProgressSlice = createSlice({
         state.files[index].uploadedBytes = state.files[index].size;
       }
     },
-    setFileError(state, action: PayloadAction<{ index: number; name: string; message: string }>) {
-      const { index, name, message } = action.payload;
+    setFileError(
+      state,
+      action: PayloadAction<{ index: number; name: string; message: string; uploadId: number }>
+    ) {
+      const { index, name, message, uploadId } = action.payload;
+      if (uploadId !== state.uploadId) {
+        return;
+      }
       if (state.files[index]) {
         state.files[index].status = 'error';
         state.files[index].error = message;
@@ -332,6 +387,7 @@ export const selectMetadataOutcome = createSelector(
 
 export const {
   openUploadProgress,
+  appendUploadFiles,
   setFileUploading,
   setFileProgress,
   setFileComplete,
@@ -345,5 +401,12 @@ export const {
   setUploadFailed,
   retryCancelledFiles,
 } = uploadProgressSlice.actions;
+
+/**
+ * The merge/reset switch. Errored and cancelled rows count as settled, so a
+ * batch that finished badly is still replaced by the next drop.
+ */
+export const isUploadInFlight = (files: ReadonlyArray<{ status: FileProgressStatus }>): boolean =>
+  files.some((f) => f.status === 'pending' || f.status === 'uploading');
 
 export const uploadProgressReducer = uploadProgressSlice.reducer;
