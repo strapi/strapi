@@ -327,5 +327,64 @@ describe('File source provider', () => {
       spy.mockRestore();
       await fs.remove(tarPath).catch(() => {});
     }, 8000);
+
+    // A sidecar lookup reopens the archive, so an ENOENT on that reopen means the archive
+    // itself is gone — not that the sidecar entry is absent.
+    test('aborts the assets stream when the archive disappears between sidecar scans', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+        {
+          name: 'assets/metadata/photo.jpg.json',
+          content: JSON.stringify({
+            id: 1,
+            hash: 'photo',
+            name: 'photo.jpg',
+            mime: 'image/jpeg',
+            size: 1,
+            url: '/photo.jpg',
+          }),
+        },
+      ]);
+
+      const originalCreateReadStream = fs.createReadStream.bind(fs);
+      let opens = 0;
+      const spy = jest.spyOn(fs, 'createReadStream').mockImplementation((filePath, options) => {
+        opens += 1;
+        if (opens >= 3) {
+          const failed = new PassThrough();
+          process.nextTick(() => {
+            failed.destroy(
+              Object.assign(new Error(`ENOENT: no such file or directory, open '${tarPath}'`), {
+                code: 'ENOENT',
+              })
+            );
+          });
+          return failed;
+        }
+        return originalCreateReadStream(filePath, options);
+      });
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report: jest.fn() } as never);
+
+      const stream = provider.createAssetsReadStream();
+      await expect(collectAssets(stream as NodeJS.ReadableStream)).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+
+      spy.mockRestore();
+      await fs.remove(tarPath).catch(() => {});
+    }, 8000);
   });
 });

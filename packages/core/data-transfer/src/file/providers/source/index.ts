@@ -18,7 +18,6 @@ import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import {
   buildFallbackAssetMetadataFromFilename,
-  isMissingAssetMetadataSidecarError,
   MissingArchiveEntryError,
   missingAssetMetadataSidecarMessage,
 } from '../../../utils/asset-metadata-fallback';
@@ -249,7 +248,9 @@ class LocalFileSourceProvider implements ISourceProvider {
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
               } catch (error) {
-                if (!isMissingAssetMetadataSidecarError(error)) {
+                // Absence in an archive is only ever the typed sentinel: each lookup reopens
+                // the archive, so a raw ENOENT means the archive itself became unreadable.
+                if (!(error instanceof MissingArchiveEntryError)) {
                   throw error;
                 }
                 reportWarning(missingAssetMetadataSidecarMessage(file));

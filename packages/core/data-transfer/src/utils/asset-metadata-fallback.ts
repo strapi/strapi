@@ -64,20 +64,3 @@ export const buildFallbackAssetMetadataFromFilename = (
 
 export const missingAssetMetadataSidecarMessage = (filename: string): string =>
   `[Data transfer] Missing asset metadata sidecar for "${filename}"; using filename-derived fallback metadata. File bytes will still be transferred.`;
-
-/**
- * True when asset metadata sidecar loading failed because the sidecar is absent.
- * Directory sources surface `ENOENT`; tar/file sources reject with `MissingArchiveEntryError`.
- * Other failures (malformed JSON, permissions, I/O) must abort the transfer.
- */
-export const isMissingAssetMetadataSidecarError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') {
-    return false;
-  }
-
-  if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-    return true;
-  }
-
-  return error instanceof MissingArchiveEntryError;
-};

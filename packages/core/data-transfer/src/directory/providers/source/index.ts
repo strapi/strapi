@@ -15,7 +15,6 @@ import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import {
   buildFallbackAssetMetadataFromFilename,
-  isMissingAssetMetadataSidecarError,
   missingAssetMetadataSidecarMessage,
 } from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -198,7 +197,9 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         try {
           metadata = await this.#readAssetMetadata(name);
         } catch (error) {
-          if (!isMissingAssetMetadataSidecarError(error)) {
+          // Only a missing file is recoverable; malformed JSON, permissions and other I/O
+          // failures must abort the transfer.
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
             throw error;
           }
           this.#reportWarning(missingAssetMetadataSidecarMessage(name));

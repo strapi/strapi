@@ -1,8 +1,4 @@
-import {
-  buildFallbackAssetMetadataFromFilename,
-  isMissingAssetMetadataSidecarError,
-  MissingArchiveEntryError,
-} from '../asset-metadata-fallback';
+import { buildFallbackAssetMetadataFromFilename } from '../asset-metadata-fallback';
 
 describe('buildFallbackAssetMetadataFromFilename', () => {
   test('derives hash, ext, and mime from export-style filename', () => {
@@ -47,31 +43,5 @@ describe('buildFallbackAssetMetadataFromFilename', () => {
       mainHash: 'we_love_pizza_abc123',
       mime: 'image/jpeg',
     });
-  });
-});
-
-describe('isMissingAssetMetadataSidecarError', () => {
-  test('accepts ENOENT from directory sources', () => {
-    const error = Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
-    expect(isMissingAssetMetadataSidecarError(error)).toBe(true);
-  });
-
-  test('accepts typed tar missing-entry errors', () => {
-    expect(
-      isMissingAssetMetadataSidecarError(new MissingArchiveEntryError('assets/metadata/x.json'))
-    ).toBe(true);
-  });
-
-  test('rejects message-only "not found" errors and other failures', () => {
-    expect(
-      isMissingAssetMetadataSidecarError(new Error('File "assets/metadata/x.json" not found'))
-    ).toBe(false);
-    expect(isMissingAssetMetadataSidecarError(new SyntaxError('Unexpected token'))).toBe(false);
-    expect(isMissingAssetMetadataSidecarError(new Error('EACCES: permission denied'))).toBe(false);
-    expect(
-      isMissingAssetMetadataSidecarError(
-        Object.assign(new Error('too many files'), { code: 'EMFILE' })
-      )
-    ).toBe(false);
   });
 });
