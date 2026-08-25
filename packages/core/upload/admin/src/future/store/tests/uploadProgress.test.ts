@@ -303,6 +303,28 @@ describe('uploadProgress slice', () => {
       expect(aggregate(progressed)).toBe(25);
     });
 
+    it('stays false when a URL row completes, so a multi-URL batch shows no percentage', () => {
+      // Completion backfills `uploadedBytes` to the file size. If that counted as "reporting
+      // bytes", finishing the first of three URLs would resurface the percentage — at 100%,
+      // since the still-pending rows have no size yet to weight against.
+      const opened = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 3, fileNames: ['a.png', 'b.png', 'c.png'] })
+      );
+      const uploading = uploadProgressReducer(
+        opened,
+        setFileUploading({ uploadId: opened.uploadId, name: 'a.png', index: 0, size: 1000 })
+      );
+      const firstDone = uploadProgressReducer(
+        uploading,
+        setFileComplete({ uploadId: opened.uploadId, index: 0, file: { id: 1 } as never })
+      );
+
+      expect(firstDone.files[0].uploadedBytes).toBe(1000);
+      expect(aggregate(firstDone)).toBe(100);
+      expect(reportsBytes(firstDone)).toBe(false);
+    });
+
     it('resets when the dialog is closed so the next batch decides for itself', () => {
       const opened = uploadProgressReducer(
         undefined,

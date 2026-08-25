@@ -298,14 +298,17 @@ export const selectAggregateProgress = createSelector(
  * Whether `selectAggregateProgress` is worth showing as a percentage. A batch that never
  * reports bytes stays pinned at 0%, so the header drops the percentage for it.
  *
- * Also checks the rows, not just the flag: any row reporting bytes proves the batch can,
- * so if the URL flow starts emitting progress the percentage returns on its own.
+ * Also checks the rows, not just the flag: an in-flight row reporting bytes proves the
+ * batch can, so if the URL flow starts emitting progress the percentage returns on its
+ * own. Only `uploading` rows count — completion backfills `uploadedBytes` to the file
+ * size, and letting settled rows qualify would resurface the percentage mid-batch for
+ * multi-URL uploads, byte-weighted over only the sizes known so far (transiently 100%).
  */
 export const selectReportsByteProgress = createSelector(
   (state: RootState) => state.uploadProgress.reportsByteProgress,
   (state: RootState) => state.uploadProgress.files,
   (reportsByteProgress, files): boolean =>
-    reportsByteProgress || files.some((f) => f.uploadedBytes > 0)
+    reportsByteProgress || files.some((f) => f.status === 'uploading' && f.uploadedBytes > 0)
 );
 
 /**
