@@ -391,10 +391,11 @@ const getNewStateFromChangedValues = (
   changedValues: string[]
 ) =>
   options.reduce<Record<string, ConditionForm>>((acc, [categoryName, values]) => {
-    acc[categoryName] = values.reduce<ConditionForm>(
-      (acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }),
-      {}
-    );
+    acc[categoryName] = values.reduce<ConditionForm>((acc, current) => {
+      acc[current.id] = changedValues.includes(current.id);
+
+      return acc;
+    }, {});
 
     return acc;
   }, {});
