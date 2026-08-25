@@ -39,7 +39,30 @@
 /** Local identifiers conventionally bound to a lodash namespace. */
 const LODASH_NAMESPACES = '(_|lodash|fp)';
 
-/** Members banned everywhere, with the native replacement to reach for instead. */
+/**
+ * Builds a banned member whose message points at its native replacement.
+ *
+ * @param {string} name
+ * @param {string} replacement
+ * @param {string} [note]
+ * @returns {{ name: string; message: string }}
+ */
+const banned = (name, replacement, note) => ({
+  name,
+  message: `Use ${replacement} instead of lodash \`${name}\`.${note ? ` ${note}` : ''}`,
+});
+
+/**
+ * Members banned everywhere, with the native replacement to reach for instead.
+ *
+ * The list is deliberately wider than what the codebase currently imports: a member with an exact
+ * native equivalent is banned whether or not it has a call site today, so the next one is caught by
+ * the linter rather than by review. Members whose lodash semantics differ from the closest native
+ * API are left out on purpose — `assignIn` copies inherited properties, `lowerCase` splits words
+ * rather than lowercasing, `min`/`max` return `undefined` for an empty array where `Math.min`/
+ * `Math.max` return infinities, and the `isMap`/`isRegExp` family survives cross-realm values that
+ * `instanceof` does not.
+ */
 const BANNED_MEMBERS = [
   {
     name: 'isArray',
@@ -78,6 +101,55 @@ const BANNED_MEMBERS = [
     message:
       'Use the native `Array.prototype.find` instead of lodash `find` — expand matcher shorthand (`{ id }`) into an explicit predicate.',
   },
+
+  // Array
+  banned('head', '`array[0]` or `Array.prototype.at`'),
+  banned('nth', '`Array.prototype.at`'),
+  banned('fill', '`Array.prototype.fill`'),
+  banned('indexOf', '`Array.prototype.indexOf`'),
+  banned('lastIndexOf', '`Array.prototype.lastIndexOf`'),
+  banned('findIndex', '`Array.prototype.findIndex`'),
+  banned('findLastIndex', '`Array.prototype.findLastIndex`'),
+  banned('flattenDeep', '`Array.prototype.flat(Infinity)`'),
+  banned(
+    'reduceRight',
+    '`Array.prototype.reduceRight`',
+    'Iterate `Object.entries`/`Object.values` for objects.'
+  ),
+  banned('toArray', '`Array.from` (or `Object.values` for objects)'),
+
+  // Object
+  banned('toPairs', '`Object.entries`'),
+  banned('fromPairs', '`Object.fromEntries`'),
+
+  // String
+  banned('endsWith', '`String.prototype.endsWith`'),
+  banned('repeat', '`String.prototype.repeat`'),
+  banned('padStart', '`String.prototype.padStart`'),
+  banned('trimStart', '`String.prototype.trimStart`'),
+  banned('parseInt', '`Number.parseInt`'),
+
+  // Number
+  banned('isSafeInteger', '`Number.isSafeInteger`'),
+
+  // Math and comparison
+  banned('add', 'the `+` operator'),
+  banned('subtract', 'the `-` operator'),
+  banned('multiply', 'the `*` operator'),
+  banned('divide', 'the `/` operator'),
+  banned('gt', 'the `>` operator'),
+  banned('gte', 'the `>=` operator'),
+  banned('lt', 'the `<` operator'),
+  banned('lte', 'the `<=` operator'),
+
+  // Function
+  banned('now', '`Date.now`'),
+  banned('noop', '`() => {}`'),
+  banned('stubTrue', '`() => true`'),
+  banned('stubFalse', '`() => false`'),
+  banned('stubArray', '`() => []`'),
+  banned('stubObject', '`() => ({})`'),
+  banned('stubString', "`() => ''`"),
 ];
 
 /**
