@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { pipe, values, sortBy, map } from 'lodash/fp';
+import { pipe, sortBy, map } from 'lodash/fp';
 
 import { models } from '../common';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
@@ -23,7 +23,7 @@ export const generateComponentsDefinitions = async (
   const { components } = strapi;
 
   const componentsDefinitions = pipe(
-    values,
+    Object.values,
     sortBy('uid'),
     map((component: any) => ({
       uid: component.uid,

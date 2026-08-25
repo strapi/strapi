@@ -2,7 +2,7 @@ import type { Schema, UID } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
-import { difference, keys } from 'lodash';
+import { difference } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { getDraftEntryValidStatus, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
@@ -43,7 +43,8 @@ export async function deleteActionsOnDisableDraftAndPublish({
 }
 
 export async function deleteActionsOnDeleteContentType({ oldContentTypes, contentTypes }: Input) {
-  const deletedContentTypes = difference(keys(oldContentTypes), keys(contentTypes)) ?? [];
+  const deletedContentTypes =
+    difference(Object.keys(oldContentTypes), Object.keys(contentTypes)) ?? [];
 
   if (deletedContentTypes.length) {
     await async.map(deletedContentTypes, async (deletedContentTypeUID: unknown) => {

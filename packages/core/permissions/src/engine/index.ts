@@ -119,10 +119,10 @@ const newEngine = (params: EngineParams): Engine => {
     const resolveConditions = (ids: string[]): (Condition | undefined)[] =>
       ids.map((id) => providers.condition.get(id) as Condition | undefined);
 
-    const removeInvalidConditions = _.filter(
-      (condition: Condition | undefined): condition is Condition =>
-        condition != null && _.isFunction(condition.handler)
-    );
+    const removeInvalidConditions = (conditions: (Condition | undefined)[]): Condition[] =>
+      conditions.filter(
+        (condition): condition is Condition => condition != null && _.isFunction(condition.handler)
+      );
 
     const evaluateConditions = (conditions: Condition[]) => {
       return Promise.all(
@@ -135,9 +135,8 @@ const newEngine = (params: EngineParams): Engine => {
       );
     };
 
-    const removeInvalidResults = _.filter(
-      ({ result }) => _.isBoolean(result) || _.isObject(result)
-    );
+    const removeInvalidResults = <T extends { result: unknown }>(results: T[]): T[] =>
+      results.filter(({ result }) => _.isBoolean(result) || _.isObject(result));
 
     const evaluatedConditions = await Promise.resolve(conditions)
       .then(resolveConditions)

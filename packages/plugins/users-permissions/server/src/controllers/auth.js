@@ -9,7 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const { concat, compact } = require('lodash/fp');
+const { compact } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
@@ -545,12 +545,10 @@ module.exports = ({ strapi }) => ({
     const alwaysAllowedKeys = ['username', 'password', 'email'];
 
     // Note that we intentionally do not filter allowedFields to allow a project to explicitly accept private or other Strapi field on registration
-    const allowedKeys = compact(
-      concat(
-        alwaysAllowedKeys,
-        Array.isArray(register?.allowedFields) ? register.allowedFields : []
-      )
-    );
+    const allowedKeys = compact([
+      ...alwaysAllowedKeys,
+      ...(Array.isArray(register?.allowedFields) ? register.allowedFields : []),
+    ]);
 
     // Check if there are any keys in requestBody that are not in allowedKeys
     const invalidKeys = Object.keys(ctx.request.body).filter((key) => !allowedKeys.includes(key));

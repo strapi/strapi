@@ -51,6 +51,33 @@ const BANNED_MEMBERS = [
     message:
       'Use native iteration instead of lodash `forEach` — `for...of`, `Array.prototype.forEach`, or `Object.entries`/`Object.values` for objects.',
   },
+  {
+    name: 'keys',
+    message: 'Use the native `Object.keys` instead of lodash `keys`.',
+  },
+  {
+    name: 'values',
+    message: 'Use the native `Object.values` instead of lodash `values`.',
+  },
+  {
+    name: 'entries',
+    message: 'Use the native `Object.entries` instead of lodash `entries`.',
+  },
+  {
+    name: 'concat',
+    message:
+      'Use the native `Array.prototype.concat` or an array spread instead of lodash `concat`.',
+  },
+  {
+    name: 'filter',
+    message:
+      'Use the native `Array.prototype.filter` instead of lodash `filter` (iterate `Object.entries`/`Object.values` for objects).',
+  },
+  {
+    name: 'find',
+    message:
+      'Use the native `Array.prototype.find` instead of lodash `find` — expand matcher shorthand (`{ id }`) into an explicit predicate.',
+  },
 ];
 
 /**

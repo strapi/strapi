@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { filter, map, pipe, prop } = require('lodash/fp');
+const { map, pipe, prop } = require('lodash/fp');
 const urlJoin = require('url-join');
 const {
   template: { createStrictInterpolationRegExp },
@@ -164,7 +164,7 @@ module.exports = ({ strapi }) => ({
 
     const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
@@ -172,7 +172,7 @@ module.exports = ({ strapi }) => ({
 
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller).map((actionName) => {
           return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
@@ -194,7 +194,8 @@ module.exports = ({ strapi }) => ({
       // create default permissions
       for (const role of roles) {
         const toCreate = pipe(
-          filter(({ roleType }) => roleType === role.type || roleType === null),
+          (permissions) =>
+            permissions.filter(({ roleType }) => roleType === role.type || roleType === null),
           map(prop('action'))
         )(DEFAULT_PERMISSIONS);
 

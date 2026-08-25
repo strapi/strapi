@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
+import { prop, uniq, uniqBy, flow, isEmpty } from 'lodash/fp';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -509,7 +509,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy('id', [...sanitizedRes.results, ...res.results]);
 
     ctx.body = {
       pagination: res.pagination || {
