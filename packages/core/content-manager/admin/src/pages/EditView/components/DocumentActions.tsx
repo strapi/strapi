@@ -793,7 +793,7 @@ const PublishAction: DocumentActionComponent = ({
   }, [components, formValues, model, schema]);
 
   const fetchDraftRelationsCount = React.useCallback(async () => {
-    if (!document?.documentId || isListView) {
+    if (!document?.documentId || isListView || !schema?.options?.draftAndPublish) {
       return;
     }
 
@@ -825,6 +825,7 @@ const PublishAction: DocumentActionComponent = ({
     documentId,
     isListView,
     model,
+    schema?.options?.draftAndPublish,
   ]);
 
   React.useEffect(() => {

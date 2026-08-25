@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "The uploaded file exceeds the maximum allowed asset size.",
+  "apiError.FileTooBig": "The file is too large to be uploaded. It exceeds the maximum request size allowed by the server.",
   "assets.uploaded": "{number, plural, one {# asset} other {# assets}} uploaded successfully",
   "asset-details.title": "File details",
   "asset-details.description": "Displays file information and metadata",
@@ -87,6 +87,7 @@
   "upload.progress.retry": "Retry",
   "upload.progress.file.uploading": "Uploading...",
   "upload.progress.file.canceled": "Canceled",
+  "upload.progress.file.queued": "Queued",
   "upload.progress.file.uploaded": "Uploaded",
   "upload.progress.file.generatingMetadata": "Uploaded • Generating metadata…",
   "upload.progress.file.metadataGenerated": "Uploaded • Metadata generated",

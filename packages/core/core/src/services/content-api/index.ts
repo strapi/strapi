@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   sanitize,
   validate,
@@ -9,6 +8,8 @@ import {
 import * as z from 'zod/v4';
 
 import type { Core, Modules, UID } from '@strapi/types';
+
+import { inspectZodSchema, isZodType } from '../../utils/zod';
 
 import instantiatePermissionsUtilities from './permissions';
 
@@ -28,37 +29,48 @@ const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api
  * Runtime check for addQueryParams: we only allow scalar or array-of-scalar schemas (no nested objects).
  * We keep this in addition to the ZodQueryParamSchema type because: (1) TypeScript can be bypassed (JS,
  * any, or schema from another Zod instance); (2) it gives a clear, immediate error at registration
- * time instead of a later failure in validate/sanitize. This list is intentionally tied to Zod v4
- * constructor names; if Zod changes internals, this may need updating.
- * Compatibility: Zod 3 and Zod 4 Classic (zod/v4) both use these constructor names and
- * expose ._def with .innerType / .element for Optional/Default/Array. Zod 4 Core/Mini use
- * ._zod.def instead; we only accept schemas from the same zod/v4 instance used here.
+ * time instead of a later failure in validate/sanitize.
  */
-const ALLOWED_QUERY_SCHEMA_NAMES = new Set([
-  'ZodString',
-  'ZodNumber',
-  'ZodBoolean',
-  'ZodEnum',
-  'ZodOptional',
-  'ZodDefault',
-  'ZodArray',
-]);
+const ALLOWED_QUERY_SCHEMA_TYPES = new Set(['string', 'number', 'boolean', 'enum']);
+
+const formatZodSchemaName = (type: string): string => {
+  if (type.length === 0) {
+    return '';
+  }
+
+  return `Zod${type
+    .split('_')
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join('')}`;
+};
 
 function assertQueryParamSchema(schema: unknown, param: string): void {
-  const name = (schema as { constructor?: { name?: string } })?.constructor?.name ?? '';
-  if (!ALLOWED_QUERY_SCHEMA_NAMES.has(name)) {
+  if (!isZodType(schema)) {
+    const name =
+      typeof schema === 'object' && schema !== null
+        ? ((schema as { constructor?: { name?: string } }).constructor?.name ?? 'Object')
+        : typeof schema;
     throw new Error(
       `contentAPI.addQueryParams: param "${param}" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ${name}. Use addInputParams for nested objects.`
     );
   }
-  if (name === 'ZodOptional' || name === 'ZodDefault') {
-    const inner = (schema as { _def?: { innerType?: unknown } })?._def?.innerType;
-    if (inner) assertQueryParamSchema(inner, param);
+
+  const inspection = inspectZodSchema(schema);
+
+  if (inspection.type === 'optional' || inspection.type === 'default') {
+    assertQueryParamSchema(inspection.innerType, param);
     return;
   }
-  if (name === 'ZodArray') {
-    const element = (schema as { _def?: { element?: unknown } })?._def?.element;
-    if (element) assertQueryParamSchema(element, param);
+
+  if (inspection.type === 'array') {
+    assertQueryParamSchema(inspection.element, param);
+    return;
+  }
+
+  if (!ALLOWED_QUERY_SCHEMA_TYPES.has(inspection.type)) {
+    throw new Error(
+      `contentAPI.addQueryParams: param "${param}" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ${formatZodSchemaName(inspection.type)}. Use addInputParams for nested objects.`
+    );
   }
 }
 
@@ -193,17 +205,13 @@ const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const routes = _.flatMap(api.routes, (route) => {
-        if ('routes' in route) {
-          return route.routes;
-        }
-
-        return route;
-      }).filter(filterContentAPI);
+    for (const [apiName, api] of Object.entries(strapi.apis)) {
+      const routes = Object.values(api.routes)
+        .flatMap((route) => ('routes' in route ? route.routes : route))
+        .filter(filterContentAPI);
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -211,21 +219,19 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      if (Array.isArray(plugin.routes)) {
-        return plugin.routes.map(transformPrefix).filter(filterContentAPI);
-      }
+      const pluginRoutes = Array.isArray(plugin.routes)
+        ? plugin.routes
+        : Object.values(plugin.routes).flatMap((route) => route.routes);
 
-      const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
-        filterContentAPI
-      );
+      const routes = pluginRoutes.map(transformPrefix).filter(filterContentAPI);
 
       if (routes.length === 0) {
-        return;
+        continue;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
@@ -233,7 +239,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
         ...route,
         path: `${apiPrefix}${route.path}`,
       }));
-    });
+    }
 
     return sanitizeRoutesMapForSerialization(routesMap);
   };

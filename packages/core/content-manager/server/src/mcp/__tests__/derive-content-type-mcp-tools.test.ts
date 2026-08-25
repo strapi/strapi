@@ -1143,6 +1143,32 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ tags: { set: null } }).success).toBe(true);
   });
 
+  it('xMany relation rejects { set: [...] } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: ['abc'], connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: ['abc'], disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: ['abc'], connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
+  it('xMany relation rejects { set: null } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: null, connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: null, disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: null, connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
   it('xMany relation accepts empty object {}', () => {
     const schema = buildDataSchema(
       mockStrapi,

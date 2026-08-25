@@ -4,13 +4,17 @@ import { DocumentSecurityAssembler } from '../src/assemblers/document/security';
 import { DocumentServerAssembler } from '../src/assemblers/document/server';
 import { DocumentContextFactory } from '../src/context';
 import { ComponentsWriter } from '../src/post-processor/component-writer';
+import { createTestContentAPISchemaRegistry } from './helpers/content-api-schema-registry';
 
-const createStrapiMock = (config: Record<string, unknown> = {}): Pick<Core.Strapi, 'config'> => ({
+const createStrapiMock = (
+  config: Record<string, unknown> = {}
+): Pick<Core.Strapi, 'config' | 'contentAPISchemaRegistry'> => ({
   config: {
     get(path: string) {
       return config[path];
     },
   } as Core.Strapi['config'],
+  contentAPISchemaRegistry: createTestContentAPISchemaRegistry(),
 });
 
 describe('OpenAPI document assemblers', () => {
