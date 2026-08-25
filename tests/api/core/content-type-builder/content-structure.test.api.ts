@@ -66,6 +66,37 @@ const folderSave = (contentStructure: unknown) => {
   return updateSchema({ contentStructure });
 };
 
+const createContentTypeStandalone = (contentType: Record<string, unknown>) => {
+  return rq({
+    method: 'POST',
+    url: '/content-type-builder/content-types',
+    body: { contentType },
+  });
+};
+
+const updateContentTypeStandalone = (uid: string, contentType: Record<string, unknown>) => {
+  return rq({
+    method: 'PUT',
+    url: `/content-type-builder/content-types/${uid}`,
+    body: { contentType },
+  });
+};
+
+const deleteContentTypeStandalone = (uid: string) => {
+  return rq({
+    method: 'DELETE',
+    url: `/content-type-builder/content-types/${uid}`,
+  });
+};
+
+const csTempInput = {
+  displayName: 'CS Temp',
+  singularName: 'cs-temp',
+  pluralName: 'cs-temps',
+  kind: 'collectionType',
+  attributes: { title: { type: 'string' } },
+};
+
 describe('Content Type Builder - Content Structure (folders)', () => {
   beforeAll(async () => {
     await builder.addContentType(widget).build();
@@ -247,6 +278,80 @@ describe('Content Type Builder - Content Structure (folders)', () => {
       const children = onDisk.sections.collectionTypes.groups[0].children;
 
       expect(children).toEqual([{ type: 'contentType', uid: WIDGET_UID }]);
+    });
+  });
+
+  describe('standalone route reconciliation', () => {
+    afterEach(async () => {
+      if (strapi.contentTypes[TEMP_UID]) {
+        await deleteContentTypeStandalone(TEMP_UID);
+        await restart();
+      }
+    });
+
+    test('a standalone delete prunes the reference, and a recreate does not resurface it', async () => {
+      expect((await createContentTypeStandalone(csTempInput)).statusCode).toBe(201);
+      await restart();
+
+      const saved = await folderSave(
+        structureWith([
+          {
+            id: 'grp_standalone',
+            name: 'Standalone',
+            parent: null,
+            children: [
+              { type: 'contentType', uid: TEMP_UID },
+              { type: 'contentType', uid: WIDGET_UID },
+            ],
+          },
+        ])
+      );
+      expect(saved.statusCode).toBe(200);
+      await restart();
+
+      expect((await deleteContentTypeStandalone(TEMP_UID)).statusCode).toBe(200);
+
+      const afterDelete = await readGroupsFile();
+      expect(afterDelete.sections.collectionTypes.groups[0].children).toEqual([
+        { type: 'contentType', uid: WIDGET_UID },
+      ]);
+
+      await restart();
+
+      expect((await createContentTypeStandalone(csTempInput)).statusCode).toBe(201);
+      await restart();
+
+      const afterRecreate = await readGroupsFile();
+      const refs = afterRecreate.sections.collectionTypes.groups.flatMap((g: any) => g.children);
+      expect(refs).not.toContainEqual({ type: 'contentType', uid: TEMP_UID });
+    });
+
+    test('a standalone kind switch prunes the now-invalid folder membership', async () => {
+      expect((await createContentTypeStandalone(csTempInput)).statusCode).toBe(201);
+      await restart();
+
+      const saved = await folderSave(
+        structureWith([
+          {
+            id: 'grp_kind',
+            name: 'Kind',
+            parent: null,
+            children: [{ type: 'contentType', uid: TEMP_UID }],
+          },
+        ])
+      );
+      expect(saved.statusCode).toBe(200);
+      await restart();
+
+      const switched = await updateContentTypeStandalone(TEMP_UID, {
+        ...csTempInput,
+        kind: 'singleType',
+      });
+      expect(switched.statusCode).toBe(201);
+
+      const onDisk = await readGroupsFile();
+      const refs = onDisk.sections.collectionTypes.groups.flatMap((g: any) => g.children);
+      expect(refs).not.toContainEqual({ type: 'contentType', uid: TEMP_UID });
     });
   });
 
