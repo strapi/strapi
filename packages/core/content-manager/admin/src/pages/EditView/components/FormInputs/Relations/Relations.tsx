@@ -50,6 +50,7 @@ import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
   RelationResult,
+  relationsApi,
 } from '../../../../../services/relations';
 import { type MainField } from '../../../../../utils/attributes';
 import { setIn } from '../../../../../utils/objects';
@@ -165,28 +166,11 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const { currentDocument, currentDocumentMeta } = useDocumentContext('RelationsField');
 
-    const [currentPage, setCurrentPage] = React.useState(1);
-
     // Use the documentId from the actual document, not the params (meta)
     const documentId = currentDocument.document?.documentId;
 
-    const { formatMessage } = useIntl();
-
-    const isMorph = props.attribute.relation.toLowerCase().includes('morph');
-    const isDisabled = isMorph || disabled;
-    // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
-    const targetModel = props.attribute.targetModel;
-
     const componentId = useComponent('RelationsField', (state) => state.id);
     const componentUID = useComponent('RelationsField', (state) => state.uid);
-
-    const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
-
-    React.useEffect(() => {
-      setCurrentPage(1);
-    }, [isSubmitting]);
-
-    const component = componentUID ? currentDocument.components[componentUID] : undefined;
 
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
@@ -203,6 +187,43 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = props.name.split('.').slice(-1);
+
+    const queryState = relationsApi.endpoints.getRelations.useQueryState(
+      {
+        model,
+        targetField,
+        id,
+        params: {
+          ...currentDocumentMeta.params,
+          pageSize: RELATIONS_TO_DISPLAY,
+          page: 1, // Any page works because serializeQueryArgs ignores it
+        },
+      },
+      {
+        skip: !id,
+      }
+    );
+
+    const [currentPage, setCurrentPage] = React.useState(queryState.data?.pagination?.page || 1);
+
+    const { formatMessage } = useIntl();
+
+    const isMorph = props.attribute.relation.toLowerCase().includes('morph');
+    const isDisabled = isMorph || disabled;
+    // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
+    const targetModel = props.attribute.targetModel;
+
+
+
+    const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
+
+    React.useEffect(() => {
+      if (isSubmitting) {
+        setCurrentPage(1);
+      }
+    }, [isSubmitting]);
+
+    const component = componentUID ? currentDocument.components[componentUID] : undefined;
 
     const schemaAttributes = component
       ? (component.attributes ?? {})
