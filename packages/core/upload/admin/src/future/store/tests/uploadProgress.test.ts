@@ -1,6 +1,8 @@
 import {
   uploadProgressReducer,
   openUploadProgress,
+  appendUploadFiles,
+  isUploadInFlight,
   setFileUploading,
   setFileProgress,
   setFileComplete,
@@ -74,11 +76,17 @@ describe('uploadProgress slice', () => {
     it('updates only the targeted file and clamps to size', () => {
       const state = makeState([makeFile(0, 'uploading', 100), makeFile(1, 'pending', 100)]);
 
-      const updated = uploadProgressReducer(state, setFileProgress({ index: 0, bytes: 40 }));
+      const updated = uploadProgressReducer(
+        state,
+        setFileProgress({ uploadId: 1, index: 0, bytes: 40 })
+      );
       expect(updated.files[0].uploadedBytes).toBe(40);
       expect(updated.files[1].uploadedBytes).toBe(0);
 
-      const clamped = uploadProgressReducer(updated, setFileProgress({ index: 0, bytes: 999 }));
+      const clamped = uploadProgressReducer(
+        updated,
+        setFileProgress({ uploadId: 1, index: 0, bytes: 999 })
+      );
       expect(clamped.files[0].uploadedBytes).toBe(100);
     });
   });
@@ -89,7 +97,11 @@ describe('uploadProgress slice', () => {
 
       const next = uploadProgressReducer(
         state,
-        setFileComplete({ index: 0, file: { id: 5, name: 'a.png', hash: 'h' } as never })
+        setFileComplete({
+          uploadId: 1,
+          index: 0,
+          file: { id: 5, name: 'a.png', hash: 'h' } as never,
+        })
       );
 
       expect(next.files[0].status).toBe('complete');
@@ -104,7 +116,7 @@ describe('uploadProgress slice', () => {
 
       const next = uploadProgressReducer(
         state,
-        setFileError({ index: 0, name: 'a.png', message: 'boom' })
+        setFileError({ uploadId: 1, index: 0, name: 'a.png', message: 'boom' })
       );
 
       expect(next.files[0].status).toBe('error');
@@ -183,7 +195,7 @@ describe('uploadProgress slice', () => {
 
       const next = uploadProgressReducer(
         state,
-        setFileUploading({ name: 'a.png', index: 0, size: 500 })
+        setFileUploading({ uploadId: 1, name: 'a.png', index: 0, size: 500 })
       );
 
       expect(next.files[0].status).toBe('uploading');
@@ -504,10 +516,13 @@ describe('uploadProgress slice', () => {
       };
 
       for (let index = 0; index < 3; index += 1) {
-        state = uploadProgressReducer(state, setFileUploading({ name: 'x', index, size: 10 }));
         state = uploadProgressReducer(
           state,
-          setFileComplete({ index, file: { id: index } as never })
+          setFileUploading({ uploadId: 1, name: 'x', index, size: 10 })
+        );
+        state = uploadProgressReducer(
+          state,
+          setFileComplete({ uploadId: 1, index, file: { id: index } as never })
         );
         state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
         observe();
@@ -541,10 +556,13 @@ describe('uploadProgress slice', () => {
       const outcomes: Array<ReturnType<typeof metadataOutcome>> = [];
 
       for (let index = 0; index < 2; index += 1) {
-        state = uploadProgressReducer(state, setFileUploading({ name: 'x', index, size: 10 }));
         state = uploadProgressReducer(
           state,
-          setFileComplete({ index, file: { id: index } as never })
+          setFileUploading({ uploadId: 1, name: 'x', index, size: 10 })
+        );
+        state = uploadProgressReducer(
+          state,
+          setFileComplete({ uploadId: 1, index, file: { id: index } as never })
         );
         state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
         outcomes.push(metadataOutcome(state));
@@ -557,6 +575,157 @@ describe('uploadProgress slice', () => {
 
       expect(outcomes.slice(0, -1).every((o) => o === null)).toBe(true);
       expect(outcomes.at(-1)).toStrictEqual({ generated: 2, skipped: 0, failed: 0 });
+    });
+  });
+  describe('a second drop while the batch is still uploading', () => {
+    const firstDrop = () =>
+      uploadProgressReducer(
+        undefined,
+        openUploadProgress({
+          totalFiles: 2,
+          fileNames: ['a.png', 'b.png'],
+          fileSizes: [10, 20],
+        })
+      );
+
+    it('appends rows and sums the total instead of replacing the batch', () => {
+      const state = firstDrop();
+
+      const merged = uploadProgressReducer(
+        state,
+        appendUploadFiles({ uploadId: state.uploadId, fileNames: ['c.png'], fileSizes: [30] })
+      );
+
+      expect(merged.totalFiles).toBe(3);
+      expect(merged.files.map((f) => f.name)).toEqual(['a.png', 'b.png', 'c.png']);
+      // Same batch: bumping the id would strand the in-flight rows from the first drop.
+      expect(merged.uploadId).toBe(state.uploadId);
+    });
+
+    it('continues indices from the current length so the first drop keeps its rows', () => {
+      const state = firstDrop();
+
+      const merged = uploadProgressReducer(
+        state,
+        appendUploadFiles({ uploadId: state.uploadId, fileNames: ['c.png'], fileSizes: [30] })
+      );
+
+      expect(merged.files.map((f) => f.index)).toEqual([0, 1, 2]);
+
+      // The appended row is addressable, and writing to it leaves the others alone.
+      const progressed = uploadProgressReducer(
+        merged,
+        setFileProgress({ index: 2, bytes: 15, uploadId: merged.uploadId })
+      );
+
+      expect(progressed.files[2].uploadedBytes).toBe(15);
+      expect(progressed.files[0].uploadedBytes).toBe(0);
+    });
+
+    it('keeps progress from the first drop rather than mixing it into the new rows', () => {
+      const state = uploadProgressReducer(
+        firstDrop(),
+        setFileProgress({ index: 0, bytes: 7, uploadId: 1 })
+      );
+
+      const merged = uploadProgressReducer(
+        state,
+        appendUploadFiles({ uploadId: state.uploadId, fileNames: ['c.png'], fileSizes: [30] })
+      );
+
+      expect(merged.files[0].uploadedBytes).toBe(7);
+    });
+
+    it('re-opens the dialog if it was dismissed while the first drop was running', () => {
+      const dismissed = { ...firstDrop(), isVisible: false, isMinimized: true };
+
+      const merged = uploadProgressReducer(
+        dismissed,
+        appendUploadFiles({ uploadId: dismissed.uploadId, fileNames: ['c.png'] })
+      );
+
+      expect(merged.isVisible).toBe(true);
+      expect(merged.isMinimized).toBe(false);
+    });
+
+    it('ignores an append aimed at a batch that has already been replaced', () => {
+      const state = firstDrop();
+
+      const stale = uploadProgressReducer(
+        state,
+        appendUploadFiles({ uploadId: state.uploadId - 1, fileNames: ['ghost.png'] })
+      );
+
+      expect(stale).toStrictEqual(state);
+    });
+  });
+
+  describe('cross-batch writes', () => {
+    // The reason the guard exists: a reset leaves the previous batch's uploads
+    // still running, and their row indices now belong to somebody else.
+    it('drops progress addressed to a batch that is no longer on screen', () => {
+      const first = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 2, fileNames: ['a.png', 'b.png'], fileSizes: [10, 10] })
+      );
+
+      const second = uploadProgressReducer(
+        first,
+        openUploadProgress({ totalFiles: 1, fileNames: ['c.png'], fileSizes: [10] })
+      );
+
+      const written = uploadProgressReducer(
+        second,
+        setFileProgress({ index: 0, bytes: 9, uploadId: first.uploadId })
+      );
+
+      expect(written.files[0].uploadedBytes).toBe(0);
+      expect(written).toStrictEqual(second);
+    });
+
+    it('drops a completion and an error from the previous batch', () => {
+      const first = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'], fileSizes: [10] })
+      );
+      const second = uploadProgressReducer(
+        first,
+        openUploadProgress({ totalFiles: 1, fileNames: ['c.png'], fileSizes: [10] })
+      );
+
+      const completed = uploadProgressReducer(
+        second,
+        setFileComplete({ index: 0, file: { id: 1 } as never, uploadId: first.uploadId })
+      );
+      expect(completed.files[0].status).toBe('pending');
+
+      const errored = uploadProgressReducer(
+        second,
+        setFileError({ index: 0, name: 'a.png', message: 'boom', uploadId: first.uploadId })
+      );
+      expect(errored.files[0].status).toBe('pending');
+      // An error from a batch nobody can see must not appear in the summary either.
+      expect(errored.errors).toEqual([]);
+    });
+  });
+
+  describe('isUploadInFlight', () => {
+    it.each([
+      ['pending', true],
+      ['uploading', true],
+      ['complete', false],
+      ['error', false],
+      ['cancelled', false],
+    ] as Array<[FileProgressStatus, boolean]>)('%s -> %s', (status, expected) => {
+      expect(isUploadInFlight([{ status }])).toBe(expected);
+    });
+
+    it('is false for an empty batch', () => {
+      expect(isUploadInFlight([])).toBe(false);
+    });
+
+    it('is true when any row is still going', () => {
+      expect(isUploadInFlight([{ status: 'complete' }, { status: 'uploading' }])).toBe(true);
     });
   });
 });

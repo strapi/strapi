@@ -18,6 +18,7 @@ import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocat
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useIsAssetDetailsOpen } from '../hooks/useIsAssetDetailsOpen';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
@@ -100,6 +101,7 @@ export const BulkActionsBar = ({
   const { canUpdate } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
+  const isDetailsDrawerOpen = useIsAssetDetailsOpen();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
@@ -245,7 +247,14 @@ export const BulkActionsBar = ({
   // without the permission, the bar has nothing to offer — drop it entirely
   // rather than show a count + "Clear selection" over no actions (mirrors the
   // drawer footer, which hides when no permitted action survives).
-  if (count === 0 || !canUpdate) {
+  //
+  // The details drawer owns the bottom of the screen while it is open. It is
+  // fixed to `bottom: 0` too, and its z-index of 200 is pinned below the
+  // overlay token on purpose, so the bar (popover, 500) covers the drawer's own
+  // footer actions — and, because the drawer is non-modal, keeps taking clicks
+  // through it. The selection itself is untouched: the bar returns unchanged
+  // when the drawer closes.
+  if (count === 0 || !canUpdate || isDetailsDrawerOpen) {
     return null;
   }
 
