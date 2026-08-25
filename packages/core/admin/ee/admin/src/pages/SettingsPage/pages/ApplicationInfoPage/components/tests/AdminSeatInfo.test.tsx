@@ -60,6 +60,37 @@ describe('<AdminSeatInfo />', () => {
     expect(getByTextWithMarkup('10/100')).toBeInTheDocument();
   });
 
+  test('Shows retained seats when live permittedSeats is wiped after expiry', () => {
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue({
+      ...LICENSE_MOCK,
+      license: {
+        ...LICENSE_MOCK.license,
+        permittedSeats: null,
+        seats: 10,
+        licenseStatus: 'expired',
+        enforcementUserCount: 4,
+      },
+    });
+
+    const { getByText } = render(<AdminSeatInfoEE />);
+
+    expect(getByText('Admin seats')).toBeInTheDocument();
+    expect(withMarkup(getByText)('4/10')).toBeInTheDocument();
+  });
+
+  test('Renders nothing when neither a live nor a retained seat limit exists', () => {
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue({
+      ...LICENSE_MOCK,
+      license: { ...LICENSE_MOCK.license, permittedSeats: null, seats: null },
+    });
+
+    const { queryByText } = render(<AdminSeatInfoEE />);
+
+    expect(queryByText('Admin seats')).not.toBeInTheDocument();
+  });
+
   // The per-plan billing links that used to live under the seat count were removed: the Plan card
   // now carries a single Manage/View subscription button that covers both cases.
   test.each([['gold'], ['bronze']])('Render no billing link (%s license)', (type) => {

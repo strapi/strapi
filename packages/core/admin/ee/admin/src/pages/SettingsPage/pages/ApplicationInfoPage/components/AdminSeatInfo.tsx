@@ -34,9 +34,15 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats } = license;
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats, seats } = license;
 
-  if (!permittedSeats) {
+  // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
+  // usable, so fall back to the retained `seats` to keep showing the count on an expired
+  // licence. Enforcement itself (`licenseLimitStatus`, `shouldStopCreate`) still runs off
+  // `permittedSeats` server-side and is untouched by this.
+  const seatLimit = permittedSeats ?? seats;
+
+  if (!seatLimit) {
     return null;
   }
 
@@ -57,12 +63,12 @@ export const AdminSeatInfoEE = () => {
                 defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
               },
               {
-                permittedSeats,
+                permittedSeats: seatLimit,
                 enforcementUserCount,
                 text: (chunks: ReactNode) => (
                   <Typography
                     fontWeight="semiBold"
-                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
+                    textColor={enforcementUserCount > seatLimit ? 'danger500' : undefined}
                   >
                     {chunks}
                   </Typography>
