@@ -11,11 +11,16 @@ interface UploadHashTarget {
   format?: string;
 }
 
-type HashIndexEntry = UploadHashTarget | 'ambiguous';
-type UploadHashIndex = Map<string, HashIndexEntry>;
+type UploadHashIndex = Map<string, UploadHashTarget[]>;
 
 const isSameTarget = (a: UploadHashTarget, b: UploadHashTarget) =>
   a.id === b.id && a.format === b.format;
+
+/** Where a provider writes an object: the S3 key prefix / Cloudinary folder, and its identity. */
+interface ProviderPlacement {
+  path?: string;
+  provider_metadata?: Record<string, unknown>;
+}
 
 /**
  * Index the exact hashes the destination knows about: the row hash for original files, plus
@@ -34,13 +39,13 @@ const loadUploadHashIndex = async (strapi: Core.Strapi): Promise<UploadHashIndex
     if (!hash) {
       return;
     }
-    const existing = index.get(hash);
-    if (existing === undefined) {
-      index.set(hash, target);
+    const targets = index.get(hash);
+    if (!targets) {
+      index.set(hash, [target]);
       return;
     }
-    if (existing !== 'ambiguous' && !isSameTarget(existing, target)) {
-      index.set(hash, 'ambiguous');
+    if (!targets.some((existing) => isSameTarget(existing, target))) {
+      targets.push(target);
     }
   };
 
@@ -67,24 +72,25 @@ export interface CreateAssetsDestinationWritableOptions {
 }
 
 /**
- * Why a target is being resolved: to update its media-library row, or — in a files-only
- * restore, which never mutates rows — only to recover the provider placement metadata that a
- * missing sidecar could not supply.
+ * How an asset was matched to the destination: through the ID map, through a hash that belongs
+ * to exactly one object, or through a hash several objects share. An ambiguous match keeps its
+ * candidates — it cannot pick a row to update, but it still describes every provider key the
+ * bytes may belong at.
  */
-type ResolveIntent = 'update' | 'placement';
+type UploadResolution =
+  | { kind: 'mapped'; target: UploadHashTarget }
+  | { kind: 'hash'; hash: string; target: UploadHashTarget }
+  | { kind: 'ambiguous'; hash: string; targets: UploadHashTarget[] };
 
 const resolveUploadTarget = async (
   uploadData: IFile,
   metadataFallback: boolean,
-  intent: ResolveIntent,
   resolveUploadFileId: (metadata: { id: number }) => number | undefined,
-  getHashIndex: () => Promise<UploadHashIndex>,
-  warn: (message: string) => void,
-  counts: { resolved: number; ambiguous: number }
-): Promise<UploadHashTarget | 'ambiguous' | undefined> => {
+  getHashIndex: () => Promise<UploadHashIndex>
+): Promise<UploadResolution | undefined> => {
   const mappedId = resolveUploadFileId(uploadData);
   if (mappedId) {
-    return { id: mappedId, format: uploadData.type };
+    return { kind: 'mapped', target: { id: mappedId, format: uploadData.type } };
   }
 
   // The asset's own hash is tried first because the index resolves it to an exact target.
@@ -103,57 +109,147 @@ const resolveUploadTarget = async (
   const index = await getHashIndex();
 
   for (const lookupHash of lookupHashes) {
-    const match = index.get(lookupHash);
+    const targets = index.get(lookupHash);
 
-    if (match === 'ambiguous') {
-      counts.ambiguous += 1;
-      warn(
-        intent === 'update'
-          ? `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; skipping database URL update (source id ${uploadData.id} was not mapped).`
-          : `[Data transfer] Ambiguous hash "${lookupHash}" matched multiple media library records; uploading "${uploadData.name}" without its provider path metadata.`
-      );
-      return 'ambiguous';
+    if (!targets?.length) {
+      continue;
     }
 
-    if (match) {
-      counts.resolved += 1;
-      warn(
-        intent === 'update'
-          ? `[Data transfer] Resolved upload file ID via hash "${lookupHash}" (source id ${uploadData.id} was not mapped).`
-          : `[Data transfer] Recovered provider path metadata via hash "${lookupHash}" for "${uploadData.name}" (media library records are left unchanged).`
-      );
-
-      if (lookupHash === uploadData.hash) {
-        // The index knows whether this hash is an original file or one of its formats.
-        return { id: match.id, format: match.format };
-      }
-
-      // Matched through the parent hash, so this asset is a variant of the resolved row.
-      return { id: match.id, format: match.format ?? uploadData.type };
+    if (targets.length > 1) {
+      return { kind: 'ambiguous', hash: lookupHash, targets };
     }
+
+    const [match] = targets;
+
+    // For the asset's own hash the index knows whether it is an original file or one of its
+    // formats; a match through the parent hash makes this asset a variant of that row.
+    const format =
+      lookupHash === uploadData.hash ? match.format : (match.format ?? uploadData.type);
+
+    return { kind: 'hash', hash: lookupHash, target: { id: match.id, format } };
   }
 
   return undefined;
 };
 
 /**
+ * Where the destination stores a given original or format. `path` belongs to the row, while
+ * `provider_metadata` identifies one object, so the latter is only read from the exact object
+ * being restored.
+ */
+const placementOf = (entry: IFile, format?: string): ProviderPlacement => {
+  const object = format ? entry.formats?.[format] : entry;
+
+  return { path: object?.path ?? entry.path, provider_metadata: object?.provider_metadata };
+};
+
+/**
  * Filename-derived metadata carries no `path` or `provider_metadata`, so a path-keyed provider
  * (AWS S3 keys objects as `path/hash.ext`, Cloudinary uses `path` as the folder) would write an
  * object that the stored URL does not name. Recover the placement from the destination row
- * before the bytes are uploaded. `path` belongs to the row, while `provider_metadata` identifies
- * one object, so the latter is only reused for the exact original or format being restored.
+ * before the bytes are uploaded.
  */
-const hydrateProviderPlacement = (uploadData: IFile, entry: IFile, format?: string) => {
-  const object = format ? entry.formats?.[format] : entry;
-  const placementPath = object?.path ?? entry.path;
-
-  if (uploadData.path === undefined && placementPath !== undefined) {
-    uploadData.path = placementPath;
+const applyProviderPlacement = (uploadData: IFile, placement: ProviderPlacement) => {
+  if (uploadData.path === undefined && placement.path !== undefined) {
+    uploadData.path = placement.path;
   }
 
-  if (uploadData.provider_metadata === undefined && object?.provider_metadata !== undefined) {
-    uploadData.provider_metadata = object.provider_metadata;
+  if (uploadData.provider_metadata === undefined && placement.provider_metadata !== undefined) {
+    uploadData.provider_metadata = placement.provider_metadata;
   }
+};
+
+/**
+ * The distinct provider placements of the objects that share a hash. Sharing an exact hash
+ * means sharing the bytes, so an ambiguous match still describes an unambiguous *set* of keys:
+ * restoring the asset at each of them makes every record naming one of those keys whole again,
+ * without picking a row. Grouped by `path` because that is what decides the key on path-keyed
+ * providers; a shared path cannot carry one object's `provider_metadata`.
+ */
+const loadCandidatePlacements = async (
+  strapi: Core.Strapi,
+  targets: UploadHashTarget[]
+): Promise<ProviderPlacement[]> => {
+  const byPath = new Map<string, { placement: ProviderPlacement; owners: number }>();
+
+  for (const target of targets) {
+    const entry: IFile | null = await strapi.db.query('plugin::upload.file').findOne({
+      where: { id: target.id },
+    });
+
+    if (!entry) {
+      continue;
+    }
+
+    const placement = placementOf(entry, target.format);
+    const existing = byPath.get(placement.path ?? '');
+
+    if (existing) {
+      existing.owners += 1;
+      continue;
+    }
+
+    byPath.set(placement.path ?? '', { placement, owners: 1 });
+  }
+
+  return [...byPath.values()].map(({ placement, owners }) =>
+    owners === 1 ? placement : { path: placement.path }
+  );
+};
+
+/**
+ * Placement recovery for a files-only restore of a missing-sidecar asset. Rows are never
+ * mutated here, so the only thing that can go wrong is writing the bytes at a key no stored URL
+ * names — hence every candidate key is returned rather than a single guess. An unmatched hash
+ * has no candidate, but it also means no record names the object: the archive filename *is* the
+ * exported provider key (`hash + ext`), so a hash the destination does not know cannot be
+ * referenced by any row or format URL.
+ */
+const recoverFallbackPlacements = async (options: {
+  strapi: Core.Strapi;
+  filename: string;
+  hash: string;
+  resolution: UploadResolution | undefined;
+  warn: (message: string) => void;
+  counts: { resolved: number; ambiguous: number; unmatched: number };
+}): Promise<ProviderPlacement[]> => {
+  const { strapi, filename, hash, resolution, warn, counts } = options;
+
+  const candidates: UploadHashTarget[] = [];
+  if (resolution?.kind === 'ambiguous') {
+    candidates.push(...resolution.targets);
+  } else if (resolution) {
+    candidates.push(resolution.target);
+  }
+
+  const placements = await loadCandidatePlacements(strapi, candidates);
+
+  if (placements.length === 0) {
+    counts.unmatched += 1;
+    warn(
+      `[Data transfer] Uploaded "${filename}" without its provider path metadata: the sidecar was missing and hash "${hash}" matches no media library record, so no stored URL names this object. The bytes were restored at the provider default key.`
+    );
+    return [{}];
+  }
+
+  if (resolution?.kind === 'ambiguous') {
+    counts.ambiguous += 1;
+    warn(
+      placements.length > 1
+        ? `[Data transfer] Ambiguous hash "${hash}" matched media library records stored under ${placements.length} different provider paths; restoring "${filename}" at each of them (same hash, same bytes) so no record is left naming a deleted object.`
+        : `[Data transfer] Ambiguous hash "${hash}" matched multiple media library records sharing one provider path; restored "${filename}" at that path.`
+    );
+    return placements;
+  }
+
+  if (resolution?.kind === 'hash') {
+    counts.resolved += 1;
+    warn(
+      `[Data transfer] Recovered provider path metadata via hash "${hash}" for "${filename}" (media library records are left unchanged).`
+    );
+  }
+
+  return placements;
 };
 
 /**
@@ -223,10 +319,18 @@ export function createAssetsDestinationWritable(
       pendingUploads += 1;
 
       chunk.stream.once('end', () => {
-        const uploadData = {
-          ...chunk.metadata,
-          stream: Readable.from(bufferedChunks),
-          ...(chunk.buffer != null ? { buffer: chunk.buffer } : {}),
+        const createUploadData = (placement?: ProviderPlacement) => {
+          const uploadData = {
+            ...chunk.metadata,
+            stream: Readable.from(bufferedChunks),
+            ...(chunk.buffer != null ? { buffer: chunk.buffer } : {}),
+          };
+
+          if (placement) {
+            applyProviderPlacement(uploadData, placement);
+          }
+
+          return uploadData;
         };
 
         transaction
@@ -235,30 +339,63 @@ export function createAssetsDestinationWritable(
               // A row is resolved to update its URL, and — with --only files, where rows are
               // never touched — to recover the provider placement metadata that a missing
               // sidecar could not supply.
-              const intent: ResolveIntent = restoreMediaEntitiesContent ? 'update' : 'placement';
-              const target =
+              const resolution =
                 restoreMediaEntitiesContent || chunk.metadataFallback
                   ? await resolveUploadTarget(
-                      uploadData,
+                      chunk.metadata,
                       chunk.metadataFallback ?? false,
-                      intent,
                       resolveUploadFileId,
-                      getHashIndex,
-                      (message) => warnings.warn(message),
-                      hashFallbackCounts
+                      getHashIndex
                     )
                   : undefined;
 
-              const resolvedTarget = target && target !== 'ambiguous' ? target : undefined;
+              if (!restoreMediaEntitiesContent) {
+                // The destination objects were deleted in beforeTransfer and the backup is
+                // dropped when the stage finishes, so the bytes are always restored — at every
+                // key the destination may name them by when the sidecar is missing.
+                const placements = chunk.metadataFallback
+                  ? await recoverFallbackPlacements({
+                      strapi,
+                      filename: chunk.filename,
+                      hash: chunk.metadata.hash,
+                      resolution,
+                      warn: (message) => warnings.warn(message),
+                      counts: hashFallbackCounts,
+                    })
+                  : [undefined];
+
+                for (const placement of placements) {
+                  await strapi.plugin('upload').provider.uploadStream(createUploadData(placement));
+                }
+
+                return;
+              }
+
+              if (resolution?.kind === 'ambiguous') {
+                hashFallbackCounts.ambiguous += 1;
+                warnings.warn(
+                  `[Data transfer] Ambiguous hash "${resolution.hash}" matched multiple media library records; skipping database URL update (source id ${chunk.metadata.id} was not mapped).`
+                );
+              } else if (resolution?.kind === 'hash') {
+                hashFallbackCounts.resolved += 1;
+                warnings.warn(
+                  `[Data transfer] Resolved upload file ID via hash "${resolution.hash}" (source id ${chunk.metadata.id} was not mapped).`
+                );
+              }
+
+              const resolvedTarget =
+                resolution && resolution.kind !== 'ambiguous' ? resolution.target : undefined;
               const entry: IFile | null = resolvedTarget
                 ? await strapi.db.query('plugin::upload.file').findOne({
                     where: { id: resolvedTarget.id },
                   })
                 : null;
 
-              if (chunk.metadataFallback && resolvedTarget && entry) {
-                hydrateProviderPlacement(uploadData, entry, resolvedTarget.format);
-              }
+              const uploadData = createUploadData(
+                chunk.metadataFallback && resolvedTarget && entry
+                  ? placementOf(entry, resolvedTarget.format)
+                  : undefined
+              );
 
               await strapi.plugin('upload').provider.uploadStream(uploadData);
               // Providers may replace provider_metadata (Cloudinary) or mutate it in place.
@@ -266,19 +403,7 @@ export function createAssetsDestinationWritable(
               // unchanged hydrated value is harmless.
               const providerMetadata = uploadData.provider_metadata;
 
-              if (!restoreMediaEntitiesContent) {
-                // Bytes are still restored: the destination assets were already deleted in
-                // beforeTransfer, so skipping the upload would lose the file entirely.
-                if (chunk.metadataFallback && !target) {
-                  hashFallbackCounts.unmatched += 1;
-                  warnings.warn(
-                    `[Data transfer] Uploaded "${chunk.filename}" without its provider path metadata (sidecar missing and no hash matched a media library record); on path-keyed providers the stored URL may not match the object that was written.`
-                  );
-                }
-                return;
-              }
-
-              if (target === 'ambiguous') {
+              if (resolution?.kind === 'ambiguous') {
                 return;
               }
 
