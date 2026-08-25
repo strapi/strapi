@@ -1,0 +1,34 @@
+{
+  "name": "tests",
+  "version": "5.52.3",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/better-sqlite3": "9.6.0",
+    "api-tests": "5.52.3",
+    "bcryptjs": "2.4.3",
+    "better-sqlite3": "12.8.0",
+    "chalk": "4.1.2",
+    "coffee": "5.5.1",
+    "dotenv": "16.6.1",
+    "execa": "5.1.1",
+    "get-port": "5.1.1",
+    "jsonwebtoken": "9.0.3",
+    "lodash": "4.18.1",
+    "rimraf": "6.1.3",
+    "semver": "7.7.4",
+    "stream-chain": "2.2.5",
+    "stream-json": "1.9.1",
+    "strip-ansi": "6.0.1",
+    "supertest": "7.2.2",
+    "tar": "7.5.22",
+    "yalc": "1.0.0-pre.53",
+    "yargs": "17.7.2",
+    "zod": "4.4.3"
+  }
+}

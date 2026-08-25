@@ -74,6 +74,7 @@
   "devDependencies": {
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
+    "@types/fs-extra": "11.0.4",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.52.3",
