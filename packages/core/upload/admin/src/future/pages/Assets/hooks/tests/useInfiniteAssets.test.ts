@@ -12,6 +12,15 @@ jest.mock('../../../../services/assets', () => ({
   useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
 }));
 
+let mockCompletedUploads: File[] = [];
+
+// Only the selector is stubbed: `services/api` imports the rest of this module,
+// so replacing it wholesale would break the hook's own import graph.
+jest.mock('../../../../store/uploadProgress', () => ({
+  ...jest.requireActual('../../../../store/uploadProgress'),
+  selectCompletedUploads: () => mockCompletedUploads,
+}));
+
 const createMockAsset = (id: number): File => ({
   id,
   name: `asset-${id}.png`,
@@ -120,6 +129,7 @@ const renderWithFolder = () => {
 describe('useInfiniteAssets', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCompletedUploads = [];
   });
 
   it('returns first page of assets on initial load', () => {
@@ -755,5 +765,82 @@ describe('useInfiniteAssets', () => {
     const { result } = renderHook(() => useInfiniteAssets());
 
     expect(result.current.error).toBe(mockError);
+  });
+});
+
+describe('useInfiniteAssets — assets uploaded during the batch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCompletedUploads = [];
+  });
+
+  const justUploaded = (overrides: Partial<File> = {}): File => ({
+    ...createMockAsset(999),
+    name: 'just-uploaded.png',
+    // Newer than anything `createMockAsset` produces, so the default sort puts
+    // it at the top of the list.
+    updatedAt: '2030-01-01T00:00:00.000Z',
+    folder: null,
+    ...overrides,
+  });
+
+  it('shows an asset as soon as its own upload finishes', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+    expect(result.current.assets).toHaveLength(PAGE_SIZE + 1);
+  });
+
+  it('leaves the list alone while a search is active', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() => useInfiniteAssets({ search: 'report' }));
+
+    // Whether an upload matches the query is the server's call, so a searched
+    // list waits for the end-of-batch refetch.
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('leaves the list alone while list filters are active', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() =>
+      useInfiniteAssets({ filters: [{ mime: { $contains: 'image' } }] })
+    );
+
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('ignores an upload that landed in another folder', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded({ folder: 42 })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('shows an upload that landed in the folder being viewed', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded({ folder: 7 })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+  });
+
+  it('matches the populated folder relation the list returns', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    // A refetched asset carries `folder` as the populated object rather than an id.
+    mockCompletedUploads = [justUploaded({ folder: { id: 7 } as unknown as number })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
   });
 });

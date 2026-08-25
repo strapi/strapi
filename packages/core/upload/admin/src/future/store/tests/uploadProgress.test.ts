@@ -13,6 +13,7 @@ import {
   setUploadFailed,
   retryCancelledFiles,
   selectAggregateProgress,
+  selectCompletedUploads,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
   selectMetadataOutcome,
@@ -54,6 +55,9 @@ const isGenerating = (state: UploadProgressState) =>
 
 const metadataOutcome = (state: UploadProgressState) =>
   selectMetadataOutcome({ uploadProgress: state });
+
+const completedUploads = (state: UploadProgressState) =>
+  selectCompletedUploads({ uploadProgress: state });
 
 describe('uploadProgress slice', () => {
   describe('openUploadProgress', () => {
@@ -727,5 +731,38 @@ describe('uploadProgress slice', () => {
     it('is true when any row is still going', () => {
       expect(isUploadInFlight([{ status: 'complete' }, { status: 'uploading' }])).toBe(true);
     });
+  });
+});
+
+describe('selectCompletedUploads', () => {
+  const uploaded = (id: number) => ({ id, name: `file-${id}.png`, hash: `hash_${id}` });
+
+  it('returns the assets of rows whose upload has finished', () => {
+    const state = makeState([makeFile(0, 'complete', 100, 100), makeFile(1, 'uploading', 100, 50)]);
+    state.files[0].file = uploaded(7);
+
+    expect(completedUploads(state)).toEqual([uploaded(7)]);
+  });
+
+  it('ignores a complete row that carries no asset', () => {
+    // Nothing to place: the row is only complete once the server has answered
+    // with the created file.
+    const state = makeState([makeFile(0, 'complete', 100, 100)]);
+
+    expect(completedUploads(state)).toStrictEqual([]);
+  });
+
+  it('ignores rows that failed or were cancelled', () => {
+    const state = makeState([makeFile(0, 'error', 100), makeFile(1, 'cancelled', 100)]);
+    state.files[0].file = uploaded(1);
+    state.files[1].file = uploaded(2);
+
+    expect(completedUploads(state)).toStrictEqual([]);
+  });
+
+  it('returns nothing when the slice is not registered yet', () => {
+    // The plugin adds the reducer in `register()`; before that the state has no
+    // upload slice at all and reading through it must not throw.
+    expect(selectCompletedUploads({})).toStrictEqual([]);
   });
 });

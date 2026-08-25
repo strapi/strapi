@@ -4,6 +4,10 @@ import { useDispatch, useStore } from 'react-redux';
 
 import { uploadApi } from '../../../services/api';
 import { useGetAssetsQuery } from '../../../services/assets';
+import { useTypedSelector } from '../../../store/hooks';
+import { selectCompletedUploads } from '../../../store/uploadProgress';
+import { getRelationId } from '../../../utils/getRelationId';
+import { mergeUploadedAssets } from '../utils/mergeUploadedAssets';
 
 import type { File, Pagination } from '../../../../../../shared/contracts/files';
 
@@ -257,7 +261,7 @@ const useInfiniteAssets = ({
   // of the outgoing folder's assets under the incoming folder's header.
   const isChangingList = accumulated.listKey !== listKey;
 
-  const assets = useMemo(
+  const loadedAssets = useMemo(
     () => (isChangingList ? [] : flattenPages(accumulated.pages)),
     [isChangingList, accumulated.pages]
   );
@@ -265,6 +269,27 @@ const useInfiniteAssets = ({
   // Deliberately the live value, not the stale-tolerant one below: paging must
   // never be driven by a total that belongs to the previous query.
   const hasNextPage = currentData ? page < currentData.pagination.pageCount : false;
+
+  const completedUploads = useTypedSelector(selectCompletedUploads);
+
+  // Only an unfiltered, unsearched list can place an upload locally: deciding
+  // whether an asset satisfies a filter means reimplementing the server's
+  // filter semantics client-side. Filtered views still refresh on the
+  // end-of-batch invalidation, as they did before.
+  const canPlaceUploads = !search && (filters?.length ?? 0) === 0;
+
+  const assets = useMemo(() => {
+    if (!canPlaceUploads || completedUploads.length === 0) {
+      return loadedAssets;
+    }
+
+    return mergeUploadedAssets({
+      assets: loadedAssets,
+      uploaded: completedUploads.filter((asset) => getRelationId(asset.folder) === folder),
+      sort,
+      hasNextPage,
+    });
+  }, [canPlaceUploads, completedUploads, loadedAssets, folder, sort, hasNextPage]);
   const isFetchingMore = isFetching && page > 1;
 
   const fetchNextPage = useCallback(() => {

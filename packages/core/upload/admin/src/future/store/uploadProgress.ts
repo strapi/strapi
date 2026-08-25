@@ -260,6 +260,30 @@ const uploadProgressSlice = createSlice({
 });
 
 /**
+ * Assets whose own upload has already finished, newest batch only.
+ *
+ * The list behind the upload dialog uses these to show each asset the moment it
+ * lands, instead of waiting for the batch mutation to invalidate the cache. Rows
+ * only carry a `file` once the server has created it, so every entry here is a
+ * real, persisted asset.
+ */
+const NO_FILES: FileProgress[] = [];
+
+export const selectCompletedUploads = createSelector(
+  // The plugin registers this slice in `register()`, so a host that has not
+  // reached that point has no upload state — and therefore nothing to place.
+  (state: Partial<RootState>) => state.uploadProgress?.files ?? NO_FILES,
+  (files): File[] =>
+    files.reduce<File[]>((completed, row) => {
+      if (row.status === 'complete' && row.file) {
+        completed.push(row.file);
+      }
+
+      return completed;
+    }, [])
+);
+
+/**
  * Byte-weighted aggregate progress across the whole batch: `sum(uploadedBytes) / sum(size)`.
  *
  * Falls back to count-based progress (settled files / total files) when all sizes are
