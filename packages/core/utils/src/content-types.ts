@@ -200,9 +200,8 @@ const getCreatorFields = (model: Model) => {
 const getNonWritableAttributes = (model: Model) => {
   if (!model) return [];
 
-  const nonWritableAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.writable === false ? acc.concat(attrName) : acc),
+  const nonWritableAttributes = Object.entries(model.attributes).reduce(
+    (acc, [attrName, attr]) => (attr.writable === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
@@ -225,9 +224,8 @@ const isWritableAttribute = (model: Model, attributeName: string) => {
 };
 
 const getNonVisibleAttributes = (model: Model) => {
-  const nonVisibleAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.visible === false ? acc.concat(attrName) : acc),
+  const nonVisibleAttributes = Object.entries(model.attributes).reduce(
+    (acc, [attrName, attr]) => (attr.visible === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
@@ -241,7 +239,7 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {
@@ -338,7 +336,7 @@ const getStoredPrivateAttributes = (model: Model) =>
 const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
-    _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
+    Object.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 
@@ -389,47 +387,31 @@ const isMorphToRelationalAttribute = (attribute?: Attribute) => {
 };
 
 const getComponentAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isComponentAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isComponentAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getMediaAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isMediaAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isMediaAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getScalarAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isScalarAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isScalarAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getRelationalAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isRelationalAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isRelationalAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 /**

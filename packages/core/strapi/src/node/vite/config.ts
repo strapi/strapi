@@ -114,7 +114,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'lodash/has',
               'lodash/isNil',
               'lodash/locale',
-              'lodash/map',
               'lodash/mapValues',
               'lodash/pull',
               'lodash/size',

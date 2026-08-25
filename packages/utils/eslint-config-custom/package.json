@@ -2,5 +2,7 @@
   "name": "eslint-config-custom",
   "version": "5.52.1",
   "private": true,
-  "main": "index.js"
+  "devDependencies": {
+    "lint-policy": "5.52.1"
+  }
 }

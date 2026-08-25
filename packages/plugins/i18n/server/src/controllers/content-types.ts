@@ -1,4 +1,4 @@
-import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
+import { pick, uniq, prop, getOr, flatten, pipe } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
@@ -15,7 +15,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const getLocalesProperty = getOr<string[]>([], 'properties.locales');
 const getFieldsProperty = prop('properties.fields');
 
-const getFirstLevelPath = map((path: string) => path.split('.')[0]);
+const getFirstLevelPath = (paths: string[]) => paths.map((path) => path.split('.')[0]);
 
 const controller = {
   async getNonLocalizedAttributes(ctx) {

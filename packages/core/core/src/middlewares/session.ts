@@ -1,4 +1,4 @@
-import { isEmpty, isArray } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { type SessionOptions, createSession } from 'koa-session';
 import type { Core } from '@strapi/types';
 
@@ -20,7 +20,7 @@ export const session: Core.MiddlewareFactory<Partial<SessionOptions>> = (
   { strapi }
 ) => {
   const { keys } = strapi.server.app;
-  if (!isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
+  if (!Array.isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
     throw new Error(
       `App keys are required. Please set app.keys in config/server.js (ex: keys: ['myKeyA', 'myKeyB'])`
     );

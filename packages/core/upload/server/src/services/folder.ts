@@ -1,4 +1,4 @@
-import { sortBy, map, isUndefined } from 'lodash/fp';
+import { sortBy, isUndefined } from 'lodash/fp';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -73,7 +73,7 @@ const deleteByIds = async (ids = []) => {
     };
   }
 
-  const pathsToDelete = map('path', folders);
+  const pathsToDelete = folders.map((folder: any) => folder.path);
 
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({

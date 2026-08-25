@@ -4,8 +4,6 @@ import {
   difference,
   isNil,
   isEmpty,
-  map,
-  isArray,
   uniq,
   isNumber,
   differenceWith,
@@ -138,7 +136,7 @@ const assertCustomTokenPermissionsValidity = (
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(permissions)) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM && !Array.isArray(permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 
@@ -591,7 +589,7 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
-  return isArray(permissions) ? map('action', permissions) : [];
+  return Array.isArray(permissions) ? permissions.map((permission: any) => permission.action) : [];
 };
 
 type WhereParams = {
@@ -1124,7 +1122,9 @@ const update = async (
         .query('admin::api-token')
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
+      const currentPermissions: string[] = (currentPermissionsResult || []).map(
+        (permission: any) => permission.action
+      );
       const newPermissions = uniq(incomingPermissions || []);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);

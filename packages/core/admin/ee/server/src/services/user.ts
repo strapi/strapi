@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { pipe, map, castArray, toNumber } from 'lodash/fp';
+import { pipe, castArray, toNumber } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
 import constants from '../../../../server/src/services/constants';
@@ -39,7 +39,9 @@ const updateEEDisabledUsersList = async (id: string, input: any) => {
   }
 };
 
-const castNumberArray = pipe(castArray, map(toNumber));
+const castNumberArray = pipe(castArray, (values: unknown[]) =>
+  values.map((value) => toNumber(value))
+);
 
 const removeFromEEDisabledUsersList = async (ids: unknown) => {
   let idsToCheck: any;

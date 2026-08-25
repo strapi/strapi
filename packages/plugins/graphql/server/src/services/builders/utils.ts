@@ -1,4 +1,4 @@
-import { entries, mapValues, omit } from 'lodash/fp';
+import { mapValues, omit } from 'lodash/fp';
 import { idArg, nonNull } from 'nexus';
 import { hasSort, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
@@ -96,7 +96,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     getUniqueScalarAttributes(attributes: Struct.SchemaAttributes) {
       const { isStrapiScalar } = getService('utils').attributes;
 
-      const uniqueAttributes = entries(attributes).filter(
+      const uniqueAttributes = Object.entries(attributes).filter(
         ([, attribute]) => isStrapiScalar(attribute) && 'unique' in attribute && attribute.unique
       );
 

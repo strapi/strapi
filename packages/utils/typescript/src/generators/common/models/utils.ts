@@ -9,7 +9,6 @@ import {
   isString,
   isNumber,
   isDate,
-  isArray,
   isBoolean,
   propEq,
 } from 'lodash/fp';
@@ -114,7 +113,7 @@ export const toTypeLiteral = (data: any): any => {
     return data ? factory.createTrue() : factory.createFalse();
   }
 
-  if (isArray(data)) {
+  if (Array.isArray(data)) {
     return factory.createTupleTypeNode(data.map((item) => toTypeLiteral(item)));
   }
 

@@ -1,4 +1,4 @@
-import { isArray, isObject } from 'lodash/fp';
+import { isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
@@ -62,7 +62,7 @@ export default (auth: unknown): Visitor =>
     };
 
     const handleMorphElements = async (elements: any[]) => {
-      if (!isArray(elements)) {
+      if (!Array.isArray(elements)) {
         throwInvalidKey({ key, path: path.attribute });
       }
 

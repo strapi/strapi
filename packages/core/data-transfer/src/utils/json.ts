@@ -1,4 +1,4 @@
-import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
+import { isObject, zip, isEqual, uniq } from 'lodash/fp';
 
 const createContext = (): Context => ({ path: [] });
 
@@ -38,7 +38,7 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     return diffs;
   };
 
-  if (isArray(a) && isArray(b)) {
+  if (Array.isArray(a) && Array.isArray(b)) {
     let k = 0;
 
     for (const [aItem, bItem] of zip(a, b)) {

@@ -1,4 +1,4 @@
-import { merge, map, difference, uniq } from 'lodash/fp';
+import { merge, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
@@ -94,7 +94,7 @@ const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await async.pipe(
     strapi.db.query('admin::api-token-permission').findMany,
-    map('action')
+    (permissions: any[]) => permissions.map((permission) => permission.action)
   )();
 
   const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));

@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { update, map } from 'lodash/fp';
+import { update } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -63,23 +63,24 @@ function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: stri
     role: typeof role === 'object' ? role.id : role,
   });
 
-  const transformStages = map((stage: PopulatedStage) => {
-    const { permissions: allPermissions = [], ...rest } = stage;
+  const transformStages = (stages: PopulatedStage[] = []) =>
+    stages.map((stage: PopulatedStage) => {
+      const { permissions: allPermissions = [], ...rest } = stage;
 
-    const fromPermissions = allPermissions
-      .filter((p) => p.actionParameters?.from)
-      .map(transformRoleToId);
+      const fromPermissions = allPermissions
+        .filter((p) => p.actionParameters?.from)
+        .map(transformRoleToId);
 
-    const toPermissions = allPermissions
-      .filter((p) => p.actionParameters?.to)
-      .map(transformRoleToId);
+      const toPermissions = allPermissions
+        .filter((p) => p.actionParameters?.to)
+        .map(transformRoleToId);
 
-    return {
-      ...rest,
-      fromPermissions,
-      toPermissions,
-    };
-  });
+      return {
+        ...rest,
+        fromPermissions,
+        toPermissions,
+      };
+    });
 
   return update('stages', transformStages, workflow);
 }
@@ -189,7 +190,9 @@ export default {
     const { populate, filters, sort } = await sanitizedQuery.read(query);
 
     const [workflows, workflowCount] = await Promise.all([
-      workflowService.find({ populate, filters, sort }).then(map(formatWorkflowToAdmin)),
+      workflowService
+        .find({ populate, filters, sort })
+        .then((results: any[]) => results.map((workflow) => formatWorkflowToAdmin(workflow))),
       workflowService.count(),
     ]);
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const { isFunction, map } = require('lodash/fp');
+const { isFunction } = require('lodash/fp');
 const modelsUtils = require('../models');
 
 const stringifyDates = (object) =>
@@ -13,7 +13,7 @@ const stringifyDates = (object) =>
     })
   );
 
-const formatFixtures = map(stringifyDates);
+const formatFixtures = (fixtures) => fixtures.map((fixture) => stringifyDates(fixture));
 
 module.exports = {
   contentType: {

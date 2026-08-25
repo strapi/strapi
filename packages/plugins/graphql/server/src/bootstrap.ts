@@ -1,4 +1,4 @@
-import { isEmpty, mergeWith, isArray, isObject, isFunction } from 'lodash/fp';
+import { isEmpty, mergeWith, isObject, isFunction } from 'lodash/fp';
 import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -16,7 +16,7 @@ import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'ko
 import { formatGraphqlError } from './format-graphql-error';
 
 const merge = mergeWith((a, b) => {
-  if (isArray(a) && isArray(b)) {
+  if (Array.isArray(a) && Array.isArray(b)) {
     return a.concat(b);
   }
 });

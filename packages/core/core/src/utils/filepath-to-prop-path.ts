@@ -19,7 +19,7 @@ export const filePathToPropPath = (
     // Split the cleaned path by matching every possible separator (either "/" or "\" depending on the OS)
     fp.split(new RegExp(`[\\${path.win32.sep}|${path.posix.sep}]`, 'g')),
     // Make sure to remove leading '.' from the different path parts
-    fp.map(fp.trimCharsStart('.')),
+    (parts: string[]) => parts.map((part) => fp.trimCharsStart('.', part)),
     // join + split in case some '.' characters are still present in different parts of the path
     fp.join('.'),
     fp.split('.'),

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 import _ from 'lodash';
-import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
+import { set, omit, pick, prop, differenceWith, differenceBy, isEqual } from 'lodash/fp';
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
@@ -431,7 +431,7 @@ const resetSuperAdminPermissions = async () => {
   const otherPermissions = otherActions.reduce((acc, action) => {
     const { actionId, subjects } = action;
 
-    if (isArray(subjects)) {
+    if (Array.isArray(subjects)) {
       acc.push(
         ...subjects.map((subject) => permissionDomain.create({ action: actionId, subject }))
       );

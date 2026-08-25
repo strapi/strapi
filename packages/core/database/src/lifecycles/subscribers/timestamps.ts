@@ -21,7 +21,7 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
-    if (_.isArray(data)) {
+    if (Array.isArray(data)) {
       data.forEach((data) => _.defaults(data, { createdAt: now, updatedAt: now }));
     }
   },
@@ -45,7 +45,7 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
-    if (_.isArray(data)) {
+    if (Array.isArray(data)) {
       data.forEach((data) => _.assign(data, { updatedAt: now }));
     }
   },

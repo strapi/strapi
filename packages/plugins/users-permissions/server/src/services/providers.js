@@ -67,7 +67,7 @@ module.exports = ({ strapi }) => {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const user = _.find(users, { provider });
+    const user = users.find((candidate) => candidate.provider === provider);
 
     if (_.isEmpty(user) && !advancedSettings.allow_register) {
       throw new Error('Register action is actually not available.');

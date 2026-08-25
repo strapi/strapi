@@ -1,4 +1,4 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+import { clone, isObject, isNil, curry } from 'lodash/fp';
 
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
@@ -213,7 +213,7 @@ const traverseEntity = async (
         ? traverseMorphRelationTarget
         : traverseRelationTarget(getModel(attribute.target!));
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
@@ -236,7 +236,7 @@ const traverseEntity = async (
     if (isMediaAttribute(attribute)) {
       parent = { schema, key, attribute, path: newPath };
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process media array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
@@ -260,7 +260,7 @@ const traverseEntity = async (
       parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process component array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
@@ -280,7 +280,7 @@ const traverseEntity = async (
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
       parent = { schema, key, attribute, path: newPath };
 
       // Process dynamic zone items in parallel with ordered error handling

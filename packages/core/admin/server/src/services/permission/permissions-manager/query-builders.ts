@@ -34,35 +34,31 @@ const buildStrapiQuery = (caslQuery: unknown) => {
 };
 
 const unwrapDeep = (obj: any): unknown => {
-  if (!_.isPlainObject(obj) && !_.isArray(obj)) {
+  if (!_.isPlainObject(obj) && !Array.isArray(obj)) {
     return obj;
   }
-  if (_.isArray(obj)) {
+  if (Array.isArray(obj)) {
     return obj.map((v: unknown) => unwrapDeep(v));
   }
 
-  return _.reduce(
-    obj,
-    (acc, v, k: any) => {
-      const key = mapKey(k);
+  return Object.entries(obj as Record<string, any>).reduce((acc, [k, v]: [any, any]) => {
+    const key = mapKey(k);
 
-      if (_.isPlainObject(v)) {
-        if ('$elemMatch' in v) {
-          _.setWith(acc, key, unwrapDeep(v.$elemMatch));
-        } else {
-          _.setWith(acc, key, unwrapDeep(v));
-        }
-      } else if (_.isArray(v)) {
-        // prettier-ignore
-        _.setWith(acc, key, v.map(v => unwrapDeep(v)));
+    if (_.isPlainObject(v)) {
+      if ('$elemMatch' in v) {
+        _.setWith(acc, key, unwrapDeep(v.$elemMatch));
       } else {
-        _.setWith(acc, key, v);
+        _.setWith(acc, key, unwrapDeep(v));
       }
+    } else if (Array.isArray(v)) {
+      // prettier-ignore
+      _.setWith(acc, key, v.map(v => unwrapDeep(v)));
+    } else {
+      _.setWith(acc, key, v);
+    }
 
-      return acc;
-    },
-    {}
-  );
+    return acc;
+  }, {});
 };
 
 export { buildCaslQuery, buildStrapiQuery };

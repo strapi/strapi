@@ -1,4 +1,4 @@
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+import { pick, pipe, has, prop, isNil, cloneDeep } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
@@ -85,7 +85,7 @@ const removeIdsMut = (
 
   for (const [attrName, attr] of Object.entries(model.attributes)) {
     const value = entry[attrName];
-    if (attr.type === 'dynamiczone' && isArray(value)) {
+    if (attr.type === 'dynamiczone' && Array.isArray(value)) {
       value.forEach((compo) => {
         if (has('__component', compo)) {
           const model = strapi.components[compo.__component];
@@ -94,7 +94,7 @@ const removeIdsMut = (
       });
     } else if (attr.type === 'component') {
       const model = strapi.components[attr.component];
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         value.forEach((compo) => removeIdsMut(model, compo));
       } else {
         removeIdsMut(model, value);

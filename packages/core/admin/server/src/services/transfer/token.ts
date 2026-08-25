@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
+import { omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -105,7 +105,9 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       .load(transferToken, 'permissions');
 
     if (currentPermissions) {
-      Object.assign(transferToken, { permissions: map('action', currentPermissions) });
+      Object.assign(transferToken, {
+        permissions: currentPermissions.map((permission: any) => permission.action),
+      });
     }
 
     return transferToken;
@@ -145,7 +147,9 @@ const update = async (
         .query(TRANSFER_TOKEN_UID)
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
+      const currentPermissions: string[] = (currentPermissionsResult || []).map(
+        (permission: any) => permission.action
+      );
       const newPermissions = uniq(attributes.permissions);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
@@ -331,8 +335,8 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
 
   return {
     ...token,
-    permissions: isArray(token.permissions)
-      ? map('action', token.permissions as TransferTokenPermission[])
+    permissions: Array.isArray(token.permissions)
+      ? (token.permissions as TransferTokenPermission[]).map((permission) => permission.action)
       : token.permissions,
   };
 };

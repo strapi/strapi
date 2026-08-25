@@ -451,7 +451,7 @@ export default (db: Database) => {
           .filter((table: PersistedTable) => {
             const dependsOn = table?.dependsOn;
 
-            if (!_.isArray(dependsOn)) {
+            if (!Array.isArray(dependsOn)) {
               return;
             }
 

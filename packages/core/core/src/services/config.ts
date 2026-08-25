@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { get, set, has, isString, isNumber, isArray, type PropertyPath } from 'lodash';
+import { get, set, has, isString, isNumber, type PropertyPath } from 'lodash';
 
 type State = {
   config: Config;
@@ -35,7 +35,7 @@ export const createConfigProvider = (
     if (isString(path)) {
       return transformPathString(path);
     }
-    if (isArray(path)) {
+    if (Array.isArray(path)) {
       // if the path is not joinable, we won't apply our deprecation support
       if (path.some((part) => !(isString(part) || isNumber(part)))) {
         return path;

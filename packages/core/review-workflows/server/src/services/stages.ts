@@ -1,6 +1,6 @@
 import type { Core, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { map, pick, isEqual } from 'lodash/fp';
+import { pick, isEqual } from 'lodash/fp';
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
 import { getService } from '../utils';
@@ -211,7 +211,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
-        const createdStagesIds = map('id', createdStages);
+        const createdStagesIds = createdStages.map((stage: any) => stage.id);
 
         // Update the workflow stages
         await async.map(updated, (destStage: any) => {

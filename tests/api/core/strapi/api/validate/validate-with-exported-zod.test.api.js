@@ -5,7 +5,6 @@
  * are used and validated/sanitized correctly throughout the content API pipeline.
  * Covers happy paths and error cases for extra query and body params.
  */
-const { values } = require('lodash/fp');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -23,11 +22,11 @@ let rq;
 let data;
 
 const addSchemas = () => {
-  for (const component of values(schemas.components)) {
+  for (const component of Object.values(schemas.components)) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types']));
 };
 
 const addFixtures = () => {

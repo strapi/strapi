@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { uniq, startsWith } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Modules, Struct } from '@strapi/types';
@@ -37,42 +36,38 @@ const getNestedFields = (
 
   const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
-  return _.reduce(
-    model.attributes,
-    (fields: any, attr: any, key: any) => {
-      if (nonAuthorizableFields.includes(key)) return fields;
+  return Object.entries(model.attributes).reduce((fields: any, [key, attr]: [string, any]) => {
+    if (nonAuthorizableFields.includes(key)) return fields;
 
-      const fieldPath = prefix ? `${prefix}.${key}` : key;
-      const shouldBeIncluded = !requiredOnly || attr.required === true;
-      const insideExistingFields = existingFields && existingFields.some(startsWith(fieldPath));
+    const fieldPath = prefix ? `${prefix}.${key}` : key;
+    const shouldBeIncluded = !requiredOnly || attr.required === true;
+    const insideExistingFields = existingFields && existingFields.some(startsWith(fieldPath));
 
-      if (attr.type === 'component') {
-        if (shouldBeIncluded || insideExistingFields) {
-          const compoFields = getNestedFields(components[attr.component], {
-            nestingLevel: nestingLevel - 1,
-            prefix: fieldPath,
-            components,
-            requiredOnly,
-            existingFields,
-          });
+    if (attr.type === 'component') {
+      if (shouldBeIncluded || insideExistingFields) {
+        const compoFields = getNestedFields(components[attr.component], {
+          nestingLevel: nestingLevel - 1,
+          prefix: fieldPath,
+          components,
+          requiredOnly,
+          existingFields,
+        });
 
-          if (compoFields.length === 0 && shouldBeIncluded) {
-            return fields.concat(fieldPath);
-          }
-
-          return fields.concat(compoFields);
+        if (compoFields.length === 0 && shouldBeIncluded) {
+          return fields.concat(fieldPath);
         }
-        return fields;
-      }
 
-      if (shouldBeIncluded) {
-        return fields.concat(fieldPath);
+        return fields.concat(compoFields);
       }
-
       return fields;
-    },
-    []
-  );
+    }
+
+    if (shouldBeIncluded) {
+      return fields.concat(fieldPath);
+    }
+
+    return fields;
+  }, []);
 };
 
 /**
@@ -88,28 +83,24 @@ const getNestedFieldsWithIntermediate = (
 
   const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
-  return _.reduce(
-    model.attributes,
-    (fields: any, attr: any, key: any) => {
-      if (nonAuthorizableFields.includes(key)) return fields;
+  return Object.entries(model.attributes).reduce((fields: any, [key, attr]: [string, any]) => {
+    if (nonAuthorizableFields.includes(key)) return fields;
 
-      const fieldPath = prefix ? `${prefix}.${key}` : key;
-      fields.push(fieldPath);
+    const fieldPath = prefix ? `${prefix}.${key}` : key;
+    fields.push(fieldPath);
 
-      if (attr.type === 'component') {
-        const compoFields = getNestedFieldsWithIntermediate(components[attr.component], {
-          nestingLevel: nestingLevel - 1,
-          prefix: fieldPath,
-          components,
-        });
+    if (attr.type === 'component') {
+      const compoFields = getNestedFieldsWithIntermediate(components[attr.component], {
+        nestingLevel: nestingLevel - 1,
+        prefix: fieldPath,
+        components,
+      });
 
-        fields.push(...compoFields);
-      }
+      fields.push(...compoFields);
+    }
 
-      return fields;
-    },
-    []
-  );
+    return fields;
+  }, []);
 };
 
 /**

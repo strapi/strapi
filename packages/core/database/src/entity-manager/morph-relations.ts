@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */ // allow __type
-import { curry, groupBy, pipe, mapValues, map, isEmpty } from 'lodash/fp';
+import { curry, groupBy, pipe, mapValues, isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
@@ -74,7 +74,7 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
       orWhere.push({
         [typeColumn.name]: type,
         field,
-        [idColumn.name]: { $in: map(idColumn.name, arr) },
+        [idColumn.name]: { $in: arr.map((row: any) => row[idColumn.name]) },
       });
     }
   }

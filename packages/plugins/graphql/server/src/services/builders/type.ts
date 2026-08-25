@@ -1,4 +1,4 @@
-import { isArray, isString, isUndefined, constant } from 'lodash/fp';
+import { isString, isUndefined, constant } from 'lodash/fp';
 import { nonNull, list, objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
@@ -214,7 +214,7 @@ export default (context: Context) => {
     }
 
     // If the target is an array of string, resolve the associated morph type and use it
-    else if (isArray(target) && target.every(isString)) {
+    else if (Array.isArray(target) && target.every(isString)) {
       const type = naming.getMorphRelationTypeName(contentType, attributeName);
 
       builder.field(attributeName, { type, resolve });
