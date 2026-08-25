@@ -96,6 +96,7 @@
   "devDependencies": {
     "@strapi/admin": "5.52.1",
     "@strapi/types": "5.52.1",
+    "@tanstack/react-query": "4.36.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -111,7 +112,6 @@
     "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-query": "3.39.3",
     "react-router-dom": "6.30.4",
     "styled-components": "6.4.1",
     "vitest": "catalog:",

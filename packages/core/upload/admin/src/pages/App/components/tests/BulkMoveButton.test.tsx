@@ -1,7 +1,7 @@
 import { DesignSystemProvider } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { within, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useBulkMove } from '../../../../hooks/useBulkMove';

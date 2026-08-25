@@ -4,8 +4,8 @@ import {
   FetchResponse,
   adminApi,
 } from '@strapi/admin/strapi-admin';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient, UseMutationResult } from 'react-query';
 import { useDispatch } from 'react-redux';
 
 import { pluginId } from '../pluginId';
@@ -27,8 +27,8 @@ export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
     (assetId: number) => del<DeleteFile.Response>(`/upload/files/${assetId}`),
     {
       onSuccess() {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
 
         toggleNotification({
           type: 'success',

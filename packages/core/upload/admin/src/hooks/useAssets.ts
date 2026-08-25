@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 
 import { Query, GetFiles } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
@@ -45,10 +45,12 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
     };
   }
 
-  const { data, error, isLoading } = useQuery<
-    GetFiles.Response['data'],
-    GetFiles.Response['error']
-  >(
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery<GetFiles.Response['data'], GetFiles.Response['error']>(
     [pluginId, 'assets', params],
     async () => {
       const { data } = await get<GetFiles.Response['data']>('/upload/files', { params });

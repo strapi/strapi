@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 
 import { GetFolders } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
@@ -54,10 +54,12 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
     };
   }
 
-  const { data, error, isLoading } = useQuery<
-    GetFolders.Response['data'],
-    GetFolders.Response['error']
-  >(
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery<GetFolders.Response['data'], GetFolders.Response['error']>(
     [pluginId, 'folders', stringify(params)],
     async () => {
       const {

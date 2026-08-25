@@ -1,9 +1,9 @@
 // TODO: find a better naming convention for the file that was an index file before
 import { DesignSystemProvider } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as renderRTL } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Breadcrumbs } from '../Breadcrumbs';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { adminApi } from '@strapi/admin/strapi-admin';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDispatch, useStore } from 'react-redux';
 
 import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
@@ -88,8 +88,8 @@ export const useUpload = () => {
     {
       mutationKey: [pluginId, 'upload'],
       onSuccess() {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
         dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics', 'AiUsage']));
       },
     }

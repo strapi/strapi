@@ -1,6 +1,6 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { useQuery } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 
 import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
@@ -43,15 +43,16 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     ];
   };
 
-  const { data, error, isLoading } = useQuery(
-    [pluginId, 'folder', 'structure'],
-    fetchFolderStructure,
-    {
-      enabled,
-      staleTime: 0,
-      cacheTime: 0,
-    }
-  );
+  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
+  const {
+    data,
+    error,
+    isInitialLoading: isLoading,
+  } = useQuery([pluginId, 'folder', 'structure'], fetchFolderStructure, {
+    enabled,
+    staleTime: 0,
+    cacheTime: 0,
+  });
 
   return { data, error, isLoading };
 };

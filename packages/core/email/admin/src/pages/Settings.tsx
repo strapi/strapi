@@ -14,8 +14,8 @@ import {
   Badge,
 } from '@strapi/design-system';
 import { Mail, Check, Cross } from '@strapi/icons';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useQuery, useMutation } from 'react-query';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 

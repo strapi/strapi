@@ -1,6 +1,6 @@
 import { type FetchResponse, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
 
 import { BulkUpdateFiles } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
@@ -42,9 +42,9 @@ export const useBulkEdit = () => {
       const { data } = res;
 
       if (data && data.length > 0) {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
-        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
       }
 
       toggleNotification({
