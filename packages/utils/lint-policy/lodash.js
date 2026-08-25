@@ -1,24 +1,33 @@
 // @ts-check
 
-/** @import { Linter } from 'eslint' */
-
 /**
- * Shared lodash policy for the monorepo.
+ * Shared lodash policy, consumed by both linters.
+ *
+ * ESLint (`eslint-config-custom`) and OxLint (`oxlint-config`) enforce the same bans, and both
+ * accept the same `[severity, ...options]` rule-value shape, so the two builders below are used
+ * verbatim by each. Only the rule *key* differs: OxLint has no native `no-restricted-syntax` and
+ * takes it from `oxlint-plugin-eslint` under the `eslint-js/` prefix.
  *
  * Each banned member has a native equivalent, so importing it only costs a module and hides the
- * standard API. The rules below ban every way of reaching one — ESM named imports, deep submodule
- * imports, CommonJS `require`, and namespace member access (`_.isArray`) — because a single
+ * standard API. Every way of reaching one is covered — ESM named imports, deep submodule imports,
+ * CommonJS `require`, and namespace member access (`_.isArray`) — because a single
  * `no-restricted-imports` entry misses most of them.
  *
  * Named imports are matched via `no-restricted-syntax` rather than `no-restricted-imports`
- * `importNames`, because the latter also rejects `import * as _ from 'lodash'` outright; the
- * namespace itself is fine, only the member access is not.
+ * `importNames`, because the latter also rejects `import * as _ from 'lodash'` outright in both
+ * linters; the namespace binding itself is fine, only the member access is not.
  */
 
 /**
  * A single `no-restricted-imports` `paths` entry.
  *
  * @typedef {{ name: string; importNames?: string[]; message?: string }} RestrictedImportPath
+ */
+
+/**
+ * A single `no-restricted-imports` `patterns` entry.
+ *
+ * @typedef {{ group: string[]; message?: string }} RestrictedImportPattern
  */
 
 /**
@@ -44,7 +53,11 @@ const BANNED_MEMBERS = [
   },
 ];
 
-/** `no-restricted-imports` patterns: `import isArray from 'lodash/isArray'`. */
+/**
+ * `no-restricted-imports` patterns: `import isArray from 'lodash/isArray'`.
+ *
+ * @type {RestrictedImportPattern[]}
+ */
 const restrictedImportPatterns = BANNED_MEMBERS.map(({ name, message }) => ({
   group: [`lodash/${name}`, `lodash/fp/${name}`],
   message,
@@ -79,11 +92,14 @@ const restrictedSyntax = BANNED_MEMBERS.flatMap(({ name, message }) => [
 ]);
 
 /**
- * Builds the `no-restricted-imports` value, appending the lodash patterns to any package-specific
+ * Builds the `no-restricted-imports` value, appending the lodash patterns to any consumer-specific
  * paths.
  *
+ * The concrete tuple return type matters: ESLint's `Linter.RuleEntry` makes the options element
+ * optional, which OxLint's stricter `no-restricted-imports` type rejects.
+ *
  * @param {RestrictedImportPath[]} [paths]
- * @returns {Linter.RuleEntry<[{ paths: RestrictedImportPath[]; patterns: typeof restrictedImportPatterns }]>}
+ * @returns {['error', { paths: RestrictedImportPath[]; patterns: RestrictedImportPattern[] }]}
  */
 const noRestrictedImports = (paths = []) => [
   'error',
@@ -91,11 +107,11 @@ const noRestrictedImports = (paths = []) => [
 ];
 
 /**
- * Builds the `no-restricted-syntax` value, appending the lodash selectors to any package-specific
- * ones.
+ * Builds the `no-restricted-syntax` value, appending the lodash selectors to any
+ * consumer-specific ones.
  *
  * @param {RestrictedSyntax[]} [selectors]
- * @returns {Linter.RuleEntry<RestrictedSyntax[]>}
+ * @returns {['error', ...RestrictedSyntax[]]}
  */
 const noRestrictedSyntax = (selectors = []) => ['error', ...selectors, ...restrictedSyntax];
 

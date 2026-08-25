@@ -2,7 +2,7 @@
 
 /** @import { Linter } from 'eslint' */
 
-const { noRestrictedImports, noRestrictedSyntax } = require('../lodash');
+const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
 
 /** @type {Linter.Config} */
 const config = {
