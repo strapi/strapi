@@ -47,21 +47,43 @@ describe('content-structure shape validation (zod)', () => {
       delete file.sections.singleTypes;
       expect(ok(file)).toBe(false);
     });
+
+    it('accepts a full tree whose ids were hand-authored (regression: QA-CTBS-001)', () => {
+      const file = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'g1',
+                name: 'Marketing',
+                parent: null,
+                children: [{ type: 'group', id: 'g2' }],
+              },
+              { id: 'g2', name: 'Blog', parent: 'g1', children: [] },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
+      expect(ok(file)).toBe(true);
+    });
   });
 
-  describe('group id regex', () => {
+  describe('group id', () => {
     const withId = (id: string) => ({ id, name: 'X', parent: null, children: [] });
 
-    it.each(['grp_blog', 'grp_1a2b3c4d5e', 'grp_marketing'])('accepts %s', (id) => {
-      expect(contentStructureGroupSchema.safeParse(withId(id)).success).toBe(true);
-    });
-
-    it.each(['blog', 'grp_', 'grp_AB', 'grp_ab', 'GRP_blog', 'grp_with space'])(
-      'rejects %s',
+    it.each(['grp_blog', 'grp_1a2b3c4d5e', 'grp_marketing', 'g1', 'blog', 'GRP_Blog', 'my-folder'])(
+      'accepts %s',
       (id) => {
-        expect(contentStructureGroupSchema.safeParse(withId(id)).success).toBe(false);
+        expect(contentStructureGroupSchema.safeParse(withId(id)).success).toBe(true);
       }
     );
+
+    it('rejects an empty id', () => {
+      expect(contentStructureGroupSchema.safeParse(withId('')).success).toBe(false);
+    });
   });
 
   describe('group name', () => {
