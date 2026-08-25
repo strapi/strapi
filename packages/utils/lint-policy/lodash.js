@@ -64,45 +64,24 @@ const banned = (name, replacement, note) => ({
  * `instanceof` does not.
  */
 const BANNED_MEMBERS = [
-  {
-    name: 'isArray',
-    message:
-      'Use the native `Array.isArray` instead of lodash `isArray` (lodash re-exports the native function).',
-  },
-  {
-    name: 'forEach',
-    message:
-      'Use native iteration instead of lodash `forEach` — `for...of`, `Array.prototype.forEach`, or `Object.entries`/`Object.values` for objects.',
-  },
-  {
-    name: 'keys',
-    message: 'Use the native `Object.keys` instead of lodash `keys`.',
-  },
-  {
-    name: 'values',
-    message: 'Use the native `Object.values` instead of lodash `values`.',
-  },
-  {
-    name: 'entries',
-    message: 'Use the native `Object.entries` instead of lodash `entries`.',
-  },
-  {
-    name: 'concat',
-    message:
-      'Use the native `Array.prototype.concat` or an array spread instead of lodash `concat`.',
-  },
-  {
-    name: 'filter',
-    message:
-      'Use the native `Array.prototype.filter` instead of lodash `filter` (iterate `Object.entries`/`Object.values` for objects).',
-  },
-  {
-    name: 'find',
-    message:
-      'Use the native `Array.prototype.find` instead of lodash `find` — expand matcher shorthand (`{ id }`) into an explicit predicate.',
-  },
-
   // Array
+  banned('isArray', '`Array.isArray`', 'lodash re-exports the native function.'),
+  banned(
+    'forEach',
+    '`for...of` or `Array.prototype.forEach`',
+    'Iterate `Object.entries`/`Object.values` for objects.'
+  ),
+  banned(
+    'filter',
+    '`Array.prototype.filter`',
+    'Iterate `Object.entries`/`Object.values` for objects.'
+  ),
+  banned(
+    'find',
+    '`Array.prototype.find`',
+    'Expand matcher shorthand (`{ id }`) into an explicit predicate.'
+  ),
+  banned('concat', '`Array.prototype.concat` or an array spread'),
   banned('head', '`array[0]` or `Array.prototype.at`'),
   banned('nth', '`Array.prototype.at`'),
   banned('fill', '`Array.prototype.fill`'),
@@ -119,6 +98,9 @@ const BANNED_MEMBERS = [
   banned('toArray', '`Array.from` (or `Object.values` for objects)'),
 
   // Object
+  banned('keys', '`Object.keys`'),
+  banned('values', '`Object.values`'),
+  banned('entries', '`Object.entries`'),
   banned('toPairs', '`Object.entries`'),
   banned('fromPairs', '`Object.fromEntries`'),
 
