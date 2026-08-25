@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 import { omit } from 'lodash/fp';
 import chalk from 'chalk';
-import type { Core, Modules } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
@@ -39,10 +39,7 @@ export const restoreConfigs = async (strapi: Core.Strapi, config: IConfiguration
   }
 
   if (config.type === 'content-structure') {
-    return restoreContentStructure(
-      strapi,
-      config.value as Modules.ContentStructure.ContentStructureFile
-    );
+    return restoreContentStructure(strapi, config.value);
   }
 };
 
@@ -60,13 +57,13 @@ export const createConfigurationWriteStream = async (
       await transaction?.attach(async () => {
         try {
           await restoreConfigs(strapi, config);
-        } catch {
+        } catch (error) {
+          const id = (config.value as { id?: unknown } | null | undefined)?.id;
+          const label = id === undefined ? config.type : `${config.type} (${id})`;
+          const reason = error instanceof Error ? error.message : String(error);
+
           return callback(
-            new ProviderTransferError(
-              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
-                config.value.id
-              )}`
-            )
+            new ProviderTransferError(`Failed to import ${chalk.yellowBright(label)}: ${reason}`)
           );
         }
         callback();

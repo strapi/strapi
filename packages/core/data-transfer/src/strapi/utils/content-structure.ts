@@ -2,6 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 interface CoreContentStructureService {
   read(): Promise<Modules.ContentStructure.ContentStructureFile | null>;
+  validate(value: unknown): Modules.ContentStructure.ContentStructureFile;
   write(structure: Modules.ContentStructure.ContentStructureFile): Promise<void>;
 }
 
@@ -33,9 +34,9 @@ export const readContentStructureForExport = async (
 
 export const restoreContentStructure = async (
   strapi: Core.Strapi,
-  value: Modules.ContentStructure.ContentStructureFile | null | undefined
+  value: unknown
 ): Promise<void> => {
-  if (!value) {
+  if (value === undefined || value === null) {
     return;
   }
 
@@ -45,5 +46,5 @@ export const restoreContentStructure = async (
     return;
   }
 
-  await service.write(value);
+  await service.write(service.validate(value));
 };

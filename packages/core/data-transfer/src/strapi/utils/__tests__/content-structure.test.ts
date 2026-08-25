@@ -55,14 +55,29 @@ describe('data-transfer content-structure config helper', () => {
   });
 
   describe('restoreContentStructure', () => {
-    test('writes the groups file through the core service', async () => {
+    test('validates then writes the groups file through the core service', async () => {
       const write = jest.fn(async () => {});
-      const strapi = asStrapi({ get: jest.fn(() => ({ write })) });
+      const validate = jest.fn((value) => value);
+      const strapi = asStrapi({ get: jest.fn(() => ({ validate, write })) });
 
       await restoreContentStructure(strapi, groupsFile);
 
+      expect(validate).toHaveBeenCalledWith(groupsFile);
       expect(write).toHaveBeenCalledTimes(1);
       expect(write).toHaveBeenCalledWith(groupsFile);
+    });
+
+    test('rejects invalid data and does not write, leaving the previous file intact', async () => {
+      const write = jest.fn(async () => {});
+      const validate = jest.fn(() => {
+        throw new Error('Unknown version "2"');
+      });
+      const strapi = asStrapi({ get: jest.fn(() => ({ validate, write })) });
+
+      await expect(restoreContentStructure(strapi, { version: 2 })).rejects.toThrow(
+        'Unknown version'
+      );
+      expect(write).not.toHaveBeenCalled();
     });
 
     test('is a no-op when there is nothing to write', async () => {
