@@ -3,6 +3,7 @@ import fse from 'fs-extra';
 
 import type { Core, Modules, UID } from '@strapi/types';
 import { isGroupExpressionValid } from './utils/isGroupExpressionValid';
+import { contentStructureFileSchema } from './validation';
 
 export const CONTENT_STRUCTURE_FILE_NAME = 'groups.json';
 
@@ -30,6 +31,11 @@ export interface ContentStructureService {
    * standard update-schema flow, which reloads the file; this method only persists it.
    */
   write(structure: Modules.ContentStructure.ContentStructureFile): Promise<void>;
+
+  /**
+   * Strictly validates an unknown value against the canonical groups.json schema; throws if invalid.
+   */
+  validate(value: unknown): Modules.ContentStructure.ContentStructureFile;
 
   /**
    * Invalidates the cached parsed groups.json file.
@@ -365,13 +371,13 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
     const dir = strapi.dirs.app.contentStructure;
 
     await fse.ensureDir(dir);
-    await fse.writeJSON(
-      join(dir, CONTENT_STRUCTURE_FILE_NAME),
-      { ...structure, version: 1 },
-      { spaces: 2 }
-    );
+    await fse.writeJSON(join(dir, CONTENT_STRUCTURE_FILE_NAME), structure, { spaces: 2 });
 
     invalidate();
+  }
+
+  function validate(value: unknown): Modules.ContentStructure.ContentStructureFile {
+    return contentStructureFileSchema.parse(value) as Modules.ContentStructure.ContentStructureFile;
   }
 
   async function countGroups() {
@@ -391,6 +397,7 @@ export function createContentStructureService(strapi: Core.Strapi): ContentStruc
     getCleanedFile,
     countGroups,
     invalidate,
+    validate,
     resolve,
     write,
     read,
