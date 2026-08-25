@@ -14,7 +14,8 @@ interface LicenseInfo {
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
   subscriptionId?: string;
   planPriceId?: string;
-  renewalDate?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  renewalDate?: number;
   // Present on the payload at runtime; declared here so the type reflects reality.
   licenseKey?: string;
   customerId?: string;

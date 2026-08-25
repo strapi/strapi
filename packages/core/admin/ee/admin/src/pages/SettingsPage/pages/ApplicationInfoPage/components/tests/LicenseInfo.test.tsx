@@ -20,7 +20,7 @@ const baseLicense: LicenseData = {
   // Growth-specific layout (admin seats / AI usage) is covered by AdminSeatInfo/AIUsage's own
   // tests, not here.
   planPriceId: 'enterprise-plan',
-  renewalDate: '2027-03-18T00:00:00.000Z',
+  renewalDate: Date.UTC(2027, 2, 18),
   lastRegistrySyncAt: Date.UTC(2026, 0, 1, 10, 0, 0),
   nextRegistrySyncAt: null,
   usingCachedLicense: false,
@@ -45,8 +45,8 @@ const baseLicense: LicenseData = {
 
 // Absolute dates render as locale-independent `yyyy/mm/dd`; mirror that here rather than
 // asserting a locale-formatted string.
-const formatDate = (iso: string) => {
-  const date = new Date(iso);
+const formatDate = (value: string | number) => {
+  const date = new Date(value);
 
   return `${date.getFullYear()}/${`${date.getMonth() + 1}`.padStart(2, '0')}/${`${date.getDate()}`.padStart(2, '0')}`;
 };

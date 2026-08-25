@@ -54,7 +54,7 @@ export interface Strapi extends Container {
     subscriptionId?: string | null | undefined;
     planPriceId?: string | null | undefined;
     licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
-    renewalDate: string | null;
+    renewalDate: number | null;
     planFeatureCatalog: string[];
     retainedLicense: {
       features?: Array<{ name: string; [key: string]: any } | string>;
@@ -64,7 +64,7 @@ export interface Strapi extends Container {
       isTrial?: boolean;
       subscriptionId?: string;
       planPriceId?: string;
-      renewalDate?: string;
+      renewalDate?: number;
     } | null;
     getTrialEndDate: ({
       strapi,

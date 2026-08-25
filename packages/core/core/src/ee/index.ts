@@ -24,7 +24,8 @@ interface LicenseInfoState {
   isTrial: boolean;
   subscriptionId?: string;
   planPriceId?: string;
-  renewalDate?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  renewalDate?: number;
 }
 
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
