@@ -1,4 +1,4 @@
-import { isNil, isArray, prop, xor, eq, differenceWith } from 'lodash/fp';
+import { isNil, prop, xor, eq, differenceWith } from 'lodash/fp';
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
@@ -110,8 +110,10 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
     );
 
     const isRegisteredAction = actionProvider.has(permission.action);
-    const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
-    const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject as string);
+    const hasInvalidProperties =
+      Array.isArray(applyToProperties) && invalidProperties.every(eq(true));
+    const isInvalidSubject =
+      Array.isArray(subjects) && !subjects.includes(permission.subject as string);
     // On an api token permission, nil properties mean "everything", not "invalid"
     const hasApiToken = !isNil(prop('apiToken', permission));
 

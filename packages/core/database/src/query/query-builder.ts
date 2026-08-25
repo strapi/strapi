@@ -558,7 +558,7 @@ const createQueryBuilder = (
 
       if (this.shouldUseDistinct()) {
         const joinsOrderByColumns = state.joins.flatMap((join) => {
-          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
+          return Object.keys(join.orderBy ?? {}).map((key) => this.aliasColumn(key, join.alias));
         });
         // Only include column-based orderBy entries here (raw expressions are handled below)
         const orderByColumns = state.orderBy

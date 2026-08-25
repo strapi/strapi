@@ -1,6 +1,6 @@
 'use strict';
 
-const { clone, has, concat, isNil } = require('lodash/fp');
+const { clone, has, isNil } = require('lodash/fp');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
@@ -71,7 +71,7 @@ const createAgent = (strapi, initialState = {}) => {
     const { method, url, body, formData, qs: queryString, headers } = options;
     const supertestAgent = request.agent(strapi.server.httpServer);
 
-    const fullUrl = concat(state.urlPrefix, url).join('');
+    const fullUrl = [state.urlPrefix, url].join('');
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 

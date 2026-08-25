@@ -1,5 +1,5 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, isObject } from 'lodash/fp';
+import { isObject } from 'lodash/fp';
 import type { z } from 'zod/v4';
 
 import { getNonWritableAttributes, constants } from '../content-types';
@@ -75,7 +75,7 @@ const createAPIValidators = (opts: APIOptions) => {
       throw new Error('Missing schema in validateInput');
     }
 
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       await Promise.all(data.map((entry) => validateInput(entry, schema, options)));
       return;
     }
@@ -233,7 +233,7 @@ const createAPIValidators = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in validateFilters');
     }
-    if (isArray(filters)) {
+    if (Array.isArray(filters)) {
       await Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
       return;
     }

@@ -1,6 +1,6 @@
 import type { Utils } from '@strapi/types';
 
-import { curry, pipe, merge, set, pick, omit, includes, isArray, prop } from 'lodash/fp';
+import { curry, pipe, merge, set, pick, omit, includes, prop } from 'lodash/fp';
 
 export interface ActionAlias {
   /**
@@ -174,7 +174,7 @@ const appliesToProperty = curry((property: string, action: Action): boolean => {
  * Check if an action applies to a subject
  */
 const appliesToSubject = curry((subject: string, action: Action): boolean => {
-  return isArray(action.subjects) && includes(subject, action.subjects);
+  return Array.isArray(action.subjects) && includes(subject, action.subjects);
 });
 
 /**

@@ -1,4 +1,4 @@
-import { isArray, isObject } from 'lodash/fp';
+import { isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
 import { RelationOrderingOptions } from '../../types';
@@ -98,7 +98,7 @@ const visitRelationAttribute = async (
   const handleMorphElements = async (elements: any[]) => {
     const allowedElements: Record<string, unknown>[] = [];
 
-    if (!isArray(elements)) {
+    if (!Array.isArray(elements)) {
       return allowedElements;
     }
 

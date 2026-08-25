@@ -6,17 +6,7 @@
  */
 
 import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import { cloneDeep, get, isEmpty, isInteger, isNil, isObject, isString, toNumber } from 'lodash/fp';
 import {
   constants,
   hasDraftAndPublish,
@@ -193,7 +183,7 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;

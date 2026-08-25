@@ -1,4 +1,4 @@
-import { map, values, sumBy, pipe, flatMap } from 'lodash/fp';
+import { map, sumBy, pipe, flatMap } from 'lodash/fp';
 import type { Schema, UID } from '@strapi/types';
 
 const getNumberOfConditionalFields = () => {
@@ -10,7 +10,7 @@ const getNumberOfConditionalFields = () => {
   ) => {
     return pipe(
       map('attributes'),
-      flatMap(values),
+      flatMap(Object.values),
       sumBy((attribute: Schema.Attribute.AnyAttribute) => {
         if (attribute.conditions && typeof attribute.conditions === 'object') {
           return 1;

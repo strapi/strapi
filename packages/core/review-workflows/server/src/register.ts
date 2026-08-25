@@ -1,4 +1,4 @@
-import { defaultsDeep, filter, pipe } from 'lodash/fp';
+import { defaultsDeep, pipe } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -86,7 +86,7 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
 
     const enabledRWContentTypes = pipe([
       getVisibleContentTypesUID,
-      filter((uid: UID.ContentType) => hasStageAttribute(contentTypes[uid])),
+      (uids: UID.ContentType[]) => uids.filter((uid) => hasStageAttribute(contentTypes[uid])),
     ])(contentTypes);
 
     // Remove previously created join tables and persist the new ones

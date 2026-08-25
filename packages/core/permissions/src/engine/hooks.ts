@@ -1,4 +1,4 @@
-import { cloneDeep, has, isArray } from 'lodash/fp';
+import { cloneDeep, has } from 'lodash/fp';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
@@ -72,7 +72,7 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
         permission.condition = { $and: [] };
       }
 
-      if (isArray(permission.condition.$and)) {
+      if (Array.isArray(permission.condition.$and)) {
         permission.condition.$and.push(rawConditionObject);
       }
 
@@ -84,7 +84,7 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
         permission.condition = { $and: [] };
       }
 
-      if (isArray(permission.condition.$and)) {
+      if (Array.isArray(permission.condition.$and)) {
         const orClause = permission.condition.$and.find(has('$or'));
 
         if (orClause) {

@@ -15,7 +15,9 @@
     "./tests": "./tests.ts"
   },
   "devDependencies": {
+    "lint-policy": "5.52.1",
     "oxlint": "1.72.0",
+    "oxlint-plugin-eslint": "1.72.0",
     "tsconfig": "5.52.1"
   },
   "scripts": {

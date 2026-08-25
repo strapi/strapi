@@ -1,20 +1,7 @@
 import type { Utils } from '@strapi/types';
 
 import { providerFactory } from '@strapi/utils';
-import {
-  pipe,
-  set,
-  pick,
-  eq,
-  omit,
-  remove,
-  get,
-  uniq,
-  isArray,
-  map,
-  curry,
-  merge,
-} from 'lodash/fp';
+import { pipe, set, pick, eq, omit, remove, get, uniq, map, curry, merge } from 'lodash/fp';
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
 
@@ -130,7 +117,7 @@ export const create = (attributes: CreatePermissionPayload) => {
  */
 export const sanitizeConditions = curry(
   (provider: Provider, permission: Permission): Permission => {
-    if (!isArray(permission.conditions)) {
+    if (!Array.isArray(permission.conditions)) {
       return permission;
     }
 
@@ -153,7 +140,7 @@ function toPermission<T extends CreatePermissionPayload>(payload: T): Permission
 function toPermission<T extends CreatePermissionPayload>(
   payload: T[] | T
 ): Permission[] | Permission {
-  if (isArray(payload)) {
+  if (Array.isArray(payload)) {
     return map((value) => create(value), payload);
   }
 

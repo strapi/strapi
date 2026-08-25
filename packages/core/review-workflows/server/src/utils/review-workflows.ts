@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { getOr, keys, pickBy, pipe, has, clamp } from 'lodash/fp';
+import { getOr, pickBy, pipe, has, clamp } from 'lodash/fp';
 import {
   ENTITY_STAGE_ATTRIBUTE,
   MAX_WORKFLOWS,
@@ -14,7 +14,7 @@ export const getVisibleContentTypesUID = pipe([
       !getOr(false, 'options.noStageAttribute', value)
   ),
   // Get UIDs
-  keys,
+  Object.keys,
 ]);
 
 export const hasStageAttribute = has(['attributes', ENTITY_STAGE_ATTRIBUTE]);

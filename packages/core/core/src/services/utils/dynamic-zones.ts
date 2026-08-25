@@ -1,4 +1,4 @@
-import { map, values, sumBy, pipe, flatMap } from 'lodash/fp';
+import { map, sumBy, pipe, flatMap } from 'lodash/fp';
 import type { Schema, UID } from '@strapi/types';
 
 const getNumberOfDynamicZones = () => {
@@ -6,7 +6,7 @@ const getNumberOfDynamicZones = () => {
 
   return pipe(
     map('attributes'),
-    flatMap(values),
+    flatMap(Object.values),
     sumBy((item) => {
       if (item.type === 'dynamiczone') {
         return 1;

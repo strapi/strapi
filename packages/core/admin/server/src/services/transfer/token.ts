@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
+import { map, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -331,7 +331,7 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
 
   return {
     ...token,
-    permissions: isArray(token.permissions)
+    permissions: Array.isArray(token.permissions)
       ? map('action', token.permissions as TransferTokenPermission[])
       : token.permissions,
   };

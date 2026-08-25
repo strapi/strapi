@@ -1,5 +1,5 @@
 import { subject as asSubject } from '@casl/ability';
-import { defaults, omit, isArray, isEmpty, uniq, intersection, getOr, isObject } from 'lodash/fp';
+import { defaults, omit, isEmpty, uniq, intersection, getOr, isObject } from 'lodash/fp';
 
 import {
   contentTypes,
@@ -161,7 +161,7 @@ export default ({ action, ability, model }: any) => {
     // TODO
     // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}): Promise<unknown> => {
-      if (isArray(data)) {
+      if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedValidate(entity, options)));
       }
 

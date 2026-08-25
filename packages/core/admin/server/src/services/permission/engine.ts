@@ -1,4 +1,4 @@
-import { curry, isArray, isEmpty, difference } from 'lodash/fp';
+import { curry, isEmpty, difference } from 'lodash/fp';
 import { engine } from '@strapi/permissions';
 import type { Ability } from '@casl/ability';
 import permissionDomain from '../../domain/permission';
@@ -56,7 +56,7 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     .on('after-format::validate.permission', ({ permission }) => {
       const { fields } = permission.properties;
 
-      if (isArray(fields) && isEmpty(fields)) {
+      if (Array.isArray(fields) && isEmpty(fields)) {
         return false;
       }
     });

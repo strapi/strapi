@@ -1,7 +1,7 @@
 import * as z from 'zod/v4';
 import { strings, validateZodSchema, contentTypes } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
-import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
+import { isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
 import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
@@ -416,7 +416,7 @@ const jsonSchema = basePropertiesSchema.extend({
         return true;
       }
 
-      if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
+      if (isNumber(value) || isNull(value) || isObject(value) || Array.isArray(value)) {
         return true;
       }
 
