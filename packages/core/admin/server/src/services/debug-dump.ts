@@ -63,15 +63,21 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
       uploadPrivate = false;
     }
 
+    const retained = strapi.ee.retainedLicense;
+
     const payload: DebugDumpPayload = {
       dumpVersion: 1,
       generatedAt: new Date().toISOString(),
       strapi: {
         version: strapi.config.get('info.strapi', null) as string | null,
         edition: strapi.EE ? 'EE' : 'CE',
+        // `edition` is the edition actually running, so a lapsed license reports CE. The plan
+        // still comes off the license, otherwise a dump from an expired Enterprise instance is
+        // indistinguishable from a project that never had a license, which is exactly the case
+        // Support is most likely to receive one for. `licenseStatus` below tells them apart.
         projectType: getProjectType({
-          isEE: Boolean(strapi.EE),
-          planPriceId: strapi.ee.planPriceId ?? undefined,
+          isEE: strapi.ee.licenseStatus !== 'none',
+          planPriceId: strapi.ee.planPriceId ?? retained?.planPriceId ?? undefined,
         }),
         environment: strapi.config.get('environment', '') as string,
         autoReload: strapi.config.get('autoReload', false) as boolean,
@@ -104,14 +110,19 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
       env,
     };
 
-    if (strapi.EE) {
+    // Emitted whenever this instance has ever had a license, not only while one is usable, so
+    // an expired license still reports its plan, seats and subscription. `disable()` wipes
+    // `licenseInfo` and keeps a display-only snapshot in `retainedLicense`, so read through to
+    // it the same way `licenseLimitInformation` does.
+    if (strapi.EE || retained) {
       payload.license = {
-        type: strapi.ee.type,
-        isTrial: strapi.ee.isTrial,
-        expireAt: strapi.ee.expireAt ?? null,
-        seats: strapi.ee.seats ?? null,
-        subscriptionId: strapi.ee.subscriptionId ?? null,
-        features: strapi.ee.features.list(),
+        licenseStatus: strapi.ee.licenseStatus,
+        type: strapi.ee.type ?? retained?.type ?? null,
+        isTrial: strapi.ee.isTrial || Boolean(retained?.isTrial),
+        expireAt: strapi.ee.expireAt ?? retained?.expireAt ?? null,
+        seats: strapi.ee.seats ?? retained?.seats ?? null,
+        subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
+        features: strapi.EE ? strapi.ee.features.list() : (retained?.features ?? []),
         entitlements: strapi.ee.entitlements.list(),
       };
     }

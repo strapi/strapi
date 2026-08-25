@@ -220,7 +220,7 @@ export declare namespace GetLicenseLimitInformation {
       expireAt: string | null;
       licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
       planPriceId: string | null;
-      renewalDate: string | null;
+      renewalDate: number | null;
       planEntitlements: Array<{
         feature: string;
         available: boolean;
@@ -269,6 +269,7 @@ export interface DebugDumpPayload {
     autoReload: boolean;
   };
   license?: {
+    licenseStatus: string;
     type: string | null | undefined;
     isTrial: boolean;
     expireAt: string | null;

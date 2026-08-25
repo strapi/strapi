@@ -11,6 +11,8 @@ const makeStrapi = () =>
       subscriptionId: 'sub_1',
       expireAt: '2026-12-31T00:00:00.000Z',
       planPriceId: 'enterprise_monthly',
+      licenseStatus: 'active',
+      retainedLicense: null,
       features: { list: () => [{ name: 'sso' }] },
       entitlements: { list: () => [] },
       licenseInfo: { licenseKey: 'SUPER_SECRET_KEY' },
@@ -120,9 +122,47 @@ describe('debug-dump service', () => {
     expect(JSON.stringify(dump.contentModel.contentTypes)).not.toContain('SHOULD_BE_HIDDEN');
   });
 
+  it('includes retained license details when the license is expired (EE disabled)', async () => {
+    // `disable()` flips EE off and wipes `licenseInfo`, keeping a display-only snapshot. Without
+    // reading through to it, a dump from a lapsed Enterprise instance is indistinguishable from
+    // a project that never had a license, which is the case Support most often receives one for.
+    const strapi = makeStrapi();
+    strapi.EE = false;
+    strapi.ee.planPriceId = undefined;
+    strapi.ee.expireAt = undefined;
+    strapi.ee.subscriptionId = undefined;
+    strapi.ee.seats = undefined;
+    strapi.ee.type = undefined;
+    strapi.ee.licenseStatus = 'expired';
+    strapi.ee.retainedLicense = {
+      type: 'gold',
+      isTrial: false,
+      seats: 10,
+      subscriptionId: 'sub_1',
+      expireAt: '2026-01-01T00:00:00.000Z',
+      planPriceId: 'cms-growth-monthly',
+      features: [{ name: 'sso' }],
+    };
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.strapi.projectType).toBe('Growth');
+    expect(dump.strapi.edition).toBe('CE');
+    expect(dump.license).toBeDefined();
+    expect(dump.license?.licenseStatus).toBe('expired');
+    expect(dump.license?.subscriptionId).toBe('sub_1');
+    expect(dump.license?.seats).toBe(10);
+    expect(dump.license?.type).toBe('gold');
+    expect(dump.license?.features).toEqual([{ name: 'sso' }]);
+
+    expect(JSON.stringify(dump)).not.toContain('SUPER_SECRET_KEY');
+  });
+
   it('omits the license section in CE', async () => {
     const strapi = makeStrapi();
     strapi.EE = false;
+    // A CE instance has never had a license, so there is nothing retained either.
+    strapi.ee.licenseStatus = 'none';
     const dump = await debugDumpService({ strapi }).generate();
     expect(dump.license).toBeUndefined();
     expect(dump.strapi.edition).toBe('CE');
