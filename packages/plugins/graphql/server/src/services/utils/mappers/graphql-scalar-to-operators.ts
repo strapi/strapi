@@ -1,4 +1,4 @@
-import { get, map, mapValues } from 'lodash/fp';
+import { get, mapValues } from 'lodash/fp';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => ({
@@ -7,7 +7,7 @@ export default ({ strapi }: Context) => ({
     const { operators } = strapi.plugin('graphql').service('builders').filters;
 
     const associations = mapValues(
-      map((operatorName: string) => operators[operatorName]),
+      (operatorNames: string[]) => operatorNames.map((operatorName) => operators[operatorName]),
       GRAPHQL_SCALAR_OPERATORS
     );
 

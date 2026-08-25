@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { map, pipe, prop } = require('lodash/fp');
+const { pipe } = require('lodash/fp');
 const urlJoin = require('url-join');
 const {
   template: { createStrictInterpolationRegExp },
@@ -51,9 +51,8 @@ module.exports = ({ strapi }) => ({
     };
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
-      const controllers = _.reduce(
-        api.controllers,
-        (acc, controller, controllerName) => {
+      const controllers = Object.entries(api.controllers).reduce(
+        (acc, [controllerName, controller]) => {
           const contentApiActions = _.pickBy(controller, isContentApi);
 
           if (_.isEmpty(contentApiActions)) {
@@ -78,9 +77,8 @@ module.exports = ({ strapi }) => ({
     }
 
     for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
-      const controllers = _.reduce(
-        plugin.controllers,
-        (acc, controller, controllerName) => {
+      const controllers = Object.entries(plugin.controllers).reduce(
+        (acc, [controllerName, controller]) => {
           const contentApiActions = _.pickBy(controller, isContentApi);
 
           if (_.isEmpty(contentApiActions)) {
@@ -160,7 +158,7 @@ module.exports = ({ strapi }) => ({
     const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
     const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
 
-    const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
+    const permissionsFoundInDB = _.uniq(dbPermissions.map((permission) => permission.action));
 
     const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
@@ -196,7 +194,7 @@ module.exports = ({ strapi }) => ({
         const toCreate = pipe(
           (permissions) =>
             permissions.filter(({ roleType }) => roleType === role.type || roleType === null),
-          map(prop('action'))
+          (permissions) => permissions.map((permission) => permission.action)
         )(DEFAULT_PERMISSIONS);
 
         await Promise.all(

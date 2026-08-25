@@ -14,7 +14,6 @@ import {
   isPlainObject,
   isString,
   isUndefined,
-  map,
   pick,
   uniqBy,
   uniqWith,
@@ -1433,7 +1432,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               if (hasInverseOrderColumn(attribute)) {
                 const nonExistingRelsIds: ID[] = difference(
                   relIdsToaddOrMove,
-                  map(inverseJoinColumn.name, currentMovingRels)
+                  currentMovingRels.map((rel: any) => rel[inverseJoinColumn.name])
                 );
 
                 const maxResults = await db
@@ -1513,7 +1512,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .transacting(trx)
                   .execute<Array<Record<string, ID>>>();
 
-                const inverseRelsIds = map(inverseJoinColumn.name, existingRels);
+                const inverseRelsIds = existingRels.map((rel) => rel[inverseJoinColumn.name]);
 
                 const nonExistingRelsIds = difference(relIdsToaddOrMove, inverseRelsIds);
 

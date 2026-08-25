@@ -2,7 +2,6 @@ import {
   curry,
   isString,
   isObject,
-  map,
   trim,
   split,
   isEmpty,
@@ -67,7 +66,11 @@ const sort = traverseFactory()
   )
   // Parse string values
   .parse(isString, () => {
-    const tokenize = pipe(split('.'), map(split(':')), flatten);
+    const tokenize = pipe(
+      split('.'),
+      (parts: string[]) => parts.map((part) => split(':', part)),
+      flatten
+    );
     const recompose = (parts: string[]) => {
       if (parts.length === 0) {
         return undefined;

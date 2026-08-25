@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, map, every, pipe } = require('lodash/fp');
+const { castArray, every, pipe } = require('lodash/fp');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -43,7 +43,11 @@ const authenticate = async (ctx) => {
       // Fetch user's permissions
       const permissions = await Promise.resolve(user.role.id)
         .then(getService('permission').findRolePermissions)
-        .then(map(getService('permission').toContentAPIPermission));
+        .then((rolePermissions) =>
+          rolePermissions.map((permission) =>
+            getService('permission').toContentAPIPermission(permission)
+          )
+        );
 
       // Generate an ability (content API engine) based on the given permissions
       const ability = await strapi.contentAPI.permissions.engine.generateAbility(permissions);
@@ -64,7 +68,9 @@ const authenticate = async (ctx) => {
 
     const publicPermissions = await getService('permission')
       .findPublicPermissions()
-      .then(map(getService('permission').toContentAPIPermission));
+      .then((permissions) =>
+        permissions.map((permission) => getService('permission').toContentAPIPermission(permission))
+      );
 
     if (publicPermissions.length === 0) {
       return { authenticated: false };

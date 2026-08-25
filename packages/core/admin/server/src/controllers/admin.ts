@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
+import { sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
@@ -118,7 +118,7 @@ export default {
 
     const getNumberOfDynamicZones = () => {
       return pipe(
-        map('attributes'),
+        (schemas: Record<string, any>) => Object.values(schemas).map((schema) => schema.attributes),
         flatMap(Object.values),
         // @ts-expect-error lodash types
         sumBy(propEq('type', 'dynamiczone'))

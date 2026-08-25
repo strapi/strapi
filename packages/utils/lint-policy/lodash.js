@@ -81,6 +81,16 @@ const BANNED_MEMBERS = [
     '`Array.prototype.find`',
     'Expand matcher shorthand (`{ id }`) into an explicit predicate.'
   ),
+  banned(
+    'map',
+    '`Array.prototype.map`',
+    "Expand iteratee shorthand (`map(xs, 'id')`) into an arrow, and map `Object.values` for objects."
+  ),
+  banned(
+    'reduce',
+    '`Array.prototype.reduce`',
+    'Reduce `Object.entries` for objects — the iteratee takes `[key, value]` rather than `(value, key)`.'
+  ),
   banned('concat', '`Array.prototype.concat` or an array spread'),
   banned('head', '`array[0]` or `Array.prototype.at`'),
   banned('nth', '`Array.prototype.at`'),

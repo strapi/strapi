@@ -16,25 +16,21 @@ module.exports = ({ strapi }) => ({
 
     const createPromises = _.flatMap(params.permissions, (type, typeName) => {
       return _.flatMap(type.controllers, (controller, controllerName) => {
-        return _.reduce(
-          controller,
-          (acc, action, actionName) => {
-            const { enabled /* policy */ } = action;
+        return Object.entries(controller).reduce((acc, [actionName, action]) => {
+          const { enabled /* policy */ } = action;
 
-            if (enabled) {
-              const actionID = `${typeName}.${controllerName}.${actionName}`;
+          if (enabled) {
+            const actionID = `${typeName}.${controllerName}.${actionName}`;
 
-              acc.push(
-                strapi.db
-                  .query('plugin::users-permissions.permission')
-                  .create({ data: { action: actionID, role: role.id } })
-              );
-            }
+            acc.push(
+              strapi.db
+                .query('plugin::users-permissions.permission')
+                .create({ data: { action: actionID, role: role.id } })
+            );
+          }
 
-            return acc;
-          },
-          []
-        );
+          return acc;
+        }, []);
       });
     });
 
@@ -100,19 +96,15 @@ module.exports = ({ strapi }) => ({
 
     const newActions = _.flatMap(permissions, (type, typeName) => {
       return _.flatMap(type.controllers, (controller, controllerName) => {
-        return _.reduce(
-          controller,
-          (acc, action, actionName) => {
-            const { enabled /* policy */ } = action;
+        return Object.entries(controller).reduce((acc, [actionName, action]) => {
+          const { enabled /* policy */ } = action;
 
-            if (enabled) {
-              acc.push(`${typeName}.${controllerName}.${actionName}`);
-            }
+          if (enabled) {
+            acc.push(`${typeName}.${controllerName}.${actionName}`);
+          }
 
-            return acc;
-          },
-          []
-        );
+          return acc;
+        }, []);
       });
     });
 

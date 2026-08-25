@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import {
@@ -130,7 +130,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinTable.on || {})
       .transacting(trx);
 
-    const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
+    const relIdsToDelete = relsToDelete.map((rel: any) => rel[inverseJoinColumn.name]);
 
     await createQueryBuilder(joinTable.name, db)
       .delete()
@@ -205,7 +205,7 @@ const deleteRelations = async ({
       done = batchToDelete.length < batchSize;
       lastId = batchToDelete[batchToDelete.length - 1]?.id || 0;
 
-      const batchIds = map(inverseJoinColumn.name, batchToDelete);
+      const batchIds = batchToDelete.map((row: any) => row[inverseJoinColumn.name]);
 
       await createQueryBuilder(joinTable.name, db)
         .delete()

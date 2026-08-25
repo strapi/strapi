@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import map from 'lodash/map';
 import tail from 'lodash/tail';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -42,7 +41,7 @@ function BoundRoute({ route }) {
           </Typography>
         </MethodBox>
         <Box paddingLeft={2} paddingRight={2}>
-          {map(formattedRoute, (value) => (
+          {formattedRoute.map((value) => (
             <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
             </Typography>

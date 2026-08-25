@@ -145,7 +145,8 @@ const newEngine = (params: EngineParams): Engine => {
       .then(removeInvalidResults);
 
     const resultPropEq = _.propEq('result');
-    const pickResults = _.map(_.prop('result'));
+    const pickResults = (results: Array<{ result: unknown }>) =>
+      results.map(({ result }) => result);
 
     if (evaluatedConditions.every(resultPropEq(false))) {
       return;

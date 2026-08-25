@@ -4,7 +4,6 @@ import {
   difference,
   isNil,
   isEmpty,
-  map,
   uniq,
   isNumber,
   differenceWith,
@@ -590,7 +589,7 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
-  return Array.isArray(permissions) ? map('action', permissions) : [];
+  return Array.isArray(permissions) ? permissions.map((permission: any) => permission.action) : [];
 };
 
 type WhereParams = {
@@ -1123,7 +1122,9 @@ const update = async (
         .query('admin::api-token')
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
+      const currentPermissions: string[] = (currentPermissionsResult || []).map(
+        (permission: any) => permission.action
+      );
       const newPermissions = uniq(incomingPermissions || []);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);

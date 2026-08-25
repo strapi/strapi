@@ -1,7 +1,7 @@
 import type { Utils } from '@strapi/types';
 
 import { providerFactory } from '@strapi/utils';
-import { pipe, set, pick, eq, omit, remove, get, uniq, map, curry, merge } from 'lodash/fp';
+import { pipe, set, pick, eq, omit, remove, get, uniq, curry, merge } from 'lodash/fp';
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
 
@@ -141,7 +141,7 @@ function toPermission<T extends CreatePermissionPayload>(
   payload: T[] | T
 ): Permission[] | Permission {
   if (Array.isArray(payload)) {
-    return map((value) => create(value), payload);
+    return payload.map((value) => create(value));
   }
 
   return create(payload);

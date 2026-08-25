@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { flow, map, sum, size, mean, max, defaultTo } from 'lodash/fp';
+import { sum, size, mean, max, defaultTo } from 'lodash/fp';
 import { add } from 'date-fns';
 import { getService } from '../../utils';
 
@@ -25,15 +25,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // There will never be more than 200 workflow, so we can safely fetch them all
       const workflows = await workflowsService.find({ populate: 'stages' });
 
-      const stagesCount = flow(
-        map('stages'), // Number of stages per workflow
-        map(size)
-      )(workflows);
+      // Number of stages per workflow
+      const stagesCount = workflows.map((workflow: any) => size(workflow.stages));
 
-      const contentTypesCount = flow(
-        map('contentTypes'), // Number of content types per workflow
-        map(size)
-      )(workflows);
+      // Number of content types per workflow
+      const contentTypesCount = workflows.map((workflow: any) => size(workflow.contentTypes));
 
       return {
         numberOfActiveWorkflows: size(workflows),

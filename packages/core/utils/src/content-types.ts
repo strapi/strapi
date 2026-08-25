@@ -200,9 +200,8 @@ const getCreatorFields = (model: Model) => {
 const getNonWritableAttributes = (model: Model) => {
   if (!model) return [];
 
-  const nonWritableAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.writable === false ? acc.concat(attrName) : acc),
+  const nonWritableAttributes = Object.entries(model.attributes).reduce(
+    (acc, [attrName, attr]) => (attr.writable === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
@@ -225,9 +224,8 @@ const isWritableAttribute = (model: Model, attributeName: string) => {
 };
 
 const getNonVisibleAttributes = (model: Model) => {
-  const nonVisibleAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.visible === false ? acc.concat(attrName) : acc),
+  const nonVisibleAttributes = Object.entries(model.attributes).reduce(
+    (acc, [attrName, attr]) => (attr.visible === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
@@ -389,47 +387,31 @@ const isMorphToRelationalAttribute = (attribute?: Attribute) => {
 };
 
 const getComponentAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isComponentAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isComponentAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getMediaAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isMediaAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isMediaAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getScalarAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isScalarAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isScalarAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getRelationalAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isRelationalAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc, [attrName, attr]) => {
+    if (isRelationalAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 /**
