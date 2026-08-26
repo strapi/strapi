@@ -58,6 +58,7 @@ const StyledCard = styled(Card)<{
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
+  isolation: isolate;
   cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
   /* No opacity change while busy — the overlay does the dimming, and stacking
