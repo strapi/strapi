@@ -1177,6 +1177,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
  * DrawerHeader
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * The icon's size lives in SVG attributes, which flex is free to override, so a
+ * long asset name would squash it. Matches the grid and table rows, where the
+ * file-type icon is shrink-proof and the name is what truncates.
+ */
+const HeaderIcon = styled(Flex)`
+  flex-shrink: 0;
+`;
+
+const HeaderTitle = styled(Typography)`
+  min-width: 0;
+`;
+
 interface DrawerHeaderProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
@@ -1195,11 +1208,13 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
       borderStyle="solid"
       borderWidth="0 0 1px 0"
     >
-      <DocIcon width={20} height={20} />
+      <HeaderIcon>
+        <DocIcon width={20} height={20} />
+      </HeaderIcon>
       <Drawer.Title asChild>
-        <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+        <HeaderTitle variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
           {asset.name}
-        </Typography>
+        </HeaderTitle>
       </Drawer.Title>
       <Box marginLeft="auto">
         <Drawer.CloseButton onClose={closeDetails}>
