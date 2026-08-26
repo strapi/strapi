@@ -123,7 +123,7 @@ describe('UploadProgressDialog', () => {
         })
       );
 
-      expect(screen.getByText('Uploading 1 items')).toBeInTheDocument();
+      expect(screen.getByText('Uploading 1 item')).toBeInTheDocument();
       expect(screen.queryByText(/%\)/)).not.toBeInTheDocument();
     });
 
@@ -136,7 +136,7 @@ describe('UploadProgressDialog', () => {
         })
       );
 
-      expect(screen.getByText(/Uploading 1 items \(25%\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Uploading 1 item \(25%\)/)).toBeInTheDocument();
     });
 
     it('shows Cancel all button during upload', () => {

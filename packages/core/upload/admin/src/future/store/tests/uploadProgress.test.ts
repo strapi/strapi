@@ -284,7 +284,7 @@ describe('uploadProgress slice', () => {
     });
 
     it('turns true once any row actually reports bytes, without a flag change', () => {
-      // Forward-compatible with CMS-1152: real bytes bring the percentage back, no revert needed.
+      // Forward-compatible: real bytes bring the percentage back, no revert needed.
       const opened = uploadProgressReducer(
         undefined,
         openUploadProgress({ totalFiles: 1, fileNames: ['remote.png'] })

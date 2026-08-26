@@ -251,14 +251,15 @@ const HeaderStatus = ({
         ? formatMessage(
             {
               id: getTranslationKey('upload.progress.uploading.indeterminate'),
-              defaultMessage: 'Uploading {total} items',
+              defaultMessage: 'Uploading {total, plural, one {# item} other {# items}}',
             },
             { total: totalFiles }
           )
         : formatMessage(
             {
               id: getTranslationKey('upload.progress.uploading.withCount'),
-              defaultMessage: 'Uploading {total} items ({percentage}%)',
+              defaultMessage:
+                'Uploading {total, plural, one {# item} other {# items}} ({percentage}%)',
             },
             {
               total: totalFiles,
