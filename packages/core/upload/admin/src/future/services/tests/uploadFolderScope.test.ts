@@ -76,14 +76,14 @@ describe('uploaded assets carry the folder they targeted', () => {
     const result = setup(5);
 
     await waitFor(() => expect(result.current.completed).toHaveLength(1));
-    expect(result.current.completed[0].folder).toBe(5);
+    expect(result.current.completed[0].asset.folder).toBe(5);
   });
 
   it('leaves a root upload at the root', async () => {
     const result = setup(null);
 
     await waitFor(() => expect(result.current.completed).toHaveLength(1));
-    expect(result.current.completed[0].folder).toBeNull();
+    expect(result.current.completed[0].asset.folder).toBeNull();
   });
 
   it('keeps a folder the response did provide', async () => {
@@ -92,6 +92,6 @@ describe('uploaded assets carry the folder they targeted', () => {
     const result = setup(5);
 
     await waitFor(() => expect(result.current.completed).toHaveLength(1));
-    expect(result.current.completed[0].folder).toBe(9);
+    expect(result.current.completed[0].asset.folder).toBe(9);
   });
 });

@@ -144,14 +144,15 @@ const useInfiniteAssets = ({
     setPageState({ queryKey, page: 1 });
   }
 
-  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery(
-    {
-      ...queryArgs,
-      page,
-      pageSize: PAGE_SIZE,
-    },
-    { skip: !enabled }
-  );
+  const { currentData, isLoading, isFetching, error, startedTimeStamp, fulfilledTimeStamp } =
+    useGetAssetsQuery(
+      {
+        ...queryArgs,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+      { skip: !enabled }
+    );
 
   const isSameQuery = accumulated.queryKey === queryKey;
 
@@ -278,18 +279,46 @@ const useInfiniteAssets = ({
   // end-of-batch invalidation, as they did before.
   const canPlaceUploads = !search && (filters?.length ?? 0) === 0;
 
+  // When the loaded data came back from a request that started after a given
+  // upload — i.e. the server had already stored it when asked. Past that point
+  // the list is the authority on whether the asset is there at all, so bridging
+  // must stop: otherwise a later delete or move, which refetches without it,
+  // would have it re-inserted.
+  const listAnsweredAfter =
+    fulfilledTimeStamp !== undefined &&
+    startedTimeStamp !== undefined &&
+    // A refetch in flight leaves `fulfilledTimeStamp` on the previous response,
+    // which predates this request — so only settled data counts.
+    fulfilledTimeStamp > startedTimeStamp
+      ? startedTimeStamp
+      : undefined;
+
   const assets = useMemo(() => {
     if (!canPlaceUploads || completedUploads.length === 0) {
       return loadedAssets;
     }
 
+    const bridging = completedUploads.filter(
+      ({ asset, completedAt }) =>
+        getRelationId(asset.folder) === folder &&
+        (listAnsweredAfter === undefined || completedAt > listAnsweredAfter)
+    );
+
     return mergeUploadedAssets({
       assets: loadedAssets,
-      uploaded: completedUploads.filter((asset) => getRelationId(asset.folder) === folder),
+      uploaded: bridging.map(({ asset }) => asset),
       sort,
       hasNextPage,
     });
-  }, [canPlaceUploads, completedUploads, loadedAssets, folder, sort, hasNextPage]);
+  }, [
+    canPlaceUploads,
+    completedUploads,
+    loadedAssets,
+    folder,
+    sort,
+    hasNextPage,
+    listAnsweredAfter,
+  ]);
   const isFetchingMore = isFetching && page > 1;
 
   const fetchNextPage = useCallback(() => {

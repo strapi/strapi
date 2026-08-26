@@ -311,7 +311,12 @@ const runUploadPool = async ({
       batcher.cancel();
       uploaded.push(file);
       dispatch(
-        setFileComplete({ index, file: withTargetFolder(file, entry.fileInfo?.folder), uploadId })
+        setFileComplete({
+          index,
+          file: withTargetFolder(file, entry.fileInfo?.folder),
+          uploadId,
+          completedAt: Date.now(),
+        })
       );
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
@@ -555,6 +560,7 @@ const processSSEStream = async ({
               index,
               file: withTargetFolder(payload.file, folderId),
               uploadId,
+              completedAt: Date.now(),
             })
           );
 

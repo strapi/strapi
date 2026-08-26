@@ -104,6 +104,7 @@ describe('uploadProgress slice', () => {
         setFileComplete({
           uploadId: 1,
           index: 0,
+          completedAt: 1000,
           file: { id: 5, name: 'a.png', hash: 'h' } as never,
         })
       );
@@ -526,7 +527,7 @@ describe('uploadProgress slice', () => {
         );
         state = uploadProgressReducer(
           state,
-          setFileComplete({ uploadId: 1, index, file: { id: index } as never })
+          setFileComplete({ uploadId: 1, index, file: { id: index } as never, completedAt: 1000 })
         );
         state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
         observe();
@@ -566,7 +567,7 @@ describe('uploadProgress slice', () => {
         );
         state = uploadProgressReducer(
           state,
-          setFileComplete({ uploadId: 1, index, file: { id: index } as never })
+          setFileComplete({ uploadId: 1, index, file: { id: index } as never, completedAt: 1000 })
         );
         state = uploadProgressReducer(state, setFileMetadataGenerating({ index, uploadId: 1 }));
         outcomes.push(metadataOutcome(state));
@@ -699,7 +700,12 @@ describe('uploadProgress slice', () => {
 
       const completed = uploadProgressReducer(
         second,
-        setFileComplete({ index: 0, file: { id: 1 } as never, uploadId: first.uploadId })
+        setFileComplete({
+          index: 0,
+          file: { id: 1 } as never,
+          uploadId: first.uploadId,
+          completedAt: 1000,
+        })
       );
       expect(completed.files[0].status).toBe('pending');
 
@@ -737,11 +743,20 @@ describe('uploadProgress slice', () => {
 describe('selectCompletedUploads', () => {
   const uploaded = (id: number) => ({ id, name: `file-${id}.png`, hash: `hash_${id}` });
 
-  it('returns the assets of rows whose upload has finished', () => {
+  it('returns the assets of rows whose upload has finished, with their completion time', () => {
     const state = makeState([makeFile(0, 'complete', 100, 100), makeFile(1, 'uploading', 100, 50)]);
     state.files[0].file = uploaded(7);
+    state.files[0].completedAt = 1000;
 
-    expect(completedUploads(state)).toEqual([uploaded(7)]);
+    expect(completedUploads(state)).toEqual([{ asset: uploaded(7), completedAt: 1000 }]);
+  });
+
+  it('ignores a row with no completion time', () => {
+    // Nothing to compare a list response against, so it cannot be settled.
+    const state = makeState([makeFile(0, 'complete', 100, 100)]);
+    state.files[0].file = uploaded(7);
+
+    expect(completedUploads(state)).toStrictEqual([]);
   });
 
   it('ignores a complete row that carries no asset', () => {
@@ -755,7 +770,9 @@ describe('selectCompletedUploads', () => {
   it('ignores rows that failed or were cancelled', () => {
     const state = makeState([makeFile(0, 'error', 100), makeFile(1, 'cancelled', 100)]);
     state.files[0].file = uploaded(1);
+    state.files[0].completedAt = 1000;
     state.files[1].file = uploaded(2);
+    state.files[1].completedAt = 1000;
 
     expect(completedUploads(state)).toStrictEqual([]);
   });
