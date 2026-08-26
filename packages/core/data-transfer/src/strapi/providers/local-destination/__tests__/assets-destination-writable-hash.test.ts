@@ -54,7 +54,7 @@ describe('createAssetsDestinationWritable (hash resolution)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        select: ['id', 'hash', 'formats'],
+        select: ['id', 'hash', 'ext', 'size', 'formats'],
       })
     );
     expect(mockFindMany).toHaveBeenCalledTimes(1);
@@ -240,7 +240,7 @@ describe('createAssetsDestinationWritable (hash resolution)', () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        select: ['id', 'hash', 'formats'],
+        select: ['id', 'hash', 'ext', 'size', 'formats'],
       })
     );
     expect(onWarning).toHaveBeenCalledWith(
@@ -538,6 +538,116 @@ describe('createAssetsDestinationWritable (hash resolution)', () => {
     expect(onWarning).toHaveBeenCalledWith(
       expect.stringContaining('Asset hash fallback summary: 2 resolved, 0 ambiguous, 0 unmatched')
     );
+    transaction.end();
+  });
+
+  // `hash` is a filename identifier, not a content digest: a record that shares it but stores a
+  // different ext or size is a different file, so its URL must not be pointed at these bytes.
+  test('skips the DB update when the only hash match describes different bytes', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const row = { id: 42, hash: 'photo_abc123', ext: '.png', size: 128, formats: null };
+    const mockFindMany = jest.fn().mockResolvedValue([row]);
+    const mockFindOne = jest.fn().mockResolvedValue(row);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'photo_abc123.png',
+      filepath: '/photo_abc123.png',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadataFallback: true,
+      metadata: {
+        hash: 'photo_abc123',
+        name: 'photo_abc123.png',
+        ext: '.png',
+        id: 0,
+        url: '/photo_abc123.png',
+        size: 0.01,
+        mime: 'image/png',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+    await waitForUploadStream(uploadStream);
+
+    expect(uploadStream).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('describe different bytes (ext or size mismatch)')
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  // With a sidecar, `size` describes the source row rather than the archived bytes (variants
+  // resolve through their parent hash), so it must not be used to reject a match.
+  test('updates the record on a hash match with a sidecar even when the stored size differs', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const row = { id: 42, hash: 'photo_abc123', ext: '.png', size: 128, url: 'old.png' };
+    const mockFindMany = jest.fn().mockResolvedValue([row]);
+    const mockFindOne = jest.fn().mockResolvedValue(row);
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning: jest.fn(),
+    });
+
+    await writeAsset(stream, {
+      filename: 'photo_abc123.png',
+      filepath: '/photo_abc123.png',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadata: {
+        hash: 'photo_abc123',
+        name: 'photo_abc123.png',
+        ext: '.png',
+        id: 7,
+        url: '/photo_abc123.png',
+        size: 0.01,
+        mime: 'image/png',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+    await waitForUploadStream(uploadStream);
+
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 42 } }));
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
     transaction.end();
   });
 });

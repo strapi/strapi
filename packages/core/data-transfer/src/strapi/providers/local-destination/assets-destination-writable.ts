@@ -5,16 +5,55 @@ import type { IAsset, IFile } from '../../../types';
 import type { Transaction } from '../../../types/utils';
 import { createCappedWarningReporter } from '../../../utils/capped-warnings';
 
+/** What the destination stores about an object's bytes, used to sanity-check a hash match. */
+interface BytesDescriptor {
+  ext?: string;
+  size?: number;
+}
+
 /** A media library row, or one of the responsive formats stored inside it. */
 interface UploadHashTarget {
   id: number;
   format?: string;
+  bytes?: BytesDescriptor;
 }
 
 type UploadHashIndex = Map<string, UploadHashTarget[]>;
 
 const isSameTarget = (a: UploadHashTarget, b: UploadHashTarget) =>
   a.id === b.id && a.format === b.format;
+
+/** `size` is a decimal column, so a driver may hand it back as a string. */
+const toKbytes = (size: unknown): number | undefined => {
+  const value = Number(size);
+
+  return size != null && Number.isFinite(value) ? Math.round(value * 100) / 100 : undefined;
+};
+
+const describeBytes = (object: IFile): BytesDescriptor => ({
+  ext: object.ext ?? undefined,
+  size: toKbytes(object.size),
+});
+
+/**
+ * Whether a hash match may name the incoming bytes. `hash` is a filename identifier — a slug
+ * plus a random suffix — not a content digest, so an equal hash is strong evidence, never proof,
+ * that two objects hold the same bytes. `ext` and `size` make the match verifiable for a
+ * missing-sidecar asset: both are read from the archived object itself (assets are exported as
+ * `hash + ext`, and the size is the byte length), so a stored value that contradicts them
+ * belongs to a different file that happens to share the identifier. `mime` is not compared —
+ * filename-derived metadata infers it from the extension, so a mismatch there says nothing
+ * about the bytes. Values the destination does not store contradict nothing.
+ */
+const mayHoldSameBytes = (target: UploadHashTarget, asset: IFile): boolean => {
+  const contradicts = (stored?: string | number, incoming?: string | number) =>
+    stored !== undefined && incoming !== undefined && stored !== incoming;
+
+  return !(
+    contradicts(target.bytes?.ext, asset.ext) ||
+    contradicts(target.bytes?.size, toKbytes(asset.size))
+  );
+};
 
 /** Where a provider writes an object: the S3 key prefix / Cloudinary folder, and its identity. */
 interface ProviderPlacement {
@@ -30,7 +69,7 @@ interface ProviderPlacement {
  */
 const loadUploadHashIndex = async (strapi: Core.Strapi): Promise<UploadHashIndex> => {
   const entries: IFile[] = await strapi.db.query('plugin::upload.file').findMany({
-    select: ['id', 'hash', 'formats'],
+    select: ['id', 'hash', 'ext', 'size', 'formats'],
   });
 
   const index: UploadHashIndex = new Map();
@@ -53,9 +92,9 @@ const loadUploadHashIndex = async (strapi: Core.Strapi): Promise<UploadHashIndex
     if (entry?.id == null) {
       continue;
     }
-    addHash(entry.hash, { id: entry.id });
+    addHash(entry.hash, { id: entry.id, bytes: describeBytes(entry) });
     for (const [format, data] of Object.entries(entry.formats ?? {})) {
-      addHash(data?.hash, { id: entry.id, format });
+      addHash(data?.hash, { id: entry.id, format, bytes: data ? describeBytes(data) : undefined });
     }
   }
 
@@ -75,12 +114,14 @@ export interface CreateAssetsDestinationWritableOptions {
  * How an asset was matched to the destination: through the ID map, through a hash that belongs
  * to exactly one object, or through a hash several objects share. An ambiguous match keeps its
  * candidates — it cannot pick a row to update, but it still describes every provider key the
- * bytes may belong at.
+ * bytes may belong at. A `mismatch` is a hash the destination knows whose objects all describe
+ * different bytes, which is not a match at all: the shared identifier is a coincidence.
  */
 type UploadResolution =
   | { kind: 'mapped'; target: UploadHashTarget }
   | { kind: 'hash'; hash: string; target: UploadHashTarget }
-  | { kind: 'ambiguous'; hash: string; targets: UploadHashTarget[] };
+  | { kind: 'ambiguous'; hash: string; targets: UploadHashTarget[] }
+  | { kind: 'mismatch'; hash: string; count: number };
 
 const resolveUploadTarget = async (
   uploadData: IFile,
@@ -115,11 +156,21 @@ const resolveUploadTarget = async (
       continue;
     }
 
-    if (targets.length > 1) {
-      return { kind: 'ambiguous', hash: lookupHash, targets };
+    // Filename-derived metadata carries no ID, so the hash is the only claim that an object is
+    // this asset. Drop the objects whose stored bytes contradict it before deciding.
+    const candidates = metadataFallback
+      ? targets.filter((target) => mayHoldSameBytes(target, uploadData))
+      : targets;
+
+    if (candidates.length === 0) {
+      return { kind: 'mismatch', hash: lookupHash, count: targets.length };
     }
 
-    const [match] = targets;
+    if (candidates.length > 1) {
+      return { kind: 'ambiguous', hash: lookupHash, targets: candidates };
+    }
+
+    const [match] = candidates;
 
     // For the asset's own hash the index knows whether it is an original file or one of its
     // formats; a match through the parent hash makes this asset a variant of that row.
@@ -160,11 +211,12 @@ const applyProviderPlacement = (uploadData: IFile, placement: ProviderPlacement)
 };
 
 /**
- * The distinct provider placements of the objects that share a hash. Sharing an exact hash
- * means sharing the bytes, so an ambiguous match still describes an unambiguous *set* of keys:
- * restoring the asset at each of them makes every record naming one of those keys whole again,
- * without picking a row. Grouped by `path` because that is what decides the key on path-keyed
- * providers; a shared path cannot carry one object's `provider_metadata`.
+ * The distinct provider placements of the objects that share a hash. Objects sharing a hash and
+ * agreeing on `ext` and `size` are taken to share the bytes — a best-effort equivalence (see
+ * `mayHoldSameBytes`), not a proven one — so an ambiguous match still describes a usable *set*
+ * of keys: restoring the asset at each of them makes every record naming one of those keys whole
+ * again, without picking a row. Grouped by `path` because that is what decides the key on
+ * path-keyed providers; a shared path cannot carry one object's `provider_metadata`.
  */
 const loadCandidatePlacements = async (
   strapi: Core.Strapi,
@@ -203,7 +255,8 @@ const loadCandidatePlacements = async (
  * names — hence every candidate key is returned rather than a single guess. An unmatched hash
  * has no candidate, but it also means no record names the object: the archive filename *is* the
  * exported provider key (`hash + ext`), so a hash the destination does not know cannot be
- * referenced by any row or format URL.
+ * referenced by any row or format URL. A hash whose objects all describe different bytes is
+ * treated the same way — none of their keys belongs to this asset.
  */
 const recoverFallbackPlacements = async (options: {
   strapi: Core.Strapi;
@@ -218,7 +271,7 @@ const recoverFallbackPlacements = async (options: {
   const candidates: UploadHashTarget[] = [];
   if (resolution?.kind === 'ambiguous') {
     candidates.push(...resolution.targets);
-  } else if (resolution) {
+  } else if (resolution?.kind === 'mapped' || resolution?.kind === 'hash') {
     candidates.push(resolution.target);
   }
 
@@ -227,7 +280,9 @@ const recoverFallbackPlacements = async (options: {
   if (placements.length === 0) {
     counts.unmatched += 1;
     warn(
-      `[Data transfer] Uploaded "${filename}" without its provider path metadata: the sidecar was missing and hash "${hash}" matches no media library record, so no stored URL names this object. The bytes were restored at the provider default key.`
+      resolution?.kind === 'mismatch'
+        ? `[Data transfer] Uploaded "${filename}" without its provider path metadata: the sidecar was missing and the ${resolution.count} media library record(s) sharing hash "${hash}" describe different bytes (ext or size mismatch), so none of their provider paths names this object. The bytes were restored at the provider default key.`
+        : `[Data transfer] Uploaded "${filename}" without its provider path metadata: the sidecar was missing and hash "${hash}" matches no media library record, so no stored URL names this object. The bytes were restored at the provider default key.`
     );
     return [{}];
   }
@@ -236,8 +291,8 @@ const recoverFallbackPlacements = async (options: {
     counts.ambiguous += 1;
     warn(
       placements.length > 1
-        ? `[Data transfer] Ambiguous hash "${hash}" matched media library records stored under ${placements.length} different provider paths; restoring "${filename}" at each of them (same hash, same bytes) so no record is left naming a deleted object.`
-        : `[Data transfer] Ambiguous hash "${hash}" matched multiple media library records sharing one provider path; restored "${filename}" at that path.`
+        ? `[Data transfer] Ambiguous hash "${hash}" matched media library records stored under ${placements.length} different provider paths; restoring "${filename}" at each of them (same hash, same ext and size) so no record is left naming a deleted object.`
+        : `[Data transfer] Ambiguous hash "${hash}" matched multiple media library records resolving to one provider path; restored "${filename}" at that path.`
     );
     return placements;
   }
@@ -384,7 +439,9 @@ export function createAssetsDestinationWritable(
               }
 
               const resolvedTarget =
-                resolution && resolution.kind !== 'ambiguous' ? resolution.target : undefined;
+                resolution?.kind === 'mapped' || resolution?.kind === 'hash'
+                  ? resolution.target
+                  : undefined;
               const entry: IFile | null = resolvedTarget
                 ? await strapi.db.query('plugin::upload.file').findOne({
                     where: { id: resolvedTarget.id },
@@ -410,7 +467,9 @@ export function createAssetsDestinationWritable(
               if (!resolvedTarget) {
                 hashFallbackCounts.unmatched += 1;
                 warnings.warn(
-                  `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
+                  resolution?.kind === 'mismatch'
+                    ? `[Data transfer] Uploaded asset "${chunk.filename}" but did not update any media library record: the sidecar was missing and the ${resolution.count} record(s) sharing hash "${resolution.hash}" describe different bytes (ext or size mismatch).`
+                    : `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
                 );
                 return;
               }

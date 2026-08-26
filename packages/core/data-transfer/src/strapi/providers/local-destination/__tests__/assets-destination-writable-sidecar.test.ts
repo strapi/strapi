@@ -311,6 +311,152 @@ describe('createAssetsDestinationWritable (sidecar fallback)', () => {
     transaction.end();
   });
 
+  // An equal hash is not proof of equal bytes, so a record whose ext or size contradicts the
+  // archived asset is dropped before the fan-out: its key belongs to another file.
+  test('excludes candidate paths whose stored bytes contradict the asset', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn(pathAwareUploadStream);
+    const rows = [
+      {
+        id: 7,
+        hash: 'dupe_hash',
+        ext: '.bin',
+        size: 0.01,
+        url: '/uploads/nested/a/dupe_hash.bin',
+        path: 'nested/a',
+        formats: null,
+      },
+      {
+        id: 8,
+        hash: 'dupe_hash',
+        ext: '.bin',
+        size: 512,
+        url: '/uploads/nested/b/dupe_hash.bin',
+        path: 'nested/b',
+        formats: null,
+      },
+    ];
+    const mockFindMany = jest.fn().mockResolvedValue(rows);
+    const mockFindOne = jest
+      .fn()
+      .mockImplementation(({ where: { id } }) =>
+        Promise.resolve(rows.find((row) => row.id === id) ?? null)
+      );
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: false,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'dupe_hash.bin',
+      filepath: '/dupe_hash.bin',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadataFallback: true,
+      metadata: {
+        hash: 'dupe_hash',
+        name: 'dupe_hash.bin',
+        ext: '.bin',
+        id: 0,
+        url: '/dupe_hash.bin',
+        size: 0.01,
+        mime: 'application/octet-stream',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+
+    expect(uploadedKeys(uploadStream)).toEqual(['nested/a/dupe_hash.bin']);
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Recovered provider path metadata via hash "dupe_hash"')
+    );
+
+    transaction.end();
+  });
+
+  test('restores at the provider default key when every hash match contradicts the asset', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn(pathAwareUploadStream);
+    const rows = [
+      {
+        id: 7,
+        hash: 'dupe_hash',
+        ext: '.bin',
+        size: 512,
+        url: '/uploads/nested/a/dupe_hash.bin',
+        path: 'nested/a',
+        formats: null,
+      },
+    ];
+    const mockFindMany = jest.fn().mockResolvedValue(rows);
+    const mockFindOne = jest
+      .fn()
+      .mockImplementation(({ where: { id } }) =>
+        Promise.resolve(rows.find((row) => row.id === id) ?? null)
+      );
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      findMany: mockFindMany,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: false,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'dupe_hash.bin',
+      filepath: '/dupe_hash.bin',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadataFallback: true,
+      metadata: {
+        hash: 'dupe_hash',
+        name: 'dupe_hash.bin',
+        ext: '.bin',
+        id: 0,
+        url: '/dupe_hash.bin',
+        size: 0.01,
+        mime: 'application/octet-stream',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+
+    // The bytes are never dropped, but they are not written at a key another file owns.
+    expect(uploadedKeys(uploadStream)).toEqual(['dupe_hash.bin']);
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('describe different bytes (ext or size mismatch)')
+    );
+
+    transaction.end();
+  });
+
   test('uploads once when ambiguous records share a provider path, without reusing their metadata', async () => {
     const passThrough = new PassThrough();
     const uploadInputs: { path?: string; provider_metadata?: unknown }[] = [];
@@ -393,7 +539,7 @@ describe('createAssetsDestinationWritable (sidecar fallback)', () => {
 
     expect(uploadInputs).toEqual([{ path: 'shared', provider_metadata: undefined }]);
     expect(onWarning).toHaveBeenCalledWith(
-      expect.stringContaining('multiple media library records sharing one provider path')
+      expect.stringContaining('multiple media library records resolving to one provider path')
     );
 
     transaction.end();
