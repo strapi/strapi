@@ -25,12 +25,16 @@ const previewScript: (config: unknown) => void = new Function(
   `${scriptSource}; return previewScript;`
 )();
 
-// Inline the only event name the blocks-forwarding path uses.
-// The real values come from admin/src/preview/utils/constants.ts — they must match.
+// 'strapiFieldChange' is hardcoded in previewScript.js as a public stable event name.
 const STRAPI_FIELD_CHANGE = 'strapiFieldChange';
 
 const INTERNAL_EVENTS = {
-  STRAPI_FIELD_CHANGE,
+  STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
+  STRAPI_FIELD_BLUR: 'strapiFieldBlur',
+  STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
+  STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+  STRAPI_IFRAME_CLICK: 'strapiIframeClick',
+  STRAPI_RESCAN_HIGHLIGHTS: 'strapiRescanHighlights',
 };
 
 const COLORS = {
@@ -190,5 +194,79 @@ describe('previewScript — blocks field forwarding', () => {
     );
 
     expect(handler).not.toHaveBeenCalled();
+  });
+});
+
+// @strapi/blocks-react-renderer renders nested lists as direct children of <ul>/<ol>
+// (not wrapped in a <li>), so the outer list container has a block-level child (<ol>/<ul>)
+// that satisfied the field-container check — incorrectly treating <ul> as the field
+// container and returning the <li>'s index within <ul> instead of <ul>'s index in the
+// real blocks-container.
+describe('previewScript — findBlockIndex for nested lists', () => {
+  const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
+      true;
+
+    // Paragraph at index 0 (no source attr), list at index 1. Only the outer <li>
+    // carries data-strapi-source so it is the sole group member — pickElementAtPoint
+    // returns it regardless of zero bounding rects in jsdom.
+    document.body.innerHTML = `
+      <div id="blocks-container">
+        <p id="para">Paragraph</p>
+        <ul id="outer-ul">
+          <li id="outer-li" data-strapi-source="${BLOCKS_SOURCE}">Outer item</li>
+          <ol id="nested-ol">
+            <li id="nested-li">Nested item</li>
+          </ol>
+        </ul>
+      </div>
+    `;
+
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  afterEach(() => {
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+    delete (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean })
+      .STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  test('blockIndex is the <ul> position in the blocks container, not the <li> position within <ul>', () => {
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+    expect(highlight).toBeTruthy();
+
+    // window.parent === window in jsdom, so sendMessage calls window.postMessage.
+    // Spy on it directly to avoid relying on jsdom's async MessageEvent dispatch.
+    const postMessageSpy = jest.spyOn(window, 'postMessage');
+
+    highlight.dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 })
+    );
+
+    const focusIntentCalls = postMessageSpy.mock.calls.filter(
+      ([data]) => (data as { type?: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+    );
+    expect(focusIntentCalls).toHaveLength(1);
+
+    const payload = (focusIntentCalls[0][0] as { payload: { blockIndex: number | null } }).payload;
+    // <ul> is at DOM index 1 in blocks-container (after <p>).
+    // Before the fix this was 0 — the <li>'s index within <ul>.
+    expect(payload.blockIndex).toBe(1);
+
+    postMessageSpy.mockRestore();
   });
 });

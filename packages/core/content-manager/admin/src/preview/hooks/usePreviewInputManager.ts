@@ -5,7 +5,7 @@ import { Schema } from '@strapi/types';
 
 import { useHasInputPopoverParent } from '../components/InputPopover';
 import { usePreviewContext } from '../pages/Preview';
-import { INTERNAL_EVENTS } from '../utils/constants';
+import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 
 type PreviewInputProps = Pick<
@@ -38,7 +38,7 @@ export function usePreviewInputManager(
      */
     if (!['component', 'dynamiczone'].includes(type)) {
       const sendMessage = getSendMessage(iframe);
-      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value, type });
+      sendMessage(PUBLIC_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value, type });
     }
   }, [name, value, iframe, type]);
 

@@ -124,12 +124,15 @@ function previewScript(config) {
    * `window.addEventListener('strapiFieldChange', …)` without the preview script
    * attempting to patch the DOM. The admin panel also posts the same payload via
    * `postMessage`, which hosts can listen for on `window` 'message' events.
+   *
+   * 'strapiFieldChange' is a public event — host apps depend on this name, so it
+   * is intentionally hardcoded rather than read from INTERNAL_EVENTS config.
    * @param {string} field
    * @param {unknown} value
    */
   const forwardBlocksFieldChange = (field, value) => {
     window.dispatchEvent(
-      new CustomEvent(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+      new CustomEvent('strapiFieldChange', {
         detail: { field, value },
       })
     );
@@ -386,7 +389,9 @@ function previewScript(config) {
      * @param {Element} element
      */
     const applyStegaToElement = (element) => {
-      // Handle img and video tags - check src attribute for stega encoding
+      // Handle img and video tags - check src and alt attributes for stega encoding.
+      // The src path handles media fields; the alt path handles blocks image blocks
+      // (the url is intentionally not encoded to avoid corrupting the src attribute).
       if (isMediaElement(element)) {
         const src = element.getAttribute('src');
         if (src) {
@@ -411,6 +416,26 @@ function previewScript(config) {
             }
           } catch (error) {}
         }
+
+        // Blocks image markers are encoded into the alt attribute (not the src).
+        // If the alt carries a marker that is not yet superseded by a src-derived one,
+        // apply it and clean the visible alt text.
+        if (!element.hasAttribute(SOURCE_ATTRIBUTE)) {
+          const alt = element.getAttribute('alt');
+          if (alt) {
+            try {
+              const result = stegaDecode(alt);
+              if (result && 'strapiSource' in result) {
+                element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
+              }
+              const cleanedAlt = stegaClean(alt);
+              if (cleanedAlt !== alt) {
+                element.setAttribute('alt', cleanedAlt);
+              }
+            } catch (error) {}
+          }
+        }
+
         return;
       }
 
@@ -596,28 +621,6 @@ function previewScript(config) {
     ];
 
     /**
-     * Find the nearest common ancestor of a set of elements — the deepest
-     * single element that is an ancestor of (or equal to) every element in
-     * the list. Reliable for 2+ elements; for a single element it returns
-     * the immediate parent (which may not be the container you want — use
-     * the BLOCK_LEVEL_TAGS fallback in findBlocksFieldContainer instead).
-     * @param {HTMLElement[]} elements
-     * @returns {HTMLElement | null}
-     */
-    const findNearestCommonAncestor = (elements) => {
-      if (elements.length === 0) return null;
-      let candidate = elements[0].parentElement;
-      while (candidate && candidate !== document.documentElement) {
-        const current = candidate;
-        if (elements.every((el) => current === el || current.contains(el))) {
-          return current;
-        }
-        candidate = candidate.parentElement;
-      }
-      return null;
-    };
-
-    /**
      * Find the DOM element that wraps the entire rendered output of a blocks
      * field — the direct parent of all top-level block elements (`<p>`, `<h1>`,
      * etc.). Used to derive a tight, always-current bounding rect for the
@@ -638,7 +641,16 @@ function previewScript(config) {
       if (!firstEl) return null;
       let el = firstEl.parentElement;
       while (el && el !== document.body && el !== document.documentElement) {
-        if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
+        // Skip list elements — <li> can have a nested <ul>/<ol> as a direct child, and
+        // @strapi/blocks-react-renderer places nested lists directly inside <ul>/<ol>
+        // (not wrapped in a <li>), so list containers also satisfy the block-level check
+        // while being blocks themselves, not the field container.
+        if (
+          el.tagName !== 'LI' &&
+          el.tagName !== 'UL' &&
+          el.tagName !== 'OL' &&
+          Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
+        ) {
           return el;
         }
         el = el.parentElement;
@@ -668,7 +680,16 @@ function previewScript(config) {
       let fieldContainer = null;
       let el = anchor.parentElement;
       while (el && el !== document.body && el !== document.documentElement) {
-        if (Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))) {
+        // Skip list elements — <li> can have a nested <ul>/<ol> as a direct child, and
+        // @strapi/blocks-react-renderer places nested lists directly inside <ul>/<ol>
+        // (not wrapped in a <li>), so list containers also satisfy the block-level check
+        // while being blocks themselves, not the field container.
+        if (
+          el.tagName !== 'LI' &&
+          el.tagName !== 'UL' &&
+          el.tagName !== 'OL' &&
+          Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
+        ) {
           fieldContainer = el;
           break;
         }
@@ -1493,8 +1514,9 @@ function previewScript(config) {
       if (!event.data?.type) return;
       if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
-      // The user typed in an input, reflect the change in the preview
-      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
+      // The user typed in an input, reflect the change in the preview.
+      // 'strapiFieldChange' is a public event name — host apps also depend on it.
+      if (event.data.type === 'strapiFieldChange') {
         const { field, value, type } = event.data.payload;
         if (!field) return;
 

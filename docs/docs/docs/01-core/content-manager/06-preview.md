@@ -68,6 +68,7 @@ The admin panel and preview iframe communicate via `postMessage`.
 sequenceDiagram
     participant Admin
     participant Iframe as Preview Iframe
+    participant Host as Host App (window)
 
     Note over Admin,Iframe: Initialization (public events)
     Iframe->>Admin: previewReady
@@ -75,8 +76,11 @@ sequenceDiagram
 
     Note over Admin,Iframe: User edits in admin panel (internal events)
     Admin->>Iframe: strapiFieldFocus
-    Admin->>Iframe: strapiFieldChange
     Admin->>Iframe: strapiFieldBlur
+
+    Note over Admin,Iframe,Host: Blocks field change (public event — admin→iframe postMessage, then script→host CustomEvent)
+    Admin->>Iframe: strapiFieldChange (postMessage)
+    Iframe->>Host: strapiFieldChange (CustomEvent on window)
 
     Note over Admin,Iframe: User clicks in preview (internal events)
     Iframe->>Admin: strapiFieldSingleClickHint
@@ -89,9 +93,9 @@ sequenceDiagram
     Admin->>Iframe: strapiUpdate
 ```
 
-Public events (`previewReady`, `strapiScript`, `strapiUpdate`) are documented to users—changing them is a breaking change.
+Public events (`previewReady`, `strapiScript`, `strapiUpdate`, `strapiFieldChange`) are documented to users—changing them is a breaking change.
 
-Internal events (for field focus/blur/change synchronization) are defined in `packages/core/content-manager/admin/src/preview/utils/constants.ts` and can be changed freely since we control both ends.
+Internal events (for field focus/blur synchronization) are defined in `packages/core/content-manager/admin/src/preview/utils/constants.ts` and can be changed freely since we control both ends.
 
 ### Frontend configuration
 
@@ -111,7 +115,7 @@ The server-side content-source-maps service (`packages/core/core/src/services/co
 
 - `paragraph`, `heading`, and `quote` nodes: the first `{ type: 'text' }` leaf in the subtree.
 - `list` nodes: the first text leaf of each list item (recursively for nested lists).
-- `image` nodes: the `url` and `alternativeText` string fields.
+- `image` nodes: the `alternativeText` string field, when non-empty (encoded into the `alt` attribute — the preview script decodes this to detect image blocks). The `url` field is intentionally **not** encoded because stega-encoding it corrupts the `src` attribute and can cause the preview highlight to expand across the full page. Image blocks with no `alternativeText` receive no stega marker; the blocks field is still highlightable via its text blocks.
 - `code` blocks are **skipped** — encoding their content would corrupt the syntax.
 
 All markers within one blocks field share both the same `fieldPath` key (e.g., `fieldPath=content`) and the same `path` key — `blocksFieldMetadata` sets `path = fieldPath` for every marker. The presence of `fieldPath` in the source attribute is what distinguishes blocks markers from regular string-field markers, and the preview script uses it as the group key to cluster all markers into one highlight.
@@ -122,7 +126,7 @@ The `deriveGroupKey` function in the preview script detects the presence of `fie
 
 The bounding box of that group is computed in `computeGroupRect` / `findBlocksContainer`:
 
-1. Walk up the DOM from any span in the group looking for an element whose direct children include a block-level tag (`P`, `H1`–`H6`, `UL`, `OL`, `BLOCKQUOTE`, `PRE`). That element is the field container.
+1. Walk up the DOM from the first span in the group looking for an ancestor whose direct children include a block-level tag (`P`, `H1`–`H6`, `UL`, `OL`, `BLOCKQUOTE`, `PRE`), skipping `LI` elements (a list item can have a nested `<ul>`/`<ol>` as a direct child, which would satisfy the check but is not the container).
 2. Use the container's `getBoundingClientRect()` as the highlight rect. This includes container padding and empty trailing blocks that have no stega spans.
 3. Fallback (if no container is found): union of all span rects plus an 80 px bottom buffer so that empty trailing blocks remain clickable.
 
@@ -130,7 +134,7 @@ The bounding box of that group is computed in `computeGroupRect` / `findBlocksCo
 
 Double-clicking a blocks field highlight opens the editor at the clicked block.
 
-1. The preview script calls `findBlockIndex(anchor, group)` to identify which block was clicked. It finds the field container (NCA for 2+ spans, walk-up fallback for single-span groups), then walks up from the clicked span until its parent is the container, and returns the DOM child index of that element.
+1. The preview script calls `findBlockIndex(anchor)` to identify which block was clicked. It applies the same block-level-tag walk-up as `findBlocksContainer` to locate the field container, then walks up from the clicked span until its parent is the container, and returns the DOM child index of that element. The full `children` list (not filtered by tag name) is used so that empty paragraphs (`<br>`) and other non-standard elements don't cause index drift.
 2. For the popover trigger position the script uses the clicked element's rect — not the full group rect — so the popover opens adjacent to the clicked line. If the stega span is zero-width (invisible chars only), it walks up to the nearest visible ancestor.
 3. `strapiFieldFocusIntent` is sent with the `path` set to the `fieldPath` value (the blocks field path) and a `blockIndex` number in the payload.
 4. `InputPopover` receives the message and calls `setPopoverField` with both the field metadata and the `blockIndex`.
@@ -158,20 +162,22 @@ The `requestAnimationFrame` delay lets any in-flight React renders in the iframe
 
 ### Live update integration for host apps
 
-While the popover is open, the admin fires `strapiFieldChange` on every keystroke. Host apps can pick this up to re-render their `BlocksRenderer` in real time without waiting for a save:
+While the popover is open, the admin fires `strapiFieldChange` on every keystroke. `strapiFieldChange` is a **public event** — its name is stable and host apps can depend on it without risk of a breaking change.
+
+The preview script re-dispatches it as a CustomEvent on the iframe `window` so host apps don't need to deal with the `postMessage` origin checks themselves:
 
 ```js
-// postMessage (received in the iframe from the admin parent)
+// Preferred: CustomEvent dispatched by the preview script on the iframe window
+window.addEventListener('strapiFieldChange', (e) => {
+  const { field, value } = e.detail;
+  // update your local state with the new blocks AST
+});
+
+// Alternative: raw postMessage received in the iframe from the admin parent
 window.addEventListener('message', (e) => {
   if (e.data?.type === 'strapiFieldChange') {
     const { field, value } = e.data.payload;
     // update your local state with the new blocks AST
   }
-});
-
-// CustomEvent dispatched by the preview script on the same window
-window.addEventListener('strapiFieldChange', (e) => {
-  const { field, value } = e.detail;
-  // update your local state with the new blocks AST
 });
 ```

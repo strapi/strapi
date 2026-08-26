@@ -1,18 +1,12 @@
 import { NotificationConfig } from '@strapi/admin/strapi-admin';
 import { MessageDescriptor } from 'react-intl';
 
-export const PREVIEW_HIGHLIGHT_COLORS = {
-  highlightHoverColor: '#7b79ff',
-  highlightActiveColor: '#4945ff',
-} as const;
-
 /**
  * These events are not part of the public API, changing them is not a breaking change.
  */
 export const INTERNAL_EVENTS = {
   STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
   STRAPI_FIELD_BLUR: 'strapiFieldBlur',
-  STRAPI_FIELD_CHANGE: 'strapiFieldChange',
   STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
   STRAPI_IFRAME_CLICK: 'strapiIframeClick',
@@ -27,6 +21,12 @@ export const PUBLIC_EVENTS = {
   PREVIEW_READY: 'previewReady',
   STRAPI_UPDATE: 'strapiUpdate',
   STRAPI_SCRIPT: 'strapiScript',
+  /**
+   * Dispatched as a CustomEvent on the iframe window when a blocks field changes.
+   * Host apps listen for this event to re-render their BlocksRenderer in real time.
+   * Also sent as a postMessage from the admin to the iframe (same event type).
+   */
+  STRAPI_FIELD_CHANGE: 'strapiFieldChange',
 } as const;
 
 /**
