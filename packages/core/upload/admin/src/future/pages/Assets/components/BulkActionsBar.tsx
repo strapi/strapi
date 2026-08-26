@@ -28,13 +28,12 @@ import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { useIsAssetDetailsOpen } from '../hooks/useIsAssetDetailsOpen';
-import { assetKey, folderKey, type ItemKey } from '../utils/selection';
+import { type ItemKey } from '../utils/selection';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../../shared/contracts/files';
-import type { Folder } from '../../../../../../shared/contracts/folders';
 
 /**
  * Bulk action bar for the future Media Library. Mobile: docked full-bleed to the
@@ -152,14 +151,18 @@ interface BulkActionsBarProps {
    * everything, which falls back to the folder currently open.
    */
   locations?: ItemLocations;
-  /** Folders currently rendered, so select-all covers them as well as assets. */
-  folders?: Folder[];
+  /**
+   * Keys of the items on screen, in render order. Owned by the view so
+   * select-all covers exactly what the user can see — in mixed mode that is not
+   * every folder.
+   */
+  renderedKeys?: ItemKey[];
 }
 
 export const BulkActionsBar = ({
   assets = [],
   locations = emptyItemLocations,
-  folders = [],
+  renderedKeys = [],
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -181,13 +184,6 @@ export const BulkActionsBar = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
-
-  // Order is irrelevant here — unlike range selection, select-all only needs the
-  // set — so folders and assets are enough, whichever way the view arranges them.
-  const renderedKeys: ItemKey[] = useMemo(
-    () => [...folders.map((folder) => folderKey(folder.id)), ...assets.map((a) => assetKey(a.id))],
-    [folders, assets]
-  );
 
   const handleSelectAll = () => {
     trackUsage('didSelectAllMediaLibraryElements');
@@ -361,7 +357,7 @@ export const BulkActionsBar = ({
         )}
       </Typography>
 
-      <TextButton onClick={handleSelectAll} marginRight={4}>
+      <TextButton onClick={handleSelectAll} marginRight={4} disabled={isBusy}>
         {formatMessage({
           id: getTranslationKey('list.bulk-actions.select-all'),
           defaultMessage: 'Select all',

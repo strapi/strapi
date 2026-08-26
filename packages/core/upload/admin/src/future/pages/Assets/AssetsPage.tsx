@@ -64,6 +64,7 @@ import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { buildAssetFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
 import { mergeMixedList } from './utils/mergeMixedList';
+import { buildRenderedKeys } from './utils/renderedKeys';
 
 import type { File, UploadFileInfo } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
@@ -177,6 +178,10 @@ const AssetsView = ({
     [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
   );
 
+  // Derived once here so the table, the grid and the bulk bar all agree on what
+  // is on screen — in mixed mode that is not simply every folder.
+  const renderedKeys = buildRenderedKeys({ folders, assets, mixedItems });
+
   const loadMoreRef = useInfiniteScrollSentinel({
     hasNextPage,
     isFetchingMore,
@@ -222,12 +227,18 @@ const AssetsView = ({
   return (
     <>
       {isGridView ? (
-        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
+        <AssetsGrid
+          folders={folders}
+          assets={assets}
+          renderedKeys={renderedKeys}
+          onAssetItemClick={onAssetItemClick}
+        />
       ) : (
         <AssetsTable
           assets={assets}
           folders={folders}
           mixedItems={mixedItems}
+          renderedKeys={renderedKeys}
           onAssetItemClick={onAssetItemClick}
         />
       )}
@@ -246,7 +257,7 @@ const AssetsView = ({
           assets: the AI metadata action needs their mime types to know what
           the provider can handle. `position: fixed` keeps it visually anchored
           regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} folders={folders} locations={locations} />
+      <BulkActionsBar assets={assets} renderedKeys={renderedKeys} locations={locations} />
     </>
   );
 };
