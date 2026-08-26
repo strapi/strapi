@@ -138,23 +138,29 @@ const encodeImageBlock = (
     return imageNode;
   }
 
-  const fieldMetadata = blocksFieldMetadata(metadata);
-  const image = { ...imageNode.image };
-
-  if (typeof image.url === 'string') {
-    image.url = encodeField(image.url, fieldMetadata);
+  const { alternativeText } = imageNode.image as Record<string, unknown>;
+  // Encode the alt text (not the URL). Encoding the URL corrupts the src attribute and can
+  // cause the preview highlight to expand across the entire page. The alt attribute is a
+  // safe target: it's visible to the previewScript via getAttribute and never used as a URL.
+  // Only encode when alternativeText is a non-empty string — images with no alt text get
+  // no stega marker and won't independently trigger the highlight, but the blocks field
+  // as a whole remains highlightable via its other (text) blocks.
+  if (typeof alternativeText !== 'string' || alternativeText.length === 0) {
+    return imageNode;
   }
 
-  if (typeof image.alternativeText === 'string') {
-    image.alternativeText = encodeField(image.alternativeText, fieldMetadata);
-  }
-
-  return { ...imageNode, image };
+  return {
+    ...imageNode,
+    image: {
+      ...(imageNode.image as Record<string, unknown>),
+      alternativeText: encodeField(alternativeText, blocksFieldMetadata(metadata)),
+    },
+  };
 };
 
 /**
  * Pure transformation over a blocks AST. Injects one stega marker per visual block
- * (first text leaf, or image URL / alternativeText) using the blocks field path for all markers.
+ * (first text leaf, or image alt text) using the blocks field path for all markers.
  * Code blocks are skipped entirely.
  */
 const encodeBlocks = (
@@ -173,6 +179,7 @@ const encodeBlocks = (
 
     switch (block.type) {
       case 'code':
+        // Skip encoding — encoding code content would corrupt the syntax.
         return block;
       case 'image':
         return encodeImageBlock(block, metadata, encodeField);

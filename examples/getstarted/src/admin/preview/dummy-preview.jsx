@@ -242,6 +242,10 @@ const PreviewComponent = () => {
   const { main, unrelated } = useLoaderData();
   const revalidator = useRevalidator();
 
+  // Live blocks field overrides — updated by strapiFieldChange events so that
+  // BlocksRenderer re-renders in real time while the popover is open.
+  const [liveFields, setLiveFields] = React.useState({});
+
   React.useEffect(() => {
     const handleMessage = (event) => {
       const { origin, data } = event;
@@ -256,7 +260,8 @@ const PreviewComponent = () => {
       }
 
       if (data?.type === 'strapiUpdate') {
-        // The data is stale, force a refetch
+        // The data is stale, force a refetch — also reset live overrides
+        setLiveFields({});
         revalidator.revalidate();
       } else if (data?.type === 'strapiScript') {
         const script = window.document.createElement('script');
@@ -271,6 +276,19 @@ const PreviewComponent = () => {
 
     return () => {
       window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const handleFieldChange = (event) => {
+      const { field, value } = event.detail;
+      setLiveFields((prev) => ({ ...prev, [field]: value }));
+    };
+
+    window.addEventListener('strapiFieldChange', handleFieldChange);
+
+    return () => {
+      window.removeEventListener('strapiFieldChange', handleFieldChange);
     };
   }, []);
 
@@ -346,7 +364,7 @@ const PreviewComponent = () => {
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
               {main ? (
                 <>
-                  <Entry data={main} />
+                  <Entry data={{ ...main, ...liveFields }} />
                   <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (

@@ -195,7 +195,7 @@ describe('encodeBlocks (pure encoder)', () => {
     expect((encoded[0].children[1] as any).children[0].children[0].text).toContain('Nested item');
   });
 
-  test('encodes image url and alternativeText with the blocks field path', () => {
+  test('encodes image alternativeText with the blocks field path', () => {
     const blocks = [
       {
         type: 'image',
@@ -209,8 +209,9 @@ describe('encodeBlocks (pure encoder)', () => {
 
     const encoded = encodeBlocks(blocks, baseMetadata, mockEncodeField as any) as typeof blocks;
 
-    expect((encoded[0] as any).image.url).toContain('/uploads/photo.png');
-    expect((encoded[0] as any).image.url).toContain(`path=${FIELD_PATH}`);
+    // url must not be modified — encoding it corrupts the src and can widen the highlight group
+    expect((encoded[0] as any).image.url).toBe('/uploads/photo.png');
+    // alternativeText gets the blocks field marker via the alt attribute
     expect((encoded[0] as any).image.alternativeText).toContain('Hero image');
     expect((encoded[0] as any).image.alternativeText).toContain(`fieldPath=${FIELD_PATH}`);
   });
@@ -254,9 +255,9 @@ describe('encodeBlocks (pure encoder)', () => {
 
     const encoded = encodeBlocks(blocks, baseMetadata, mockEncodeField as any) as typeof blocks;
 
-    expect(collectEncodedStrings(encoded)).toHaveLength(3);
+    expect(collectEncodedStrings(encoded)).toHaveLength(2); // paragraph + list item; code skipped, image has no alt
     expect(encoded[1].children[0].text).toBe('console.log("hi")');
-    expect((encoded[2] as any).image.url).toContain('/uploads/a.png');
+    expect(encoded[2]).toBe(blocks[2]); // image block returned unchanged (no alternativeText)
   });
 
   test('returns empty arrays unchanged', () => {
