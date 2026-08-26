@@ -519,6 +519,36 @@ describe('UploadProgressDialog', () => {
       });
       expect(screen.getByText('File size exceeded')).toBeInTheDocument();
     });
+
+    it('translates machine-readable server error codes instead of showing them raw', async () => {
+      // `FileTooBig` is the code returned by the body middleware when koa-body's
+      // maxFileSize is exceeded; it has a matching `apiError.*` translation entry.
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'too-big.png', 'error', 'FileTooBig')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('too-big.png')).toBeInTheDocument();
+      });
+
+      const row = screen.getByText('too-big.png').closest('div')!;
+      expect(row).not.toHaveTextContent('FileTooBig');
+    });
+
+    it('falls back to a generic message when the server gives no error message', async () => {
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'mystery.png', 'error')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('mystery.png')).toBeInTheDocument();
+      });
+      expect(screen.getByText('An error occurred while uploading the file.')).toBeInTheDocument();
+    });
   });
 
   describe('FileRowRenderer - cancelled file', () => {
@@ -571,6 +601,74 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('uploading-a.png')).toBeInTheDocument();
       expect(screen.getByText('uploading-b.png')).toBeInTheDocument();
       expect(screen.getByText('uploading-c.png')).toBeInTheDocument();
+    });
+  });
+
+  describe('queued files', () => {
+    // The whole point of the ticket: with the default concurrency of 1, a 40-file
+    // drop has one row uploading and 39 waiting, and the waiting ones used to be
+    // rendered nowhere at all.
+    it('lists files that have not started yet', () => {
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            createMockFile(0, 'started.png', 'uploading'),
+            createMockFile(1, 'waiting-a.png', 'pending'),
+            createMockFile(2, 'waiting-b.png', 'pending'),
+            createMockFile(3, 'done.png', 'complete'),
+          ],
+        })
+      );
+
+      expect(screen.getByText('waiting-a.png')).toBeInTheDocument();
+      expect(screen.getByText('waiting-b.png')).toBeInTheDocument();
+      expect(screen.getAllByText('Queued')).toHaveLength(2);
+    });
+
+    it('renders every file in the batch, whatever its state', () => {
+      const files = [
+        createMockFile(0, 'a.png', 'uploading'),
+        createMockFile(1, 'b.png', 'pending'),
+        createMockFile(2, 'c.png', 'complete'),
+        createMockFile(3, 'd.png', 'error', 'boom'),
+        createMockFile(4, 'e.png', 'cancelled'),
+      ];
+
+      setup(createMockState({ totalFiles: files.length, files }));
+
+      files.forEach((file) => {
+        expect(screen.getByText(file.name)).toBeInTheDocument();
+      });
+    });
+
+    it('shows no progress bar on a queued row', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [createMockFile(0, 'waiting.png', 'pending')],
+        })
+      );
+
+      expect(screen.getByText('Queued')).toBeInTheDocument();
+      // A bar — even an indeterminate one — would read as "in progress" on a file
+      // the pool has not picked up yet.
+      expect(screen.queryAllByRole('progressbar')).toHaveLength(0);
+    });
+
+    it('gives the uploading row a bar and the queued row none', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            createMockFile(0, 'going.png', 'uploading'),
+            createMockFile(1, 'waiting.png', 'pending'),
+          ],
+        })
+      );
+
+      // Exactly one: the in-flight row. The queued row contributes none.
+      expect(screen.getAllByRole('progressbar')).toHaveLength(1);
     });
   });
 });

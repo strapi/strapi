@@ -6,6 +6,7 @@ import {
   Check,
   CheckCircle,
   ChevronDown,
+  Clock,
   Cross,
   CrossCircle,
   Information,
@@ -559,6 +560,22 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCurrentFile = file.status === 'uploading';
   const isCompleted = file.status === 'complete';
   const isCancelled = file.status === 'cancelled';
+  const isQueued = file.status === 'pending';
+
+  if (isQueued) {
+    // No bar: there is nothing to report yet, and an indeterminate bar would read
+    // as "in progress" on a file the pool has not picked up.
+    return (
+      <FileRow icon={<Clock fill="neutral600" />} fileName={file.name}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTranslationKey('upload.progress.file.queued'),
+            defaultMessage: 'Queued',
+          })}
+        </Typography>
+      </FileRow>
+    );
+  }
 
   if (isCurrentFile) {
     // Determinate only once bytes are actually being reported — a known `size` is not
@@ -593,7 +610,20 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
     return (
       <FileRow icon={<CrossCircle fill="danger500" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
-          {file.error}
+          {file.error
+            ? /**
+               * The server may return a machine-readable code (e.g. `FileTooBig` from the
+               * body middleware) or an already human-readable sentence (e.g. the upload
+               * plugin's size-limit message). Translate the former, fall back to the latter.
+               */
+              formatMessage({
+                id: getTranslationKey(`apiError.${file.error}`),
+                defaultMessage: file.error,
+              })
+            : formatMessage({
+                id: getTranslationKey('upload.generic-error'),
+                defaultMessage: 'An error occurred while uploading the file.',
+              })}
         </Typography>
       </FileRow>
     );
@@ -645,6 +675,9 @@ export const UploadProgressDialog = () => {
   // in-flight row, not just the first (a `find` here dated to the strictly
   // sequential era and hid all but the lowest-index worker's row).
   const uploadingFiles = files.filter((f) => f.status === 'uploading');
+  // Everything the pool has not reached yet. Listed in queue order, which is the
+  // order `files` is already in, so a row's position tells the user where it sits.
+  const queuedFiles = files.filter((f) => f.status === 'pending');
   const completedFiles = files
     .filter((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled')
     .sort((a, b) => {
@@ -678,6 +711,10 @@ export const UploadProgressDialog = () => {
             paddingRight={4}
           >
             {uploadingFiles.map((file) => (
+              <FileRowRenderer key={file.index} file={file} />
+            ))}
+
+            {queuedFiles.map((file) => (
               <FileRowRenderer key={file.index} file={file} />
             ))}
 
