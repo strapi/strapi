@@ -72,6 +72,8 @@ type AttributeCondition<
  * Tree representation of a Strapi filter for a given schema UID
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = {
+  // The recursive references below go through `extends infer` so that TypeScript defers them instead
+  // of expanding the whole filter tree while TSchemaUID is still unresolved
   [TIter in Operator.Group]?: (ObjectNotation<TSchemaUID> extends infer TNested
     ? TNested
     : never)[];
@@ -95,9 +97,9 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         },
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
-          [TKey in string]?: NestedAttributeCondition<TSchemaUID, never> extends infer TNested
-            ? AttributeCondition<TSchemaUID, never> | TNested
-            : never;
+          [TKey in string]?:
+            | AttributeCondition<TSchemaUID, never>
+            | (NestedAttributeCondition<TSchemaUID, never> extends infer TNested ? TNested : never);
         }
       >
     : never);
