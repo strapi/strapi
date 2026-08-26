@@ -115,6 +115,37 @@ Content-manager's derived tools re-run the same `permission-checker` service use
 
 Custom tools should follow the same pattern: use `auth.policies` for the coarse gate, then call into the same policy/permission services your REST controllers use for the fine-grained checks.
 
+## Advertised schema wire contract
+
+The `inputSchema` and optional `outputSchema` returned by `tools/list` are JSON Schema 2020-12
+documents. A schema can declare this dialect with
+`https://json-schema.org/draft/2020-12/schema` or omit `$schema`; the MCP specification defines an
+absent declaration as 2020-12. Capability authors and clients must interpret the document
+structurally as 2020-12. For example, positional tuples use `prefixItems`, and generated recursive
+schemas use `$defs` rather than the older `definitions` container.
+
+Strapi passes each capability's authored Zod schema to the MCP SDK. Zod serializes it and the SDK
+advertises that result. Strapi does not rewrite or re-serialize advertised schemas. This boundary is
+covered by tests that enumerate through a real MCP client and through an authenticated `/mcp`
+request, then compile every advertised input and output schema as 2020-12.
+
+### Current content-manager schema observations
+
+The known SDK conversion hazards are tracked upstream in
+[#2464](https://github.com/modelcontextprotocol/typescript-sdk/issues/2464) and
+[#2636](https://github.com/modelcontextprotocol/typescript-sdk/issues/2636). Authenticated
+enumeration of real content-manager tools currently shows:
+
+- Date, datetime, time, and timestamp write fields are advertised as strings. Content-manager does
+  not author these fields with `z.date()`, so the date conversion failure in #2464 is not present.
+- Content-manager output schemas contain no defaulted fields, so the defaulted-output mismatch in
+  #2464 is not present.
+- Extra-property declarations follow the authored object behavior: strict write-data objects
+  advertise `additionalProperties: false`, loose output objects advertise an open
+  `additionalProperties` schema, and ordinary input objects can omit the keyword. The omission
+  described in #2636 is present, but it remains valid JSON Schema 2020-12 and does not drop any
+  content-manager tool in strict schema validation.
+
 ## Defining and registering capabilities
 
 Public builders are re-exported from `@strapi/core` / `@strapi/strapi` as `ai.mcp.defineTool`, `ai.mcp.definePrompt`, `ai.mcp.defineResource` (`packages/core/core/src/mcp.ts` → `services/mcp/{tool,prompt,resource}-registry.ts`). They are identity functions at runtime — their only job is inferring/narrowing TypeScript types (input/output schema shape, `devModeOnly` vs `auth` access variant).
@@ -144,21 +175,31 @@ strapi.ai.mcp.registerTool(greet);
 
 `registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning a `GetPromptResult`, and `uri`/`metadata`/`createHandler` returning a `ReadResourceResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
 
-### SDK request context
+### Handler context
 
-Capability handlers retain Strapi's existing positional or `{ args, extra }` API. The `extra` value is the SDK v2 [`ServerContext`](https://ts.sdk.modelcontextprotocol.io/v2/server/api/interfaces/server.ServerContext.html). SDK v1 request fields moved as follows:
+Capability handlers retain Strapi's positional or `{ args, extra }` API. Strapi owns the `extra`
+handler-context contract and translates the underlying transport's request facts into it. Capability
+authors do not depend on an MCP SDK context type.
 
-| SDK v1 `extra`               | SDK v2 `ServerContext`       |
-| ---------------------------- | ---------------------------- |
-| `signal`                     | `mcpReq.signal`              |
-| `requestId`                  | `mcpReq.id`                  |
-| `_meta`                      | `mcpReq._meta`               |
-| `sendNotification(...)`      | `mcpReq.notify(...)`         |
-| `sendRequest(...)`           | `mcpReq.send(...)`           |
-| `authInfo`                   | `http?.authInfo`             |
-| `requestInfo`                | `http?.req`                  |
-| `closeSSEStream()`           | `http?.closeSSE()`           |
-| `closeStandaloneSSEStream()` | `http?.closeStandaloneSSE()` |
+Every member is optional because availability varies by request and transport:
+
+| Member        | Meaning                                                  |
+| ------------- | -------------------------------------------------------- |
+| `signal`      | Cancellation signal for the invocation                   |
+| `requestId`   | JSON-RPC request identifier                              |
+| `sessionId`   | Transport session identifier, when session state exists  |
+| `authInfo`    | Information about a token authenticated by the transport |
+| `_meta`       | Complete request metadata                                |
+| `requestInfo` | Originating HTTP request information                     |
+
+Strapi preserves the established meaning of these names. `_meta` includes ordinary request metadata
+and reserved MCP protocol keys, even when the SDK handles those groups separately. `requestInfo`
+uses `{ headers, url? }`; `headers` is a plain mapping, so existing access such as
+`extra.requestInfo?.headers.authorization` continues to work.
+
+Server-initiated client messaging, SSE stream-closing controls, and experimental task facilities are
+not part of Strapi's handler context. There is no escape hatch to the SDK context. Code that reads
+one of these excluded fields fails the TypeScript check instead of receiving `undefined` at runtime.
 
 ### Fault isolation
 

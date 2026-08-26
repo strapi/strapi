@@ -89,18 +89,9 @@ const mockUser = { id: 42 };
 const mockContext = { userAbility: makeUserAbility(), user: mockUser };
 
 const mockExtra = {
-  mcpReq: {
-    id: 'test-request-id',
-    method: 'tools/call',
-    signal: new AbortController().signal,
-    _meta: undefined,
-    requestState: () => undefined,
-    send: jest.fn(),
-    notify: jest.fn(),
-    log: jest.fn(),
-    elicitInput: jest.fn(),
-    requestSampling: jest.fn(),
-  },
+  requestId: 'test-request-id',
+  signal: new AbortController().signal,
+  _meta: undefined,
 } satisfies HandlerParams['extra'];
 
 const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({

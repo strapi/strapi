@@ -1,4 +1,4 @@
-import type { McpServer, RegisteredResource } from '@modelcontextprotocol/server';
+import type { McpServer, RegisteredResource, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -7,6 +7,7 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
+import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
 
 /**
  * Defines a Strapi MCP resource with full type inference, ready to pass to
@@ -98,7 +99,8 @@ export class McpResourceRegistry
             'resource',
             name,
             definition.telemetry,
-            safeHandler
+            (uri: URL, context: ServerContext) =>
+              safeHandler(uri, createMcpCapabilityHandlerContext(context))
           );
 
           return mcpServer.registerResource(name, uri, metadata, sdkHandler);

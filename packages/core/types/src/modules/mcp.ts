@@ -5,7 +5,6 @@ import type {
   GetPromptResult,
   ReadResourceResult,
   ResourceMetadata,
-  ServerContext,
 } from '@modelcontextprotocol/server';
 import type * as Core from '../core';
 
@@ -63,6 +62,41 @@ export type McpCapabilityDefinition<Name extends string = string> = {
 } & McpCapabilityAccess;
 
 /**
+ * Information about the token authenticated for an MCP request.
+ */
+export type McpHandlerAuthInfo = {
+  token: string;
+  clientId: string;
+  scopes: string[];
+  expiresAt?: number;
+  resource?: URL;
+  extra?: Record<string, unknown>;
+};
+
+/**
+ * Information about the HTTP request that originated an MCP invocation.
+ */
+export type McpHandlerRequestInfo = {
+  headers: Record<string, string | string[] | undefined>;
+  url?: URL;
+};
+
+/**
+ * Request-scoped facts Strapi provides to MCP capability handlers.
+ *
+ * Every fact is optional because availability depends on the request and transport.
+ * Strapi owns this contract and normalizes it independently of the underlying MCP SDK.
+ */
+export type McpCapabilityHandlerContext = {
+  signal?: AbortSignal;
+  requestId?: string | number;
+  sessionId?: string;
+  authInfo?: McpHandlerAuthInfo;
+  _meta?: Record<string, unknown>;
+  requestInfo?: McpHandlerRequestInfo;
+};
+
+/**
  * Handler function for Strapi MCP tools.
  * Receives a single object parameter `{ args, extra }`.
  * When InputSchema is a ZodObject, `args` is typed as its inferred shape.
@@ -75,7 +109,7 @@ export type McpToolHandler<
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
 > = (
   params: {
-    extra: ServerContext;
+    extra: McpCapabilityHandlerContext;
   } & (InputSchema extends z.ZodObject<z.ZodRawShape>
     ? { args: z.infer<InputSchema> }
     : { args?: never })
@@ -176,8 +210,8 @@ export interface McpToolBuilder {
  */
 export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined> =
   ArgsSchema extends z.ZodTypeAny
-    ? (args: z.infer<ArgsSchema>, extra: ServerContext) => Promise<GetPromptResult>
-    : (extra: ServerContext) => Promise<GetPromptResult>;
+    ? (args: z.infer<ArgsSchema>, extra: McpCapabilityHandlerContext) => Promise<GetPromptResult>
+    : (extra: McpCapabilityHandlerContext) => Promise<GetPromptResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP prompt definition.
@@ -238,7 +272,10 @@ export interface McpPromptBuilder {
 /**
  * Callback function for Strapi MCP resources
  */
-export type McpResourceCallback = (uri: URL, extra: ServerContext) => Promise<ReadResourceResult>;
+export type McpResourceCallback = (
+  uri: URL,
+  extra: McpCapabilityHandlerContext
+) => Promise<ReadResourceResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP resource definition.

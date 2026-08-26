@@ -3,6 +3,8 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAgent } from 'api-tests/agent';
 import { createAuthRequest } from 'api-tests/request';
 import type { Core, UID } from '@strapi/types';
+import type { AdvertisedTool } from './utils/mcp-client';
+import { getStrictClientUsableTools, JSON_SCHEMA_2020_12 } from './utils/strict-tool-client';
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const MODEL_UID = 'api::mcp-rbac-doc.mcp-rbac-doc';
@@ -24,6 +26,7 @@ const ct = {
   attributes: {
     title: { type: 'string' },
     secret: { type: 'string' },
+    publishedOn: { type: 'date' },
   },
 };
 
@@ -44,7 +47,7 @@ type JsonRpcResponse = {
   jsonrpc?: '2.0';
   id?: number | string | null;
   result?: {
-    tools?: Array<{ name: string }>;
+    tools?: AdvertisedTool[];
     structuredContent?: Record<string, unknown>;
     content?: Array<{ type: string; text?: string }>;
     isError?: boolean;
@@ -176,12 +179,12 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
     return res.body.data;
   };
 
-  const listToolNames = async (accessKey: string): Promise<string[]> => {
+  const listTools = async (accessKey: string): Promise<AdvertisedTool[]> => {
     const res = await mcpRpc(accessKey, 'tools/list');
     expect(res.statusCode).toBe(200);
     const parsed = parseMcpResponse(res);
     expect(parsed.error).toBeUndefined();
-    return parsed.result?.tools?.map((tool) => tool.name) ?? [];
+    return parsed.result?.tools ?? [];
   };
 
   const callTool = async (
@@ -200,9 +203,61 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
     properties: { fields },
   });
 
+  const actionPermission = (action: string): AdminPermission => ({
+    action,
+    subject: MODEL_UID,
+    conditions: [],
+    properties: {},
+  });
+
   // ---------------------------------------------------------------------------
   // Tests
   // ---------------------------------------------------------------------------
+
+  test('strict clients retain every advertised content-manager tool', async () => {
+    const fields = ['title', 'secret', 'publishedOn'];
+    const token = await createAdminToken([
+      fieldPermission(CM_ACTIONS.read, fields),
+      fieldPermission(CM_ACTIONS.create, fields),
+      fieldPermission(CM_ACTIONS.update, fields),
+      actionPermission(CM_ACTIONS.delete),
+    ]);
+    await initializeMcpSession(token.accessKey);
+
+    const advertisedTools = await listTools(token.accessKey);
+    expect(advertisedTools.length).toBeGreaterThan(0);
+    expect(getStrictClientUsableTools(advertisedTools)).toHaveLength(advertisedTools.length);
+
+    for (const tool of advertisedTools) {
+      expect([undefined, JSON_SCHEMA_2020_12]).toContain(tool.inputSchema.$schema);
+      if (tool.outputSchema !== undefined) {
+        expect([undefined, JSON_SCHEMA_2020_12]).toContain(tool.outputSchema.$schema);
+      }
+    }
+
+    const listTool = advertisedTools.find((tool) => tool.name === `list_${SLUG}`);
+    expect(listTool).toBeDefined();
+    expect(listTool?.inputSchema).toHaveProperty('$defs');
+    expect(JSON.stringify(listTool?.inputSchema)).toContain('"$ref":"#/$defs/');
+    expect(JSON.stringify(listTool?.inputSchema)).not.toContain('"definitions"');
+
+    const createTool = advertisedTools.find((tool) => tool.name === `create_${SLUG}`);
+    expect(createTool).toBeDefined();
+    expect(createTool?.inputSchema).toMatchObject({
+      properties: {
+        data: {
+          additionalProperties: false,
+          properties: {
+            publishedOn: { type: 'string' },
+          },
+        },
+      },
+    });
+    expect(createTool?.outputSchema).toHaveProperty('additionalProperties', {});
+    expect(JSON.stringify(advertisedTools.map((tool) => tool.outputSchema))).not.toContain(
+      '"default":'
+    );
+  });
 
   test('get tool output omits fields the token cannot read', async () => {
     const seeded = await strapi.documents(MODEL_UID as UID.CollectionType).create({
@@ -268,12 +323,14 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
     const token = await createAdminToken([fieldPermission(CM_ACTIONS.read, ['title', 'secret'])]);
     await initializeMcpSession(token.accessKey);
 
-    const toolNames = await listToolNames(token.accessKey);
+    const advertisedTools = await listTools(token.accessKey);
+    const toolNames = advertisedTools.map((tool) => tool.name);
     expect(toolNames).toContain(`list_${SLUG}`);
     expect(toolNames).toContain(`get_${SLUG}`);
     expect(toolNames).not.toContain(`create_${SLUG}`);
     expect(toolNames).not.toContain(`update_${SLUG}`);
     expect(toolNames).not.toContain(`delete_${SLUG}`);
+    expect(getStrictClientUsableTools(advertisedTools)).toHaveLength(advertisedTools.length);
 
     const response = await callTool(token.accessKey, `delete_${SLUG}`, {
       documentId: seeded.documentId,
