@@ -304,6 +304,11 @@ describe('slugifyUidForMcpToolName', () => {
     expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
   });
 
+  it('includes the content-type suffix so api models sharing an api name stay unique', () => {
+    expect(slugifyUidForMcpToolName('api::writer.writer')).toBe('writer');
+    expect(slugifyUidForMcpToolName('api::writer.editor')).toBe('writer_editor');
+  });
+
   it('maps plugin UIDs to namespace-model_content-type per documented format', () => {
     expect(slugifyUidForMcpToolName('plugin::i18n.locale')).toBe('plugin-i18n_locale');
   });
@@ -347,6 +352,28 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
         'write_plugin-cms-basics_settings',
       ])
     );
+  });
+
+  it('derives unique tool names for api content types that share an api name', () => {
+    const models = [
+      baseModel({
+        uid: 'api::writer.writer',
+        apiID: 'writer',
+        kind: 'collectionType',
+      }),
+      baseModel({
+        uid: 'api::writer.editor',
+        apiID: 'editor',
+        kind: 'collectionType',
+      }),
+    ];
+
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, models);
+    const names = tools.map((tool) => tool.name);
+    const uniqueNames = new Set(names);
+
+    expect(uniqueNames.size).toBe(names.length);
+    expect(names).toEqual(expect.arrayContaining(['list_writer', 'list_writer_editor']));
   });
 
   it('emits list/get with explorer.read for a collection type', () => {
@@ -1114,6 +1141,32 @@ describe('buildDataSchema', () => {
       relationModel.attributes as TestAttrs
     );
     expect(schema.safeParse({ tags: { set: null } }).success).toBe(true);
+  });
+
+  it('xMany relation rejects { set: [...] } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: ['abc'], connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: ['abc'], disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: ['abc'], connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
+  it('xMany relation rejects { set: null } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: null, connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: null, disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: null, connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
   });
 
   it('xMany relation accepts empty object {}', () => {

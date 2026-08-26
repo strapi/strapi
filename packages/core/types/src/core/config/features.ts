@@ -4,7 +4,7 @@
  * @see docs/docs/docs/06-future-flags.md
  */
 export interface FeaturesFutureFlags {
-  unstableMediaLibrary?: boolean;
+  betaMediaLibrary?: boolean;
   experimental_firstPublishedAt?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }

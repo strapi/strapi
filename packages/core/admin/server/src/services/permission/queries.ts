@@ -112,9 +112,11 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
     const isRegisteredAction = actionProvider.has(permission.action);
     const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
     const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject as string);
+    // On an api token permission, nil properties mean "everything", not "invalid"
+    const hasApiToken = !isNil(prop('apiToken', permission));
 
     // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
-    if (!isRegisteredAction || isInvalidSubject || hasInvalidProperties) {
+    if (!isRegisteredAction || isInvalidSubject || (hasInvalidProperties && !hasApiToken)) {
       permissionsToRemove.push(permission);
     }
   }

@@ -7,6 +7,12 @@ import { getTranslationKey } from '../../../utils/translations';
 
 interface EmptyStateProps {
   onAddAssets: () => void;
+  /**
+   * RBAC gate — without `assets.create` the "Add assets" CTA is hidden.
+   * Required (not defaulted) so a permission gate can't silently regress to
+   * permissive when a future call site forgets to pass it.
+   */
+  canAddAssets: boolean;
   searchQuery?: string;
   onClearSearch?: () => void;
 }
@@ -17,7 +23,12 @@ interface EmptyStateProps {
  * as New > File upload; drag-and-drop upload keeps working since the page-wide
  * drop zone wraps this component.
  */
-export const EmptyState = ({ onAddAssets, searchQuery, onClearSearch }: EmptyStateProps) => {
+export const EmptyState = ({
+  onAddAssets,
+  canAddAssets,
+  searchQuery,
+  onClearSearch,
+}: EmptyStateProps) => {
   const { formatMessage } = useIntl();
   const isSearchEmptyState = Boolean(searchQuery);
 
@@ -60,12 +71,14 @@ export const EmptyState = ({ onAddAssets, searchQuery, onClearSearch }: EmptySta
           })}
         </Button>
       ) : (
-        <Button onClick={onAddAssets}>
-          {formatMessage({
-            id: getTranslationKey('list.empty.add-assets'),
-            defaultMessage: 'Add assets',
-          })}
-        </Button>
+        canAddAssets && (
+          <Button onClick={onAddAssets}>
+            {formatMessage({
+              id: getTranslationKey('list.empty.add-assets'),
+              defaultMessage: 'Add assets',
+            })}
+          </Button>
+        )
       )}
     </Flex>
   );

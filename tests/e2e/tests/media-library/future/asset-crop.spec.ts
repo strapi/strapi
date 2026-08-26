@@ -6,7 +6,7 @@ import { describeOnCondition } from '../../../../utils/shared';
 
 import { AssetsPage } from './page-objects/AssetsPage';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('Media Library - Crop', () => {
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - Crop', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
