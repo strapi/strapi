@@ -50,7 +50,14 @@ const HeaderStatusMessage = ({
   metadataSubtitle?: string;
 }) => {
   return (
-    <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingLeft={2}
+      paddingRight={2}
+      paddingTop={1}
+      paddingBottom={1}
+    >
       <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
       </Drawer.Title>
@@ -69,6 +76,7 @@ const HeaderStatusMessage = ({
 };
 
 const HeaderStatusIcon = styled(Flex)`
+  align-self: stretch;
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => `${theme.borderRadius} 0 0 ${theme.borderRadius}`};
 
