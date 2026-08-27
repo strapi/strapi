@@ -99,6 +99,10 @@ const configureStoreImpl = (
  * instead (as this used to) unmounts every form first, so the warning — and the
  * user's edits — never make it to the screen. Falls back to the hard redirect
  * when no provider is listening, so the user is never stranded on a dead page.
+ *
+ * `triggerSessionExpired` is idempotent per dead session (baseQuery often
+ * already called it for this 401). The `!` check is only the no-listener
+ * fallback; it must not run logout a second time.
  */
 const rtkQueryUnauthorizedMiddleware: Middleware =
   ({ dispatch }: MiddlewareAPI) =>

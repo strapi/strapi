@@ -874,7 +874,6 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     return (
-      !isSubmitting &&
       hasUnsavedEdits &&
       (currentLocation.pathname !== nextLocation.pathname ||
         currentLocation.search !== nextLocation.search)

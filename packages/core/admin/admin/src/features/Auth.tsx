@@ -31,6 +31,7 @@ import { getOrCreateDeviceId } from '../utils/deviceId';
 import {
   attemptTokenRefresh,
   getFetchClient,
+  resetSessionExpiredNotification,
   setOnSessionExpired,
   setOnTokenUpdate,
 } from '../utils/getFetchClient';
@@ -411,6 +412,7 @@ const AuthProvider = ({
       if ('data' in res) {
         const { token } = res.data;
 
+        resetSessionExpiredNotification();
         dispatch(
           loginAction({
             token,

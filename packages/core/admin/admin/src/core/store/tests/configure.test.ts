@@ -55,6 +55,20 @@ describe('configureStore / unauthorized middleware', () => {
     expect(store.getState().admin_app.token).toBe('a-token');
   });
 
+  it('does not invoke the session-expired handler twice for two 401 rejections', () => {
+    stubLocation();
+    const onSessionExpired = jest.fn();
+    setOnSessionExpired(onSessionExpired);
+
+    const store = configureStore();
+    store.dispatch(setToken('a-token'));
+
+    store.dispatch(rejectedWith(401));
+    store.dispatch(rejectedWith(401));
+
+    expect(onSessionExpired).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back to logging out and redirecting when nothing handles the expiry', () => {
     const location = stubLocation();
     setOnSessionExpired(null);
