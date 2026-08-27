@@ -295,20 +295,45 @@ export const selectAggregateProgress = createSelector(
 );
 
 /**
- * Whether `selectAggregateProgress` is worth showing as a percentage. A batch that never
- * reports bytes stays pinned at 0%, so the header drops the percentage for it.
+ * Whether to show byte-weighted `selectAggregateProgress` rather than count-based progress.
+ * A batch that never reports bytes stays pinned at 0%, so the header falls back to
+ * `selectCountBasedProgress`.
  *
- * Also checks the rows, not just the flag: an in-flight row reporting bytes proves the
- * batch can, so if the URL flow starts emitting progress the percentage returns on its
- * own. Only `uploading` rows count — completion backfills `uploadedBytes` to the file
- * size, and letting settled rows qualify would resurface the percentage mid-batch for
- * multi-URL uploads, byte-weighted over only the sizes known so far (transiently 100%).
+ * Checks the rows too, not just the flag: an in-flight row reporting bytes proves the batch
+ * can, so byte-weighting takes over once the URL flow starts emitting progress. Only
+ * `uploading` rows count — completion backfills `uploadedBytes` to the file size, so letting
+ * settled rows qualify would switch a multi-URL batch to byte-weighting mid-upload over only
+ * the sizes known so far (transiently 100% after the first file).
  */
 export const selectReportsByteProgress = createSelector(
   (state: RootState) => state.uploadProgress.reportsByteProgress,
   (state: RootState) => state.uploadProgress.files,
   (reportsByteProgress, files): boolean =>
     reportsByteProgress || files.some((f) => f.status === 'uploading' && f.uploadedBytes > 0)
+);
+
+/**
+ * Count-based progress (settled / total rows) for a batch that reports no transferred bytes
+ * (the URL flow). Used by the header whenever `selectReportsByteProgress` is false.
+ *
+ * Never byte-weights, so a multi-URL batch climbs 33 → 67 → 100 as each file lands instead
+ * of jumping to a transient 100% after the first.
+ *
+ * Returns `null` until a row settles — 0% is the frozen signal this flow exists to remove
+ * (a lone URL upload would otherwise read "Uploading 1 item (0%)" throughout), so the header
+ * stays indeterminate until there's real progress.
+ */
+export const selectCountBasedProgress = createSelector(
+  (state: RootState) => state.uploadProgress.files,
+  (files): number | null => {
+    const settled = files.filter(
+      (f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled'
+    ).length;
+
+    if (settled === 0) return null;
+
+    return Math.round((settled / files.length) * 100);
+  }
 );
 
 /**

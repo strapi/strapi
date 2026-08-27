@@ -15,6 +15,7 @@ import {
   retryCancelledFiles,
   selectAggregateProgress,
   selectReportsByteProgress,
+  selectCountBasedProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
   selectMetadataOutcome,
@@ -56,6 +57,9 @@ const aggregate = (state: UploadProgressState) =>
 
 const reportsBytes = (state: UploadProgressState) =>
   selectReportsByteProgress({ uploadProgress: state });
+
+const countBased = (state: UploadProgressState) =>
+  selectCountBasedProgress({ uploadProgress: state });
 
 const metadataProgress = (state: UploadProgressState) =>
   selectMetadataProgress({ uploadProgress: state });
@@ -303,10 +307,10 @@ describe('uploadProgress slice', () => {
       expect(aggregate(progressed)).toBe(25);
     });
 
-    it('stays false when a URL row completes, so a multi-URL batch shows no percentage', () => {
+    it('stays false when a URL row completes, so the batch stays on the count-based branch', () => {
       // Completion backfills `uploadedBytes` to the file size. If that counted as "reporting
-      // bytes", finishing the first of three URLs would resurface the percentage — at 100%,
-      // since the still-pending rows have no size yet to weight against.
+      // bytes", finishing the first of three URLs would flip to byte-weighting and read 100%
+      // (pending rows have no size yet). Staying false keeps count-based progress at 33%.
       const opened = uploadProgressReducer(
         undefined,
         openUploadProgress({ totalFiles: 3, fileNames: ['a.png', 'b.png', 'c.png'] })
@@ -323,6 +327,8 @@ describe('uploadProgress slice', () => {
       expect(firstDone.files[0].uploadedBytes).toBe(1000);
       expect(aggregate(firstDone)).toBe(100);
       expect(reportsBytes(firstDone)).toBe(false);
+      // What the header actually reads here — count-based, not the byte-weighted 100%.
+      expect(countBased(firstDone)).toBe(33);
     });
 
     it('resets when the dialog is closed so the next batch decides for itself', () => {
@@ -334,6 +340,67 @@ describe('uploadProgress slice', () => {
       const closed = uploadProgressReducer(opened, closeUploadProgress());
 
       expect(closed.reportsByteProgress).toBe(false);
+    });
+  });
+
+  describe('selectCountBasedProgress', () => {
+    it('stays null while a lone URL upload is in flight, so no frozen 0% is shown', () => {
+      // The single-file case the PR exists to fix: count-based is a flat 0% for the whole
+      // transfer, so the honest signal is an indeterminate header, not "0%".
+      const opened = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['remote.png'] })
+      );
+      const uploading = uploadProgressReducer(
+        opened,
+        setFileUploading({ uploadId: opened.uploadId, name: 'remote.png', index: 0, size: 5000 })
+      );
+
+      expect(countBased(uploading)).toBeNull();
+    });
+
+    it('climbs 33 -> 67 as each URL lands, never a transient 100% after the first', () => {
+      let state = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 3, fileNames: ['a.png', 'b.png', 'c.png'] })
+      );
+
+      // Nothing settled yet — indeterminate, not 0%.
+      expect(countBased(state)).toBeNull();
+
+      // First URL lands. Its size is now known, but count-based ignores that and reads 33%
+      // (byte-weighting would misread 100% here).
+      state = uploadProgressReducer(
+        state,
+        setFileUploading({ uploadId: state.uploadId, name: 'a.png', index: 0, size: 1000 })
+      );
+      state = uploadProgressReducer(
+        state,
+        setFileComplete({ uploadId: state.uploadId, index: 0, file: { id: 1 } as never })
+      );
+      expect(countBased(state)).toBe(33);
+
+      // Second lands → 67%.
+      state = uploadProgressReducer(
+        state,
+        setFileComplete({ uploadId: state.uploadId, index: 1, file: { id: 2 } as never })
+      );
+      expect(countBased(state)).toBe(67);
+    });
+
+    it('counts errored and cancelled rows as settled, so a failed row cannot stall progress', () => {
+      const state = makeState([
+        makeFile(0, 'complete', 0),
+        makeFile(1, 'error', 0),
+        makeFile(2, 'uploading', 0),
+      ]);
+
+      // 2 of 3 rows settled → 67%.
+      expect(countBased(state)).toBe(67);
+    });
+
+    it('returns null for an empty batch', () => {
+      expect(countBased(makeState([]))).toBeNull();
     });
   });
 
@@ -752,6 +819,36 @@ describe('uploadProgress slice', () => {
 
       expect(merged.isVisible).toBe(true);
       expect(merged.isMinimized).toBe(false);
+    });
+
+    // Regression guard: `appendUploadFiles` never touches `reportsByteProgress`, so the flag
+    // set when the batch opened must survive the merge. Merges can't cross flows (the guard in
+    // api.ts), so the opening flow's flag is always the right one to keep.
+    it('leaves reportsByteProgress true after merging into a direct-file batch', () => {
+      const state = firstDrop();
+      expect(state.reportsByteProgress).toBe(true);
+
+      const merged = uploadProgressReducer(
+        state,
+        appendUploadFiles({ uploadId: state.uploadId, fileNames: ['c.png'], fileSizes: [30] })
+      );
+
+      expect(merged.reportsByteProgress).toBe(true);
+    });
+
+    it('leaves reportsByteProgress false after merging into a URL (no-size) batch', () => {
+      const urlDrop = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 1, fileNames: ['a.png'] })
+      );
+      expect(urlDrop.reportsByteProgress).toBe(false);
+
+      const merged = uploadProgressReducer(
+        urlDrop,
+        appendUploadFiles({ uploadId: urlDrop.uploadId, fileNames: ['b.png'] })
+      );
+
+      expect(merged.reportsByteProgress).toBe(false);
     });
 
     it('ignores an append aimed at a batch that has already been replaced', () => {

@@ -139,6 +139,24 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText(/Uploading 1 item \(25%\)/)).toBeInTheDocument();
     });
 
+    it('shows count-based progress for a multi-URL batch as each file lands', () => {
+      // No streamed bytes: count-based climbs by settled row (1 of 3 → 33%). Byte-weighting
+      // would misread 100% here since only the finished row has a size.
+      setup(
+        createMockState({
+          totalFiles: 3,
+          reportsByteProgress: false,
+          files: [
+            createMockFile(0, 'a.png', 'complete'),
+            createMockFile(1, 'b.png', 'uploading'),
+            createMockFile(2, 'c.png', 'pending'),
+          ],
+        })
+      );
+
+      expect(screen.getByText(/Uploading 3 items \(33%\)/)).toBeInTheDocument();
+    });
+
     it('shows Cancel all button during upload', () => {
       setup(
         createMockState({

@@ -26,6 +26,7 @@ import {
   cancelUpload,
   selectAggregateProgress,
   selectReportsByteProgress,
+  selectCountBasedProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
   selectMetadataOutcome,
@@ -307,8 +308,10 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   );
   const aggregateProgress = useTypedSelector(selectAggregateProgress);
   const reportsByteProgress = useTypedSelector(selectReportsByteProgress);
-  // No bytes to weight means no percentage to show.
-  const progress = reportsByteProgress ? aggregateProgress : null;
+  const countBasedProgress = useTypedSelector(selectCountBasedProgress);
+  // Byte-weighted when the flow streams bytes (direct-file), else count-based (settled/total).
+  // Both return `null` for an indeterminate header when there's nothing to show yet.
+  const progress = reportsByteProgress ? aggregateProgress : countBasedProgress;
   const metadataProgress = useTypedSelector(selectMetadataProgress);
   const isGeneratingMetadata = useTypedSelector(selectIsGeneratingMetadata);
   const metadataOutcome = useTypedSelector(selectMetadataOutcome);
