@@ -86,6 +86,77 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
         attributes: [{ name: 'name', type, ...opts, status: 'NEW' }],
       });
     });
+
+    it('marks a new private scalar attribute as not searchable by default', () => {
+      const initializedState = init();
+
+      const state = reducer(
+        initializedState,
+        actions.addAttribute({
+          attributeToSet: { type: 'text', name: 'secret', private: true },
+          forTarget,
+          targetUid,
+        })
+      );
+
+      expect(getType(state, { forTarget, targetUid })).toMatchObject({
+        attributes: [
+          {
+            name: 'secret',
+            type: 'text',
+            private: true,
+            searchable: false,
+            status: 'NEW',
+          },
+        ],
+      });
+    });
+
+    it.each([true, false])(
+      'preserves searchable: %s for a new private scalar attribute',
+      (searchable) => {
+        const initializedState = init();
+
+        const state = reducer(
+          initializedState,
+          actions.addAttribute({
+            attributeToSet: { type: 'text', name: 'secret', private: true, searchable },
+            forTarget,
+            targetUid,
+          })
+        );
+
+        expect(getType(state, { forTarget, targetUid })).toMatchObject({
+          attributes: [
+            {
+              name: 'secret',
+              type: 'text',
+              private: true,
+              searchable,
+              status: 'NEW',
+            },
+          ],
+        });
+      }
+    );
+
+    it('does not add searchable to a new non-private scalar attribute', () => {
+      const initializedState = init();
+
+      const state = reducer(
+        initializedState,
+        actions.addAttribute({
+          attributeToSet: { type: 'text', name: 'title' },
+          forTarget,
+          targetUid,
+        })
+      );
+
+      const [attribute] = getType(state, { forTarget, targetUid }).attributes;
+
+      expect(attribute).toEqual({ name: 'title', type: 'text', status: 'NEW' });
+      expect(attribute).not.toHaveProperty('searchable');
+    });
   });
 
   it('Should throw id content type does not exist', () => {

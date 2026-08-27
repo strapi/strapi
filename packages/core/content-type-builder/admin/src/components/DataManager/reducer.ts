@@ -214,9 +214,17 @@ const setAttributeStatus = (attribute: { status?: Status }, status: Status) => {
   attribute.status = getNewStatus(attribute.status, status);
 };
 
+const applyPrivateSearchDefault = <T extends Record<string, unknown>>(attribute: T): T => {
+  if (attribute.private === true && attribute.searchable === undefined) {
+    return { ...attribute, searchable: false };
+  }
+
+  return attribute;
+};
+
 const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
   return {
-    ...properties,
+    ...applyPrivateSearchDefault(properties),
     status: 'NEW',
   } as AnyAttribute;
 };
@@ -227,7 +235,7 @@ const setAttributeAt = (type: ContentType | Component, index: number, attribute:
   const newStatus = getNewStatus(previousAttribute.status, 'CHANGED');
 
   type.attributes[index] = {
-    ...attribute,
+    ...applyPrivateSearchDefault(attribute),
     status: newStatus,
   };
 

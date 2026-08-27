@@ -265,6 +265,7 @@ const basePropertiesSchema = z.object({
   ]),
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
+  searchable: z.boolean().optional(),
   pluginOptions: z.record(z.string(), z.unknown()).optional(),
   conditions: z.preprocess((val) => {
     return val;
