@@ -165,6 +165,33 @@ describe('licenseLimitInformation (extended fields)', () => {
     expect(data.lastRegistrySyncAt).toBeNull();
   });
 
+  it('keeps offline mode after expiry when type lives only on the retained snapshot', async () => {
+    // disable() wipes licenseInfo.type; STRAPI_DISABLE_LICENSE_PING is still set. licenseMode
+    // must read retained type or Overview shows the online check-in line instead of expiry.
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: null,
+        licenseStatus: 'expired',
+        retainedLicense: {
+          type: 'gold',
+          seats: 10,
+          subscriptionId: 'sub_123',
+          expireAt: '2026-01-01T00:00:00.000Z',
+          isTrial: false,
+          features: [],
+        },
+        features: { list: () => [], isEnabled: () => false },
+        entitlements: { list: () => [] },
+      },
+    });
+    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.licenseMode).toBe('offline');
+  });
+
   it('flags usingCachedLicense when the last sync errored but a cached license exists', async () => {
     createStrapiMock({
       stored: { value: JSON.stringify({ license: 'cached', error: 'network', lastCheckAt: 1 }) },

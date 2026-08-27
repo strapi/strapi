@@ -88,6 +88,21 @@ describe('debug-dump scrub', () => {
     );
   });
 
+  it('relativizes Windows app and home paths (backslash separators)', () => {
+    expect(
+      scrub('C:\\Users\\alice\\app\\src\\index.js', {
+        appRoot: 'C:\\Users\\alice\\app',
+        homeDir: 'C:\\Users\\alice',
+      })
+    ).toBe('<app>\\src\\index.js');
+    expect(
+      scrub('C:\\Users\\alice\\.ssh\\id_rsa', {
+        appRoot: 'D:\\srv\\app',
+        homeDir: 'C:\\Users\\alice',
+      })
+    ).toBe('<home>\\.ssh\\id_rsa');
+  });
+
   it('never writes through the __proto__ setter', () => {
     const r = scrub({ ['__proto__']: { polluted: true }, safe: 1 });
     expect(({} as any).polluted).toBeUndefined();
