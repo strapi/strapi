@@ -143,6 +143,7 @@
     "concurrently": "8.2.2",
     "css-loader": "6.11.0",
     "dotenv": "16.6.1",
+    "esbuild": "0.28.1",
     "esbuild-loader": "4.5.0",
     "esbuild-register": "3.6.0",
     "execa": "5.1.1",
