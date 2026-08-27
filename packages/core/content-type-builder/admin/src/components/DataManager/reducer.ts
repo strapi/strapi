@@ -2,6 +2,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 
+import { applyPrivateSearchDefault } from '../../utils/applyPrivateSearchDefault';
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
@@ -212,14 +213,6 @@ const getNewStatus = (oldStatus: Status | undefined, newStatus: Status) => {
 
 const setAttributeStatus = (attribute: { status?: Status }, status: Status) => {
   attribute.status = getNewStatus(attribute.status, status);
-};
-
-const applyPrivateSearchDefault = <T extends Record<string, unknown>>(attribute: T): T => {
-  if (attribute.private === true && attribute.searchable === undefined) {
-    return { ...attribute, searchable: false };
-  }
-
-  return attribute;
 };
 
 const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {

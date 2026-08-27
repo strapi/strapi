@@ -9,6 +9,38 @@ const relatedContentType = initCT('relationship', {});
 const baseComponent = initCompo('test', {});
 type AddAttributePayload = Parameters<typeof actions.addAttribute>[0];
 
+const SEARCHABLE_SCALAR_TYPES = [
+  'string',
+  'text',
+  'uid',
+  'email',
+  'enumeration',
+  'richtext',
+  'biginteger',
+  'integer',
+  'decimal',
+  'float',
+] as const;
+
+const NON_SEARCHABLE_PRIVATE_ATTRIBUTES = [
+  { type: 'password' },
+  { type: 'boolean' },
+  { type: 'blocks' },
+  { type: 'json' },
+  { type: 'date' },
+  { type: 'time' },
+  { type: 'datetime' },
+  { type: 'timestamp' },
+  { type: 'media', multiple: false },
+  { type: 'component', component: 'default.test', repeatable: false },
+  { type: 'dynamiczone', components: ['default.test'] },
+  {
+    type: 'relation',
+    relation: 'oneWay',
+    target: 'api::relationship.relationship',
+  },
+] as const;
+
 const init = () => {
   return initUtils({
     components: {
@@ -87,30 +119,59 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
       });
     });
 
-    it('marks a new private scalar attribute as not searchable by default', () => {
-      const initializedState = init();
+    it.each(SEARCHABLE_SCALAR_TYPES)(
+      'marks a new private %s attribute as not searchable by default',
+      (type) => {
+        const initializedState = init();
 
-      const state = reducer(
-        initializedState,
-        actions.addAttribute({
-          attributeToSet: { type: 'text', name: 'secret', private: true },
-          forTarget,
-          targetUid,
-        })
-      );
+        const state = reducer(
+          initializedState,
+          actions.addAttribute({
+            attributeToSet: {
+              type,
+              name: 'secret',
+              private: true,
+            } as AddAttributePayload['attributeToSet'],
+            forTarget,
+            targetUid,
+          })
+        );
 
-      expect(getType(state, { forTarget, targetUid })).toMatchObject({
-        attributes: [
-          {
-            name: 'secret',
-            type: 'text',
-            private: true,
-            searchable: false,
-            status: 'NEW',
-          },
-        ],
-      });
-    });
+        expect(getType(state, { forTarget, targetUid })).toMatchObject({
+          attributes: [
+            {
+              name: 'secret',
+              type,
+              private: true,
+              searchable: false,
+              status: 'NEW',
+            },
+          ],
+        });
+      }
+    );
+
+    it.each(NON_SEARCHABLE_PRIVATE_ATTRIBUTES)(
+      'does not add searchable to a new private $type attribute',
+      (properties) => {
+        const initializedState = init();
+        const attributeToSet = {
+          ...properties,
+          name: 'secret',
+          private: true,
+        } as AddAttributePayload['attributeToSet'];
+
+        const state = reducer(
+          initializedState,
+          actions.addAttribute({ attributeToSet, forTarget, targetUid })
+        );
+
+        const [attribute] = getType(state, { forTarget, targetUid }).attributes;
+
+        expect(attribute).toEqual({ ...attributeToSet, status: 'NEW' });
+        expect(attribute).not.toHaveProperty('searchable');
+      }
+    );
 
     it.each([true, false])(
       'preserves searchable: %s for a new private scalar attribute',
