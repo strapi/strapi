@@ -26,6 +26,8 @@ export interface FileProgress {
   size: number;
   uploadedBytes: number;
   file?: File;
+  /** When the server confirmed the upload. Set with the row's asset. */
+  completedAt?: number;
   error?: string;
   metadataStatus?: FileMetadataStatus;
 }
@@ -142,14 +144,18 @@ const uploadProgressSlice = createSlice({
         file.uploadedBytes = Math.min(bytes, file.size);
       }
     },
-    setFileComplete(state, action: PayloadAction<{ index: number; file: File; uploadId: number }>) {
-      const { index, file, uploadId } = action.payload;
+    setFileComplete(
+      state,
+      action: PayloadAction<{ index: number; file: File; uploadId: number; completedAt: number }>
+    ) {
+      const { index, file, uploadId, completedAt } = action.payload;
       if (uploadId !== state.uploadId) {
         return;
       }
       if (state.files[index]) {
         state.files[index].status = 'complete';
         state.files[index].file = file;
+        state.files[index].completedAt = completedAt;
         // Reflect completion in the aggregate even if the final progress event was throttled.
         state.files[index].uploadedBytes = state.files[index].size;
       }
@@ -258,6 +264,36 @@ const uploadProgressSlice = createSlice({
     },
   },
 });
+
+/**
+ * Assets whose own upload has already finished, newest batch only.
+ *
+ * The list behind the upload dialog uses these to show each asset the moment it
+ * lands, instead of waiting for the batch mutation to invalidate the cache. Rows
+ * only carry a `file` once the server has created it, so every entry here is a
+ * real, persisted asset.
+ */
+const NO_FILES: FileProgress[] = [];
+
+/** An uploaded asset, with the moment the server confirmed it. */
+export interface CompletedUpload {
+  asset: File;
+  completedAt: number;
+}
+
+export const selectCompletedUploads = createSelector(
+  // The plugin registers this slice in `register()`, so a host that has not
+  // reached that point has no upload state — and therefore nothing to place.
+  (state: Partial<RootState>) => state.uploadProgress?.files ?? NO_FILES,
+  (files): CompletedUpload[] =>
+    files.reduce<CompletedUpload[]>((completed, row) => {
+      if (row.status === 'complete' && row.file && row.completedAt !== undefined) {
+        completed.push({ asset: row.file, completedAt: row.completedAt });
+      }
+
+      return completed;
+    }, [])
+);
 
 /**
  * Byte-weighted aggregate progress across the whole batch: `sum(uploadedBytes) / sum(size)`.
