@@ -155,6 +155,8 @@ export interface IAsset {
   stream: Readable;
   stats: IAssetStats;
   metadata: IFile;
+  /** Metadata was reconstructed from the asset filename because its sidecar was missing. */
+  metadataFallback?: boolean;
   buffer?: Buffer;
 }
 

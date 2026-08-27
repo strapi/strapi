@@ -13,6 +13,12 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import {
+  buildFallbackAssetMetadataFromFilename,
+  isMissingAssetMetadataSidecarError,
+  missingAssetMetadataSidecarMessage,
+  parseAssetSidecar,
+} from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { unknownPathToPosix } from '../../../file/providers/source/utils';
 
@@ -62,6 +68,17 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         origin: 'directory-source-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'asset-metadata-fallback',
+      },
+      kind: 'warning',
     });
   }
 
@@ -178,15 +195,18 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       const stat = await fs.stat(absUpload);
       if (stat.isFile()) {
         let metadata: IAsset['metadata'];
+        let metadataFallback = false;
         try {
-          metadata = await this.#readAssetMetadata(name);
+          const sidecar = await this.#readAssetMetadata(name);
+          metadata = sidecar.metadata;
+          metadataFallback = sidecar.metadataFallback;
         } catch (error) {
-          outStream.destroy(
-            new ProviderTransferError(`Failed to read metadata for ${name}`, {
-              details: { error },
-            })
-          );
-          return;
+          if (!isMissingAssetMetadataSidecarError(error)) {
+            throw error;
+          }
+          this.#reportWarning(missingAssetMetadataSidecarMessage(name));
+          metadata = buildFallbackAssetMetadataFromFilename(name, { size: stat.size });
+          metadataFallback = true;
         }
 
         const normalizedPath = unknownPathToPosix(path.posix.join('assets', 'uploads', name));
@@ -196,6 +216,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
           filepath: normalizedPath,
           stats: { size: stat.size },
           stream: fs.createReadStream(absUpload),
+          ...(metadataFallback ? { metadataFallback: true } : {}),
         };
         await write(outStream, asset);
       }
@@ -203,9 +224,11 @@ class LocalDirectorySourceProvider implements ISourceProvider {
     outStream.end();
   }
 
-  async #readAssetMetadata(filename: string): Promise<IAsset['metadata']> {
+  async #readAssetMetadata(
+    filename: string
+  ): Promise<{ metadata: IAsset['metadata']; metadataFallback: boolean }> {
     const metadataPath = this.#safePath('assets', 'metadata', `${filename}.json`);
-    return fs.readJson(metadataPath);
+    return parseAssetSidecar(await fs.readJson(metadataPath));
   }
 
   async #listJsonlFiles(posixSubdir: string): Promise<string[]> {

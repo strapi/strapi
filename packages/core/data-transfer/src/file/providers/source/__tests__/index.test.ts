@@ -2,6 +2,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import tarStream from 'tar-stream';
+import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
@@ -132,6 +133,140 @@ describe('File source provider', () => {
         expect(isPathEquivalent(inputA, inputB)).toEqual(expected);
       }
     );
+  });
+
+  describe('asset metadata fallback', () => {
+    const createTar = async (
+      entries: Array<{ name: string; content: string | Buffer }>
+    ): Promise<string> => {
+      const tarPath = path.join(os.tmpdir(), `strapi-dt-assets-${Date.now()}-${Math.random()}.tar`);
+      const pack = tarStream.pack();
+      for (const entry of entries) {
+        pack.entry({ name: entry.name }, entry.content);
+      }
+      pack.finalize();
+      await pipeline(pack, fs.createWriteStream(tarPath));
+      return tarPath;
+    };
+
+    const collectAssets = async (stream: NodeJS.ReadableStream) => {
+      const assets: Array<{
+        metadataFallback?: boolean;
+        metadata?: { hash?: string; mime?: string; metadataFallback?: boolean };
+      }> = [];
+      for await (const chunk of stream as AsyncIterable<{
+        metadataFallback?: boolean;
+        metadata?: { hash?: string; mime?: string; metadataFallback?: boolean };
+        stream?: NodeJS.ReadableStream;
+      }>) {
+        assets.push(chunk);
+        chunk.stream?.resume();
+      }
+      return assets;
+    };
+
+    test('uses filename fallback only when the sidecar entry is missing', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+      ]);
+
+      const report = jest.fn();
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report } as never);
+
+      const assets = await collectAssets(
+        provider.createAssetsReadStream() as NodeJS.ReadableStream
+      );
+      await fs.remove(tarPath);
+
+      expect(assets).toHaveLength(1);
+      expect(assets[0].metadata).toMatchObject({ hash: 'photo', mime: 'image/jpeg' });
+      expect(assets[0].metadataFallback).toBe(true);
+      expect(report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'warning',
+          details: expect.objectContaining({ origin: 'asset-metadata-fallback' }),
+        })
+      );
+    });
+
+    test('aborts when the sidecar JSON is malformed', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+        { name: 'assets/metadata/photo.jpg.json', content: '{not valid json' },
+      ]);
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report: jest.fn() } as never);
+
+      await expect(
+        collectAssets(provider.createAssetsReadStream() as NodeJS.ReadableStream)
+      ).rejects.toThrow(SyntaxError);
+      await fs.remove(tarPath);
+    });
+
+    test('aborts when reopening the archive for a sidecar fails', async () => {
+      const tarPath = await createTar([
+        {
+          name: 'metadata.json',
+          content: JSON.stringify({
+            createdAt: new Date().toISOString(),
+            strapi: { version: '1.0.0' },
+          }),
+        },
+        { name: 'assets/uploads/photo.jpg', content: Buffer.from('jpeg-bytes') },
+      ]);
+      const originalCreateReadStream = fs.createReadStream.bind(fs);
+      let opens = 0;
+      const spy = jest.spyOn(fs, 'createReadStream').mockImplementation((filePath, options) => {
+        opens += 1;
+        if (opens >= 3) {
+          const failed = new PassThrough();
+          process.nextTick(() => {
+            failed.destroy(
+              Object.assign(new Error('EMFILE: too many open files'), { code: 'EMFILE' })
+            );
+          });
+          return failed;
+        }
+        return originalCreateReadStream(filePath, options);
+      });
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap({ report: jest.fn() } as never);
+
+      await expect(
+        collectAssets(provider.createAssetsReadStream() as NodeJS.ReadableStream)
+      ).rejects.toThrow('EMFILE');
+      spy.mockRestore();
+      await fs.remove(tarPath);
+    });
   });
 
   describe('Backpressure', () => {

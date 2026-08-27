@@ -13,6 +13,7 @@ import type {
   ProviderType,
 } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
+import { serializeAssetSidecar } from '../../../utils/asset-metadata-fallback';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -172,7 +173,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
         try {
           fs.mkdirSync(path.dirname(entryPath), { recursive: true });
           fs.mkdirSync(path.dirname(entryMetadataPath), { recursive: true });
-          fs.writeFileSync(entryMetadataPath, JSON.stringify(data.metadata), 'utf8');
+          fs.writeFileSync(entryMetadataPath, serializeAssetSidecar(data), 'utf8');
           fileStream = createWriteStream(entryPath);
         } catch (error: unknown) {
           callback(assetWriteError(error));

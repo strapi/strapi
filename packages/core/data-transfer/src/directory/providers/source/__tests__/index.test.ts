@@ -59,6 +59,67 @@ describe('Directory source provider', () => {
     stream.destroy();
   });
 
+  test('createAssetsReadStream uses filename fallback when metadata sidecar is missing', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-fallback-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.writeFile(
+      path.join(dir, 'assets', 'uploads', 'abc123.jpeg'),
+      Buffer.from('jpeg-bytes')
+    );
+
+    const report = jest.fn();
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report } as never);
+
+    const assets: Array<{
+      metadataFallback?: boolean;
+      metadata?: { hash?: string; ext?: string };
+    }> = [];
+    const stream = provider.createAssetsReadStream();
+    for await (const chunk of stream) {
+      assets.push(chunk);
+      chunk.stream?.resume();
+    }
+
+    expect(assets).toHaveLength(1);
+    expect(assets[0].metadata).toMatchObject({
+      hash: 'abc123',
+      ext: '.jpeg',
+      mime: 'image/jpeg',
+    });
+    expect(assets[0].metadataFallback).toBe(true);
+    expect(report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'warning',
+        details: expect.objectContaining({
+          message: expect.stringContaining('Missing asset metadata sidecar'),
+        }),
+      })
+    );
+  });
+
+  test('createAssetsReadStream rejects malformed sidecar JSON', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-malformed-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'abc123.jpeg'), 'jpeg-bytes');
+    await fs.writeFile(path.join(dir, 'assets', 'metadata', 'abc123.jpeg.json'), '{not valid json');
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createAssetsReadStream();
+    await expect(
+      (async () => {
+        for await (const chunk of stream) {
+          chunk.stream?.resume();
+        }
+      })()
+    ).rejects.toThrow(SyntaxError);
+  });
+
   test('entities read stream pauses under backpressure (slow consumer)', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-bp-'));
     await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);

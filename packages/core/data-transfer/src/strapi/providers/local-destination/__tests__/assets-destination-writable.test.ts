@@ -310,3 +310,47 @@ describe('regression: pre-#26086 immediate Readable.from(PassThrough) (#26086)',
     transaction.end();
   });
 });
+
+describe('missing asset sidecar fallback', () => {
+  test('uploads the bytes without selecting or updating a media-library row', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const strapi = createMockStrapi(uploadStream);
+    const transaction = createTransaction(strapi);
+    const removeAssetsBackup = jest.fn().mockResolvedValue(undefined);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup,
+    });
+
+    await writeAsset(stream, {
+      filename: 'orphan.jpg',
+      filepath: 'assets/uploads/orphan.jpg',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadataFallback: true,
+      metadata: {
+        ...baseMetadata,
+        id: 0,
+        hash: 'orphan',
+        name: 'orphan.jpg',
+        url: '/orphan.jpg',
+      },
+    });
+
+    passThrough.end(Buffer.from('hello'));
+    await waitForUploadStream(uploadStream);
+
+    expect(uploadStream).toHaveBeenCalledTimes(1);
+    expect(strapi.db.query).not.toHaveBeenCalled();
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((error?: Error | null) => (error ? reject(error) : resolve()));
+    });
+    expect(removeAssetsBackup).not.toHaveBeenCalled();
+    transaction.end();
+  });
+});

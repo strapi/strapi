@@ -110,6 +110,12 @@ export default async (opts: CmdOptions) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
+  let assetMetadataFallbackUsed = false;
+  engine.diagnostics.on('warning', ({ details }) => {
+    if (details.origin === 'asset-metadata-fallback') {
+      assetMetadataFallbackUsed = true;
+    }
+  });
   engine.diagnostics.onDiagnostic(formatDiagnostic('import', opts.verbose));
 
   const progress = engine.progress.stream;
@@ -165,6 +171,13 @@ export default async (opts: CmdOptions) => {
       getTransferTelemetryPayload(engine)
     );
     await strapiInstance.destroy();
+
+    if (assetMetadataFallbackUsed) {
+      exitWith(1, [
+        'Import completed with missing asset metadata.',
+        'All asset bytes were processed, but files restored from filenames may require manual verification.',
+      ]);
+    }
 
     exitWith(0, exitMessageText('import'));
   } catch {

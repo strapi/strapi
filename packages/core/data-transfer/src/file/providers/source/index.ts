@@ -16,6 +16,12 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import {
+  buildFallbackAssetMetadataFromFilename,
+  MissingArchiveEntryError,
+  missingAssetMetadataSidecarMessage,
+  parseAssetSidecar,
+} from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
@@ -80,6 +86,17 @@ class LocalFileSourceProvider implements ISourceProvider {
     });
   }
 
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'asset-metadata-fallback',
+      },
+      kind: 'warning',
+    });
+  }
+
   /**
    * tar `Parser` invokes the pipeline completion callback when the archive ends, but it does not
    * reliably await async `onReadEntry` — defer `end` until outstanding async entry work is done.
@@ -135,7 +152,7 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   async #loadAssetMetadata(path: string) {
     const backupStream = this.#getBackupStream();
-    return this.#parseJSONFile<IFile>(backupStream, path);
+    return parseAssetSidecar(await this.#parseJSONFile<IFile>(backupStream, path));
   }
 
   async getMetadata() {
@@ -189,6 +206,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
+    const reportWarning = this.#reportWarning.bind(this);
     this.#reportInfo('creating assets read stream');
 
     let activeAsyncEntries = 0;
@@ -196,6 +214,8 @@ class LocalFileSourceProvider implements ISourceProvider {
       activeAsyncEntries += 1;
       try {
         await fn();
+      } catch (error) {
+        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
       } finally {
         activeAsyncEntries -= 1;
       }
@@ -217,11 +237,19 @@ class LocalFileSourceProvider implements ISourceProvider {
               const { path: filePath, size = 0 } = entry;
               const normalizedPath = unknownPathToPosix(filePath);
               const file = path.basename(normalizedPath);
-              let metadata;
+              let metadata: IFile;
+              let metadataFallback = false;
               try {
-                metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-              } catch {
-                throw new Error(`Failed to read metadata for ${file}`);
+                const sidecar = await loadAssetMetadata(`assets/metadata/${file}.json`);
+                metadata = sidecar.metadata;
+                metadataFallback = sidecar.metadataFallback;
+              } catch (error) {
+                if (!(error instanceof MissingArchiveEntryError)) {
+                  throw error;
+                }
+                reportWarning(missingAssetMetadataSidecarMessage(file));
+                metadata = buildFallbackAssetMetadataFromFilename(file, { size });
+                metadataFallback = true;
               }
               const asset: IAsset = {
                 metadata,
@@ -229,6 +257,7 @@ class LocalFileSourceProvider implements ISourceProvider {
                 filepath: normalizedPath,
                 stats: { size },
                 stream: entry as unknown as Readable,
+                ...(metadataFallback ? { metadataFallback: true } : {}),
               };
               await write(outStream, asset);
             });
@@ -373,10 +402,14 @@ class LocalFileSourceProvider implements ISourceProvider {
             },
           }),
         ],
-        () => {
+        (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
           // If the promise hasn't been resolved and we've parsed all
           // the archive entries, then the file doesn't exist
-          reject(new Error(`File "${filePath}" not found`));
+          reject(new MissingArchiveEntryError(filePath));
         }
       );
     });
