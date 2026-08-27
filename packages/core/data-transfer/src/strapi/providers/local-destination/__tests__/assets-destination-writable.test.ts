@@ -312,6 +312,38 @@ describe('regression: pre-#26086 immediate Readable.from(PassThrough) (#26086)',
 });
 
 describe('missing asset sidecar fallback', () => {
+  test('still removes the local backup when every asset has complete sidecar metadata', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const strapi = createMockStrapi(uploadStream);
+    const transaction = createTransaction(strapi);
+    const removeAssetsBackup = jest.fn().mockResolvedValue(undefined);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => 1,
+      restoreMediaEntitiesContent: false,
+      removeAssetsBackup,
+    });
+
+    await writeAsset(stream, {
+      filename: 'a.jpg',
+      filepath: '/a',
+      stats: { size: 5 },
+      stream: passThrough,
+      metadata: baseMetadata,
+    });
+
+    passThrough.end(Buffer.from('hello'));
+    await waitForUploadStream(uploadStream);
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((error?: Error | null) => (error ? reject(error) : resolve()));
+    });
+    expect(removeAssetsBackup).toHaveBeenCalledTimes(1);
+    transaction.end();
+  });
+
   test('uploads the bytes without selecting or updating a media-library row', async () => {
     const passThrough = new PassThrough();
     const uploadStream = jest.fn().mockResolvedValue(undefined);

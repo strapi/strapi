@@ -93,6 +93,7 @@ describe('Directory source provider', () => {
       expect.objectContaining({
         kind: 'warning',
         details: expect.objectContaining({
+          origin: 'asset-metadata-fallback',
           message: expect.stringContaining('Missing asset metadata sidecar'),
         }),
       })
