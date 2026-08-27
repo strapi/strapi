@@ -191,6 +191,7 @@ In addition to the CNA Operational Rules, the following classes of report are co
 - **Social-engineering attacks** against Strapi staff, contributors, or community members
 - **Physical-access attacks** against developer machines or production servers
 - **Best-practice recommendations** that do not correspond to an actual security boundary violation (e.g. "you should rotate keys more often")
+- **Path traversal or arbitrary file write via a Data Transfer (DTS) transfer token** — a `push` or `pull` transfer token is an administrator-issued, RBAC-gated credential whose entire purpose is to fully mirror one environment's data and media onto another. Strapi does not sanitize or restrict asset metadata accepted from an authenticated transfer session beyond requiring a valid token — this is the intended trust model for that credential, not a vulnerability. The security boundary is possession of the token itself. Reports in this class will be closed unless they demonstrate the token can be forged, guessed, or obtained without an administrator granting it.
 
 In addition to the above stated rules, we will also apply some generic rules as well:
 
