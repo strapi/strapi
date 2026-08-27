@@ -35,6 +35,12 @@ export interface ISourceProvider extends IProvider {
   results?: ISourceProviderTransferResults;
 
   /**
+   * Validate a stage before the destination provider prepares for transfer.
+   * Use this for checks that must happen before a restore can mutate destination data.
+   */
+  validateStage?(stage: TransferStage): MaybePromise<void>;
+
+  /**
    * Optional totals for a stage. Called by the engine after the stage read stream is created and before `stage::start`.
    * Used for CLI progress (e.g. bytes/count remaining, ETA). Omit or return null when unknown (older remotes, file providers).
    */

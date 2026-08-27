@@ -1,5 +1,15 @@
 import path from 'path';
 
+import type { IFile } from '../../../types';
+
+export const validateAssetMetadata = (metadata: unknown): IFile => {
+  if (metadata === null || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    throw new TypeError('Asset sidecar metadata must be a JSON object');
+  }
+
+  return metadata as IFile;
+};
+
 /**
  * Note: in versions of the transfer engine <=4.9.0, exports were generated with windows paths
  * on Windows systems, and posix paths on posix systems.

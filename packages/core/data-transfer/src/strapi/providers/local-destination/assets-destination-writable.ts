@@ -36,7 +36,6 @@ export function createAssetsDestinationWritable(
   } = options;
 
   let pendingUploads = 0;
-  let metadataFallbackUsed = false;
 
   return new Writable({
     objectMode: true,
@@ -46,20 +45,14 @@ export function createAssetsDestinationWritable(
           setImmediate(resolve);
         });
       }
-      if (!metadataFallbackUsed) {
-        await removeAssetsBackup();
-      }
+      await removeAssetsBackup();
       next();
     },
     write(chunk: IAsset, _encoding, callback) {
       const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
-      const fileId = resolveUploadFileId(chunk.metadata);
-      metadataFallbackUsed ||= chunk.metadataFallback === true;
 
-      // Preserve the existing strict behavior for complete exports. Filename-derived fallback
-      // metadata deliberately has no trustworthy row identity, so it may restore bytes but must
-      // never select or mutate a media-library row.
-      if (!fileId && !chunk.metadataFallback) {
+      const fileId = resolveUploadFileId(chunk.metadata);
+      if (!fileId) {
         callback(new Error(`File ID not found for ID: ${chunk.metadata.id}`));
         return;
       }
@@ -89,12 +82,7 @@ export function createAssetsDestinationWritable(
             try {
               await strapi.plugin('upload').provider.uploadStream(uploadData);
 
-              if (!restoreMediaEntitiesContent || chunk.metadataFallback) {
-                return;
-              }
-
-              if (!fileId) {
-                // Guarded above; kept to narrow the type after the async boundary.
+              if (!restoreMediaEntitiesContent) {
                 return;
               }
 

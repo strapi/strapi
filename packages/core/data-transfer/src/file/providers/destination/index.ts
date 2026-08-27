@@ -16,7 +16,6 @@ import type {
   Stream,
 } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
-import { serializeAssetSidecar } from '../../../utils/asset-metadata-fallback';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -273,7 +272,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
         const entryMetadataPath = path.posix.join('assets', 'metadata', `${data.filename}.json`);
-        const stringifiedMetadata = serializeAssetSidecar(data);
+        const stringifiedMetadata = JSON.stringify(data.metadata);
         archiveStream.entry(
           {
             name: entryMetadataPath,

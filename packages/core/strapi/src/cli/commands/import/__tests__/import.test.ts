@@ -12,8 +12,6 @@ import importAction from '../action';
 import { UPLOAD_CONTENT_TYPE_UIDS } from '../../../utils/data-transfer';
 import { expectExit } from '../../__tests__/commands.test.utils';
 
-let mockEmitAssetFallback = false;
-
 jest.mock('@strapi/core', () => ({
   createStrapi: jest.fn(),
   compileStrapi: jest.fn(),
@@ -86,24 +84,8 @@ jest.mock('@strapi/data-transfer', () => {
     engine: {
       ...actual.engine,
       createTransferEngine: jest.fn(() => {
-        let warningListener:
-          | ((diagnostic: {
-              kind: 'warning';
-              details: { message: string; createdAt: Date; origin?: string };
-            }) => void)
-          | undefined;
         return {
           transfer: jest.fn(() => {
-            if (mockEmitAssetFallback) {
-              warningListener?.({
-                kind: 'warning',
-                details: {
-                  message: 'Missing asset metadata sidecar',
-                  createdAt: new Date(),
-                  origin: 'asset-metadata-fallback',
-                },
-              });
-            }
             return {
               engine: {},
             };
@@ -121,11 +103,7 @@ jest.mock('@strapi/data-transfer', () => {
             getMetadata: jest.fn(),
           },
           diagnostics: {
-            on: jest.fn((kind, listener) => {
-              if (kind === 'warning') {
-                warningListener = listener;
-              }
-            }),
+            on: jest.fn().mockReturnThis(),
             onDiagnostic: jest.fn().mockReturnThis(),
           },
           onSchemaDiff: jest.fn(),
@@ -146,7 +124,6 @@ describe('Import', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockEmitAssetFallback = false;
     jest.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => false } as Stats);
   });
 
@@ -211,14 +188,6 @@ describe('Import', () => {
       }
     );
     expect(fileDataTransfer.providers.createLocalFileSourceProvider).not.toHaveBeenCalled();
-  });
-
-  it('exits non-zero after processing all bytes when fallback metadata was used', async () => {
-    mockEmitAssetFallback = true;
-
-    await expectExit(1, async () => {
-      await importAction({ file: 'test.tar', exclude: [], only: [] });
-    });
   });
 
   it('excludes upload types from restore for issue #25008-style import', async () => {
