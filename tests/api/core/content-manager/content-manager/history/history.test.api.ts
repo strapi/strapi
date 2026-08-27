@@ -218,6 +218,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
   let collectionTypeDocumentId;
   let singleTypeDocumentId;
   let relations;
+  // Hoisted so the deletion test can target this suite's own asset by id. Test files
+  // share a database within a CI shard, so upload ids are not stable across runs.
+  let imageA;
 
   const createEntry = async ({ uid, data, isCollectionType = true }: CreateEntryArgs) => {
     const type = isCollectionType ? 'collection-types' : 'single-types';
@@ -323,7 +326,8 @@ describeOnCondition(edition === 'EE')('History API', () => {
     const relationIds = relations.map((relation) => relation.data.documentId);
 
     // Upload media assets to be added to versions
-    const [imageA, imageB] = await uploadFiles();
+    let imageB;
+    [imageA, imageB] = await uploadFiles();
     const nestedComposWithImages = {
       rootImage: imageA.id,
       rootImageSibling: imageB.id,
@@ -715,10 +719,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
         url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
       });
 
-      // Delete an asset
+      // Delete an asset — target this suite's own upload rather than a hardcoded id.
       await rq({
         method: 'DELETE',
-        url: `/upload/files/1`,
+        url: `/upload/files/${imageA.id}`,
       });
 
       // Restore the initial version containing the deleted asset
