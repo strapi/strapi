@@ -76,10 +76,45 @@ const relationHolderCT = {
   },
 };
 
+// A *non-media* polymorphic pair. `morphOne` is a generic inverse polymorphic relation,
+// not a media marker: media merely happens to be modelled as morphOne/morphMany against
+// `plugin::upload.file`. These types prove the single-media last-wins truncation never
+// reaches a user-authored morphOne (which must keep every row written for it).
+const morphTargetCT = {
+  displayName: 'delta-morph-target',
+  singularName: 'delta-morph-target',
+  pluralName: 'delta-morph-targets',
+  draftAndPublish: false,
+  attributes: {
+    label: { type: 'string' },
+    // morphToMany (join-table backed), mirroring how `plugin::upload.file.related` is
+    // modelled. This is the branch the single-media last-wins truncation lives in; a
+    // morphToOne target would be an FK column and never reach it.
+    holder: { type: 'relation', relation: 'morphToMany' },
+  },
+};
+
+const morphHolderCT = {
+  displayName: 'delta-morph-holder',
+  singularName: 'delta-morph-holder',
+  pluralName: 'delta-morph-holders',
+  draftAndPublish: false,
+  attributes: {
+    tagged: {
+      type: 'relation',
+      relation: 'morphOne',
+      target: 'api::delta-morph-target.delta-morph-target',
+      morphBy: 'holder',
+    },
+  },
+};
+
 const SINGLE_UID = 'api::delta-single.delta-single';
 const MULTIPLE_UID = 'api::delta-multiple.delta-multiple';
 const TARGET_UID = 'api::delta-target.delta-target';
 const HOLDER_UID = 'api::delta-holder.delta-holder';
+const MORPH_TARGET_UID = 'api::delta-morph-target.delta-morph-target';
+const MORPH_HOLDER_UID = 'api::delta-morph-holder.delta-morph-holder';
 const FILE_UID = 'plugin::upload.file';
 
 const createEntry = (uid, body = {}, qs = {}) =>
@@ -146,6 +181,8 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       .addContentType(multipleMediaCT)
       .addContentType(relationTargetCT)
       .addContentType(relationHolderCT)
+      .addContentType(morphTargetCT)
+      .addContentType(morphHolderCT)
       .build();
 
     strapi = await createStrapiInstance();
@@ -587,6 +624,157 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       });
       expect(update.statusCode).toBe(200);
       expect(await readPickId(documentId)).toBe(targetC);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Review follow-ups (PR #27116)
+  // ---------------------------------------------------------------------------
+
+  describe('Single media — explicit { set: null } clears the field', () => {
+    // `toAssocs` used to test the `set` key by truthiness, so `{ set: null }` fell through
+    // to the connect/disconnect branch and arrived WITHOUT a `set` key — the shape-based
+    // partial-update gate then read it as an empty delta and preserved the relation.
+    // `{ set: null }` is a valid "clear this field" payload and must empty it.
+    test('{ set: null } empties the cover and leaves no rows', async () => {
+      const { id, documentId } = await createWithCover();
+
+      const update = await updateEntry(
+        SINGLE_UID,
+        documentId,
+        { cover: { set: null } },
+        { populate: ['cover'] }
+      );
+      expect(update.statusCode).toBe(200);
+
+      expect(await readCover(documentId)).toBe(null);
+      expect(await countJoinRows(id, 'cover')).toBe(0);
+    });
+
+    test('{ set: null } on multiple media empties the gallery and leaves no rows', async () => {
+      const create = await createEntry(
+        MULTIPLE_UID,
+        { gallery: [fileA, fileB] },
+        { populate: ['gallery'] }
+      );
+      expect(create.statusCode).toBe(201);
+      const { id, documentId } = create.body.data;
+      expect(await countGalleryRows(id)).toBe(2);
+
+      const update = await updateEntry(
+        MULTIPLE_UID,
+        documentId,
+        { gallery: { set: null } },
+        { populate: ['gallery'] }
+      );
+      expect(update.statusCode).toBe(200);
+
+      const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
+      expect(read.body.data.gallery).toEqual([]);
+      expect(await countGalleryRows(id)).toBe(0);
+    });
+  });
+
+  describe('Non-media morphOne is never truncated', () => {
+    // Last-wins truncation is gated on the upload target, not on `relation === 'morphOne'`.
+    // A user-authored morphOne must keep every row written for it — notably the draft +
+    // published entity rows the Document Service expands one documentId into.
+    //
+    // Driven through the query engine because that is the layer the truncation lives in
+    // (entity-manager), and the morphOne side is not writable through the content-manager
+    // REST payloads used elsewhere in this file.
+    // Join-table backed morph (same shape as `plugin::upload.file.related`), resolved
+    // from metadata so physical names stay dialect-agnostic.
+    const countMorphRows = async (holderId) => {
+      const { joinTable } = strapi.db.metadata.get(MORPH_TARGET_UID).attributes.holder;
+      const rows = await strapi.db.getConnection(joinTable.name).where({
+        [joinTable.morphColumn.idColumn.name]: holderId,
+        [joinTable.morphColumn.typeColumn.name]: MORPH_HOLDER_UID,
+      });
+      return rows.length;
+    };
+
+    test('a morphOne set with two target rows keeps both (no slice to one)', async () => {
+      const holder = await strapi.db.query(MORPH_HOLDER_UID).create({ data: {} });
+
+      // Two distinct target rows, mirroring the draft+published pair the Document Service
+      // expands a single documentId into for a non-D&P source pointing at a D&P model.
+      const t1 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'one' } });
+      const t2 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'two' } });
+
+      // Write both through the morphOne side — the join-table branch that used to slice(-1)
+      // for every morphOne, media or not.
+      await strapi.db.query(MORPH_HOLDER_UID).update({
+        where: { id: holder.id },
+        data: { tagged: [t1.id, t2.id] },
+      });
+
+      // Both rows must survive: last-wins truncation is media-only.
+      expect(await countMorphRows(holder.id)).toBe(2);
+    });
+  });
+
+  describe('Connect dedup — heterogeneous representations of one file', () => {
+    // toIdArray dedups with uniqWith(isEqual) *before* scalar and object entries are given
+    // a common shape, so `[B, { id: B }]` survived as two structurally different entries.
+    // The morph join table has no composite uniqueness guard, so that inserted two
+    // identical rows. Every path now dedups by target id before insert.
+    test('create with { connect: [B, { id: B }] } on multiple media inserts one row', async () => {
+      const create = await createEntry(
+        MULTIPLE_UID,
+        { gallery: { connect: [fileB, { id: fileB }] } },
+        { populate: ['gallery'] }
+      );
+      expect(create.statusCode).toBe(201);
+      const { id, documentId } = create.body.data;
+
+      const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
+      expect(read.body.data.gallery.map((f) => f.id)).toEqual([fileB]);
+      expect(await countGalleryRows(id)).toBe(1);
+    });
+
+    test('update with { connect: [B, { id: B }] } on multiple media inserts one row', async () => {
+      const create = await createEntry(
+        MULTIPLE_UID,
+        { gallery: [fileA] },
+        { populate: ['gallery'] }
+      );
+      expect(create.statusCode).toBe(201);
+      const { id, documentId } = create.body.data;
+
+      const update = await updateEntry(
+        MULTIPLE_UID,
+        documentId,
+        { gallery: { connect: [fileB, { id: fileB }] } },
+        { populate: ['gallery'] }
+      );
+      expect(update.statusCode).toBe(200);
+
+      const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
+      expect(read.body.data.gallery.map((f) => f.id).sort()).toEqual([fileA, fileB].sort());
+      expect(await countGalleryRows(id)).toBe(2);
+    });
+
+    test('{ set: [B, { id: B }] } on multiple media inserts one row', async () => {
+      const create = await createEntry(
+        MULTIPLE_UID,
+        { gallery: [fileA] },
+        { populate: ['gallery'] }
+      );
+      expect(create.statusCode).toBe(201);
+      const { id, documentId } = create.body.data;
+
+      const update = await updateEntry(
+        MULTIPLE_UID,
+        documentId,
+        { gallery: { set: [fileB, { id: fileB }] } },
+        { populate: ['gallery'] }
+      );
+      expect(update.statusCode).toBe(200);
+
+      const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
+      expect(read.body.data.gallery.map((f) => f.id)).toEqual([fileB]);
+      expect(await countGalleryRows(id)).toBe(1);
     });
   });
 });

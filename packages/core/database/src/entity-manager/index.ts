@@ -146,6 +146,20 @@ type Assocs =
       disconnect?: Array<ScalarAssoc> | null;
     };
 
+/**
+ * Media attributes are modelled as morph relations targeting the upload file model
+ * (see transformAttribute in @strapi/core: `media` -> morphOne/morphMany on
+ * `plugin::upload.file`). Single media is last-wins and holds at most one file.
+ *
+ * `morphOne` on its own is NOT a media marker — it is a generic inverse polymorphic
+ * relation available to any content type — so last-wins truncation must be gated on
+ * the upload target rather than on the relation kind.
+ */
+const UPLOAD_FILE_UID = 'plugin::upload.file';
+
+const isSingleMediaAttribute = (attribute: { relation?: string; target?: string }) =>
+  attribute.relation === 'morphOne' && attribute.target === UPLOAD_FILE_UID;
+
 const toAssocs = (data: Assocs) => {
   if (
     isArray(data) ||
@@ -159,7 +173,12 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  if (data?.set) {
+  // Check for the `set` key by presence, not truthiness: `{ set: null }` is a valid
+  // "clear this field" payload. A truthiness check let it fall through to the
+  // connect/disconnect branch below, where it arrived without a `set` key and was
+  // then indistinguishable from a delta payload — silently preserving the relation
+  // instead of clearing it.
+  if (isRecord(data) && has('set', data) && data.set !== undefined) {
     return {
       set: isNull(data.set) ? data.set : toIdArray(data.set),
     };
@@ -619,9 +638,23 @@ export const createEntityManager = (db: Database): EntityManager => {
               continue;
             }
 
-            // Single media (morphOne) is last-wins and holds at most one file.
-            const dataset =
-              attribute.relation === 'morphOne' ? (attachData ?? []).slice(-1) : (attachData ?? []);
+            // Single media is last-wins and holds at most one file. Gate on the upload
+            // target, not on `morphOne`: `morphOne` is a generic inverse polymorphic
+            // relation that users can author against any content type. For a non-D&P
+            // source targeting a D&P model the Document Service deliberately expands one
+            // documentId into both the draft and published entity ids, so truncating a
+            // generic morphOne here would drop a legitimate row.
+            //
+            // Then deduplicate by target id before ordering/insert: toIdArray dedups with
+            // uniqWith(isEqual) *before* scalar and object entries are given a common
+            // shape, so `[B, { id: B }]` survives as two structurally different entries and
+            // would insert two identical morph rows — the join table has no composite
+            // uniqueness guard. Regular joinTable relations already guard this with
+            // uniqBy('id', ...); do the same here.
+            const dataset = uniqBy(
+              'id',
+              isSingleMediaAttribute(attribute) ? (attachData ?? []).slice(-1) : (attachData ?? [])
+            );
 
             const rows = dataset.map((data, idx) => {
               return {
@@ -880,7 +913,9 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const isSingle = attribute.relation === 'morphOne';
+            // Single *media* only — see isSingleMediaAttribute: a generic `morphOne`
+            // must keep every row the Document Service expanded for it.
+            const isSingle = isSingleMediaAttribute(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
             const hasSet = !isEmpty(cleanRelationData.set);
 
@@ -893,8 +928,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isPartialUpdate = !has('set', cleanRelationData);
 
             if (isPartialUpdate) {
-              // For single media (morphOne) a connect is last-wins and the field holds
-              // at most one file, so a connect replaces whatever is attached: delete ALL
+              // For single media a connect is last-wins and the field holds at most one
+              // file, so a connect replaces whatever is attached: delete ALL
               // existing rows for this field first (not just the connected ids). Upload
               // files have no draft & publish, so we enforce exactly one physical row —
               // do not copy the xToOne-relation looseness that tolerates two rows.
@@ -943,9 +978,14 @@ export const createEntityManager = (db: Database): EntityManager => {
               if (hasConnect) {
                 // Single media is last-wins: keep only the final connected file so the
                 // field ends with exactly one row. Multiple media appends all connects.
-                const connects = isSingle
-                  ? (cleanRelationData.connect ?? []).slice(-1)
-                  : (cleanRelationData.connect ?? []);
+                // Dedup by id (see the create path): mixed scalar/object representations
+                // of the same file must produce exactly one physical row.
+                const connects = uniqBy(
+                  'id',
+                  isSingle
+                    ? (cleanRelationData.connect ?? []).slice(-1)
+                    : (cleanRelationData.connect ?? [])
+                );
 
                 // Query database to find the order of the last relation
                 const start = await this.createQueryBuilder(joinTable.name)
@@ -991,14 +1031,15 @@ export const createEntityManager = (db: Database): EntityManager => {
               .execute();
 
             if (hasSet) {
-              // Single media (morphOne) is last-wins for multi-item set/array shapes too,
+              // Single media is last-wins for multi-item set/array shapes too,
               // mirroring create and `normalizeXToOneRelationValue` for xToOne relations.
               // Without the slice, `{ set: [B, C] }` would insert both rows and — because
               // morphOne populate reads `order asc` + first — leave B observable with a
               // hidden C row, the same phantom-row defect the connect path guards against.
-              const setData = isSingle
-                ? (cleanRelationData.set ?? []).slice(-1)
-                : (cleanRelationData.set ?? []);
+              const setData = uniqBy(
+                'id',
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? [])
+              );
 
               const rows = setData.map((data, idx) => ({
                 [joinColumn.name]: data.id,
