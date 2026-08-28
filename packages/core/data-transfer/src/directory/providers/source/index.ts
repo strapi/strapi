@@ -252,7 +252,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
 
   async #readAssetMetadata(filename: string): Promise<IAsset['metadata']> {
     const metadataPath = this.#safePath('assets', 'metadata', `${filename}.json`);
-    return validateAssetMetadata(await fs.readJson(metadataPath));
+    return validateAssetMetadata(await fs.readJson(metadataPath), filename);
   }
 
   async #listJsonlFiles(posixSubdir: string): Promise<string[]> {

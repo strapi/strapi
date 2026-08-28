@@ -152,9 +152,13 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
-  async #loadAssetMetadata(path: string) {
+  async #loadAssetMetadata(sidecarPath: string) {
     const backupStream = this.#getBackupStream();
-    return validateAssetMetadata(await this.#parseJSONFile<IFile>(backupStream, path));
+    const filename = path.posix.basename(sidecarPath).replace(/\.json$/, '');
+    return validateAssetMetadata(
+      await this.#parseJSONFile<IFile>(backupStream, sidecarPath),
+      filename
+    );
   }
 
   async getMetadata() {
@@ -276,7 +280,7 @@ class LocalFileSourceProvider implements ISourceProvider {
       try {
         metadata.set(
           filename,
-          validateAssetMetadata(JSON.parse(sidecars.get(filename)!.toString()))
+          validateAssetMetadata(JSON.parse(sidecars.get(filename)!.toString()), filename)
         );
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);

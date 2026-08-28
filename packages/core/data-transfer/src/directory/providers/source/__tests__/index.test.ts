@@ -67,8 +67,12 @@ describe('Directory source provider', () => {
     await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
     await fs.writeJson(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), {
       id: 1,
+      name: 'photo.jpg',
       hash: 'photo',
       ext: '.jpg',
+      mime: 'image/jpeg',
+      size: 1,
+      url: '/uploads/photo.jpg',
     });
     const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
     await provider.bootstrap({ report: jest.fn() } as never);
@@ -97,6 +101,23 @@ describe('Directory source provider', () => {
 
     await expect(provider.validateStage('assets')).rejects.toThrow(
       'Asset metadata preflight failed for "photo.jpg"'
+    );
+
+    await fs.remove(dir);
+  });
+
+  test('asset preflight rejects incomplete object sidecar metadata', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-assets-incomplete-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'assets', 'uploads'));
+    await fs.ensureDir(path.join(dir, 'assets', 'metadata'));
+    await fs.writeFile(path.join(dir, 'assets', 'uploads', 'photo.jpg'), 'jpeg-bytes');
+    await fs.writeFile(path.join(dir, 'assets', 'metadata', 'photo.jpg.json'), '{}');
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    await expect(provider.validateStage('assets')).rejects.toThrow(
+      'Asset sidecar metadata has invalid required fields'
     );
 
     await fs.remove(dir);
