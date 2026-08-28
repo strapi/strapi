@@ -63,6 +63,10 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.untitled',
+    defaultMessage: 'Untitled',
+  });
   const field = useField<
     { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
   >(props.name);
@@ -126,7 +130,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
             const { targetModel } = props.attribute;
             const href = `../${COLLECTION_TYPES}/${targetModel}/${relationData.documentId}`;
-            const label = getRelationLabel(relationData, props.mainField);
+            const label = getRelationLabel(relationData, props.mainField, emptyLabel);
             const isAdminUserRelation = targetModel === 'admin::user';
 
             return (

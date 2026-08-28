@@ -1,3 +1,4 @@
+import { Form } from '@strapi/admin/strapi-admin';
 import {
   RenderOptions,
   fireEvent,
@@ -15,8 +16,12 @@ import { RelationsInput, RelationsFieldProps } from '../Relations';
 const render = (
   {
     initialEntries,
+    initialValues,
     ...props
-  }: Partial<RelationsFieldProps> & Pick<RenderOptions, 'initialEntries'> = { initialEntries: [] }
+  }: Partial<RelationsFieldProps> &
+    Pick<RenderOptions, 'initialEntries'> & { initialValues?: Record<string, unknown> } = {
+    initialEntries: [],
+  }
 ) =>
   renderRTL(
     <RelationsInput
@@ -39,7 +44,18 @@ const render = (
       renderOptions: {
         wrapper: ({ children }) => (
           <Routes>
-            <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
+            <Route
+              path="/content-manager/:collectionType/:slug/:id"
+              element={
+                initialValues ? (
+                  <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+                    {children}
+                  </Form>
+                ) : (
+                  children
+                )
+              }
+            />
           </Routes>
         ),
       },
@@ -89,6 +105,38 @@ describe('Relations', () => {
     expect(screen.getByRole('button', { name: 'Relation entity 1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Relation entity 2' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Relation entity 3' })).toBeInTheDocument();
+  });
+
+  it('renders localized fallback labels for fill-from-locale connect items', async () => {
+    render({
+      initialValues: {
+        relations: {
+          connect: [
+            {
+              id: 101,
+              documentId: 'internal-empty-key',
+              locale: 'fr',
+              name: '',
+              label: '',
+              __temp_key__: 'a0',
+            },
+            {
+              id: 102,
+              documentId: 'internal-null-key',
+              locale: 'fr',
+              name: null,
+              label: 'internal-null-key',
+              __temp_key__: 'a1',
+            },
+          ],
+          disconnect: [],
+        },
+      },
+    });
+
+    expect(await screen.findAllByRole('button', { name: 'Untitled' })).toHaveLength(2);
+    expect(screen.queryByText('internal-empty-key')).not.toBeInTheDocument();
+    expect(screen.queryByText('internal-null-key')).not.toBeInTheDocument();
   });
 
   it('should be disabled when the prop is passed', async () => {
