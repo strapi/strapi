@@ -603,6 +603,24 @@ function previewScript(config) {
     let focusedField = null;
 
     /**
+     * Blocks fields fully delegate live-typing renders to the host frontend
+     * (see forwardBlocksFieldChange) — new or resized block content never gets
+     * a stega tag of its own, so the per-element ResizeObserver used for every
+     * other field type can't see it. Observing the field's own container
+     * instead picks up any size change inside it (new blocks, growing or
+     * shrinking text, removed blocks) without requiring each child to be
+     * individually tagged. computeGroupRect already reads the container's
+     * rect fresh on every call — this only makes sure something re-triggers
+     * that read while the user is typing, instead of waiting for the next
+     * explicit rescan.
+     * @type {Map<string, HTMLElement>}
+     */
+    const observedContainers = new Map();
+    const containerResizeObserver = new ResizeObserver(() => {
+      updateAllHighlights();
+    });
+
+    /**
      * Block-level HTML tags produced by standard Strapi blocks renderers.
      * Each corresponds to exactly one top-level Slate block in the editor.
      */
@@ -717,6 +735,36 @@ function previewScript(config) {
         el = el.parentElement;
       }
       return null;
+    };
+
+    /**
+     * Keeps a blocks group's container under observation as its membership
+     * changes. Safe to call every time an element joins the group — re-finding
+     * and re-observing the same container is a no-op; it only does real work
+     * when the container genuinely changes or disappears (e.g. an image-only
+     * field where findBlocksContainer's area guard rejects every candidate).
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     */
+    const syncContainerObservation = (groupKey, group) => {
+      const firstEl = group.elements.values().next().value;
+      const sourceAttr = firstEl?.getAttribute(SOURCE_ATTRIBUTE);
+      const isBlocksField = !!sourceAttr && new URLSearchParams(sourceAttr).has('fieldPath');
+      if (!isBlocksField) return;
+
+      const container = findBlocksContainer(group);
+      const previousContainer = observedContainers.get(groupKey);
+      if (container === previousContainer) return;
+
+      if (previousContainer) {
+        containerResizeObserver.unobserve(previousContainer);
+      }
+      if (container) {
+        containerResizeObserver.observe(container);
+        observedContainers.set(groupKey, container);
+      } else {
+        observedContainers.delete(groupKey);
+      }
     };
 
     /**
@@ -1092,6 +1140,12 @@ function previewScript(config) {
      * @param {HighlightGroup} group
      */
     const destroyGroup = (groupKey, group) => {
+      const observedContainer = observedContainers.get(groupKey);
+      if (observedContainer) {
+        containerResizeObserver.unobserve(observedContainer);
+        observedContainers.delete(groupKey);
+      }
+
       const pendingTimeout = pendingClicks.get(group);
       if (pendingTimeout) {
         window.clearTimeout(pendingTimeout);
@@ -1203,6 +1257,7 @@ function previewScript(config) {
       group.elements.add(element);
       elementToGroupKey.set(element, groupKey);
       drawGroup(group);
+      syncContainerObservation(groupKey, group);
     };
 
     /**
