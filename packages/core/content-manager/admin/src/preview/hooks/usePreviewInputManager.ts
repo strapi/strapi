@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useField } from '@strapi/admin/strapi-admin';
+import { useField, useForm } from '@strapi/admin/strapi-admin';
 import { Schema } from '@strapi/types';
 
 import { useHasInputPopoverParent } from '../components/InputPopover';
@@ -26,8 +26,13 @@ export function usePreviewInputManager(
   const hasInputPopoverParent = useHasInputPopoverParent();
   const { value } = useField(name);
   const { type } = attribute;
+  const isSubmitting = useForm('usePreviewInputManager', (state) => state.isSubmitting);
+  const wasSubmittingRef = React.useRef(isSubmitting);
 
   React.useEffect(() => {
+    const justFinishedSubmitting = wasSubmittingRef.current && !isSubmitting;
+    wasSubmittingRef.current = isSubmitting;
+
     if (!iframe || !type) {
       return;
     }
@@ -36,11 +41,23 @@ export function usePreviewInputManager(
      * Only send message if the field is not a data structure (component, dynamic zone)
      * because we already send events for their fields
      */
-    if (!['component', 'dynamiczone'].includes(type)) {
-      const sendMessage = getSendMessage(iframe);
-      sendMessage(PUBLIC_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value, type });
+    if (['component', 'dynamiczone'].includes(type)) {
+      return;
     }
-  }, [name, value, iframe, type]);
+
+    if (justFinishedSubmitting) {
+      // A save just completed. resetForm() (called on the save-success path) re-syncs
+      // every field to the server-confirmed value, which looks like a change here even
+      // though nothing the user did changed. The previewed frontend already gets the
+      // authoritative, correctly-encoded data via the strapiUpdate + revalidate flow
+      // triggered by that same save — broadcasting this stale echo would only race
+      // against it, reintroducing pre-save (unencoded) content over the fresh fetch.
+      return;
+    }
+
+    const sendMessage = getSendMessage(iframe);
+    sendMessage(PUBLIC_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value, type });
+  }, [name, value, iframe, type, isSubmitting]);
 
   // Track previous value to detect media deletion
   const prevValueRef = React.useRef(value);
