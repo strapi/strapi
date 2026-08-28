@@ -621,6 +621,47 @@ function previewScript(config) {
     ];
 
     /**
+     * Maximum area a candidate blocks container may have, relative to the union
+     * of the group's own marked elements. A real field container is only
+     * slightly larger than its content (padding, empty trailing blocks). A
+     * candidate many times larger is a page-level layout element that merely
+     * happens to contain block-level children, and using it would stretch the
+     * highlight across unrelated content.
+     */
+    const MAX_CONTAINER_AREA_RATIO = 6;
+
+    /**
+     * Extra height added below a blocks field's marked content so empty trailing
+     * blocks (which produce no stega span) stay hoverable and clickable. Always
+     * clamped to the field's own bounds — see computeGroupRect.
+     */
+    const BLOCKS_TRAILING_BUFFER = 80;
+
+    /**
+     * Union rect of a group's marked elements, ignoring zero-sized ones.
+     * @param {HighlightGroup} group
+     * @returns {{ left: number, top: number, width: number, height: number } | null}
+     */
+    const getGroupUnionRect = (group) => {
+      let minLeft = Infinity;
+      let minTop = Infinity;
+      let maxRight = -Infinity;
+      let maxBottom = -Infinity;
+      let any = false;
+      group.elements.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) return;
+        any = true;
+        if (r.left < minLeft) minLeft = r.left;
+        if (r.top < minTop) minTop = r.top;
+        if (r.right > maxRight) maxRight = r.right;
+        if (r.bottom > maxBottom) maxBottom = r.bottom;
+      });
+      if (!any) return null;
+      return { left: minLeft, top: minTop, width: maxRight - minLeft, height: maxBottom - minTop };
+    };
+
+    /**
      * Find the DOM element that wraps the entire rendered output of a blocks
      * field — the direct parent of all top-level block elements (`<p>`, `<h1>`,
      * etc.). Used to derive a tight, always-current bounding rect for the
@@ -633,12 +674,24 @@ function previewScript(config) {
      * correctly — including lists where NCA would land on <li> (not the
      * container) and single-span groups where there is no useful NCA.
      *
+     * The block-level-tag test alone is not sufficient: a blocks field whose
+     * blocks produce no block-level tags (e.g. a field containing only an
+     * image, which renders as <img>) has no matching ancestor inside the field,
+     * so the walk escapes into page layout and matches an unrelated container.
+     * That stretched the highlight over the whole page and — because highlights
+     * sit on top and swallow clicks — made the rest of the preview unclickable.
+     * We therefore reject candidates whose area dwarfs the group's own content.
+     *
      * @param {HighlightGroup} group
      * @returns {HTMLElement | null}
      */
     const findBlocksContainer = (group) => {
       const firstEl = group.elements.values().next().value;
       if (!firstEl) return null;
+
+      const union = getGroupUnionRect(group);
+      const unionArea = union ? union.width * union.height : 0;
+
       let el = firstEl.parentElement;
       while (el && el !== document.body && el !== document.documentElement) {
         // Skip list elements — <li> can have a nested <ul>/<ol> as a direct child, and
@@ -651,6 +704,14 @@ function previewScript(config) {
           el.tagName !== 'OL' &&
           Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
         ) {
+          const r = el.getBoundingClientRect();
+          const area = r.width * r.height;
+          // Accept only a container that stays proportionate to the field's own
+          // content. Bail out entirely rather than climbing further: everything
+          // above an over-large candidate is even larger.
+          if (unionArea > 0 && area > unionArea * MAX_CONTAINER_AREA_RATIO) {
+            return null;
+          }
           return el;
         }
         el = el.parentElement;
@@ -677,6 +738,14 @@ function previewScript(config) {
       // NCA across the full group.elements set was previously used here but
       // caused incorrect results when the NCA landed on a high-level ancestor
       // (e.g. <main> or <article>) that has many non-blocks children.
+      //
+      // The same area guard as findBlocksContainer applies: when the field
+      // renders no block-level tag (e.g. an image-only field) the walk would
+      // otherwise escape into page layout and return an index within an
+      // unrelated container.
+      const anchorRect = anchor.getBoundingClientRect();
+      const anchorArea = anchorRect.width * anchorRect.height;
+
       let fieldContainer = null;
       let el = anchor.parentElement;
       while (el && el !== document.body && el !== document.documentElement) {
@@ -690,6 +759,10 @@ function previewScript(config) {
           el.tagName !== 'OL' &&
           Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
         ) {
+          const r = el.getBoundingClientRect();
+          if (anchorArea > 0 && r.width * r.height > anchorArea * MAX_CONTAINER_AREA_RATIO) {
+            return -1;
+          }
           fieldContainer = el;
           break;
         }
@@ -756,11 +829,35 @@ function previewScript(config) {
       });
       if (!any) return null;
 
+      let bottom = maxBottom;
+      if (isBlocksField) {
+        // The buffer keeps empty trailing blocks clickable, but it must not spill
+        // past the field itself — otherwise it covers whatever the host renders
+        // below (e.g. the next field's label) and swallows its clicks.
+        //
+        // Clamp it to the field's own extent: walk up while each ancestor still
+        // starts at the marked content's top edge. Such an ancestor wraps only
+        // this field, so its bottom includes trailing blocks (which carry no
+        // stega span) while stopping short of sibling content. The first
+        // ancestor that starts higher up belongs to the surrounding layout.
+        const limit = maxBottom + BLOCKS_TRAILING_BUFFER;
+        let fieldBottom = maxBottom;
+        const firstElement = /** @type {HTMLElement} */ (firstEl);
+        let el = firstElement?.parentElement;
+        while (el && el !== document.body && el !== document.documentElement) {
+          const r = el.getBoundingClientRect();
+          if (r.height === 0 || r.top < minTop - 1) break;
+          if (r.bottom > fieldBottom) fieldBottom = r.bottom;
+          el = el.parentElement;
+        }
+        bottom = Math.min(limit, Math.max(maxBottom, fieldBottom));
+      }
+
       return {
         left: minLeft,
         top: minTop,
         width: maxRight - minLeft,
-        height: maxBottom - minTop + (isBlocksField ? 80 : 0),
+        height: bottom - minTop,
       };
     };
 
