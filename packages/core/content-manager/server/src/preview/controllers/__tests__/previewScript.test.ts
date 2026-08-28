@@ -453,3 +453,118 @@ describe('previewScript — trailing buffer stays inside the blocks field', () =
     expect(height).toBeLessThanOrEqual(380);
   });
 });
+
+// computeGroupRect already derives a blocks field's highlight from its container's
+// own rect when one is found (see findBlocksContainer), reading it fresh on every
+// call — but nothing previously re-triggered that read while the user was typing
+// in the side panel, only an explicit rescan (on popover close) did. New blocks
+// added by a live, unsaved edit get no stega tag of their own (see the
+// "blocks field forwarding" describe above), so only the container's own size
+// change can signal that the highlight is now out of date.
+describe('previewScript — blocks container resize is observed live', () => {
+  const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
+
+  const observedCallbacks = new Map<Element, ResizeObserverCallback>();
+
+  class MockResizeObserver {
+    callback: ResizeObserverCallback;
+
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+
+    observe(target: Element) {
+      observedCallbacks.set(target, this.callback);
+    }
+
+    unobserve(target: Element) {
+      observedCallbacks.delete(target);
+    }
+
+    disconnect() {}
+  }
+
+  const rect = (left: number, top: number, width: number, height: number) =>
+    ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON() {},
+    }) as DOMRect;
+
+  beforeEach(async () => {
+    observedCallbacks.clear();
+    global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+
+    (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
+      true;
+
+    // A real field container: <dd> wraps a <p>, a genuine block-level tag, so
+    // findBlocksContainer accepts <dd> as the field's own container.
+    document.body.innerHTML = `
+      <dd id="field">
+        <p id="para" data-strapi-source="${BLOCKS_SOURCE}">Hello world</p>
+      </dd>
+    `;
+
+    const field = document.getElementById('field') as HTMLElement;
+    const para = document.getElementById('para') as HTMLElement;
+    field.getBoundingClientRect = () => rect(100, 100, 320, 60);
+    para.getBoundingClientRect = () => rect(100, 100, 300, 40);
+
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  afterEach(() => {
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+    delete (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean })
+      .STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  test('the field container is registered for resize observation', () => {
+    const field = document.getElementById('field') as HTMLElement;
+    expect(observedCallbacks.has(field)).toBe(true);
+  });
+
+  test('growing the container live-resizes the highlight without a rescan', () => {
+    const field = document.getElementById('field') as HTMLElement;
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+
+    // 60px content + 2*HIGHLIGHT_PADDING (2px)
+    expect(parseFloat(highlight.style.height)).toBeCloseTo(64, 0);
+
+    // Simulate the host adding a new block while the user types in the side
+    // panel: the container grows, but the new block itself gets no stega tag
+    // (it was never saved), so nothing but the container's own resize can
+    // signal that the highlight is stale.
+    field.getBoundingClientRect = () => rect(100, 100, 320, 140);
+    const callback = observedCallbacks.get(field);
+    expect(callback).toBeDefined();
+    const noEntries: ResizeObserverEntry[] = [];
+    callback?.(noEntries, null as unknown as ResizeObserver);
+
+    // 140px content + 2*HIGHLIGHT_PADDING (2px)
+    expect(parseFloat(highlight.style.height)).toBeCloseTo(144, 0);
+  });
+
+  test('shrinking the container live-resizes the highlight too', () => {
+    const field = document.getElementById('field') as HTMLElement;
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+
+    field.getBoundingClientRect = () => rect(100, 100, 320, 30);
+    const callback = observedCallbacks.get(field);
+    const noEntries: ResizeObserverEntry[] = [];
+    callback?.(noEntries, null as unknown as ResizeObserver);
+
+    // 30px content + 2*HIGHLIGHT_PADDING (2px)
+    expect(parseFloat(highlight.style.height)).toBeCloseTo(34, 0);
+  });
+});
