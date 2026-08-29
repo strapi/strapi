@@ -1,6 +1,7 @@
 {
   "name": "@strapi/plugin-sentry",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Send Strapi error events to Sentry",
   "homepage": "https://strapi.io",
   "bugs": {

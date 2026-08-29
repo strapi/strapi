@@ -1,6 +1,7 @@
 {
   "name": "strapi-plugin-todo-example",
   "version": "0.0.0",
+  "type": "commonjs",
   "description": "Keep track of your content management with todo lists",
   "license": "SEE LICENSE IN LICENSE",
   "exports": {

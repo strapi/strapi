@@ -1,6 +1,7 @@
 {
   "name": "@strapi/provider-email-nodemailer",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Nodemailer provider for Strapi",
   "keywords": [
     "strapi",

@@ -1,6 +1,7 @@
 {
   "name": "api-tests",
   "version": "5.52.2",
+  "type": "commonjs",
   "private": true,
   "dependencies": {
     "dotenv": "16.6.1",

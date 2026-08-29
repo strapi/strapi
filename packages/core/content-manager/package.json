@@ -1,6 +1,7 @@
 {
   "name": "@strapi/content-manager",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "A powerful UI to easily manage your data.",
   "homepage": "https://strapi.io",
   "bugs": {

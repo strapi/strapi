@@ -1,6 +1,7 @@
 {
   "name": "@strapi/generators",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",

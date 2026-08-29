@@ -1,6 +1,7 @@
 {
   "name": "@strapi/data-transfer",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",

@@ -1,6 +1,7 @@
 {
   "name": "@strapi/content-releases",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Strapi plugin for organizing and releasing content",
   "homepage": "https://strapi.io",
   "bugs": {

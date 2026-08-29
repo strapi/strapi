@@ -1,6 +1,7 @@
 {
   "name": "@strapi/email",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Easily configure your Strapi application to send emails.",
   "homepage": "https://strapi.io",
   "bugs": {

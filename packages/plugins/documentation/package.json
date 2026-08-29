@@ -1,6 +1,7 @@
 {
   "name": "@strapi/plugin-documentation",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "homepage": "https://strapi.io",
   "bugs": {

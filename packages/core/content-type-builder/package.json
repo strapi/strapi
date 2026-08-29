@@ -1,6 +1,7 @@
 {
   "name": "@strapi/content-type-builder",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Create and manage content types",
   "homepage": "https://strapi.io",
   "bugs": {

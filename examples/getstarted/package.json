@@ -1,6 +1,7 @@
 {
   "name": "getstarted",
   "version": "0.0.0",
+  "type": "commonjs",
   "private": true,
   "description": "A Strapi application.",
   "license": "SEE LICENSE IN LICENSE",

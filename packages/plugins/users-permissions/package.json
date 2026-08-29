@@ -1,6 +1,7 @@
 {
   "name": "@strapi/plugin-users-permissions",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Protect your API with a full-authentication process based on JWT",
   "homepage": "https://strapi.io",
   "bugs": {

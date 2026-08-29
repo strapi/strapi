@@ -1,6 +1,7 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",

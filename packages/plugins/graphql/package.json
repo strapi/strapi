@@ -1,6 +1,7 @@
 {
   "name": "@strapi/plugin-graphql",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Adds GraphQL endpoint with default API methods.",
   "homepage": "https://strapi.io",
   "bugs": {

@@ -1,6 +1,7 @@
 {
   "name": "@strapi/database",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
