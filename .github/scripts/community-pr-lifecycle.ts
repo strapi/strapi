@@ -1,8 +1,8 @@
-import type { getOctokit } from '@actions/github';
-import type { Context } from '@actions/github/lib/context';
+import type { context, getOctokit } from '@actions/github';
 import type * as Core from '@actions/core';
 
 type Octokit = ReturnType<typeof getOctokit>;
+type Context = typeof context;
 
 interface ScriptArgs {
   github: Octokit;
