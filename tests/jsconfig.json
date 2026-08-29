@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6"
+    "module": "node20",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "jest"]
   },
   "exclude": ["node_modules", "dist"]
 }

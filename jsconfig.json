@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "module": "commonjs",
-    "target": "es6"
+    "module": "node20",
+    "lib": ["ES2023"],
+    "types": ["node"]
   },
   "exclude": [
     "**/node_modules/*",
