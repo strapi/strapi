@@ -2,6 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "module": "node20",
+    "target": "es2023",
     "lib": ["ES2023"],
     "types": ["node"]
   },

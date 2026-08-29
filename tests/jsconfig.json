@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "node20",
+    "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "types": ["node", "jest"]
   },
