@@ -9,7 +9,7 @@ test.describe('Content Type UID Generation', () => {
     await sharedSetup('ctb-uid-generation', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));

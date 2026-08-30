@@ -42,6 +42,33 @@ export function usePreviewInputManager(
     }
   }, [name, value, iframe, type]);
 
+  // Track previous value to detect media deletion
+  const prevValueRef = React.useRef(value);
+
+  React.useEffect(() => {
+    // Only run inside popover for media fields
+    if (!hasInputPopoverParent || !setPopoverField || type !== 'media') {
+      return;
+    }
+
+    const currentValue = value;
+    const previousValue = prevValueRef.current;
+
+    // Check if we transitioned from having a value to null/empty
+    const hadValue =
+      previousValue != null && (Array.isArray(previousValue) ? previousValue.length > 0 : true);
+    const hasNoValue =
+      currentValue == null || (Array.isArray(currentValue) ? currentValue.length === 0 : false);
+
+    if (hadValue && hasNoValue) {
+      // Media was deleted, close the popover
+      setPopoverField(null);
+    }
+
+    // Update ref for next comparison
+    prevValueRef.current = currentValue;
+  }, [value, hasInputPopoverParent, setPopoverField, type]);
+
   const sendMessage = getSendMessage(iframe);
 
   return {

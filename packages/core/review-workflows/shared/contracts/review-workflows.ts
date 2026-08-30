@@ -36,7 +36,8 @@ interface StagePermission
 interface Stage extends Entity {
   color: string;
   name: string;
-  permissions?: StagePermission[];
+  fromPermissions?: StagePermission[];
+  toPermissions?: StagePermission[];
 }
 
 /**
@@ -55,7 +56,7 @@ namespace GetStages {
 
   export interface Response {
     data: Stage[];
-    meta?: { workflowCount: number };
+    meta?: { workflowCount: number; stageCount?: number; canTransition?: boolean };
     error?: errors.ApplicationError;
   }
 }
@@ -87,7 +88,8 @@ namespace UpdateStage {
 interface Stage extends Entity {
   color: string;
   name: string;
-  permissions?: StagePermission[];
+  fromPermissions?: StagePermission[];
+  toPermissions?: StagePermission[];
 }
 
 interface Workflow extends Entity {

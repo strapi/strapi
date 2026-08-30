@@ -1,4 +1,4 @@
-import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
+import { isNil, isArray, prop, xor, eq, differenceWith } from 'lodash/fp';
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
@@ -112,9 +112,11 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
     const isRegisteredAction = actionProvider.has(permission.action);
     const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
     const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject as string);
+    // On an api token permission, nil properties mean "everything", not "invalid"
+    const hasApiToken = !isNil(prop('apiToken', permission));
 
     // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
-    if (!isRegisteredAction || isInvalidSubject || hasInvalidProperties) {
+    if (!isRegisteredAction || isInvalidSubject || (hasInvalidProperties && !hasApiToken)) {
       permissionsToRemove.push(permission);
     }
   }
@@ -135,13 +137,23 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
 
   for (let page = 0; page < pageCount; page += 1) {
     // 1. Find invalid permissions and collect their ID to delete them later
-    const results = (await strapi.db
-      .query('admin::permission')
-      .findMany({ limit: pageSize, offset: page * pageSize })) as Permission[];
+    const results = (await strapi.db.query('admin::permission').findMany({
+      limit: pageSize,
+      offset: page * pageSize,
+      populate: ['role', 'apiToken'],
+    })) as Permission[];
 
     const permissions = permissionDomain.toPermission(results);
     const permissionsToRemove = await filterPermissionsToRemove(permissions);
-    const permissionsIdToRemove = map(prop('id'), permissionsToRemove);
+
+    // Also remove orphaned permissions (no role AND no apiToken)
+    const orphanedPermissions = permissions.filter(
+      (permission: any) => !permission.role && !permission.apiToken
+    );
+
+    const permissionsIdToRemove = Array.from(
+      new Set([...permissionsToRemove, ...orphanedPermissions].map((p) => p.id))
+    );
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(

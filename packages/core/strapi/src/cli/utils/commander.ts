@@ -2,11 +2,11 @@
  * This file includes hooks to use for commander.hook and argParsers for commander.argParser
  */
 
-import inquirer from 'inquirer';
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
 import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
+import { getInquirer } from './get-inquirer';
 
 /**
  * argParser: Parse a comma-delimited string as an array
@@ -14,7 +14,7 @@ import { exitWith } from './helpers';
 const parseList = (value: string) => {
   try {
     return value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
-  } catch (e) {
+  } catch {
     exitWith(1, `Unrecognized input: ${value}`);
   }
 
@@ -62,7 +62,7 @@ const parseURL = (value: string) => {
     }
 
     return url;
-  } catch (e) {
+  } catch {
     throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
   }
 };
@@ -80,12 +80,13 @@ const promptEncryptionKey = async (thisCommand: Command) => {
   // if encrypt==true but we have no key, prompt for it
   if (opts.encrypt && !(opts.key && opts.key.length > 0)) {
     try {
+      const inquirer = await getInquirer();
       const answers = await inquirer.prompt([
         {
           type: 'password',
           message: 'Please enter an encryption key',
           name: 'key',
-          validate(key) {
+          validate(key: string) {
             if (key.length > 0) return true;
 
             return 'Key must be present when using the encrypt option';
@@ -93,7 +94,7 @@ const promptEncryptionKey = async (thisCommand: Command) => {
         },
       ]);
       opts.key = answers.key;
-    } catch (e) {
+    } catch {
       return exitWith(1, 'Failed to get encryption key');
     }
     if (!opts.key) {
@@ -125,6 +126,7 @@ const confirmMessage = async (message: string, { force }: { force?: boolean } = 
     return true;
   }
 
+  const inquirer = await getInquirer();
   const answers = await inquirer.prompt([
     {
       type: 'confirm',

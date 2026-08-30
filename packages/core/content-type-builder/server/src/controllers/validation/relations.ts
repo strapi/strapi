@@ -8,7 +8,7 @@ import { isValidName } from './common';
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<string | undefined> =>
-  function (this: TestContext, value) {
+  function isValidRelationValue(this: TestContext, value) {
     // NOTE: In case of an undefined value, delegate the check to .required()
     if (value === undefined) {
       return true;
@@ -44,6 +44,7 @@ export const getRelationValidator = (
     type: yup.string().oneOf(['relation']).required(),
     relation: yup.string().test('isValidRelation', isValidRelation(allowedRelations)).required(),
     configurable: yup.boolean().nullable(),
+    required: yup.boolean(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
   };

@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
 import {
@@ -93,7 +92,7 @@ async function createProject(
     try {
       await waitForEnvironmentCreation(projectData.environmentInternalName);
       environmentSpinner.succeed('Environment created successfully!\n');
-    } catch (e: Error | unknown) {
+    } catch {
       environmentSpinner.fail(
         `An error occurred while creating the environment on Strapi Cloud.\n`
       );
@@ -134,6 +133,7 @@ export default async (ctx: CLIContext) => {
   };
 
   const projectAnswersDefaulted = defaults(defaultValues);
+  const { default: inquirer } = await import('inquirer');
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
   const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);

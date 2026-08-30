@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import { fireEvent } from '@testing-library/react';
 import { render, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { EditLocale } from '../EditLocale';
 
@@ -65,12 +65,12 @@ describe('Edit Locale', () => {
 
   it('should show an error if the update fails', async () => {
     server.use(
-      rest.put('/i18n/locales/:id', (_, res, ctx) =>
-        res(
-          ctx.status(500),
-          ctx.json({
+      http.put('/i18n/locales/:id', () =>
+        HttpResponse.json(
+          {
             error: new errors.ApplicationError('Could not update locale'),
-          })
+          },
+          { status: 500 }
         )
       )
     );
@@ -112,10 +112,9 @@ describe('Edit Locale', () => {
 
     it('should handle validation errors from the server', async () => {
       server.use(
-        rest.put('/i18n/locales/:id', (_, res, ctx) =>
-          res(
-            ctx.status(400),
-            ctx.json({
+        http.put('/i18n/locales/:id', () =>
+          HttpResponse.json(
+            {
               error: new errors.ValidationError('Valiation error', {
                 errors: [
                   {
@@ -124,7 +123,8 @@ describe('Edit Locale', () => {
                   },
                 ],
               }),
-            })
+            },
+            { status: 400 }
           )
         )
       );

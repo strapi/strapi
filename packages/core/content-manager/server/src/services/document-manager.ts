@@ -1,16 +1,16 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, errors, pagination } from '@strapi/utils';
+import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
-const { ApplicationError } = errors;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -72,9 +72,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         maxLimit: 1000,
       });
 
+      const { populate: _populate, sort: _sort, ...countParams } = params;
       const [documents, total = 0] = await Promise.all([
         strapi.documents(uid).findMany(params),
-        strapi.documents(uid).count(params),
+        strapi.documents(uid).count(countParams),
       ]);
 
       return {
@@ -144,12 +145,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'delete'>, 'documentId'> = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
-
       await strapi.documents(uid).delete({
         ...opts,
         documentId: id,
-        populate,
       });
       return {};
     },
@@ -170,9 +168,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async publish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'publish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi
@@ -184,7 +182,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       return strapi.db.transaction(async () => {
         const results = await Promise.all(
-          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
         );
 
         const publishedEntitiesCount = results.flat().filter(Boolean).length;
@@ -202,7 +200,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           documentIds.map((id) =>
             strapi
               .documents(uid)
-              .unpublish({ ...opts, documentId: id })
+              .unpublish({ ...opts, documentId: id, populate: {} })
               .then((result) => result?.entries)
           )
         );
@@ -217,9 +215,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async unpublish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi
@@ -231,9 +229,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async discardDraft(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi
@@ -246,17 +244,15 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return 0;
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
-        throw new ApplicationError(
-          `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
-        );
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
-      return sumDraftCounts(document, uid);
+      return sumDraftCounts(strapi, document, uid);
     },
 
     async countManyEntriesDraftRelations(
@@ -270,25 +266,22 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      let localeFilter = {};
-      if (locale) {
-        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
-      }
-
-      const entities = await strapi.db.query(uid).findMany({
+      const entities = await strapi.documents(uid).findMany({
         populate,
-        where: {
-          documentId: { $in: documentIds },
-          ...localeFilter,
-        },
+        filters: { documentId: { $in: documentIds } } as any,
+        locale,
+        status: 'draft',
       });
 
-      const totalNumberDraftRelations: number = entities!.reduce(
-        (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
-        0
+      const counts = await Promise.all(
+        entities.map((entity: Document) => sumDraftCounts(strapi, entity, uid))
       );
 
-      return totalNumberDraftRelations;
+      return counts.reduce(
+        (total, entityCounts) =>
+          total + entityCounts.unpublishedRelations + entityCounts.draftM2mLinks,
+        0
+      );
     },
   };
 };

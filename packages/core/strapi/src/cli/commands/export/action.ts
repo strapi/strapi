@@ -1,3 +1,4 @@
+import path from 'path';
 import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
 import fs from 'fs-extra';
 import chalk from 'chalk';
@@ -7,12 +8,12 @@ import {
   engine as engineDataTransfer,
   strapi as strapiDataTransfer,
   file as fileDataTransfer,
+  directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
 
 import {
   getDefaultExportName,
   buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -20,12 +21,18 @@ import {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
+  buildTransferTransforms,
+  normalizeTransferFilterOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
+import { normalizeExportDirFormatOpts } from './validate-dir-format';
 
 const {
   providers: { createLocalFileDestinationProvider },
 } = fileDataTransfer;
+
 const {
   providers: { createLocalStrapiSourceProvider },
 } = strapiDataTransfer;
@@ -34,12 +41,17 @@ const BYTES_IN_MB = 1024 * 1024;
 
 interface CmdOptions {
   file?: string;
+  /** @default 'tar' */
+  format?: 'tar' | 'dir';
   encrypt?: boolean;
   verbose?: boolean;
   key?: string;
   compress?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
   maxSizeJsonl?: number;
 }
@@ -57,7 +69,11 @@ export default async (opts: CmdOptions) => {
     exitWith(1, 'Could not parse command arguments');
   }
 
+  normalizeExportDirFormatOpts(opts);
+  normalizeTransferFilterOptions(opts);
+
   const strapi = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapi);
 
   const source = createSourceProvider(strapi);
   const destination = createDestinationProvider(opts);
@@ -68,25 +84,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
-          },
-        },
-      ],
-      entities: [
-        {
-          filter(entity) {
-            return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
-          },
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   });
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('export', opts.verbose));
@@ -109,6 +107,13 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
+    });
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });
@@ -121,8 +126,14 @@ export default async (opts: CmdOptions) => {
 
     results = await engine.transfer();
     outFile = results.destination?.file?.path ?? '';
-    const outFileExists = await fs.pathExists(outFile);
-    if (!outFileExists) {
+    if ((opts.format ?? 'tar') === 'dir') {
+      const metadataPath = path.join(outFile, 'metadata.json');
+      if (!(await fs.pathExists(metadataPath))) {
+        throw new engineDataTransfer.errors.TransferEngineTransferError(
+          `Export directory was not created correctly "${outFile}"`
+        );
+      }
+    } else if (!(await fs.pathExists(outFile))) {
       throw new engineDataTransfer.errors.TransferEngineTransferError(
         `Export file not created "${outFile}"`
       );
@@ -134,7 +145,7 @@ export default async (opts: CmdOptions) => {
     try {
       const table = buildTransferTable(results.engine);
       console.log(table?.toString());
-    } catch (e) {
+    } catch {
       console.error('There was an error displaying the results of the transfer.');
     }
 
@@ -158,16 +169,27 @@ const createSourceProvider = (strapi: Core.Strapi) => {
 };
 
 /**
- * It creates a local file destination provider based on the given options
+ * It creates a local file or directory destination provider based on the given options
  */
 const createDestinationProvider = (opts: CmdOptions) => {
-  const { file, compress, encrypt, key, maxSizeJsonl } = opts;
+  const { file, compress, encrypt, key, maxSizeJsonl, format = 'tar' } = opts;
 
   const filepath = isString(file) && file.length > 0 ? file : getDefaultExportName();
 
   const maxSizeJsonlInMb = isFinite(toNumber(maxSizeJsonl))
     ? toNumber(maxSizeJsonl) * BYTES_IN_MB
     : undefined;
+
+  if (format === 'dir') {
+    const { createLocalDirectoryDestinationProvider } = directoryDataTransfer.providers;
+    const dirPath = path.isAbsolute(filepath) ? filepath : path.resolve(process.cwd(), filepath);
+    return createLocalDirectoryDestinationProvider({
+      directory: { path: dirPath },
+      file: {
+        maxSizeJsonl: maxSizeJsonlInMb,
+      },
+    });
+  }
 
   return createLocalFileDestinationProvider({
     file: {

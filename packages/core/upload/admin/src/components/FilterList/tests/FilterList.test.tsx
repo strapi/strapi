@@ -5,7 +5,8 @@
  *
  */
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
 import { FilterList } from '../FilterList';
@@ -26,6 +27,48 @@ const messages = {
 };
 
 describe('<FilterList />', () => {
+  const filtersSchema = [
+    {
+      name: 'createdAt',
+      fieldSchema: {
+        type: 'date',
+      },
+      metadatas: { label: 'createdAt' },
+    },
+    {
+      name: 'updatedAt',
+      fieldSchema: {
+        type: 'date',
+      },
+      metadatas: { label: 'updatedAt' },
+    },
+    {
+      name: 'mime',
+      fieldSchema: {
+        type: 'enumeration',
+        options: [
+          { label: 'image', value: 'image' },
+          { label: 'video', value: 'video' },
+          { label: 'file', value: 'file' },
+        ],
+      },
+      metadatas: { label: 'type' },
+    },
+  ];
+
+  const renderWithFilter = (value: string, onRemoveFilter = jest.fn()) =>
+    render(
+      <DesignSystemProvider>
+        <IntlProvider locale="en" messages={messages} defaultLocale="en">
+          <FilterList
+            appliedFilters={[{ mime: { $contains: value } }]}
+            filtersSchema={filtersSchema}
+            onRemoveFilter={onRemoveFilter}
+          />
+        </IntlProvider>
+      </DesignSystemProvider>
+    );
+
   it('renders and matches the snapshot', () => {
     const filters = [
       { mime: { $contains: 'image' } },
@@ -92,5 +135,96 @@ describe('<FilterList />', () => {
     );
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('removes file type filter when clicking on it', async () => {
+    const user = userEvent.setup();
+    const onRemoveFilter = jest.fn();
+
+    // The file type filter uses a complex object structure
+    const fileFilter = {
+      mime: {
+        $not: {
+          $contains: ['image', 'video'],
+        },
+      },
+    };
+
+    const filters = [fileFilter];
+
+    render(
+      <DesignSystemProvider>
+        <IntlProvider locale="en" messages={messages} defaultLocale="en">
+          <FilterList
+            appliedFilters={filters}
+            filtersSchema={filtersSchema}
+            onRemoveFilter={onRemoveFilter}
+          />
+        </IntlProvider>
+      </DesignSystemProvider>
+    );
+
+    expect(screen.getByText(/type is file/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button'));
+
+    expect(onRemoveFilter).toHaveBeenCalledWith([]);
+  });
+
+  it('removes file type filter with $ne operator when clicking on it', async () => {
+    const user = userEvent.setup();
+    const onRemoveFilter = jest.fn();
+
+    // The "is not file" filter uses $contains with array
+    const notFileFilter = {
+      mime: {
+        $contains: ['image', 'video'],
+      },
+    };
+
+    const filters = [notFileFilter];
+
+    render(
+      <DesignSystemProvider>
+        <IntlProvider locale="en" messages={messages} defaultLocale="en">
+          <FilterList
+            appliedFilters={filters}
+            filtersSchema={filtersSchema}
+            onRemoveFilter={onRemoveFilter}
+          />
+        </IntlProvider>
+      </DesignSystemProvider>
+    );
+
+    expect(screen.getByText(/type is not file/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button'));
+
+    expect(onRemoveFilter).toHaveBeenCalledWith([]);
+  });
+
+  it.each([
+    ['a literal percent sign', '100%'],
+    ['a percent sign mid-string', '50%off'],
+    ['a trailing percent sign', 'draft%'],
+    ['an incomplete escape', '100%2'],
+    ['text that merely looks pre-encoded', 'a%26b'],
+    ['an ampersand', 'a&b'],
+  ])('renders %s without crashing, showing it as stored', (_label, value) => {
+    expect(() => renderWithFilter(value)).not.toThrow();
+    expect(
+      screen.getByText(new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))
+    ).toBeInTheDocument();
+  });
+
+  it('removes a percent-valued filter when its chip is clicked', async () => {
+    const user = userEvent.setup();
+    const onRemoveFilter = jest.fn();
+
+    renderWithFilter('100%', onRemoveFilter);
+
+    await user.click(screen.getByRole('button'));
+
+    expect(onRemoveFilter).toHaveBeenCalledWith([]);
   });
 });

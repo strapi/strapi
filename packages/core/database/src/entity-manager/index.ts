@@ -51,6 +51,37 @@ import { EntityManager, Repository, Entity } from './types';
 
 export * from './types';
 
+/**
+ * Batched join-table insert for SQLite etc. (GH#25198). Uses dialect.getBatchInsertSize().
+ * All batches run in the same transaction so the operation is atomic; no partial state on failure.
+ * Caller must pass an active transaction (trx) — do not call without one.
+ */
+async function batchInsertJoinTable(
+  db: Database,
+  joinTableName: string,
+  rows: Record<string, unknown>[],
+  trx: any,
+  options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+): Promise<void> {
+  if (rows.length === 0) return;
+  if (trx == null) {
+    throw new Error(
+      'batchInsertJoinTable requires a transaction so all batches commit or roll back atomically'
+    );
+  }
+  const batchSize = db.dialect.getBatchInsertSize();
+  for (let i = 0; i < rows.length; i += batchSize) {
+    const chunk = rows.slice(i, i + batchSize);
+    let qb = createQueryBuilder(joinTableName, db).insert(chunk).transacting(trx);
+    if (options?.onConflict) {
+      qb = qb.onConflict(options.onConflict);
+      if (options.merge) qb.merge(options.merge);
+      else if (options.ignore) qb.ignore();
+    }
+    await qb.execute();
+  }
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   isObject(value) && !isNil(value);
 
@@ -193,9 +224,27 @@ const processData = (
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        const attrValue = !isUndefined(data[attributeName])
+        let attrValue = !isUndefined(data[attributeName])
           ? data[attributeName]
           : data[joinColumnName];
+
+        // Legacy single-column storage: only one id fits. Take the last
+        // and warn — modern schemas use a join table that can hold both
+        // the draft and published rows of the related entry.
+        if (
+          isObject(attrValue) &&
+          !Array.isArray(attrValue) &&
+          'set' in attrValue &&
+          Array.isArray(attrValue.set)
+        ) {
+          const setIds = attrValue.set;
+          if (setIds.length > 1) {
+            strapi?.log?.warn?.(
+              `Multiple ids provided for xToOne relation "${attributeName}" stored in a single FK column; keeping only the last id. Consider using a join table (useJoinTable: true) to support multiple versions of a Draft-and-Publish target.`
+            );
+          }
+          attrValue = setIds.length > 0 ? setIds[setIds.length - 1] : null;
+        }
 
         if (isNull(attrValue)) {
           obj[joinColumnName] = attrValue;
@@ -342,9 +391,25 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Nothing to insert');
       }
 
-      const createdEntries = await this.createQueryBuilder(uid)
-        .insert(dataToInsert)
-        .execute<Array<ID | { id: ID }>>();
+      const batchSize = db.dialect.getBatchInsertSize();
+      const trx = await db.transaction();
+      let createdEntries: Array<ID | { id: ID }> = [];
+      try {
+        for (let i = 0; i < dataToInsert.length; i += batchSize) {
+          const chunk = dataToInsert.slice(i, i + batchSize);
+          const chunkResult = await this.createQueryBuilder(uid)
+            .insert(chunk)
+            .transacting(trx.get())
+            .execute<Array<ID | { id: ID }>>();
+          createdEntries = createdEntries.concat(
+            Array.isArray(chunkResult) ? chunkResult : [chunkResult]
+          );
+        }
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
 
       const result = {
         count: data.length,
@@ -475,14 +540,15 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
+    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
-      const { where } = params;
-
+      // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
+      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
+      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(pick(['_q', 'where', 'filters'], params))
         .delete()
         .execute<number>({ mapResults: false });
 
@@ -551,14 +617,14 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(('on' in joinTable && joinTable.on) || {}),
-                  ...(data.__pivot || {}),
+                  ...('on' in joinTable && joinTable.on),
+                  ...data.__pivot,
                   order: idx + 1,
                   field: attributeName,
                 };
               }) ?? [];
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
 
           continue;
@@ -588,8 +654,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField as '__type'],
-            ...(('on' in joinTable && joinTable.on) || {}),
-            ...(data.__pivot || {}),
+            ...('on' in joinTable && joinTable.on),
+            ...data.__pivot,
             order: idx + 1,
           })) satisfies Record<string, any>[];
 
@@ -624,7 +690,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             transaction: trx,
           });
 
-          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+          await batchInsertJoinTable(db, joinTable.name, rows, trx);
 
           continue;
         }
@@ -693,8 +759,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
-              ...(('on' in joinTable && joinTable.on) || {}),
-              ...(data.__pivot || {}),
+              ...('on' in joinTable && joinTable.on),
+              ...data.__pivot,
             };
           }) satisfies Record<string, any>[];
 
@@ -748,7 +814,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+          await batchInsertJoinTable(db, joinTable.name, insert, trx);
         }
       }
     },
@@ -822,7 +888,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                       [idColumn.name]: id,
                       [typeColumn.name]: uid,
                       [joinColumn.name]: item.id,
-                      ...(joinTable.on || {}),
+                      ...joinTable.on,
                       field: attributeName,
                     };
                   }),
@@ -842,8 +908,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .where({
                     [idColumn.name]: id,
                     [typeColumn.name]: uid,
-                    ...(joinTable.on || {}),
-                    ...(data.__pivot || {}),
+                    ...joinTable.on,
+                    ...data.__pivot,
                   })
                   .max('order')
                   .first()
@@ -856,16 +922,13 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(joinTable.on || {}),
-                  ...(data.__pivot || {}),
+                  ...joinTable.on,
+                  ...data.__pivot,
                   order: startOrder + idx + 1,
                   field: attributeName,
                 })) satisfies Record<string, any>[];
 
-                await this.createQueryBuilder(joinTable.name)
-                  .insert(rows)
-                  .transacting(trx)
-                  .execute();
+                await batchInsertJoinTable(db, joinTable.name, rows, trx);
               }
 
               continue;
@@ -877,7 +940,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -888,13 +951,13 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 order: idx + 1,
                 field: attributeName,
               })) satisfies Record<string, any>[];
 
-              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+              await batchInsertJoinTable(db, joinTable.name, rows, trx);
             }
           }
 
@@ -929,8 +992,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
               ...(cleanRelationData.connect ?? []).map((data, idx) => ({
@@ -938,8 +1001,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [idColumn.name]: data.id,
                 // @ts-expect-error TODO
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
             ];
@@ -960,6 +1023,15 @@ export const createEntityManager = (db: Database): EntityManager => {
                   {
                     [joinColumn.name]: id,
                     order: this.createQueryBuilder(joinTable.name)
+                      .min('order')
+                      .where({ [joinColumn.name]: id })
+                      .where(joinTable.on || {})
+                      .transacting(trx)
+                      .getKnexQuery(),
+                  },
+                  {
+                    [joinColumn.name]: id,
+                    order: this.createQueryBuilder(joinTable.name)
                       .max('order')
                       .where({ [joinColumn.name]: id })
                       .where(joinTable.on || {})
@@ -969,9 +1041,9 @@ export const createEntityManager = (db: Database): EntityManager => {
                 ],
               })
               .where(joinTable.on || {})
+              .orderBy('order')
               .transacting(trx)
               .execute<Array<Record<string, any>>>();
-
             if (!isEmpty(idsToDelete)) {
               const where = {
                 $or: idsToDelete.map((item: any) => {
@@ -979,7 +1051,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                     [idColumn.name]: item.id,
                     [typeColumn.name]: item[typeField],
                     [joinColumn.name]: id,
-                    ...(joinTable.on || {}),
+                    ...joinTable.on,
                   };
                 }),
               };
@@ -1008,8 +1080,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField as '__type'],
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 field: attributeName,
               })) satisfies Record<string, any>[];
 
@@ -1039,7 +1111,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 row.order = orderMap[encodedId];
               });
 
-              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+              await batchInsertJoinTable(db, joinTable.name, rows, trx);
             }
 
             continue;
@@ -1051,7 +1123,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .delete()
               .where({
                 [joinColumn.name]: id,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
               })
               .transacting(trx)
               .execute();
@@ -1061,8 +1133,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               [idColumn.name]: data.id,
               [typeColumn.name]: data[typeField],
               field: attributeName,
-              ...(joinTable.on || {}),
-              ...(data.__pivot || {}),
+              ...joinTable.on,
+              ...data.__pivot,
               order: idx + 1,
             })) satisfies Record<string, any>[];
 
@@ -1074,7 +1146,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               transaction: trx,
             });
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
 
           continue;
@@ -1132,13 +1204,148 @@ export const createEntityManager = (db: Database): EntityManager => {
                 // cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
+
+              // Use id-only comparison so a disconnect item whose id also appears in
+              // the connect array is correctly excluded from deletion (deep-equality
+              // fails because connect items carry extra fields like `position`).
               const relIdsToDelete = toIds(
                 differenceWith(
-                  isEqual,
+                  (a: { id: ID }, b: { id: ID }) => a.id === b.id,
                   cleanRelationData.disconnect,
                   cleanRelationData.connect ?? []
                 )
               );
+
+              // When a connect item's position.before/after references an id that is
+              // about to be deleted (relIdsToDelete), the referenced row won't exist by
+              // the time the adjacentRelations query runs below, causing sortConnectArray
+              // to throw. Rewrite such a position to point at the nearest surviving
+              // neighbor in the relation's current order, so the item lands where the
+              // deleted relation used to be instead of always falling back to the end.
+              const idKey = (value: ID) => String(value);
+              const deletedIds = new Set(relIdsToDelete.map(idKey));
+              let resolvedConnect = cleanRelationData.connect ?? [];
+
+              if (
+                hasOrderColumn(attribute) &&
+                !isEmpty(relIdsToDelete) &&
+                resolvedConnect.some((item) => {
+                  const adjacentId = item.position?.before ?? item.position?.after;
+                  return adjacentId != null && deletedIds.has(idKey(adjacentId));
+                })
+              ) {
+                const currentOrder = await this.createQueryBuilder(joinTable.name)
+                  .select([inverseJoinColumn.name, orderColumnName])
+                  .where({ [joinColumn.name]: id })
+                  .where(joinTable.on || {})
+                  .orderBy(orderColumnName)
+                  .transacting(trx)
+                  .execute<Array<Record<string, any>>>();
+
+                const orderedIds = currentOrder.map((rel) => rel[inverseJoinColumn.name]);
+                const orderedIdKeys = orderedIds.map(idKey);
+                const connectIds = new Set(resolvedConnect.map((item) => idKey(item.id)));
+                const deletedIdsInCurrentOrder = new Set(
+                  orderedIds.map(idKey).filter((orderedId) => deletedIds.has(orderedId))
+                );
+
+                // A neighbor is only a valid fallback target if it survives the delete
+                // and isn't being moved by this connect payload.
+                const findSurvivingNeighbor = (targetId: ID, direction: 1 | -1) => {
+                  let index = orderedIdKeys.indexOf(idKey(targetId));
+                  while (index !== -1) {
+                    index += direction;
+                    const candidate = orderedIds[index];
+                    if (candidate === undefined) {
+                      return undefined;
+                    }
+                    const candidateKey = idKey(candidate);
+                    if (!deletedIds.has(candidateKey) && !connectIds.has(candidateKey)) {
+                      return candidate;
+                    }
+                  }
+                  return undefined;
+                };
+
+                const positionByConnectId = new Map<
+                  ID,
+                  NonNullable<(typeof resolvedConnect)[number]['position']>
+                >();
+                const connectGroups = new Map<
+                  string,
+                  { targetId: ID; before: typeof resolvedConnect; after: typeof resolvedConnect }
+                >();
+
+                const getConnectGroup = (targetId: ID) => {
+                  const targetKey = idKey(targetId);
+                  let group = connectGroups.get(targetKey);
+                  if (!group) {
+                    group = { targetId, before: [], after: [] };
+                    connectGroups.set(targetKey, group);
+                  }
+                  return group;
+                };
+
+                resolvedConnect.forEach((item) => {
+                  const { before, after } = item.position ?? {};
+                  const adjacentId = before ?? after;
+
+                  if (
+                    adjacentId == null ||
+                    !deletedIds.has(idKey(adjacentId)) ||
+                    !deletedIdsInCurrentOrder.has(idKey(adjacentId))
+                  ) {
+                    return;
+                  }
+
+                  const group = getConnectGroup(adjacentId);
+                  if (before) {
+                    group.before.push(item);
+                  } else {
+                    group.after.push(item);
+                  }
+                });
+
+                connectGroups.forEach(({ targetId, before, after }) => {
+                  const previousNeighbor = findSurvivingNeighbor(targetId, -1);
+                  const nextNeighbor = findSurvivingNeighbor(targetId, 1);
+                  let previousPositionId = previousNeighbor;
+
+                  before.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+
+                  after.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+                });
+
+                resolvedConnect = resolvedConnect.map((item) => {
+                  const position = positionByConnectId.get(item.id);
+
+                  if (position) {
+                    return { ...item, position };
+                  }
+
+                  return item;
+                });
+              }
 
               if (!isEmpty(relIdsToDelete)) {
                 await deleteRelations({ id, attribute, db, relIdsToDelete, transaction: trx });
@@ -1167,8 +1374,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               if (hasOrderColumn(attribute)) {
@@ -1180,11 +1387,18 @@ export const createEntityManager = (db: Database): EntityManager => {
                         [joinColumn.name]: id,
                         [inverseJoinColumn.name]: {
                           $in: compact(
-                            cleanRelationData.connect?.map(
-                              (r) => r.position?.after || r.position?.before
-                            )
+                            resolvedConnect.map((r) => r.position?.after || r.position?.before)
                           ),
                         },
+                      },
+                      {
+                        [joinColumn.name]: id,
+                        [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                          .min(orderColumnName)
+                          .where({ [joinColumn.name]: id })
+                          .where(joinTable.on || {})
+                          .transacting(trx)
+                          .getKnexQuery(),
                       },
                       {
                         [joinColumn.name]: id,
@@ -1198,6 +1412,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                     ],
                   })
                   .where(joinTable.on || {})
+                  .orderBy(orderColumnName)
                   .transacting(trx)
                   .execute<Array<Record<string, any>>>();
 
@@ -1207,7 +1422,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   joinTable.orderColumnName,
                   cleanRelationData.options?.strict
                 )
-                  .connect(cleanRelationData.connect ?? [])
+                  .connect(resolvedConnect)
                   .getOrderMap();
 
                 insert.forEach((row) => {
@@ -1243,25 +1458,21 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // insert rows
-              const query = this.createQueryBuilder(joinTable.name)
-                .insert(insert)
-                .onConflict(joinTable.pivotColumns)
-                .transacting(trx);
-
-              if (hasOrderColumn(attribute)) {
-                query.merge([orderColumnName]);
-              } else {
-                query.ignore();
-              }
-
-              await query.execute();
+              await batchInsertJoinTable(db, joinTable.name, insert, trx, {
+                onConflict: joinTable.pivotColumns,
+                merge: hasOrderColumn(attribute) ? [orderColumnName] : undefined,
+                ignore: !hasOrderColumn(attribute),
+              });
 
               // remove gap between orders
               await cleanOrderColumns({ attribute, db, id, transaction: trx });
             } else {
-              if (isAnyToOne(attribute)) {
-                cleanRelationData.set = cleanRelationData.set?.slice(-1);
-              }
+              // Keep every row. The payload was already collapsed to a
+              // single related entry upstream; what's left here may still
+              // be two rows for the same entry (its draft and published
+              // sides) and both need to be linked, otherwise the entry
+              // vanishes from the Edit View on save.
+
               // overwrite all relations
               relIdsToaddOrMove = toIds(cleanRelationData.set);
               await deleteRelations({
@@ -1280,8 +1491,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               // add order value
@@ -1328,18 +1539,11 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // insert rows
-              const query = this.createQueryBuilder(joinTable.name)
-                .insert(insert)
-                .onConflict(joinTable.pivotColumns)
-                .transacting(trx);
-
-              if (hasOrderColumn(attribute)) {
-                query.merge([orderColumnName]);
-              } else {
-                query.ignore();
-              }
-
-              await query.execute();
+              await batchInsertJoinTable(db, joinTable.name, insert, trx, {
+                onConflict: joinTable.pivotColumns,
+                merge: hasOrderColumn(attribute) ? [orderColumnName] : undefined,
+                ignore: !hasOrderColumn(attribute),
+              });
             }
 
             // Delete the previous relations for oneToAny relations
@@ -1423,7 +1627,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -1453,7 +1657,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .delete()
             .where({
               [joinColumn.name]: id,
-              ...(joinTable.on || {}),
+              ...joinTable.on,
             })
             .transacting(trx)
             .execute();
@@ -1463,7 +1667,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
         // do not need to delete links when using foreign keys
         if (db.dialect.usesForeignKeys()) {
-          return;
+          continue;
         }
 
         // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
@@ -1554,6 +1758,36 @@ export const createEntityManager = (db: Database): EntityManager => {
     // extra features
     // -> virtuals
     // -> private
+
+    /**
+     * Insert join-table rows in batches (GH#25198).
+     * Uses dialect.getBatchInsertSize() so SQLite etc. can enforce a safe batch size.
+     * All batches run in the same transaction; caller must pass an active transaction.
+     */
+    async insertJoinTableRows(
+      joinTableName: string,
+      rows: Record<string, unknown>[],
+      trx: any,
+      options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+    ) {
+      if (rows.length === 0) return;
+      if (trx == null) {
+        throw new Error(
+          'insertJoinTableRows requires a transaction so all batches commit or roll back atomically'
+        );
+      }
+      const batchSize = db.dialect.getBatchInsertSize();
+      for (let i = 0; i < rows.length; i += batchSize) {
+        const chunk = rows.slice(i, i + batchSize);
+        let qb = this.createQueryBuilder(joinTableName).insert(chunk).transacting(trx);
+        if (options?.onConflict) {
+          qb = qb.onConflict(options.onConflict);
+          if (options.merge) qb.merge(options.merge);
+          else if (options.ignore) qb.ignore();
+        }
+        await qb.execute();
+      }
+    },
 
     createQueryBuilder(uid) {
       return createQueryBuilder(uid, db);

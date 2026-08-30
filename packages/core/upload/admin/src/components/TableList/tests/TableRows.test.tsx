@@ -181,10 +181,23 @@ describe('TableList | TableRows', () => {
   });
 
   describe('rendering folder & asset with the same id', () => {
+    const FOLDER_FIXTURE_SAME_ID = { ...FOLDER_FIXTURE, id: 1 };
+
+    it('should render both rows when folder and asset share the same numeric id', () => {
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE_SAME_ID, ASSET_FIXTURE],
+      });
+
+      expect(
+        getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
+      ).toBeInTheDocument();
+      expect(getByRole('checkbox', { name: 'Select michka asset' })).toBeInTheDocument();
+    });
+
     it('should reflect selected only folder state', () => {
       const { getByRole } = setup({
-        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
-        selected: [{ id: 2, type: 'folder' }],
+        rows: [FOLDER_FIXTURE_SAME_ID, ASSET_FIXTURE],
+        selected: [{ id: 1, type: 'folder' }],
       });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
@@ -193,7 +206,7 @@ describe('TableList | TableRows', () => {
 
     it('should reflect selected only asset state', () => {
       const { getByRole } = setup({
-        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
+        rows: [FOLDER_FIXTURE_SAME_ID, ASSET_FIXTURE],
         selected: [{ id: 1, type: 'asset' }],
       });
 
@@ -205,10 +218,10 @@ describe('TableList | TableRows', () => {
 
     it('should reflect selected both asset & folder state', () => {
       const { getByRole } = setup({
-        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
+        rows: [FOLDER_FIXTURE_SAME_ID, ASSET_FIXTURE],
         selected: [
           { id: 1, type: 'asset' },
-          { id: 2, type: 'folder' },
+          { id: 1, type: 'folder' },
         ],
       });
 

@@ -48,7 +48,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   document: ReturnType<UseDocument>;
 }
 
-const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
+const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
 
@@ -112,6 +112,8 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
       })}
     </Flex>
   );
-};
+});
+
+FormLayout.displayName = 'FormLayout';
 
 export { FormLayout, FormLayoutProps };

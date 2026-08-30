@@ -1,11 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  deepEncodeQueryValues,
+  usePersistentStateScope,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import { useLocation } from 'react-router-dom';
 
 type PropertyPath = Parameters<typeof get>[1];
+
+interface PersistentQueryConfigEntry {
+  paths: PropertyPath[];
+  scoped?: boolean;
+}
 
 const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
   const result: Record<string, unknown> = {};
@@ -21,38 +29,82 @@ const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
   return result;
 };
 
-export const usePersistentPartialQueryParams = (
-  keyPrefix: string,
-  keysToPersist: PropertyPath[],
-  pathnameInKey = true
+export type PersistentQueryConfig = Record<string, PersistentQueryConfigEntry>;
+
+const normalizeConfigEntry = (
+  key: string,
+  entry: PersistentQueryConfigEntry,
+  scope: string | false | undefined
 ) => {
-  const { pathname } = useLocation();
+  const { paths } = entry;
+  const isScoped = entry.scoped === true && !!scope;
+
+  return {
+    key: isScoped ? `${key}:${scope}` : key,
+    paths,
+  };
+};
+
+export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) => {
+  const scope = usePersistentStateScope();
   const [{ query }, setQuery] = useQueryParams();
-  const localStorageKey = `${keyPrefix}${pathnameInKey ? pathname : ''}`;
+  const clonedConfig = JSON.stringify(config);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // load query params from local storge
   useEffect(() => {
-    const savedQueryParams = window.localStorage.getItem(localStorageKey);
-    if (!savedQueryParams) return;
+    const mergedFilteredQuery: Record<string, unknown> = {};
 
-    let parsedSavedParams: Record<string, unknown>;
-    try {
-      parsedSavedParams = JSON.parse(savedQueryParams);
-    } catch {
-      return;
+    for (const [keyPrefix, entry] of Object.entries(config)) {
+      const { key, paths } = normalizeConfigEntry(keyPrefix, entry, scope);
+
+      const savedQueryParams = window.localStorage.getItem(key);
+      if (!savedQueryParams) continue;
+
+      let parsedSavedParams: Record<string, unknown>;
+      try {
+        parsedSavedParams = JSON.parse(savedQueryParams);
+      } catch {
+        continue;
+      }
+      if (Object.keys(parsedSavedParams).length === 0) continue;
+
+      const filteredQuery = filterObjectKeys(parsedSavedParams, paths);
+      Object.assign(mergedFilteredQuery, filteredQuery);
     }
-    if (Object.keys(parsedSavedParams).length === 0) return;
 
-    const filteredQuery = filterObjectKeys(parsedSavedParams, keysToPersist);
-    setQuery({ ...filteredQuery, ...query }, 'push', true);
+    if (Object.keys(mergedFilteredQuery).length > 0) {
+      const nextQuery: Record<string, unknown> = { ...mergedFilteredQuery, ...query };
+
+      if (nextQuery.filters !== undefined) {
+        //`setQuery` never encodes the values, and it cannot be fixed as it would introduce breaking changes.
+        // This ensures that, when reading the persisted values and writing them in the URI, they are encoded properly.
+        // We are only encoding the filters because we know they can hold values with special characters. We didn't bother
+        // with the other query params because as of today, they are not expected to hold such values.
+        nextQuery.filters = deepEncodeQueryValues(nextQuery.filters);
+      }
+
+      setQuery(nextQuery, 'push', true);
+    }
+    setIsHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localStorageKey]);
+  }, [clonedConfig, scope]);
 
   // update local storage
   useEffect(() => {
-    const paramsToPersist = filterObjectKeys(query, keysToPersist);
-    if (Object.keys(paramsToPersist).length === 0) return;
-    window.localStorage.setItem(localStorageKey, JSON.stringify(paramsToPersist));
+    for (const [keyPrefix, entry] of Object.entries(config)) {
+      const { key, paths } = normalizeConfigEntry(keyPrefix, entry, scope);
+
+      const paramsToPersist = filterObjectKeys(query, paths);
+      if (Object.keys(paramsToPersist).length === 0) {
+        window.localStorage.removeItem(key);
+        continue;
+      }
+
+      window.localStorage.setItem(key, JSON.stringify(paramsToPersist));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, keysToPersist]);
+  }, [query, clonedConfig, scope]);
+
+  return { isHydrated };
 };

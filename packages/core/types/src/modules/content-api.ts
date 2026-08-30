@@ -1,4 +1,4 @@
-import permissions from '@strapi/permissions';
+import { engine } from '@strapi/permissions';
 import { providerFactory, sanitize, validate } from '@strapi/utils';
 import type { z } from 'zod/v4';
 
@@ -17,12 +17,12 @@ export type ZodQueryParamSchema =
   | z.ZodDefault<ZodScalarSchema | z.ZodArray<ZodScalarSchema>>
   | z.ZodArray<ZodScalarSchema>;
 
-/** Zod namespace type (e.g. from `import * as z from 'zod/v4'`) passed to schema factory. */
+/** Zod namespace Strapi passes into `schema` factory callbacks. */
 export type ZodSchemaFactory = typeof z;
 
 /** Schema + optional matchRoute for one query param. Keys in addQueryParams are the param names. */
 export type QueryParamEntry = {
-  /** Zod schema or factory. Must be scalar or array of scalars (no nested objects). */
+  /** Zod schema or factory. Prefer `(z) => schema` so the app does not import Zod. Must be scalar or array of scalars (no nested objects). */
   schema: ZodQueryParamSchema | ((z: ZodSchemaFactory) => ZodQueryParamSchema);
   /** If provided, the param is only merged into routes for which this returns true. */
   matchRoute?: (route: Route) => boolean;
@@ -30,7 +30,7 @@ export type QueryParamEntry = {
 
 /** Schema + optional matchRoute for one input param (root-level body.data). Keys in addInputParams are the param names. */
 export type InputParamEntry = {
-  /** Zod schema or factory. Any Zod type allowed (scalars, objects, arrays). */
+  /** Zod schema or factory. Prefer `(z) => schema` so the app does not import Zod. Any Zod type allowed (scalars, objects, arrays). */
   schema: z.ZodType | ((z: ZodSchemaFactory) => z.ZodType);
   /** If provided, the param is only merged into routes for which this returns true. */
   matchRoute?: (route: Route) => boolean;
@@ -56,7 +56,7 @@ type ActionProvider = {
 } & ReturnType<typeof providerFactory>;
 
 export interface PermissionUtilities {
-  engine: ReturnType<typeof permissions.engine.new>;
+  engine: ReturnType<typeof engine.new>;
   providers: {
     action: ActionProvider;
     condition: ConditionProvider;
@@ -82,21 +82,36 @@ export interface ContentApi {
   /**
    * Register extra query params to be merged into content-api route schemas.
    * Query params accept only Zod scalar or array-of-scalar schemas (no nested objects); enforced at runtime. Use {@link ContentApi.addInputParams} for nested structures.
-   * Use `z` from `@strapi/utils` or `zod/v4` for compatibility.
+   * Prefer `schema: (z) => …`. Strapi passes its own Zod into the callback, so apps do not import `zod`, `zod/v4`, or `@strapi/utils`.
+   *
+   * @example
+   * strapi.contentAPI.addQueryParams({
+   *   search: {
+   *     schema: (z) => z.string().max(200).optional(),
+   *   },
+   * });
    *
    * @param options - {@link AddQueryParamsOptions}: record of param name → {@link QueryParamEntry}. Each entry has:
    * @param options.[paramName] - {@link QueryParamEntry} (key is the param name, e.g. `"search"`).
-   * @param options.[paramName].schema - {@link ZodQueryParamSchema} or `(z: {@link ZodSchemaFactory}) => {@link ZodQueryParamSchema}`. Must be scalar or array of scalars. No nested objects.
+   * @param options.[paramName].schema - {@link ZodQueryParamSchema} or `(z: {@link ZodSchemaFactory}) => {@link ZodQueryParamSchema}`. Prefer the factory. Must be scalar or array of scalars. No nested objects.
    * @param options.[paramName].matchRoute - Optional. `(route: {@link Route}) => boolean`; if provided, this param is only added to routes for which it returns true.
    */
   addQueryParams: (options: AddQueryParamsOptions) => void;
   /**
    * Register extra input params (root-level body.data) to be merged into content-api route schemas.
    * Any Zod type is allowed (scalars, objects, arrays). Enforced at runtime.
+   * Prefer `schema: (z) => …`. Strapi passes its own Zod into the callback, so apps do not import `zod`, `zod/v4`, or `@strapi/utils`.
+   *
+   * @example
+   * strapi.contentAPI.addInputParams({
+   *   clientMutationId: {
+   *     schema: (z) => z.string().max(100).optional(),
+   *   },
+   * });
    *
    * @param options - {@link AddInputParamsOptions}: record of param name → {@link InputParamEntry}. Each entry has:
    * @param options.[paramName] - {@link InputParamEntry} (key is the root-level key in body.data, e.g. `"metadata"`).
-   * @param options.[paramName].schema - `z.ZodType` or `(z: {@link ZodSchemaFactory}) => z.ZodType`. Any Zod type (e.g. z.object(), z.array(), scalars).
+   * @param options.[paramName].schema - `z.ZodType` or `(z: {@link ZodSchemaFactory}) => z.ZodType`. Prefer the factory. Any Zod type (e.g. z.object(), z.array(), scalars).
    * @param options.[paramName].matchRoute - Optional. `(route: {@link Route}) => boolean`; if provided, this param is only added to routes for which it returns true.
    */
   addInputParams: (options: AddInputParamsOptions) => void;

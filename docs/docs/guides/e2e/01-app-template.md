@@ -9,7 +9,7 @@ tags:
 
 ## Overview
 
-An app template has been created in `e2e/app-template` which provide some customizations and utilities to allow the tests to run. Note that if any changes are made to the app template, you will need to run `yarn test:e2e:clean` to update the test apps with the new template.
+An app template lives under **`tests/app-template`** (shared with other test types). It provides customizations and utilities to allow the tests to run. If you change the template, run **`yarn test:e2e:clean`** and regenerate test apps so they pick up the new template.
 
 Here you can read about what content schemas the test instance has & the API customisations we've built (incl. why we built them).
 
@@ -21,7 +21,7 @@ The app template should be realistic and structured in a way an actual user migh
 
 To update the app template:
 
-- Run `yarn test:e2e clean` to remove existing test apps
+- Run `yarn test:e2e:clean` to remove existing test apps
 - Run `yarn test:e2e -c=1 -- --ui` to generate a test app (don't run any tests)
 - Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
 - With the test app server running on 1337 you can now login to the app
@@ -30,7 +30,7 @@ To update the app template:
 
 Once the app template is updated:
 
-- Run `yarn test:e2e clean` to remove existing test apps
+- Run `yarn test:e2e:clean` to remove existing test apps
 - Run `yarn test:e2e -c=1 -- --ui` to generate a new test app using the updated template (don't run any tests)
 - Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
 - Follow the instructions to [export the updated data set](./02-data-transfer.md#exporting-an-updated-data-packet)

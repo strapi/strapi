@@ -68,7 +68,7 @@ export const TableRows = ({
 
         return (
           <Tr
-            key={id}
+            key={`${contentType}-${id}`}
             onClick={() => handleRowClickFn(element, id, path || undefined, contentType)}
           >
             <Td onClick={(e) => e.stopPropagation()}>

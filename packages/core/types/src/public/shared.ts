@@ -13,7 +13,7 @@
  * Here's how `DocumentServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
  * declare module '@strapi/types' {
- *   export module Shared {
+ *   export namespace Public {
  *     export interface DocumentServicePluginParams {
  *       'locale': string;
  *     }
@@ -38,7 +38,7 @@ export interface DocumentServicePluginParams {}
  * Here's how `EntityServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
  * declare module '@strapi/types' {
- *   export module Shared {
+ *   export namespace Public {
  *     export interface EntityServicePluginParams {
  *       'locale': string;
  *     }
@@ -48,7 +48,7 @@ export interface DocumentServicePluginParams {}
  *
  * @remark This type needs to be reviewed since it's not augmented anywhere yet
  *
- * @deprecated The entity service is deprecated and will be removed in v6. Use the document service instead.
+ * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
  */
 export interface EntityServicePluginParams {}
 

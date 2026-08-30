@@ -15,7 +15,9 @@ interface EditorApi {
   scrollIntoView: (args?: Parameters<HTMLElement['scrollIntoView']>[0]) => void;
 }
 
-interface EditorProps extends Omit<FieldValue, 'initialValue'>, Omit<InputProps, 'type' | 'label'> {
+interface EditorProps
+  extends Omit<FieldValue<string>, 'initialValue'>,
+    Omit<InputProps, 'type' | 'label'> {
   editorRef: React.MutableRefObject<EditorFromTextArea>;
   isPreviewMode?: boolean;
   isExpandMode?: boolean;
@@ -41,6 +43,10 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     const onChangeRef = React.useRef(onChange);
 
     React.useEffect(() => {
+      onChangeRef.current = onChange;
+    }, [onChange]);
+
+    React.useEffect(() => {
       if (editorRef.current) {
         // Ensure the editor and its wrapper are cleaned up whenever this view is re-rendered
         // e.g. in case of re-ordering wysiwyg components in a DynamicZone
@@ -63,14 +69,22 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
       // @ts-expect-error – doesn't think command exists?
       CodeMirror.commands.newlineAndIndentContinueMarkdownList =
         newlineAndIndentContinueMarkdownList;
-      editorRef.current.on('change', (doc) => {
-        onChangeRef.current(name, doc.getValue());
+      editorRef.current.on('change', (cm, change) => {
+        // setValue (prop sync) must not notify the form — parent already has the value.
+        if (change.origin === 'setValue') {
+          return;
+        }
+        onChangeRef.current(name, cm.getValue());
       });
     }, [editorRef, textareaRef, name, placeholder]);
 
     React.useEffect(() => {
-      if (value && !editorRef.current.hasFocus()) {
-        editorRef.current.setValue(value);
+      if (editorRef.current.hasFocus()) {
+        return;
+      }
+      const nextValue = value ?? '';
+      if (editorRef.current.getValue() !== nextValue) {
+        editorRef.current.setValue(nextValue);
       }
     }, [editorRef, value]);
 
@@ -141,8 +155,9 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
         : '410px'}; //  512px(total height) - 48px (header) - 52px(footer) - 2px border
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-      'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+      'Helvetica Neue', sans-serif;
 
     ${({ theme }) => theme.breakpoints.medium} {
       font-size: 1.4rem;

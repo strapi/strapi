@@ -1,4 +1,4 @@
-import * as globalAgent from 'global-agent';
+import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -7,8 +7,8 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
-import tsUtils from '@strapi/typescript-utils';
 import { loadConfiguration } from './configuration';
+import { warnDeprecatedServerConfig } from './configuration/server-config';
 
 import * as factories from './factories';
 
@@ -38,6 +38,17 @@ import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+import { createContentAPISchemaRegistry } from './core-api/routes/validation/schema-registry';
+
+// Lazy: only resolved when `useTypescriptMigrations` is true (default false)
+let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
+const tsUtils = (): typeof import('@strapi/typescript-utils') => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return lazyTsUtils as typeof import('@strapi/typescript-utils');
+};
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -60,6 +71,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get admin(): Core.Module {
     return this.get('admin');
+  }
+
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
   }
 
   get EE(): boolean {
@@ -229,6 +244,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('content-api');
   }
 
+  get contentAPISchemaRegistry(): Core.ContentAPISchemaRegistry {
+    return this.get('content-api-schema-registry');
+  }
+
   get sanitizers() {
     return this.get('sanitizers');
   }
@@ -261,10 +280,13 @@ class Strapi extends Container implements Core.Strapi {
       ...config.get('server.logger.config'),
     });
 
+    warnDeprecatedServerConfig(config, logger);
+
     // Instantiate the Strapi container
     this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
+      .add('content-api-schema-registry', () => createContentAPISchemaRegistry())
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
@@ -279,9 +301,9 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
-        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
-        const tsMigrationsEnabled =
-          this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
+        const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
+        const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
+        const tsMigrationsEnabled = useTSM && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
         return new Database(
           _.merge(this.config.get('database'), {
@@ -332,7 +354,7 @@ class Strapi extends Container implements Core.Strapi {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
-      } catch (e) {
+      } catch {
         this.telemetry.send('didNotOpenTab');
       }
     }
@@ -515,7 +537,7 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    globalAgent.bootstrap();
+    bootstrapGlobalAgent();
 
     if (httpProxy) {
       this.log.info(`Using HTTP proxy: ${httpProxy}`);
@@ -568,13 +590,20 @@ class Strapi extends Container implements Core.Strapi {
   getModel(uid: UID.ContentType): Schema.ContentType;
   getModel(uid: UID.Component): Schema.Component;
   getModel<TUID extends UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component | undefined {
-    if (uid in this.contentTypes) {
-      return this.contentTypes[uid as UID.ContentType];
+    // Looked up on the registries directly rather than through the `contentTypes` /
+    // `components` getters. Those getters call `getAll()`, and the content-type registry
+    // builds a fresh copy of every registered schema on each call. Reading `uid in
+    // this.contentTypes` and then `this.contentTypes[uid]` therefore built that copy
+    // twice per lookup, and a component uid built it four times over. `getModel` runs
+    // once per relation, component, media and dynamic-zone node of every sanitized
+    // response, which made this the single hottest path in a REST request.
+    const contentType = this.get('content-types').get(uid as UID.ContentType);
+
+    if (contentType !== undefined) {
+      return contentType;
     }
 
-    if (uid in this.components) {
-      return this.components[uid as UID.Component];
-    }
+    return this.get('components').get(uid as UID.Component);
   }
 
   /**

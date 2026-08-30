@@ -28,119 +28,152 @@ const getEnvBool = (envVar, defaultValue) => {
 
 /**
  * @typedef ConfigOptions
- * @type {{ port: number; testDir: string; appDir: string; reportFileName: string }}
+ * @type {{ port: number; testDir: string; appDir: string; reportFileName: string; domain: string }}
  */
 
 /**
+ * Port comes from `tests/scripts/run-tests.js` (`8000 + testAppIndex`). Do not default to 8000 here:
+ * the second app uses 8001, etc. The generated `playwright.config.js` also assigns `process.env.PORT`
+ * so `globalSetup` and test helpers match `baseURL` / `webServer`.
+ *
  * @see https://playwright.dev/docs/test-configuration
  * @type {(options: ConfigOptions) => import('@playwright/test').PlaywrightTestConfig}
  */
-const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
-  testDir,
-  testMatch: '*.spec.ts',
+const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
+  // Isolate artifacts per domain+port: every test app resolves `../test-results/` to the same
+  // `test-apps/e2e/test-results/` folder, and the HTML reporter defaults to cwd `playwright-report/`,
+  // so parallel `yarn test:e2e` runs overwrite each other without subfolders.
+  const artifactKey = `${domain}-${port}`;
+  const outputDirBase = getEnvString(
+    process.env.PLAYWRIGHT_OUTPUT_DIR,
+    path.join('..', 'test-results')
+  );
+  const outputDir = path.join(outputDirBase, artifactKey);
+  const htmlReportFolder = path.join(__dirname, 'test-apps', 'e2e', 'html-report', artifactKey);
 
-  /* default timeout for a jest test */
-  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
+  return {
+    testDir,
+    testMatch: '*.spec.ts',
 
-  /* Global setup to set localStorage for all tests */
-  globalSetup: require.resolve('./tests/utils/global-setup.ts'),
+    /* default timeout for a jest test */
+    timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
-  expect: {
-    /**
-     * Maximum time expect() should wait for the condition to be met.
-     * For example in `await expect(locator).toHaveText();`
-     */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 10 * 1000),
-  },
-  /* Run tests in files in parallel */
-  fullyParallel: false,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 3 : 1,
-  /* Opt out of parallel tests on CI. */
-  workers: 1,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['html'],
-    // Junit reporter for Trunk flaky test CI upload
-    [
-      'junit',
+    /* Global setup to set localStorage for all tests */
+    globalSetup: require.resolve('./tests/utils/global-setup.ts'),
+
+    expect: {
+      /**
+       * Maximum time expect() should wait for the condition to be met.
+       * For example in `await expect(locator).toHaveText();`
+       */
+      timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 10 * 1000),
+    },
+    /* Run tests in files in parallel */
+    fullyParallel: false,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: !!process.env.CI,
+    /* Retry on CI only */
+    retries: process.env.CI ? 3 : 1,
+    /* Opt out of parallel tests on CI. */
+    workers: 1,
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    reporter: [
+      ['html', { outputFolder: htmlReportFolder }],
+      // Junit reporter for Trunk flaky test CI upload
+      [
+        'junit',
+        {
+          outputFile: path.join(
+            getEnvString(
+              process.env.PLAYWRIGHT_OUTPUT_DIR,
+              path.join(__dirname, 'test-apps', 'junit-reports')
+            ),
+            reportFileName
+          ),
+        },
+      ],
+    ],
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    use: {
+      /* Base URL to use in actions like `await page.goto('/')`. */
+      baseURL: `http://127.0.0.1:${port}`,
+
+      /** Set timezone for consistency across any machine*/
+      timezoneId: 'Europe/Paris',
+
+      /* Default time each action such as `click()` can take */
+      actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
+      // Only record trace when retrying a test to optimize test performance
+      trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+      video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
+        ? {
+            mode: 'on-first-retry', // Only save videos when retrying a test
+            size: {
+              width: 1280,
+              height: 720,
+            },
+          }
+        : 'off',
+
+      /* Use the storage state with localStorage set globally */
+      storageState: './tests/e2e/playwright-storage-state.json',
+    },
+
+    /* Configure projects for major browsers */
+    projects: [
       {
-        outputFile: path.join(
-          getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../../junit-reports/'),
-          reportFileName
-        ),
+        name: 'chromium',
+        use: {
+          ...devices['Desktop Chrome'],
+          permissions: ['clipboard-read', 'clipboard-write'],
+        },
+      },
+
+      {
+        name: 'firefox',
+        use: {
+          ...devices['Desktop Firefox'],
+          // Firefox doesn't need clipboard permissions for secure sites
+        },
+      },
+
+      {
+        name: 'webkit',
+        use: {
+          ...devices['Desktop Safari'],
+          permissions: ['clipboard-read'],
+        },
       },
     ],
-  ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: `http://127.0.0.1:${port}`,
 
-    /** Set timezone for consistency across any machine*/
-    timezoneId: 'Europe/Paris',
+    /* Folder for test artifacts such as screenshots, videos, traces, etc.
+     * Must be outside the project itself or develop mode will restart when files are written
+     * */
+    outputDir,
 
-    /* Default time each action such as `click()` can take */
-    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
-    // Only record trace when retrying a test to optimize test performance
-    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
-    video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
-      ? {
-          mode: 'on-first-retry', // Only save videos when retrying a test
-          size: {
-            width: 1280,
-            height: 720,
-          },
-        }
-      : 'off',
-
-    /* Use the storage state with localStorage set globally */
-    storageState: './tests/e2e/playwright-storage-state.json',
-  },
-
-  /* Configure projects for major browsers */
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['clipboard-read', 'clipboard-write'],
+    /* Run your local dev server before starting the tests */
+    webServer: {
+      command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
+      url: `http://127.0.0.1:${port}`,
+      // Strapi reads PORT/HOST from env (see tests/app-template/config/server.js). Without this,
+      // `yarn playwright test --config test-apps/e2e/test-app-0/playwright.config.js` leaves PORT
+      // unset → default 1337 while baseURL/webServer.url expect 8000+ (browser-runner sets PORT).
+      env: {
+        PORT: String(port),
+        HOST: '127.0.0.1',
       },
+      /* default Strapi server startup timeout to 160s */
+      timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
+      // If true, Playwright skips `command` when `url` already responds — you may get the wrong
+      // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
+      // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
+      // server up. CI always starts fresh.
+      reuseExistingServer: process.env.CI
+        ? false
+        : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
+      stdout: 'pipe',
     },
-
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        // Firefox doesn't need clipboard permissions for secure sites
-      },
-    },
-
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        permissions: ['clipboard-read'],
-      },
-    },
-  ],
-
-  /* Folder for test artifacts such as screenshots, videos, traces, etc.
-   * Must be outside the project itself or develop mode will restart when files are written
-   * */
-  outputDir: getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'),
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
-    url: `http://127.0.0.1:${port}`,
-    /* default Strapi server startup timeout to 160s */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
-    reuseExistingServer: true,
-    stdout: 'pipe',
-  },
-});
+  };
+};
 
 module.exports = { createConfig };

@@ -50,9 +50,9 @@ const command = new commander.Command('create-strapi-app')
   .option('--git-init', 'Initialize a git repository')
   .option('--no-git-init', 'Do no initialize a git repository')
 
-  // A/B testing options
-  .option('--enable-ab-tests', 'Enable anonymous A/B testing')
-  .option('--no-enable-ab-tests', 'Disable anonymous A/B testing')
+  // Legacy no-ops (hidden from --help): accept old flags so existing CI/scripts keep working
+  .addOption(new commander.Option('--enable-ab-tests', 'ignored').hideHelp())
+  .addOption(new commander.Option('--no-enable-ab-tests', 'ignored').hideHelp())
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
@@ -167,16 +167,17 @@ async function run(args: string[]): Promise<void> {
     devDependencies: {},
     dependencies: {
       '@strapi/strapi': version,
+      '@strapi/database': version,
       '@strapi/plugin-users-permissions': version,
       '@strapi/plugin-cloud': version,
       // third party
       react: '^18.0.0',
       'react-dom': '^18.0.0',
-      'react-router-dom': '^6.0.0',
+      // Match @strapi/* peer ranges (^6.30.3) so npm peer resolution stays clean
+      'react-router-dom': '^6.30.3',
       'styled-components': '^6.0.0',
     },
     shouldCreateGrowthSsoTrial,
-    isABTestEnabled: false,
   };
 
   if (options.template !== undefined) {
@@ -212,13 +213,6 @@ async function run(args: string[]): Promise<void> {
   }
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
-
-  scope.isABTestEnabled = await resolveOption(
-    options.enableAbTests,
-    skipPrompts,
-    false,
-    prompts.enableABTests
-  );
 
   addDatabaseDependencies(scope);
 

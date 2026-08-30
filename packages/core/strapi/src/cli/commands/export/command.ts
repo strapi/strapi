@@ -3,11 +3,16 @@ import { createCommand, Option } from 'commander';
 import {
   excludeOption,
   onlyOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
+  normalizeTransferFilterOptionsHook,
 } from '../../utils/data-transfer';
 import { promptEncryptionKey } from '../../utils/commander';
 import action from './action';
+import { prepareExportDirFormatCli } from './validate-dir-format';
 
 /**
  * `$ strapi export`
@@ -32,12 +37,25 @@ const command = () => {
       )
     )
     .addOption(
-      new Option('-f, --file <file>', 'name to use for exported file (without extensions)')
+      new Option(
+        '-f, --file <file>',
+        'tar: base name without extensions; dir: output directory path (--format dir)'
+      )
+    )
+    .addOption(
+      new Option('--format <format>', 'export as tar archive or unpacked directory')
+        .choices(['tar', 'dir'])
+        .default('tar')
     )
     .addOption(excludeOption)
     .addOption(onlyOption)
+    .addOption(excludeContentTypesOption)
+    .addOption(onlyContentTypesOption)
     .addOption(throttleOption)
+    .hook('preAction', normalizeTransferFilterOptionsHook)
     .hook('preAction', validateExcludeOnly)
+    .hook('preAction', validateContentTypeTransferOptions)
+    .hook('preAction', prepareExportDirFormatCli)
     .hook('preAction', promptEncryptionKey)
     .action(action);
 };

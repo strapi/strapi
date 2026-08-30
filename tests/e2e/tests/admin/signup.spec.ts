@@ -6,7 +6,7 @@ import { fillValidSignUpForm } from '../../../utils/signup';
 
 test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('without-admin.tar', (cts) =>
+    await resetDatabaseAndImportDataFromPath('without-admin', (cts) =>
       cts.filter((ct) => ct !== 'plugin::i18n.locale')
     );
     await page.goto('/admin');
@@ -74,13 +74,15 @@ test.describe('Sign Up', () => {
     await expect(page.getByText('Passwords do not match')).toBeVisible();
   });
 
-  test('a user should be able to signup when the strapi instance starts fresh', async ({
-    page,
-  }) => {
-    await page.getByRole('button', { name: "Let's start" }).click();
+  test(
+    'a user should be able to signup when the strapi instance starts fresh',
+    { tag: ['@critical'] },
+    async ({ page }) => {
+      await page.getByRole('button', { name: "Let's start" }).click();
 
-    await expect(page).toHaveTitle(TITLE_HOME);
-  });
+      await expect(page).toHaveTitle(TITLE_HOME);
+    }
+  );
 
   test('a user should be redirected to /usecase page if they mark news as true', async ({
     page,

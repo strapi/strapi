@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import type { DistinctQuestion } from 'inquirer';
 import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
   email?: string;
@@ -17,7 +18,7 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
+const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   { type: 'password', name: 'password', message: 'New password?' },
   {
@@ -44,6 +45,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
   const { email, password } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(password) && process.stdin.isTTY) {
+    const inquirer = await getInquirer();
     const inquiry = await inquirer.prompt(promptQuestions);
 
     if (!inquiry.confirm) {

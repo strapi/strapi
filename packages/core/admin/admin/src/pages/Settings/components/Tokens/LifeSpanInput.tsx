@@ -1,8 +1,9 @@
 import { SingleSelectOption, SingleSelect, Typography, Field } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
-import { getDateOfExpiration } from '../../pages/ApiTokens/EditView/utils/getDateOfExpiration';
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
+
+import { getDateOfExpiration } from './utils/getDateOfExpiration';
 
 import type { ApiToken } from '../../../../../../shared/contracts/api-token';
 import type { TransferToken } from '../../../../../../shared/contracts/transfer';

@@ -86,6 +86,30 @@ const FILE_9 = {
   ...COMMON_PROPERTIES,
 };
 
+const FILE_10 = {
+  id: 10,
+  mime: '',
+  name: 'animation.lottie',
+  url: '/uploads/animation.lottie',
+  ...COMMON_PROPERTIES,
+};
+
+const FILE_MOV_STORED_OCTET_STREAM = {
+  id: 11,
+  mime: 'application/octet-stream',
+  name: 'sample_960x400_ocean_with_audio.mov',
+  url: '/uploads/sample.mov',
+  ...COMMON_PROPERTIES,
+};
+
+const FILE_MOV_STORED_QUICKTIME = {
+  id: 12,
+  mime: 'video/quicktime',
+  name: 'sample_960x400_ocean_with_audio.mov',
+  url: '/uploads/sample.mov',
+  ...COMMON_PROPERTIES,
+};
+
 const files = [FILE_1, FILE_2, FILE_3, FILE_4, FILE_5, FILE_6, FILE_7, FILE_8, FILE_9];
 
 describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', () => {
@@ -129,5 +153,30 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], files);
 
     expect(results).toEqual(files);
+  });
+
+  it('allows files with empty MIME type when "files" is an allowed type', () => {
+    const results = getAllowedFiles(['files'], [FILE_10]);
+
+    expect(results).toEqual([FILE_10]);
+  });
+
+  it('rejects files with empty MIME type when "files" is not an allowed type', () => {
+    const results = getAllowedFiles(['images', 'videos', 'audios'], [FILE_10]);
+
+    expect(results).toEqual([]);
+  });
+
+  it('allows files with empty MIME type alongside other types when "files" is included', () => {
+    const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], [...files, FILE_10]);
+
+    expect(results).toEqual([...files, FILE_10]);
+  });
+
+  it('filters library assets by their stored MIME against a video-only field', () => {
+    expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_OCTET_STREAM])).toEqual([]);
+    expect(getAllowedFiles(['videos'], [FILE_MOV_STORED_QUICKTIME])).toEqual([
+      FILE_MOV_STORED_QUICKTIME,
+    ]);
   });
 });

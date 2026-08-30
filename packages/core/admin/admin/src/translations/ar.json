@@ -577,7 +577,7 @@
   "Settings.application.description": "المعلومات العالمية للوحة الإدارة",
   "Settings.application.edition-title": "الإصدار الحالي",
   "Settings.application.ee-or-ce": "{communityEdition، select، true {Community Edition} أخرى {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "إدارة المقاعد",
+  "Settings.application.ee.admin-seats.add-seats": "إدارة الاشتراك",
   "Settings.application.ee.admin-seats.support": "اتصل بالمبيعات",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "عند الحد: أضف مقاعد لدعوة المزيد من المستخدمين",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
@@ -768,5 +768,8 @@
   "Usecase.title": "تخبرنا أكثر قليلا عن نفسك",
   "Users.components.List.empty": "لا يوجد مستخدمون ...",
   "Users.components.List.empty.withFilters": "لا يوجد مستخدمون لديهم عوامل التصفية المطبقة ...",
-  "Users.components.List.empty.withSearch": "لا يوجد مستخدمون مطابقون للبحث({search})..."
+  "Users.components.List.empty.withSearch": "لا يوجد مستخدمون مطابقون للبحث({search})...",
+  "HomePage.widget.deploy-now.title": "هل أنت مستعد للنشر؟",
+  "HomePage.widget.deploy-now.description": "انشر مشروعك.",
+  "HomePage.widget.deploy-now.button": "انشر الآن"
 }

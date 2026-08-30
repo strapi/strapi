@@ -17,6 +17,7 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export { LazyOutlet, type LazyOutletProps } from './components/LazyOutlet';
 export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
@@ -59,7 +60,11 @@ export { useHistory } from './features/BackButton';
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
 export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
-export { useQueryParams } from './hooks/useQueryParams';
+export {
+  useQueryParams,
+  deepEncodeQueryValues,
+  withEncodedUserParams,
+} from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';
@@ -68,7 +73,11 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
 export { useDeviceType } from './hooks/useDeviceType';
-export { usePersistentState, useScopedPersistentState } from './hooks/usePersistentState';
+export {
+  usePersistentState,
+  useScopedPersistentState,
+  usePersistentStateScope,
+} from './hooks/usePersistentState';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 

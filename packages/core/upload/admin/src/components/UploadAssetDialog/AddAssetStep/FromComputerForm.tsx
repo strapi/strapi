@@ -5,7 +5,7 @@ import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+import { ASSET_SOURCES } from '../../../constants';
 import { useTracking } from '../../../hooks/useTracking';
 import { getTrad, rawFileToAsset } from '../../../utils';
 
@@ -59,24 +59,15 @@ export const FromComputerForm = ({
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    // inputRef.current?.click();
+  const filesToAssets = async (fileList: FileList) => {
+    const files = Array.from(fileList);
+
+    return Promise.all(files.map((file) => rawFileToAsset(file, ASSET_SOURCES.Computer)));
   };
 
-  const handleChange = () => {
+  const handleChange = async () => {
     const files = inputRef.current?.files;
-    const assets: FileWithRawFile[] = [];
-
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
-          assets.push(asset);
-        }
-      }
-    }
+    const assets = files ? await filesToAssets(files) : [];
 
     if (trackedLocation) {
       trackUsage('didSelectFile', { source: 'computer', location: trackedLocation });
@@ -85,21 +76,11 @@ export const FromComputerForm = ({
     onAddAssets(assets);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
-      const files = e.dataTransfer.files;
-      const assets = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
-          assets.push(asset);
-        }
-      }
-
+      const assets = await filesToAssets(e.dataTransfer.files);
       onAddAssets(assets);
     }
 
@@ -158,15 +139,6 @@ export const FromComputerForm = ({
                   zIndex={1}
                   onChange={handleChange}
                 />
-
-                {/* <Box position="relative">
-                  <Button type="button" onClick={handleClick}>
-                    {formatMessage({
-                      id: getTrad('input.button.label'),
-                      defaultMessage: 'Browse files',
-                    })}
-                  </Button>
-                </Box> */}
               </Wrapper>
             </Flex>
           </MediaBox>

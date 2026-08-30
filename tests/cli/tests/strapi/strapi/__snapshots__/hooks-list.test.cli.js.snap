@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hooks:list should output list of hooks 1`] = `
+"│ Name                             │
+│ strapi::content-types.beforeSync │
+│ strapi::content-types.afterSync  │"
+`;

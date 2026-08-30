@@ -57,6 +57,35 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   }
 
   /**
+   * Paginated files response schema: `{ data, meta: { pagination } }`.
+   *
+   * Pagination meta is either page-based (`page`/`pageSize`) or offset-based
+   * (`start`/`limit`), and `total`/`pageCount` are omitted when
+   * `pagination[withCount]=false`.
+   */
+  get paginatedFiles() {
+    const pagedPagination = z.object({
+      page: z.number().int(),
+      pageSize: z.number().int(),
+      pageCount: z.number().int().optional(),
+      total: z.number().int().optional(),
+    });
+
+    const offsetPagination = z.object({
+      start: z.number().int(),
+      limit: z.number().int(),
+      total: z.number().int().optional(),
+    });
+
+    return z.object({
+      data: this.files,
+      meta: z.object({
+        pagination: z.union([pagedPagination, offsetPagination]),
+      }),
+    });
+  }
+
+  /**
    * File ID parameter validation
    */
   get fileId() {

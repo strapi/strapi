@@ -5,62 +5,82 @@ import { AssetsPage } from './page-objects/AssetsPage';
 import path from 'path';
 import { describeOnCondition } from '../../../../utils/shared';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
-  'Media Library - Grid View',
-  () => {
-    test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
-      await page.goto('/admin');
-      await login({ page });
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - Grid View', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test.describe('View Toggle', () => {
+    test('should switch between grid and table views', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      // Switch to table view
+      await assetsPage.switchToTableView();
+      expect(await assetsPage.isGridViewActive()).toBe(false);
+
+      // Switch back to grid view
+      await assetsPage.switchToGridView();
+      expect(await assetsPage.isGridViewActive()).toBe(true);
     });
 
-    test.describe('View Toggle', () => {
-      test('should switch between grid and table views', async ({ page }) => {
-        const assetsPage = new AssetsPage(page);
-        await assetsPage.goto();
+    test('should persist view preference', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
 
-        // Switch to table view
-        await assetsPage.switchToTableView();
-        expect(await assetsPage.isGridViewActive()).toBe(false);
+      // Switch to table view
+      await assetsPage.switchToTableView();
 
-        // Switch back to grid view
-        await assetsPage.switchToGridView();
-        expect(await assetsPage.isGridViewActive()).toBe(true);
-      });
+      // Reload page
+      await page.reload();
+      await page.waitForLoadState('networkidle');
 
-      test('should persist view preference', async ({ page }) => {
-        const assetsPage = new AssetsPage(page);
-        await assetsPage.goto();
-
-        // Switch to table view
-        await assetsPage.switchToTableView();
-
-        // Reload page
-        await page.reload();
-        await page.waitForLoadState('networkidle');
-
-        // Should still be in table view
-        expect(await assetsPage.isGridViewActive()).toBe(false);
-      });
+      // Should still be in table view
+      expect(await assetsPage.isGridViewActive()).toBe(false);
     });
 
-    test.describe('Grid Display', () => {
-      test('should display uploaded file as card in grid view', async ({ page }) => {
-        const assetsPage = new AssetsPage(page);
-        await assetsPage.goto();
+    test('should keep the selection when switching views', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
 
-        // Ensure we're in grid view
-        await assetsPage.switchToGridView();
-        expect(await assetsPage.isGridViewActive()).toBe(true);
+      const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+      await assetsPage.uploadFilesWithFilePicker(testImagePath);
+      await assetsPage.waitForUploadSuccess();
 
-        const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
-        await assetsPage.uploadFilesWithFilePicker(testImagePath);
-        await assetsPage.waitForUploadSuccess();
+      await assetsPage.switchToTableView();
+      await assetsPage.selectAsset('test-image.jpg');
+      await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
 
-        // Verify asset appears as card
-        const assetCard = assetsPage.getAssetCard('test-image');
-        await expect(assetCard).toBeVisible();
-      });
+      // Both views render the same list, so the view is deliberately kept out
+      // of the fingerprint that clears the selection (see getListQueryKey).
+      await assetsPage.switchToGridView();
+      await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+      await expect(assetsPage.getSelectionCheckbox('test-image.jpg')).toBeChecked();
+
+      await assetsPage.switchToTableView();
+      await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+      await expect(assetsPage.getSelectionCheckbox('test-image.jpg')).toBeChecked();
     });
-  }
-);
+  });
+
+  test.describe('Grid Display', () => {
+    test('should display uploaded file as card in grid view', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      // Ensure we're in grid view
+      await assetsPage.switchToGridView();
+      expect(await assetsPage.isGridViewActive()).toBe(true);
+
+      const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+      await assetsPage.uploadFilesWithFilePicker(testImagePath);
+      await assetsPage.waitForUploadSuccess();
+
+      // Verify asset appears as card
+      const assetCard = assetsPage.getAssetCard('test-image');
+      await expect(assetCard).toBeVisible();
+    });
+  });
+});

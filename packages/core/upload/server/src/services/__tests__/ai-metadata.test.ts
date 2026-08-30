@@ -48,15 +48,12 @@ describe('AI Metadata Service', () => {
       config: {
         get: jest.fn(),
       },
-      ee: {
-        isEE: true,
-        features: {
+      ai: {
+        admin: {
           isEnabled: jest.fn().mockReturnValue(true),
+          getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
         },
       },
-      get: jest.fn().mockReturnValue({
-        getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
-      }),
       log: {
         http: jest.fn(),
         warn: jest.fn(),
@@ -71,7 +68,6 @@ describe('AI Metadata Service', () => {
               if (serviceName === 'upload') {
                 return { getSettings: mockGetSettings };
               }
-              // ...other services if needed
               return {};
             }),
           };
@@ -90,45 +86,33 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when AI is enabled, EE is available and aiMetadata is set to true', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
+    it('should return true when strapi.ai.admin.isEnabled() is true and aiMetadata is true', async () => {
+      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
       expect(mockGetSettings).toHaveBeenCalled();
     });
 
-    it('should return false when AI is disabled but EE is available', async () => {
-      mockStrapi.config.get.mockReturnValue(false);
+    it('should return false when strapi.ai.admin.isEnabled() is false', async () => {
+      mockStrapi.ai.admin.isEnabled.mockReturnValue(false);
+
+      expect(await aiMetadataService.isEnabled()).toBe(false);
+      expect(mockGetSettings).not.toHaveBeenCalled();
+    });
+
+    it('should return false when strapi.ai.admin.isEnabled() is true but aiMetadata is false', async () => {
+      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
-    it('should return false when AI is enabled but EE is not available', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
-      mockGetSettings.mockResolvedValue({ aiMetadata: true });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(false);
+    it('should default aiMetadata to true when not set in settings', async () => {
+      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+      mockGetSettings.mockResolvedValue({});
 
-      expect(await aiMetadataService.isEnabled()).toBe(false);
-    });
-
-    it('should return false when both AI and EE are disabled', async () => {
-      mockStrapi.config.get.mockReturnValue(false);
-      mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(false);
-
-      expect(await aiMetadataService.isEnabled()).toBe(false);
-    });
-
-    it('should return false when both AI and EE are enabled but aiMetadata is disabled', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
-      mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
-
-      expect(await aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(true);
     });
   });
 
@@ -164,27 +148,23 @@ describe('AI Metadata Service', () => {
     } as File;
 
     beforeEach(() => {
-      // Mock strapi config
       mockStrapi.config.get.mockImplementation((key: string) => {
         if (key === 'server.absoluteUrl') return 'test-url';
-        if (key === 'admin.ai.enabled') return true;
         if (key === 'server.port') return 1337;
         return undefined;
       });
 
       // Mock service as enabled by default
+      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
-      mockStrapi.ee.isEE = true;
 
-      // Mock readFile to return proper Buffer with .buffer property
       const mockBuffer = Buffer.from('image-data');
       mockReadFile.mockResolvedValue(mockBuffer);
     });
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
-        mockStrapi.config.get.mockReturnValue(false);
-        mockGetSettings.mockResolvedValue({ aiMetadata: false });
+        mockStrapi.ai.admin.isEnabled.mockReturnValue(false);
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
@@ -192,13 +172,22 @@ describe('AI Metadata Service', () => {
       });
 
       it('should throw if getSettings throws an error', async () => {
-        mockStrapi.config.get.mockReturnValue(true);
+        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
         mockGetSettings.mockRejectedValue(new Error('Settings error'));
-        mockStrapi.ee.isEE = true;
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
 
         await expect(aiMetadataService.processFiles(files)).rejects.toThrow('Settings error');
+      });
+
+      it('should throw when getAiToken fails (fail-fast)', async () => {
+        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+        mockGetSettings.mockResolvedValue({ aiMetadata: true });
+        mockStrapi.ai.admin.getAiToken.mockRejectedValue(new Error('token error'));
+
+        await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
+          'Failed to retrieve AI token'
+        );
       });
     });
 
@@ -302,10 +291,9 @@ describe('AI Metadata Service', () => {
         ]);
       });
 
-      it('should not call fetch and throw if aiMetadata is false, even if AI and EE are enabled', async () => {
-        mockStrapi.config.get.mockReturnValue(true);
+      it('should not call fetch and throw if aiMetadata is false', async () => {
+        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
         mockGetSettings.mockResolvedValue({ aiMetadata: false });
-        mockStrapi.ee.isEE = true;
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
 
@@ -553,6 +541,219 @@ describe('AI Metadata Service', () => {
         { alternativeText: 'Alt 4', caption: 'Caption 4' },
         { user: { id: 1 } }
       );
+    });
+  });
+
+  describe('generateForFiles', () => {
+    const mockFindMany = jest.fn();
+    const user = { id: 1 };
+
+    const image = (id: number): File =>
+      ({
+        id,
+        name: `image${id}.jpg`,
+        url: `/tmp/image${id}.jpg`,
+        mime: 'image/jpeg',
+        size: 1024,
+        provider: 'local',
+        hash: `hash${id}`,
+      }) as File;
+
+    beforeEach(() => {
+      mockFindMany.mockReset();
+
+      mockStrapi.db = {
+        query: jest.fn().mockReturnValue({ findMany: mockFindMany }),
+      };
+
+      aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
+
+      // The chunk processing itself is exercised through these two, which have
+      // their own dedicated tests above.
+      jest.spyOn(aiMetadataService, 'processFiles').mockResolvedValue([]);
+      jest.spyOn(aiMetadataService, 'updateFilesWithAIMetadata').mockResolvedValue(undefined);
+    });
+
+    it('returns an error entry for ids that no longer exist', async () => {
+      mockFindMany.mockResolvedValue([]);
+
+      const results = await aiMetadataService.generateForFiles([42], user);
+
+      expect(results).toEqual([{ id: 42, status: 'error', error: 'File not found' }]);
+      expect(aiMetadataService.processFiles).not.toHaveBeenCalled();
+    });
+
+    it('skips non-image files without calling the AI service', async () => {
+      const pdf = { id: 1, name: 'doc.pdf', mime: 'application/pdf' } as File;
+      mockFindMany.mockResolvedValue([pdf]);
+
+      const results = await aiMetadataService.generateForFiles([1], user);
+
+      expect(results).toEqual([{ id: 1, status: 'skipped' }]);
+      expect(aiMetadataService.processFiles).not.toHaveBeenCalled();
+    });
+
+    it('skips image formats the AI provider does not support', async () => {
+      const svg = { id: 1, name: 'logo.svg', mime: 'image/svg+xml' } as File;
+      mockFindMany.mockResolvedValue([svg]);
+
+      const results = await aiMetadataService.generateForFiles([1], user);
+
+      expect(results).toEqual([{ id: 1, status: 'skipped' }]);
+      expect(aiMetadataService.processFiles).not.toHaveBeenCalled();
+    });
+
+    it('normalises numeric string ids so they match the database rows', async () => {
+      const files = [image(1), image(2)];
+      const metadataResults = [
+        { altText: 'Alt 1', caption: 'Caption 1' },
+        { altText: 'Alt 2', caption: 'Caption 2' },
+      ];
+
+      mockFindMany.mockResolvedValue(files);
+      jest.spyOn(aiMetadataService, 'processFiles').mockResolvedValue(metadataResults);
+
+      const results = await aiMetadataService.generateForFiles(['1', '2'], user);
+
+      expect(mockFindMany).toHaveBeenCalledWith({ where: { id: { $in: [1, 2] } } });
+      expect(results).toEqual([
+        { id: 1, status: 'success' },
+        { id: 2, status: 'success' },
+      ]);
+    });
+
+    it('reports success and persists metadata for images', async () => {
+      const files = [image(1), image(2)];
+      const metadataResults = [
+        { altText: 'Alt 1', caption: 'Caption 1' },
+        { altText: 'Alt 2', caption: 'Caption 2' },
+      ];
+
+      mockFindMany.mockResolvedValue(files);
+      jest.spyOn(aiMetadataService, 'processFiles').mockResolvedValue(metadataResults);
+
+      const results = await aiMetadataService.generateForFiles([1, 2], user);
+
+      expect(results).toEqual([
+        { id: 1, status: 'success' },
+        { id: 2, status: 'success' },
+      ]);
+      expect(aiMetadataService.processFiles).toHaveBeenCalledWith(files);
+      expect(aiMetadataService.updateFilesWithAIMetadata).toHaveBeenCalledWith(
+        files,
+        metadataResults,
+        user
+      );
+    });
+
+    it('reports an error for an image the AI service returned no result for', async () => {
+      mockFindMany.mockResolvedValue([image(1), image(2)]);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockResolvedValue([{ altText: 'Alt 1', caption: 'Caption 1' }, null]);
+
+      const results = await aiMetadataService.generateForFiles([1, 2], user);
+
+      expect(results).toEqual([
+        { id: 1, status: 'success' },
+        { id: 2, status: 'error', error: 'AI metadata generation returned no result' },
+      ]);
+    });
+
+    it('preserves the requested order and mixes statuses', async () => {
+      const pdf = { id: 2, name: 'doc.pdf', mime: 'application/pdf' } as File;
+
+      mockFindMany.mockResolvedValue([image(1), pdf]);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockResolvedValue([{ altText: 'Alt 1', caption: 'Caption 1' }]);
+
+      const results = await aiMetadataService.generateForFiles([3, 2, 1], user);
+
+      expect(results).toEqual([
+        { id: 3, status: 'error', error: 'File not found' },
+        { id: 2, status: 'skipped' },
+        { id: 1, status: 'success' },
+      ]);
+    });
+
+    it('propagates the disabled error from processFiles as per-file errors', async () => {
+      mockFindMany.mockResolvedValue([image(1)]);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockRejectedValue(new Error('AI Metadata service is not enabled'));
+
+      const results = await aiMetadataService.generateForFiles([1], user);
+
+      expect(results).toEqual([
+        { id: 1, status: 'error', error: 'AI Metadata service is not enabled' },
+      ]);
+      expect(aiMetadataService.updateFilesWithAIMetadata).not.toHaveBeenCalled();
+    });
+
+    it('processes images in sequential chunks of 20', async () => {
+      const files = Array.from({ length: 45 }, (_, index) => image(index + 1));
+      const ids = files.map((file) => file.id);
+
+      mockFindMany.mockResolvedValue(files);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockImplementation(async (chunkFiles) =>
+          chunkFiles.map((file) => ({ altText: `Alt ${file.id}`, caption: `Caption ${file.id}` }))
+        );
+
+      const results = await aiMetadataService.generateForFiles(ids, user);
+
+      expect(aiMetadataService.processFiles).toHaveBeenCalledTimes(3);
+      expect((aiMetadataService.processFiles as jest.Mock).mock.calls[0][0]).toHaveLength(20);
+      expect((aiMetadataService.processFiles as jest.Mock).mock.calls[1][0]).toHaveLength(20);
+      expect((aiMetadataService.processFiles as jest.Mock).mock.calls[2][0]).toHaveLength(5);
+      expect(results.every((result) => result.status === 'success')).toBe(true);
+    });
+
+    it('marks only the failing chunk as errored and keeps processing later chunks', async () => {
+      const files = Array.from({ length: 25 }, (_, index) => image(index + 1));
+      const ids = files.map((file) => file.id);
+
+      mockFindMany.mockResolvedValue(files);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockRejectedValueOnce(new Error('AI server unavailable'))
+        .mockImplementationOnce(async (chunkFiles) =>
+          chunkFiles.map((file) => ({ altText: `Alt ${file.id}`, caption: `Caption ${file.id}` }))
+        );
+
+      const results = await aiMetadataService.generateForFiles(ids, user);
+
+      expect(aiMetadataService.processFiles).toHaveBeenCalledTimes(2);
+      expect(results.slice(0, 20)).toEqual(
+        files.slice(0, 20).map((file) => ({
+          id: file.id,
+          status: 'error',
+          error: 'AI server unavailable',
+        }))
+      );
+      expect(results.slice(20)).toEqual(
+        files.slice(20).map((file) => ({ id: file.id, status: 'success' }))
+      );
+      expect(aiMetadataService.updateFilesWithAIMetadata).toHaveBeenCalledTimes(1);
+    });
+
+    it('deduplicates repeated ids', async () => {
+      mockFindMany.mockResolvedValue([image(1)]);
+      jest
+        .spyOn(aiMetadataService, 'processFiles')
+        .mockResolvedValue([{ altText: 'Alt 1', caption: 'Caption 1' }]);
+
+      const results = await aiMetadataService.generateForFiles([1, 1], user);
+
+      expect(mockFindMany).toHaveBeenCalledWith({ where: { id: { $in: [1] } } });
+      expect(aiMetadataService.processFiles).toHaveBeenCalledTimes(1);
+      expect((aiMetadataService.processFiles as jest.Mock).mock.calls[0][0]).toHaveLength(1);
+      expect(results).toEqual([
+        { id: 1, status: 'success' },
+        { id: 1, status: 'success' },
+      ]);
     });
   });
 });

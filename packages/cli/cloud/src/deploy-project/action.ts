@@ -1,5 +1,4 @@
 import fse from 'fs-extra';
-import inquirer from 'inquirer';
 import boxen from 'boxen';
 import path from 'path';
 import chalk from 'chalk';
@@ -51,6 +50,7 @@ const boxenOptions: boxen.Options = {
 const QUIT_OPTION = 'Quit';
 
 async function promptForEnvironment(environments: string[]): Promise<string> {
+  const { default: inquirer } = await import('inquirer');
   const choices = environments.map((env) => ({ name: env, value: env }));
   const { selectedEnvironment } = await inquirer.prompt([
     {
@@ -348,6 +348,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     );
     if (shouldDisplayWarning) {
       ctx.logger.log(boxen(cliConfig.projectDeployment.confirmationText, boxenOptions));
+      const { default: inquirer } = await import('inquirer');
       const { confirm } = await inquirer.prompt([
         {
           type: 'confirm',

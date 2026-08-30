@@ -1,4 +1,4 @@
-import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
+import { curry, isEmpty, isNil, isArray, isPlainObject } from 'lodash/fp';
 
 import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
@@ -44,10 +44,12 @@ const defaultSanitizeOutput = async (ctx: Context, entity: Data) => {
     throw new Error('Missing schema in defaultSanitizeOutput');
   }
 
+  // Named parameters rather than a rest-spread: this runs once per key, per node, per
+  // entity, and `(...args)` allocated a fresh array on every call.
   return traverseEntity(
-    (...args) => {
-      removePassword(...args);
-      removePrivate(...args);
+    (visitorOptions, visitorUtils) => {
+      removePassword(visitorOptions, visitorUtils);
+      removePrivate(visitorOptions, visitorUtils);
     },
     ctx,
     entity
@@ -82,9 +84,12 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     traverseQueryFilters(removePassword, ctx),
     // Remove private from filters
     traverseQueryFilters(removePrivate, ctx),
-    // Remove empty objects
+    // Remove empty plain objects and empty arrays. Do not use lodash isObject+isEmpty: built-ins with no
+    // enumerable keys (Date, RegExp, boxed primitives, etc.) are "empty" and would wrongly drop valid operands.
     traverseQueryFilters(({ key, value }, { remove }) => {
-      if (isObject(value) && isEmpty(value)) {
+      const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
+      const isEmptyArrayOperand = isArray(value) && isEmpty(value);
+      if (isEmptyPlainObject || isEmptyArrayOperand) {
         remove(key);
       }
     }, ctx)

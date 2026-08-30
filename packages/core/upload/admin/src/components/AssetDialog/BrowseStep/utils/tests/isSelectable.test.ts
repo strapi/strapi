@@ -20,4 +20,9 @@ describe('TableList | isSelectable', () => {
   it('should return false if no mime is passed', () => {
     expect(isSelectable(['image', 'file', 'video', 'audio'])).toEqual(false);
   });
+
+  it('requires a video MIME for video-only fields', () => {
+    expect(isSelectable(['video'], 'application/octet-stream')).toEqual(false);
+    expect(isSelectable(['video'], 'video/quicktime')).toEqual(true);
+  });
 });

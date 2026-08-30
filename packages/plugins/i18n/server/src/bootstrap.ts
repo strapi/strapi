@@ -102,7 +102,9 @@ export default async () => {
   registerModelsHooks();
 
   // AI Localizations
-  getService('ai-localizations').setupMiddleware();
+  if (strapi.ai.admin.isEnabled() === true) {
+    getService('ai-localizations').setupMiddleware();
+  }
 
   sendDidInitializeEvent();
 };

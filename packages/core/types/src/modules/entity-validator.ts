@@ -8,8 +8,11 @@ export type Entity = {
   [key: string]: unknown;
 } | null;
 
-type Options = { isDraft?: boolean; locale?: string };
+type Options = { isDraft?: boolean; locale?: string; strictRelations?: boolean };
 
+/**
+ * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
+ */
 export interface EntityValidator {
   validateEntityCreation: <TUID extends UID.ContentType>(
     model: ContentTypes[TUID],

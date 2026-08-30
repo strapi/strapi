@@ -15,7 +15,6 @@ import {
   Tbody,
   Td,
   Tooltip,
-  IconButton,
   Thead,
   Tr,
   RawTrProps,
@@ -33,7 +32,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
@@ -43,7 +42,6 @@ import { createContext } from './Context';
 
 interface BaseRow {
   id: string | number;
-  [key: string]: any;
 }
 
 interface TableHeader<TData = object, THeader = object> {
@@ -70,7 +68,17 @@ interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TR
   selectRow: (row: TRow | TRow[]) => void;
 }
 
-const [TableProvider, useTable] = createContext<TableContextValue<any, any>>('Table');
+type DefaultTableHeader = TableHeader<BaseRow, object>;
+type DefaultTableContextValue = TableContextValue<BaseRow, DefaultTableHeader>;
+
+const [TableProvider, useTable] = createContext<DefaultTableContextValue>('Table');
+
+const GenericTableProvider = TableProvider as <
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+>(
+  props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
+) => React.ReactElement;
 
 interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
   extends Partial<
@@ -120,7 +128,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   };
 
   return (
-    <TableProvider
+    <GenericTableProvider
       colCount={colCount}
       hasHeaderCheckbox={hasHeaderCheckbox}
       setHasHeaderCheckbox={setHasHeaderCheckbox}
@@ -133,7 +141,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
       selectRow={selectRow}
     >
       {children}
-    </TableProvider>
+    </GenericTableProvider>
   );
 };
 
@@ -174,53 +182,66 @@ const Head = ({ children }: Table.HeadProps) => {
  * be passed to your data-fetching function.
  */
 const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, THead>) => {
-  const [{ query }, setQuery] = useQueryParams<{ sort?: `${string}:${'ASC' | 'DESC'}` }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    sort?: `${string}:${'ASC' | 'DESC'}`;
+    filters?: unknown;
+    _q?: unknown;
+  }>();
   const sort = query?.sort ?? '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
   const isSorted = sortBy === name;
 
   const sortLabel = formatMessage(
-    { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+    {
+      id: 'components.TableHeader.sort',
+      defaultMessage: 'Sort on {label}',
+    },
     { label }
   );
 
   const handleClickSort = () => {
     if (sortable) {
       setQuery(
-        {
+        withEncodedUserParams(query, {
           sort: `${name}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-        },
+        }),
         'push',
         true
       );
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (sortable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      handleClickSort();
+    }
+  };
+
   return (
-    <Th
-      action={
-        isSorted &&
-        sortable && (
-          <IconButton label={sortLabel} onClick={handleClickSort} variant="ghost">
-            <SortIcon $isUp={sortOrder === 'ASC'} />
-          </IconButton>
-        )
-      }
+    <SortableTh
+      onClick={sortable ? handleClickSort : undefined}
+      onKeyDown={sortable ? handleKeyDown : undefined}
+      tabIndex={sortable ? 0 : undefined}
+      aria-sort={isSorted ? (sortOrder === 'ASC' ? 'ascending' : 'descending') : undefined}
+      $sortable={!!sortable}
     >
       <Tooltip label={sortable ? sortLabel : label}>
-        <Typography
-          textColor="neutral600"
-          tag={!isSorted && sortable ? 'button' : 'span'}
-          onClick={handleClickSort}
-          variant="sigma"
-        >
-          {label}
-        </Typography>
+        <Flex gap={1}>
+          <Typography textColor="neutral600" tag="span" variant="sigma">
+            {label}
+          </Typography>
+          {isSorted && sortable && <SortIcon $isUp={sortOrder === 'ASC'} />}
+        </Flex>
       </Tooltip>
-    </Th>
+    </SortableTh>
   );
 };
+
+const SortableTh = styled(Th)<{ $sortable: boolean }>`
+  cursor: ${({ $sortable }) => ($sortable ? 'pointer' : 'default')};
+`;
 
 const SortIcon = styled(CaretDown)<{
   $isUp: boolean;
@@ -403,7 +424,11 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
   const { formatMessage } = useIntl();
 
   const handleSelectRow = () => {
-    selectRow(rows.find((row) => row.id === id));
+    const row = rows.find((row) => row.id === id);
+
+    if (row !== undefined) {
+      selectRow(row);
+    }
   };
 
   const isChecked = selectedRows.findIndex((row) => row.id === id) > -1;

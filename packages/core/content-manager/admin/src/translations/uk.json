@@ -249,7 +249,6 @@
   "relation.notAvailable": "Немає доступних зв'язків",
   "relation.publicationState.draft": "Чернетка",
   "relation.publicationState.published": "Опубліковано",
-  "reviewWorkflows.stage.label": "Етап перегляду",
   "select.currently.selected": "{count} зараз вибрано",
   "success.record.clone": "Документ клоновано",
   "success.record.discard": "Зміни відхилено",

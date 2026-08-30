@@ -1,5 +1,6 @@
 'use strict';
 
+import jwt from 'jsonwebtoken';
 import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createRequest } from 'api-tests/request';
 
@@ -17,7 +18,16 @@ describe('Admin Logout Sessions', () => {
   });
 
   afterAll(async () => {
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query('admin::session').deleteMany({});
+      await strapi.destroy();
+    }
+  });
+
+  afterEach(async () => {
+    if (strapi) {
+      await strapi.db.query('admin::session').deleteMany({});
+    }
   });
 
   const getCookie = (res: any, name: string): string | undefined => {
@@ -115,53 +125,114 @@ describe('Admin Logout Sessions', () => {
     expect(res.statusCode).toBe(200);
 
     // Derive userId from the access token payload
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as any;
+    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as {
+      userId: string;
+    };
     const userId = String(decoded.userId);
 
     const sessions = await strapi.db.query('admin::session').findMany({ where: { userId } });
     expect(sessions).toHaveLength(0);
   });
 
-  it.todo(
-    // TODO: not sure if we want to support this
-    'logout with unknown deviceId returns 200 and does not revoke other sessions'
+  it('logout revokes the current session when client deviceId differs from the session record (SSO-like)', async () => {
+    const rq = createRequest({ strapi });
+    const wrongClientDeviceId = '99999999-9999-4999-8999-999999999999';
 
-    //   async () => {
-    //   const rq = createRequest({ strapi });
+    // SSO omits deviceId, so the server generates one.
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
 
-    //   const loginA = await rq.post('/admin/login', {
-    //     body: { ...superAdmin.loginInfo, deviceId },
-    //   });
-    //   expect(loginA.statusCode).toBe(200);
+    const refreshCookie = getCookie(loginRes, cookieName)!;
+    const cookiePair = refreshCookie.split(';')[0];
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePair },
+    });
+    const accessToken = tokenRes.body?.data?.token as string;
 
-    //   const loginB = await rq.post('/admin/login', {
-    //     body: { ...superAdmin.loginInfo, deviceId: deviceId2 },
-    //   });
-    //   expect(loginB.statusCode).toBe(200);
+    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as {
+      userId: string;
+      sessionId: string;
+    };
+    const userId = String(decoded.userId);
 
-    //   // Get an access token from one of the sessions (device B)
-    //   const refreshCookie = getCookie(loginB, 'strapi_admin_refresh')!;
-    //   const cookiePair = refreshCookie.split(';')[0];
-    //   const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
-    //     headers: { Cookie: cookiePair },
-    //   });
-    //   const accessToken = tokenRes.body?.data?.token as string;
+    const sessionFromToken = await strapi.db.query('admin::session').findOne({
+      where: { sessionId: decoded.sessionId, status: 'active' },
+    });
+    expect(sessionFromToken?.deviceId).toBeDefined();
+    expect(sessionFromToken?.deviceId).not.toBe(wrongClientDeviceId);
 
-    //   // Attempt logout with a deviceId that does not exist
-    //   const unknownDeviceId = '66666666-6666-4666-8666-666666666666';
-    //   const res = await createRequest({ strapi })
-    //     // @ts-expect-error - chaining helper
-    //     .setToken(accessToken)
-    //     .post(`/admin/logout?deviceId=${unknownDeviceId}`);
-    //   expect(res.statusCode).toBe(200);
+    const res = await createRequest({ strapi })
+      .setToken(accessToken)
+      .post('/admin/logout', { body: { deviceId: wrongClientDeviceId } });
+    expect(res.statusCode).toBe(200);
 
-    //   // Verify sessions for A and B still exist
-    //   const sessions = await strapi.db.query('admin::session').findMany({});
-    //   expect(sessions.some((s: any) => s.deviceId === deviceId)).toBe(true);
-    //   expect(sessions.some((s: any) => s.deviceId === deviceId2)).toBe(true);
-    // }
-  );
+    const sessionsAfter = await strapi.db.query('admin::session').findMany({
+      where: { userId, deviceId: sessionFromToken!.deviceId, status: 'active' },
+    });
+    expect(sessionsAfter).toHaveLength(0);
+  });
+
+  it('SSO-like logout of device A leaves device B active', async () => {
+    const rq = createRequest({ strapi });
+    const wrongClientDeviceId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const deviceB = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+    // Device A: omit deviceId so the server assigns one (SSO-like).
+    const loginA = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginA.statusCode).toBe(200);
+
+    const loginB = await rq.post('/admin/login', {
+      body: { ...superAdmin.loginInfo, deviceId: deviceB },
+    });
+    expect(loginB.statusCode).toBe(200);
+
+    const refreshCookieA = getCookie(loginA, cookieName)!;
+    const cookiePairA = refreshCookieA.split(';')[0];
+    const tokenResA = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePairA },
+    });
+    const accessTokenA = tokenResA.body?.data?.token as string;
+
+    const decodedA = jwt.verify(accessTokenA, strapi.config.get('admin.auth.secret')) as {
+      userId: string;
+      sessionId: string;
+    };
+    const userId = String(decodedA.userId);
+
+    const sessionA = await strapi.db.query('admin::session').findOne({
+      where: { sessionId: decodedA.sessionId, status: 'active' },
+    });
+    expect(sessionA?.deviceId).toBeDefined();
+    expect(sessionA?.deviceId).not.toBe(wrongClientDeviceId);
+    expect(sessionA?.deviceId).not.toBe(deviceB);
+
+    const logoutA = await createRequest({ strapi })
+      .setToken(accessTokenA)
+      .post('/admin/logout', { body: { deviceId: wrongClientDeviceId } });
+    expect(logoutA.statusCode).toBe(200);
+
+    const sessionsAAfter = await strapi.db.query('admin::session').findMany({
+      where: { userId, deviceId: sessionA!.deviceId, status: 'active' },
+    });
+    expect(sessionsAAfter).toHaveLength(0);
+
+    const sessionsBAfter = await strapi.db.query('admin::session').findMany({
+      where: { userId, deviceId: deviceB, status: 'active' },
+    });
+    expect(sessionsBAfter.length).toBeGreaterThan(0);
+
+    const refreshCookieB = getCookie(loginB, cookieName)!;
+    const cookiePairB = refreshCookieB.split(';')[0];
+    const tokenResB = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePairB },
+    });
+    expect(tokenResB.statusCode).toBe(200);
+
+    const me = await createRequest({ strapi })
+      .setToken(tokenResB.body?.data?.token as string)
+      .get('/admin/users/me');
+    expect(me.statusCode).toBe(200);
+  });
 
   it('device B remains valid after device-scoped logout of device A', async () => {
     const rq = createRequest({ strapi });

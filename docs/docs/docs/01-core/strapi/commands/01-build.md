@@ -124,7 +124,7 @@ interface BuildContext {
 
 ### Static Files
 
-The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. We only generate two files for this – an `index.html` which is a static rendered React Component from the `@strapi/admin` package (DefaultDocument) & an `entry.js` file which calls the `renderAdmin` function & provides a mount point & plugin object.
+The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. We only generate two files for this – an `index.html` which is a static rendered React Component from the `@strapi/admin` package (DefaultDocument) & an `app.js` file which calls the `renderAdmin` function & provides a mount point & plugin object.
 
 ### Bundling
 

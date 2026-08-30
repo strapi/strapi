@@ -1,12 +1,20 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
-import strapiUtils from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation } =
-  strapiUtils.contentTypes;
+const {
+  isVisibleAttribute,
+  isScalarAttribute,
+  getDoesAttributeRequireValidation,
+  isPrivateAttribute,
+  hasDraftAndPublish,
+} = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
+
+const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
+  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
 
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
@@ -42,7 +50,8 @@ function getPopulateForRelation(
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
-  if (initialPopulate) {
+  // Use initialPopulate when explicitly provided (including `false` to suppress population)
+  if (initialPopulate !== undefined) {
     return initialPopulate;
   }
 
@@ -78,7 +87,7 @@ function getPopulateForDZ(
   attribute: Schema.Attribute.DynamicZone,
   options: PopulateOptions,
   level: number
-) {
+): { on: { [key: string]: { populate: { [key: string]: boolean | object } } } } {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
     (acc: any, componentUID: UID.Component) => ({
@@ -156,7 +165,7 @@ const getDeepPopulate = (
     maxLevel = Infinity,
   }: PopulateOptions = {},
   level = 1
-) => {
+): { [key: string]: boolean | object } => {
   if (level > maxLevel) {
     return {};
   }
@@ -194,76 +203,95 @@ const getDeepPopulate = (
  * @param options - Options to apply while populating
  * @param level - Current level of nested call
  */
+const validationPopulateCache = new Map<string, Record<string, any>>();
+
 const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
+  const cached = validationPopulateCache.get(uid);
+  if (cached) {
+    return cached;
+  }
+
   const model = strapi.getModel(uid);
   if (!model) {
     return {};
   }
 
-  return Object.entries(model.attributes).reduce((populateAcc: any, [attributeName, attribute]) => {
-    if (isScalarAttribute(attribute)) {
-      // If the scalar attribute requires validation, add it to the fields array
-      if (getDoesAttributeRequireValidation(attribute)) {
-        populateAcc.fields = populateAcc.fields || [];
-        populateAcc.fields.push(attributeName);
-      }
-      return populateAcc;
-    }
-
-    if (isMedia(attribute)) {
-      if (getDoesAttributeRequireValidation(attribute)) {
-        populateAcc.populate = populateAcc.populate || {};
-        populateAcc.populate[attributeName] = {
-          populate: {
-            folder: true,
-          },
-        };
+  const result = Object.entries(model.attributes).reduce(
+    (populateAcc: any, [attributeName, attribute]) => {
+      if (isScalarAttribute(attribute)) {
+        // If the scalar attribute requires validation, add it to the fields array
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
+          populateAcc.fields = populateAcc.fields || [];
+          populateAcc.fields.push(attributeName);
+        }
         return populateAcc;
       }
-    }
 
-    if (isComponent(attribute)) {
-      // @ts-expect-error - should be a component
-      const component = attribute.component;
+      if (isMedia(attribute)) {
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
+          populateAcc.populate = populateAcc.populate || {};
+          populateAcc.populate[attributeName] = {
+            populate: {
+              folder: true,
+            },
+          };
+          return populateAcc;
+        }
+      }
 
-      // Get the validation result for this component
-      const componentResult = getPopulateForValidation(component);
+      if (isComponent(attribute)) {
+        // @ts-expect-error - should be a component
+        const component = attribute.component;
 
-      if (Object.keys(componentResult).length > 0) {
-        populateAcc.populate = populateAcc.populate || {};
-        populateAcc.populate[attributeName] = componentResult;
+        // Get the validation result for this component
+        const componentResult = getPopulateForValidation(component);
+
+        if (Object.keys(componentResult).length > 0) {
+          populateAcc.populate = populateAcc.populate || {};
+          populateAcc.populate[attributeName] = componentResult;
+        }
+
+        return populateAcc;
+      }
+
+      if (isDynamicZone(attribute)) {
+        const components = (attribute as Schema.Attribute.DynamicZone).components;
+        // Handle dynamic zone components
+        const componentsResult = (components || []).reduce(
+          (acc, componentUID) => {
+            // Get validation populate for this component
+            const componentResult = getPopulateForValidation(componentUID);
+
+            // Only include component if it has fields requiring validation
+            if (Object.keys(componentResult).length > 0) {
+              acc[componentUID] = componentResult;
+            }
+
+            return acc;
+          },
+          {} as Record<string, any>
+        );
+
+        // Only add to populate if we have components requiring validation
+        if (Object.keys(componentsResult).length > 0) {
+          populateAcc.populate = populateAcc.populate || {};
+          populateAcc.populate[attributeName] = { on: componentsResult };
+        }
       }
 
       return populateAcc;
-    }
+    },
+    {}
+  );
 
-    if (isDynamicZone(attribute)) {
-      const components = (attribute as Schema.Attribute.DynamicZone).components;
-      // Handle dynamic zone components
-      const componentsResult = (components || []).reduce(
-        (acc, componentUID) => {
-          // Get validation populate for this component
-          const componentResult = getPopulateForValidation(componentUID);
-
-          // Only include component if it has fields requiring validation
-          if (Object.keys(componentResult).length > 0) {
-            acc[componentUID] = componentResult;
-          }
-
-          return acc;
-        },
-        {} as Record<string, any>
-      );
-
-      // Only add to populate if we have components requiring validation
-      if (Object.keys(componentsResult).length > 0) {
-        populateAcc.populate = populateAcc.populate || {};
-        populateAcc.populate[attributeName] = { on: componentsResult };
-      }
-    }
-
-    return populateAcc;
-  }, {});
+  validationPopulateCache.set(uid, result);
+  return result;
 };
 
 /**
@@ -275,8 +303,18 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  * @returns result.populate
  * @returns result.hasRelations
  */
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
+
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
+  const cached = draftCountPopulateCache.get(uid);
+  if (cached) {
+    return cached;
+  }
+
   const model = strapi.getModel(uid);
+  if (!model) {
+    return { populate: {}, hasRelations: false };
+  }
   let hasRelations = false;
 
   const populate = Object.keys(model.attributes).reduce((populateAcc: any, attributeName) => {
@@ -290,9 +328,32 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           break;
         }
 
+        // Skip relations to content types without draft & publish,
+        // as they don't have a publishedAt attribute and can't have drafts
+        if (!('target' in attribute)) {
+          break;
+        }
+
+        const targetModel = strapi.getModel(attribute.target);
+        if (!targetModel || !hasDraftAndPublish(targetModel)) {
+          break;
+        }
+
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
+          // Draft entries link to draft rows of related documents. Populate documentId/locale
+          // so we can distinguish truly unpublished targets from published documents that
+          // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
+          const fields: string[] = ['documentId'];
+          if (isLocalizedContentType(targetModel)) {
+            fields.push('locale');
+          }
           populateAcc[attributeName] = {
-            count: true,
+            fields,
             filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
           };
           hasRelations = true;
@@ -336,7 +397,9 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
     return populateAcc;
   }, {});
 
-  return { populate, hasRelations };
+  const result = { populate, hasRelations };
+  draftCountPopulateCache.set(uid, result);
+  return result;
 };
 
 /**
@@ -363,8 +426,7 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
         const populatePath = path.attribute.replace(/\./g, '.populate.');
-        // @ts-expect-error - lodash doesn't resolve the Populate type correctly
-        populateQuery = set(populatePath, {}, populateQuery);
+        populateQuery = merge(populateQuery, set(populatePath, {}, {}));
       }
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },
@@ -374,8 +436,46 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
   return populateQuery;
 };
 
-const buildDeepPopulate = (uid: UID.CollectionType) => {
-  return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
+const deepPopulateCache = new Map<string, object>();
+
+const buildDeepPopulate = async (uid: UID.CollectionType) => {
+  const cached = deepPopulateCache.get(uid);
+  if (cached) {
+    return cached;
+  }
+
+  const result = await getService('populate-builder')(uid)
+    .populateDeep(Infinity)
+    .countRelations()
+    .build();
+
+  deepPopulateCache.set(uid, result);
+
+  return result;
+};
+
+/**
+ * Restrict localizations populate to only metadata fields for localized content types.
+ * Returns an empty object for non-localized content types.
+ *
+ * By default, localizations are deeply populated which includes all relations and
+ * components for every locale — this is expensive and unnecessary for CM responses.
+ * The CM only needs these fields from localizations:
+ * - locale: to identify which locales exist
+ * - documentId: to link to the localized document
+ * - publishedAt: to determine published/draft status
+ * - updatedAt: to support the modified state indicator in the UI
+ */
+const getPopulateForLocalizations = (model: UID.Schema) => {
+  const modelSchema = strapi.getModel(model);
+  if (
+    (modelSchema as unknown as { pluginOptions: { i18n: { localized?: boolean } } }).pluginOptions
+      ?.i18n?.localized
+  ) {
+    return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };
+  }
+
+  return {};
 };
 
 export {
@@ -384,4 +484,5 @@ export {
   getPopulateForValidation,
   getQueryPopulate,
   buildDeepPopulate,
+  getPopulateForLocalizations,
 };

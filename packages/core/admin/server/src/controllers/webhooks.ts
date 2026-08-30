@@ -1,7 +1,4 @@
 import isLocalhostIp from 'is-localhost-ip';
-// Regular import references a deprecated node module,
-// See https://www.npmjs.com/package/punycode.js#installation
-import punycode from 'punycode/';
 import type { Context } from 'koa';
 import _ from 'lodash';
 
@@ -38,7 +35,7 @@ const webhookValidator = yup
           }
 
           try {
-            const parsedUrl = new URL(punycode.toASCII(url!));
+            const parsedUrl = new URL(url!);
             const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
             return !isLocalUrl;
           } catch {

@@ -17,6 +17,40 @@ import {
 import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
+import { ValidationError } from '../errors';
+
+const DEFAULT_QS_ARRAY_LIMIT = 100;
+
+/**
+ * Detects objects with consecutive numeric string keys and string values — the shape `qs`
+ * produces when indexed array notation exceeds `arrayLimit` (see #25632).
+ */
+const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, string> => {
+  if (!isObject(value) || isArray(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+
+  if (keys.length === 0 || keys.length <= DEFAULT_QS_ARRAY_LIMIT) {
+    return false;
+  }
+
+  const hasConsecutiveNumericKeys = keys.every((key, index) => key === String(index));
+
+  if (!hasConsecutiveNumericKeys) {
+    return false;
+  }
+
+  return Object.values(value).every((entry) => typeof entry === 'string');
+};
+
+const throwQsArrayLimitPopulateError = (entryCount: number) => {
+  throw new ValidationError(
+    `Too many populate entries (${entryCount}). The maximum number of populate entries when using array notation is ${DEFAULT_QS_ARRAY_LIMIT}. ` +
+      'Consider using object notation (populate[field]=true), nested population, or reducing the number of fields.'
+  );
+};
 
 const isKeyword = (keyword: string) => {
   return ({ key, attribute }: { key: string; attribute: Attribute }) => {
@@ -54,6 +88,9 @@ const populate = traverseFactory()
     );
 
     return paths.filter((item) => !isNil(item));
+  })
+  .intercept(isQsArrayLimitPopulateObject, async (_visitor, _options, populate) => {
+    throwQsArrayLimitPopulateError(Object.keys(populate).length);
   })
   // for wildcard, generate custom utilities to modify the values
   .parse(isWildcard, () => ({
@@ -145,10 +182,18 @@ const populate = traverseFactory()
       return data[key];
     },
   }))
-  .ignore(({ key, attribute }) => {
-    // we don't want to recurse using traversePopulate and instead let
-    // the visitors recurse with the appropriate traversal (sort, filters, etc...)
-    return ['sort', 'filters', 'fields'].includes(key) && !attribute;
+  .ignore(({ key, attribute, parent }) => {
+    // We don't want to recurse using traversePopulate for query keywords.
+    // Instead, the visitors handle them with the appropriate traversal (sort, filters, etc.).
+    //
+    // When a keyword name (e.g. 'filters') also exists as an attribute in the schema,
+    // we still treat it as a keyword if we're inside a nested populate context
+    // (parent is an attribute). This prevents the traverse from recursing into
+    // component/relation attributes named 'filters' with query filter data,
+    // which would cause "Invalid key" validation errors (issue #21338).
+    //
+    // The attribute can still be populated explicitly via `populate: { filters: true }`.
+    return ['sort', 'filters', 'fields'].includes(key) && (!attribute || !!parent?.attribute);
   })
   .on(
     // Handle recursion on populate."populate"

@@ -11,7 +11,6 @@ import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -28,12 +27,10 @@ const AIUageDataCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
   const latestStrapiReleaseTag = useAppInfo(
     'ApplicationInfoPage',
     (state) => state.latestStrapiReleaseTag
@@ -185,6 +182,8 @@ const ApplicationInfoPage = () => {
                         <Link
                           href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
                           endIcon={<ExternalLink />}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           {formatMessage({
                             id: 'Settings.application.link-upgrade',
@@ -197,22 +196,17 @@ const ApplicationInfoPage = () => {
                   <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
-                        id: 'Settings.application.edition-title',
-                        defaultMessage: 'current edition',
+                        id: 'Settings.application.plan-title',
+                        defaultMessage: 'current plan',
                       })}
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'Settings.application.ee-or-ce',
-                            defaultMessage:
-                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
-                          },
-                          { communityEdition }
-                        )}
-                      </Typography>
-                      <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                      <Typography>{window.strapi.projectType}</Typography>
+                      <Link
+                        href="https://strapi.io/pricing-self-hosted"
+                        endIcon={<ExternalLink />}
+                        target="_blank"
+                      >
                         {formatMessage({
                           id: 'Settings.application.link-pricing',
                           defaultMessage: 'See all pricing plans',

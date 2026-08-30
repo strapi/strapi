@@ -1,4 +1,4 @@
-import utils from '@strapi/utils';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { mapValues } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
@@ -65,7 +65,7 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
 };
 
 const formatAttributes = (model: any) => {
-  const { getVisibleAttributes } = utils.contentTypes;
+  const { getVisibleAttributes } = contentTypesUtils;
 
   // only get attributes that can be seen in the CTB
   return getVisibleAttributes(model).map((key) => {
@@ -181,12 +181,14 @@ export const updateSchema = async (schema: CTBSchema) => {
         }, {})
       );
 
-      await getService('content-types').generateAPI({
-        displayName: contentType!.displayName,
-        singularName: contentType!.singularName,
-        pluralName: contentType!.pluralName,
-        kind: contentType!.kind,
-      });
+      if (!contentType.plugin) {
+        await getService('content-types').generateAPI({
+          displayName: contentType!.displayName,
+          singularName: contentType!.singularName,
+          pluralName: contentType!.pluralName,
+          kind: contentType!.kind,
+        });
+      }
     }
 
     if (action === 'update') {
