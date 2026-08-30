@@ -39,6 +39,10 @@
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
+    "./dist/*": [
+      "./dist/*.js",
+      "./dist/*/index.js"
+    ],
     "./*": "./*"
   },
   "files": [
