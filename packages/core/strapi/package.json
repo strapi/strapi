@@ -64,22 +64,22 @@
   ],
   "exports": {
     ".": {
+      "@strapi/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./admin": {
+      "@strapi/source": "./src/admin.ts",
       "types": "./dist/admin.d.ts",
-      "source": "./src/admin.ts",
       "import": "./dist/admin.mjs",
       "require": "./dist/admin.js",
       "default": "./dist/admin.js"
     },
     "./admin/test": {
+      "@strapi/source": "./src/admin-test.ts",
       "types": "./dist/admin-test.d.ts",
-      "source": "./src/admin-test.ts",
       "import": "./dist/admin-test.mjs",
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
