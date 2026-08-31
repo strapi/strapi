@@ -386,6 +386,7 @@
   "sidebar.folders": "Folders",
   "sidebar.tree.aria-label": "Media library folders",
   "sidebar.tree.expand": "Expand {name}",
+  "sidebar.tree.no-subfolders": "{name} has no subfolders",
   "sidebar.tree.collapse": "Collapse {name}",
   "sidebar.tree.empty": "No folders yet",
   "sidebar.tree.loading": "Loading folders...",

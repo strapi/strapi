@@ -68,36 +68,58 @@ describe('FolderTree', () => {
     expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
   });
 
-  it('toggles a leaf folder chevron without revealing children or navigating', () => {
+  it('offers no expand control on a folder with no subfolders', () => {
     const onSelectFolder = jest.fn();
     renderTree({ onSelectFolder });
 
-    const expandLeaf = screen.getByRole('button', { name: /expand top b/i });
-    expect(expandLeaf).toHaveAttribute('aria-expanded', 'false');
+    // An enabled chevron on a leaf invites a click that can do nothing: it
+    // toggles the row's expanded state with no children to reveal.
+    const leafChevron = screen.getByRole('button', { name: /top b has no subfolders/i });
 
-    fireEvent.click(expandLeaf);
+    // The DS IconButton marks itself `aria-disabled` rather than using the
+    // native attribute, so assert that and — more importantly — that pressing
+    // it changes nothing.
+    expect(leafChevron).toHaveAttribute('aria-disabled', 'true');
+    // Nothing to expand means no expanded state to report.
+    expect(leafChevron).not.toHaveAttribute('aria-expanded');
+    expect(screen.queryByRole('button', { name: /expand top b/i })).not.toBeInTheDocument();
+
+    fireEvent.click(leafChevron);
 
     expect(onSelectFolder).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: /collapse top b/i })).toHaveAttribute(
-      'aria-expanded',
-      'true'
-    );
-    expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /collapse top b/i })).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: /collapse top b/i }));
+  it('mutes the leaf chevron rather than showing a disabled control', () => {
+    renderTree();
 
-    expect(screen.getByRole('button', { name: /expand top b/i })).toHaveAttribute(
-      'aria-expanded',
-      'false'
+    // The design system's disabled state is a filled, bordered pill, which draws
+    // more attention than the enabled chevron beside it. The override has to
+    // outrank that rule, so assert the resolved values, not the declaration.
+    const style = window.getComputedStyle(
+      screen.getByRole('button', { name: /top b has no subfolders/i })
     );
+
+    expect(style.opacity).toBe('0.5');
+    expect(style.background).toBe('transparent');
+    expect(style.borderColor).toBe('transparent');
+  });
+
+  it('keeps the expand control on a folder that has subfolders', () => {
+    renderTree();
+
+    const parentChevron = screen.getByRole('button', { name: /expand top a/i });
+
+    expect(parentChevron).not.toHaveAttribute('aria-disabled', 'true');
+    expect(parentChevron).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('does not auto-expand the destination folder when navigating to a leaf', () => {
     renderTree({ currentFolderId: 5 });
 
-    expect(screen.getByRole('button', { name: /expand top b/i })).toHaveAttribute(
-      'aria-expanded',
-      'false'
+    expect(screen.getByRole('button', { name: /top b has no subfolders/i })).toHaveAttribute(
+      'aria-disabled',
+      'true'
     );
   });
 
