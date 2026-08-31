@@ -194,5 +194,5 @@ const prepareTempKeys = (relations: RelResult[], existingRelations: RelationResu
 
 const { useGetRelationsQuery, useLazySearchRelationsQuery } = relationsApi;
 
-export { useGetRelationsQuery, useLazySearchRelationsQuery };
+export { useGetRelationsQuery, useLazySearchRelationsQuery, relationsApi };
 export type { RelationResult };
