@@ -62,26 +62,29 @@ const Bar = styled(Flex)<{ $isDrawerOpen: boolean; $isStacked: boolean }>`
 
   /* Mobile with the metadata action present: the labelled button plus the icons
      no longer fit beside the count on one line, so the count takes a row of its
-     own and every button drops to the next. Children in source order: count,
-     action cluster, divider, clear. */
+     own and every button drops to the next.
+
+     Addressed by slot rather than by position: these rules used to use
+     nth-child, which silently retargeted the moment a control was inserted
+     into the row. */
   ${({ $isStacked }) =>
     $isStacked &&
     css`
       flex-wrap: wrap;
       justify-content: space-between;
 
-      > :first-child {
+      > [data-bar-slot='count'] {
         flex-basis: 100%;
         margin-right: 0;
       }
 
-      > :nth-child(2) {
+      > [data-bar-slot='actions'] {
         margin-left: 0;
       }
 
       /* The divider only existed to set the clear action apart from the rest;
          with the row spread it would hang in mid-air between them. */
-      > :nth-child(3) {
+      > [data-bar-slot='divider'] {
         display: none;
       }
     `}
@@ -108,15 +111,15 @@ const Bar = styled(Flex)<{ $isDrawerOpen: boolean; $isStacked: boolean }>`
     /* One line again from tablet up, where it fits. */
     flex-wrap: nowrap;
 
-    > :first-child {
+    > [data-bar-slot='count'] {
       flex-basis: auto;
     }
 
-    > :nth-child(2) {
+    > [data-bar-slot='actions'] {
       margin-left: auto;
     }
 
-    > :nth-child(3) {
+    > [data-bar-slot='divider'] {
       display: block;
     }
   }
@@ -347,7 +350,7 @@ export const BulkActionsBar = ({
         defaultMessage: 'Bulk actions',
       })}
     >
-      <Typography fontWeight="bold" textColor="neutral800" marginRight={4}>
+      <Typography data-bar-slot="count" fontWeight="bold" textColor="neutral800" marginRight={4}>
         {formatMessage(
           {
             id: getTranslationKey('list.bulk-actions.selected-count'),
@@ -366,7 +369,7 @@ export const BulkActionsBar = ({
 
       {/* Past the early return the user always has `assets.update`, so the
           individual actions no longer re-check it. */}
-      <ActionCluster>
+      <ActionCluster data-bar-slot="actions">
         {isAiMetadataEnabled && (
           <Tooltip label={metadataDisabledReason}>
             {/* Wrapped so the tooltip still receives pointer events while the
@@ -431,7 +434,7 @@ export const BulkActionsBar = ({
         />
       </ActionCluster>
 
-      <VerticalDivider aria-hidden />
+      <VerticalDivider data-bar-slot="divider" aria-hidden />
 
       <IconButton
         variant="ghost"
