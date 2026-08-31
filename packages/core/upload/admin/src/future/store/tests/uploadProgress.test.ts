@@ -326,7 +326,12 @@ describe('uploadProgress slice', () => {
       );
       const firstDone = uploadProgressReducer(
         uploading,
-        setFileComplete({ uploadId: opened.uploadId, index: 0, file: { id: 1 } as never })
+        setFileComplete({
+          uploadId: opened.uploadId,
+          index: 0,
+          file: { id: 1 } as never,
+          completedAt: 1000,
+        })
       );
 
       expect(firstDone.files[0].uploadedBytes).toBe(1000);
@@ -381,14 +386,24 @@ describe('uploadProgress slice', () => {
       );
       state = uploadProgressReducer(
         state,
-        setFileComplete({ uploadId: state.uploadId, index: 0, file: { id: 1 } as never })
+        setFileComplete({
+          uploadId: state.uploadId,
+          index: 0,
+          file: { id: 1 } as never,
+          completedAt: 1000,
+        })
       );
       expect(countBased(state)).toBe(33);
 
       // Second lands → 67%.
       state = uploadProgressReducer(
         state,
-        setFileComplete({ uploadId: state.uploadId, index: 1, file: { id: 2 } as never })
+        setFileComplete({
+          uploadId: state.uploadId,
+          index: 1,
+          file: { id: 2 } as never,
+          completedAt: 1000,
+        })
       );
       expect(countBased(state)).toBe(67);
     });
