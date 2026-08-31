@@ -30,6 +30,8 @@ const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
  * @internal
  * @description Returns the direct parent object for a dot-separated path.
  */
+const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 const getDirectParent = (data: unknown, path: string): unknown => {
   if (!path) return undefined;
   const isNumericIndex = (value: string) => /^\d+$/.test(value);
@@ -38,6 +40,8 @@ const getDirectParent = (data: unknown, path: string): unknown => {
   let current: unknown = data;
 
   for (const segment of parentPath) {
+    if (BLOCKED_KEYS.has(segment)) return undefined;
+
     if (current == null) return undefined;
 
     if (isNumericIndex(segment)) {
