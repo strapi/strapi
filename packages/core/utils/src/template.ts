@@ -1,7 +1,7 @@
 /**
  * Create a strict interpolation RegExp based on the given variables' name
  */
-const createStrictInterpolationRegExp = (allowedVariableNames: string[], flags: string) => {
+const createStrictInterpolationRegExp = (allowedVariableNames: string[], flags?: string) => {
   const oneOfVariables = allowedVariableNames.join('|');
 
   // 1. We need to match the delimiters: <%= ... %>
@@ -13,6 +13,6 @@ const createStrictInterpolationRegExp = (allowedVariableNames: string[], flags: 
 /**
  * Create a loose interpolation RegExp to match as many groups as possible
  */
-const createLooseInterpolationRegExp = (flags: string) => new RegExp(/<%=([\s\S]+?)%>/, flags);
+const createLooseInterpolationRegExp = (flags?: string) => new RegExp(/<%=([\s\S]+?)%>/, flags);
 
 export { createStrictInterpolationRegExp, createLooseInterpolationRegExp };
