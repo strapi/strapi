@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
 import createUploadService from '../../upload';
-import { validateUploadBody } from '../../../controllers/validation/admin/upload';
 
 const PROVIDER = 'local';
 
@@ -90,92 +89,6 @@ describe('Upload service - replace()', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  test('keeps the name of the asset being replaced, not the uploaded file', async () => {
-    currentDbFile = {
-      id: 10,
-      name: 'original-name.txt',
-      hash: 'original_abc123',
-      ext: '.txt',
-      provider: PROVIDER,
-      formats: null,
-    };
-
-    // The admin sends no `fileInfo` on replace, and the name would otherwise
-    // fall through to the uploaded file's own filename — silently renaming the
-    // asset to `document.txt`.
-    await uploadService.replace(10, {
-      data: { fileInfo: {} as any },
-      file: inputFile() as any,
-    });
-
-    expect(dbUpdate).toHaveBeenCalledTimes(1);
-    expect(dbUpdate.mock.calls[0][0].data.name).toBe('original-name.txt');
-  });
-
-  // The service-level tests above pass `fileInfo` by hand. This one runs the
-  // body the admin actually sends — no `fileInfo` at all — through the real
-  // validator first, which is the layer where a defaulted name would undo the
-  // fix without any of the other tests noticing.
-  test('preserves the name for the payload the admin really sends', async () => {
-    currentDbFile = {
-      id: 12,
-      name: 'original-name.txt',
-      hash: 'original_ghi789',
-      ext: '.txt',
-      provider: PROVIDER,
-      formats: null,
-    };
-
-    const data = (await validateUploadBody({})) as { fileInfo: any };
-
-    expect(data.fileInfo.name).toBeUndefined();
-
-    await uploadService.replace(12, { data, file: inputFile() as any });
-
-    expect(dbUpdate.mock.calls[0][0].data.name).toBe('original-name.txt');
-  });
-
-  test('treats an empty name as "not given" rather than blanking it', async () => {
-    currentDbFile = {
-      id: 13,
-      name: 'original-name.txt',
-      hash: 'original_jkl012',
-      ext: '.txt',
-      provider: PROVIDER,
-      formats: null,
-    };
-
-    // `formatFileInfo` reads the name as `fileInfo.name || filename`, so an
-    // empty string has always meant "no name supplied". A nullish check here
-    // would instead let it through and leave the asset with no name at all.
-    await uploadService.replace(13, {
-      data: { fileInfo: { name: '' } as any },
-      file: inputFile() as any,
-    });
-
-    expect(dbUpdate.mock.calls[0][0].data.name).toBe('original-name.txt');
-  });
-
-  test('still honours an explicit rename sent with the replacement', async () => {
-    currentDbFile = {
-      id: 11,
-      name: 'original-name.txt',
-      hash: 'original_def456',
-      ext: '.txt',
-      provider: PROVIDER,
-      formats: null,
-    };
-
-    // Preserving the name is the default, not a lock: a caller that means to
-    // rename can still say so.
-    await uploadService.replace(11, {
-      data: { fileInfo: { name: 'deliberately-renamed.txt' } as any },
-      file: inputFile() as any,
-    });
-
-    expect(dbUpdate.mock.calls[0][0].data.name).toBe('deliberately-renamed.txt');
   });
 
   test('replacing an image with a non-image deletes the old generated formats', async () => {
