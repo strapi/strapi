@@ -74,7 +74,9 @@ describe('FolderTree', () => {
 
     // An enabled chevron on a leaf invites a click that can do nothing: it
     // toggles the row's expanded state with no children to reveal.
-    const leafChevron = screen.getByRole('button', { name: /top b has no subfolders/i });
+    const leafChevron = screen.getByRole('button', {
+      name: 'The folder Top B has no subfolders',
+    });
 
     // The DS IconButton marks itself `aria-disabled` rather than using the
     // native attribute, so assert that and — more importantly — that pressing

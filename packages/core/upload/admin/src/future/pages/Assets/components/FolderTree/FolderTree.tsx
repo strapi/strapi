@@ -312,7 +312,7 @@ const FolderTreeItemInner = ({
               : formatMessage(
                   {
                     id: getTranslationKey('sidebar.tree.no-subfolders'),
-                    defaultMessage: '{name} has no subfolders',
+                    defaultMessage: 'The folder {name} has no subfolders',
                   },
                   { name }
                 )
