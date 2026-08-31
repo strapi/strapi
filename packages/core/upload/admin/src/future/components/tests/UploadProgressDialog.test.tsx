@@ -66,6 +66,45 @@ describe('UploadProgressDialog', () => {
     jest.clearAllMocks();
   });
 
+  describe('Long file names', () => {
+    const longName = `${'a'.repeat(200)}.png`;
+
+    it('ellipsizes the name instead of widening the row', () => {
+      setup(
+        createMockState({
+          isVisible: true,
+          files: [createMockFile(0, longName, 'uploading')],
+        })
+      );
+
+      // An unconstrained row grows to the width of its longest name, which pushes
+      // past the fixed-width panel and gives the dialog a horizontal scrollbar
+      // on top of the vertical one.
+      const name = screen.getByText(longName);
+
+      expect(window.getComputedStyle(name).textOverflow).toBe('ellipsis');
+      // The floor belongs to the name, so it is what gives way.
+      expect(window.getComputedStyle(name).minWidth).toBe('0');
+    });
+
+    it('keeps the status icon at full size next to a truncated name', () => {
+      setup(
+        createMockState({
+          isVisible: true,
+          files: [createMockFile(0, longName, 'uploading')],
+        })
+      );
+
+      // The icon sizes itself through SVG attributes, which flex may override —
+      // so without a shrink guard a long name squashes it instead of truncating.
+      // eslint-disable-next-line testing-library/no-node-access
+      const icon = screen.getByText(longName).previousElementSibling;
+
+      expect(icon).toBeInTheDocument();
+      expect(window.getComputedStyle(icon as Element).flexShrink).toBe('0');
+    });
+  });
+
   describe('Dialog visibility', () => {
     it('renders the dialog when isVisible is true', () => {
       setup(createMockState({ isVisible: true }));

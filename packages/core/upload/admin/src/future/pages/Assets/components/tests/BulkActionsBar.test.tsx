@@ -8,6 +8,12 @@ import type { File } from '../../../../../../../shared/contracts/files';
 
 const mockToggleNotification = jest.fn();
 const mockAIAvailability = jest.fn(() => false);
+let mockAiMetadataEnabled = false;
+
+jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
+  ...jest.requireActual('../../../../hooks/useAIMetadataEnabled'),
+  useAIMetadataEnabled: () => mockAiMetadataEnabled,
+}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -59,6 +65,7 @@ const setup = (initialEntries?: string[]) =>
 describe('BulkActionsBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAiMetadataEnabled = false;
   });
 
   it('is visible with a selection and no details param', async () => {
@@ -71,7 +78,8 @@ describe('BulkActionsBar', () => {
     expect(screen.getByText('2 items selected')).toBeInTheDocument();
   });
 
-  it('is hidden while the details drawer is open', async () => {
+  // jsdom matches no breakpoint, so the base (mobile) rules are what applies here.
+  it('is hidden on mobile while the details drawer is open', async () => {
     const { user } = setup();
 
     await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
@@ -83,6 +91,40 @@ describe('BulkActionsBar', () => {
     await waitFor(() =>
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument()
     );
+  });
+
+  // jsdom matches no breakpoint, so these read the mobile rules.
+  describe('mobile layout with the metadata action', () => {
+    const openBar = async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 2' }));
+
+      return screen.findByRole('region', { name: 'Bulk actions' });
+    };
+
+    it('drops the buttons to their own line when Create metadata is offered', async () => {
+      mockAiMetadataEnabled = true;
+
+      const bar = await openBar();
+
+      // The labelled button plus the icons no longer fit beside the count, so
+      // the count takes a full row and the buttons wrap under it, spread across it.
+      const style = window.getComputedStyle(bar);
+
+      expect(style.flexWrap).toBe('wrap');
+      expect(style.justifyContent).toBe('space-between');
+    });
+
+    it('keeps everything on one line without it', async () => {
+      const bar = await openBar();
+
+      const style = window.getComputedStyle(bar);
+
+      expect(style.flexWrap).not.toBe('wrap');
+      expect(style.justifyContent).not.toBe('space-between');
+    });
   });
 
   it('returns with the selection intact once the drawer closes', async () => {

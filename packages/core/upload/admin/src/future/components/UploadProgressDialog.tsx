@@ -34,6 +34,7 @@ import {
 import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
+import { TruncatedText } from './TruncatedText';
 
 import type { FileMetadataStatus, FileProgress, FileProgressStatus } from '../store/uploadProgress';
 import type { MessageDescriptor } from 'react-intl';
@@ -52,7 +53,14 @@ const HeaderStatusMessage = ({
   metadataSubtitle?: string;
 }) => {
   return (
-    <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingLeft={2}
+      paddingRight={2}
+      paddingTop={1}
+      paddingBottom={1}
+    >
       <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
       </Drawer.Title>
@@ -71,6 +79,7 @@ const HeaderStatusMessage = ({
 };
 
 const HeaderStatusIcon = styled(Flex)`
+  align-self: stretch;
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => `${theme.borderRadius} 0 0 ${theme.borderRadius}`};
 
@@ -497,6 +506,27 @@ const IndeterminateBar = () => {
   );
 };
 
+/**
+ * Without a floor of zero the row is as wide as its longest filename, which
+ * pushes past the panel and gives the dialog a second, horizontal scrollbar
+ * instead of truncating.
+ *
+ * The floor belongs to the name alone: the icon carries its size in SVG
+ * attributes, which flex is free to override, so letting it shrink squashes it
+ * against a long name instead of truncating the name.
+ */
+const FileRowName = styled(Flex)`
+  min-width: 0;
+
+  > :first-child {
+    flex-shrink: 0;
+  }
+
+  > :last-child {
+    min-width: 0;
+  }
+`;
+
 const FileRow = ({
   icon,
   fileName,
@@ -508,12 +538,12 @@ const FileRow = ({
 }) => {
   return (
     <Flex direction="column" alignItems="stretch" justifyContent="center" gap={1} width="100%">
-      <Flex gap={2}>
+      <FileRowName gap={2}>
         {icon}
-        <Typography variant="omega" fontWeight="semiBold" ellipsis>
+        <TruncatedText variant="omega" fontWeight="semiBold">
           {fileName}
-        </Typography>
-      </Flex>
+        </TruncatedText>
+      </FileRowName>
       {children}
     </Flex>
   );
