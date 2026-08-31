@@ -168,7 +168,9 @@ describe('MCP content-manager relation shaping (api)', () => {
       expect(res.statusCode).toBe(200);
       createdLocaleIds.push(res.body.id);
     }
-  });
+    // Default 60s hook timeout is too tight for this suite: 1 component + 3 content types
+    // via the CTB API, a full Strapi boot, and 2 locale creations.
+  }, 120000);
 
   afterAll(async () => {
     await deleteAllDocuments();
@@ -180,7 +182,7 @@ describe('MCP content-manager relation shaping (api)', () => {
 
     await strapi.destroy();
     await builder.cleanup();
-  });
+  }, 120000);
 
   afterEach(async () => {
     await deleteAllDocuments();
