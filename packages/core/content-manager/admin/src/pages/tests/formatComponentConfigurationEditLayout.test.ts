@@ -131,7 +131,6 @@ describe('formatComponentConfigurationEditLayout', () => {
               placeholder: '',
               visible: true,
               editable: true,
-              // @ts-expect-error — mainField is used at runtime (see useDocumentLayout getMainField call).
               mainField: 'title',
             },
             list: { label: 'Cta' },

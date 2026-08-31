@@ -1,7 +1,7 @@
 import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
-import type { Data, Modules, UID } from '@strapi/types';
+import type { Data, Modules, Struct, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -48,6 +48,72 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   }
 
   return mainField;
+};
+
+const sanitizeMediaField = (
+  model: Struct.Schema,
+  mediaField: string,
+  userAbility: unknown
+): string | null => {
+  const attr = model.attributes?.[mediaField];
+  if (!attr || attr.type !== 'media') return null;
+
+  const permissionChecker = getService('permission-checker').create({
+    userAbility,
+    model: model.uid,
+  });
+
+  if (!permissionChecker.can.read(null, mediaField)) return null;
+
+  return mediaField;
+};
+
+/**
+ * Loads the media of the given relations through a dedicated query and returns a new
+ * list with it attached.
+ *
+ * The media is deliberately NOT populated through `loadPages`: that helper forwards the
+ * very same query to its `count: true` companion, so a populate there leaks the selected
+ * columns into an aggregate. Strict engines reject it — PostgreSQL raises
+ * `column "t0.id" must appear in the GROUP BY clause` — while SQLite and MySQL let it pass.
+ *
+ * `permittedIds` must only ever contain ids returned by the permission-checked query, so
+ * the media of relations the user is not allowed to read is never loaded.
+ */
+const loadRelationsMedia = async ({
+  targetUid,
+  mediaField,
+  populateForMedia,
+  relations,
+  permittedIds,
+}: {
+  targetUid: string;
+  mediaField: string;
+  populateForMedia: Record<string, unknown>;
+  relations: Array<Record<string, unknown>>;
+  permittedIds: unknown[];
+}): Promise<Array<Record<string, unknown>>> => {
+  if (permittedIds.length === 0) {
+    return relations;
+  }
+
+  const { populate } = strapi
+    .get('query-params')
+    .transform(targetUid, { populate: populateForMedia });
+
+  const rows: Array<Record<string, unknown>> = await strapi.db.query(targetUid).findMany({
+    select: ['id'],
+    where: { id: { $in: permittedIds } },
+    populate,
+  });
+
+  const mediaById = new Map(rows.map((row) => [row.id, row[mediaField]]));
+
+  return relations.map((relation) =>
+    mediaById.has(relation.id)
+      ? { ...relation, [mediaField]: mediaById.get(relation.id) }
+      : relation
+  );
 };
 
 /**
@@ -244,6 +310,20 @@ export default {
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
+    const mediaField = flow(
+      prop(`metadatas.${targetField}.edit.mediaField`),
+      (field: string | undefined) =>
+        field ? sanitizeMediaField(targetSchema, field, userAbility) : null
+    )(modelConfig);
+
+    const populateForMedia = mediaField
+      ? {
+          [mediaField]: {
+            fields: ['url', 'alternativeText', 'formats', 'width', 'height', 'mime', 'name'],
+          },
+        }
+      : undefined;
+
     const fieldsToSelect = uniq([
       mainField,
       PUBLISHED_AT_ATTRIBUTE,
@@ -262,6 +342,8 @@ export default {
       attribute,
       fieldsToSelect,
       mainField,
+      mediaField,
+      populateForMedia,
       source: { schema: sourceSchema, isLocalized: isSourceLocalized },
       target: { schema: targetSchema, isLocalized: isTargetLocalized },
       sourceSchema,
@@ -286,6 +368,7 @@ export default {
       targetField,
       fieldsToSelect,
       mainField,
+      populateForMedia,
       source: {
         schema: { uid: sourceUid, modelType: sourceModelType },
         isLocalized: isSourceLocalized,
@@ -315,6 +398,9 @@ export default {
       // cannot select other fields as the user may not have the permissions
       fields: fieldsToSelect,
       ...permissionQuery,
+      ...(populateForMedia
+        ? { populate: { ...permissionQuery.populate, ...populateForMedia } }
+        : {}),
     };
 
     // If no status is requested, we find all the draft relations and later update them
@@ -429,6 +515,8 @@ export default {
       targetField,
       fieldsToSelect,
       status,
+      mediaField,
+      populateForMedia,
       source: { schema: sourceSchema },
       target: { schema: targetSchema },
     } = await this.extractAndValidateRequestInfo(ctx, id);
@@ -481,6 +569,10 @@ export default {
      * - Second one also loads the main field, and excludes forbidden relations.
      *
      * The response contains the union of the two queries.
+     *
+     * NOTE: the media thumbnail is deliberately NOT populated here. This query
+     * bypasses the permission query, so populating it would expose the media of
+     * relations the user is not allowed to read.
      */
     const res = await loadRelations({ id: entryId }, targetField, {
       select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
@@ -511,6 +603,17 @@ export default {
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
+    const relationsWithMedia =
+      mediaField && populateForMedia
+        ? await loadRelationsMedia({
+            targetUid,
+            mediaField,
+            populateForMedia,
+            relations: relationsUnion,
+            permittedIds: sanitizedRes.results.map((relation: { id: unknown }) => relation.id),
+          })
+        : relationsUnion;
+
     ctx.body = {
       pagination: res.pagination || {
         page: 1,
@@ -518,7 +621,7 @@ export default {
         pageSize: 10,
         total: relationsUnion.length,
       },
-      results: await addStatusToRelations(targetUid, relationsUnion),
+      results: await addStatusToRelations(targetUid, relationsWithMedia),
     };
   },
 };

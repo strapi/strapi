@@ -62,5 +62,44 @@ const getMainField = (
   };
 };
 
-export { checkIfAttributeIsDisplayable, getMainField };
-export type { MainField };
+interface MediaField {
+  name: string;
+}
+
+/**
+ * @internal
+ * @description given an attribute and a mediaField name, verify the target schema has a matching media attribute.
+ */
+const getMediaField = (
+  attribute: SchemaUtils.Attribute.AnyAttribute,
+  mediaFieldName: string | undefined,
+  { schemas, components }: { schemas: Schema[]; components: ComponentsDictionary }
+): MediaField | undefined => {
+  if (!mediaFieldName) {
+    return undefined;
+  }
+
+  let targetAttributes: Schema['attributes'] | undefined;
+
+  if (attribute.type === 'component') {
+    targetAttributes = components[attribute.component]?.attributes;
+  } else if (attribute.type === 'relation') {
+    const target =
+      'targetModel' in attribute
+        ? attribute.targetModel
+        : 'target' in attribute
+          ? attribute.target
+          : undefined;
+
+    targetAttributes = schemas.find((schema) => schema.uid === target)?.attributes;
+  }
+
+  if (targetAttributes?.[mediaFieldName]?.type !== 'media') {
+    return undefined;
+  }
+
+  return { name: mediaFieldName };
+};
+
+export { checkIfAttributeIsDisplayable, getMainField, getMediaField };
+export type { MainField, MediaField };

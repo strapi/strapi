@@ -23,6 +23,8 @@ export type Metadatas = {
       placeholder?: string;
       visible?: boolean;
       editable?: boolean;
+      mainField?: string;
+      mediaField?: string;
     };
     list: {
       label?: string;

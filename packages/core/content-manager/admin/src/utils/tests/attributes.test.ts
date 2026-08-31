@@ -1,12 +1,109 @@
-import { checkIfAttributeIsDisplayable, getMainField } from '../attributes';
+import { checkIfAttributeIsDisplayable, getMainField, getMediaField } from '../attributes';
 
+import type { ComponentsDictionary, Schema as ContentTypeSchema } from '../../hooks/useDocument';
 import type { Schema } from '@strapi/types';
 
 type RelationAttributeWithTargetModel = Schema.Attribute.Relation & {
   targetModel: string;
 };
 
+type RelationTarget = Schema.Attribute.OneToOne['target'];
+
 describe('attributes', () => {
+  describe('getMediaField', () => {
+    const schemas = [
+      {
+        uid: 'api::product.product',
+        attributes: {
+          name: { type: 'string' },
+          coverImage: { type: 'media' },
+          description: { type: 'text' },
+        },
+      },
+    ] as unknown as ContentTypeSchema[];
+
+    const components: ComponentsDictionary = {};
+
+    const relationTo = (targetModel: RelationTarget) =>
+      ({
+        type: 'relation',
+        relation: 'oneToOne',
+        target: targetModel,
+        targetModel,
+      }) satisfies RelationAttributeWithTargetModel;
+
+    it('should return undefined when mediaFieldName is undefined', () => {
+      const attribute = relationTo('api::product.product');
+      expect(getMediaField(attribute, undefined, { schemas, components })).toBeUndefined();
+    });
+
+    it('should return MediaField object for valid media attribute', () => {
+      const attribute = relationTo('api::product.product');
+      const result = getMediaField(attribute, 'coverImage', { schemas, components });
+      expect(result).toEqual({ name: 'coverImage' });
+    });
+
+    it('should return undefined for non-media attribute', () => {
+      const attribute = relationTo('api::product.product');
+      expect(getMediaField(attribute, 'name', { schemas, components })).toBeUndefined();
+    });
+
+    it('should return undefined for non-existent attribute', () => {
+      const attribute = relationTo('api::product.product');
+      expect(getMediaField(attribute, 'nonExistent', { schemas, components })).toBeUndefined();
+    });
+
+    it('should return undefined when target schema is not found', () => {
+      const attribute = relationTo('api::unknown.unknown');
+      expect(getMediaField(attribute, 'coverImage', { schemas, components })).toBeUndefined();
+    });
+
+    it('should resolve the target schema from `target` when `targetModel` is absent', () => {
+      const attribute = {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'api::product.product',
+      } as Schema.Attribute.AnyAttribute;
+
+      expect(getMediaField(attribute, 'coverImage', { schemas, components })).toEqual({
+        name: 'coverImage',
+      });
+    });
+
+    it('should resolve the media field from the component attributes', () => {
+      const componentsWithMedia = {
+        'basic.card': {
+          uid: 'basic.card',
+          attributes: {
+            title: { type: 'string' },
+            picture: { type: 'media' },
+          },
+        },
+      } as unknown as ComponentsDictionary;
+
+      const attribute = {
+        type: 'component',
+        component: 'basic.card',
+        repeatable: false,
+      } satisfies Schema.Attribute.Component;
+
+      expect(
+        getMediaField(attribute, 'picture', { schemas, components: componentsWithMedia })
+      ).toEqual({ name: 'picture' });
+
+      expect(
+        getMediaField(attribute, 'title', { schemas, components: componentsWithMedia })
+      ).toBeUndefined();
+
+      expect(getMediaField(attribute, 'picture', { schemas, components })).toBeUndefined();
+    });
+
+    it('should return undefined for an attribute that is neither a relation nor a component', () => {
+      const attribute = { type: 'string' } satisfies Schema.Attribute.String;
+
+      expect(getMediaField(attribute, 'coverImage', { schemas, components })).toBeUndefined();
+    });
+  });
   describe('checkIfAttributeIsDisplayable', () => {
     it('should return false if the relation is morph', () => {
       const attribute = {
