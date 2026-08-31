@@ -4,7 +4,7 @@ import { useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
 import { ArrowRight, Cross, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import {
   AI_METADATA_MAX_FILES,
@@ -18,6 +18,7 @@ import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocat
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useIsAssetDetailsOpen } from '../hooks/useIsAssetDetailsOpen';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
@@ -29,7 +30,7 @@ import type { File } from '../../../../../../shared/contracts/files';
  * bottom edge (no radius, top border only). Desktop (medium+): a floating,
  * centered pill.
  */
-const Bar = styled(Flex)`
+const Bar = styled(Flex)<{ $isDrawerOpen: boolean; $isStacked: boolean }>`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndices.popover};
   left: 0;
@@ -45,13 +46,69 @@ const Bar = styled(Flex)`
   border-radius: 0;
   box-shadow: ${({ theme }) => theme.shadows.popupShadow};
 
+  /* Docked full-bleed at the bottom on mobile, which is exactly where the open
+     drawer keeps its own actions — so it steps aside there, and only there. */
+  display: ${({ $isDrawerOpen }) => ($isDrawerOpen ? 'none' : 'flex')};
+
+  /* Mobile with the metadata action present: the labelled button plus the icons
+     no longer fit beside the count on one line, so the count takes a row of its
+     own and every button drops to the next. Children in source order: count,
+     action cluster, divider, clear. */
+  ${({ $isStacked }) =>
+    $isStacked &&
+    css`
+      flex-wrap: wrap;
+      justify-content: space-between;
+
+      > :first-child {
+        flex-basis: 100%;
+        margin-right: 0;
+      }
+
+      > :nth-child(2) {
+        margin-left: 0;
+      }
+
+      /* The divider only existed to set the clear action apart from the rest;
+         with the row spread it would hang in mid-air between them. */
+      > :nth-child(3) {
+        display: none;
+      }
+    `}
+
   ${({ theme }) => theme.breakpoints.medium} {
+    display: flex;
     left: 50%;
     right: auto;
     bottom: ${({ theme }) => theme.spaces[4]};
     transform: translateX(-50%);
     border: 1px solid ${({ theme }) => theme.colors.neutral150};
     border-radius: ${({ theme }) => theme.borderRadius};
+    /* Sized by its content, capped so the pill can never span the whole
+       viewport. The nowrap is what lets the content set that width — without it
+       the labels wrap and the bar reads as narrow and tall. Inherited, so it
+       covers every label inside.
+
+       Deliberately not applied on mobile: there the bar is full-bleed and
+       cannot grow, so refusing to wrap would clip the last action on a narrow
+       phone rather than widen anything. */
+    white-space: nowrap;
+    max-width: 90%;
+
+    /* One line again from tablet up, where it fits. */
+    flex-wrap: nowrap;
+
+    > :first-child {
+      flex-basis: auto;
+    }
+
+    > :nth-child(2) {
+      margin-left: auto;
+    }
+
+    > :nth-child(3) {
+      display: block;
+    }
   }
 `;
 
@@ -100,6 +157,7 @@ export const BulkActionsBar = ({
   const { canUpdate } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
+  const isDetailsDrawerOpen = useIsAssetDetailsOpen();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
@@ -245,12 +303,20 @@ export const BulkActionsBar = ({
   // without the permission, the bar has nothing to offer — drop it entirely
   // rather than show a count + "Clear selection" over no actions (mirrors the
   // drawer footer, which hides when no permitted action survives).
+  //
+  // With the drawer open the bar is hidden on mobile only, in CSS: there the two
+  // are stacked at `bottom: 0` and the bar (popover, 500) would cover the
+  // drawer's footer actions, since the drawer sits below the overlay token at
+  // 200. From `medium` up the drawer is a side panel and the bar is a centered
+  // pill, so they no longer collide.
   if (count === 0 || !canUpdate) {
     return null;
   }
 
   return (
     <Bar
+      $isDrawerOpen={isDetailsDrawerOpen}
+      $isStacked={isAiMetadataEnabled}
       tag="section"
       role="region"
       aria-label={formatMessage({

@@ -45,21 +45,14 @@ export const EmptyStateAsset = ({
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
-      const files = e.dataTransfer.files;
-      const assets: FileWithoutIdHash[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, ASSET_SOURCES.Computer);
-
-          assets.push(asset);
-        }
-      }
+      const files = Array.from(e.dataTransfer.files);
+      const assets = await Promise.all(
+        files.map((file) => rawFileToAsset(file, ASSET_SOURCES.Computer))
+      );
 
       onDropAsset(assets);
     }

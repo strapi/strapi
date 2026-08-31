@@ -48,6 +48,8 @@ const createMockState = (overrides: Partial<UploadProgressState> = {}): UploadPr
   files: [],
   errors: [],
   uploadId: 1,
+  // Direct-file flow by default; the URL flow opts out.
+  reportsByteProgress: true,
   ...overrides,
 });
 
@@ -62,6 +64,45 @@ const setup = (state: UploadProgressState = createMockState()) => {
 describe('UploadProgressDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('Long file names', () => {
+    const longName = `${'a'.repeat(200)}.png`;
+
+    it('ellipsizes the name instead of widening the row', () => {
+      setup(
+        createMockState({
+          isVisible: true,
+          files: [createMockFile(0, longName, 'uploading')],
+        })
+      );
+
+      // An unconstrained row grows to the width of its longest name, which pushes
+      // past the fixed-width panel and gives the dialog a horizontal scrollbar
+      // on top of the vertical one.
+      const name = screen.getByText(longName);
+
+      expect(window.getComputedStyle(name).textOverflow).toBe('ellipsis');
+      // The floor belongs to the name, so it is what gives way.
+      expect(window.getComputedStyle(name).minWidth).toBe('0');
+    });
+
+    it('keeps the status icon at full size next to a truncated name', () => {
+      setup(
+        createMockState({
+          isVisible: true,
+          files: [createMockFile(0, longName, 'uploading')],
+        })
+      );
+
+      // The icon sizes itself through SVG attributes, which flex may override —
+      // so without a shrink guard a long name squashes it instead of truncating.
+      // eslint-disable-next-line testing-library/no-node-access
+      const icon = screen.getByText(longName).previousElementSibling;
+
+      expect(icon).toBeInTheDocument();
+      expect(window.getComputedStyle(icon as Element).flexShrink).toBe('0');
+    });
   });
 
   describe('Dialog visibility', () => {
@@ -90,6 +131,69 @@ describe('UploadProgressDialog', () => {
         })
       );
       expect(screen.getByText(/Uploading 4 items \(50%\)/)).toBeInTheDocument();
+    });
+
+    it('still shows the percentage while most rows of a concurrent batch are unstarted', () => {
+      // Worker-pool case: unstarted rows sit at `uploadedBytes: 0` but still count.
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            { ...createMockFile(0, 'file1.png', 'uploading'), uploadedBytes: 512 },
+            createMockFile(1, 'file2.png', 'uploading'),
+            createMockFile(2, 'file3.png', 'pending'),
+            createMockFile(3, 'file4.png', 'pending'),
+          ],
+        })
+      );
+
+      // 512 / 4096 = 12.5% → 13
+      expect(screen.getByText(/Uploading 4 items \(13%\)/)).toBeInTheDocument();
+    });
+
+    it('omits the percentage for a URL batch, which never reports bytes', () => {
+      // The server reports only the file's size, never incremental bytes, so any
+      // percentage would sit frozen at 0%.
+      setup(
+        createMockState({
+          totalFiles: 1,
+          reportsByteProgress: false,
+          files: [createMockFile(0, 'remote-file.png', 'uploading')],
+        })
+      );
+
+      expect(screen.getByText('Uploading 1 item')).toBeInTheDocument();
+      expect(screen.queryByText(/%\)/)).not.toBeInTheDocument();
+    });
+
+    it('brings the percentage back as soon as a URL batch does report bytes', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          reportsByteProgress: false,
+          files: [{ ...createMockFile(0, 'remote-file.png', 'uploading'), uploadedBytes: 256 }],
+        })
+      );
+
+      expect(screen.getByText(/Uploading 1 item \(25%\)/)).toBeInTheDocument();
+    });
+
+    it('shows count-based progress for a multi-URL batch as each file lands', () => {
+      // No streamed bytes: count-based climbs by settled row (1 of 3 → 33%). Byte-weighting
+      // would misread 100% here since only the finished row has a size.
+      setup(
+        createMockState({
+          totalFiles: 3,
+          reportsByteProgress: false,
+          files: [
+            createMockFile(0, 'a.png', 'complete'),
+            createMockFile(1, 'b.png', 'uploading'),
+            createMockFile(2, 'c.png', 'pending'),
+          ],
+        })
+      );
+
+      expect(screen.getByText(/Uploading 3 items \(33%\)/)).toBeInTheDocument();
     });
 
     it('shows Cancel all button during upload', () => {
@@ -519,6 +623,36 @@ describe('UploadProgressDialog', () => {
       });
       expect(screen.getByText('File size exceeded')).toBeInTheDocument();
     });
+
+    it('translates machine-readable server error codes instead of showing them raw', async () => {
+      // `FileTooBig` is the code returned by the body middleware when koa-body's
+      // maxFileSize is exceeded; it has a matching `apiError.*` translation entry.
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'too-big.png', 'error', 'FileTooBig')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('too-big.png')).toBeInTheDocument();
+      });
+
+      const row = screen.getByText('too-big.png').closest('div')!;
+      expect(row).not.toHaveTextContent('FileTooBig');
+    });
+
+    it('falls back to a generic message when the server gives no error message', async () => {
+      setup(
+        createMockState({
+          files: [createMockFile(0, 'mystery.png', 'error')],
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('mystery.png')).toBeInTheDocument();
+      });
+      expect(screen.getByText('An error occurred while uploading the file.')).toBeInTheDocument();
+    });
   });
 
   describe('FileRowRenderer - cancelled file', () => {
@@ -571,6 +705,74 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByText('uploading-a.png')).toBeInTheDocument();
       expect(screen.getByText('uploading-b.png')).toBeInTheDocument();
       expect(screen.getByText('uploading-c.png')).toBeInTheDocument();
+    });
+  });
+
+  describe('queued files', () => {
+    // The whole point of the ticket: with the default concurrency of 1, a 40-file
+    // drop has one row uploading and 39 waiting, and the waiting ones used to be
+    // rendered nowhere at all.
+    it('lists files that have not started yet', () => {
+      setup(
+        createMockState({
+          totalFiles: 4,
+          files: [
+            createMockFile(0, 'started.png', 'uploading'),
+            createMockFile(1, 'waiting-a.png', 'pending'),
+            createMockFile(2, 'waiting-b.png', 'pending'),
+            createMockFile(3, 'done.png', 'complete'),
+          ],
+        })
+      );
+
+      expect(screen.getByText('waiting-a.png')).toBeInTheDocument();
+      expect(screen.getByText('waiting-b.png')).toBeInTheDocument();
+      expect(screen.getAllByText('Queued')).toHaveLength(2);
+    });
+
+    it('renders every file in the batch, whatever its state', () => {
+      const files = [
+        createMockFile(0, 'a.png', 'uploading'),
+        createMockFile(1, 'b.png', 'pending'),
+        createMockFile(2, 'c.png', 'complete'),
+        createMockFile(3, 'd.png', 'error', 'boom'),
+        createMockFile(4, 'e.png', 'cancelled'),
+      ];
+
+      setup(createMockState({ totalFiles: files.length, files }));
+
+      files.forEach((file) => {
+        expect(screen.getByText(file.name)).toBeInTheDocument();
+      });
+    });
+
+    it('shows no progress bar on a queued row', () => {
+      setup(
+        createMockState({
+          totalFiles: 1,
+          files: [createMockFile(0, 'waiting.png', 'pending')],
+        })
+      );
+
+      expect(screen.getByText('Queued')).toBeInTheDocument();
+      // A bar — even an indeterminate one — would read as "in progress" on a file
+      // the pool has not picked up yet.
+      expect(screen.queryAllByRole('progressbar')).toHaveLength(0);
+    });
+
+    it('gives the uploading row a bar and the queued row none', () => {
+      setup(
+        createMockState({
+          totalFiles: 2,
+          files: [
+            createMockFile(0, 'going.png', 'uploading'),
+            createMockFile(1, 'waiting.png', 'pending'),
+          ],
+        })
+      );
+
+      // Exactly one: the in-flight row. The queued row contributes none.
+      expect(screen.getAllByRole('progressbar')).toHaveLength(1);
     });
   });
 });
