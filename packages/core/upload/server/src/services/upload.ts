@@ -493,6 +493,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       _.assign(fileData, {
         hash: dbFile.hash,
         ext: dbFile.ext,
+        // Replacing swaps the bytes, not the asset: the name belongs to the
+        // entry, not to whichever file was uploaded into it. Without this the
+        // asset silently takes the new upload's filename. An explicit
+        // `fileInfo.name` still wins, so a deliberate rename is still possible.
+        //
+        // Falsy rather than nullish on purpose: `formatFileInfo` treats an empty
+        // name as "not given" (`fileInfo.name || filename`), so a nullish check
+        // here would let `''` through and blank the name outright.
+        name: fileInfo?.name || dbFile.name,
       });
 
       // clear old formats — replaceImage / replace will set new ones
