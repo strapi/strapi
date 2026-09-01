@@ -184,3 +184,4 @@ examples/**/types/generated
 
 # Ignore yarn.lock inside templates
 templates/yarn.lock
+config.bat
