@@ -795,7 +795,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // Owns the replace upload so isReplacing can drive the busy overlay.
   const handleReplace = React.useCallback(
     async (file: globalThis.File) => {
-      const res = await replaceMutation({ id: asset.id, file });
+      const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
         notify({
           type: 'danger',
@@ -818,7 +818,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
+    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
