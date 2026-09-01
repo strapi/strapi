@@ -25,7 +25,8 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   get file() {
     return z.object({
       id: this.fileId,
-      documentId: z.uuid(),
+      // documentId is a cuid2 (see `createDocumentId`), not a UUID.
+      documentId: z.string(),
       name: z.string(),
       alternativeText: z.string().nullable().optional(),
       caption: z.string().nullable().optional(),
@@ -90,6 +91,16 @@ export class UploadRouteValidator extends AbstractRouteValidator {
    */
   get fileId() {
     return z.number().int().positive();
+  }
+
+  /**
+   * File identifier path-param validation.
+   *
+   * Content-API file routes (`/files/:id`) accept either the numeric primary key
+   * or the string documentId, so the param is widened to allow both.
+   */
+  get fileIdentifier() {
+    return z.union([z.number().int().positive(), z.string().min(1)]);
   }
 
   /**
