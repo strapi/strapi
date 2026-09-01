@@ -6,6 +6,9 @@ import {
   generateTotp,
   generateTotpSecret,
   verifyTotp,
+  generateRecoveryCode,
+  generateRecoveryCodes,
+  normaliseRecoveryCode,
 } from '../mfa';
 
 // RFC 6238 Appendix B, SHA-1 rows. The seed is the ASCII string below, 20 bytes.
@@ -144,5 +147,30 @@ describe('buildOtpauthUri', () => {
     expect(uri).toBe(
       'otpauth://totp/kai%40doe.com?secret=MZXW6YTBOI&algorithm=SHA1&digits=6&period=30'
     );
+  });
+});
+
+describe('recovery codes', () => {
+  test('is 10 characters from the Crockford alphabet', () => {
+    // Crockford base32 excludes I, L, O and U so a human transcribing from paper cannot
+    // confuse them with 1, 1, 0 and V.
+    expect(generateRecoveryCode()).toMatch(/^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{10}$/);
+  });
+
+  test('generates the requested number of distinct codes', () => {
+    const codes = generateRecoveryCodes(10);
+    expect(codes).toHaveLength(10);
+    expect(new Set(codes).size).toBe(10);
+  });
+
+  test('normalises the formatting a user is likely to type', () => {
+    const code = generateRecoveryCode();
+    const messy = `  ${code.slice(0, 5).toLowerCase()}-${code.slice(5).toLowerCase()} `;
+    expect(normaliseRecoveryCode(messy)).toBe(code);
+  });
+
+  test('maps the ambiguous characters a user might type by mistake', () => {
+    expect(normaliseRecoveryCode('OIL')).toBe('011');
+    expect(normaliseRecoveryCode('u')).toBe('V');
   });
 });

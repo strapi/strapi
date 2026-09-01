@@ -55,6 +55,9 @@ export {
   verifyTotp,
   constantTimeEquals,
   buildOtpauthUri,
+  generateRecoveryCode,
+  generateRecoveryCodes,
+  normaliseRecoveryCode,
   type TotpWindow,
   type VerifyTotpResult,
 } from './mfa';

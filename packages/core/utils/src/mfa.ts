@@ -177,3 +177,38 @@ export const buildOtpauthUri = ({
 
   return `otpauth://totp/${labelPath}?${params.join('&')}`;
 };
+
+// Crockford base32: no I, L, O or U, so transcription from paper is unambiguous.
+const CROCKFORD_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const RECOVERY_CODE_LENGTH = 10;
+
+/** 10 characters over a 32 character alphabet, so 50 bits of entropy. */
+export const generateRecoveryCode = (): string => {
+  let code = '';
+  // Rejection-free: 256 is not a multiple of 32, so mask to 5 bits instead of using modulo,
+  // which would otherwise bias the first 8 characters of the alphabet.
+  while (code.length < RECOVERY_CODE_LENGTH) {
+    for (const byte of crypto.randomBytes(RECOVERY_CODE_LENGTH)) {
+      if (code.length === RECOVERY_CODE_LENGTH) break;
+      code += CROCKFORD_ALPHABET[byte & 31];
+    }
+  }
+  return code;
+};
+
+export const generateRecoveryCodes = (count: number): string[] => {
+  const codes = new Set<string>();
+  while (codes.size < count) {
+    codes.add(generateRecoveryCode());
+  }
+  return [...codes];
+};
+
+/** Accepts the dashes, spaces, lowercase and ambiguous characters a human will type. */
+export const normaliseRecoveryCode = (input: string): string =>
+  (input ?? '')
+    .toUpperCase()
+    .replace(/[\s-]/g, '')
+    .replace(/[IL]/g, '1')
+    .replace(/O/g, '0')
+    .replace(/U/g, 'V');
