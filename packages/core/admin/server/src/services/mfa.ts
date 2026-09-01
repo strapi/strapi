@@ -75,18 +75,35 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return Boolean(user?.mfaEnabledAt && user?.mfaSecret);
   };
 
-  /** Decrypts the stored secret, turning a key problem into an actionable per-user error. */
+  /**
+   * Decrypts the stored secret, turning any way it can go wrong — a missing/rotated key, a
+   * corrupted or hand-edited value, an unsupported version tag — into the same actionable
+   * per-user error. `encryption.decrypt` throws raw `Error`s for malformed input instead of
+   * returning null for every failure mode, and `base32Decode` throws on non-base32 plaintext, so
+   * both must be inside the same guard or a malformed stored value becomes an unhandled 500.
+   */
   const readSecret = (user: { mfaSecret?: string | null }): Buffer => {
     if (!user.mfaSecret) {
       throw new ValidationError('Two-factor authentication is not set up for this account');
     }
-    const decrypted = encryption.decrypt(user.mfaSecret);
-    if (!decrypted) {
+
+    let secret: Buffer | null = null;
+    try {
+      const decrypted = encryption.decrypt(user.mfaSecret);
+      if (decrypted) {
+        secret = base32Decode(decrypted);
+      }
+    } catch {
+      secret = null;
+    }
+
+    if (!secret) {
       throw new ApplicationError(
         'The stored two-factor secret could not be read. This usually means the admin encryption key changed. Use a recovery code, or reset this user with `strapi admin:reset-user-mfa`.'
       );
     }
-    return base32Decode(decrypted);
+
+    return secret;
   };
 
   const beginEnrolment = async (userId: string, password: string) => {
@@ -95,6 +112,18 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const passwordOk = await auth.validatePassword(password, user.password);
     if (!passwordOk) {
       throw new ValidationError('Invalid credentials');
+    }
+
+    // Refuse rather than overwrite: for an already-enrolled account, silently replacing the
+    // secret while leaving mfaEnabledAt set would break their existing authenticator while
+    // still demanding a code, locking them out. And doing it unconditionally would let anyone
+    // holding just the password disable 2FA on someone else's account by starting enrolment and
+    // never finishing it (mfaEnabledAt gets reset to null below) — the exact bypass 2FA exists
+    // to prevent. The user must disable two-factor authentication first, then enrol again.
+    if (user.mfaEnabledAt) {
+      throw new ValidationError(
+        'Two-factor authentication is already enabled for this account. Disable it first, then enrol again.'
+      );
     }
 
     const secret = generateTotpSecret();
@@ -144,8 +173,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const metadata = strapi.db.metadata.get(USER_UID);
     const { tableName } = metadata;
     // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and mfaLastUsedStep's static type is the full Attribute union.
-    const lastUsedStepColumn: string | undefined = metadata.attributes.mfaLastUsedStep.columnName;
+    // attributes and mfaLastUsedStep's static type is the full Attribute union. Optional
+    // chaining also guards the case where the attribute itself is missing (e.g. a migration
+    // that hasn't run), which would otherwise throw a TypeError before the check below can
+    // raise the intended, actionable ApplicationError.
+    const lastUsedStepColumn: string | undefined = metadata.attributes.mfaLastUsedStep?.columnName;
 
     if (!lastUsedStepColumn) {
       throw new ApplicationError(
