@@ -84,7 +84,6 @@ describe('import-export', () => {
   });
 
   test.todo('roundtrip with compressed export/import (.tar.gz)');
-  test.todo('roundtrip with encrypted export/import (.tar.gz.enc) and key');
   test.todo('roundtrip with --only (partial content) and verify only those types restored');
   test.todo('roundtrip with without-admin fixture (different data combo)');
   test.todo('roundtrip preserves i18n locales and localized content counts');
