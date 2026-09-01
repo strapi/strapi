@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 import { generateTotp, base32Decode } from '@strapi/utils';
 import createMfaService from '../mfa';
+import { MFA_DEFAULTS } from '../../config/mfa';
 
 const DEFAULT_USER_TABLE = 'admin_users';
 const DEFAULT_LAST_USED_STEP_COLUMN = 'mfa_last_used_step';
@@ -120,9 +121,17 @@ const buildConnection =
     return builder;
   };
 
+type RecoveryRow = { id: number; userId: string; codeHash: string; usedAt: Date | null };
+
 const buildStrapi = (
   overrides: Record<string, unknown> = {},
-  metadataOverrides: { tableName?: string; columnName?: string } = {}
+  metadataOverrides: { tableName?: string; columnName?: string } = {},
+  recoveryOverrides: {
+    deleteMany?: jest.Mock;
+    createMany?: jest.Mock;
+    findMany?: jest.Mock;
+    count?: jest.Mock;
+  } = {}
 ) => {
   const tableName = metadataOverrides.tableName ?? DEFAULT_USER_TABLE;
   const columnName = metadataOverrides.columnName ?? DEFAULT_LAST_USED_STEP_COLUMN;
@@ -150,6 +159,30 @@ const buildStrapi = (
     };
   });
 
+  // A real store (not an inert no-op), so `completeEnrolment`'s recovery codes are genuinely
+  // persisted here too — regressing `issueRecoveryCodes` to skip storage, not just to return
+  // `[]`, would also be caught by a test that inspects `recoveryRows`. `recoveryOverrides` lets a
+  // test swap in a throwing `createMany` etc. to exercise the ordering guarantee in
+  // `completeEnrolment` (recovery codes before `mfaEnabledAt`).
+  const recoveryRows: RecoveryRow[] = [];
+  let nextRecoveryId = 1;
+  const recoveryMocks = {
+    deleteMany: jest.fn(async ({ where }: any) => {
+      for (let i = recoveryRows.length - 1; i >= 0; i -= 1) {
+        if (recoveryRows[i].userId === where.userId) recoveryRows.splice(i, 1);
+      }
+    }),
+    createMany: jest.fn(async ({ data }: any) => {
+      for (const row of data) {
+        recoveryRows.push({ id: nextRecoveryId, usedAt: null, ...row });
+        nextRecoveryId += 1;
+      }
+    }),
+    findMany: jest.fn(async () => []),
+    count: jest.fn(async () => 0),
+    ...recoveryOverrides,
+  };
+
   const strapi = {
     config: {
       get: jest.fn((path: string, defaultValue?: unknown) => {
@@ -161,17 +194,8 @@ const buildStrapi = (
     log: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
     db: {
       query: jest.fn((uid: string) => {
-        // The enrolment tests below only care that `completeEnrolment` finishes and sets
-        // `mfaEnabledAt`; the recovery codes it issues along the way are irrelevant to them, so
-        // this branch is a minimal no-op store rather than a full duplicate of the fixture in
-        // the "recovery codes" describe block further down, which exercises that store for real.
         if (uid === RECOVERY_UID) {
-          return {
-            deleteMany: jest.fn(async () => {}),
-            createMany: jest.fn(async () => {}),
-            findMany: jest.fn(async () => []),
-            count: jest.fn(async () => 0),
-          };
+          return recoveryMocks;
         }
 
         return {
@@ -195,11 +219,17 @@ const buildStrapi = (
       }),
       connection: buildConnection(users, tableName, resolveKey),
       metadata: { get: metadataGet },
+      // The service's own transaction usage (`issueRecoveryCodes`) is exercised here as a plain
+      // pass-through: the fixtures above already mutate a shared in-memory store synchronously,
+      // so there is nothing for a fake commit/rollback to add. What this stub does prove is the
+      // ordering in `completeEnrolment` — if the callback throws (a `createMany` override that
+      // throws), `transaction` rejects and propagates, exactly like the real implementation.
+      transaction: jest.fn(async (run: (args: { trx: unknown }) => unknown) => run({ trx: {} })),
     },
     ...overrides,
   };
 
-  return { strapi, users, metadataGet };
+  return { strapi, users, metadataGet, recoveryRows };
 };
 
 const defaultDeps = (strapi: unknown) => ({
@@ -275,17 +305,43 @@ describe('mfa service: enrolment', () => {
   });
 
   test('activates enrolment only after a valid code and records the consumed step', async () => {
-    const { strapi, users } = buildStrapi();
+    const { strapi, users, recoveryRows } = buildStrapi();
     const service = createMfaService(defaultDeps(strapi));
 
     const { secret } = await service.beginEnrolment('1', 'pw');
     const code = generateTotp({ secret: base32Decode(secret) });
 
-    await service.completeEnrolment('1', code);
+    const result = await service.completeEnrolment('1', code);
 
     const stored = users.get('1')!;
     expect(stored.mfaEnabledAt).toBeInstanceOf(Date);
     expect(Number(stored.mfaLastUsedStep)).toBeGreaterThan(0);
+    // Regressing `completeEnrolment` back to a hardcoded `{ recoveryCodes: [] }` must fail this:
+    // the codes are real, config-sized, and genuinely persisted (not just returned).
+    expect(result.recoveryCodes).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
+    expect(recoveryRows).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
+  });
+
+  test('a recovery-code write failure during completeEnrolment leaves the user unenrolled and propagates', async () => {
+    const { strapi, users } = buildStrapi(
+      {},
+      {},
+      {
+        createMany: jest.fn(async () => {
+          throw new Error('constraint violation');
+        }),
+      }
+    );
+    const service = createMfaService(defaultDeps(strapi));
+
+    const { secret } = await service.beginEnrolment('1', 'pw');
+    const code = generateTotp({ secret: base32Decode(secret) });
+
+    // `mfaEnabledAt` must never be set on this path: `issueRecoveryCodes` is called before it,
+    // specifically so a storage failure here leaves the user free to retry rather than enrolled
+    // with an empty, unrecoverable recovery-code set.
+    await expect(service.completeEnrolment('1', code)).rejects.toThrow(/constraint violation/);
+    expect(users.get('1')!.mfaEnabledAt).toBeNull();
   });
 
   test('rejects an invalid code and leaves enrolment inactive', async () => {
@@ -409,51 +465,56 @@ describe('mfa service: isEnabled', () => {
 });
 
 describe('mfa service: recovery codes', () => {
-  type RecoveryRow = { id: number; userId: string; codeHash: string; usedAt: Date | null };
+  const DEFAULT_RECOVERY_CODE_COUNT = 7; // deliberately not the MFA_DEFAULTS value (10) — see
+  // Finding 2: a fixture that matches the default can't distinguish "read the config" from
+  // "ignore it and use the default".
 
   /**
    * A knex-shaped `where().whereNull().update()` builder backed by the same live `rows` array
    * `strapi.db.query(RECOVERY_UID)` reads and writes, mirroring `buildConnection` above for the
    * user table: the conditional UPDATE must see live state at the moment it runs so that, of two
    * concurrent winners racing for the same row, only the first to execute can satisfy
-   * `whereNull(usedAtColumn)`.
+   * `whereNull(usedAtColumn)`. `tableName`/`columnName` are parameters, not the module-level
+   * `RECOVERY_TABLE`/`RECOVERY_USED_AT_COLUMN` constants, so a test can prove the service
+   * resolves these from metadata rather than hardcoding them (Finding 3).
    */
-  const buildRecoveryConnection = (rows: RecoveryRow[]) => (requestedTable: string) => {
-    if (requestedTable !== RECOVERY_TABLE) {
-      throw new Error(
-        `Unexpected table in mock connection: got "${requestedTable}", expected "${RECOVERY_TABLE}"`
-      );
-    }
+  const buildRecoveryConnection =
+    (rows: RecoveryRow[], tableName: string, columnName: string) => (requestedTable: string) => {
+      if (requestedTable !== tableName) {
+        throw new Error(
+          `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
+        );
+      }
 
-    let idFilter: number | undefined;
-    let requireNull = false;
+      let idFilter: number | undefined;
+      let requireNull = false;
 
-    const builder = {
-      where(condition: Record<string, unknown>) {
-        idFilter = Number(condition.id);
-        return builder;
-      },
-      whereNull(column: string) {
-        if (column !== RECOVERY_USED_AT_COLUMN) {
-          throw new Error(`Unexpected column in mock connection: ${column}`);
-        }
-        requireNull = true;
-        return builder;
-      },
-      async update(data: Record<string, unknown>) {
-        const row = rows.find((r) => r.id === idFilter);
-        if (!row) return 0;
-        if (requireNull && row.usedAt !== null) return 0;
+      const builder = {
+        where(condition: Record<string, unknown>) {
+          idFilter = Number(condition.id);
+          return builder;
+        },
+        whereNull(column: string) {
+          if (column !== columnName) {
+            throw new Error(`Unexpected column in mock connection: ${column}`);
+          }
+          requireNull = true;
+          return builder;
+        },
+        async update(data: Record<string, unknown>) {
+          const row = rows.find((r) => r.id === idFilter);
+          if (!row) return 0;
+          if (requireNull && row.usedAt !== null) return 0;
 
-        for (const [column, value] of Object.entries(data)) {
-          if (column === RECOVERY_USED_AT_COLUMN) row.usedAt = value as Date;
-        }
-        return 1;
-      },
+          for (const [column, value] of Object.entries(data)) {
+            if (column === columnName) row.usedAt = value as Date;
+          }
+          return 1;
+        },
+      };
+
+      return builder;
     };
-
-    return builder;
-  };
 
   /**
    * `db.query(RECOVERY_UID).findMany` returns snapshots (`{ ...row }`), not live references, the
@@ -463,13 +524,41 @@ describe('mfa service: recovery codes', () => {
    * that reads `candidate.usedAt` after `await`ing a slow bcrypt comparison would see a write the
    * other racing call already made to that same shared object, and would incorrectly refuse the
    * second call — hiding exactly the bug this suite exists to catch.
+   *
+   * `tableName`/`columnName` default to the real physical names but can be overridden per test
+   * (Finding 3); `recoveryCodeCount` defaults to a non-default value (Finding 2).
    */
-  const setup = () => {
+  const setup = (
+    options: { tableName?: string; columnName?: string; recoveryCodeCount?: number } = {}
+  ) => {
+    const tableName = options.tableName ?? RECOVERY_TABLE;
+    const columnName = options.columnName ?? RECOVERY_USED_AT_COLUMN;
+    const recoveryCodeCount = options.recoveryCodeCount ?? DEFAULT_RECOVERY_CODE_COUNT;
+
     const rows: RecoveryRow[] = [];
     let nextId = 1;
 
+    const createMany = jest.fn(async ({ data }: any) => {
+      for (const row of data) {
+        rows.push({ id: nextId, usedAt: null, ...row });
+        nextId += 1;
+      }
+    });
+    const deleteMany = jest.fn(async () => {
+      rows.length = 0;
+    });
+    const findMany = jest.fn(async ({ where }: any) =>
+      rows
+        .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
+        .map((r) => ({ ...r }))
+    );
+    const count = jest.fn(
+      async ({ where }: any) =>
+        rows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
+    );
+
     const strapi = {
-      config: { get: jest.fn(() => ({ enabled: true, recoveryCodeCount: 10 })) },
+      config: { get: jest.fn(() => ({ enabled: true, recoveryCodeCount })) },
       features: { future: { isEnabled: jest.fn(() => true) } },
       log: { warn: jest.fn(), error: jest.fn() },
       db: {
@@ -477,43 +566,29 @@ describe('mfa service: recovery codes', () => {
           if (uid !== RECOVERY_UID) {
             throw new Error(`Unexpected query uid in mock: ${uid}`);
           }
-          return {
-            createMany: jest.fn(async ({ data }: any) => {
-              for (const row of data) {
-                rows.push({ id: nextId, usedAt: null, ...row });
-                nextId += 1;
-              }
-            }),
-            deleteMany: jest.fn(async () => {
-              rows.length = 0;
-            }),
-            findMany: jest.fn(async ({ where }: any) =>
-              rows
-                .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
-                .map((r) => ({ ...r }))
-            ),
-            count: jest.fn(
-              async ({ where }: any) =>
-                rows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
-            ),
-          };
+          return { createMany, deleteMany, findMany, count };
         }),
-        connection: jest.fn(buildRecoveryConnection(rows)),
+        connection: jest.fn(buildRecoveryConnection(rows, tableName, columnName)),
+        // A plain pass-through: the fixture's `deleteMany`/`createMany` above mutate the shared
+        // `rows` array synchronously regardless of any transaction, so there is nothing for a
+        // fake commit/rollback to add here. What matters is that a throwing callback rejects,
+        // which it does naturally since this is just `await cb(...)`.
+        transaction: jest.fn(async (run: (args: { trx: unknown }) => unknown) => run({ trx: {} })),
         metadata: {
           get: jest.fn((uid: string) => {
             if (uid !== RECOVERY_UID) {
               throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
             }
             return {
-              tableName: RECOVERY_TABLE,
-              attributes: { usedAt: { columnName: RECOVERY_USED_AT_COLUMN } },
+              tableName,
+              attributes: { usedAt: { columnName } },
             };
           }),
         },
       },
     };
 
-    return { strapi, rows };
+    return { strapi, rows, createMany };
   };
 
   const deps = (strapi: unknown) => ({
@@ -531,8 +606,8 @@ describe('mfa service: recovery codes', () => {
 
     const codes = await service.issueRecoveryCodes('1');
 
-    expect(codes).toHaveLength(10);
-    expect(rows).toHaveLength(10);
+    expect(codes).toHaveLength(DEFAULT_RECOVERY_CODE_COUNT);
+    expect(rows).toHaveLength(DEFAULT_RECOVERY_CODE_COUNT);
     // The plaintext must never be stored.
     for (const code of codes) {
       expect(rows.some((r) => r.codeHash === code)).toBe(false);
@@ -574,7 +649,7 @@ describe('mfa service: recovery codes', () => {
     const first = await service.issueRecoveryCodes('1');
     await service.issueRecoveryCodes('1');
 
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(DEFAULT_RECOVERY_CODE_COUNT);
     expect(await service.consumeRecoveryCode('1', first[0])).toBe(false);
   });
 
@@ -585,7 +660,36 @@ describe('mfa service: recovery codes', () => {
     const codes = await service.issueRecoveryCodes('1');
     await service.consumeRecoveryCode('1', codes[0]);
 
-    expect(await service.countUnusedRecoveryCodes('1')).toBe(9);
+    expect(await service.countUnusedRecoveryCodes('1')).toBe(DEFAULT_RECOVERY_CODE_COUNT - 1);
+  });
+
+  test('recoveryCodeCount: 0 deletes the old set and returns an empty array without calling createMany', async () => {
+    const { strapi, rows, createMany } = setup({ recoveryCodeCount: 0 });
+    const service = createMfaService(deps(strapi));
+
+    // Seed an existing set the way a real deployment would have one before an operator turns
+    // recovery codes off.
+    await service.issueRecoveryCodes('1');
+    createMany.mockClear();
+
+    const codes = await service.issueRecoveryCodes('1');
+
+    expect(codes).toEqual([]);
+    expect(rows).toHaveLength(0);
+    expect(createMany).not.toHaveBeenCalled();
+  });
+
+  test('resolves the recovery-code table and the usedAt column from strapi.db.metadata rather than hardcoding them', async () => {
+    const { strapi, rows } = setup({
+      tableName: 'weird_recovery_table',
+      columnName: 'weird_used_at',
+    });
+    const service = createMfaService(deps(strapi));
+
+    const [code] = await service.issueRecoveryCodes('1');
+
+    expect(await service.consumeRecoveryCode('1', code)).toBe(true);
+    expect(rows.find((r) => r.codeHash === `h:${code}`)?.usedAt).toBeInstanceOf(Date);
   });
 
   test('the replay guard allows only one winner when two requests race for the same code', async () => {

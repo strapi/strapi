@@ -214,9 +214,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       throw new ValidationError('Invalid code');
     }
 
+    // Issued before `mfaEnabledAt` is flipped, not after: if this throws (a constraint
+    // violation, a dropped connection), the safe direction is to leave the user unenrolled and
+    // free to retry, rather than enrolled with an empty recovery-code set and no way to get one
+    // (no regenerate endpoint exists until Task 10). The consumed TOTP step stays consumed
+    // either way — that is the safe outcome, not something to unwind.
+    const recoveryCodes = await issueRecoveryCodes(userId);
+
     await userQuery().update({ where: { id: userId }, data: { mfaEnabledAt: new Date() } });
 
-    return { recoveryCodes: await issueRecoveryCodes(userId) };
+    return { recoveryCodes };
   };
 
   // --- Recovery codes ---------------------------------------------------
@@ -246,9 +253,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     );
 
     // Regenerating replaces the whole set: previously issued codes must stop working, so the old
-    // rows are deleted rather than left around as consumable leftovers.
-    await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
-    await recoveryQuery().createMany({ data });
+    // rows are deleted rather than left around as consumable leftovers. Wrapped in a transaction
+    // so the delete and the insert either both land or neither does — a `createMany` failure
+    // (constraint violation, dropped connection) must never strand the delete having already
+    // committed, which would leave the account with zero recovery codes and no way to get any.
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+
+      // `recoveryCodeCount: 0` is a valid, if unusual, config (disables the fallback entirely).
+      // `createMany({ data: [] })` against an empty array is not a case worth trusting every
+      // query engine to no-op correctly, so skip it outright rather than assume.
+      if (data.length > 0) {
+        await recoveryQuery().createMany({ data });
+      }
+    });
 
     return codes;
   };
@@ -269,6 +287,25 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return false;
     }
 
+    // Resolved once per call, before any candidate is even fetched, rather than inside the
+    // match branch below: a schema or migration problem must surface deterministically on every
+    // call, not only when a user happens to submit a code that matches — a wrong code silently
+    // returning `false` while masking a broken column mapping would be worse than raising here.
+    const metadata = strapi.db.metadata.get(RECOVERY_CODE_UID);
+    const { tableName } = metadata;
+    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
+    // attributes and usedAt's static type is the full Attribute union. Optional chaining also
+    // guards the case where the attribute itself is missing (e.g. a migration that hasn't
+    // run), which would otherwise throw a TypeError before the check below can raise the
+    // intended, actionable ApplicationError.
+    const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
+
+    if (!usedAtColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::mfa-recovery-code.usedAt'
+      );
+    }
+
     const candidates = await recoveryQuery().findMany({
       where: { userId: String(userId), usedAt: null },
     });
@@ -280,21 +317,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       const matches = await auth.validatePassword(normalised, candidate.codeHash);
       if (!matches) {
         continue;
-      }
-
-      const metadata = strapi.db.metadata.get(RECOVERY_CODE_UID);
-      const { tableName } = metadata;
-      // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-      // attributes and usedAt's static type is the full Attribute union. Optional chaining also
-      // guards the case where the attribute itself is missing (e.g. a migration that hasn't
-      // run), which would otherwise throw a TypeError before the check below can raise the
-      // intended, actionable ApplicationError.
-      const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
-
-      if (!usedAtColumn) {
-        throw new ApplicationError(
-          'Could not resolve the physical column name for admin::mfa-recovery-code.usedAt'
-        );
       }
 
       // Conditional update: whoever flips usedAt from null wins, so a code cannot be spent twice
