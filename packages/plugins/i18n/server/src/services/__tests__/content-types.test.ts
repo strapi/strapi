@@ -444,6 +444,43 @@ describe('content-types service', () => {
       expect(entry.name).toBe('fr');
     });
 
+    it('preserves explicit empty arrays for non-component attributes', () => {
+      const modelDef = {
+        attributes: {
+          config: {
+            type: 'json',
+            pluginOptions: { i18n: { localized: false } },
+          },
+          gallery: {
+            type: 'media',
+            multiple: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: jest.fn(() => modelDef),
+        components: {},
+      } as any;
+
+      const entry = {
+        config: [],
+        gallery: [],
+      };
+      const relatedEntry = {
+        config: [{ source: 'default-locale' }],
+        gallery: [{ id: 42, name: 'default.jpg' }],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry).toEqual({
+        config: [],
+        gallery: [],
+      });
+    });
+
     it('deep-fills nested components when the parent component is present but nested keys are unset', () => {
       const innerModel = {
         attributes: {
@@ -613,7 +650,7 @@ describe('content-types service', () => {
       expect(entry.title).toBe('fr');
     });
 
-    it('deep-fills matching items in a non-empty repeatable component', () => {
+    it('preserves non-empty repeatable component payloads without positional merging', () => {
       const innerModel = {
         attributes: {
           label: { type: 'string' },
@@ -665,10 +702,10 @@ describe('content-types service', () => {
 
       fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
 
-      expect(entry.profiles).toEqual([{ name: 'keep-parent', inners: [{ label: 'keep-inner' }] }]);
+      expect(entry.profiles).toEqual([{ name: 'keep-parent', inners: [] }]);
     });
 
-    it('deep-fills matching component types in a non-empty dynamic zone', () => {
+    it('preserves non-empty dynamic-zone payloads without positional merging', () => {
       const innerModel = {
         attributes: {
           label: { type: 'string' },
@@ -741,7 +778,7 @@ describe('content-types service', () => {
         {
           __component: 'default.hero',
           name: 'keep-parent',
-          inners: [{ label: 'keep-inner' }],
+          inners: [],
         },
         { __component: 'default.other', name: 'replacement' },
       ]);
