@@ -143,6 +143,27 @@ describe('AssetDetails (asset details drawer body)', () => {
     });
   });
 
+  it('surfaces the server error message when the metadata save fails', async () => {
+    server.use(
+      http.put('*/upload/files/:id', () =>
+        HttpResponse.json({ error: { message: 'name must be unique' } }, { status: 400 })
+      )
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    const nameInput = await screen.findByDisplayValue('photo.png');
+    await waitFor(() => expect(nameInput).toBeEnabled());
+    await user.clear(nameInput);
+    await user.type(nameInput, 'taken.png');
+
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    await screen.findByText('name must be unique');
+  });
+
   it('renders the Media Library root option plus every folder returned by the API', async () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
@@ -250,8 +271,11 @@ describe('AssetDetails (asset details drawer body)', () => {
   it('keeps the drawer open and surfaces the error message when the delete request fails', async () => {
     const closeDetails = jest.fn();
     server.use(
-      http.delete('/upload/files/:id', () =>
-        HttpResponse.json({ error: { message: 'Asset locked' } }, { status: 400 })
+      http.delete('*/upload/files/:id', () =>
+        HttpResponse.json(
+          { error: { message: 'This file is used by 3 entries.' } },
+          { status: 400 }
+        )
       )
     );
 
@@ -262,7 +286,32 @@ describe('AssetDetails (asset details drawer body)', () => {
     await screen.findByText(/This file cannot be recovered/i);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
+    await screen.findByText('This file is used by 3 entries.');
     await waitFor(() => expect(closeDetails).not.toHaveBeenCalled());
+  });
+
+  it('surfaces the server error message when the replace request fails', async () => {
+    server.use(
+      http.post('*/upload/files/:id/replace', () =>
+        HttpResponse.json(
+          { error: { message: 'photo.png exceeds size limit of 100 KB.' } },
+          { status: 413 }
+        )
+      )
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+    await screen.findByText(/Replace this media file\?/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['hello'], 'photo.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await screen.findByText('photo.png exceeds size limit of 100 KB.');
   });
 
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
@@ -270,9 +319,14 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Request (see admin-test-utils request-body-stash), so `request.formData()`
     // reliably returns the picked file here instead of relying on undici's
     // cross-realm multipart serialization (which yields a `text/plain` body).
-    let captured: { id: string | null; file: FormDataEntryValue | null } = {
+    let captured: {
+      id: string | null;
+      file: FormDataEntryValue | null;
+      fileInfo: FormDataEntryValue | null;
+    } = {
       id: null,
       file: null,
+      fileInfo: null,
     };
     server.use(
       http.post('/upload/files/:id/replace', async ({ request, params }) => {
@@ -280,6 +334,7 @@ describe('AssetDetails (asset details drawer body)', () => {
         captured = {
           id: String(params.id),
           file: body.get('files'),
+          fileInfo: body.get('fileInfo'),
         };
         return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
       })
@@ -309,6 +364,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(captured.id).toBe('1'));
     expect(captured.file).toBeInstanceOf(File);
     expect((captured.file as File).name).toBe('replacement.png');
+    expect(JSON.parse(String(captured.fileInfo))).toMatchObject({ name: 'photo.png' });
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);
@@ -596,5 +652,88 @@ describe('AssetDetails RBAC gating', () => {
       expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument()
     );
     expect(screen.getByRole('button', { name: 'Download' })).toBeInTheDocument();
+  });
+});
+
+describe('Replace media placement', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  const pdfAsset = {
+    ...baseAsset,
+    name: 'report.pdf',
+    ext: '.pdf',
+    mime: 'application/pdf',
+  } as AssetWithPopulatedCreatedBy;
+
+  // Replace used to live in the preview overlay, which is image-gated, so it was
+  // unavailable for anything that is not an image. In the footer it is gated on
+  // `canUpdate` alone.
+  it('offers Replace on a non-image asset, where Crop does not apply', async () => {
+    render(<AssetDetails asset={pdfAsset} closeDetails={jest.fn()} />);
+
+    expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
+  });
+
+  it('still offers Replace alongside Crop on an image', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    expect(await screen.findByRole('button', { name: 'Replace this file' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Crop' })).toBeInTheDocument();
+  });
+
+  it('offers only the same type in the file picker', async () => {
+    render(<AssetDetails asset={pdfAsset} closeDetails={jest.fn()} />);
+
+    await screen.findByRole('button', { name: 'Replace this file' });
+
+    // The server pins the replacement to the old extension, so a cross-type pick
+    // would leave the bytes and the URL disagreeing.
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(document.querySelector('input[type="file"]')).toHaveAttribute(
+      'accept',
+      'application/pdf'
+    );
+  });
+});
+
+describe('icon button tooltips', () => {
+  beforeEach(() => {
+    server.use(buildFoldersHandler(), buildSettingsHandler());
+  });
+
+  // Every action in the drawer is icon-only, so the label is the only thing
+  // naming it. All were already wired for accessibility; they just passed
+  // `withTooltip={false}`, so a sighted user got no hover hint. Crop is in here
+  // too, even though it sits on the preview rather than in the footer — being
+  // the only icon button without a hint was the inconsistency.
+  it.each([['Replace this file'], ['Delete this file'], ['Copy link'], ['Download'], ['Crop']])(
+    'shows a tooltip on hover for %s',
+    async (label) => {
+      const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+      const button = await screen.findByRole('button', { name: label });
+      await user.hover(button);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(label);
+    }
+  );
+
+  it('keeps the buttons reachable by their accessible name', async () => {
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    // Enabling the tooltip must not move the accessible name onto the tooltip
+    // element and leave the button unnamed.
+    for (const label of [
+      'Replace this file',
+      'Delete this file',
+      'Copy link',
+      'Download',
+      'Crop',
+    ]) {
+      expect(await screen.findByRole('button', { name: label })).toBeInTheDocument();
+    }
   });
 });
