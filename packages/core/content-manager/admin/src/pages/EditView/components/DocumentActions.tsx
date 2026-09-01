@@ -109,7 +109,7 @@ interface DialogOptions {
   variant?: ButtonProps['variant'];
   cancelLabel?: string;
   confirmLabel?: string;
-  onConfirm?: () => void | Promise<void>;
+  onConfirm?: () => boolean | void | Promise<boolean | void>;
   onCancel?: () => void | Promise<void>;
 }
 
@@ -549,11 +549,15 @@ const DocumentActionConfirmDialog = ({
   };
 
   const handleConfirm = async () => {
+    let shouldClose = true;
+
     if (onConfirm) {
-      await onConfirm();
+      shouldClose = (await onConfirm()) !== false;
     }
 
-    onClose();
+    if (shouldClose) {
+      onClose();
+    }
   };
 
   const dialogBody = bodyIcon ? (
@@ -696,7 +700,8 @@ const PublishAction: DocumentActionComponent = ({
   document,
 }) => {
   const {
-    currentDocument: { schema },
+    currentDocument: { schema, components, document: currentDocumentData },
+    currentDocumentMeta,
   } = useDocumentContext('PublishAction');
 
   const navigate = useNavigate();
@@ -711,7 +716,8 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
   );
   const { publish, isLoading } = useDocumentActions();
-  const { clear: clearAutosave } = useAutosave();
+  const { clear: clearAutosave, pendingBaseVersion } = useAutosave();
+  const [hasPublishConflict, setHasPublishConflict] = React.useState(false);
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
   const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
@@ -730,10 +736,6 @@ const PublishAction: DocumentActionComponent = ({
   const getValues = useForm('PublishAction', (state) => state.getValues);
   const formValues = useForm('PublishAction', ({ values }) => values);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
-  const {
-    currentDocument: { components },
-  } = useDocumentContext('PublishAction');
-
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
   const fromRelationModal = relationContext != undefined;
@@ -773,7 +775,6 @@ const PublishAction: DocumentActionComponent = ({
 
   const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
 
-  const { currentDocumentMeta } = useDocumentContext('PublishAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -864,9 +865,11 @@ const PublishAction: DocumentActionComponent = ({
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
+  const hasExistingDraft =
+    collectionType === SINGLE_TYPES ? Boolean(document?.documentId) : Boolean(documentId);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const performPublish = async () => {
+  const performPublish = async ({ overwrite = false }: { overwrite?: boolean } = {}) => {
     setSubmitting(true);
 
     try {
@@ -917,7 +920,7 @@ const PublishAction: DocumentActionComponent = ({
             }),
           });
         }
-        return;
+        return true;
       }
 
       const { data } = handleInvisibleAttributes(transformDocumentData(getValues()), {
@@ -929,13 +932,32 @@ const PublishAction: DocumentActionComponent = ({
           collectionType,
           model,
           documentId,
+          baseVersion:
+            !overwrite && hasExistingDraft
+              ? (pendingBaseVersion ??
+                (typeof currentDocumentData?.updatedAt === 'string'
+                  ? currentDocumentData.updatedAt
+                  : undefined))
+              : undefined,
           params: currentDocumentMeta.params,
         },
         data
       );
 
+      if (
+        'error' in res &&
+        isBaseQueryError(res.error) &&
+        'status' in res.error &&
+        res.error.status === 409
+      ) {
+        setHasPublishConflict(true);
+        openPublishConfirmDialog(publishConfirmScope);
+        return false;
+      }
+
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
+        setHasPublishConflict(false);
         await clearAutosave();
         resetForm(getValues());
         dispatchGuidedTour({
@@ -1042,6 +1064,8 @@ const PublishAction: DocumentActionComponent = ({
         onPreview();
       }
     }
+
+    return true;
   };
 
   const getFreshDraftRelationCounts = React.useCallback(
@@ -1149,76 +1173,98 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      await performPublish();
-
-      // Skip the registered dialog when publishing directly.
-      return true;
+      return performPublish();
     },
-    dialog: supportsDraftRelationWarning
+    dialog: hasPublishConflict
       ? {
           type: 'dialog',
-          variant: dialogVariant,
-          bodyIcon,
           title: formatMessage({
-            id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
-            defaultMessage: 'Confirmation',
+            id: 'content-manager.autosave.conflict.title',
+            defaultMessage: 'This document was updated by someone else',
           }),
-          content: (
-            <>
-              {hasUnpublishedRelations
-                ? formatMessage(
-                    {
-                      id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
-                      defaultMessage:
-                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
-                    },
-                    {
-                      count: draftRelationCounts.unpublishedRelations,
-                    }
-                  )
-                : formatMessage(
-                    {
-                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
-                      defaultMessage:
-                        '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
-                    },
-                    {
-                      count: draftRelationCounts.draftM2mLinks,
-                    }
-                  )}
-              {hasUnpublishedRelations && hasDraftM2mLinks
-                ? ` ${formatMessage(
-                    {
-                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.additional'),
-                      defaultMessage:
-                        '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
-                    },
-                    {
-                      count: draftRelationCounts.draftM2mLinks,
-                    }
-                  )}`
-                : null}{' '}
-              {formatMessage({
-                id: getTranslation('popUpWarning.warning.publish-question'),
-                defaultMessage: 'Do you still want to publish?',
-              })}
-            </>
-          ),
-          confirmLabel:
-            confirmLabel === 'publish'
-              ? formatMessage({
-                  id: 'app.utils.publish',
-                  defaultMessage: 'Publish',
-                })
-              : formatMessage({
-                  id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
-                  defaultMessage: 'Publish without relations',
-                }),
-          onConfirm: async () => {
-            await performPublish();
-          },
+          content: formatMessage({
+            id: 'content-manager.autosave.conflict.body',
+            defaultMessage:
+              'Reload to review the latest saved document, or overwrite it with your changes.',
+          }),
+          cancelLabel: formatMessage({
+            id: 'content-manager.autosave.conflict.reload',
+            defaultMessage: 'Reload',
+          }),
+          confirmLabel: formatMessage({
+            id: 'content-manager.autosave.conflict.overwrite',
+            defaultMessage: 'Overwrite',
+          }),
+          onCancel: () => globalThis.location.reload(),
+          onConfirm: () => performPublish({ overwrite: true }),
         }
-      : undefined,
+      : supportsDraftRelationWarning
+        ? {
+            type: 'dialog',
+            variant: dialogVariant,
+            bodyIcon,
+            title: formatMessage({
+              id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
+              defaultMessage: 'Confirmation',
+            }),
+            content: (
+              <>
+                {hasUnpublishedRelations
+                  ? formatMessage(
+                      {
+                        id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
+                        defaultMessage:
+                          'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
+                      },
+                      {
+                        count: draftRelationCounts.unpublishedRelations,
+                      }
+                    )
+                  : formatMessage(
+                      {
+                        id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
+                        defaultMessage:
+                          '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
+                      },
+                      {
+                        count: draftRelationCounts.draftM2mLinks,
+                      }
+                    )}
+                {hasUnpublishedRelations && hasDraftM2mLinks
+                  ? ` ${formatMessage(
+                      {
+                        id: getTranslation(
+                          'popUpWarning.warning.has-draft-m2m-relations.additional'
+                        ),
+                        defaultMessage:
+                          '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
+                      },
+                      {
+                        count: draftRelationCounts.draftM2mLinks,
+                      }
+                    )}`
+                  : null}{' '}
+                {formatMessage({
+                  id: getTranslation('popUpWarning.warning.publish-question'),
+                  defaultMessage: 'Do you still want to publish?',
+                })}
+              </>
+            ),
+            confirmLabel:
+              confirmLabel === 'publish'
+                ? formatMessage({
+                    id: 'app.utils.publish',
+                    defaultMessage: 'Publish',
+                  })
+                : formatMessage({
+                    id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                    defaultMessage: 'Publish without relations',
+                  }),
+            onConfirm: async () => {
+              return performPublish();
+            },
+          }
+        : undefined,
   };
 };
 

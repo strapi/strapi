@@ -79,7 +79,7 @@ export declare namespace Delete {
  */
 export declare namespace Publish {
   export interface Request {
-    body: {};
+    body: Partial<Document> & { baseVersion?: string };
     query: {
       locale: string;
     };

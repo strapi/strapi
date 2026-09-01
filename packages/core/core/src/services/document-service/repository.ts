@@ -510,11 +510,20 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
-    if (baseVersion && Number.isNaN(Date.parse(baseVersion))) {
-      throw new errors.ValidationError('baseVersion must be a valid ISO date');
-    }
+    if (baseVersion !== undefined) {
+      const parsedBaseVersion =
+        typeof baseVersion === 'string' && baseVersion.length > 0
+          ? new Date(baseVersion)
+          : undefined;
 
-    if (baseVersion) {
+      if (
+        !parsedBaseVersion ||
+        Number.isNaN(parsedBaseVersion.getTime()) ||
+        parsedBaseVersion.toISOString() !== baseVersion
+      ) {
+        throw new errors.ValidationError('baseVersion must be a valid ISO timestamp');
+      }
+
       const lockedEntry = await strapi.db
         .queryBuilder(uid)
         .select(['id', 'updatedAt'])
@@ -523,17 +532,24 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .first()
         .execute<{ id: number; updatedAt: Date | string }>();
 
-      if (lockedEntry) {
-        const currentVersion = new Date(lockedEntry.updatedAt).toISOString();
+      if (!lockedEntry) {
+        throw new errors.ConflictError('The document has changed since it was loaded', {
+          documentId,
+          locale: queryParams?.locale,
+          expected: baseVersion,
+          current: null,
+        });
+      }
 
-        if (new Date(currentVersion).getTime() !== new Date(baseVersion).getTime()) {
-          throw new errors.ConflictError('The document has changed since it was loaded', {
-            documentId,
-            locale: queryParams?.locale,
-            expected: baseVersion,
-            current: currentVersion,
-          });
-        }
+      const currentVersion = new Date(lockedEntry.updatedAt).toISOString();
+
+      if (currentVersion !== baseVersion) {
+        throw new errors.ConflictError('The document has changed since it was loaded', {
+          documentId,
+          locale: queryParams?.locale,
+          expected: baseVersion,
+          current: currentVersion,
+        });
       }
     }
 

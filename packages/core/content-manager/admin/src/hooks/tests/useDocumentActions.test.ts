@@ -472,6 +472,40 @@ describe('useDocumentActions', () => {
       await screen.findByText('Published document');
     });
 
+    it('sends baseVersion with an existing draft publish', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '/content-manager/:collectionType/:uid/:id/actions/publish',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({
+              documentId: '12345',
+              id: 1,
+              title: 'test',
+              publishedAt: '2024-01-23T16:23:38.948Z',
+            });
+          }
+        )
+      );
+      const { result } = renderHook(() => useDocumentActions());
+
+      await result.current.publish(
+        {
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+          baseVersion: '2026-01-01T00:00:00.000Z',
+        },
+        { title: 'Entry 1' }
+      );
+
+      expect(requestBody).toEqual({
+        title: 'Entry 1',
+        baseVersion: '2026-01-01T00:00:00.000Z',
+      });
+    });
+
     it('should return the errors when unsuccessful', async () => {
       server.use(
         http.post('/content-manager/:collectionType/:uid/:id/actions/publish', () => {

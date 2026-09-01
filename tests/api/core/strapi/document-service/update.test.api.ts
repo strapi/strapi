@@ -148,13 +148,31 @@ describe('Document Service', () => {
     it('rejects an invalid baseVersion', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
+      for (const baseVersion of ['', 'not-a-date', '2026-01-01', false, null]) {
+        await expect(
+          updateArticle({
+            documentId: articleDb.documentId,
+            baseVersion,
+            data: { title: 'Invalid version update' },
+          } as Parameters<typeof updateArticle>[0])
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+      }
+    });
+
+    it('rejects a versioned update when the target no longer exists', async () => {
       await expect(
         updateArticle({
-          documentId: articleDb.documentId,
-          baseVersion: 'not-a-date',
-          data: { title: 'Invalid version update' },
+          documentId: 'missing-document',
+          baseVersion: new Date(0).toISOString(),
+          data: { title: 'Missing version update' },
         })
-      ).rejects.toMatchObject({ name: 'ValidationError' });
+      ).rejects.toMatchObject({
+        name: 'ConflictError',
+        details: {
+          expected: new Date(0).toISOString(),
+          current: null,
+        },
+      });
     });
 
     it('Can update a draft article in dutch', async () => {
@@ -213,6 +231,7 @@ describe('Document Service', () => {
 
       const article = await updateArticle({
         documentId: articleDb.documentId,
+        baseVersion: new Date(articleDb.updatedAt).toISOString(),
         data: { title: 'Updated Document' },
         status: 'published',
       });

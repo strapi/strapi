@@ -3,18 +3,26 @@ import * as React from 'react';
 import { Form, useForm } from '@strapi/admin/strapi-admin';
 import { render, screen, waitFor } from '@tests/utils';
 
-import { deleteAutosave, getAutosave, setAutosave } from '../../utils/autosave';
+import {
+  deleteAutosave,
+  getAutosave,
+  purgeExpiredAutosaves,
+  setAutosave,
+} from '../../utils/autosave';
 import { Autosave, useAutosave } from '../Autosave';
 
 jest.mock('../../utils/autosave', () => ({
   ...jest.requireActual('../../utils/autosave'),
   deleteAutosave: jest.fn(),
   getAutosave: jest.fn(),
+  purgeExpiredAutosaves: jest.fn(),
+  registerAutosaveOwner: jest.fn(),
   setAutosave: jest.fn(),
 }));
 
 const mockedGetAutosave = jest.mocked(getAutosave);
 const mockedDeleteAutosave = jest.mocked(deleteAutosave);
+const mockedPurgeExpiredAutosaves = jest.mocked(purgeExpiredAutosaves);
 const mockedSetAutosave = jest.mocked(setAutosave);
 
 const CurrentTitle = () => {
@@ -53,6 +61,7 @@ describe('Autosave', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedDeleteAutosave.mockResolvedValue(undefined);
+    mockedPurgeExpiredAutosaves.mockResolvedValue(undefined);
     mockedSetAutosave.mockResolvedValue('autosave-key');
   });
 

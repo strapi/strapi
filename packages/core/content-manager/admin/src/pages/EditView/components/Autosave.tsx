@@ -8,6 +8,8 @@ import {
   createAutosaveKey,
   deleteAutosave,
   getAutosave,
+  purgeExpiredAutosaves,
+  registerAutosaveOwner,
   setAutosave,
   type AutosaveRecord,
 } from '../utils/autosave';
@@ -74,8 +76,10 @@ const Autosave = ({
     loadedKey.current = undefined;
     setRecovery(undefined);
     setStatus('idle');
+    registerAutosaveOwner({ instanceId, userId });
 
-    getAutosave(key)
+    purgeExpiredAutosaves()
+      .then(() => getAutosave(key))
       .then((record) => {
         if (!active) {
           return;
@@ -97,7 +101,7 @@ const Autosave = ({
     return () => {
       active = false;
     };
-  }, [baseVersion, enabled, initialValues, key]);
+  }, [baseVersion, enabled, initialValues, instanceId, key, userId]);
 
   React.useEffect(() => {
     if (!enabled || loadedKey.current !== key || !modified) {

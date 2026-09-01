@@ -1,12 +1,22 @@
+import type { Middleware } from '@reduxjs/toolkit';
+
 const DATABASE_NAME = 'strapi-content-manager';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'autosaves';
+const AUTOSAVE_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+const registeredOwners = new Set<string>();
 
 export interface AutosaveRecord {
   key: string;
   data: object;
   baseVersion?: string;
   savedAt: string;
+}
+
+interface AutosaveOwner {
+  instanceId: string;
+  userId: string | number;
 }
 
 const openDatabase = () =>
@@ -50,6 +60,82 @@ export const setAutosave = (record: AutosaveRecord) =>
 
 export const deleteAutosave = (key: string) =>
   runTransaction<undefined>('readwrite', (store) => store.delete(key));
+
+const createOwnerPrefix = ({ instanceId, userId }: AutosaveOwner) =>
+  `autosave:${instanceId}:${userId}:`;
+
+const runCursorTransaction = async (
+  shouldDelete: (record: AutosaveRecord) => boolean
+): Promise<void> => {
+  const database = await openDatabase();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, 'readwrite');
+      const request = transaction.objectStore(STORE_NAME).openCursor();
+
+      request.onsuccess = () => {
+        const cursor = request.result;
+
+        if (!cursor) {
+          resolve();
+          return;
+        }
+
+        if (shouldDelete(cursor.value as AutosaveRecord)) {
+          cursor.delete();
+        }
+
+        cursor.continue();
+      };
+      request.onerror = () => reject(request.error);
+      transaction.onerror = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
+};
+
+export const purgeExpiredAutosaves = (now = Date.now()) =>
+  runCursorTransaction(({ savedAt }) => {
+    const savedAtTime = Date.parse(savedAt);
+
+    return Number.isNaN(savedAtTime) || now - savedAtTime >= AUTOSAVE_RETENTION_MS;
+  });
+
+export const purgeAutosavesForOwner = (owner: AutosaveOwner) => {
+  const prefix = createOwnerPrefix(owner);
+
+  return runCursorTransaction(({ key }) => key.startsWith(prefix));
+};
+
+export const registerAutosaveOwner = (owner: AutosaveOwner) => {
+  registeredOwners.add(createOwnerPrefix(owner));
+};
+
+export const purgeRegisteredAutosaves = async () => {
+  const prefixes = [...registeredOwners];
+
+  if (prefixes.length === 0) {
+    return;
+  }
+
+  await runCursorTransaction(({ key }) => prefixes.some((prefix) => key.startsWith(prefix)));
+  prefixes.forEach((prefix) => registeredOwners.delete(prefix));
+};
+
+export const createAutosaveLogoutMiddleware = (): Middleware => () => (next) => (action) => {
+  if (
+    typeof action === 'object' &&
+    action !== null &&
+    'type' in action &&
+    action.type === 'admin/logout'
+  ) {
+    purgeRegisteredAutosaves().catch(() => undefined);
+  }
+
+  return next(action);
+};
 
 export const createAutosaveKey = ({
   instanceId,

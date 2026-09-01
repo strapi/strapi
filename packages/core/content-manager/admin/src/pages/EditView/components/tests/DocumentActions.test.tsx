@@ -137,7 +137,12 @@ const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: 
     model: 'api::child.child',
     collectionType: 'collection-types',
     meta: { availableStatus: [], availableLocales: [] },
-    document: { documentId: 'child', id: 1, status: 'draft' },
+    document: {
+      documentId: 'child',
+      id: 1,
+      status: 'draft',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
   });
 
   if (!action) {
@@ -158,6 +163,26 @@ const ExistingDocumentActionHarness = () => {
   });
 
   return action ? <DocumentActions actions={[{ ...action, id: 'update' }]} /> : null;
+};
+
+const ExistingPublishActionHarness = () => {
+  const action = PublishAction({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: {
+      documentId: 'child',
+      id: 1,
+      status: 'draft',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+  });
+
+  return action ? (
+    <DocumentActions actions={[{ ...action, id: 'publish', disabled: false }]} />
+  ) : null;
 };
 
 const DiscardActionHarness = () => {
@@ -252,6 +277,52 @@ describe('relation parent updates', () => {
     expect(mockClearAutosave).toHaveBeenCalled();
   });
 
+  it('uses the recovered backup version when publishing restored changes', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+
+    const { user } = render(<ExistingPublishActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(mockPublish).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2025-12-31T23:59:00.000Z' }),
+      {}
+    );
+    expect(mockClearAutosave).toHaveBeenCalled();
+  });
+
+  it('offers Reload and Overwrite when publishing a stale draft', async () => {
+    mockPublish
+      .mockResolvedValueOnce({
+        error: {
+          status: 409,
+          name: 'ConflictError',
+          message: 'The document has changed since it was loaded',
+        },
+      })
+      .mockResolvedValueOnce({ data: { documentId: 'child', locale: 'en' } });
+
+    const { user } = render(<ExistingPublishActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+    expect(
+      await screen.findByText('This document was updated by someone else')
+    ).toBeInTheDocument();
+    expect(mockPublish).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ baseVersion: '2026-01-01T00:00:00.000Z' }),
+      {}
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Overwrite' }));
+
+    expect(mockPublish).toHaveBeenNthCalledWith(
+      2,
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
+  });
+
   it('clears the local backup after discarding server changes', async () => {
     const { user } = render(<DiscardActionHarness />);
 
@@ -287,6 +358,10 @@ describe('relation parent updates', () => {
     await user.click(screen.getByRole('button', { name: 'Publish child' }));
 
     await waitFor(() => expect(mockPublish).toHaveBeenCalled());
+    expect(mockPublish).toHaveBeenCalledWith(
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
     await waitFor(() =>
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'GO_TO_CREATED_RELATION' })

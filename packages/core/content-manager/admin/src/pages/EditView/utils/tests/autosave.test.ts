@@ -5,6 +5,10 @@ import {
   getAutosave,
   getOrCreateAutosaveSessionId,
   isAutosaveEnabled,
+  createAutosaveLogoutMiddleware,
+  purgeAutosavesForOwner,
+  purgeExpiredAutosaves,
+  registerAutosaveOwner,
   setAutosave,
   type AutosaveRecord,
 } from '../autosave';
@@ -39,6 +43,28 @@ const objectStore = {
       records.delete(key);
       return undefined;
     }),
+  openCursor: () => {
+    const result = {} as IDBRequest<IDBCursorWithValue | null>;
+    const entries = [...records.entries()];
+    let index = 0;
+
+    const advance = () => {
+      const entry = entries[index++];
+      const cursor = entry
+        ? ({
+            value: entry[1],
+            delete: () => request(() => records.delete(entry[0])),
+            continue: () => setTimeout(advance),
+          } as unknown as IDBCursorWithValue)
+        : null;
+
+      Object.defineProperty(result, 'result', { configurable: true, value: cursor });
+      result.onsuccess?.(new Event('success') as IDBRequestEventMap['success']);
+    };
+
+    setTimeout(advance);
+    return result;
+  },
 } as unknown as IDBObjectStore;
 
 const database = {
@@ -133,6 +159,72 @@ describe('autosave storage', () => {
 
     expect(second).toBe(first);
     expect(otherLocale).not.toBe(first);
+  });
+
+  it('purges expired and malformed autosaves while retaining recent records', async () => {
+    const now = new Date('2026-09-01T12:00:00.000Z').getTime();
+    records.set('expired', {
+      key: 'expired',
+      data: {},
+      savedAt: '2026-08-25T11:59:59.999Z',
+    });
+    records.set('recent', {
+      key: 'recent',
+      data: {},
+      savedAt: '2026-08-25T12:00:00.001Z',
+    });
+    records.set('malformed', { key: 'malformed', data: {}, savedAt: 'invalid' });
+
+    await purgeExpiredAutosaves(now);
+
+    expect([...records.keys()]).toEqual(['recent']);
+  });
+
+  it('purges only the selected user on explicit cleanup and logout', async () => {
+    const owner = { instanceId: 'instance', userId: 1 };
+    records.set('owner', {
+      key: createAutosaveKey({
+        ...owner,
+        model: 'api::article.article',
+        documentId: 'one',
+      }),
+      data: {},
+      savedAt: new Date().toISOString(),
+    });
+    records.set('other-user', {
+      key: createAutosaveKey({
+        instanceId: 'instance',
+        userId: 2,
+        model: 'api::article.article',
+        documentId: 'two',
+      }),
+      data: {},
+      savedAt: new Date().toISOString(),
+    });
+
+    await purgeAutosavesForOwner(owner);
+    expect([...records.keys()]).toEqual(['other-user']);
+
+    records.set('owner-again', {
+      key: createAutosaveKey({
+        ...owner,
+        model: 'api::article.article',
+        documentId: 'three',
+      }),
+      data: {},
+      savedAt: new Date().toISOString(),
+    });
+    registerAutosaveOwner(owner);
+    const next = jest.fn();
+    const dispatch = createAutosaveLogoutMiddleware()({
+      dispatch: jest.fn(),
+      getState: jest.fn(),
+    })(next);
+    dispatch({ type: 'admin/logout' });
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect([...records.keys()]).toEqual(['other-user']);
+    expect(next).toHaveBeenCalledWith({ type: 'admin/logout' });
   });
 
   it('selects a stable document ID for existing, create, and single-type forms', () => {

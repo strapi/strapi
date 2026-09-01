@@ -380,7 +380,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
+      invalidatesTags: (_result, error, { collectionType, model, documentId }) => {
+        if (error) {
+          return [];
+        }
+
         return [
           {
             type: 'Document',

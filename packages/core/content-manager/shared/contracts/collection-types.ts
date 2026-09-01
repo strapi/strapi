@@ -208,7 +208,7 @@ export declare namespace PublishAndCreate {
  */
 export declare namespace Publish {
   export interface Request {
-    body: Partial<Document>;
+    body: Partial<Document> & { baseVersion?: string };
     query: {
       locale?: string | null;
     };

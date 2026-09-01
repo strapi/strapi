@@ -134,6 +134,7 @@ type UseDocumentActions = (
       collectionType: string;
       model: string;
       documentId?: string;
+      baseVersion?: string;
       params?: QueryParams;
     },
     document: Partial<Document>
@@ -352,7 +353,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const [publishDocument, { isLoading: isPublishing }] = usePublishDocumentMutation();
 
   const publish: IUseDocumentActs['publish'] = React.useCallback(
-    async ({ collectionType, model, documentId, params }, data) => {
+    async ({ collectionType, model, documentId, baseVersion, params }, data) => {
       try {
         trackUsage('willPublishEntry', { documentId });
 
@@ -360,7 +361,7 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           documentId,
-          data,
+          data: { ...data, baseVersion },
           params,
         });
 
