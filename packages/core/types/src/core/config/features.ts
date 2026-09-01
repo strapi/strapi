@@ -6,6 +6,7 @@
 export interface FeaturesFutureFlags {
   betaMediaLibrary?: boolean;
   experimental_firstPublishedAt?: boolean;
+  unstableAdminMfa?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }
 

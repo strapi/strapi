@@ -31,6 +31,24 @@ export interface AuthProvider {
   [key: string]: unknown;
 }
 
+export interface MfaWindow {
+  back: number;
+  forward: number;
+}
+
+export interface Mfa {
+  enabled?: boolean;
+  digits?: number;
+  step?: number;
+  window?: MfaWindow;
+  challengeTtl?: number;
+  maxChallengeAttempts?: number;
+  maxUserAttempts?: number;
+  userAttemptWindow?: number;
+  recoveryCodeCount?: number;
+  issuer?: string;
+}
+
 export interface Auth {
   secret: string;
   domain?: string;
@@ -42,6 +60,7 @@ export interface Auth {
     expiresIn?: string | number;
     [key: string]: unknown;
   };
+  mfa?: Mfa;
 }
 
 export interface TransferToken {
