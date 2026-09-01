@@ -184,3 +184,5 @@ examples/**/types/generated
 
 # Ignore yarn.lock inside templates
 templates/yarn.lock
+
+.github/instructions/nx.instructions.md
