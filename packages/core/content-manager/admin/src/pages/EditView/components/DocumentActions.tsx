@@ -1241,11 +1241,12 @@ const UpdateAction: DocumentActionComponent = ({
   const { create, update, clone, isLoading } = useDocumentActions();
   const { clear: clearAutosave } = useAutosave();
   const {
-    currentDocument: { components },
+    currentDocument: { components, document: currentDocumentData },
+    currentDocumentMeta,
   } = useDocumentContext('UpdateAction');
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
-  const { document, getInitialFormValues, schema } = useDoc();
+  const { getInitialFormValues, schema } = useDoc();
   const pendingConflict = React.useRef<{
     data: object;
     values: object;
@@ -1292,7 +1293,6 @@ const UpdateAction: DocumentActionComponent = ({
   const rootDocumentMeta = useRelationModal('UpdateAction', (state) => state.rootDocumentMeta);
   const fromRelationModal = relationContext != undefined;
 
-  const { currentDocumentMeta } = useDocumentContext('UpdateAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
@@ -1391,7 +1391,10 @@ const UpdateAction: DocumentActionComponent = ({
             collectionType,
             model,
             documentId,
-            baseVersion: typeof document?.updatedAt === 'string' ? document.updatedAt : undefined,
+            baseVersion:
+              typeof currentDocumentData?.updatedAt === 'string'
+                ? currentDocumentData.updatedAt
+                : undefined,
             params: currentDocumentMeta.params,
           },
           data

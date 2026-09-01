@@ -73,7 +73,11 @@ jest.mock('../../../../hooks/useDocument', () => ({
 }));
 jest.mock('../../../../hooks/useDocumentContext', () => ({
   useDocumentContext: () => ({
-    currentDocument: { schema: currentDocumentSchema, components: {} },
+    currentDocument: {
+      schema: currentDocumentSchema,
+      components: {},
+      document: { updatedAt: '2026-01-01T00:00:00.000Z' },
+    },
     currentDocumentMeta: {
       documentId: undefined,
       model: 'api::child.child',
