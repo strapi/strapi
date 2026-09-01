@@ -5,6 +5,7 @@ import { render, screen, waitFor } from '@tests/utils';
 const mockCreate = jest.fn();
 const mockPublish = jest.fn();
 const mockUpdate = jest.fn();
+const mockDiscard = jest.fn();
 const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
@@ -58,6 +59,7 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
     create: mockCreate,
     publish: mockPublish,
     update: mockUpdate,
+    discard: mockDiscard,
     isLoading: false,
   }),
 }));
@@ -122,6 +124,7 @@ jest.mock('../Autosave', () => ({
 import {
   DocumentActions,
   DocumentActionsMenu,
+  DEFAULT_ACTIONS,
   openPublishConfirmDialog,
   PublishAction,
   UpdateAction,
@@ -157,6 +160,20 @@ const ExistingDocumentActionHarness = () => {
   return action ? <DocumentActions actions={[{ ...action, id: 'update' }]} /> : null;
 };
 
+const DiscardActionHarness = () => {
+  const Action = DEFAULT_ACTIONS.find((action) => action.type === 'discard')!;
+  const action = Action({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: { documentId: 'child', id: 1, status: 'modified' },
+  });
+
+  return action ? <DocumentActions actions={[{ ...action, id: 'discard' }]} /> : null;
+};
+
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -185,6 +202,7 @@ describe('relation parent updates', () => {
     mockCreate.mockResolvedValue({ data: { documentId: 'created', locale: 'en' } });
     mockPublish.mockResolvedValue({ data: { documentId: 'published', locale: 'en' } });
     mockUpdate.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
+    mockDiscard.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
     mockUpdateParent.mockResolvedValue({ data: {} });
     mockCountDraftRelations.mockResolvedValue({
       data: { unpublishedRelations: 0, draftM2mLinks: 0 },
@@ -231,6 +249,21 @@ describe('relation parent updates', () => {
       expect.objectContaining({ baseVersion: '2025-12-31T23:59:00.000Z' }),
       {}
     );
+    expect(mockClearAutosave).toHaveBeenCalled();
+  });
+
+  it('clears the local backup after discarding server changes', async () => {
+    const { user } = render(<DiscardActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    expect(mockDiscard).toHaveBeenCalledWith({
+      collectionType: 'collection-types',
+      model: 'api::child.child',
+      documentId: 'child',
+      params: {},
+    });
     expect(mockClearAutosave).toHaveBeenCalled();
   });
 
