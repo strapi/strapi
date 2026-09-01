@@ -34,7 +34,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    const can = (action: string, entity?: Entity, field?: string) => {
+    const can = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -46,7 +46,7 @@ const createPermissionChecker =
       );
     };
 
-    const cannot = (action: string, entity?: Entity, field?: string) => {
+    const cannot = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 

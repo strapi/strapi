@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
+import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const {
@@ -70,16 +70,20 @@ const removeId = (value: any) => {
   }
 };
 
-const removeIds = (model: any) => (entry: any) => removeIdsMut(model, cloneDeep(entry));
+const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
+  removeIdsMut(model, cloneDeep(entry));
 
-const removeIdsMut = (model: any, entry: any): Record<string, any> => {
+const removeIdsMut = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+): Record<string, any> => {
   if (isNil(entry)) {
     return entry as unknown as Record<string, any>;
   }
 
   removeId(entry);
 
-  _.forEach(model.attributes, (attr, attrName) => {
+  for (const [attrName, attr] of Object.entries(model.attributes)) {
     const value = entry[attrName];
     if (attr.type === 'dynamiczone' && isArray(value)) {
       value.forEach((compo) => {
@@ -96,7 +100,7 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
         removeIdsMut(model, value);
       }
     }
-  });
+  }
 
   return entry;
 };
@@ -107,7 +111,10 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
  * @param {object} entry
  * @returns {object}
  */
-const copyNonLocalizedAttributes = (model: any, entry: any) => {
+const copyNonLocalizedAttributes = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
   return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
@@ -146,7 +153,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
 
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
-  _.forEach(relatedEntryCopy, (value, field) => {
+  for (const [field, value] of Object.entries(relatedEntryCopy)) {
     // Empty arrays are the admin create-locale default for required repeatable
     // components and dynamic zones — treat them as unset so sibling data is inherited.
     const isUnset =
@@ -154,7 +161,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
 
     if (isUnset) {
       entry[field] = value;
-      return;
+      continue;
     }
 
     // A present-but-shallow non-repeatable component (nested keys omitted or [])
@@ -168,7 +175,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
       isPresentObject(value)
     ) {
       fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
-      return;
+      continue;
     }
 
     // A non-empty repeatable component can also be shallow when it comes from a
@@ -186,7 +193,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
           fillNonLocalizedAttributes(component, relatedComponent, { model: attr.component });
         }
       });
-      return;
+      continue;
     }
 
     // Dynamic-zone items need the same repair, but only when the item at the
@@ -206,7 +213,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
         }
       });
     }
-  });
+  }
 };
 
 /**

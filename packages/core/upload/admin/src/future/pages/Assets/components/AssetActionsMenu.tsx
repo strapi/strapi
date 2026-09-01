@@ -14,6 +14,7 @@ import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from 
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -55,6 +56,7 @@ interface AssetActionsMenuProps {
  */
 export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { deselect } = useAssetSelection();
@@ -109,23 +111,21 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
 
     let res;
     try {
-      res = await replaceAsset({ id: asset.id, file });
+      res = await replaceAsset({ id: asset.id, file, fileInfo: { name: asset.name } });
     } finally {
       releaseBusy();
     }
 
     if ('error' in res) {
-      // `fetchBaseQuery` already unwraps the API envelope, so a server-sent
-      // reason (file too large, unsupported type) lands directly on `message`.
-      const { message } = res.error as { message?: string };
       toggleNotification({
         type: 'danger',
-        message:
-          message ??
+        message: getErrorMessage(
+          res.error,
           formatMessage({
             id: getTranslationKey('asset-details.replace.error'),
             defaultMessage: 'Failed to replace the file.',
-          }),
+          })
+        ),
       });
       return;
     }

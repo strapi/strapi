@@ -8,6 +8,9 @@ const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
 let parentInitialFormValues: Record<string, unknown> | undefined;
+let currentDocumentSchema: { options: { draftAndPublish: boolean } } = {
+  options: { draftAndPublish: true },
+};
 let relationModalState = {
   isModalOpen: true,
   fieldToConnect: 'relation',
@@ -63,7 +66,7 @@ jest.mock('../../../../hooks/useDocument', () => ({
 }));
 jest.mock('../../../../hooks/useDocumentContext', () => ({
   useDocumentContext: () => ({
-    currentDocument: { schema: { options: { draftAndPublish: true } }, components: {} },
+    currentDocument: { schema: currentDocumentSchema, components: {} },
     currentDocumentMeta: {
       documentId: undefined,
       model: 'api::child.child',
@@ -243,6 +246,36 @@ describe('relation parent updates', () => {
         disconnect: [],
       },
     });
+  });
+});
+
+describe('draft relations count fetching', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+  });
+
+  afterEach(() => {
+    currentDocumentSchema = { options: { draftAndPublish: true } };
+  });
+
+  it('fetches the draft relations count for a Draft & Publish content type', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: true } };
+
+    render(<ActionHarness Action={PublishAction} label="Publish child" />);
+
+    await waitFor(() => expect(mockCountDraftRelations).toHaveBeenCalled());
+  });
+
+  it('does not fetch the draft relations count for a non Draft & Publish content type', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: false } };
+
+    render(<ActionHarness Action={PublishAction} label="Publish child" />);
+
+    expect(mockCountDraftRelations).not.toHaveBeenCalled();
   });
 });
 

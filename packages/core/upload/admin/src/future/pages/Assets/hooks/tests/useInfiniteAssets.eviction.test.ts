@@ -36,6 +36,8 @@ jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,
   useStore: () => ({ getState: () => mockState }),
+  // No <Provider> here, so selectors read the same stand-in state as `useStore`.
+  useSelector: (selector: (state: unknown) => unknown) => selector(mockState),
 }));
 
 const key = (folder: number, page: number) =>
