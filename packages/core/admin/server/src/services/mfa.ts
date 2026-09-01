@@ -22,6 +22,19 @@ const CHALLENGE_UID = 'admin::mfa-challenge';
 const EVENT_UID = 'admin::mfa-event';
 
 /**
+ * `validateMfaConfig` pins `digits` to 6, 7 or 8, and `verifyTotp` requires exactly `digits`
+ * characters, so nothing longer than this can ever satisfy a TOTP check.
+ */
+const MAX_TOTP_CODE_LENGTH = 8;
+
+/**
+ * `generateRecoveryCode` emits exactly 10 Crockford base32 characters, and `normaliseRecoveryCode`
+ * only ever removes separators or maps a character 1:1, so a genuine recovery code always
+ * normalises to exactly this length.
+ */
+const RECOVERY_CODE_LENGTH = 10;
+
+/**
  * Security notices surfaced in-app, and — for `challenge_failed` — the stored counter the
  * account-scoped throttle reads. Never carries the code, secret or URI it is about.
  */
@@ -480,6 +493,36 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * TOTP verification for this endpoint only, where a secret that cannot be read must mean "this
+   * code did not match" rather than a fatal error.
+   *
+   * `verifyTotpForUser` throws for an undecryptable secret (an `ENCRYPTION_KEY` rotation) or a
+   * missing one, and that error's own message tells the user to use a recovery code. Letting it
+   * propagate from `verifyChallenge` would make the documented escape hatch unreachable at the
+   * only endpoint that accepts it, and would skip `verifyChallenge`'s `challenge_failed` event
+   * — so the per-challenge counter would advance while the account-scoped one never did,
+   * leaving an account with a broken secret unthrottled no matter how long it was guessed at.
+   *
+   * Deliberately scoped to this one call site: `completeEnrolment`, and the disable/regenerate
+   * paths to come, must keep the actionable error rather than silently report "invalid code".
+   */
+  const attemptTotp = async (userId: string, code: string) => {
+    try {
+      return await verifyTotpForUser(userId, code);
+    } catch (error) {
+      // None of these messages carry secret material, and this only fires on a genuinely broken
+      // or absent secret, not on an ordinary wrong code — so it is a signal an operator needs
+      // rather than something an attacker can use to flood the log.
+      strapi.log.warn(
+        `Two-factor verification could not check a TOTP code for admin user ${userId}. A recovery code is the way back into this account. Cause: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { valid: false as const };
+    }
+  };
+
+  /**
    * Both enrolled factors are accepted at this one endpoint, TOTP first and then a recovery code.
    * There is deliberately no client-supplied factor selector: letting the caller pick which check
    * runs is the classic factor-switching bypass.
@@ -528,22 +571,42 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return { ok: false as const, reason: 'exhausted' as const };
     }
 
-    const totpResult = await verifyTotpForUser(challenge.userId, code);
+    // Which check to even attempt is decided by the submitted code's own shape, never by anything
+    // the client claims it is presenting. TOTP codes are 6-8 digits and recovery codes normalise
+    // to exactly 10 characters, so the two factors have disjoint lengths and no input that could
+    // have matched is excluded — this is a dispatch on the data, not the factor-switching bypass.
+    //
+    // It matters because `consumeRecoveryCode` bcrypt-compares against every unused code: without
+    // this, every wrong 6-digit code on an unauthenticated endpoint would cost
+    // `recoveryCodeCount` bcrypt comparisons, roughly a second of CPU each at the default of 10.
+    // The attempt caps bound the total, but there is no reason to hand out the amplifier.
+    const normalised = normaliseRecoveryCode(code);
 
-    // `consumeTotpStep` is what makes a code single-use across the whole account rather than
-    // within one challenge, so a code spent on an earlier challenge cannot be replayed against a
-    // freshly created one (CVE-2024-0227).
-    if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
-      return consumeChallenge(challenge.id, challenge.userId);
+    if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
+      const totpResult = await attemptTotp(challenge.userId, code);
+
+      // `consumeTotpStep` is what makes a code single-use across the whole account rather than
+      // within one challenge, so a code spent on an earlier challenge cannot be replayed against a
+      // freshly created one (CVE-2024-0227).
+      if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
+        return consumeChallenge(challenge.id, challenge.userId);
+      }
     }
 
-    if (await consumeRecoveryCode(challenge.userId, code)) {
+    if (
+      normalised.length === RECOVERY_CODE_LENGTH &&
+      (await consumeRecoveryCode(challenge.userId, code))
+    ) {
       // Recorded on consumption rather than on success: the code is spent either way, and the
       // notice is about a recovery code having been used on the account.
       await recordEvent(challenge.userId, 'recovery_code_used');
       return consumeChallenge(challenge.id, challenge.userId);
     }
 
+    // Reached whether a check ran and failed or the code matched no factor's shape at all. Both
+    // are one spent attempt at both tiers: the per-challenge counter above and this event, which
+    // is what `isAccountThrottled` counts. A path that charges one tier but not the other is a
+    // hole in the other.
     await recordEvent(challenge.userId, 'challenge_failed');
     return { ok: false as const, reason: 'invalid' as const };
   };
@@ -551,6 +614,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /**
    * Housekeeping, not enforcement: expired challenges are already rejected on read, so this only
    * keeps the table from growing. Nothing depends on it having run.
+   *
+   * The DELETE is unbounded — no LIMIT, no batching. That is acceptable rather than overlooked:
+   * rows can only be created by `createChallenge`, which is throttled per account and rate
+   * limited per IP, and `challengeTtl` defaults to five minutes, so the expired set at boot is
+   * small. If that ever stops being true the fix is batching here, not a shorter TTL.
    */
   const sweepExpiredChallenges = async (): Promise<number> => {
     const result = await challengeQuery().deleteMany({

@@ -218,10 +218,15 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   const mfaService = getService('mfa');
   if (mfaService.isEnabled()) {
-    // Bounded housekeeping. Expired challenges are also rejected lazily on read, so this is only
-    // about not letting the table grow — nothing about the security of the flow depends on it
-    // having run, which is exactly why it is wrapped: a cleanup that cannot fail safely would
-    // otherwise be able to stop the admin from booting at all.
+    // Housekeeping. Expired challenges are also rejected lazily on read, so this is only about
+    // not letting the table grow — nothing about the security of the flow depends on it having
+    // run, which is exactly why it is wrapped: a cleanup that cannot fail safely would otherwise
+    // be able to stop the admin from booting at all.
+    //
+    // The delete is unbounded, deliberately. Challenge rows come only from `createChallenge`,
+    // which is throttled per account and rate limited per IP, and they expire after
+    // `challengeTtl` (five minutes by default), so the expired set at boot is small. Batching
+    // would be the fix if that ever changed.
     try {
       await mfaService.sweepExpiredChallenges();
     } catch (error) {

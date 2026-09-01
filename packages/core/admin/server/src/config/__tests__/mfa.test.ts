@@ -123,6 +123,24 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
   });
 
+  // Zero is rejected as well as negative, deliberately, and these two pin that: a guard written
+  // `< 0` would satisfy every case above but let `0` through, and `0` is a lockout on both knobs —
+  // a zero TTL expires every challenge the instant it is created, and a zero-length window makes
+  // the account-scoped counter match nothing at all.
+  test('falls back to the default challengeTtl and warns when it is exactly 0', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ challengeTtl: 0 }, logger);
+    expect(result.challengeTtl).toBe(MFA_DEFAULTS.challengeTtl);
+    expect(logger.warnings.join(' ')).toContain('challengeTtl');
+  });
+
+  test('falls back to the default userAttemptWindow and warns when it is exactly 0', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ userAttemptWindow: 0 }, logger);
+    expect(result.userAttemptWindow).toBe(MFA_DEFAULTS.userAttemptWindow);
+    expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
+  });
+
   test('MFA_DEFAULTS cannot be mutated through config export', () => {
     // Save original values
     const originalDigits = MFA_DEFAULTS.digits;

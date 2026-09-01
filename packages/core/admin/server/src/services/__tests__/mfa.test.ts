@@ -225,7 +225,17 @@ const buildChallengeConnection =
       );
     }
 
-    const resolveKey = (column: string) => (column === attemptsColumn ? 'attempts' : column);
+    // Throws rather than falling through to identity, mirroring `buildRecoveryConnection`'s
+    // `whereNull` guard: with an identity fallback a service that hardcoded `'attempts'` would
+    // still mutate `row.attempts` and the metadata-resolution test below could never fail, so it
+    // would only be enforcing the table half of the claim.
+    const resolveKey = (column: string) => {
+      if (column === attemptsColumn) return 'attempts';
+      if (column === 'id') return 'id';
+      throw new Error(
+        `Unexpected column in mock connection: got "${column}", expected "${attemptsColumn}" or "id"`
+      );
+    };
     const predicates: Array<(row: ChallengeRow) => boolean> = [];
 
     const builder = {
@@ -966,6 +976,8 @@ describe('mfa service: challenge lifecycle', () => {
       tableName?: string;
       attemptsColumn?: string;
       mfaConfig?: Record<string, unknown>;
+      /** Simulates an ENCRYPTION_KEY rotation: the stored secret can no longer be decrypted. */
+      unreadableSecret?: boolean;
     } = {}
   ) => {
     const fixture = buildMfaFixture({
@@ -982,16 +994,27 @@ describe('mfa service: challenge lifecycle', () => {
     user.mfaSecret = `enc:${base32Encode(secret)}`;
     user.mfaEnabledAt = new Date();
 
+    // Spies, not bare lambdas, so a test can assert which factor was even *attempted*. `decrypt`
+    // is only ever reached through `readSecret` inside `verifyTotpForUser`, and
+    // `validatePassword` only through `consumeRecoveryCode`'s candidate loop, so a zero call
+    // count on either is proof that branch never ran.
+    const decrypt = jest.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
+    const validatePassword = jest.fn(async (plain: string, hash: string) => hash === `h:${plain}`);
+
     const service = createMfaService({
       strapi: fixture.strapi as unknown as Core.Strapi,
-      encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: (v: string) => v.slice(4) },
-      auth: {
-        validatePassword: async (plain: string, hash: string) => hash === `h:${plain}`,
-        hashPassword: async (plain: string) => `h:${plain}`,
-      },
+      encryption: { encrypt: (v: string) => `enc:${v}`, decrypt },
+      auth: { validatePassword, hashPassword: async (plain: string) => `h:${plain}` },
     });
 
-    return { ...fixture, service, secret, validCode: () => generateTotp({ secret }) };
+    return {
+      ...fixture,
+      service,
+      secret,
+      decrypt,
+      validatePassword,
+      validCode: () => generateTotp({ secret }),
+    };
   };
 
   type ChallengeService = ReturnType<typeof setup>['service'];
@@ -1323,6 +1346,93 @@ describe('mfa service: challenge lifecycle', () => {
 
     expect(metadataGet).toHaveBeenCalledWith(CHALLENGE_UID);
     expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+  });
+
+  test('a recovery code still works when the stored totp secret cannot be read', async () => {
+    // The ENCRYPTION_KEY-rotation case recovery codes exist for. `verifyTotpForUser` throws for an
+    // undecryptable secret, and that error's own message tells the user to present a recovery
+    // code — so if the throw escaped `verifyChallenge`, the documented escape hatch would be
+    // unreachable at the only endpoint that accepts it.
+    const { service, challenges, events, recoveryRows, decrypt } = setup({
+      unreadableSecret: true,
+    });
+    const codes = await service.issueRecoveryCodes('1');
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, codes[0])).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+
+    expect(recoveryRows.find((r) => r.codeHash === `h:${codes[0]}`)!.usedAt).toBeInstanceOf(Date);
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+    expect(events.filter((e) => e.type === 'recovery_code_used')).toHaveLength(1);
+
+    // With the length routing a recovery-shaped code never reaches the TOTP branch at all, so the
+    // broken secret is not merely survived, it is never touched.
+    expect(decrypt).not.toHaveBeenCalled();
+  });
+
+  test('an unreadable totp secret fails the attempt instead of throwing, and still charges both tiers', async () => {
+    const { service, strapi, challenges, events, secret } = setup({ unreadableSecret: true });
+
+    const { token } = await service.createChallenge('1');
+
+    // A totp-shaped code does reach the TOTP branch, where the secret read throws. That must be
+    // "this code did not match", not an error escaping to the caller: propagating would skip the
+    // `challenge_failed` event below, so the per-challenge counter would advance while the
+    // account-scoped one never did — leaving an account with a broken secret guessable forever.
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+
+    // Not swallowed silently: an operator needs to know why TOTP stopped working. And the warning
+    // must not carry the thing it is about.
+    const warn = strapi.log.warn as jest.Mock;
+    expect(warn).toHaveBeenCalled();
+    const logged = warn.mock.calls.map((call) => String(call[0])).join(' ');
+    expect(logged).toMatch(/recovery code/i);
+    expect(logged).not.toContain(base32Encode(secret));
+  });
+
+  test('a totp-shaped wrong code costs no bcrypt comparisons', async () => {
+    const { service, validatePassword } = setup();
+    await service.issueRecoveryCodes('1');
+    validatePassword.mockClear();
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+
+    // There are ten unused codes sitting in the store, so without dispatching on the code's own
+    // length this wrong 6-digit code would bcrypt-compare against every one of them — about a
+    // second of CPU, on an unauthenticated endpoint, for every wrong guess.
+    expect(validatePassword).not.toHaveBeenCalled();
+  });
+
+  test('a recovery-shaped wrong code costs no totp verification', async () => {
+    const { service, decrypt, validatePassword } = setup();
+    await service.issueRecoveryCodes('1');
+    validatePassword.mockClear();
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, 'ZZZZZZZZZZ')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+
+    // The two factors have disjoint lengths, so a 10-character code is never a TOTP candidate and
+    // the secret is never decrypted for it.
+    expect(decrypt).not.toHaveBeenCalled();
+    // ...but the recovery branch really did run, so the assertion above is about routing rather
+    // than about nothing having happened.
+    expect(validatePassword).toHaveBeenCalled();
   });
 
   test('sweeping removes expired challenges and leaves live ones alone', async () => {
