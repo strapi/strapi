@@ -1239,7 +1239,7 @@ const UpdateAction: DocumentActionComponent = ({
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
-  const { clear: clearAutosave } = useAutosave();
+  const { clear: clearAutosave, pendingBaseVersion } = useAutosave();
   const {
     currentDocument: { components, document: currentDocumentData },
     currentDocumentMeta,
@@ -1392,9 +1392,10 @@ const UpdateAction: DocumentActionComponent = ({
             model,
             documentId,
             baseVersion:
-              typeof currentDocumentData?.updatedAt === 'string'
+              pendingBaseVersion ??
+              (typeof currentDocumentData?.updatedAt === 'string'
                 ? currentDocumentData.updatedAt
-                : undefined,
+                : undefined),
             params: currentDocumentMeta.params,
           },
           data

@@ -83,3 +83,46 @@ export const getOrCreateAutosaveSessionId = (model: string, locale?: string) => 
     return sessionId;
   }
 };
+
+export const getAutosaveDocumentId = ({
+  documentId,
+  isCreatingDocument,
+  isSingleType,
+  model,
+  locale,
+}: {
+  documentId?: string;
+  isCreatingDocument: boolean;
+  isSingleType: boolean;
+  model: string;
+  locale?: string;
+}) => {
+  if (documentId) {
+    return documentId;
+  }
+
+  if (isCreatingDocument) {
+    return `create:${getOrCreateAutosaveSessionId(model, locale)}`;
+  }
+
+  return isSingleType ? `single:${model}` : '';
+};
+
+export const isAutosaveEnabled = ({
+  hasDraftAndPublished,
+  status,
+  documentId,
+  userId,
+  instanceId,
+}: {
+  hasDraftAndPublished: boolean;
+  status: 'draft' | 'published';
+  documentId: string;
+  userId?: string | number;
+  instanceId: string;
+}) =>
+  hasDraftAndPublished &&
+  status === 'draft' &&
+  Boolean(documentId) &&
+  userId !== undefined &&
+  Boolean(instanceId);

@@ -27,6 +27,7 @@ type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface AutosaveContextValue {
   clear: () => Promise<void>;
+  pendingBaseVersion?: string;
 }
 
 const AutosaveContext = React.createContext<AutosaveContextValue>({
@@ -52,8 +53,12 @@ const Autosave = ({
   const [status, setStatus] = React.useState<AutosaveStatus>('idle');
   const [savedAt, setSavedAt] = React.useState<string>();
   const [recovery, setRecovery] = React.useState<AutosaveRecord>();
+  const [pendingBaseVersion, setPendingBaseVersion] = React.useState<string>();
   const loadedKey = React.useRef<string>();
   const wasModified = React.useRef(false);
+  const writeGeneration = React.useRef(0);
+  const timeoutRef = React.useRef<number>();
+  const pendingWrite = React.useRef<Promise<unknown>>();
 
   const key = React.useMemo(
     () => createAutosaveKey({ instanceId, userId, model, documentId, locale }),
@@ -78,11 +83,7 @@ const Autosave = ({
 
         loadedKey.current = key;
 
-        if (
-          record &&
-          record.savedAt > (baseVersion ?? '') &&
-          JSON.stringify(record.data) !== JSON.stringify(initialValues)
-        ) {
+        if (record && JSON.stringify(record.data) !== JSON.stringify(initialValues)) {
           setRecovery(record);
         }
       })
@@ -103,26 +104,30 @@ const Autosave = ({
       return;
     }
 
-    let active = true;
+    const generation = writeGeneration.current;
     setStatus('saving');
-    const timeout = window.setTimeout(
+    timeoutRef.current = window.setTimeout(
       () => {
         const nextSavedAt = new Date().toISOString();
 
-        setAutosave({
+        if (generation !== writeGeneration.current) {
+          return;
+        }
+
+        pendingWrite.current = setAutosave({
           key,
           data: values,
-          baseVersion,
+          baseVersion: pendingBaseVersion ?? baseVersion,
           savedAt: nextSavedAt,
         })
           .then(() => {
-            if (active) {
+            if (generation === writeGeneration.current) {
               setSavedAt(nextSavedAt);
               setStatus('saved');
             }
           })
           .catch(() => {
-            if (active) {
+            if (generation === writeGeneration.current) {
               setStatus('error');
             }
           });
@@ -131,10 +136,12 @@ const Autosave = ({
     );
 
     return () => {
-      active = false;
-      window.clearTimeout(timeout);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = undefined;
+      }
     };
-  }, [baseVersion, enabled, isSubmitting, key, modified, values]);
+  }, [baseVersion, enabled, isSubmitting, key, modified, pendingBaseVersion, values]);
 
   React.useEffect(() => {
     if (!enabled) {
@@ -158,9 +165,18 @@ const Autosave = ({
       return;
     }
 
+    writeGeneration.current += 1;
+
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
+    }
+
     try {
+      await pendingWrite.current;
       await deleteAutosave(key);
       wasModified.current = false;
+      setPendingBaseVersion(undefined);
       setRecovery(undefined);
       setStatus('idle');
     } catch {
@@ -172,19 +188,18 @@ const Autosave = ({
     if (recovery) {
       setValues(recovery.data);
       setSavedAt(recovery.savedAt);
+      setPendingBaseVersion(recovery.baseVersion);
       setStatus('saved');
       setRecovery(undefined);
     }
   };
 
   const handleDiscard = () => {
-    deleteAutosave(key).catch(() => undefined);
-    setRecovery(undefined);
-    setStatus('idle');
+    clear().catch(() => undefined);
   };
 
   return (
-    <AutosaveContext.Provider value={{ clear }}>
+    <AutosaveContext.Provider value={{ clear, pendingBaseVersion }}>
       {enabled ? (
         <>
           <Box paddingBottom={2}>
@@ -225,7 +240,7 @@ const Autosave = ({
                   {formatMessage({
                     id: 'content-manager.autosave.recovery.body',
                     defaultMessage:
-                      'A local backup from this browser is newer than the saved document. Restore it?',
+                      'This browser has unsaved changes that differ from the saved document. Restore them?',
                   })}
                 </Typography>
               </Dialog.Body>

@@ -38,7 +38,7 @@ import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
-import { getOrCreateAutosaveSessionId } from './utils/autosave';
+import { getAutosaveDocumentId, isAutosaveEnabled } from './utils/autosave';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -123,17 +123,17 @@ const EditViewPage = () => {
    * document with varying params.
    */
   const isCreatingDocument = !id && !isSingleType;
-  const autosaveDocumentId = React.useMemo(() => {
-    if (document?.documentId) {
-      return document.documentId;
-    }
-
-    if (isCreatingDocument) {
-      return `create:${getOrCreateAutosaveSessionId(model, activeLocale)}`;
-    }
-
-    return isSingleType ? `single:${model}` : '';
-  }, [activeLocale, document?.documentId, isCreatingDocument, isSingleType, model]);
+  const autosaveDocumentId = React.useMemo(
+    () =>
+      getAutosaveDocumentId({
+        documentId: document?.documentId,
+        isCreatingDocument,
+        isSingleType,
+        model,
+        locale: activeLocale,
+      }),
+    [activeLocale, document?.documentId, isCreatingDocument, isSingleType, model]
+  );
 
   const {
     isLoading: isLoadingLayout,
@@ -209,13 +209,13 @@ const EditViewPage = () => {
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
         <Autosave
-          enabled={
-            hasDraftAndPublished &&
-            status === 'draft' &&
-            Boolean(autosaveDocumentId) &&
-            userId !== undefined &&
-            Boolean(persistenceScope)
-          }
+          enabled={isAutosaveEnabled({
+            hasDraftAndPublished,
+            status,
+            documentId: autosaveDocumentId,
+            userId,
+            instanceId: persistenceScope || '',
+          })}
           instanceId={persistenceScope || ''}
           userId={userId ?? ''}
           model={model}

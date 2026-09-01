@@ -630,6 +630,49 @@ describe('useDocumentActions', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('does not refetch the document after a version conflict', async () => {
+      const getDocument = jest.fn();
+
+      server.use(
+        http.put('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
+              error: {
+                status: 409,
+                name: 'ConflictError',
+                message: 'The document has changed since it was loaded',
+                details: {},
+              },
+            },
+            { status: 409 }
+          );
+        }),
+        http.get('/content-manager/:collectionType/:uid/:id', () => {
+          getDocument();
+
+          return HttpResponse.json({ data: { documentId: '12345' } });
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      await result.current.update(
+        {
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+          baseVersion: '2026-01-01T00:00:00.000Z',
+        },
+        { title: 'Updated' }
+      );
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+
+      expect(getDocument).not.toHaveBeenCalled();
+    });
+
     it('should return the errors when unsuccessful', async () => {
       server.use(
         http.put('/content-manager/:collectionType/:uid/:id', () => {

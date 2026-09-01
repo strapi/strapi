@@ -8,6 +8,8 @@ const mockUpdate = jest.fn();
 const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
+const mockClearAutosave = jest.fn();
+let mockPendingBaseVersion: string | undefined;
 let parentInitialFormValues: Record<string, unknown> | undefined;
 let currentDocumentSchema: { options: { draftAndPublish: boolean } } = {
   options: { draftAndPublish: true },
@@ -110,6 +112,12 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
       },
     }),
 }));
+jest.mock('../Autosave', () => ({
+  useAutosave: () => ({
+    clear: mockClearAutosave,
+    pendingBaseVersion: mockPendingBaseVersion,
+  }),
+}));
 
 import {
   DocumentActions,
@@ -152,6 +160,7 @@ const ExistingDocumentActionHarness = () => {
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPendingBaseVersion = undefined;
     parentInitialFormValues = undefined;
     relationModalState = {
       isModalOpen: true,
@@ -209,6 +218,20 @@ describe('relation parent updates', () => {
       expect.not.objectContaining({ baseVersion: expect.anything() }),
       {}
     );
+  });
+
+  it('uses the recovered backup version when saving restored changes', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2025-12-31T23:59:00.000Z' }),
+      {}
+    );
+    expect(mockClearAutosave).toHaveBeenCalled();
   });
 
   it('completes UpdateAction child creation without a parent mutation when parent data is absent', async () => {

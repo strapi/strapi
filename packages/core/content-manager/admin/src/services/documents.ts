@@ -439,7 +439,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
+      invalidatesTags: (_result, error, { collectionType, model, documentId }) => {
+        // Failed writes (including 409 stale-version) must not refetch the document.
+        // Refetch remounts Edit View, drops the conflict dialog, and replaces local edits.
+        if (error) {
+          return [];
+        }
+
         return [
           {
             type: 'Document',
