@@ -4,6 +4,7 @@ import { http, HttpResponse } from 'msw';
 
 import { AssetsTable } from '../components/AssetsTable';
 import { BulkActionsBar } from '../components/BulkActionsBar';
+import { INTERACTIVE_ELEMENT_SELECTOR } from '../constants';
 import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -553,6 +554,19 @@ describe('AssetsTable', () => {
 
       await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
+    });
+
+    // The drawer's dismissal policy keys off this selector, so it has to match
+    // what the design system actually renders rather than what it is assumed to.
+    it('renders the selection checkboxes as elements the drawer treats as interactive', async () => {
+      setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
+
+      for (const name of ['Select all', 'Select Photos', 'Select image1.png']) {
+        const control = await screen.findByRole('checkbox', { name });
+
+        // eslint-disable-next-line testing-library/no-node-access
+        expect(control.closest(INTERACTIVE_ELEMENT_SELECTOR)).not.toBeNull();
+      }
     });
 
     it('selects folders and assets via the header checkbox and shows indeterminate when partial', async () => {

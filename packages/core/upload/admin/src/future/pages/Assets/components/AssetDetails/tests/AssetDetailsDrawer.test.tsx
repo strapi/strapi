@@ -757,13 +757,21 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
   const renderOpenDrawer = async () => {
     const result = render(
       <>
-        <button type="button" data-testid="page-background">
-          Background
-        </button>
+        {/* Inert canvas — the only thing behind that dismisses. */}
+        <div data-testid="page-background">Background</div>
         {/* Stands in for a grid card/table row, whose click switches the drawer. */}
         <button type="button" data-testid="other-asset" {...ASSET_DETAILS_TRIGGER_PROPS}>
           Other asset
         </button>
+        {/* The list's own controls, which must not dismiss it. */}
+        <button type="button" data-testid="toolbar-button">
+          Sort
+        </button>
+        <button type="button" role="checkbox" aria-checked="false" data-testid="select-all" />
+        <input data-testid="search" aria-label="Search" />
+        <div role="menuitem" data-testid="menu-option">
+          Name (A to Z)
+        </div>
         <AssetDetailsDrawer />
       </>,
       { initialEntries: ['/?assetId=1'] }
@@ -775,12 +783,27 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     return { ...result, drawer };
   };
 
-  it('closes when the pointer goes down outside the panel', async () => {
+  it('closes when the pointer goes down on inert page background', async () => {
     const { user, drawer } = await renderOpenDrawer();
 
     await user.click(screen.getByTestId('page-background'));
 
     await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  // The drawer is a reference panel: operating the list behind it is not
+  // leaving it.
+  it.each([
+    ['a toolbar button', 'toolbar-button'],
+    ['the select-all checkbox', 'select-all'],
+    ['the search field', 'search'],
+    ['an option in a menu portaled out of the page', 'menu-option'],
+  ])('stays open when the pointer goes down on %s', async (_label, testId) => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId(testId));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
   });
 
   it('stays open when the pointer goes down inside the panel', async () => {

@@ -62,7 +62,7 @@ import {
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
-import { ASSET_DETAILS_TRIGGER_SELECTOR } from '../../constants';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, INTERACTIVE_ELEMENT_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
@@ -1287,16 +1287,28 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 /**
  * Whether a pointer press outside the panel should leave the drawer open.
  *
- * Two cases: the panel is already closing (`forceMount` keeps it listening
- * through the animation, so dismissing again would re-trigger the
- * unsaved-changes guard for nothing), or the press landed on another asset's
- * card/row — its `click`, firing right after, switches the drawer instead of
- * closing it, so closing here would just cause a close-then-reopen.
+ * Only an inert part of the page behind dismisses it. A press on any control
+ * there — checkbox, select all, search, sort, filters — is the user working the
+ * list with the drawer as a reference, so it stays. An asset's card or row also
+ * stays: its `click` fires right after and switches the drawer, which would
+ * otherwise read as close-then-reopen. And `forceMount` keeps a closing panel
+ * listening through its animation, where dismissing again would re-trigger the
+ * unsaved-changes guard for nothing.
  */
-const shouldKeepDrawerOpen = (event: { target: EventTarget | null }, isVisible: boolean) =>
-  !isVisible ||
-  (event.target instanceof Element &&
-    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null);
+const shouldKeepDrawerOpen = (event: { target: EventTarget | null }, isVisible: boolean) => {
+  if (!isVisible) {
+    return true;
+  }
+
+  if (!(event.target instanceof Element)) {
+    return false;
+  }
+
+  return (
+    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null ||
+    event.target.closest(INTERACTIVE_ELEMENT_SELECTOR) !== null
+  );
+};
 
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
