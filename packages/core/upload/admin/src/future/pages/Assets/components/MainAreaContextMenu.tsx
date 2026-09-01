@@ -187,13 +187,13 @@ export const MainAreaContextMenu = ({
             <Menu.Item onSelect={onImportFiles} startIcon={<Files />}>
               {formatMessage({
                 id: getTranslationKey('import-files'),
-                defaultMessage: 'Import files',
+                defaultMessage: 'File upload',
               })}
             </Menu.Item>
             <Menu.Item onSelect={onImportFromUrl} startIcon={<Link />}>
               {formatMessage({
                 id: getTranslationKey('import-from-url'),
-                defaultMessage: 'Import from URL',
+                defaultMessage: 'File upload from URL',
               })}
             </Menu.Item>
           </ActionsMenuContent>

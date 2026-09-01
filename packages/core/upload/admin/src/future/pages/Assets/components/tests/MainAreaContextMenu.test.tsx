@@ -75,8 +75,8 @@ describe('MainAreaContextMenu', () => {
     const items = await screen.findAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'New folder',
-      'Import files',
-      'Import from URL',
+      'File upload',
+      'File upload from URL',
     ]);
   });
 
@@ -127,8 +127,8 @@ describe('MainAreaContextMenu', () => {
 
   it.each([
     ['New folder', () => onCreateFolder],
-    ['Import files', () => onImportFiles],
-    ['Import from URL', () => onImportFromUrl],
+    ['File upload', () => onImportFiles],
+    ['File upload from URL', () => onImportFromUrl],
   ])('runs %s and closes', async (label, getHandler) => {
     const { user } = setup();
 

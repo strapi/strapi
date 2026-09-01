@@ -742,121 +742,124 @@ export const AssetsPage = () => {
                     <Box ref={headerSentinelRef} height={0} aria-hidden />
                     <Box ref={scrollAnchorRef} height={0} aria-hidden />
 
-                    <StickyHeader $compact={isHeaderCompact}>
-                      <TitleRow>
-                        <Typography variant="alpha" tag="h1">
-                          {pageHeaderTitle}
-                        </Typography>
-                        {canCreate && (
-                          <SimpleMenu
-                            popoverPlacement="bottom-end"
-                            variant="default"
-                            endIcon={<ChevronDown />}
-                            label={formatMessage({
-                              id: getTranslationKey('new'),
-                              defaultMessage: 'New',
-                            })}
-                          >
-                            <MenuItem
-                              onSelect={() => setIsCreateFolderDialogOpen(true)}
-                              startIcon={<FolderIcon />}
-                            >
-                              {formatMessage({
-                                id: getTranslationKey('folder.create.title'),
-                                defaultMessage: 'New folder',
-                              })}
-                            </MenuItem>
-                            <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                              {formatMessage({
-                                id: getTranslationKey('import-files'),
-                                defaultMessage: 'Import files',
-                              })}
-                            </MenuItem>
-                            <MenuItem
-                              onSelect={() => setIsUrlDialogOpen(true)}
-                              startIcon={<Link />}
-                            >
-                              {formatMessage({
-                                id: getTranslationKey('import-from-url'),
-                                defaultMessage: 'Import from URL',
-                              })}
-                            </MenuItem>
-                          </SimpleMenu>
-                        )}
-                      </TitleRow>
-
-                      <Toolbar $compact={isHeaderCompact}>
-                        <FilterSearchGroup>
-                          <Box>
-                            <FilterMenu listFilters={listFilters} />
-                          </Box>
-                          <SearchSlot>
-                            <AssetsSearchInput />
-                          </SearchSlot>
-                        </FilterSearchGroup>
-                        <SortToggleGroup>
-                          <Box>
-                            <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-                          </Box>
-                          <StyledToggleGroup
-                            type="single"
-                            value={isGridView ? 'grid' : 'table'}
-                            onValueChange={(value) =>
-                              value &&
-                              setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                            }
-                            aria-label={formatMessage({
-                              id: getTranslationKey('view.switch.label'),
-                              defaultMessage: 'View options',
-                            })}
-                          >
-                            <StyledToggleItem
-                              value="table"
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.table'),
-                                defaultMessage: 'Table view',
-                              })}
-                            >
-                              <List />
-                              <ToggleLabel>
-                                {formatMessage({
-                                  id: getTranslationKey('view.table'),
-                                  defaultMessage: 'Table view',
-                                })}
-                              </ToggleLabel>
-                            </StyledToggleItem>
-                            <StyledToggleItem
-                              value="grid"
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.grid'),
-                                defaultMessage: 'Grid view',
-                              })}
-                            >
-                              <GridIcon />
-                              <ToggleLabel>
-                                {formatMessage({
-                                  id: getTranslationKey('view.grid'),
-                                  defaultMessage: 'Grid view',
-                                })}
-                              </ToggleLabel>
-                            </StyledToggleItem>
-                          </StyledToggleGroup>
-                        </SortToggleGroup>
-                      </Toolbar>
-
-                      <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
-                    </StickyHeader>
-
-                    {/* Right-clicking the empty parts of the list offers the same
-                        creation actions as the "New" menu above, acting on the
-                        folder currently open. Items keep the browser's own menu —
-                        see MainAreaContextMenu. */}
+                    {/* Right-clicking the empty parts of the area offers the same
+                        creation actions as the "New" menu, acting on the folder
+                        currently open. Wraps the header too: its empty band reads
+                        as part of the same surface, and its controls are already
+                        excluded — as is the table's own header row, which will
+                        become interactive once columns are sortable. Items keep
+                        the browser's own menu — see MainAreaContextMenu. */}
                     <MainAreaContextMenu
                       disabled={!canCreate}
                       onCreateFolder={() => setIsCreateFolderDialogOpen(true)}
                       onImportFiles={handleFileSelect}
                       onImportFromUrl={() => setIsUrlDialogOpen(true)}
                     >
+                      <StickyHeader $compact={isHeaderCompact}>
+                        <TitleRow>
+                          <Typography variant="alpha" tag="h1">
+                            {pageHeaderTitle}
+                          </Typography>
+                          {canCreate && (
+                            <SimpleMenu
+                              popoverPlacement="bottom-end"
+                              variant="default"
+                              endIcon={<ChevronDown />}
+                              label={formatMessage({
+                                id: getTranslationKey('new'),
+                                defaultMessage: 'New',
+                              })}
+                            >
+                              <MenuItem
+                                onSelect={() => setIsCreateFolderDialogOpen(true)}
+                                startIcon={<FolderIcon />}
+                              >
+                                {formatMessage({
+                                  id: getTranslationKey('folder.create.title'),
+                                  defaultMessage: 'New folder',
+                                })}
+                              </MenuItem>
+                              <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                                {formatMessage({
+                                  id: getTranslationKey('import-files'),
+                                  defaultMessage: 'File upload',
+                                })}
+                              </MenuItem>
+                              <MenuItem
+                                onSelect={() => setIsUrlDialogOpen(true)}
+                                startIcon={<Link />}
+                              >
+                                {formatMessage({
+                                  id: getTranslationKey('import-from-url'),
+                                  defaultMessage: 'File upload from URL',
+                                })}
+                              </MenuItem>
+                            </SimpleMenu>
+                          )}
+                        </TitleRow>
+
+                        <Toolbar $compact={isHeaderCompact}>
+                          <FilterSearchGroup>
+                            <Box>
+                              <FilterMenu listFilters={listFilters} />
+                            </Box>
+                            <SearchSlot>
+                              <AssetsSearchInput />
+                            </SearchSlot>
+                          </FilterSearchGroup>
+                          <SortToggleGroup>
+                            <Box>
+                              <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
+                            </Box>
+                            <StyledToggleGroup
+                              type="single"
+                              value={isGridView ? 'grid' : 'table'}
+                              onValueChange={(value) =>
+                                value &&
+                                setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
+                              }
+                              aria-label={formatMessage({
+                                id: getTranslationKey('view.switch.label'),
+                                defaultMessage: 'View options',
+                              })}
+                            >
+                              <StyledToggleItem
+                                value="table"
+                                aria-label={formatMessage({
+                                  id: getTranslationKey('view.table'),
+                                  defaultMessage: 'Table view',
+                                })}
+                              >
+                                <List />
+                                <ToggleLabel>
+                                  {formatMessage({
+                                    id: getTranslationKey('view.table'),
+                                    defaultMessage: 'Table view',
+                                  })}
+                                </ToggleLabel>
+                              </StyledToggleItem>
+                              <StyledToggleItem
+                                value="grid"
+                                aria-label={formatMessage({
+                                  id: getTranslationKey('view.grid'),
+                                  defaultMessage: 'Grid view',
+                                })}
+                              >
+                                <GridIcon />
+                                <ToggleLabel>
+                                  {formatMessage({
+                                    id: getTranslationKey('view.grid'),
+                                    defaultMessage: 'Grid view',
+                                  })}
+                                </ToggleLabel>
+                              </StyledToggleItem>
+                            </StyledToggleGroup>
+                          </SortToggleGroup>
+                        </Toolbar>
+
+                        <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
+                      </StickyHeader>
+
                       <Layouts.Content>
                         <BetaNotice />
                         {/* Renders nothing — keeps every loaded page's query subscribed

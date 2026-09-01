@@ -638,9 +638,49 @@ describe('AssetsPage main-area context menu', () => {
     const items = await screen.findAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'New folder',
-      'Import files',
-      'Import from URL',
+      'File upload',
+      'File upload from URL',
     ]);
+  });
+
+  it('reaches the page header band, whose empty space is part of the same surface', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // The heading is inert, so a press on it is background rather than a
+    // control. The header used to sit outside the wrapped area entirely, which
+    // made its whole band a dead zone.
+    fireEvent.contextMenu(screen.getByRole('heading', { level: 1 }), {
+      clientX: 200,
+      clientY: 40,
+    });
+
+    expect(await screen.findAllByRole('menuitem')).toHaveLength(3);
+  });
+
+  it('leaves the table header row to the browser, since sorting will make it interactive', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    // Grid is the default view, and only the table has a header row.
+    window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', '1');
+
+    try {
+      renderPage();
+      await waitForCreatePermission();
+
+      // Wrapping the header brought `thead` inside the hit area, so the explicit
+      // `thead` exclusion is now what keeps it out.
+      const table = await screen.findByRole('grid');
+      // eslint-disable-next-line testing-library/no-node-access
+      const columnHeader = table.querySelector('thead th') as HTMLElement;
+
+      fireEvent.contextMenu(columnHeader, { clientX: 200, clientY: 120 });
+
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    } finally {
+      window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+    }
   });
 
   it('creates the folder inside the folder currently open', async () => {
@@ -661,18 +701,18 @@ describe('AssetsPage main-area context menu', () => {
     expect(await screen.findByText('New folder in Photos')).toBeInTheDocument();
   });
 
-  it('opens the file picker from Import files', async () => {
+  it('opens the file picker from File upload', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
     const { user } = renderPage();
     await waitForCreatePermission();
 
-    // The hidden input the header "New > Import files" also clicks.
+    // The hidden input the header "New > File upload" also clicks.
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const click = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
 
     rightClickBackground();
-    await user.click(await screen.findByRole('menuitem', { name: 'Import files' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'File upload' }));
 
     expect(click).toHaveBeenCalled();
     click.mockRestore();
