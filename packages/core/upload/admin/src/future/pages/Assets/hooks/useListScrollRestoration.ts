@@ -17,6 +17,13 @@ const SCROLL_ROOT_SELECTOR = '[data-strapi-main-content]';
  */
 const RESTORE_WINDOW_MS = 2000;
 
+/**
+ * How many list offsets to keep. Matches `MAX_REMEMBERED_LISTS` in
+ * `useInfiniteAssets`: the two are keyed identically, so they should forget on
+ * the same terms.
+ */
+const MAX_REMEMBERED_OFFSETS = 10;
+
 interface PendingRestore {
   top: number;
   deadline: number;
@@ -57,7 +64,22 @@ export const useListScrollRestoration = (key: string) => {
     }
 
     const handleScroll = () => {
-      offsetsRef.current.set(keyRef.current, container.scrollTop);
+      const offsets = offsetsRef.current;
+
+      // Delete before set so the entry moves to the end. Map iterates in
+      // insertion order, so the first key is the least recently scrolled.
+      offsets.delete(keyRef.current);
+      offsets.set(keyRef.current, container.scrollTop);
+
+      while (offsets.size > MAX_REMEMBERED_OFFSETS) {
+        const oldest = offsets.keys().next().value;
+
+        if (oldest === undefined) {
+          break;
+        }
+
+        offsets.delete(oldest);
+      }
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });

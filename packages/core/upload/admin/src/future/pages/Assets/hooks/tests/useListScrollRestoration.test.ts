@@ -161,4 +161,26 @@ describe('useListScrollRestoration', () => {
       jest.useRealTimers();
     }
   });
+
+  it('forgets the least recently scrolled list once the cap is passed', () => {
+    const { getByTestId, rerender } = renderHarness('folder-0');
+    const root = getByTestId('scroll-root');
+
+    clampScrollTop(root, () => 5000);
+
+    // Eleven lists, one past the ten-entry cap, each left at its own offset.
+    for (let i = 0; i < 11; i += 1) {
+      rerender(createElement(Harness, { listKey: `folder-${i}` }));
+      scrollTo(root, 100 + i * 10);
+    }
+
+    // The first is the least recently scrolled, so it has been dropped and
+    // opens at the top.
+    rerender(createElement(Harness, { listKey: 'folder-0' }));
+    expect(root.scrollTop).toBe(0);
+
+    // One still inside the cap comes back where it was left.
+    rerender(createElement(Harness, { listKey: 'folder-10' }));
+    expect(root.scrollTop).toBe(200);
+  });
 });
