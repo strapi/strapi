@@ -2,6 +2,12 @@
 
 /** @import { Linter } from 'eslint' */
 
+// Resolved from the root `node_modules`, where every ESLint config and plugin this repository
+// uses is declared — the same hoisting `extends: '@strapi/eslint-config/front/javascript'` below
+// already relies on. ESLint 8 resolves shareable configs and plugins relative to the end-user
+// config, so lint dependencies live at the root rather than per workspace.
+const { rules: airbnbStyleRules } = require('eslint-config-airbnb-base/rules/style');
+
 const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
 
 /** @type {Linter.Config} */
@@ -60,7 +66,20 @@ const config = {
         message: 'Please use import [method] from lodash/[method]',
       },
     ]),
-    'no-restricted-syntax': noRestrictedSyntax(),
+    /**
+     * ESLint replaces rule options rather than merging them, so the entries inherited from
+     * `airbnb` (via `@strapi/eslint-config/front/javascript`) have to be re-supplied here or they
+     * are dropped. They are read from airbnb's own module rather than copied, so they stay in step
+     * with the version resolved at lint time. `back` sets this rule to `off` upstream and
+     * `front/typescript` never extends airbnb, so this entrypoint is the only one with inherited
+     * entries to preserve.
+     *
+     * The `typeof` filter drops airbnb's leading severity string; `noRestrictedSyntax` supplies
+     * its own.
+     */
+    'no-restricted-syntax': noRestrictedSyntax(
+      airbnbStyleRules['no-restricted-syntax'].filter((entry) => typeof entry === 'object')
+    ),
     'no-restricted-globals': [
       'error',
       {
