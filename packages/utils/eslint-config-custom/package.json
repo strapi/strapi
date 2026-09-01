@@ -3,6 +3,6 @@
   "version": "5.52.2",
   "private": true,
   "dependencies": {
-    "lint-policy": "5.52.1"
+    "lint-policy": "5.52.2"
   }
 }

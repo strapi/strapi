@@ -15,7 +15,7 @@
     "./tests": "./tests.ts"
   },
   "dependencies": {
-    "lint-policy": "5.52.1"
+    "lint-policy": "5.52.2"
   },
   "devDependencies": {
     "oxlint": "1.72.0",

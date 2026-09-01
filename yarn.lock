@@ -16990,7 +16990,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   dependencies:
-    lint-policy: "npm:5.52.1"
+    lint-policy: "npm:5.52.2"
   languageName: unknown
   linkType: soft
 
@@ -21984,7 +21984,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-policy@npm:5.52.1, lint-policy@workspace:packages/utils/lint-policy":
+"lint-policy@npm:5.52.2, lint-policy@workspace:packages/utils/lint-policy":
   version: 0.0.0-use.local
   resolution: "lint-policy@workspace:packages/utils/lint-policy"
   languageName: unknown
@@ -24522,7 +24522,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "oxlint-config@workspace:packages/utils/oxlint-config"
   dependencies:
-    lint-policy: "npm:5.52.1"
+    lint-policy: "npm:5.52.2"
     oxlint: "npm:1.72.0"
     oxlint-plugin-eslint: "npm:1.72.0"
     tsconfig: "npm:5.52.2"
