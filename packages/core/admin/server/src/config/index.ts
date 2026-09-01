@@ -6,7 +6,7 @@ export const forgotPassword = {
 };
 
 export const auth = {
-  mfa: MFA_DEFAULTS,
+  mfa: { ...MFA_DEFAULTS, window: { ...MFA_DEFAULTS.window } },
 };
 
 export default {

@@ -50,6 +50,42 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
     result.step = MFA_DEFAULTS.step;
   }
 
+  // Nonsense values: warn and fall back.
+  if (!Number.isFinite(result.window.back) || result.window.back < 0) {
+    logger.warn(
+      `${PREFIX} window.back must be a non-negative number. Got ${result.window.back}, using ${MFA_DEFAULTS.window.back}.`
+    );
+    result.window.back = MFA_DEFAULTS.window.back;
+  }
+
+  if (!Number.isFinite(result.window.forward) || result.window.forward < 0) {
+    logger.warn(
+      `${PREFIX} window.forward must be a non-negative number. Got ${result.window.forward}, using ${MFA_DEFAULTS.window.forward}.`
+    );
+    result.window.forward = MFA_DEFAULTS.window.forward;
+  }
+
+  if (!Number.isFinite(result.maxChallengeAttempts) || result.maxChallengeAttempts < 0) {
+    logger.warn(
+      `${PREFIX} maxChallengeAttempts must be a non-negative number. Got ${result.maxChallengeAttempts}, using ${MFA_DEFAULTS.maxChallengeAttempts}.`
+    );
+    result.maxChallengeAttempts = MFA_DEFAULTS.maxChallengeAttempts;
+  }
+
+  if (!Number.isFinite(result.maxUserAttempts) || result.maxUserAttempts < 0) {
+    logger.warn(
+      `${PREFIX} maxUserAttempts must be a non-negative number. Got ${result.maxUserAttempts}, using ${MFA_DEFAULTS.maxUserAttempts}.`
+    );
+    result.maxUserAttempts = MFA_DEFAULTS.maxUserAttempts;
+  }
+
+  if (!Number.isFinite(result.recoveryCodeCount) || result.recoveryCodeCount < 0) {
+    logger.warn(
+      `${PREFIX} recoveryCodeCount must be a non-negative number. Got ${result.recoveryCodeCount}, using ${MFA_DEFAULTS.recoveryCodeCount}.`
+    );
+    result.recoveryCodeCount = MFA_DEFAULTS.recoveryCodeCount;
+  }
+
   // Security wideners: warn and honour.
   if (result.window.back > 1 || result.window.forward > 1) {
     logger.warn(
