@@ -203,7 +203,7 @@ const EditView = () => {
             tokenType: TRANSFER_TOKEN_TYPE,
           });
         }
-      } catch (err) {
+      } catch {
         toggleNotification({
           type: 'danger',
           message: formatMessage({

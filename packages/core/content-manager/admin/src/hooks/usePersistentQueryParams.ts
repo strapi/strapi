@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { usePersistentStateScope, useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  deepEncodeQueryValues,
+  usePersistentStateScope,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -70,7 +74,17 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
     }
 
     if (Object.keys(mergedFilteredQuery).length > 0) {
-      setQuery({ ...mergedFilteredQuery, ...query }, 'push', true);
+      const nextQuery: Record<string, unknown> = { ...mergedFilteredQuery, ...query };
+
+      if (nextQuery.filters !== undefined) {
+        //`setQuery` never encodes the values, and it cannot be fixed as it would introduce breaking changes.
+        // This ensures that, when reading the persisted values and writing them in the URI, they are encoded properly.
+        // We are only encoding the filters because we know they can hold values with special characters. We didn't bother
+        // with the other query params because as of today, they are not expected to hold such values.
+        nextQuery.filters = deepEncodeQueryValues(nextQuery.filters);
+      }
+
+      setQuery(nextQuery, 'push', true);
     }
     setIsHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps

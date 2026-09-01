@@ -1,3 +1,5 @@
+import { attemptTokenRefresh } from '@strapi/admin/strapi-admin';
+
 import type { File } from '../../../../shared/contracts/files';
 
 /**
@@ -18,10 +20,17 @@ export class UploadAbortedError extends Error {
 export class UploadFileError extends Error {
   status?: number;
 
-  constructor(message: string, status?: number) {
+  /**
+   * Whether `message` came from the response body. The fallbacks this module
+   * invents are hardcoded English; callers with localized text should use theirs.
+   */
+  isServerMessage: boolean;
+
+  constructor(message: string, status?: number, isServerMessage = false) {
     super(message);
     this.name = 'UploadFileError';
     this.status = status;
+    this.isServerMessage = isServerMessage;
   }
 }
 
@@ -39,18 +48,19 @@ export type UploadProgressCallback = (bytes: number, total: number) => void;
  * @param formData - Prebuilt multipart body containing the single file and its `fileInfo`.
  * @param signal - Aborts the in-flight request when triggered.
  * @param onProgress - Called with `(loaded, total)` bytes as the upload progresses.
- * @returns The parsed, signed `File` on a 2xx response.
+ * @returns The parsed response body on a 2xx response — a signed `File` by default,
+ * or `T` when the endpoint returns a different shape (e.g. an array of files).
  * @throws {UploadAbortedError} When the signal aborts.
  * @throws {UploadFileError} On a non-2xx response or network error.
  */
-export const uploadFileViaXHR = (
+const sendUploadViaXHR = <T>(
   url: string,
   token: string | null | undefined,
   formData: FormData,
   signal: AbortSignal,
   onProgress?: UploadProgressCallback
-): Promise<File> => {
-  return new Promise<File>((resolve, reject) => {
+): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
     if (signal.aborted) {
       reject(new UploadAbortedError());
       return;
@@ -81,7 +91,7 @@ export const uploadFileViaXHR = (
 
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          resolve(JSON.parse(xhr.responseText) as File);
+          resolve(JSON.parse(xhr.responseText) as T);
         } catch {
           reject(new UploadFileError('Failed to parse upload response'));
         }
@@ -89,13 +99,18 @@ export const uploadFileViaXHR = (
       }
 
       let message = `Upload failed with status ${xhr.status}`;
+      let isServerMessage = false;
       try {
         const parsed = JSON.parse(xhr.responseText);
-        message = parsed?.error?.message || parsed?.message || message;
+        const serverMessage = parsed?.error?.message || parsed?.message;
+        if (serverMessage) {
+          message = serverMessage;
+          isServerMessage = true;
+        }
       } catch {
         // Keep the default status-based message.
       }
-      reject(new UploadFileError(message, xhr.status));
+      reject(new UploadFileError(message, xhr.status, isServerMessage));
     };
 
     xhr.onerror = () => {
@@ -110,4 +125,32 @@ export const uploadFileViaXHR = (
 
     xhr.send(formData);
   });
+};
+
+export const uploadFileViaXHR = async <T = File>(
+  url: string,
+  token: string | null | undefined,
+  formData: FormData,
+  signal: AbortSignal,
+  onProgress?: UploadProgressCallback
+): Promise<T> => {
+  try {
+    return await sendUploadViaXHR<T>(url, token, formData, signal, onProgress);
+  } catch (error) {
+    if (!(error instanceof UploadFileError) || error.status !== 401) {
+      throw error;
+    }
+
+    try {
+      const refreshedToken = await attemptTokenRefresh();
+
+      return await sendUploadViaXHR<T>(url, refreshedToken, formData, signal, onProgress);
+    } catch (refreshError) {
+      if (refreshError instanceof UploadFileError) {
+        throw refreshError;
+      }
+
+      throw error;
+    }
+  }
 };
