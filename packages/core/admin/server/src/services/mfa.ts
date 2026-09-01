@@ -3,7 +3,9 @@ import {
   base32Encode,
   buildOtpauthUri,
   errors,
+  generateRecoveryCodes,
   generateTotpSecret,
+  normaliseRecoveryCode,
   verifyTotp,
 } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -14,6 +16,7 @@ const { ApplicationError, ValidationError } = errors;
 export const FUTURE_FLAG = 'unstableAdminMfa';
 
 const USER_UID = 'admin::user';
+const RECOVERY_CODE_UID = 'admin::mfa-recovery-code';
 
 interface EncryptionLike {
   encrypt(value: string): string | null;
@@ -22,6 +25,7 @@ interface EncryptionLike {
 
 interface AuthLike {
   validatePassword(password: string, hash: string): Promise<boolean>;
+  hashPassword(password: string): Promise<string>;
 }
 
 export interface MfaServiceDeps {
@@ -33,11 +37,14 @@ export interface MfaServiceDeps {
 /**
  * Native TOTP two-factor authentication for admin users.
  *
- * Organised in three groups, extended by later tasks:
+ * Organised in four groups, extended by later tasks:
  *  - Config & status: `isEnabled`, `config`, `isEnrolled`.
- *  - Enrolment: `beginEnrolment`, `completeEnrolment` (Task 6 fills in recovery codes).
+ *  - Enrolment: `beginEnrolment`, `completeEnrolment`.
  *  - Verification primitives: `verifyTotpForUser`, `consumeTotpStep`, the atomic replay guard
  *    shared by enrolment and, later, challenge verification (Task 7).
+ *  - Recovery codes (Task 6): `issueRecoveryCodes`, `consumeRecoveryCode`,
+ *    `countUnusedRecoveryCodes` — the single-use fallback for when the authenticator app is
+ *    unavailable, consumed with the same atomic replay-guard shape as `consumeTotpStep`.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -209,8 +216,99 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     await userQuery().update({ where: { id: userId }, data: { mfaEnabledAt: new Date() } });
 
-    // Filled in by Task 6.
-    return { recoveryCodes: [] as string[] };
+    return { recoveryCodes: await issueRecoveryCodes(userId) };
+  };
+
+  // --- Recovery codes ---------------------------------------------------
+  // A single-use fallback for when the authenticator app is unavailable (device lost, secret
+  // undecryptable after an ENCRYPTION_KEY rotation, etc). One row per code so consumption is a
+  // conditional row update, the same replay-guard shape as `consumeTotpStep`.
+
+  const recoveryQuery = () => strapi.db.query(RECOVERY_CODE_UID);
+
+  /**
+   * Recovery codes are hashed with the same password hasher the admin already uses for admin
+   * user passwords, because ASVS 6.5.2 requires a password-storage hash with a salt for secrets
+   * under 112 bits of entropy, and these codes carry only 50. Crucially, bcrypt's per-hash salt
+   * makes this independent of the encryption key: rotating `ENCRYPTION_KEY` makes every TOTP
+   * secret undecryptable, and if recovery codes died with it the user would lose their escape
+   * hatch at the exact moment they needed it. The plaintext is returned to the caller once here
+   * and never stored — only the hash is persisted, and it must never reach a log either.
+   */
+  const issueRecoveryCodes = async (userId: string): Promise<string[]> => {
+    const codes = generateRecoveryCodes(config().recoveryCodeCount);
+    const data = await Promise.all(
+      codes.map(async (code) => ({
+        userId: String(userId),
+        codeHash: await auth.hashPassword(code),
+        usedAt: null,
+      }))
+    );
+
+    // Regenerating replaces the whole set: previously issued codes must stop working, so the old
+    // rows are deleted rather than left around as consumable leftovers.
+    await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+    await recoveryQuery().createMany({ data });
+
+    return codes;
+  };
+
+  const countUnusedRecoveryCodes = (userId: string): Promise<number> =>
+    recoveryQuery().count({ where: { userId: String(userId), usedAt: null } });
+
+  /**
+   * The replay guard for recovery codes, matching `consumeTotpStep`'s shape: verification (which
+   * candidate hash matches) is separated from the atomic consume (a single conditional UPDATE
+   * whose affected-row count is the decision), so two concurrent requests carrying the same code
+   * cannot both succeed. Never read-then-write: that would leave a window between the check and
+   * the write for a second request to slip through.
+   */
+  const consumeRecoveryCode = async (userId: string, code: string): Promise<boolean> => {
+    const normalised = normaliseRecoveryCode(code);
+    if (!normalised) {
+      return false;
+    }
+
+    const candidates = await recoveryQuery().findMany({
+      where: { userId: String(userId), usedAt: null },
+    });
+
+    for (const candidate of candidates) {
+      // Sequential rather than parallel: bcrypt is deliberately slow and this endpoint is rate
+      // limited, so there is no reason to burn every comparison once one matches.
+      // eslint-disable-next-line no-await-in-loop
+      const matches = await auth.validatePassword(normalised, candidate.codeHash);
+      if (!matches) {
+        continue;
+      }
+
+      const metadata = strapi.db.metadata.get(RECOVERY_CODE_UID);
+      const { tableName } = metadata;
+      // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
+      // attributes and usedAt's static type is the full Attribute union. Optional chaining also
+      // guards the case where the attribute itself is missing (e.g. a migration that hasn't
+      // run), which would otherwise throw a TypeError before the check below can raise the
+      // intended, actionable ApplicationError.
+      const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
+
+      if (!usedAtColumn) {
+        throw new ApplicationError(
+          'Could not resolve the physical column name for admin::mfa-recovery-code.usedAt'
+        );
+      }
+
+      // Conditional update: whoever flips usedAt from null wins, so a code cannot be spent twice
+      // by two concurrent requests.
+      const affected = await strapi.db
+        .connection(tableName)
+        .where({ id: candidate.id })
+        .whereNull(usedAtColumn)
+        .update({ [usedAtColumn]: new Date() });
+
+      return affected === 1;
+    }
+
+    return false;
   };
 
   return {
@@ -221,6 +319,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     completeEnrolment,
     verifyTotpForUser,
     consumeTotpStep,
+    issueRecoveryCodes,
+    consumeRecoveryCode,
+    countUnusedRecoveryCodes,
   };
 };
 

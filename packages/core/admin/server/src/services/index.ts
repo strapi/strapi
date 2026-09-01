@@ -53,6 +53,6 @@ export default {
     createMfaService({
       strapi,
       encryption,
-      auth: { validatePassword: auth.validatePassword },
+      auth: { validatePassword: auth.validatePassword, hashPassword: auth.hashPassword },
     }),
 };

@@ -5,6 +5,9 @@ import createMfaService from '../mfa';
 const DEFAULT_USER_TABLE = 'admin_users';
 const DEFAULT_LAST_USED_STEP_COLUMN = 'mfa_last_used_step';
 const USER_UID = 'admin::user';
+const RECOVERY_UID = 'admin::mfa-recovery-code';
+const RECOVERY_TABLE = 'strapi_admin_mfa_recovery_codes';
+const RECOVERY_USED_AT_COLUMN = 'used_at';
 
 type UserRow = Record<string, unknown>;
 type ResolveKey = (column: string) => string;
@@ -157,24 +160,39 @@ const buildStrapi = (
     features: { future: { isEnabled: jest.fn(() => true) } },
     log: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
     db: {
-      query: jest.fn(() => ({
-        // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
-        // subsequent write elsewhere must not retroactively change what an in-flight read already
-        // observed. Spreading into a new object is what makes a read-then-write mutant in
-        // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
-        // returning the stored object directly let two racing reads silently share one mutable
-        // object and see each other's write, masking the exact bug Finding 1 exists to catch.
-        findOne: jest.fn(async ({ where }: any) => {
-          const row = users.get(String(where.id));
-          return row ? { ...row } : null;
-        }),
-        update: jest.fn(async ({ where, data }: any) => {
-          const user = users.get(String(where.id));
-          if (!user) return null;
-          Object.assign(user, data);
-          return user;
-        }),
-      })),
+      query: jest.fn((uid: string) => {
+        // The enrolment tests below only care that `completeEnrolment` finishes and sets
+        // `mfaEnabledAt`; the recovery codes it issues along the way are irrelevant to them, so
+        // this branch is a minimal no-op store rather than a full duplicate of the fixture in
+        // the "recovery codes" describe block further down, which exercises that store for real.
+        if (uid === RECOVERY_UID) {
+          return {
+            deleteMany: jest.fn(async () => {}),
+            createMany: jest.fn(async () => {}),
+            findMany: jest.fn(async () => []),
+            count: jest.fn(async () => 0),
+          };
+        }
+
+        return {
+          // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
+          // subsequent write elsewhere must not retroactively change what an in-flight read already
+          // observed. Spreading into a new object is what makes a read-then-write mutant in
+          // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
+          // returning the stored object directly let two racing reads silently share one mutable
+          // object and see each other's write, masking the exact bug Finding 1 exists to catch.
+          findOne: jest.fn(async ({ where }: any) => {
+            const row = users.get(String(where.id));
+            return row ? { ...row } : null;
+          }),
+          update: jest.fn(async ({ where, data }: any) => {
+            const user = users.get(String(where.id));
+            if (!user) return null;
+            Object.assign(user, data);
+            return user;
+          }),
+        };
+      }),
       connection: buildConnection(users, tableName, resolveKey),
       metadata: { get: metadataGet },
     },
@@ -187,7 +205,9 @@ const buildStrapi = (
 const defaultDeps = (strapi: unknown) => ({
   strapi: strapi as unknown as Core.Strapi,
   encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: (v: string) => v.slice(4) },
-  auth: { validatePassword: async () => true },
+  // `hashPassword` is exercised for real here because `completeEnrolment` now issues recovery
+  // codes on its way to success, which hashes each one with it.
+  auth: { validatePassword: async () => true, hashPassword: async (v: string) => `h:${v}` },
 });
 
 describe('mfa service: enrolment', () => {
@@ -196,7 +216,7 @@ describe('mfa service: enrolment', () => {
     const service = createMfaService({
       strapi: strapi as unknown as Core.Strapi,
       encryption: { encrypt: () => null, decrypt: () => null },
-      auth: { validatePassword: async () => true },
+      auth: { validatePassword: async () => true, hashPassword: async (v: string) => v },
     });
 
     await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/encryption key/i);
@@ -207,7 +227,7 @@ describe('mfa service: enrolment', () => {
     const service = createMfaService({
       strapi: strapi as unknown as Core.Strapi,
       encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: (v: string) => v.slice(4) },
-      auth: { validatePassword: async () => false },
+      auth: { validatePassword: async () => false, hashPassword: async (v: string) => v },
     });
 
     await expect(service.beginEnrolment('1', 'wrong')).rejects.toThrow(/invalid credentials/i);
@@ -285,7 +305,7 @@ describe('mfa service: enrolment', () => {
     const service = createMfaService({
       strapi: strapi as unknown as Core.Strapi,
       encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: () => null },
-      auth: { validatePassword: async () => true },
+      auth: { validatePassword: async () => true, hashPassword: async (v: string) => v },
     });
 
     await expect(service.verifyTotpForUser('1', '123456')).rejects.toThrow(/could not be read/i);
@@ -306,7 +326,7 @@ describe('mfa service: enrolment', () => {
           throw new Error('Unsupported encryption version: v0');
         },
       },
-      auth: { validatePassword: async () => true },
+      auth: { validatePassword: async () => true, hashPassword: async (v: string) => v },
     });
 
     await expect(service.verifyTotpForUser('1', '123456')).rejects.toThrow(/could not be read/i);
@@ -385,5 +405,203 @@ describe('mfa service: isEnabled', () => {
     const service = createMfaService(defaultDeps(strapi));
 
     expect(service.isEnabled()).toBe(true);
+  });
+});
+
+describe('mfa service: recovery codes', () => {
+  type RecoveryRow = { id: number; userId: string; codeHash: string; usedAt: Date | null };
+
+  /**
+   * A knex-shaped `where().whereNull().update()` builder backed by the same live `rows` array
+   * `strapi.db.query(RECOVERY_UID)` reads and writes, mirroring `buildConnection` above for the
+   * user table: the conditional UPDATE must see live state at the moment it runs so that, of two
+   * concurrent winners racing for the same row, only the first to execute can satisfy
+   * `whereNull(usedAtColumn)`.
+   */
+  const buildRecoveryConnection = (rows: RecoveryRow[]) => (requestedTable: string) => {
+    if (requestedTable !== RECOVERY_TABLE) {
+      throw new Error(
+        `Unexpected table in mock connection: got "${requestedTable}", expected "${RECOVERY_TABLE}"`
+      );
+    }
+
+    let idFilter: number | undefined;
+    let requireNull = false;
+
+    const builder = {
+      where(condition: Record<string, unknown>) {
+        idFilter = Number(condition.id);
+        return builder;
+      },
+      whereNull(column: string) {
+        if (column !== RECOVERY_USED_AT_COLUMN) {
+          throw new Error(`Unexpected column in mock connection: ${column}`);
+        }
+        requireNull = true;
+        return builder;
+      },
+      async update(data: Record<string, unknown>) {
+        const row = rows.find((r) => r.id === idFilter);
+        if (!row) return 0;
+        if (requireNull && row.usedAt !== null) return 0;
+
+        for (const [column, value] of Object.entries(data)) {
+          if (column === RECOVERY_USED_AT_COLUMN) row.usedAt = value as Date;
+        }
+        return 1;
+      },
+    };
+
+    return builder;
+  };
+
+  /**
+   * `db.query(RECOVERY_UID).findMany` returns snapshots (`{ ...row }`), not live references, the
+   * same rule the top-of-file comment on the user mock's `findOne` explains: a snapshot is what
+   * makes a read-then-write mutant in `consumeRecoveryCode` racy under `Promise.all` the way it
+   * would be against a real database. If `findMany` handed out live objects instead, a mutant
+   * that reads `candidate.usedAt` after `await`ing a slow bcrypt comparison would see a write the
+   * other racing call already made to that same shared object, and would incorrectly refuse the
+   * second call — hiding exactly the bug this suite exists to catch.
+   */
+  const setup = () => {
+    const rows: RecoveryRow[] = [];
+    let nextId = 1;
+
+    const strapi = {
+      config: { get: jest.fn(() => ({ enabled: true, recoveryCodeCount: 10 })) },
+      features: { future: { isEnabled: jest.fn(() => true) } },
+      log: { warn: jest.fn(), error: jest.fn() },
+      db: {
+        query: jest.fn((uid: string) => {
+          if (uid !== RECOVERY_UID) {
+            throw new Error(`Unexpected query uid in mock: ${uid}`);
+          }
+          return {
+            createMany: jest.fn(async ({ data }: any) => {
+              for (const row of data) {
+                rows.push({ id: nextId, usedAt: null, ...row });
+                nextId += 1;
+              }
+            }),
+            deleteMany: jest.fn(async () => {
+              rows.length = 0;
+            }),
+            findMany: jest.fn(async ({ where }: any) =>
+              rows
+                .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
+                .map((r) => ({ ...r }))
+            ),
+            count: jest.fn(
+              async ({ where }: any) =>
+                rows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
+            ),
+          };
+        }),
+        connection: jest.fn(buildRecoveryConnection(rows)),
+        metadata: {
+          get: jest.fn((uid: string) => {
+            if (uid !== RECOVERY_UID) {
+              throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
+            }
+            return {
+              tableName: RECOVERY_TABLE,
+              attributes: { usedAt: { columnName: RECOVERY_USED_AT_COLUMN } },
+            };
+          }),
+        },
+      },
+    };
+
+    return { strapi, rows };
+  };
+
+  const deps = (strapi: unknown) => ({
+    strapi: strapi as never,
+    encryption: { encrypt: (v: string) => v, decrypt: (v: string) => v },
+    auth: {
+      validatePassword: async (plain: string, hash: string) => hash === `h:${plain}`,
+      hashPassword: async (plain: string) => `h:${plain}`,
+    } as never,
+  });
+
+  test('issues the configured number of codes and stores only hashes', async () => {
+    const { strapi, rows } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const codes = await service.issueRecoveryCodes('1');
+
+    expect(codes).toHaveLength(10);
+    expect(rows).toHaveLength(10);
+    // The plaintext must never be stored.
+    for (const code of codes) {
+      expect(rows.some((r) => r.codeHash === code)).toBe(false);
+    }
+  });
+
+  test('a code works once and not twice', async () => {
+    const { strapi } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const [code] = await service.issueRecoveryCodes('1');
+
+    expect(await service.consumeRecoveryCode('1', code)).toBe(true);
+    expect(await service.consumeRecoveryCode('1', code)).toBe(false);
+  });
+
+  test('accepts a code the user typed with dashes and lowercase', async () => {
+    const { strapi } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const [code] = await service.issueRecoveryCodes('1');
+    const messy = `${code.slice(0, 5).toLowerCase()}-${code.slice(5).toLowerCase()}`;
+
+    expect(await service.consumeRecoveryCode('1', messy)).toBe(true);
+  });
+
+  test('rejects an unknown code', async () => {
+    const { strapi } = setup();
+    const service = createMfaService(deps(strapi));
+
+    await service.issueRecoveryCodes('1');
+    expect(await service.consumeRecoveryCode('1', 'ZZZZZZZZZZ')).toBe(false);
+  });
+
+  test('regenerating replaces the whole set', async () => {
+    const { strapi, rows } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const first = await service.issueRecoveryCodes('1');
+    await service.issueRecoveryCodes('1');
+
+    expect(rows).toHaveLength(10);
+    expect(await service.consumeRecoveryCode('1', first[0])).toBe(false);
+  });
+
+  test('reports how many unused codes remain, ignoring consumed ones', async () => {
+    const { strapi } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const codes = await service.issueRecoveryCodes('1');
+    await service.consumeRecoveryCode('1', codes[0]);
+
+    expect(await service.countUnusedRecoveryCodes('1')).toBe(9);
+  });
+
+  test('the replay guard allows only one winner when two requests race for the same code', async () => {
+    const { strapi, rows } = setup();
+    const service = createMfaService(deps(strapi));
+
+    const [code] = await service.issueRecoveryCodes('1');
+
+    const [a, b] = await Promise.all([
+      service.consumeRecoveryCode('1', code),
+      service.consumeRecoveryCode('1', code),
+    ]);
+
+    // Exactly one of the two racing calls may win — a read-then-write implementation would let
+    // both see the pre-write state (usedAt: null) and both return true.
+    expect([a, b].sort()).toEqual([false, true]);
+    expect(rows.find((r) => r.codeHash === `h:${code}`)?.usedAt).toBeInstanceOf(Date);
   });
 });
