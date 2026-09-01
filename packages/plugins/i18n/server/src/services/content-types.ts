@@ -154,10 +154,15 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
   for (const [field, value] of Object.entries(relatedEntryCopy)) {
+    const attr = modelDef.attributes?.[field];
     // Empty arrays are the admin create-locale default for required repeatable
-    // components and dynamic zones — treat them as unset so sibling data is inherited.
-    const isUnset =
-      isNil(entry[field]) || (Array.isArray(entry[field]) && entry[field].length === 0);
+    // components and dynamic zones. Other array-valued fields, such as JSON and
+    // multiple media, may be intentionally cleared and must remain untouched.
+    const isEmptyComponentValue =
+      Array.isArray(entry[field]) &&
+      entry[field].length === 0 &&
+      ((attr?.type === 'component' && attr.repeatable) || attr?.type === 'dynamiczone');
+    const isUnset = isNil(entry[field]) || isEmptyComponentValue;
 
     if (isUnset) {
       entry[field] = value;
@@ -167,7 +172,6 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
     // A present-but-shallow non-repeatable component (nested keys omitted or [])
     // must still inherit those nested values. Otherwise saving a secondary locale
     // syncs the shallow object to every locale and wipes nested data.
-    const attr = modelDef.attributes?.[field];
     if (
       attr?.type === 'component' &&
       !attr.repeatable &&
@@ -176,42 +180,6 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
     ) {
       fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
       continue;
-    }
-
-    // A non-empty repeatable component can also be shallow when it comes from a
-    // partially populated sibling. Preserve omitted nested values item-by-item
-    // without restoring items that the request intentionally removed.
-    if (
-      attr?.type === 'component' &&
-      attr.repeatable &&
-      Array.isArray(entry[field]) &&
-      Array.isArray(value)
-    ) {
-      entry[field].forEach((component: unknown, index: number) => {
-        const relatedComponent = value[index];
-        if (isPresentObject(component) && isPresentObject(relatedComponent)) {
-          fillNonLocalizedAttributes(component, relatedComponent, { model: attr.component });
-        }
-      });
-      continue;
-    }
-
-    // Dynamic-zone items need the same repair, but only when the item at the
-    // matching position has the same component type.
-    if (attr?.type === 'dynamiczone' && Array.isArray(entry[field]) && Array.isArray(value)) {
-      entry[field].forEach((component: unknown, index: number) => {
-        const relatedComponent = value[index];
-        if (
-          isPresentObject(component) &&
-          isPresentObject(relatedComponent) &&
-          component.__component === relatedComponent.__component &&
-          typeof component.__component === 'string'
-        ) {
-          fillNonLocalizedAttributes(component, relatedComponent, {
-            model: component.__component,
-          });
-        }
-      });
     }
   }
 };

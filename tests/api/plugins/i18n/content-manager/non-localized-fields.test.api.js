@@ -910,7 +910,7 @@ describe('i18n', () => {
         ]);
       });
 
-      test('preserves nested data in a non-empty shallow dynamic-zone payload', async () => {
+      test('preserves nested data from the deeply populated dynamic-zone metadata', async () => {
         const nestedBlock = {
           __component: 'default.outer',
           name: 'shared-name',
@@ -932,14 +932,15 @@ describe('i18n', () => {
           qs: { locale: 'fr' },
         });
         expect(getRes.statusCode).toBe(200);
-        expect(getRes.body.meta.availableLocales[0].nonLocalizedDz[0].mid.inners).toEqual([
+        const availableLocale = getRes.body.meta.availableLocales[0];
+        expect(availableLocale.nonLocalizedDz[0].mid.inners).toEqual([
           expect.objectContaining({ label: 'keep-inner' }),
         ]);
 
         const frRes = await update('api::category.category', docId, {
           locale: 'fr',
           name: 'nested dz french',
-          nonLocalizedDz: [{ __component: 'default.outer', name: 'shared-name' }],
+          nonLocalizedDz: availableLocale.nonLocalizedDz,
         });
         expect(frRes.statusCode).toBe(200);
         expect(frRes.body.data.nonLocalizedDz[0].mid.inners).toEqual([
@@ -960,6 +961,65 @@ describe('i18n', () => {
         });
         expect(enEntry.nonLocalizedDz[0].mid.inners).toEqual([
           expect.objectContaining({ label: 'keep-inner' }),
+        ]);
+      });
+
+      test('does not graft nested data into an explicit dynamic-zone replacement', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'dz replacement default',
+          nonLocalizedDz: [
+            {
+              __component: 'default.outer',
+              name: 'original',
+              mid: {
+                heading: 'original-heading',
+                inners: [{ label: 'original-inner' }],
+              },
+            },
+          ],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+        const replacement = {
+          __component: 'default.outer',
+          name: 'replacement',
+          mid: {
+            heading: 'replacement-heading',
+            inners: [],
+          },
+        };
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'dz replacement french',
+          nonLocalizedDz: [replacement],
+        });
+        expect(frRes.statusCode).toBe(200);
+        expect(frRes.body.data.nonLocalizedDz).toEqual([
+          expect.objectContaining({
+            name: 'replacement',
+            mid: expect.objectContaining({ inners: [] }),
+          }),
+        ]);
+
+        const enEntry = await strapi.db.query('api::category.category').findOne({
+          where: { documentId: docId, locale: 'en', publishedAt: null },
+          populate: {
+            nonLocalizedDz: {
+              on: {
+                'default.outer': {
+                  populate: ['mid.inners'],
+                },
+              },
+            },
+          },
+        });
+        expect(enEntry.nonLocalizedDz).toEqual([
+          expect.objectContaining({
+            name: 'replacement',
+            mid: expect.objectContaining({ inners: [] }),
+          }),
         ]);
       });
     });
