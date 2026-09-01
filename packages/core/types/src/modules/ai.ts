@@ -1,3 +1,4 @@
+import type * as Documents from './documents';
 import type * as MCP from './mcp';
 
 /**
@@ -26,7 +27,25 @@ export type AiAdminService = {
   }>;
 };
 
+export interface AiService {
+  generateLocalizations: ({
+    document,
+    targetLocales,
+    translateableContent,
+    minimalContentTypeSchema,
+  }: {
+    document: Documents.AnyDocument;
+    targetLocales: any[];
+    // TODO right type?
+    translateableContent: Record<string, unknown>;
+    minimalContentTypeSchema: Record<string, Record<string, unknown>>;
+  }) => Promise<{
+    localizations: Array<{ content: Record<string, unknown>; locale: string }>;
+  }>;
+}
+
 export type AiNamespace = {
   admin: AiAdminService;
+  service: AiService;
   mcp: MCP.McpService;
 };

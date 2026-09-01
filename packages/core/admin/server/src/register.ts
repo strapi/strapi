@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 import registerAdminPanelRoute from './routes/serve-admin-panel';
 import adminAuthStrategy from './strategies/admin';
 import { createAiAdminService } from './ai/services/ai';
+import { createStrapiManagedAiProvider } from './ai/services/strapi-managed';
 import contentApiTokenAuthStrategy from './strategies/content-api-token';
 import adminTokenAuthStrategy from './strategies/admin-token';
 import { migrateAdminPreferedLanguageDkToDa } from './migrations/database/migrate-prefered-language-dk-to-da';
@@ -17,6 +18,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.get('auth').register('content-api', contentApiTokenAuthStrategy);
 
   strapi.add('ai.admin', () => createAiAdminService({ strapi }));
+  strapi.add('ai.service', () => {
+    return createStrapiManagedAiProvider({ strapi });
+  });
 
   const shouldServeAdminPanel = strapi.config.get('admin.serveAdminPanel');
 
