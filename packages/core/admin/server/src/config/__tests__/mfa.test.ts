@@ -90,6 +90,39 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('maxChallengeAttempts');
   });
 
+  // challengeTtl and userAttemptWindow are the same silent-lockout class the guards above exist
+  // for: `challengeTtl: NaN` makes `new Date(Date.now() + NaN * 1000)` an Invalid Date, so every
+  // challenge is born already expired and nobody can ever complete a second factor, and
+  // `userAttemptWindow: NaN` makes the account-scoped attempt counter match nothing, silently
+  // disabling the throttle NIST SP 800-63B requires.
+  test('falls back to the default challengeTtl and warns when it is NaN', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ challengeTtl: NaN }, logger);
+    expect(result.challengeTtl).toBe(MFA_DEFAULTS.challengeTtl);
+    expect(logger.warnings.join(' ')).toContain('challengeTtl');
+  });
+
+  test('falls back to the default challengeTtl and warns when it is negative', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ challengeTtl: -300 }, logger);
+    expect(result.challengeTtl).toBe(MFA_DEFAULTS.challengeTtl);
+    expect(logger.warnings.join(' ')).toContain('challengeTtl');
+  });
+
+  test('falls back to the default userAttemptWindow and warns when it is NaN', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ userAttemptWindow: NaN }, logger);
+    expect(result.userAttemptWindow).toBe(MFA_DEFAULTS.userAttemptWindow);
+    expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
+  });
+
+  test('falls back to the default userAttemptWindow and warns when it is negative', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ userAttemptWindow: -900 }, logger);
+    expect(result.userAttemptWindow).toBe(MFA_DEFAULTS.userAttemptWindow);
+    expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
+  });
+
   test('MFA_DEFAULTS cannot be mutated through config export', () => {
     // Save original values
     const originalDigits = MFA_DEFAULTS.digits;

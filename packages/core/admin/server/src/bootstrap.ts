@@ -215,4 +215,21 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   tokenService.checkSecretIsDefined();
 
   await createDefaultAPITokensIfNeeded();
+
+  const mfaService = getService('mfa');
+  if (mfaService.isEnabled()) {
+    // Bounded housekeeping. Expired challenges are also rejected lazily on read, so this is only
+    // about not letting the table grow — nothing about the security of the flow depends on it
+    // having run, which is exactly why it is wrapped: a cleanup that cannot fail safely would
+    // otherwise be able to stop the admin from booting at all.
+    try {
+      await mfaService.sweepExpiredChallenges();
+    } catch (error) {
+      strapi.log.warn(
+        `Could not sweep expired two-factor challenges: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
 };

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import {
   base32Decode,
   base32Encode,
@@ -11,12 +12,38 @@ import {
 import type { Core } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 
-const { ApplicationError, ValidationError } = errors;
+const { ApplicationError, RateLimitError, ValidationError } = errors;
 
 export const FUTURE_FLAG = 'unstableAdminMfa';
 
 const USER_UID = 'admin::user';
 const RECOVERY_CODE_UID = 'admin::mfa-recovery-code';
+const CHALLENGE_UID = 'admin::mfa-challenge';
+const EVENT_UID = 'admin::mfa-event';
+
+/**
+ * Security notices surfaced in-app, and — for `challenge_failed` — the stored counter the
+ * account-scoped throttle reads. Never carries the code, secret or URI it is about.
+ */
+export type MfaEventType =
+  | 'enabled'
+  | 'disabled'
+  | 'reset'
+  | 'challenge_failed'
+  | 'recovery_code_used';
+
+/**
+ * `unusable`  — no such challenge, already spent, or expired. Nothing was evaluated.
+ * `throttled` — the account-scoped window is full. Nothing was evaluated.
+ * `exhausted` — this challenge's own attempt cap was already reached; it has been destroyed.
+ * `invalid`   — an attempt was evaluated and neither factor matched.
+ *
+ * Only `ok: true` means a second factor was satisfied. The four failure reasons exist to let the
+ * caller phrase a message, not to be treated as degrees of success.
+ */
+export type VerifyChallengeResult =
+  | { ok: true; userId: string }
+  | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
 interface EncryptionLike {
   encrypt(value: string): string | null;
@@ -45,6 +72,9 @@ export interface MfaServiceDeps {
  *  - Recovery codes (Task 6): `issueRecoveryCodes`, `consumeRecoveryCode`,
  *    `countUnusedRecoveryCodes` — the single-use fallback for when the authenticator app is
  *    unavailable, consumed with the same atomic replay-guard shape as `consumeTotpStep`.
+ *  - Challenge lifecycle (Task 7): `createChallenge`, `verifyChallenge`, `recordEvent`,
+ *    `isAccountThrottled`, `sweepExpiredChallenges` — the only code that decides whether a second
+ *    factor was satisfied, and the two-tier attempt limiting that stops brute force.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -333,6 +363,203 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return false;
   };
 
+  // --- Challenge lifecycle and two-tier rate limiting -------------------
+  // A challenge is the short-lived record of "this password has been accepted, a second factor is
+  // outstanding". It grants nothing by itself and authorises exactly one operation.
+  //
+  // Two tiers, because either alone is a bypass:
+  //  - per challenge (`maxChallengeAttempts`), exact, enforced by one conditional UPDATE. Running
+  //    it out destroys the challenge and sends the user back to their password.
+  //  - per account (`maxUserAttempts` within `userAttemptWindow`), approximate, counted from
+  //    stored `challenge_failed` events. The per-challenge cap alone would let an attacker
+  //    holding a valid password create a fresh challenge after every few guesses and try
+  //    forever; NIST SP 800-63B requires the limit be scoped to the account. It is a rolling
+  //    window and self-clearing — never a permanent lockout.
+  //
+  // Expiry is enforced lazily on read (`sweepExpiredChallenges` is only housekeeping), so a
+  // sweep that never runs cannot make a stale challenge usable.
+
+  const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
+  const eventQuery = () => strapi.db.query(EVENT_UID);
+
+  /**
+   * Physical names for the two raw statements in this group, resolved from metadata for the same
+   * reasons as `consumeTotpStep` and `consumeRecoveryCode`: the raw connection speaks columns, not
+   * attributes, and a schema or migration problem must surface as an actionable error rather than
+   * as a `TypeError` or, far worse, as an UPDATE that silently affects nothing and therefore
+   * reads as "cap already reached".
+   */
+  const challengeTable = () => {
+    const metadata = strapi.db.metadata.get(CHALLENGE_UID);
+    const { tableName } = metadata;
+    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
+    // attributes and attempts' static type is the full Attribute union. Optional chaining also
+    // guards the case where the attribute itself is missing (e.g. a migration that hasn't run),
+    // which would otherwise throw a TypeError before the check below can raise the intended,
+    // actionable ApplicationError.
+    const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
+
+    if (!attemptsColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::mfa-challenge.attempts'
+      );
+    }
+
+    return { tableName, attemptsColumn };
+  };
+
+  /**
+   * Metadata is neutral context only — never a code, a secret, an otpauth URI or anything derived
+   * from them. These rows are readable wherever admin data is readable and are surfaced back to
+   * the user in-app, so a "helpful" note about which code was tried would be storing a credential
+   * in a table nobody thinks of as credential storage.
+   */
+  const recordEvent = async (
+    userId: string,
+    type: MfaEventType,
+    metadata: Record<string, unknown> = {}
+  ): Promise<void> => {
+    await eventQuery().create({ data: { userId: String(userId), type, metadata, seenAt: null } });
+  };
+
+  /**
+   * The account-scoped tier. Being a `COUNT` over a rolling window it is approximate under
+   * concurrency — a handful of simultaneous requests can each see the same pre-write count — and
+   * that is acceptable here: it is a backstop against sustained recycling, while the exact limit
+   * on any single challenge is the conditional increment in `verifyChallenge`.
+   */
+  const isAccountThrottled = async (userId: string): Promise<boolean> => {
+    const { maxUserAttempts, userAttemptWindow } = config();
+    const since = new Date(Date.now() - userAttemptWindow * 1000);
+
+    const failures = await eventQuery().count({
+      where: { userId: String(userId), type: 'challenge_failed', createdAt: { $gt: since } },
+    });
+
+    return failures >= maxUserAttempts;
+  };
+
+  const createChallenge = async (userId: string): Promise<{ token: string; expiresIn: number }> => {
+    // Checked here as well as in `verifyChallenge`: throttling only one of the two leaves the
+    // other as the way around it.
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
+    const { challengeTtl } = config();
+    // 32 bytes from a CSPRNG. This token is the only thing between an accepted password and a
+    // session, so it is sized as a credential even though it authorises just one operation.
+    const token = crypto.randomBytes(32).toString('hex');
+
+    await challengeQuery().create({
+      data: {
+        token,
+        userId: String(userId),
+        factorType: 'totp',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + challengeTtl * 1000),
+        consumedAt: null,
+      },
+    });
+
+    return { token, expiresIn: challengeTtl };
+  };
+
+  /**
+   * Spends the challenge. A single unconditional-looking DELETE is in fact the conditional
+   * consume: whoever removes the row wins, so a token cannot authorise two operations even if two
+   * concurrent requests each present a genuinely valid factor.
+   */
+  const consumeChallenge = async (id: unknown, userId: string): Promise<VerifyChallengeResult> => {
+    const { tableName } = challengeTable();
+    const affected = await strapi.db.connection(tableName).where({ id }).del();
+
+    return affected === 1
+      ? { ok: true as const, userId }
+      : { ok: false as const, reason: 'unusable' as const };
+  };
+
+  /**
+   * Both enrolled factors are accepted at this one endpoint, TOTP first and then a recovery code.
+   * There is deliberately no client-supplied factor selector: letting the caller pick which check
+   * runs is the classic factor-switching bypass.
+   */
+  const verifyChallenge = async (token: string, code: string): Promise<VerifyChallengeResult> => {
+    const challenge = await challengeQuery().findOne({ where: { token } });
+
+    if (!challenge || challenge.consumedAt) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+
+    // Expiry must fail closed. `new Date('nonsense') <= new Date()` is false for an Invalid Date,
+    // so comparing without this check would turn a missing or malformed `expiresAt` — a
+    // hand-edited row, a column added by a migration that never backfilled — into a challenge
+    // that never expires.
+    const expiresAt = new Date(challenge.expiresAt);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+
+    if (await isAccountThrottled(challenge.userId)) {
+      return { ok: false as const, reason: 'throttled' as const };
+    }
+
+    // One conditional statement — `UPDATE ... SET attempts = attempts + 1 WHERE id = ? AND
+    // attempts < ?` — whose affected-row count is the decision, exactly like `consumeTotpStep`.
+    // The cap check and the increment cannot be separated, so concurrent requests cannot all read
+    // the same pre-write counter and each be granted an attempt. `increment(...).returning(...)`
+    // would be the obvious way to judge the new value instead, but `returning` is unsupported on
+    // MySQL, and reading the counter back would in any case be a second statement.
+    //
+    // This runs *before* any code is checked, so a request that crashes mid-verification has
+    // still cost an attempt.
+    const { tableName, attemptsColumn } = challengeTable();
+    const accepted = await strapi.db
+      .connection(tableName)
+      .where({ id: challenge.id })
+      .where(attemptsColumn, '<', config().maxChallengeAttempts)
+      .increment(attemptsColumn, 1);
+
+    if (accepted !== 1) {
+      // The cap was already reached. Destroy the challenge rather than leave a dead row that some
+      // later path might revive by resetting the counter: exhausting a challenge sends the user
+      // back to their password, which is why the account-scoped tier below has to exist too.
+      await challengeQuery().deleteMany({ where: { id: challenge.id } });
+      return { ok: false as const, reason: 'exhausted' as const };
+    }
+
+    const totpResult = await verifyTotpForUser(challenge.userId, code);
+
+    // `consumeTotpStep` is what makes a code single-use across the whole account rather than
+    // within one challenge, so a code spent on an earlier challenge cannot be replayed against a
+    // freshly created one (CVE-2024-0227).
+    if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
+      return consumeChallenge(challenge.id, challenge.userId);
+    }
+
+    if (await consumeRecoveryCode(challenge.userId, code)) {
+      // Recorded on consumption rather than on success: the code is spent either way, and the
+      // notice is about a recovery code having been used on the account.
+      await recordEvent(challenge.userId, 'recovery_code_used');
+      return consumeChallenge(challenge.id, challenge.userId);
+    }
+
+    await recordEvent(challenge.userId, 'challenge_failed');
+    return { ok: false as const, reason: 'invalid' as const };
+  };
+
+  /**
+   * Housekeeping, not enforcement: expired challenges are already rejected on read, so this only
+   * keeps the table from growing. Nothing depends on it having run.
+   */
+  const sweepExpiredChallenges = async (): Promise<number> => {
+    const result = await challengeQuery().deleteMany({
+      where: { expiresAt: { $lt: new Date() } },
+    });
+
+    return result?.count ?? 0;
+  };
+
   return {
     isEnabled,
     config,
@@ -344,6 +571,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     issueRecoveryCodes,
     consumeRecoveryCode,
     countUnusedRecoveryCodes,
+    recordEvent,
+    isAccountThrottled,
+    createChallenge,
+    verifyChallenge,
+    sweepExpiredChallenges,
   };
 };
 

@@ -65,6 +65,17 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
     result.window.forward = MFA_DEFAULTS.window.forward;
   }
 
+  // Not merely nonsense: `new Date(Date.now() + NaN * 1000)` is an Invalid Date, so every
+  // challenge would be born already expired and no user could ever complete a second factor.
+  // A zero or negative TTL has the same effect, which is why this mirrors `step`'s positive
+  // check rather than the non-negative one used for the counters below.
+  if (!Number.isFinite(result.challengeTtl) || result.challengeTtl <= 0) {
+    logger.warn(
+      `${PREFIX} challengeTtl must be a positive number of seconds; anything else expires every challenge the moment it is created, locking everyone out of the second factor. Got ${result.challengeTtl}, using ${MFA_DEFAULTS.challengeTtl}.`
+    );
+    result.challengeTtl = MFA_DEFAULTS.challengeTtl;
+  }
+
   if (!Number.isFinite(result.maxChallengeAttempts) || result.maxChallengeAttempts < 0) {
     logger.warn(
       `${PREFIX} maxChallengeAttempts must be a non-negative number. Got ${result.maxChallengeAttempts}, using ${MFA_DEFAULTS.maxChallengeAttempts}.`
@@ -77,6 +88,19 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
       `${PREFIX} maxUserAttempts must be a non-negative number. Got ${result.maxUserAttempts}, using ${MFA_DEFAULTS.maxUserAttempts}.`
     );
     result.maxUserAttempts = MFA_DEFAULTS.maxUserAttempts;
+  }
+
+  // The rolling window the account-scoped attempt counter looks back over. A non-finite or
+  // non-positive value makes `createdAt > now - window` match nothing, so the counter always
+  // reads zero and the account-scoped throttle NIST SP 800-63B requires is silently disabled —
+  // leaving only the per-challenge cap, which an attacker bypasses by creating a fresh
+  // challenge after every few guesses. Operators who want a looser account tier raise
+  // `maxUserAttempts`; a zero-length window is never what they meant.
+  if (!Number.isFinite(result.userAttemptWindow) || result.userAttemptWindow <= 0) {
+    logger.warn(
+      `${PREFIX} userAttemptWindow must be a positive number of seconds; anything else silently disables the account-scoped attempt throttle. Got ${result.userAttemptWindow}, using ${MFA_DEFAULTS.userAttemptWindow}.`
+    );
+    result.userAttemptWindow = MFA_DEFAULTS.userAttemptWindow;
   }
 
   if (!Number.isFinite(result.recoveryCodeCount) || result.recoveryCodeCount < 0) {

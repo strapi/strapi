@@ -1,5 +1,11 @@
 import type { Core } from '@strapi/types';
-import { generateTotp, base32Decode } from '@strapi/utils';
+import {
+  generateTotp,
+  generateTotpSecret,
+  base32Decode,
+  base32Encode,
+  errors,
+} from '@strapi/utils';
 import createMfaService from '../mfa';
 import { MFA_DEFAULTS } from '../../config/mfa';
 
@@ -9,6 +15,10 @@ const USER_UID = 'admin::user';
 const RECOVERY_UID = 'admin::mfa-recovery-code';
 const RECOVERY_TABLE = 'strapi_admin_mfa_recovery_codes';
 const RECOVERY_USED_AT_COLUMN = 'used_at';
+const CHALLENGE_UID = 'admin::mfa-challenge';
+const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
+const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
+const EVENT_UID = 'admin::mfa-event';
 
 type UserRow = Record<string, unknown>;
 type ResolveKey = (column: string) => string;
@@ -123,19 +133,237 @@ const buildConnection =
 
 type RecoveryRow = { id: number; userId: string; codeHash: string; usedAt: Date | null };
 
-const buildStrapi = (
-  overrides: Record<string, unknown> = {},
-  metadataOverrides: { tableName?: string; columnName?: string } = {},
-  recoveryOverrides: {
-    deleteMany?: jest.Mock;
-    createMany?: jest.Mock;
-    findMany?: jest.Mock;
-    count?: jest.Mock;
-  } = {}
-) => {
-  const tableName = metadataOverrides.tableName ?? DEFAULT_USER_TABLE;
-  const columnName = metadataOverrides.columnName ?? DEFAULT_LAST_USED_STEP_COLUMN;
-  const resolveKey: ResolveKey = (column) => (column === columnName ? 'mfaLastUsedStep' : column);
+interface ChallengeRow {
+  id: number;
+  token: string;
+  userId: string;
+  factorType: string;
+  attempts: number;
+  expiresAt: Date;
+  consumedAt: Date | null;
+  createdAt: Date;
+  // The mock connection writes by physical column name, which is a parameter per test.
+  [key: string]: unknown;
+}
+
+interface EventRow {
+  id: number;
+  userId: string;
+  type: string;
+  metadata: Record<string, unknown>;
+  seenAt: Date | null;
+  createdAt: Date;
+  [key: string]: unknown;
+}
+
+/**
+ * Coerces a value to something orderable for the `$gt`/`$lt` family. Deliberately narrow and
+ * loud: every comparison the service actually issues through `strapi.db.query` is on a datetime
+ * (`expiresAt`, `createdAt`), so anything else reaching here means the mock has drifted from the
+ * service. Better to fail the test than to compare as NaN, which would make every filter match
+ * nothing and silently turn the throttle tests green.
+ */
+const asComparable = (value: unknown): number => {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === 'number') return value;
+  throw new Error(`Unsupported comparison value in mock: ${String(value)}`);
+};
+
+/**
+ * A minimal `strapi.db.query` where-clause evaluator: plain equality, `null`, plus the
+ * `$gt`/`$gte`/`$lt`/`$lte` operators the challenge and event queries use. Unknown operators
+ * throw, so a filter the mock cannot honour can never be mistaken for one that matched nothing.
+ */
+const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknown> = {}): boolean =>
+  Object.entries(where).every(([field, condition]) => {
+    if (condition === null || condition === undefined) {
+      return row[field] === null || row[field] === undefined;
+    }
+
+    if (typeof condition === 'object' && !(condition instanceof Date)) {
+      return Object.entries(condition as Record<string, unknown>).every(([operator, value]) => {
+        const current = asComparable(row[field]);
+        const bound = asComparable(value);
+        switch (operator) {
+          case '$gt':
+            return current > bound;
+          case '$gte':
+            return current >= bound;
+          case '$lt':
+            return current < bound;
+          case '$lte':
+            return current <= bound;
+          default:
+            throw new Error(`Unsupported operator in mock: ${operator}`);
+        }
+      });
+    }
+
+    return String(row[field]) === String(condition);
+  });
+
+/**
+ * A knex-shaped builder for the challenge table, backed by the same live `rows` array
+ * `strapi.db.query(CHALLENGE_UID)` reads and writes. Two things matter here:
+ *
+ *  - every `.where(...)` is stored as a closure and evaluated against the **live** row at the
+ *    moment `increment`/`del` runs, so `UPDATE ... SET attempts = attempts + 1 WHERE id = ? AND
+ *    attempts < ?` really is one conditional statement whose affected-row count is the decision.
+ *    A stub that captured the row up front, or that always reported success, would let a
+ *    read-then-write implementation pass the concurrency test.
+ *  - the update bodies contain no `await`, so each runs to completion before any other racing
+ *    call resumes — the single-threaded stand-in for a database's row-level atomicity.
+ *
+ * `tableName`/`attemptsColumn` are parameters so a test can prove the service resolves them from
+ * `strapi.db.metadata` rather than hardcoding them.
+ */
+const buildChallengeConnection =
+  (rows: ChallengeRow[], tableName: string, attemptsColumn: string) => (requestedTable: string) => {
+    if (requestedTable !== tableName) {
+      throw new Error(
+        `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
+      );
+    }
+
+    const resolveKey = (column: string) => (column === attemptsColumn ? 'attempts' : column);
+    const predicates: Array<(row: ChallengeRow) => boolean> = [];
+
+    const builder = {
+      where(condition: Record<string, unknown> | string, operator?: string, value?: unknown) {
+        if (typeof condition === 'string') {
+          const key = resolveKey(condition);
+          predicates.push((row) => {
+            const current = Number(row[key]);
+            switch (operator) {
+              case '<':
+                return current < Number(value);
+              case '<=':
+                return current <= Number(value);
+              case '>':
+                return current > Number(value);
+              case '>=':
+                return current >= Number(value);
+              default:
+                throw new Error(`Unsupported operator in mock: ${operator}`);
+            }
+          });
+        } else {
+          predicates.push((row) =>
+            Object.entries(condition).every(
+              ([key, expected]) => String(row[resolveKey(key)]) === String(expected)
+            )
+          );
+        }
+        return builder;
+      },
+      async increment(column: string, amount: number) {
+        const key = resolveKey(column);
+        let affected = 0;
+        for (const row of rows) {
+          if (predicates.every((predicate) => predicate(row))) {
+            row[key] = Number(row[key]) + amount;
+            affected += 1;
+          }
+        }
+        return affected;
+      },
+      async del() {
+        let affected = 0;
+        for (let i = rows.length - 1; i >= 0; i -= 1) {
+          if (predicates.every((predicate) => predicate(rows[i]))) {
+            rows.splice(i, 1);
+            affected += 1;
+          }
+        }
+        return affected;
+      },
+    };
+
+    return builder;
+  };
+
+/**
+ * A knex-shaped `where().whereNull().update()` builder for the recovery-code table, backed by the
+ * same live `rows` array `strapi.db.query(RECOVERY_UID)` reads and writes, mirroring
+ * `buildConnection` above for the user table: the conditional UPDATE must see live state at the
+ * moment it runs so that, of two concurrent winners racing for the same row, only the first to
+ * execute can satisfy `whereNull(usedAtColumn)`.
+ */
+const buildRecoveryConnection =
+  (rows: RecoveryRow[], tableName: string, columnName: string) => (requestedTable: string) => {
+    if (requestedTable !== tableName) {
+      throw new Error(
+        `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
+      );
+    }
+
+    let idFilter: number | undefined;
+    let requireNull = false;
+
+    const builder = {
+      where(condition: Record<string, unknown>) {
+        idFilter = Number(condition.id);
+        return builder;
+      },
+      whereNull(column: string) {
+        if (column !== columnName) {
+          throw new Error(`Unexpected column in mock connection: ${column}`);
+        }
+        requireNull = true;
+        return builder;
+      },
+      async update(data: Record<string, unknown>) {
+        const row = rows.find((r) => r.id === idFilter);
+        if (!row) return 0;
+        if (requireNull && row.usedAt !== null) return 0;
+
+        for (const [column, value] of Object.entries(data)) {
+          if (column === columnName) row.usedAt = value as Date;
+        }
+        return 1;
+      },
+    };
+
+    return builder;
+  };
+
+interface FixtureOptions {
+  userTableName?: string;
+  userStepColumn?: string;
+  recoveryTableName?: string;
+  recoveryUsedAtColumn?: string;
+  challengeTableName?: string;
+  challengeAttemptsColumn?: string;
+  /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
+  mfaConfig?: Record<string, unknown>;
+  recoveryOverrides?: Record<string, jest.Mock>;
+  strapiOverrides?: Record<string, unknown>;
+}
+
+/**
+ * The one fixture for the whole suite. The challenge flow alone touches `admin::user`,
+ * `admin::mfa-recovery-code`, `admin::mfa-challenge` and `admin::mfa-event`, so a fixture that
+ * throws on any uid but its own cannot serve it — and two fixtures with different notions of the
+ * same store would let a test pass against a world the service never sees.
+ *
+ * Two rules hold throughout, because the security properties under test depend on them:
+ *  - every row handed out is a snapshot (`{ ...row }`), never a live reference. That is what
+ *    makes a read-then-write implementation racy under `Promise.all` the way it would be against
+ *    a real database; sharing one mutable object lets two racing reads see each other's write and
+ *    hides exactly the bug these tests exist to catch.
+ *  - every `db.connection` write path evaluates its predicates against live rows at the moment
+ *    the statement runs, and reports a true affected-row count.
+ */
+const buildMfaFixture = (options: FixtureOptions = {}) => {
+  const userTable = options.userTableName ?? DEFAULT_USER_TABLE;
+  const userStepColumn = options.userStepColumn ?? DEFAULT_LAST_USED_STEP_COLUMN;
+  const recoveryTable = options.recoveryTableName ?? RECOVERY_TABLE;
+  const recoveryUsedAtColumn = options.recoveryUsedAtColumn ?? RECOVERY_USED_AT_COLUMN;
+  const challengeTable = options.challengeTableName ?? CHALLENGE_TABLE;
+  const challengeAttemptsColumn = options.challengeAttemptsColumn ?? CHALLENGE_ATTEMPTS_COLUMN;
+
+  const resolveUserKey: ResolveKey = (column) =>
+    column === userStepColumn ? 'mfaLastUsedStep' : column;
 
   const users = new Map<string, UserRow>();
   users.set('1', {
@@ -148,16 +376,47 @@ const buildStrapi = (
   });
 
   const metadataGet = jest.fn((uid: string) => {
-    if (uid !== USER_UID) {
-      throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
+    switch (uid) {
+      case USER_UID:
+        return {
+          tableName: userTable,
+          attributes: { mfaLastUsedStep: { columnName: userStepColumn } },
+        };
+      case RECOVERY_UID:
+        return {
+          tableName: recoveryTable,
+          attributes: { usedAt: { columnName: recoveryUsedAtColumn } },
+        };
+      case CHALLENGE_UID:
+        return {
+          tableName: challengeTable,
+          attributes: { attempts: { columnName: challengeAttemptsColumn } },
+        };
+      default:
+        throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
     }
-    return {
-      tableName,
-      attributes: {
-        mfaLastUsedStep: { columnName },
-      },
-    };
   });
+
+  const userMocks = {
+    // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
+    // subsequent write elsewhere must not retroactively change what an in-flight read already
+    // observed. Spreading into a new object is what makes a read-then-write mutant in
+    // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
+    // returning the stored object directly let two racing reads silently share one mutable
+    // object and see each other's write, masking the exact bug Finding 1 exists to catch.
+    findOne: jest.fn(async ({ where }: any) => {
+      const row = users.get(String(where.id));
+      return row ? { ...row } : null;
+    }),
+    update: jest.fn(async ({ where, data }: any) => {
+      const user = users.get(String(where.id));
+      if (!user) return null;
+      Object.assign(user, data);
+      // A snapshot for the same reason `findOne` returns one: a caller that keeps an update's
+      // return value must not be left holding a window onto later writes.
+      return { ...user };
+    }),
+  };
 
   // A real store (not an inert no-op), so `completeEnrolment`'s recovery codes are genuinely
   // persisted here too — regressing `issueRecoveryCodes` to skip storage, not just to return
@@ -168,25 +427,97 @@ const buildStrapi = (
   let nextRecoveryId = 1;
   const recoveryMocks = {
     deleteMany: jest.fn(async ({ where }: any) => {
+      let count = 0;
       for (let i = recoveryRows.length - 1; i >= 0; i -= 1) {
-        if (recoveryRows[i].userId === where.userId) recoveryRows.splice(i, 1);
+        if (recoveryRows[i].userId === where.userId) {
+          recoveryRows.splice(i, 1);
+          count += 1;
+        }
       }
+      return { count };
     }),
     createMany: jest.fn(async ({ data }: any) => {
       for (const row of data) {
         recoveryRows.push({ id: nextRecoveryId, usedAt: null, ...row });
         nextRecoveryId += 1;
       }
+      return { count: data.length };
     }),
-    findMany: jest.fn(async () => []),
-    count: jest.fn(async () => 0),
-    ...recoveryOverrides,
+    findMany: jest.fn(async ({ where }: any) =>
+      recoveryRows
+        .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
+        .map((r) => ({ ...r }))
+    ),
+    count: jest.fn(
+      async ({ where }: any) =>
+        recoveryRows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
+    ),
+    ...options.recoveryOverrides,
   };
+
+  const challenges: ChallengeRow[] = [];
+  let nextChallengeId = 1;
+  const challengeMocks = {
+    create: jest.fn(async ({ data }: any) => {
+      // `createdAt` is supplied by @strapi/database's timestamps subscriber, which uses
+      // `_.defaults` — so it is filled in here unless the caller passed one.
+      const row: ChallengeRow = { id: nextChallengeId, createdAt: new Date(), ...data };
+      nextChallengeId += 1;
+      challenges.push(row);
+      return { ...row };
+    }),
+    findOne: jest.fn(async ({ where }: any) => {
+      const row = challenges.find((c) => matchesWhere(c, where));
+      return row ? { ...row } : null;
+    }),
+    deleteMany: jest.fn(async ({ where }: any) => {
+      let count = 0;
+      for (let i = challenges.length - 1; i >= 0; i -= 1) {
+        if (matchesWhere(challenges[i], where)) {
+          challenges.splice(i, 1);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
+    count: jest.fn(
+      async ({ where }: any = {}) => challenges.filter((c) => matchesWhere(c, where)).length
+    ),
+  };
+
+  const events: EventRow[] = [];
+  let nextEventId = 1;
+  const eventMocks = {
+    create: jest.fn(async ({ data }: any) => {
+      const row: EventRow = { id: nextEventId, createdAt: new Date(), ...data };
+      nextEventId += 1;
+      events.push(row);
+      return { ...row };
+    }),
+    count: jest.fn(
+      async ({ where }: any = {}) => events.filter((e) => matchesWhere(e, where)).length
+    ),
+    findMany: jest.fn(async ({ where }: any = {}) =>
+      events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }))
+    ),
+  };
+
+  const userConnection = buildConnection(users, userTable, resolveUserKey);
+  const recoveryConnection = buildRecoveryConnection(
+    recoveryRows,
+    recoveryTable,
+    recoveryUsedAtColumn
+  );
+  const challengeConnection = buildChallengeConnection(
+    challenges,
+    challengeTable,
+    challengeAttemptsColumn
+  );
 
   const strapi = {
     config: {
       get: jest.fn((path: string, defaultValue?: unknown) => {
-        if (path === 'admin.auth.mfa') return { enabled: true };
+        if (path === 'admin.auth.mfa') return { enabled: true, ...options.mfaConfig };
         return defaultValue;
       }),
     },
@@ -194,30 +525,25 @@ const buildStrapi = (
     log: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
     db: {
       query: jest.fn((uid: string) => {
-        if (uid === RECOVERY_UID) {
-          return recoveryMocks;
+        switch (uid) {
+          case USER_UID:
+            return userMocks;
+          case RECOVERY_UID:
+            return recoveryMocks;
+          case CHALLENGE_UID:
+            return challengeMocks;
+          case EVENT_UID:
+            return eventMocks;
+          default:
+            throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
-
-        return {
-          // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
-          // subsequent write elsewhere must not retroactively change what an in-flight read already
-          // observed. Spreading into a new object is what makes a read-then-write mutant in
-          // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
-          // returning the stored object directly let two racing reads silently share one mutable
-          // object and see each other's write, masking the exact bug Finding 1 exists to catch.
-          findOne: jest.fn(async ({ where }: any) => {
-            const row = users.get(String(where.id));
-            return row ? { ...row } : null;
-          }),
-          update: jest.fn(async ({ where, data }: any) => {
-            const user = users.get(String(where.id));
-            if (!user) return null;
-            Object.assign(user, data);
-            return user;
-          }),
-        };
       }),
-      connection: buildConnection(users, tableName, resolveKey),
+      connection: jest.fn((table: string) => {
+        if (table === userTable) return userConnection(table);
+        if (table === recoveryTable) return recoveryConnection(table);
+        if (table === challengeTable) return challengeConnection(table);
+        throw new Error(`Unexpected table in mock connection: ${table}`);
+      }),
       metadata: { get: metadataGet },
       // The service's own transaction usage (`issueRecoveryCodes`) is exercised here as a plain
       // pass-through: the fixtures above already mutate a shared in-memory store synchronously,
@@ -226,11 +552,29 @@ const buildStrapi = (
       // throws), `transaction` rejects and propagates, exactly like the real implementation.
       transaction: jest.fn(async (run: (args: { trx: unknown }) => unknown) => run({ trx: {} })),
     },
-    ...overrides,
+    ...options.strapiOverrides,
   };
 
-  return { strapi, users, metadataGet, recoveryRows };
+  return { strapi, users, metadataGet, recoveryRows, recoveryMocks, challenges, events };
 };
+
+/** Adapter keeping the enrolment suite's call shape onto the merged fixture above. */
+const buildStrapi = (
+  overrides: Record<string, unknown> = {},
+  metadataOverrides: { tableName?: string; columnName?: string } = {},
+  recoveryOverrides: {
+    deleteMany?: jest.Mock;
+    createMany?: jest.Mock;
+    findMany?: jest.Mock;
+    count?: jest.Mock;
+  } = {}
+) =>
+  buildMfaFixture({
+    userTableName: metadataOverrides.tableName,
+    userStepColumn: metadataOverrides.columnName,
+    recoveryOverrides: recoveryOverrides as Record<string, jest.Mock>,
+    strapiOverrides: overrides,
+  });
 
 const defaultDeps = (strapi: unknown) => ({
   strapi: strapi as unknown as Core.Strapi,
@@ -470,125 +814,28 @@ describe('mfa service: recovery codes', () => {
   // "ignore it and use the default".
 
   /**
-   * A knex-shaped `where().whereNull().update()` builder backed by the same live `rows` array
-   * `strapi.db.query(RECOVERY_UID)` reads and writes, mirroring `buildConnection` above for the
-   * user table: the conditional UPDATE must see live state at the moment it runs so that, of two
-   * concurrent winners racing for the same row, only the first to execute can satisfy
-   * `whereNull(usedAtColumn)`. `tableName`/`columnName` are parameters, not the module-level
-   * `RECOVERY_TABLE`/`RECOVERY_USED_AT_COLUMN` constants, so a test can prove the service
-   * resolves these from metadata rather than hardcoding them (Finding 3).
-   */
-  const buildRecoveryConnection =
-    (rows: RecoveryRow[], tableName: string, columnName: string) => (requestedTable: string) => {
-      if (requestedTable !== tableName) {
-        throw new Error(
-          `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
-        );
-      }
-
-      let idFilter: number | undefined;
-      let requireNull = false;
-
-      const builder = {
-        where(condition: Record<string, unknown>) {
-          idFilter = Number(condition.id);
-          return builder;
-        },
-        whereNull(column: string) {
-          if (column !== columnName) {
-            throw new Error(`Unexpected column in mock connection: ${column}`);
-          }
-          requireNull = true;
-          return builder;
-        },
-        async update(data: Record<string, unknown>) {
-          const row = rows.find((r) => r.id === idFilter);
-          if (!row) return 0;
-          if (requireNull && row.usedAt !== null) return 0;
-
-          for (const [column, value] of Object.entries(data)) {
-            if (column === columnName) row.usedAt = value as Date;
-          }
-          return 1;
-        },
-      };
-
-      return builder;
-    };
-
-  /**
-   * `db.query(RECOVERY_UID).findMany` returns snapshots (`{ ...row }`), not live references, the
-   * same rule the top-of-file comment on the user mock's `findOne` explains: a snapshot is what
-   * makes a read-then-write mutant in `consumeRecoveryCode` racy under `Promise.all` the way it
-   * would be against a real database. If `findMany` handed out live objects instead, a mutant
-   * that reads `candidate.usedAt` after `await`ing a slow bcrypt comparison would see a write the
-   * other racing call already made to that same shared object, and would incorrectly refuse the
-   * second call — hiding exactly the bug this suite exists to catch.
-   *
-   * `tableName`/`columnName` default to the real physical names but can be overridden per test
-   * (Finding 3); `recoveryCodeCount` defaults to a non-default value (Finding 2).
+   * Adapter onto the merged fixture at the top of this file. `tableName`/`columnName` default to
+   * the real physical names but can be overridden per test (Finding 3), and `recoveryCodeCount`
+   * defaults to a non-default value (Finding 2). Everything else — snapshot hand-outs, a live
+   * conditional UPDATE — is the shared fixture's job, so the recovery suite and the challenge
+   * suite cannot drift into two different notions of the same store.
    */
   const setup = (
     options: { tableName?: string; columnName?: string; recoveryCodeCount?: number } = {}
   ) => {
-    const tableName = options.tableName ?? RECOVERY_TABLE;
-    const columnName = options.columnName ?? RECOVERY_USED_AT_COLUMN;
-    const recoveryCodeCount = options.recoveryCodeCount ?? DEFAULT_RECOVERY_CODE_COUNT;
-
-    const rows: RecoveryRow[] = [];
-    let nextId = 1;
-
-    const createMany = jest.fn(async ({ data }: any) => {
-      for (const row of data) {
-        rows.push({ id: nextId, usedAt: null, ...row });
-        nextId += 1;
-      }
-    });
-    const deleteMany = jest.fn(async () => {
-      rows.length = 0;
-    });
-    const findMany = jest.fn(async ({ where }: any) =>
-      rows
-        .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
-        .map((r) => ({ ...r }))
-    );
-    const count = jest.fn(
-      async ({ where }: any) =>
-        rows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
-    );
-
-    const strapi = {
-      config: { get: jest.fn(() => ({ enabled: true, recoveryCodeCount })) },
-      features: { future: { isEnabled: jest.fn(() => true) } },
-      log: { warn: jest.fn(), error: jest.fn() },
-      db: {
-        query: jest.fn((uid: string) => {
-          if (uid !== RECOVERY_UID) {
-            throw new Error(`Unexpected query uid in mock: ${uid}`);
-          }
-          return { createMany, deleteMany, findMany, count };
-        }),
-        connection: jest.fn(buildRecoveryConnection(rows, tableName, columnName)),
-        // A plain pass-through: the fixture's `deleteMany`/`createMany` above mutate the shared
-        // `rows` array synchronously regardless of any transaction, so there is nothing for a
-        // fake commit/rollback to add here. What matters is that a throwing callback rejects,
-        // which it does naturally since this is just `await cb(...)`.
-        transaction: jest.fn(async (run: (args: { trx: unknown }) => unknown) => run({ trx: {} })),
-        metadata: {
-          get: jest.fn((uid: string) => {
-            if (uid !== RECOVERY_UID) {
-              throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
-            }
-            return {
-              tableName,
-              attributes: { usedAt: { columnName } },
-            };
-          }),
-        },
+    const fixture = buildMfaFixture({
+      recoveryTableName: options.tableName,
+      recoveryUsedAtColumn: options.columnName,
+      mfaConfig: {
+        recoveryCodeCount: options.recoveryCodeCount ?? DEFAULT_RECOVERY_CODE_COUNT,
       },
-    };
+    });
 
-    return { strapi, rows, createMany };
+    return {
+      strapi: fixture.strapi,
+      rows: fixture.recoveryRows,
+      createMany: fixture.recoveryMocks.createMany,
+    };
   };
 
   const deps = (strapi: unknown) => ({
@@ -707,5 +954,389 @@ describe('mfa service: recovery codes', () => {
     // both see the pre-write state (usedAt: null) and both return true.
     expect([a, b].sort()).toEqual([false, true]);
     expect(rows.find((r) => r.codeHash === `h:${code}`)?.usedAt).toBeInstanceOf(Date);
+  });
+});
+
+describe('mfa service: challenge lifecycle', () => {
+  /** 32 random bytes, hex-encoded. Anything shorter or non-hex is a weaker token. */
+  const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
+
+  const setup = (
+    options: {
+      tableName?: string;
+      attemptsColumn?: string;
+      mfaConfig?: Record<string, unknown>;
+    } = {}
+  ) => {
+    const fixture = buildMfaFixture({
+      challengeTableName: options.tableName,
+      challengeAttemptsColumn: options.attemptsColumn,
+      mfaConfig: options.mfaConfig,
+    });
+
+    // A challenge only ever exists for someone already enrolled, so the fixture user is seeded
+    // that way directly rather than driven through beginEnrolment/completeEnrolment: those would
+    // consume a TOTP step on the way in and quietly weaken every replay assertion below.
+    const secret = generateTotpSecret();
+    const user = fixture.users.get('1')!;
+    user.mfaSecret = `enc:${base32Encode(secret)}`;
+    user.mfaEnabledAt = new Date();
+
+    const service = createMfaService({
+      strapi: fixture.strapi as unknown as Core.Strapi,
+      encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: (v: string) => v.slice(4) },
+      auth: {
+        validatePassword: async (plain: string, hash: string) => hash === `h:${plain}`,
+        hashPassword: async (plain: string) => `h:${plain}`,
+      },
+    });
+
+    return { ...fixture, service, secret, validCode: () => generateTotp({ secret }) };
+  };
+
+  type ChallengeService = ReturnType<typeof setup>['service'];
+
+  /**
+   * Spends the entire account-scoped budget the way an attacker with a valid password would:
+   * a fresh challenge every time the per-challenge cap is reached. Without the account tier this
+   * loop would never need to stop.
+   */
+  const burnAccountBudget = async (service: ChallengeService) => {
+    const perChallenge = MFA_DEFAULTS.maxChallengeAttempts;
+    const perAccount = MFA_DEFAULTS.maxUserAttempts;
+    let spent = 0;
+
+    while (spent < perAccount) {
+      // eslint-disable-next-line no-await-in-loop
+      const { token } = await service.createChallenge('1');
+      for (let i = 0; i < perChallenge && spent < perAccount; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const outcome = await service.verifyChallenge(token, '000000');
+        expect(outcome).toEqual({ ok: false, reason: 'invalid' });
+        spent += 1;
+      }
+    }
+
+    return spent;
+  };
+
+  /** Rewinds every recorded event by `seconds`, standing in for the passage of time. */
+  const ageEvents = (events: EventRow[], seconds: number) => {
+    for (const event of events) {
+      event.createdAt = new Date(Date.now() - seconds * 1000);
+    }
+  };
+
+  test('a fresh challenge grants nothing until a code is presented', async () => {
+    const { service, challenges } = setup();
+
+    const { token, expiresIn } = await service.createChallenge('1');
+
+    // The token is unguessable and carries the full 32 bytes: it is the only thing standing
+    // between a password holder and a session, so a short or non-random token is a real finding.
+    expect(token).toMatch(TOKEN_PATTERN);
+    expect(expiresIn).toBe(MFA_DEFAULTS.challengeTtl);
+
+    const row = challenges.find((c) => c.token === token)!;
+    expect(row).toBeDefined();
+    // Unconsumed and unattempted: creating a challenge must not be, or imply, a passed factor.
+    expect(row.consumedAt).toBeNull();
+    expect(row.attempts).toBe(0);
+    expect(row.userId).toBe('1');
+    expect(row.expiresAt.getTime()).toBeGreaterThan(Date.now());
+    expect(row.expiresAt.getTime()).toBeLessThanOrEqual(
+      Date.now() + MFA_DEFAULTS.challengeTtl * 1000
+    );
+
+    // Holding the token buys nothing on its own. Presenting it with no code is a failed attempt,
+    // not a pass and not a free retry — an implementation that short-circuited an empty code
+    // before the counter (or, worse, treated "no code" as "nothing to reject") would fail here.
+    await expect(service.verifyChallenge(token, '')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+  });
+
+  test('an expired challenge is unusable', async () => {
+    const { service, challenges, users, events, validCode } = setup();
+
+    const { token } = await service.createChallenge('1');
+    challenges.find((c) => c.token === token)!.expiresAt = new Date(Date.now() - 1000);
+
+    // Rejected on read, so expiry does not depend on the sweep having run. A correct code cannot
+    // revive it either — expiry is checked before anything is judged.
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: false,
+      reason: 'unusable',
+    });
+
+    // Nothing was spent on a challenge that was never going to be usable: no attempt charged, no
+    // TOTP step burned (so the code still works on a fresh challenge), no failure recorded
+    // against the account. Checking the code first would have consumed the step and handed an
+    // attacker a way to burn a legitimate user's codes through dead challenges.
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(0);
+    expect(users.get('1')!.mfaLastUsedStep).toBeNull();
+    expect(events).toHaveLength(0);
+
+    // An unparseable expiry fails closed too. `new Date('nonsense') <= new Date()` is false, so a
+    // naive comparison would read a malformed `expiresAt` as "never expires" — a challenge that
+    // outlives its window forever is the same finding as no window at all.
+    challenges.find((c) => c.token === token)!.expiresAt = new Date('nonsense');
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: false,
+      reason: 'unusable',
+    });
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(0);
+  });
+
+  test('a consumed challenge cannot be reused', async () => {
+    const { service, challenges, validCode } = setup();
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+
+    // Success destroys the row, so the token cannot be presented again at all.
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: false,
+      reason: 'unusable',
+    });
+  });
+
+  test('a challenge is single-use even when two valid factors are presented at once', async () => {
+    const { service, challenges, validCode } = setup();
+    const [recoveryCode] = await service.issueRecoveryCodes('1');
+
+    const { token } = await service.createChallenge('1');
+
+    // Two genuinely valid factors racing on one token. Both would pass their own verification, so
+    // only the challenge's own single-use consume can stop the token authorising two operations.
+    // A delete that ignores its affected-row count lets both through.
+    const outcomes = await Promise.all([
+      service.verifyChallenge(token, validCode()),
+      service.verifyChallenge(token, recoveryCode),
+    ]);
+
+    expect(outcomes.filter((outcome) => outcome.ok)).toHaveLength(1);
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+  });
+
+  test('the challenge is destroyed once its attempt cap is exhausted', async () => {
+    const { service, challenges, validCode } = setup();
+    const cap = MFA_DEFAULTS.maxChallengeAttempts;
+
+    const { token } = await service.createChallenge('1');
+
+    for (let i = 0; i < cap; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+        ok: false,
+        reason: 'invalid',
+      });
+    }
+
+    // Exactly `cap` guesses were evaluated, no more and no fewer: an off-by-one here is a free
+    // extra guess per challenge, forever.
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(cap);
+
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'exhausted',
+    });
+    // Destroyed, not merely refused: leaving the row behind would make the cap depend on a
+    // counter that some other path might reset.
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+
+    // And a correct code cannot rescue an exhausted challenge — the user must start again from
+    // their password, which is the point of the per-challenge tier.
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: false,
+      reason: 'unusable',
+    });
+  });
+
+  test('concurrent presentations cannot exceed the per-challenge cap', async () => {
+    const { service, challenges } = setup();
+    const cap = MFA_DEFAULTS.maxChallengeAttempts;
+
+    const { token } = await service.createChallenge('1');
+
+    const outcomes = await Promise.all(
+      Array.from({ length: cap + 3 }, () => service.verifyChallenge(token, '000000'))
+    );
+
+    expect(outcomes.every((outcome) => outcome.ok === false)).toBe(true);
+
+    // At most `cap` of them were actually evaluated as attempts; the rest were refused without
+    // being judged. A read-then-write increment lets all cap+3 read the same pre-write counter,
+    // pass the cap check and be evaluated — that is precisely the bug this test exists to catch,
+    // and it is how a "5 attempts" cap becomes "as many as you can send at once".
+    const evaluated = outcomes.filter((outcome) => !outcome.ok && outcome.reason === 'invalid');
+    const refused = outcomes.filter(
+      (outcome) => !outcome.ok && (outcome.reason === 'exhausted' || outcome.reason === 'unusable')
+    );
+
+    expect(evaluated.length).toBeLessThanOrEqual(cap);
+    expect(evaluated.length + refused.length).toBe(cap + 3);
+
+    // The counter itself never ran past the cap either (the row is normally gone by now).
+    const row = challenges.find((c) => c.token === token);
+    expect(row === undefined || Number(row.attempts) <= cap).toBe(true);
+  });
+
+  test('challenge recycling is capped account-wide', async () => {
+    const { service, challenges, users, events, validCode } = setup();
+
+    // An attacker who already holds an unspent challenge, created before the account filled up.
+    const { token: held } = await service.createChallenge('1');
+
+    const spent = await burnAccountBudget(service);
+    expect(spent).toBe(MFA_DEFAULTS.maxUserAttempts);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(
+      MFA_DEFAULTS.maxUserAttempts
+    );
+    expect(await service.isAccountThrottled('1')).toBe(true);
+
+    // No new challenge: without this, the per-challenge cap is only a speed bump, since a fresh
+    // challenge resets the counter and the loop above could run forever.
+    await expect(service.createChallenge('1')).rejects.toBeInstanceOf(errors.RateLimitError);
+
+    // And the already-held challenge is refused too. Throttling only createChallenge would let
+    // anyone who grabbed a challenge first keep guessing straight through the account cap.
+    const attemptsBefore = challenges.find((c) => c.token === held)!.attempts;
+    await expect(service.verifyChallenge(held, validCode())).resolves.toEqual({
+      ok: false,
+      reason: 'throttled',
+    });
+
+    // Refused before anything was spent: a throttled request must not cost an attempt, and must
+    // not consume the legitimate user's TOTP step — otherwise the throttle becomes a way to burn
+    // the codes of the account it is supposed to protect.
+    expect(challenges.find((c) => c.token === held)!.attempts).toBe(attemptsBefore);
+    expect(users.get('1')!.mfaLastUsedStep).toBeNull();
+  });
+
+  test('the account cap clears once its window passes', async () => {
+    const { service, events, validCode } = setup();
+    const window = MFA_DEFAULTS.userAttemptWindow;
+
+    await burnAccountBudget(service);
+    expect(await service.isAccountThrottled('1')).toBe(true);
+
+    // Still inside the window: the throttle holds. This is the assertion that catches a window
+    // applied in the wrong unit — treating userAttemptWindow as milliseconds would drop
+    // 14-minute-old failures out of a 15-minute window immediately.
+    ageEvents(events, window - 60);
+    expect(await service.isAccountThrottled('1')).toBe(true);
+
+    // Past the window it self-clears. This is a rolling window, never a permanent lockout: a
+    // locked-out admin with no way back in is an outage, not a security control.
+    ageEvents(events, window + 60);
+    expect(await service.isAccountThrottled('1')).toBe(false);
+
+    const { token } = await service.createChallenge('1');
+    expect(token).toMatch(TOKEN_PATTERN);
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+  });
+
+  test('a recovery code satisfies a challenge and records the event', async () => {
+    const { service, challenges, events, recoveryRows } = setup();
+    const codes = await service.issueRecoveryCodes('1');
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, codes[0])).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+
+    expect(recoveryRows.find((r) => r.codeHash === `h:${codes[0]}`)!.usedAt).toBeInstanceOf(Date);
+    expect(challenges.some((c) => c.token === token)).toBe(false);
+
+    const recorded = events.filter((e) => e.type === 'recovery_code_used');
+    expect(recorded).toHaveLength(1);
+    expect(recorded[0].userId).toBe('1');
+    // The event is a notice, not an audit of the secret material. A recorded code is a stored
+    // credential in a table nobody thinks of as credential storage.
+    const serialised = JSON.stringify(recorded[0]);
+    for (const code of codes) {
+      expect(serialised).not.toContain(code);
+    }
+    expect(serialised).not.toMatch(/otpauth|secret/i);
+
+    // The spent code cannot satisfy a second challenge, but an unused one still can.
+    const { token: second } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(second, codes[0])).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+    await expect(service.verifyChallenge(second, codes[1])).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+  });
+
+  test('a totp code already consumed in another challenge is rejected as a replay', async () => {
+    const { service, users, challenges, events, validCode } = setup();
+    const code = validCode();
+
+    const { token: first } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(first, code)).resolves.toEqual({ ok: true, userId: '1' });
+
+    const consumedStep = Number(users.get('1')!.mfaLastUsedStep);
+    expect(consumedStep).toBeGreaterThan(0);
+
+    // CVE-2024-0227: a brand new challenge must not resurrect a code that was already spent. The
+    // step is consumed per account, not per challenge, so B cannot accept it even though B has
+    // its own untouched attempt counter — an implementation that scoped the replay guard to the
+    // challenge would hand an observer of one code a free second login for the rest of the step.
+    const { token: second } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(second, code)).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+
+    // The replayed presentation was charged as a failure at both tiers, and the recorded step is
+    // unchanged (nothing rewound it to let the code work again).
+    expect(Number(users.get('1')!.mfaLastUsedStep)).toBe(consumedStep);
+    expect(challenges.find((c) => c.token === second)!.attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+  });
+
+  test('resolves the challenge table and the attempts column from strapi.db.metadata rather than hardcoding them', async () => {
+    const { service, challenges, metadataGet } = setup({
+      tableName: 'weird_challenge_table',
+      attemptsColumn: 'weird_attempts_col',
+    });
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+
+    expect(metadataGet).toHaveBeenCalledWith(CHALLENGE_UID);
+    expect(challenges.find((c) => c.token === token)!.attempts).toBe(1);
+  });
+
+  test('sweeping removes expired challenges and leaves live ones alone', async () => {
+    const { service, challenges } = setup();
+
+    const { token: live } = await service.createChallenge('1');
+    const { token: dead } = await service.createChallenge('1');
+    challenges.find((c) => c.token === dead)!.expiresAt = new Date(Date.now() - 1000);
+
+    await expect(service.sweepExpiredChallenges()).resolves.toBe(1);
+    expect(challenges.map((c) => c.token)).toEqual([live]);
+
+    // Housekeeping only: nothing to do a second time, and it never touches a usable challenge.
+    await expect(service.sweepExpiredChallenges()).resolves.toBe(0);
+    expect(challenges.map((c) => c.token)).toEqual([live]);
   });
 });
