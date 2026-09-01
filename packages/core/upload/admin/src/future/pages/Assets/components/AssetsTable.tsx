@@ -29,6 +29,7 @@ import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -591,6 +592,8 @@ interface AssetsTableProps {
    * order instead of folders-first. Range selection follows the same order.
    */
   mixedItems?: MixedItem[] | null;
+  /** Keys of the rendered rows, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
@@ -598,6 +601,7 @@ export const AssetsTable = ({
   assets,
   folders = [],
   mixedItems = null,
+  renderedKeys,
   onAssetItemClick,
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
@@ -622,14 +626,8 @@ export const AssetsTable = ({
 
   // Render order — folders first by default, or the interleaved mixed order.
   // Range selection follows it.
-  const orderedItemKeys: ItemKey[] = mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
-    : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
-      ];
+  const orderedItemKeys: ItemKey[] =
+    renderedKeys ?? buildRenderedKeys({ folders, assets, mixedItems });
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {

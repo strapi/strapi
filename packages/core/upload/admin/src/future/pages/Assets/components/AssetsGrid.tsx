@@ -13,6 +13,7 @@ import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -530,18 +531,22 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  /** Keys of the rendered items, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
+export const AssetsGrid = ({
+  assets,
+  folders = [],
+  renderedKeys,
+  onAssetItemClick,
+}: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
   // range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  const orderedItemKeys: ItemKey[] = renderedKeys ?? buildRenderedKeys({ folders, assets });
 
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.
