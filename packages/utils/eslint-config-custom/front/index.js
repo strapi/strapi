@@ -8,7 +8,7 @@
 // config, so lint dependencies live at the root rather than per workspace.
 const { rules: airbnbStyleRules } = require('eslint-config-airbnb-base/rules/style');
 
-const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
+const { lodashImportPatterns, lodashSelectors } = require('lint-policy/lodash');
 
 /** @type {Linter.Config} */
 const config = {
@@ -60,12 +60,18 @@ const config = {
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
-    'no-restricted-imports': noRestrictedImports([
+    'no-restricted-imports': [
+      'error',
       {
-        name: 'lodash',
-        message: 'Please use import [method] from lodash/[method]',
+        paths: [
+          {
+            name: 'lodash',
+            message: 'Please use import [method] from lodash/[method]',
+          },
+        ],
+        patterns: [...lodashImportPatterns],
       },
-    ]),
+    ],
     /**
      * ESLint replaces rule options rather than merging them, so the entries inherited from
      * `airbnb` (via `@strapi/eslint-config/front/javascript`) have to be re-supplied here or they
@@ -74,12 +80,13 @@ const config = {
      * `front/typescript` never extends airbnb, so this entrypoint is the only one with inherited
      * entries to preserve.
      *
-     * The `typeof` filter drops airbnb's leading severity string; `noRestrictedSyntax` supplies
-     * its own.
+     * The `typeof` filter drops airbnb's leading severity string.
      */
-    'no-restricted-syntax': noRestrictedSyntax(
-      airbnbStyleRules['no-restricted-syntax'].filter((entry) => typeof entry === 'object')
-    ),
+    'no-restricted-syntax': [
+      'error',
+      ...airbnbStyleRules['no-restricted-syntax'].filter((entry) => typeof entry === 'object'),
+      ...lodashSelectors,
+    ],
     'no-restricted-globals': [
       'error',
       {

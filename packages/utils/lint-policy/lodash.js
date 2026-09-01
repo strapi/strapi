@@ -4,24 +4,27 @@
  * Shared lodash policy, consumed by both linters.
  *
  * ESLint (`eslint-config-custom`) and OxLint (`oxlint-config`) enforce the same bans, and both
- * accept the same `[severity, ...options]` rule-value shape, so the two builders below are used
- * verbatim by each. Only the rule *key* differs: OxLint has no native `no-restricted-syntax` and
+ * accept the same `[severity, ...options]` rule-value shape, so each spreads these arrays into its
+ * own rule value. Only the rule *key* differs: OxLint has no native `no-restricted-syntax` and
  * takes it from `oxlint-plugin-eslint` under the `eslint-js/` prefix.
  *
+ * Both exports are `readonly`: a consumer prepending its own entries must spread rather than
+ * mutate, so one config cannot alter what the others enforce. OxLint's `no-restricted-imports`
+ * type wants a mutable `patterns`, which the spread at each call site already produces.
+ *
  * Each banned member has a native equivalent, so importing it only costs a module and hides the
- * standard API. Every way of reaching one is covered — ESM named imports, deep submodule imports,
- * CommonJS `require`, and namespace member access (`_.isArray`) — because a single
- * `no-restricted-imports` entry misses most of them.
+ * standard API. The forms present in this repository are covered — ESM named imports, deep
+ * submodule imports, CommonJS `require`, and static member access on a namespace bound to `_`,
+ * `lodash` or `fp` — because a single `no-restricted-imports` entry misses most of them.
+ *
+ * Deliberately *not* covered, none of which occur here: a default import bound to any other name
+ * (`import l from 'lodash'; l.isArray(x)`), member access straight off a require
+ * (`require('lodash').isArray(x)`), computed access (`_['isArray']`), and every `lodash-es`
+ * form (not a dependency of this repository).
  *
  * Named imports are matched via `no-restricted-syntax` rather than `no-restricted-imports`
  * `importNames`, because the latter also rejects `import * as _ from 'lodash'` outright in both
  * linters; the namespace binding itself is fine, only the member access is not.
- */
-
-/**
- * A single `no-restricted-imports` `paths` entry.
- *
- * @typedef {{ name: string; importNames?: string[]; message?: string }} RestrictedImportPath
  */
 
 /**
@@ -36,7 +39,7 @@
  * @typedef {{ selector: string; message?: string }} RestrictedSyntax
  */
 
-/** Local identifiers conventionally bound to a lodash namespace. */
+/** Local identifiers conventionally bound to a lodash namespace; any other binding is not matched. */
 const LODASH_NAMESPACES = '(_|lodash|fp)';
 
 /** Members banned everywhere, with the native replacement to reach for instead. */
@@ -56,7 +59,7 @@ const BANNED_MEMBERS = [
 /**
  * `no-restricted-imports` patterns: `import isArray from 'lodash/isArray'`.
  *
- * @type {RestrictedImportPattern[]}
+ * @type {readonly RestrictedImportPattern[]}
  */
 const restrictedImportPatterns = BANNED_MEMBERS.map(({ name, message }) => ({
   group: [`lodash/${name}`, `lodash/fp/${name}`],
@@ -66,7 +69,7 @@ const restrictedImportPatterns = BANNED_MEMBERS.map(({ name, message }) => ({
 /**
  * `no-restricted-syntax` entries, covering the forms `no-restricted-imports` cannot express.
  *
- * @type {RestrictedSyntax[]}
+ * @type {readonly RestrictedSyntax[]}
  */
 const restrictedSyntax = BANNED_MEMBERS.flatMap(({ name, message }) => [
   {
@@ -91,28 +94,7 @@ const restrictedSyntax = BANNED_MEMBERS.flatMap(({ name, message }) => [
   },
 ]);
 
-/**
- * Builds the `no-restricted-imports` value, appending the lodash patterns to any consumer-specific
- * paths.
- *
- * The concrete tuple return type matters: ESLint's `Linter.RuleEntry` makes the options element
- * optional, which OxLint's stricter `no-restricted-imports` type rejects.
- *
- * @param {RestrictedImportPath[]} [paths]
- * @returns {['error', { paths: RestrictedImportPath[]; patterns: RestrictedImportPattern[] }]}
- */
-const noRestrictedImports = (paths = []) => [
-  'error',
-  { paths, patterns: restrictedImportPatterns },
-];
-
-/**
- * Builds the `no-restricted-syntax` value, appending the lodash selectors to any
- * consumer-specific ones.
- *
- * @param {RestrictedSyntax[]} [selectors]
- * @returns {['error', ...RestrictedSyntax[]]}
- */
-const noRestrictedSyntax = (selectors = []) => ['error', ...selectors, ...restrictedSyntax];
-
-module.exports = { noRestrictedImports, noRestrictedSyntax };
+module.exports = {
+  lodashImportPatterns: restrictedImportPatterns,
+  lodashSelectors: restrictedSyntax,
+};

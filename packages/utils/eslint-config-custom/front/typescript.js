@@ -2,7 +2,7 @@
 
 /** @import { Linter } from 'eslint' */
 
-const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
+const { lodashImportPatterns, lodashSelectors } = require('lint-policy/lodash');
 
 /** @type {Linter.Config} */
 const config = {
@@ -37,13 +37,19 @@ const config = {
      */
     'import/no-named-as-default-member': 'off',
     'import/no-extraneous-dependencies': 'error',
-    'no-restricted-imports': noRestrictedImports([
+    'no-restricted-imports': [
+      'error',
       {
-        name: 'lodash',
-        message: 'Please use import [method] from lodash/[method]',
+        paths: [
+          {
+            name: 'lodash',
+            message: 'Please use import [method] from lodash/[method]',
+          },
+        ],
+        patterns: [...lodashImportPatterns],
       },
-    ]),
-    'no-restricted-syntax': noRestrictedSyntax(),
+    ],
+    'no-restricted-syntax': ['error', ...lodashSelectors],
     'no-restricted-globals': [
       'error',
       {

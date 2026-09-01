@@ -1,6 +1,6 @@
 import type { OxlintConfig } from 'oxlint';
 
-import { noRestrictedImports, noRestrictedSyntax } from 'lint-policy/lodash';
+import { lodashImportPatterns, lodashSelectors } from 'lint-policy/lodash';
 
 /**
  * Shared baseline applied to every file in the monorepo.
@@ -39,8 +39,8 @@ export const base = {
     // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js.
     // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js`
     // JS plugin declared above, which is why this key carries the plugin prefix.
-    'no-restricted-imports': noRestrictedImports(),
-    'eslint-js/no-restricted-syntax': noRestrictedSyntax(),
+    'no-restricted-imports': ['error', { patterns: [...lodashImportPatterns] }],
+    'eslint-js/no-restricted-syntax': ['error', ...lodashSelectors],
   },
   ignorePatterns: [
     '**/dist/**',

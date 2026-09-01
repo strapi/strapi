@@ -2,7 +2,7 @@
 
 /** @import { Linter } from 'eslint' */
 
-const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
+const { lodashImportPatterns, lodashSelectors } = require('lint-policy/lodash');
 
 /** @type {Linter.Config} */
 const config = {
@@ -47,8 +47,8 @@ const config = {
         props: false,
       },
     ],
-    'no-restricted-imports': noRestrictedImports(),
-    'no-restricted-syntax': noRestrictedSyntax(),
+    'no-restricted-imports': ['error', { patterns: [...lodashImportPatterns] }],
+    'no-restricted-syntax': ['error', ...lodashSelectors],
   },
 };
 
