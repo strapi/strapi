@@ -64,7 +64,7 @@ const LinkEllipsis = styled(Link)`
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
-    id: 'content-manager.containers.untitled',
+    id: 'content-manager.containers.empty-label',
     defaultMessage: 'Untitled',
   });
   const field = useField<

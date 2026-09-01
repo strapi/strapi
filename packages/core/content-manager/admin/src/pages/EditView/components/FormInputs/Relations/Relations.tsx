@@ -172,7 +172,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const { formatMessage } = useIntl();
     const emptyLabel = formatMessage({
-      id: 'content-manager.containers.untitled',
+      id: 'content-manager.containers.empty-label',
       defaultMessage: 'Untitled',
     });
 
@@ -711,7 +711,7 @@ const RelationModalWithContext = ({
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
-    id: 'content-manager.containers.untitled',
+    id: 'content-manager.containers.empty-label',
     defaultMessage: 'Untitled',
   });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
@@ -1211,7 +1211,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
 
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
-    id: 'content-manager.containers.untitled',
+    id: 'content-manager.containers.empty-label',
     defaultMessage: 'Untitled',
   });
 

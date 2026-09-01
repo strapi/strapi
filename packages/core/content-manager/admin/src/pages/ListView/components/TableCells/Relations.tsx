@@ -20,7 +20,7 @@ interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'cont
 const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
-    id: 'content-manager.containers.untitled',
+    id: 'content-manager.containers.empty-label',
     defaultMessage: 'Untitled',
   });
 
@@ -42,7 +42,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
   const { model } = useDoc();
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
-    id: 'content-manager.containers.untitled',
+    id: 'content-manager.containers.empty-label',
     defaultMessage: 'Untitled',
   });
   const { notifyStatus } = useNotifyAT();
