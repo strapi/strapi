@@ -424,16 +424,17 @@ const documentApi = contentManagerApi.injectEndpoints({
       Pick<Update.Params, 'model'> &
         Partial<Pick<Update.Params, 'documentId'>> & {
           collectionType: string;
-          data: Update.Request['body'];
+          data: Omit<Update.Request['body'], 'baseVersion'>;
+          baseVersion?: string;
           params?: Update.Request['query'];
         }
     >({
-      query: ({ collectionType, model, documentId, data, params }) => ({
+      query: ({ collectionType, model, documentId, data, baseVersion, params }) => ({
         url: `/content-manager/${collectionType}/${model}${
           documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
         }`,
         method: 'PUT',
-        data,
+        data: { ...data, baseVersion },
         config: {
           params,
         },

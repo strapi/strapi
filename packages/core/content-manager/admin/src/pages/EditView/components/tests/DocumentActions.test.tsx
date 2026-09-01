@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@tests/utils';
 
 const mockCreate = jest.fn();
 const mockPublish = jest.fn();
+const mockUpdate = jest.fn();
 const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
@@ -51,10 +52,16 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   useIsDesktop: () => true,
 }));
 jest.mock('../../../../hooks/useDocumentActions', () => ({
-  useDocumentActions: () => ({ create: mockCreate, publish: mockPublish, isLoading: false }),
+  useDocumentActions: () => ({
+    create: mockCreate,
+    publish: mockPublish,
+    update: mockUpdate,
+    isLoading: false,
+  }),
 }));
 jest.mock('../../../../hooks/useDocument', () => ({
   useDoc: () => ({
+    document: { updatedAt: '2026-01-01T00:00:00.000Z' },
     schema: { options: { draftAndPublish: true } },
     getInitialFormValues: () => parentInitialFormValues,
   }),
@@ -125,6 +132,19 @@ const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: 
   return <button onClick={() => action.onClick?.({} as React.SyntheticEvent)}>{label}</button>;
 };
 
+const ExistingDocumentActionHarness = () => {
+  const action = UpdateAction({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: { documentId: 'child', id: 1, status: 'draft' },
+  });
+
+  return action ? <DocumentActions actions={[{ ...action, id: 'update' }]} /> : null;
+};
+
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -151,11 +171,40 @@ describe('relation parent updates', () => {
     };
     mockCreate.mockResolvedValue({ data: { documentId: 'created', locale: 'en' } });
     mockPublish.mockResolvedValue({ data: { documentId: 'published', locale: 'en' } });
+    mockUpdate.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
     mockUpdateParent.mockResolvedValue({ data: {} });
     mockCountDraftRelations.mockResolvedValue({
       data: { unpublishedRelations: 0, draftM2mLinks: 0 },
       error: undefined,
     });
+  });
+
+  it('offers Reload and Overwrite when the saved version is stale', async () => {
+    mockUpdate.mockResolvedValueOnce({
+      error: {
+        status: 409,
+        name: 'ConflictError',
+        message: 'The document has changed since it was loaded',
+      },
+    });
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(
+      await screen.findByText('This document was updated by someone else')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Overwrite' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Overwrite' }));
+
+    expect(mockUpdate).toHaveBeenNthCalledWith(
+      2,
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
   });
 
   it('completes UpdateAction child creation without a parent mutation when parent data is absent', async () => {

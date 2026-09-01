@@ -54,6 +54,7 @@ import {
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
+import { useAutosave } from './Autosave';
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
 import type { DocumentActionComponent } from '../../../content-manager';
@@ -106,6 +107,7 @@ interface DialogOptions {
    */
   bodyIcon?: 'danger' | 'default';
   variant?: ButtonProps['variant'];
+  cancelLabel?: string;
   confirmLabel?: string;
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
@@ -530,6 +532,7 @@ const DocumentActionConfirmDialog = ({
   title,
   content,
   bodyIcon,
+  cancelLabel,
   confirmLabel,
   isOpen,
   variant = 'secondary',
@@ -578,10 +581,11 @@ const DocumentActionConfirmDialog = ({
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button variant="tertiary" fullWidth>
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
+              {cancelLabel ??
+                formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
             </Button>
           </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
@@ -707,6 +711,7 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
   );
   const { publish, isLoading } = useDocumentActions();
+  const { clear: clearAutosave } = useAutosave();
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
   const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
@@ -931,6 +936,7 @@ const PublishAction: DocumentActionComponent = ({
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
+        await clearAutosave();
         resetForm(getValues());
         dispatchGuidedTour({
           type: 'set_completed_actions',
@@ -1233,12 +1239,17 @@ const UpdateAction: DocumentActionComponent = ({
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
+  const { clear: clearAutosave } = useAutosave();
   const {
     currentDocument: { components },
   } = useDocumentContext('UpdateAction');
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
-  const { getInitialFormValues } = useDoc();
+  const { document, getInitialFormValues, schema } = useDoc();
+  const pendingConflict = React.useRef<{
+    data: object;
+    values: object;
+  }>();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -1294,8 +1305,6 @@ const UpdateAction: DocumentActionComponent = ({
     },
     { skip: !parentDocumentMetaToUpdate }
   );
-  const { schema } = useDoc();
-
   const suitableSchema = fromRelationModal ? relationalModalSchema : schema;
   const hasDraftAndPublished = suitableSchema?.options?.draftAndPublish ?? false;
 
@@ -1312,7 +1321,7 @@ const UpdateAction: DocumentActionComponent = ({
 
     try {
       if (!modified) {
-        return;
+        return true;
       }
 
       // Blur the active element so inputs that debounce into the form (e.g. blocks editor) flush
@@ -1341,7 +1350,7 @@ const UpdateAction: DocumentActionComponent = ({
           }),
         });
 
-        return;
+        return true;
       }
 
       const latestValues = getValues();
@@ -1382,14 +1391,23 @@ const UpdateAction: DocumentActionComponent = ({
             collectionType,
             model,
             documentId,
+            baseVersion: typeof document?.updatedAt === 'string' ? document.updatedAt : undefined,
             params: currentDocumentMeta.params,
           },
           data
         );
 
-        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-          setErrors(formatValidationErrors(res.error));
+        if ('error' in res && isBaseQueryError(res.error)) {
+          if ('status' in res.error && res.error.status === 409) {
+            pendingConflict.current = { data, values: latestValues };
+            return false;
+          }
+
+          if (res.error.name === 'ValidationError') {
+            setErrors(formatValidationErrors(res.error));
+          }
         } else {
+          await clearAutosave();
           resetForm(latestValues);
         }
       } else {
@@ -1407,6 +1425,7 @@ const UpdateAction: DocumentActionComponent = ({
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
+          await clearAutosave();
           if (fromRelationModal) {
             const createdRelation = {
               documentId: res.data.documentId,
@@ -1464,7 +1483,7 @@ const UpdateAction: DocumentActionComponent = ({
                       type: 'danger',
                       message: formatAPIError(updateRes.error),
                     });
-                    return;
+                    return true;
                   }
                 } catch (err) {
                   toggleNotification({
@@ -1511,6 +1530,32 @@ const UpdateAction: DocumentActionComponent = ({
         onPreview();
       }
     }
+
+    return true;
+  };
+
+  const overwriteConflict = async () => {
+    const pending = pendingConflict.current;
+
+    if (!pending) {
+      return;
+    }
+
+    const res = await update(
+      {
+        collectionType,
+        model,
+        documentId,
+        params: currentDocumentMeta.params,
+      },
+      pending.data
+    );
+
+    if ('data' in res) {
+      await clearAutosave();
+      resetForm(pending.values);
+      pendingConflict.current = undefined;
+    }
   };
 
   // Save a draft on CMD+Enter (macOS) / CTRL+Enter (Windows/Linux), with CMD/CTRL+S as an alias.
@@ -1551,6 +1596,28 @@ const UpdateAction: DocumentActionComponent = ({
     }),
     onClick: handleUpdate,
     position: ['panel', 'preview', 'relation-modal'],
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'content-manager.autosave.conflict.title',
+        defaultMessage: 'This document was updated by someone else',
+      }),
+      content: formatMessage({
+        id: 'content-manager.autosave.conflict.body',
+        defaultMessage:
+          'Reload to review the latest saved document, or overwrite it with your changes.',
+      }),
+      cancelLabel: formatMessage({
+        id: 'content-manager.autosave.conflict.reload',
+        defaultMessage: 'Reload',
+      }),
+      confirmLabel: formatMessage({
+        id: 'content-manager.autosave.conflict.overwrite',
+        defaultMessage: 'Overwrite',
+      }),
+      onCancel: () => globalThis.location.reload(),
+      onConfirm: overwriteConflict,
+    },
   };
 };
 
@@ -1719,6 +1786,7 @@ const DiscardAction: DocumentActionComponent = ({
   const { schema } = useDoc();
   const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
   const { discard, isLoading } = useDocumentActions();
+  const { clear: clearAutosave } = useAutosave();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -1754,12 +1822,16 @@ const DiscardAction: DocumentActionComponent = ({
       ),
       loading: isLoading,
       onConfirm: async () => {
-        await discard({
+        const res = await discard({
           collectionType,
           model,
           documentId,
           params,
         });
+
+        if ('data' in res) {
+          await clearAutosave();
+        }
       },
     },
   };

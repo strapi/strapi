@@ -492,7 +492,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function update(opts = {} as any) {
-    const { documentId, ...params } = opts;
+    const { documentId, baseVersion, ...params } = opts;
 
     const queryParams = await async.pipe(
       validateParams,
@@ -509,6 +509,33 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
+
+    if (baseVersion && Number.isNaN(Date.parse(baseVersion))) {
+      throw new errors.ValidationError('baseVersion must be a valid ISO date');
+    }
+
+    if (baseVersion) {
+      const lockedEntry = await strapi.db
+        .queryBuilder(uid)
+        .select(['id', 'updatedAt'])
+        .where({ ...queryParams?.lookup, documentId })
+        .forUpdate()
+        .first()
+        .execute<{ id: number; updatedAt: Date | string }>();
+
+      if (lockedEntry) {
+        const currentVersion = new Date(lockedEntry.updatedAt).toISOString();
+
+        if (new Date(currentVersion).getTime() !== new Date(baseVersion).getTime()) {
+          throw new errors.ConflictError('The document has changed since it was loaded', {
+            documentId,
+            locale: queryParams?.locale,
+            expected: baseVersion,
+            current: currentVersion,
+          });
+        }
+      }
+    }
 
     // Validation
     // Find if document exists

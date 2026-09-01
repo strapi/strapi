@@ -3,8 +3,10 @@ import * as React from 'react';
 import {
   Page,
   Form,
+  useAuth,
   useRBAC,
   useNotification,
+  usePersistentStateScope,
   useQueryParams,
   tours,
   Layouts,
@@ -31,10 +33,12 @@ import {
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
+import { Autosave } from './components/Autosave';
 import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
+import { getOrCreateAutosaveSessionId } from './utils/autosave';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -58,6 +62,8 @@ const EditViewPage = () => {
   const activeLocale = plugins?.i18n?.locale;
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const userId = useAuth('EditViewAutosave', (state) => state.user?.id);
+  const persistenceScope = usePersistentStateScope();
   const isDesktop = useIsDesktop();
   const isMobile = useIsMobile();
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
@@ -117,6 +123,17 @@ const EditViewPage = () => {
    * document with varying params.
    */
   const isCreatingDocument = !id && !isSingleType;
+  const autosaveDocumentId = React.useMemo(() => {
+    if (document?.documentId) {
+      return document.documentId;
+    }
+
+    if (isCreatingDocument) {
+      return `create:${getOrCreateAutosaveSessionId(model, activeLocale)}`;
+    }
+
+    return isSingleType ? `single:${model}` : '';
+  }, [activeLocale, document?.documentId, isCreatingDocument, isSingleType, model]);
 
   const {
     isLoading: isLoadingLayout,
@@ -191,86 +208,102 @@ const EditViewPage = () => {
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
-        <>
-          <Header
-            isCreating={isCreatingDocument}
-            status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-            title={pageTitle}
-          />
-          <Layouts.Content>
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root
-                paddingTop={{
-                  initial: 6,
-                  medium: 4,
-                  large: 8,
-                }}
-                gap={4}
-              >
-                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <tours.contentManager.Fields>
-                      <Box />
-                    </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
-                  </Tabs.Content>
-                </Grid.Item>
-                {isDesktop && (
-                  <Grid.Item col={3} direction="column" alignItems="stretch">
-                    <Panels />
+        <Autosave
+          enabled={
+            hasDraftAndPublished &&
+            status === 'draft' &&
+            Boolean(autosaveDocumentId) &&
+            userId !== undefined &&
+            Boolean(persistenceScope)
+          }
+          instanceId={persistenceScope || ''}
+          userId={userId ?? ''}
+          model={model}
+          documentId={autosaveDocumentId}
+          locale={typeof document?.locale === 'string' ? document.locale : activeLocale}
+          baseVersion={typeof document?.updatedAt === 'string' ? document.updatedAt : undefined}
+        >
+          <>
+            <Header
+              isCreating={isCreatingDocument}
+              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+              title={pageTitle}
+            />
+            <Layouts.Content>
+              <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+                <Tabs.List
+                  aria-label={formatMessage({
+                    id: getTranslation('containers.edit.tabs.label'),
+                    defaultMessage: 'Document status',
+                  })}
+                >
+                  {hasDraftAndPublished ? (
+                    <>
+                      <StatusTab value="draft">
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.draft'),
+                          defaultMessage: 'draft',
+                        })}
+                      </StatusTab>
+                      <StatusTab
+                        disabled={!meta || meta.availableStatus.length === 0}
+                        value="published"
+                      >
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.published'),
+                          defaultMessage: 'published',
+                        })}
+                      </StatusTab>
+                    </>
+                  ) : null}
+                </Tabs.List>
+                <Grid.Root
+                  paddingTop={{
+                    initial: 6,
+                    medium: 4,
+                    large: 8,
+                  }}
+                  gap={4}
+                >
+                  <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                    <Tabs.Content value="draft">
+                      <tours.contentManager.Fields>
+                        <Box />
+                      </tours.contentManager.Fields>
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
+                    <Tabs.Content value="published">
+                      <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                    </Tabs.Content>
                   </Grid.Item>
-                )}
-              </Grid.Root>
-            </Tabs.Root>
-            {!isDesktop && (
-              <>
-                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
-                  <ActionsDrawer.Overlay />
-                  <ActionsDrawer.Header>
-                    <ActionsPanelContent />
-                  </ActionsDrawer.Header>
-                  <ActionsDrawer.Content>
-                    <Panels withActions={false} />
-                  </ActionsDrawer.Content>
-                </ActionsDrawer.Root>
-                {/* Adding a fixed height to the bottom of the page to prevent 
+                  {isDesktop && (
+                    <Grid.Item col={3} direction="column" alignItems="stretch">
+                      <Panels />
+                    </Grid.Item>
+                  )}
+                </Grid.Root>
+              </Tabs.Root>
+              {!isDesktop && (
+                <>
+                  <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                    <ActionsDrawer.Overlay />
+                    <ActionsDrawer.Header>
+                      <ActionsPanelContent />
+                    </ActionsDrawer.Header>
+                    <ActionsDrawer.Content>
+                      <Panels withActions={false} />
+                    </ActionsDrawer.Content>
+                  </ActionsDrawer.Root>
+                  {/* Adding a fixed height to the bottom of the page to prevent
                 the actions drawer from covering the content
                 (40px button + 12px * 2 padding + 1px border) */}
-                <Box height="6.5rem" />
-              </>
-            )}
-          </Layouts.Content>
-          <Blocker />
-        </>
+                  <Box height="6.5rem" />
+                </>
+              )}
+            </Layouts.Content>
+            <Blocker />
+          </>
+        </Autosave>
       </Form>
     </Page.Main>
   );

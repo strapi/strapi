@@ -553,6 +553,83 @@ describe('useDocumentActions', () => {
       await screen.findByText('Saved document');
     });
 
+    it('sends baseVersion with the update', async () => {
+      let requestBody: Record<string, unknown> | undefined;
+
+      server.use(
+        http.put('/content-manager/:collectionType/:uid/:id', async ({ request }) => {
+          requestBody = (await request.json()) as Record<string, unknown>;
+
+          return HttpResponse.json({
+            data: {
+              documentId: '12345',
+              id: 1,
+              title: 'Updated',
+            },
+          });
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      await result.current.update(
+        {
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+          baseVersion: '2026-01-01T00:00:00.000Z',
+        },
+        { title: 'Updated' }
+      );
+
+      expect(requestBody).toMatchObject({
+        title: 'Updated',
+        baseVersion: '2026-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('returns a version conflict without showing a generic error notification', async () => {
+      server.use(
+        http.put('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
+              error: {
+                status: 409,
+                name: 'ConflictError',
+                message: 'The document has changed since it was loaded',
+                details: {},
+              },
+            },
+            { status: 409 }
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      const response = await result.current.update(
+        {
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+          baseVersion: '2026-01-01T00:00:00.000Z',
+        },
+        { title: 'Updated' }
+      );
+
+      expect(response).toEqual({
+        error: {
+          status: 409,
+          name: 'ConflictError',
+          message: 'The document has changed since it was loaded',
+          details: {},
+        },
+      });
+      expect(
+        screen.queryByText('The document has changed since it was loaded')
+      ).not.toBeInTheDocument();
+    });
+
     it('should return the errors when unsuccessful', async () => {
       server.use(
         http.put('/content-manager/:collectionType/:uid/:id', () => {

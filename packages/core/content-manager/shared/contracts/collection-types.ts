@@ -140,7 +140,7 @@ export declare namespace Clone {
  */
 export declare namespace Update {
   export interface Request {
-    body: Partial<Document>;
+    body: Partial<Document> & { baseVersion?: string };
     query: {
       locale?: string | null;
     };
@@ -154,7 +154,7 @@ export declare namespace Update {
   export interface Response {
     data: Document;
     meta: DocumentMetadata;
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.ApplicationError<'ConflictError'>;
   }
 }
 
