@@ -125,4 +125,40 @@ describe('useListScrollRestoration', () => {
       jest.useRealTimers();
     }
   });
+
+  // The case above leaves the column short for the whole test, so an expired
+  // restore that still ran would be clamped to 0 and look harmless. Here the
+  // pages arrive *after* the window closes, which is when applying the offset
+  // one last time actually moves the viewport.
+  it('does not apply an expired offset once the list finally grows', () => {
+    jest.useFakeTimers();
+
+    try {
+      const { getByTestId, rerender } = renderHarness('folder-1');
+      const root = getByTestId('scroll-root');
+
+      let maxScrollTop = 1000;
+      clampScrollTop(root, () => maxScrollTop);
+
+      scrollTo(root, 640);
+
+      maxScrollTop = 0;
+      rerender(createElement(Harness, { listKey: 'folder-2' }));
+      rerender(createElement(Harness, { listKey: 'folder-1' }));
+      expect(root.scrollTop).toBe(0);
+
+      // The window closes while the rows are still missing.
+      jest.advanceTimersByTime(5000);
+
+      // They land late, and the user has meanwhile scrolled somewhere of their
+      // own choosing. The next commit must leave that alone.
+      maxScrollTop = 1000;
+      scrollTo(root, 120);
+      rerender(createElement(Harness, { listKey: 'folder-1' }));
+
+      expect(root.scrollTop).toBe(120);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

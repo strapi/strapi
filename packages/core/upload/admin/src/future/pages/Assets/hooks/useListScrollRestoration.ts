@@ -92,11 +92,19 @@ export const useListScrollRestoration = (key: string) => {
       return;
     }
 
+    // Before the assignment, not alongside it: past the window the offset has to
+    // be dropped rather than applied one final time to a list the user has since
+    // scrolled themselves.
+    if (Date.now() > pending.deadline) {
+      pendingRef.current = null;
+      return;
+    }
+
     container.scrollTop = pending.top;
 
     // The browser clamps to the content that exists now, so a target the list
     // isn't tall enough for yet stays pending for the next commit.
-    if (container.scrollTop >= pending.top || Date.now() > pending.deadline) {
+    if (container.scrollTop >= pending.top) {
       pendingRef.current = null;
     }
   });
