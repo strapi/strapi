@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 
-import type { IAsset } from '../../../../../types';
+import type { IAsset } from '../../../../types';
 import { createRemoteStrapiDestinationProvider } from '..';
 
 import { connectToWebsocket, createDispatcher } from '../../utils';

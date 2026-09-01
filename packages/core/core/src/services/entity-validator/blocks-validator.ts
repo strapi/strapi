@@ -22,7 +22,7 @@ const checkValidLink = (link: string) => {
   try {
     // eslint-disable-next-line no-new
     new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
-  } catch (error) {
+  } catch {
     return false;
   }
   return true;
@@ -80,7 +80,7 @@ const quoteNodeValidator = yup.object().shape({
 
 const codeBlockValidator = yup.object().shape({
   type: yup.string().equals(['code']).required(),
-  syntax: yup.string().nullable(),
+  language: yup.string().nullable(),
   children: yup
     .array()
     .of(textNodeValidator)

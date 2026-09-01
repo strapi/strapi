@@ -1,5 +1,4 @@
 import path from 'path';
-import packageJson from 'package-json';
 import Configstore from 'configstore';
 import semver from 'semver';
 import boxen from 'boxen';
@@ -53,6 +52,12 @@ export const createUpdateNotifier = (strapi: Core.Strapi) => {
     }
 
     try {
+      // `package-json` is ESM-only. The CJS build can't statically import it while engines
+      // allow Node <20.19 (`require()` of ESM throws ERR_REQUIRE_ESM there), so load it via
+      // dynamic import. Once the Node floor is >=22, this can revert to a static
+      // `import packageJson from 'package-json'` — rollup's `interop: 'auto'` resolves the
+      // default export shape correctly.
+      const { default: packageJson } = await import('package-json');
       const res = await packageJson(pkg.name);
       if (res.version) {
         config.set('latest', res.version);

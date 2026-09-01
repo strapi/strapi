@@ -30,11 +30,44 @@ import { getTranslation } from './utils/getTranslation';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type {
+  ContentManagerPlugin,
+  DocumentActionComponent,
+  HeaderActionComponent,
+} from '@strapi/content-manager/strapi-admin';
+
+type ContentTypeBuilderFormsAPI = {
+  addContentTypeSchemaMutation: (mutation: typeof mutateCTBContentTypeSchema) => void;
+  components: {
+    add: (component: { id: string; component: typeof CheckboxConfirmation }) => void;
+  };
+  extendContentType: (extension: {
+    validator: () => Record<string, unknown>;
+    form: {
+      advanced: () => Array<Record<string, unknown>>;
+    };
+  }) => void;
+  extendFields: (
+    fields: typeof LOCALIZED_FIELDS,
+    extension: {
+      form: {
+        advanced: (args: ContentTypeBuilderAdvancedFieldArgs) => Array<Record<string, unknown>>;
+      };
+    }
+  ) => void;
+};
+
+type ContentTypeBuilderAdvancedFieldArgs = {
+  contentTypeSchema?: Record<string, unknown>;
+  forTarget: string;
+  step?: string;
+  type?: string;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.addMiddlewares([extendCTBAttributeInitialDataMiddleware, extendCTBInitialDataMiddleware]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
@@ -46,7 +79,7 @@ export default {
       name: pluginId,
     });
   },
-  bootstrap(app: any) {
+  bootstrap(app: StrapiApp) {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
@@ -70,19 +103,20 @@ export default {
     });
 
     const contentManager = app.getPlugin('content-manager');
+    const contentManagerApis = contentManager.apis as ContentManagerPlugin['config']['apis'];
 
-    contentManager.apis.addDocumentHeaderAction([
+    contentManagerApis.addDocumentHeaderAction([
       AITranslationStatusAction,
       LocalePickerAction,
       FillFromAnotherLocaleAction,
-    ]);
-    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+    ] as HeaderActionComponent[]);
+    contentManagerApis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
       return actions;
     });
 
-    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+    contentManagerApis.addDocumentAction((actions: DocumentActionComponent[]) => {
       // When enabled the bulk locale publish action should be the first action
       // in 'More Document Actions' and therefore the third action in the array
       actions.splice(2, 0, BulkLocalePublishAction);
@@ -113,7 +147,7 @@ export default {
     const ctbPlugin = app.getPlugin('content-type-builder');
 
     if (ctbPlugin) {
-      const ctbFormsAPI = ctbPlugin.apis.forms;
+      const ctbFormsAPI = ctbPlugin.apis.forms as ContentTypeBuilderFormsAPI;
       ctbFormsAPI.addContentTypeSchemaMutation(mutateCTBContentTypeSchema);
       ctbFormsAPI.components.add({ id: 'checkboxConfirmation', component: CheckboxConfirmation });
 
@@ -145,7 +179,12 @@ export default {
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
         form: {
-          advanced({ contentTypeSchema, forTarget, type, step }: any) {
+          advanced({
+            contentTypeSchema,
+            forTarget,
+            type,
+            step,
+          }: ContentTypeBuilderAdvancedFieldArgs) {
             if (forTarget !== 'contentType') {
               return [];
             }

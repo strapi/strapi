@@ -27,7 +27,7 @@ const alreadyUsedAttributeNames = (
 };
 
 const getUsedContentTypeAttributeNames = (
-  ctShema: any,
+  ctShema: { attributes?: Record<string, unknown> },
   isEdition: boolean,
   attributeNameToEdit: string
 ) => {
@@ -126,8 +126,9 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         message: getTrad('error.validation.regex'),
         test(value) {
           try {
-            return new RegExp(value || '') !== null;
-          } catch (e) {
+            new RegExp(value || '');
+            return true;
+          } catch {
             return false;
           }
         },
@@ -154,8 +155,9 @@ const createStringShape = (usedAttributeNames: Array<string>, reservedNames: Arr
         message: getTrad('error.validation.regex'),
         test(value) {
           try {
-            return new RegExp(value || '') !== null;
-          } catch (e) {
+            new RegExp(value || '');
+            return true;
+          } catch {
             return false;
           }
         },
@@ -181,7 +183,7 @@ const isMinSuperiorThanMax = <
       return true;
     }
 
-    const { max } = (this as any).parent;
+    const { max } = this.parent as { max?: T };
 
     if (!max) {
       return true;

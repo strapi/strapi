@@ -1,5 +1,6 @@
 import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
+import { parse, stringify } from 'qs';
 import { useLocation } from 'react-router-dom';
 
 import { usePersistentPartialQueryParams } from '../usePersistentQueryParams';
@@ -10,6 +11,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: jest.fn(),
   usePersistentStateScope: jest.fn(),
 }));
@@ -21,6 +23,25 @@ describe('usePersistentPartialQueryParams', () => {
   const keysToPersist = ['page', 'pageSize', 'sort'];
   const pathname = '/content-manager/collection-types/api::article.article';
   const key = `${keyPrefix}${pathname}`;
+
+  const filtersFor = (value: string) => ({ $and: [{ name: { $eq: value } }] });
+
+  const renderWithQuery = (query: Record<string, unknown>) => {
+    (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
+    window.localStorage.setItem(key, JSON.stringify({ page: 2 }));
+
+    return renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
+  };
+
+  const lastFiltersPassedToSetQuery = () => {
+    const [lastCall] = mockSetQuery.mock.calls.slice(-1);
+
+    return (lastCall?.[0] as { filters?: unknown } | undefined)?.filters;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -142,6 +163,34 @@ describe('usePersistentPartialQueryParams', () => {
     expect(saved).toBeNull();
   });
 
+  it('should remove persisted params from localStorage when persisted keys are cleared', async () => {
+    window.localStorage.setItem(key, JSON.stringify({ page: 1, pageSize: 10, sort: 'name:asc' }));
+
+    type Props = { query: Record<string, unknown> };
+
+    const { rerender } = renderHook(
+      ({ query }: Props) => {
+        (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
+        return usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        });
+      },
+      { initialProps: { query: { page: 1, pageSize: 10, sort: 'name:asc' } } as Props }
+    );
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(key)).toBe(
+        JSON.stringify({ page: 1, pageSize: 10, sort: 'name:asc' })
+      );
+    });
+
+    rerender({ query: {} } as Props);
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(key)).toBeNull();
+    });
+  });
+
   it('should handle invalid JSON in localStorage gracefully', () => {
     window.localStorage.setItem(key, 'invalid-json');
 
@@ -261,5 +310,137 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     expect(mockSetQuery).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a literal percent sign', '100%', '100%25'],
+    ['a percent sign mid-string', '50%off', '50%25off'],
+    ['an ampersand, which would otherwise truncate the value', 'a&b', 'a%26b'],
+    ['a plus sign, which would otherwise return as a space', 'a+b', 'a%2Bb'],
+    ['a hash, which would otherwise make navigate throw', 'a#b', 'a%23b'],
+    ['text that merely looks pre-encoded', 'a%26b', 'a%2526b'],
+    ['a non-ascii character', 'café', 'caf%C3%A9'],
+  ])('should re-encode %s', async (_label, decoded, encoded) => {
+    renderWithQuery({ filters: filtersFor(decoded) });
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: filtersFor(encoded) },
+        'push',
+        true
+      );
+    });
+  });
+
+  it.each(['100%', 'a&b', 'a+b', 'a#b', 'a%26b', 'café', 'a=b', 'plain'])(
+    'should restore %s through the full URL round-trip',
+    async (value) => {
+      renderWithQuery({ filters: filtersFor(value) });
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalled();
+      });
+
+      // Exactly what setQuery -> the URL -> useQueryParams would produce.
+      const url = stringify({ filters: lastFiltersPassedToSetQuery() }, { encode: false });
+      const reparsed = parse(url) as { filters: { $and: [{ name: { $eq: string } }] } };
+
+      expect(reparsed.filters.$and[0].name.$eq).toBe(value);
+    }
+  );
+
+  it('should not double-encode when the value is hydrated twice', async () => {
+    renderWithQuery({ filters: filtersFor('100%') });
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalled();
+    });
+
+    const url = stringify({ filters: lastFiltersPassedToSetQuery() }, { encode: false });
+    const reparsed = parse(url) as { filters: unknown };
+
+    jest.clearAllMocks();
+    window.localStorage.clear();
+    renderWithQuery({ filters: reparsed.filters as Record<string, unknown> });
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: filtersFor('100%25') },
+        'push',
+        true
+      );
+    });
+  });
+
+  it('should leave non-string filter leaves untouched', async () => {
+    renderWithQuery({ filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] } });
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        { page: 2, filters: { $and: [{ id: { $eq: 5 } }, { active: { $eq: true } }] } },
+        'push',
+        true
+      );
+    });
+  });
+
+  it('should persist the decoded value to localStorage, not the encoded one', async () => {
+    (useQueryParams as jest.Mock).mockReturnValue([
+      { query: { page: 1, filters: filtersFor('100%') } },
+      mockSetQuery,
+    ]);
+
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: [...keysToPersist, 'filters'] },
+      })
+    );
+
+    await waitFor(() => {
+      const saved = JSON.parse(window.localStorage.getItem(key) ?? '{}');
+      expect(saved.filters).toEqual(filtersFor('100%'));
+    });
+  });
+
+  describe('isHydrated', () => {
+    it('flips to true after the hydration effect runs when localStorage is populated', async () => {
+      window.localStorage.setItem(key, JSON.stringify({ page: 2, pageSize: 20, sort: 'name:asc' }));
+
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
+
+    it('flips to true even when localStorage is empty', async () => {
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
+
+    it('flips to true even when localStorage holds invalid JSON', async () => {
+      window.localStorage.setItem(key, 'invalid-json');
+
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
   });
 });

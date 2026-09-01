@@ -375,12 +375,66 @@ describe('Content API - Permissions', () => {
       );
     });
 
+    const querySchemaError = (param: string, got: string) =>
+      `contentAPI.addQueryParams: param "${param}" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ${got}. Use addInputParams for nested objects.`;
+
     it('addQueryParams throws when schema is a nested object (only scalars/arrays of scalars allowed)', () => {
       expect(() =>
         contentAPI.addQueryParams({
           filter: { schema: z.object({ name: z.string() }) },
         })
-      ).toThrow(/contentAPI\.addQueryParams: param "filter" schema must be a scalar/);
+      ).toThrow(querySchemaError('filter', 'ZodObject'));
+    });
+
+    it.each([
+      { label: 'plain object', schema: {}, got: 'Object' },
+      { label: 'null', schema: null, got: 'object' },
+      { label: 'number', schema: 42, got: 'number' },
+    ])('addQueryParams throws when schema is not a Zod type ($label)', ({ schema, got }) => {
+      expect(() =>
+        contentAPI.addQueryParams({
+          filter: { schema },
+        } as Parameters<typeof contentAPI.addQueryParams>[0])
+      ).toThrow(querySchemaError('filter', got));
+    });
+
+    it('addQueryParams throws when schema is an optional nested object', () => {
+      expect(() =>
+        contentAPI.addQueryParams({
+          filter: { schema: z.object({ name: z.string() }).optional() },
+        })
+      ).toThrow(querySchemaError('filter', 'ZodObject'));
+    });
+
+    it('addQueryParams throws when schema is an array of objects', () => {
+      expect(() =>
+        contentAPI.addQueryParams({
+          filter: { schema: z.array(z.object({ name: z.string() })) },
+        })
+      ).toThrow(querySchemaError('filter', 'ZodObject'));
+    });
+
+    it('addQueryParams throws when schema type name needs underscore formatting', () => {
+      expect(() =>
+        contentAPI.addQueryParams({
+          filter: { schema: z.templateLiteral(['id-', z.string()]) },
+        })
+      ).toThrow(querySchemaError('filter', 'ZodTemplateLiteral'));
+    });
+
+    it.each([
+      { label: 'string', schema: z.string(), value: 'foo' },
+      { label: 'number', schema: z.number(), value: 1 },
+      { label: 'boolean', schema: z.boolean(), value: true },
+      { label: 'enum', schema: z.enum(['draft', 'published']), value: 'draft' },
+      { label: 'optional string', schema: z.string().optional(), value: undefined },
+      { label: 'default string', schema: z.string().default('x'), value: undefined },
+    ])('addQueryParams accepts $label and merges into route', ({ schema, value }) => {
+      contentAPI.addQueryParams({ extra: { schema } });
+      const route = contentAPIRoute({ request: { query: {} } });
+      expect(() => contentAPI.applyExtraParamsToRoutes([route])).not.toThrow();
+      const extraSchema = route.request?.query?.extra as z.ZodType;
+      expect(extraSchema.safeParse(value).success).toBe(true);
     });
 
     it('addQueryParams accepts array of scalars and merges into route', () => {

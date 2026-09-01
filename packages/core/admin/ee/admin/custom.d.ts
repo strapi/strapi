@@ -26,8 +26,9 @@ declare global {
       flags: {
         promoteEE?: boolean;
         nps?: boolean;
+        docLinks?: boolean;
       };
-      projectType: 'Community' | 'Enterprise';
+      projectType: 'Community' | 'Growth' | 'Enterprise';
       telemetryDisabled: boolean;
       ai: {
         enabled: boolean;

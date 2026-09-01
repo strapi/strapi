@@ -44,6 +44,8 @@ describe('Settings', () => {
           sizeOptimization: true,
           responsiveDimensions: true,
           aiMetadata: true,
+          // Read-only echo of the app config, defaulting to 1 (sequential).
+          concurrentUploadRequests: 1,
         },
       });
     });
@@ -75,8 +77,34 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
+          // Read-only echo of the app config, appended to every GET response.
+          concurrentUploadRequests: 1,
         },
       });
+    });
+
+    test('strips the read-only concurrentUploadRequests echo from a PUT instead of persisting it', async () => {
+      // The legacy Settings page seeds its form from GET (which now echoes
+      // concurrentUploadRequests) and PUTs the whole payload back. That echo
+      // must never be written to the store.
+      const updateRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: {
+          sizeOptimization: true,
+          responsiveDimensions: true,
+          concurrentUploadRequests: 4,
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data).not.toHaveProperty('concurrentUploadRequests');
+
+      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
+
+      // GET still echoes the config value (1), not the 4 that was PUT — proving
+      // it was stripped, not persisted.
+      expect(getRes.body.data.concurrentUploadRequests).toBe(1);
     });
   });
 });

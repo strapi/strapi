@@ -41,6 +41,24 @@ const getStrapiTestBaseUrl = () => {
   return `http://127.0.0.1:${port}`;
 };
 
+export const resyncSuperAdminPermissionsAfterImport = async () => {
+  try {
+    const resyncRes = await fetch(
+      new URL('/api/config/permissions/resync-super-admin', getStrapiTestBaseUrl()),
+      { method: 'POST' }
+    );
+    if (!resyncRes.ok) {
+      console.error(
+        `Super Admin permission resync failed: HTTP ${resyncRes.status} ${await resyncRes.text()}`
+      );
+      process.exit(1);
+    }
+  } catch (err) {
+    console.error('Super Admin permission resync failed.' + JSON.stringify(err, null, 2));
+    process.exit(1);
+  }
+};
+
 /**
  * Reset the DB and import data from a DTS backup
  * This function ensures we keep all admin user's and roles in the DB

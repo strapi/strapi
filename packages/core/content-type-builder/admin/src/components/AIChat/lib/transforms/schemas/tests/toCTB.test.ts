@@ -1,7 +1,8 @@
 import { transformChatToCTB } from '../toCTB';
 
-import type { ContentType } from '../../../../../../types';
+import type { ContentType, Component } from '../../../../../../types';
 import type { Schema } from '../../../types/schema';
+import type { UID } from '@strapi/types';
 
 const makeSchema = (overrides: Partial<Schema> = {}): Schema => ({
   action: 'create',
@@ -43,6 +44,89 @@ describe('transformChatToCTB', () => {
       const result = transformChatToCTB(schema) as ContentType;
 
       expect(result).toMatchObject({ options: { draftAndPublish: true } });
+    });
+  });
+
+  describe('plugin content-types', () => {
+    it('preserves identity fields when updating an existing plugin content-type', () => {
+      const oldSchema: ContentType = {
+        uid: 'plugin::my-plugin.my-thing' as UID.ContentType,
+        modelType: 'contentType',
+        kind: 'collectionType',
+        plugin: 'my-plugin',
+        modelName: 'my-thing',
+        collectionName: 'my_plugin_my_things',
+        globalId: 'MyPluginMyThing',
+        visible: true,
+        status: 'UNCHANGED',
+        restrictRelationsTo: null,
+        info: {
+          displayName: 'My thing',
+          singularName: 'my-thing',
+          pluralName: 'my-things',
+        },
+        options: { draftAndPublish: false },
+        pluginOptions: { i18n: { localized: true } },
+        attributes: [],
+      };
+
+      const schema = makeSchema({
+        uid: 'plugin::my-plugin.my-thing',
+        name: 'Wrong Name From Ai',
+        action: 'update',
+        attributes: { title: { type: 'string' } },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.plugin).toBe('my-plugin');
+      expect(result.globalId).toBe('MyPluginMyThing');
+      expect(result.modelName).toBe('my-thing');
+      expect(result.collectionName).toBe('my_plugin_my_things');
+      expect(result.info.singularName).toBe('my-thing');
+      expect(result.info.pluralName).toBe('my-things');
+      expect(result.options).toMatchObject({ draftAndPublish: false });
+      expect(result.pluginOptions?.i18n).toMatchObject({ localized: true });
+    });
+  });
+
+  describe('kind fallback', () => {
+    it('keeps a valid content-type kind', () => {
+      const result = transformChatToCTB(makeSchema({ kind: 'singleType' })) as ContentType;
+
+      expect(result.kind).toBe('singleType');
+    });
+
+    it('falls back to collectionType when the kind is not a content-type kind', () => {
+      // AI can emit `kind: 'component'` (or omit it) on a contentType payload; the guard coerces
+      // any non-content-type kind to 'collectionType' rather than passing it through.
+      const componentKind = transformChatToCTB(makeSchema({ kind: 'component' })) as ContentType;
+      expect(componentKind.kind).toBe('collectionType');
+
+      const missingKind = transformChatToCTB(makeSchema({ kind: undefined })) as ContentType;
+      expect(missingKind.kind).toBe('collectionType');
+    });
+  });
+
+  describe('singularName / pluralName preservation', () => {
+    it('does not carry identity from an old *component* schema into a content-type', () => {
+      // previousContentType is only set when oldSchema.modelType === 'contentType', so a component
+      // oldSchema must NOT leak its names — the content-type falls back to names computed from the
+      // schema name ("Product" -> product / products).
+      const oldComponent = {
+        modelType: 'component',
+        uid: 'default.thing',
+        info: { singularName: 'leaked-singular', pluralName: 'leaked-plural' },
+        attributes: [],
+      } as unknown as Component;
+
+      const result = transformChatToCTB(
+        makeSchema({ name: 'Product', action: 'update' }),
+        oldComponent
+      ) as ContentType;
+
+      expect(result.info.singularName).toBe('product');
+      expect(result.info.pluralName).toBe('products');
     });
   });
 });

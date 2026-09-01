@@ -15,8 +15,11 @@ type VersionedEnvMap = {
 const installArgumentsMap: {
   [key: string]: VersionedArgumentsMap;
 } = {
+  // Do not pass --legacy-peer-deps: a lockfile written under that mode fails
+  // strict `npm ci` unless the same flag is set (see #27019). Fresh Strapi apps
+  // install cleanly with npm's default peer-dep resolution.
   npm: {
-    '*': ['--legacy-peer-deps'],
+    '*': [],
   },
   yarn: {
     '<4': ['--network-timeout', '1000000'],

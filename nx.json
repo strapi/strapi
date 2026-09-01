@@ -11,9 +11,8 @@
       "!{projectRoot}/**/*.md",
       "!{projectRoot}/jest.config.js",
       "!{projectRoot}/jest.config.front.js",
-      "!{projectRoot}/tsconfig.eslint.json",
-      "!{projectRoot}/.eslintignore",
-      "!{projectRoot}/.eslintrc.js"
+      "!{projectRoot}/**/tsconfig.eslint.json",
+      "!{projectRoot}/**/.eslintrc.cjs"
     ]
   },
   "cli": {
@@ -49,9 +48,8 @@
       "inputs": [
         "{projectRoot}/**/*.js",
         "{projectRoot}/**/*.ts",
-        "{projectRoot}/.eslintrc.js",
-        "{projectRoot}/.eslintignore",
-        "{projectRoot}/tsconfig.eslint.json",
+        "{projectRoot}/**/.eslintrc.cjs",
+        "{projectRoot}/**/tsconfig.eslint.json",
         "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
       ],
       "cache": true

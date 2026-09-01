@@ -3,7 +3,7 @@ import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
 import type { Core, Struct } from '@strapi/types';
-import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import { createAssetsDestinationWritable } from './assets-destination-writable';
@@ -133,11 +133,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
-    this.#reportInfo('deleting all assets');
     // if we're not restoring files, don't touch the files
     if (!this.#areAssetsIncluded()) {
       return;
     }
+
+    this.#reportInfo('deleting all assets');
 
     const stream: Readable = this.strapi.db
       // Create a query builder instance (default type is 'select')
@@ -280,7 +281,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         // Create a .gitkeep file to ensure the directory is not empty
         await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
         this.#reportInfo(`created assets backup directory ${backupDirectory}`);
-      } catch (err) {
+      } catch {
         throw new ProviderTransferError(
           'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory',
           {

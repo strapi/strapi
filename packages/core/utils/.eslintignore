@@ -1,6 +1,0 @@
-node_modules/
-.eslintrc.js
-jest.config.js
-dist/
-coverage/
-rollup.config.mjs

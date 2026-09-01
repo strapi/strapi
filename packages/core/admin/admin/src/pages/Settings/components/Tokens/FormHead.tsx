@@ -50,7 +50,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       if (onRegenerate) {
         onRegenerate(res.data.accessKey);
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -166,7 +166,7 @@ export const FormHead = <TToken extends Token | null>({
               />
             )}
             <Flex width="100%" gap={2}>
-              {token?.id && toggleToken && (
+              {token?.id && toggleToken && canShowToken === true && (
                 <tours.apiTokens.ViewAPIToken>
                   <Tooltip
                     label={

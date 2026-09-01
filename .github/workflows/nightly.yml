@@ -18,7 +18,7 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: yarn
       - run: ./scripts/pre-publish.sh --yes
         env:

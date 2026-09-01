@@ -2,7 +2,10 @@ import type { Page } from '@playwright/test';
 
 import { login as loginFunc } from './login';
 import { resetFiles as resetFilesFunc } from './file-reset';
-import { resetDatabaseAndImportDataFromPath } from './dts-import';
+import {
+  resetDatabaseAndImportDataFromPath,
+  resyncSuperAdminPermissionsAfterImport,
+} from './dts-import';
 import { navToHeader } from './shared';
 
 export type SharedSetupOptions = {
@@ -10,6 +13,8 @@ export type SharedSetupOptions = {
   resetFiles?: boolean; // Whether to reset files before tests
   /** DTS packet name under `tests/e2e/data` (e.g. `with-admin`). When set, runs `resetDatabaseAndImportDataFromPath` — the e2e DB reset/seed (see docs/guides/e2e/02-data-transfer.md). Runs after `resetFiles` when `firstRun || resetAlways`. */
   importData?: string;
+  /** When true, rebuilds CM config + Super Admin permissions after DTS import for tests that need the current permission registry. */
+  resyncSuperAdminPermissions?: boolean;
   afterSetup?: ({ page }: { page: Page }) => Promise<void>; // An async function for custom setup logic that runs after the main setup
   resetAlways?: boolean; // Whether to reset the setup always, even if the setup has already been run
 };
@@ -44,7 +49,14 @@ const setupRegistry: Record<string, boolean> = {};
 export const sharedSetup = async (
   id: string,
   page: Page,
-  { login, resetFiles, importData, afterSetup, resetAlways }: SharedSetupOptions
+  {
+    login,
+    resetFiles,
+    importData,
+    resyncSuperAdminPermissions,
+    afterSetup,
+    resetAlways,
+  }: SharedSetupOptions
 ) => {
   let firstRun = !setupRegistry[id];
   const extraRun = !firstRun && resetAlways;
@@ -58,6 +70,9 @@ export const sharedSetup = async (
     }
     if (importData) {
       await resetDatabaseAndImportDataFromPath(importData);
+      if (resyncSuperAdminPermissions) {
+        await resyncSuperAdminPermissionsAfterImport();
+      }
     }
 
     if (extraRun) {

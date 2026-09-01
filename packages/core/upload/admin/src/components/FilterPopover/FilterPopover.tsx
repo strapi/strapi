@@ -99,9 +99,9 @@ export const FilterPopover = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const encodedValue = encodeURIComponent(modifiedData.value);
+    const { value } = modifiedData;
 
-    if (encodedValue) {
+    if (value) {
       if (modifiedData.name === 'mime') {
         const alreadyAppliedFilters = filters.filter((filter) => {
           return Object.keys(filter)[0] === 'mime';
@@ -240,12 +240,12 @@ export const FilterPopover = ({
             filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt'] &&
             filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt']?.[
               modifiedDataName as '$contains' | '$notContains' | '$eq' | '$not'
-            ] === encodedValue
+            ] === value
           );
         }) !== undefined;
 
       if (!hasFilter) {
-        const filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: encodedValue } };
+        const filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: value } };
 
         const nextFilters = [...filters, filterToAdd];
 

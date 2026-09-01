@@ -15,7 +15,7 @@ const checkPermissionsSchema = yup.object().shape({
   ),
 });
 
-const checkPermissionsExist = function (permissions: any) {
+const checkPermissionsExist = function checkPermissionsExist(permissions: any) {
   const existingActions = getService('permission').actionProvider.values();
   const failIndex = permissions.findIndex(
     (permission: any) =>

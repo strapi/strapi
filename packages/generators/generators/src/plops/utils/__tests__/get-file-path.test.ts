@@ -6,6 +6,11 @@ describe('Get-File-Path util', () => {
     expect(filePath).toBe(`api/{{ api }}`);
   });
 
+  test('with destination set as new', () => {
+    const filePath = getFilePath('new');
+    expect(filePath).toBe(`api/{{ id }}`);
+  });
+
   test('with destination set as plugin', () => {
     const filePath = getFilePath('plugin');
     expect(filePath).toBe(`plugins/{{ plugin }}/server/src`);

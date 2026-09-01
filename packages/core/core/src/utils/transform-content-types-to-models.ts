@@ -321,7 +321,11 @@ export const transformContentTypesToModels = (
       lifecycles: contentType?.lifecycles ?? {},
     };
 
-    // Add indexes to model
+    // Document lookups: secondary btree index declared here so syncSchema owns it
+    // (instead of DDL in internal migration `5.0.0-06-add-document-id-indexes`, now a no-op).
+    // Keep the exact same name/columns schema sync already produced so existing databases
+    // see no index diff on upgrade (a rename would orphan the old index, since the schema
+    // builder's dropIndex is a silent no-op unless forceMigration is enabled).
     if (contentType.modelType === 'contentType') {
       model.indexes = [
         ...(model.indexes || []),

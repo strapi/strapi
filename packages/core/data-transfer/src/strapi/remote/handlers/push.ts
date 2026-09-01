@@ -3,7 +3,7 @@ import { Writable, PassThrough } from 'stream';
 import type { Core } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
-import type { TransferStage, IAsset, Protocol } from '../../../../types';
+import type { TransferStage, IAsset, Protocol } from '../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
 import { write } from '../../../utils/writable-async-write';
@@ -563,7 +563,14 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       strapi.log.warn(message);
     };
 
-    return { transferID: this.transferID, checksums: true };
+    return {
+      transferID: this.transferID,
+      checksums: true,
+      // Echo the client's requested asset wire format so it knows we can decode it. Older remotes
+      // (pre-#23479) do `Buffer.from(item.data.data)` directly and will not echo this back — the
+      // client treats the missing field as "base64 unsupported" and falls back to legacy shape.
+      ...(params?.assetEncoding === 'base64' ? { assetEncoding: 'base64' as const } : {}),
+    };
   },
 
   async status(this: PushHandler) {

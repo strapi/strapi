@@ -18,7 +18,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
-  const { folderPath, _q, ...paramsExceptFolderAndQ } = query;
+  const { folder, folderPath: _folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
   let params: Query;
 
@@ -34,7 +34,11 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
         $and: [
           ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
           {
-            folderPath: { $eq: folderPath ?? '/' },
+            folder: {
+              id: folder ?? {
+                $null: true,
+              },
+            },
           },
         ],
       },
@@ -47,7 +51,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   >(
     [pluginId, 'assets', params],
     async () => {
-      const { data } = await get('/upload/files', { params });
+      const { data } = await get<GetFiles.Response['data']>('/upload/files', { params });
 
       return data;
     },

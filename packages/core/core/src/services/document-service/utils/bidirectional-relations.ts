@@ -83,6 +83,15 @@ const captureJoinBatches = async (
     relatedHasDraftAndPublish: boolean;
     /** Model that owns this attribute; draft capture is skipped for components. */
     schemaUid: UID.ContentType;
+    /**
+     * True when the attribute being captured is the owning side of the relation and the entity
+     * being published owns it (e.g. publishing an Article for `Article.categories`). In that case
+     * the owning-side order is rebuilt from the draft by `entries.publish`, so capturing the old
+     * published rows would only let `sync()` overwrite the freshly published order with a stale
+     * one — silently reverting a reorder made in the draft. The inverse-side order still needs the
+     * old-published capture to be restored, so this only suppresses the owning-side capture.
+     */
+    isOwningSide: boolean;
     oldVersions: LoadContext['oldVersions'];
     newVersions: LoadContext['newVersions'];
   }
@@ -94,6 +103,7 @@ const captureJoinBatches = async (
     relatedUid,
     relatedHasDraftAndPublish,
     schemaUid,
+    isOwningSide,
     oldVersions,
     newVersions,
   } = opts;
@@ -101,7 +111,11 @@ const captureJoinBatches = async (
   const batches: RelationEntry[] = [];
   const { name: table } = joinTable;
 
-  const oldIds = oldVersions.map((e) => e.id);
+  // Skip the old-published capture for the owning side: those rows are recreated in draft order
+  // by `entries.publish`, so restoring their order from the old published version is at best a
+  // no-op and at worst reverts a draft reorder. The draftsOnly capture below is still needed
+  // (e.g. when a related entry is published after this one) and is not affected by this guard.
+  const oldIds = isOwningSide ? [] : oldVersions.map((e) => e.id);
   if (oldIds.length > 0) {
     const existing = await strapi.db
       .getConnection()
@@ -254,6 +268,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
             ? !!strapi.contentTypes[relatedUid]?.options?.draftAndPublish
             : !!model.options?.draftAndPublish,
           schemaUid: model.uid as UID.ContentType,
+          isOwningSide,
           oldVersions,
           newVersions,
         });

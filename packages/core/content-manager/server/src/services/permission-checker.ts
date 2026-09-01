@@ -1,8 +1,9 @@
+import type { Ability } from '@casl/ability';
 import { async } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 import type { Core, UID, Modules } from '@strapi/types';
 
-const ACTIONS = {
+export const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
   create: 'plugin::content-manager.explorer.create',
   update: 'plugin::content-manager.explorer.update',
@@ -21,7 +22,7 @@ type Query = {
 
 const createPermissionChecker =
   (strapi: Core.Strapi) =>
-  ({ userAbility, model }: { userAbility: any; model: string }) => {
+  ({ userAbility, model }: { userAbility: Ability; model: string }) => {
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       model,
@@ -33,9 +34,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const can = (action: string, entity?: Entity, field: string) => {
+    const can = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -47,9 +46,7 @@ const createPermissionChecker =
       );
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const cannot = (action: string, entity?: Entity, field: string) => {
+    const cannot = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 

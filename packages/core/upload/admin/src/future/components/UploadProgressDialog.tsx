@@ -6,30 +6,61 @@ import {
   Check,
   CheckCircle,
   ChevronDown,
+  Clock,
   Cross,
   CrossCircle,
+  Information,
   MinusCircle,
+  Sparkle,
   Upload,
+  WarningCircle,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled, keyframes } from 'styled-components';
+import { keyframes, styled } from 'styled-components';
 
-import { abortUpload, useRetryCancelledFilesStreamMutation } from '../services/api';
+import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
-import { closeUploadProgress, toggleMinimize, cancelUpload } from '../store/uploadProgress';
+import {
+  closeUploadProgress,
+  toggleMinimize,
+  cancelUpload,
+  selectAggregateProgress,
+  selectReportsByteProgress,
+  selectCountBasedProgress,
+  selectMetadataProgress,
+  selectIsGeneratingMetadata,
+  selectMetadataOutcome,
+} from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
+import { TruncatedText } from './TruncatedText';
 
-import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
+import type { FileMetadataStatus, FileProgress, FileProgressStatus } from '../store/uploadProgress';
+import type { MessageDescriptor } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
  * DialogHeader
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
+const HeaderStatusMessage = ({
+  title,
+  subtitle,
+  metadataSubtitle,
+}: {
+  title: string;
+  subtitle?: string;
+  metadataSubtitle?: string;
+}) => {
   return (
-    <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingLeft={2}
+      paddingRight={2}
+      paddingTop={1}
+      paddingBottom={1}
+    >
       <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
       </Drawer.Title>
@@ -38,11 +69,17 @@ const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: st
           {subtitle}
         </Typography>
       </Drawer.Description>
+      {metadataSubtitle && (
+        <Typography variant="pi" textColor="neutral600">
+          {metadataSubtitle}
+        </Typography>
+      )}
     </Flex>
   );
 };
 
 const HeaderStatusIcon = styled(Flex)`
+  align-self: stretch;
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => `${theme.borderRadius} 0 0 ${theme.borderRadius}`};
 
@@ -58,10 +95,23 @@ const HeaderStatusWrapper = styled(Flex)`
 
 type HeaderStatusProps = {
   status: 'uploading' | 'success' | 'error' | 'canceled';
-  progress?: number;
+  /** Byte-weighted progress, or `null` for a batch that reports no bytes (the URL flow). */
+  progress: number | null;
   totalFiles: number;
   successfulCount: number;
   errorCount: number;
+  /**
+   * Count-based metadata progress, or `null` when no row entered the metadata phase.
+   * Shown as an extra subtitle while generation is still in flight.
+   */
+  metadataProgress: number | null;
+  /** Whether any row is still generating — drives whether the subtitle shows at all. */
+  isGeneratingMetadata: boolean;
+  /**
+   * Terminal per-outcome counts, or `null` while the phase is unfinished or was never
+   * entered. Replaces the in-flight subtitle once generation settles.
+   */
+  metadataOutcome: { generated: number; skipped: number; failed: number } | null;
 };
 
 const HeaderStatus = ({
@@ -70,8 +120,63 @@ const HeaderStatus = ({
   totalFiles,
   successfulCount,
   errorCount,
+  metadataProgress,
+  isGeneratingMetadata,
+  metadataOutcome,
 }: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
+
+  // Completion is upload-driven, so the terminal header can appear while metadata is
+  // still generating — the subtitle keeps ticking underneath until it settles.
+  //
+  // Gated on work actually being in flight rather than on `progress < 100`: in a
+  // sequential batch the percentage touches 100% between files, which would blink the
+  // subtitle out and back in on every upload.
+  //
+  // Once the phase settles the line is not dropped but replaced with the outcome, so the
+  // header keeps confirming what happened instead of silently losing the message.
+  const metadataSubtitle = (() => {
+    if (metadataProgress !== null && isGeneratingMetadata) {
+      return formatMessage(
+        {
+          id: getTranslationKey('upload.progress.generatingMetadata.withCount'),
+          defaultMessage: 'Generating metadata with AI ({percentage}%)',
+        },
+        { percentage: metadataProgress }
+      );
+    }
+
+    if (metadataOutcome === null) {
+      return undefined;
+    }
+
+    // Only `generated` rows had metadata written, so only they can be reported as a
+    // success. With none, there is nothing to confirm — an all-skipped batch of
+    // non-images would otherwise read as "generated on 0 files". Per-row sublines
+    // already spell out skipped and failed outcomes.
+    if (metadataOutcome.generated === 0) {
+      return undefined;
+    }
+
+    if (metadataOutcome.failed > 0) {
+      return formatMessage(
+        {
+          id: getTranslationKey('upload.progress.metadataGenerated.withFailures'),
+          defaultMessage: '{generatedCount} generated, {failedCount} failed',
+        },
+        { generatedCount: metadataOutcome.generated, failedCount: metadataOutcome.failed }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: getTranslationKey('upload.progress.metadataGenerated.withCount'),
+        defaultMessage:
+          '{count, plural, one {Metadata successfully generated on # file} other {Metadata successfully generated on # files}}',
+      },
+      { count: metadataOutcome.generated }
+    );
+  })();
 
   if (status === 'error') {
     return (
@@ -122,6 +227,7 @@ const HeaderStatus = ({
             defaultMessage: 'Upload successful!',
           })}
           subtitle={subtitle}
+          metadataSubtitle={metadataSubtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -142,31 +248,41 @@ const HeaderStatus = ({
             id: getTranslationKey('upload.progress.canceled.subtitle'),
             defaultMessage: 'Some files were not uploaded',
           })}
+          metadataSubtitle={metadataSubtitle}
         />
       </HeaderStatusWrapper>
     );
   }
 
   if (status === 'uploading') {
-    const progressPercentage = progress ? Math.round(progress) : 0;
+    // Two separate strings so a locale can position (or omit) the percentage itself.
+    const title =
+      progress === null
+        ? formatMessage(
+            {
+              id: getTranslationKey('upload.progress.uploading.indeterminate'),
+              defaultMessage: 'Uploading {total, plural, one {# item} other {# items}}',
+            },
+            { total: totalFiles }
+          )
+        : formatMessage(
+            {
+              id: getTranslationKey('upload.progress.uploading.withCount'),
+              defaultMessage:
+                'Uploading {total, plural, one {# item} other {# items}} ({percentage}%)',
+            },
+            {
+              total: totalFiles,
+              percentage: Math.round(progress),
+            }
+          );
 
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="primary200">
           <Upload fill="primary700" />
         </HeaderStatusIcon>
-        <HeaderStatusMessage
-          title={formatMessage(
-            {
-              id: getTranslationKey('upload.progress.uploading.withCount'),
-              defaultMessage: 'Uploading {total} items ({percentage}%)',
-            },
-            {
-              total: totalFiles,
-              percentage: progressPercentage,
-            }
-          )}
-        />
+        <HeaderStatusMessage title={title} metadataSubtitle={metadataSubtitle} />
       </HeaderStatusWrapper>
     );
   }
@@ -196,20 +312,33 @@ const HEADER_COLOR_MAP = {
 const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const { formatMessage } = useIntl();
 
-  const { isMinimized, progress, files, uploadId, totalFiles } = useTypedSelector(
+  const { isMinimized, files, uploadId, totalFiles } = useTypedSelector(
     (state) => state.uploadProgress
   );
+  const aggregateProgress = useTypedSelector(selectAggregateProgress);
+  const reportsByteProgress = useTypedSelector(selectReportsByteProgress);
+  const countBasedProgress = useTypedSelector(selectCountBasedProgress);
+  // Byte-weighted when the flow streams bytes (direct-file), else count-based (settled/total).
+  // Both return `null` for an indeterminate header when there's nothing to show yet.
+  const progress = reportsByteProgress ? aggregateProgress : countBasedProgress;
+  const metadataProgress = useTypedSelector(selectMetadataProgress);
+  const isGeneratingMetadata = useTypedSelector(selectIsGeneratingMetadata);
+  const metadataOutcome = useTypedSelector(selectMetadataOutcome);
   const dispatch = useTypedDispatch();
-  const [retryCancelledFiles] = useRetryCancelledFilesStreamMutation();
+  const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
-  const isComplete = progress === 100;
-  const isAllUploaded = isComplete && files.every((f) => f.status !== 'uploading');
-  const isAllErrored = isComplete && files.length > 0 && files.every((f) => f.status === 'error');
+  // The batch is complete once every file has reached a terminal state. Byte-weighted
+  // progress can't be used here because errored/cancelled rows never reach 100%.
+  const isComplete =
+    files.length > 0 &&
+    files.every((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled');
+  const isAllUploaded = isComplete;
+  const isAllErrored = isComplete && files.every((f) => f.status === 'error');
   const hasCancelledFiles = files.some((f) => f.status === 'cancelled');
   const successfulCount = files.filter((f) => f.status === 'complete').length;
   const errorCount = files.filter((f) => f.status === 'error').length;
   // Success includes partial success (some files succeeded, even if some failed)
-  const isSuccess = isComplete && isAllUploaded && successfulCount > 0 && !hasCancelledFiles;
+  const isSuccess = isComplete && successfulCount > 0 && !hasCancelledFiles;
   const status = ((): HeaderStatusProps['status'] => {
     if (isAllErrored) return 'error';
     if (isSuccess) return 'success';
@@ -248,13 +377,16 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
         totalFiles={totalFiles}
         successfulCount={successfulCount}
         errorCount={errorCount}
+        metadataProgress={metadataProgress}
+        isGeneratingMetadata={isGeneratingMetadata}
+        metadataOutcome={metadataOutcome}
       />
       <Flex gap={1}>
         {!isAllUploaded && (
           <TextButton onClick={handleCancel} fontWeight="bold">
             {formatMessage({
               id: getTranslationKey('upload.progress.cancel'),
-              defaultMessage: 'Cancel',
+              defaultMessage: 'Cancel all',
             })}
           </TextButton>
         )}
@@ -298,33 +430,100 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
  * UploadProgressDialog
  * -----------------------------------------------------------------------------------------------*/
 
-const indeterminate = keyframes`
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
-`;
-
-const IndeterminateBar = styled.div`
+const ProgressTrack = styled.div`
   width: 100%;
   height: ${({ theme }) => theme.spaces[1]};
   background-color: ${({ theme }) => theme.colors.neutral200};
   border-radius: 4px;
   overflow: hidden;
-  position: relative;
+`;
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 25%;
-    background-color: ${({ theme }) => theme.colors.primary700};
-    border-radius: 4px;
-    animation: ${indeterminate} 1.5s ease-in-out infinite;
+const ProgressIndicator = styled.div<{ $percent: number }>`
+  height: 100%;
+  width: ${({ $percent }) => $percent}%;
+  background-color: ${({ theme }) => theme.colors.primary700};
+  border-radius: 4px;
+  transition: width 0.15s linear;
+`;
+
+const DeterminateBar = ({ percent }: { percent: number }) => {
+  const clamped = Math.min(100, Math.max(0, Math.round(percent)));
+  return (
+    <ProgressTrack role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamped}>
+      <ProgressIndicator $percent={clamped} />
+    </ProgressTrack>
+  );
+};
+
+const INDETERMINATE_INDICATOR_WIDTH = 40;
+
+/**
+ * `translateX` percentages resolve against the *indicator's* own width, not the track's.
+ * So -100% is exactly "fully off the left edge" regardless of the width above, and the
+ * end offset converts a full track width into those same own-width units. Both ends sit
+ * flush off-track, which keeps entry and exit symmetric — a smaller start offset would
+ * make the bar pop in already partly visible.
+ */
+const indeterminateSlide = keyframes`
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(${(100 / INDETERMINATE_INDICATOR_WIDTH) * 100}%);
+  }
+`;
+
+const IndeterminateIndicator = styled.div`
+  height: 100%;
+  width: ${INDETERMINATE_INDICATOR_WIDTH}%;
+  background-color: ${({ theme }) => theme.colors.primary700};
+  border-radius: 4px;
+  /* Linear, not an eased curve: the DS easings decelerate to a stop, which on a loop
+     reads as a stall at the wrap point. Constant speed is what makes it read as a sweep. */
+  animation: ${indeterminateSlide} 1.2s linear infinite;
+
+  /* A perpetually moving bar is a vestibular trigger; fall back to a static track fill. */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+`;
+
+/**
+ * Progress bar for work whose completion fraction is genuinely unknowable, rather
+ * than merely unknown-yet: the AI metadata endpoint answers in one go, and the URL
+ * flow can't report bytes until the server has fetched the file and knows its size.
+ *
+ * Deliberately omits `aria-valuenow` — that absence is precisely how ARIA conveys
+ * an indeterminate progressbar, so assistive tech announces "busy" instead of "0%".
+ */
+const IndeterminateBar = () => {
+  return (
+    <ProgressTrack role="progressbar" aria-valuemin={0} aria-valuemax={100}>
+      <IndeterminateIndicator />
+    </ProgressTrack>
+  );
+};
+
+/**
+ * Without a floor of zero the row is as wide as its longest filename, which
+ * pushes past the panel and gives the dialog a second, horizontal scrollbar
+ * instead of truncating.
+ *
+ * The floor belongs to the name alone: the icon carries its size in SVG
+ * attributes, which flex is free to override, so letting it shrink squashes it
+ * against a long name instead of truncating the name.
+ */
+const FileRowName = styled(Flex)`
+  min-width: 0;
+
+  > :first-child {
+    flex-shrink: 0;
+  }
+
+  > :last-child {
+    min-width: 0;
   }
 `;
 
@@ -339,15 +538,66 @@ const FileRow = ({
 }) => {
   return (
     <Flex direction="column" alignItems="stretch" justifyContent="center" gap={1} width="100%">
-      <Flex gap={2}>
+      <FileRowName gap={2}>
         {icon}
-        <Typography variant="omega" fontWeight="semiBold" ellipsis>
+        <TruncatedText variant="omega" fontWeight="semiBold">
           {fileName}
-        </Typography>
-      </Flex>
+        </TruncatedText>
+      </FileRowName>
       {children}
     </Flex>
   );
+};
+
+/**
+ * Icon + subline for a successfully uploaded row, keyed by its metadata phase.
+ * `'none'` covers rows that never entered the phase — AI metadata disabled — and
+ * renders exactly as before this feature existed. Non-images do enter the phase and
+ * land on `skipped`.
+ *
+ * `skipped` uses a neutral `Information` icon, deliberately distinct from
+ * generated/failed/cancelled — skipping is an expected outcome for a non-image, not a
+ * problem to flag.
+ */
+const COMPLETED_ROW_PRESENTATION: Record<
+  FileMetadataStatus | 'none',
+  { icon: React.ReactNode; message: MessageDescriptor }
+> = {
+  none: {
+    icon: <CheckCircle fill="success500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.uploaded'),
+      defaultMessage: 'Uploaded',
+    },
+  },
+  generating: {
+    icon: <Sparkle fill="primary600" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.generatingMetadata'),
+      defaultMessage: 'Uploaded • Generating metadata…',
+    },
+  },
+  generated: {
+    icon: <CheckCircle fill="success500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataGenerated'),
+      defaultMessage: 'Uploaded • Metadata generated',
+    },
+  },
+  skipped: {
+    icon: <Information fill="neutral500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataSkipped'),
+      defaultMessage: 'Upload complete • Metadata generation skipped',
+    },
+  },
+  failed: {
+    icon: <WarningCircle fill="warning500" />,
+    message: {
+      id: getTranslationKey('upload.progress.file.metadataFailed'),
+      defaultMessage: 'Upload complete • Metadata generation failed',
+    },
+  },
 };
 
 const FileRowRenderer = ({ file }: { file: FileProgress }) => {
@@ -356,8 +606,35 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCurrentFile = file.status === 'uploading';
   const isCompleted = file.status === 'complete';
   const isCancelled = file.status === 'cancelled';
+  const isQueued = file.status === 'pending';
+
+  if (isQueued) {
+    // No bar: there is nothing to report yet, and an indeterminate bar would read
+    // as "in progress" on a file the pool has not picked up.
+    return (
+      <FileRow icon={<Clock fill="neutral600" />} fileName={file.name}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTranslationKey('upload.progress.file.queued'),
+            defaultMessage: 'Queued',
+          })}
+        </Typography>
+      </FileRow>
+    );
+  }
 
   if (isCurrentFile) {
+    // Determinate only once bytes are actually being reported — a known `size` is not
+    // enough. The two upload flows differ here:
+    //  - the direct-file flow streams real byte counts from XHR, so `uploadedBytes`
+    //    climbs and a determinate bar is meaningful;
+    //  - the URL flow learns the size from the `file:uploading` SSE event but receives
+    //    no incremental counts at all (the next event is `file:complete`), so
+    //    `uploadedBytes` stays 0 for the whole transfer.
+    // Keying off `size` alone froze URL rows at a determinate 0% for the entire upload;
+    // keying off reported bytes keeps them animating until there is a fraction to show.
+    const hasReportedProgress = file.size > 0 && file.uploadedBytes > 0;
+
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
@@ -366,7 +643,11 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        <IndeterminateBar />
+        {hasReportedProgress ? (
+          <DeterminateBar percent={(file.uploadedBytes / file.size) * 100} />
+        ) : (
+          <IndeterminateBar />
+        )}
       </FileRow>
     );
   }
@@ -375,7 +656,20 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
     return (
       <FileRow icon={<CrossCircle fill="danger500" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
-          {file.error}
+          {file.error
+            ? /**
+               * The server may return a machine-readable code (e.g. `FileTooBig` from the
+               * body middleware) or an already human-readable sentence (e.g. the upload
+               * plugin's size-limit message). Translate the former, fall back to the latter.
+               */
+              formatMessage({
+                id: getTranslationKey(`apiError.${file.error}`),
+                defaultMessage: file.error,
+              })
+            : formatMessage({
+                id: getTranslationKey('upload.generic-error'),
+                defaultMessage: 'An error occurred while uploading the file.',
+              })}
         </Typography>
       </FileRow>
     );
@@ -395,14 +689,17 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   }
 
   if (isCompleted) {
+    // The upload succeeded; the metadata phase (if any) drives both the icon and the
+    // subline from here on — a metadata failure shows a warning, not an upload error.
+    const { icon, message } = COMPLETED_ROW_PRESENTATION[file.metadataStatus ?? 'none'];
+
     return (
-      <FileRow icon={<CheckCircle fill="success500" />} fileName={file.name}>
+      <FileRow icon={icon} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: getTranslationKey('upload.progress.file.uploaded'),
-            defaultMessage: 'Uploaded',
-          })}
+          {formatMessage(message)}
         </Typography>
+        {/* Generation has no intermediate progress to report, so the bar stays indeterminate. */}
+        {file.metadataStatus === 'generating' && <IndeterminateBar />}
       </FileRow>
     );
   }
@@ -420,7 +717,13 @@ export const UploadProgressDialog = () => {
   const dispatch = useTypedDispatch();
   const { isVisible, isMinimized, files } = useTypedSelector((state) => state.uploadProgress);
 
-  const currentFile = files.find((f) => f.status === 'uploading');
+  // With concurrent uploads several files are `uploading` at once — render every
+  // in-flight row, not just the first (a `find` here dated to the strictly
+  // sequential era and hid all but the lowest-index worker's row).
+  const uploadingFiles = files.filter((f) => f.status === 'uploading');
+  // Everything the pool has not reached yet. Listed in queue order, which is the
+  // order `files` is already in, so a row's position tells the user where it sits.
+  const queuedFiles = files.filter((f) => f.status === 'pending');
   const completedFiles = files
     .filter((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled')
     .sort((a, b) => {
@@ -453,7 +756,13 @@ export const UploadProgressDialog = () => {
             paddingLeft={4}
             paddingRight={4}
           >
-            {currentFile && <FileRowRenderer file={currentFile} />}
+            {uploadingFiles.map((file) => (
+              <FileRowRenderer key={file.index} file={file} />
+            ))}
+
+            {queuedFiles.map((file) => (
+              <FileRowRenderer key={file.index} file={file} />
+            ))}
 
             {completedFiles.length > 0 && (
               <CompletedFilesList>

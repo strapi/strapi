@@ -20,7 +20,10 @@ export default [
     method: 'POST',
     path: '/register-admin',
     handler: 'authentication.registerAdmin',
-    config: { auth: false },
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
   },
   {
     method: 'GET',
