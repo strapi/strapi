@@ -82,6 +82,8 @@ export async function rollback(uid: Internal.UID.ContentType) {
  * Creates a delete function to clear an api folder
  */
 const createDeleteApiFunction = (baseName: string) => {
+  const contentTypeFolder = path.join('content-types', baseName);
+
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
@@ -89,8 +91,13 @@ const createDeleteApiFunction = (baseName: string) => {
   return async (filePath: string) => {
     const fileName = path.basename(filePath, path.extname(filePath));
 
-    const isSchemaFile = filePath.endsWith(`${baseName}/schema.json`);
-    if (fileName === baseName || isSchemaFile) {
+    // The `content-types/<baseName>` folder belongs entirely to this content type, so every
+    // file it holds must go, including unrelated ones the user may have added. Leaving any
+    // behind keeps the folder alive without its schema.json, which prevents Strapi from
+    // booting. See https://github.com/strapi/strapi/issues/17360
+    const isInContentTypeFolder = path.dirname(filePath).endsWith(contentTypeFolder);
+
+    if (fileName === baseName || isInContentTypeFolder) {
       return fse.remove(filePath);
     }
   };
