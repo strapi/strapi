@@ -7,7 +7,7 @@ import {
   waitFor,
 } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
@@ -50,6 +50,76 @@ const render = (
   );
 
 describe('Relations', () => {
+  const renderRelationNavigation = (relation: {
+    documentId: string;
+    locale: string | null;
+    name: string;
+  }) => {
+    server.use(
+      http.get<{ model: string; id: string; fieldName: string }>(
+        '/content-manager/relations/:model/:id/:fieldName',
+        () =>
+          HttpResponse.json({
+            results: [
+              {
+                id: 1,
+                ...relation,
+                status: 'published',
+              },
+            ],
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+          })
+      )
+    );
+
+    const LocationProbe = () => {
+      const location = useLocation();
+
+      return <output data-testid="location">{`${location.pathname}${location.search}`}</output>;
+    };
+
+    return renderRTL(
+      <RelationsInput
+        attribute={{
+          type: 'relation',
+          relation: 'manyToMany',
+          target: 'api::category.category',
+          inversedBy: 'relation_locales',
+          // @ts-expect-error – this is what the API returns
+          targetModel: 'api::category.category',
+          relationType: 'manyToMany',
+        }}
+        label="relations"
+        mainField={{ name: 'name', type: 'string' }}
+        model="api::address.address"
+        name="relations"
+        type="relation"
+        isRelatedToCurrentDocument
+        onChange={jest.fn()}
+      />,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug/:id"
+                element={
+                  <>
+                    <LocationProbe />
+                    {children}
+                  </>
+                }
+              />
+            </Routes>
+          ),
+        },
+        initialEntries: [
+          '/content-manager/collection-types/api::address.address/12345?plugins[i18n][locale]=en',
+        ],
+      }
+    );
+  };
+
   /**
    * TODO: for some reason, we're not getting any data from MSW.
    */
@@ -200,6 +270,36 @@ describe('Relations', () => {
         id: '99',
       });
     });
+  });
+
+  it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
+    const { user } = renderRelationNavigation({
+      documentId: 'non-localized-intermediate',
+      locale: null,
+      name: 'Non-localized intermediate',
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Non-localized intermediate' }));
+    await user.click(screen.getByRole('button', { name: 'Go to entry' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/content-manager/collection-types/api::category.category/non-localized-intermediate?plugins[i18n][locale]=en'
+    );
+  });
+
+  it('uses the related record locale when opening a localized nested relation in full page', async () => {
+    const { user } = renderRelationNavigation({
+      documentId: 'localized-intermediate',
+      locale: 'fr',
+      name: 'Localized intermediate',
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Localized intermediate' }));
+    await user.click(screen.getByRole('button', { name: 'Go to entry' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/content-manager/collection-types/api::category.category/localized-intermediate?plugins[i18n][locale]=fr'
+    );
   });
 
   describe.skip('Accessibility', () => {

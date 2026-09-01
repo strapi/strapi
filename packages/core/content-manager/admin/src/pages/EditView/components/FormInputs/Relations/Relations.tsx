@@ -1248,7 +1248,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
   }, [dragPreviewRef]);
 
   const safeDocumentId = documentId ?? apiData?.documentId;
-  const safeLocale = locale ?? apiData?.locale ?? null;
+  const relationLocale = locale ?? apiData?.locale;
   const documentMeta = React.useMemo(
     () =>
       ({
@@ -1256,10 +1256,10 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
         model: targetModel,
         collectionType: getCollectionType(href)!,
         params: {
-          locale: safeLocale,
+          locale: relationLocale ?? documentParams?.locale ?? null,
         },
       }) as DocumentMeta,
-    [safeDocumentId, href, safeLocale, targetModel]
+    [safeDocumentId, href, relationLocale, documentParams, targetModel]
   );
 
   return (
