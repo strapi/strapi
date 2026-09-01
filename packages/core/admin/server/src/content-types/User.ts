@@ -64,6 +64,24 @@ export default {
       private: true,
       searchable: false,
     },
+    mfaSecret: {
+      type: 'string',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
+    mfaEnabledAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
+    mfaLastUsedStep: {
+      type: 'biginteger',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     registrationToken: {
       type: 'string',
       configurable: false,
@@ -113,6 +131,9 @@ export default {
         hidden: true,
       },
       registrationToken: {
+        hidden: true,
+      },
+      mfaSecret: {
         hidden: true,
       },
     },
