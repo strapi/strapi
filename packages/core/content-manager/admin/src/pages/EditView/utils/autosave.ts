@@ -3,7 +3,14 @@ import type { Middleware } from '@reduxjs/toolkit';
 const DATABASE_NAME = 'strapi-content-manager';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'autosaves';
-const AUTOSAVE_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Backups are unsaved work, so they never expire on a timer — someone returning from a long
+ * holiday must still find their draft. The store is bounded by volume instead: when it outgrows
+ * these budgets, the least recently backed up documents are evicted first.
+ */
+const AUTOSAVE_MAX_RECORDS = 200;
+const AUTOSAVE_MAX_BYTES = 10 * 1024 * 1024;
 
 const registeredOwners = new Set<string>();
 
@@ -96,17 +103,83 @@ const runCursorTransaction = async (
   }
 };
 
-export const purgeExpiredAutosaves = (now = Date.now()) =>
-  runCursorTransaction(({ savedAt }) => {
-    const savedAtTime = Date.parse(savedAt);
+interface AutosaveFootprint {
+  key: string;
+  savedAt: string;
+  bytes: number;
+}
 
-    return Number.isNaN(savedAtTime) || now - savedAtTime >= AUTOSAVE_RETENTION_MS;
-  });
+const listAutosaveFootprints = async (): Promise<AutosaveFootprint[]> => {
+  const database = await openDatabase();
 
-export const purgeAutosavesForOwner = (owner: AutosaveOwner) => {
-  const prefix = createOwnerPrefix(owner);
+  try {
+    return await new Promise<AutosaveFootprint[]>((resolve, reject) => {
+      const footprints: AutosaveFootprint[] = [];
+      const transaction = database.transaction(STORE_NAME, 'readonly');
+      const request = transaction.objectStore(STORE_NAME).openCursor();
 
-  return runCursorTransaction(({ key }) => key.startsWith(prefix));
+      request.onsuccess = () => {
+        const cursor = request.result;
+
+        if (!cursor) {
+          resolve(footprints);
+          return;
+        }
+
+        const record = cursor.value as AutosaveRecord;
+
+        footprints.push({
+          key: record.key,
+          savedAt: record.savedAt,
+          bytes: JSON.stringify(record).length,
+        });
+
+        cursor.continue();
+      };
+      request.onerror = () => reject(request.error);
+      transaction.onerror = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
+};
+
+export const evictAutosavesOverQuota = async ({
+  protectedKey,
+  maxRecords = AUTOSAVE_MAX_RECORDS,
+  maxBytes = AUTOSAVE_MAX_BYTES,
+}: { protectedKey?: string; maxRecords?: number; maxBytes?: number } = {}) => {
+  const footprints = await listAutosaveFootprints();
+
+  let records = footprints.length;
+  let bytes = footprints.reduce((total, footprint) => total + footprint.bytes, 0);
+
+  if (records <= maxRecords && bytes <= maxBytes) {
+    return;
+  }
+
+  const evictable = footprints
+    .filter((footprint) => footprint.key !== protectedKey)
+    .sort((a, b) => a.savedAt.localeCompare(b.savedAt));
+  const evicted = new Set<string>();
+
+  for (const footprint of evictable) {
+    // A single oversized backup must not drag the whole store down with it: the most recent
+    // remaining backup is always kept, whatever the byte budget says.
+    if (records <= 1 || (records <= maxRecords && bytes <= maxBytes)) {
+      break;
+    }
+
+    evicted.add(footprint.key);
+    records -= 1;
+    bytes -= footprint.bytes;
+  }
+
+  if (evicted.size === 0) {
+    return;
+  }
+
+  await runCursorTransaction(({ key }) => evicted.has(key));
 };
 
 export const registerAutosaveOwner = (owner: AutosaveOwner) => {

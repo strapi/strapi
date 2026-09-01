@@ -5,8 +5,8 @@ import { render, screen, waitFor } from '@tests/utils';
 
 import {
   deleteAutosave,
+  evictAutosavesOverQuota,
   getAutosave,
-  purgeExpiredAutosaves,
   setAutosave,
 } from '../../utils/autosave';
 import { Autosave, useAutosave } from '../Autosave';
@@ -14,15 +14,15 @@ import { Autosave, useAutosave } from '../Autosave';
 jest.mock('../../utils/autosave', () => ({
   ...jest.requireActual('../../utils/autosave'),
   deleteAutosave: jest.fn(),
+  evictAutosavesOverQuota: jest.fn(),
   getAutosave: jest.fn(),
-  purgeExpiredAutosaves: jest.fn(),
   registerAutosaveOwner: jest.fn(),
   setAutosave: jest.fn(),
 }));
 
 const mockedGetAutosave = jest.mocked(getAutosave);
 const mockedDeleteAutosave = jest.mocked(deleteAutosave);
-const mockedPurgeExpiredAutosaves = jest.mocked(purgeExpiredAutosaves);
+const mockedEvictAutosavesOverQuota = jest.mocked(evictAutosavesOverQuota);
 const mockedSetAutosave = jest.mocked(setAutosave);
 
 const CurrentTitle = () => {
@@ -61,7 +61,7 @@ describe('Autosave', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedDeleteAutosave.mockResolvedValue(undefined);
-    mockedPurgeExpiredAutosaves.mockResolvedValue(undefined);
+    mockedEvictAutosavesOverQuota.mockResolvedValue(undefined);
     mockedSetAutosave.mockResolvedValue('autosave-key');
   });
 
@@ -208,6 +208,39 @@ describe('Autosave', () => {
         data: { title: 'Edited title' },
       })
     );
+    await waitFor(() =>
+      expect(mockedEvictAutosavesOverQuota).toHaveBeenCalledWith({
+        protectedKey: 'autosave:instance-1:1:api::article.article:doc-1:en',
+      })
+    );
+  });
+
+  it('keeps the backup when trimming the store fails', async () => {
+    mockedGetAutosave.mockResolvedValue(undefined);
+    mockedEvictAutosavesOverQuota.mockRejectedValue(new Error('quota failure'));
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <ChangeTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'Edit title' }));
+
+    await screen.findByText(/Local backup saved/, {
+      timeout: 1500,
+    });
+    expect(screen.queryByText("Couldn't save a local backup")).not.toBeInTheDocument();
   });
 
   it('waits for an in-flight backup before deleting it', async () => {

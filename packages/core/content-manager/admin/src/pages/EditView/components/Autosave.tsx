@@ -7,8 +7,8 @@ import { useIntl } from 'react-intl';
 import {
   createAutosaveKey,
   deleteAutosave,
+  evictAutosavesOverQuota,
   getAutosave,
-  purgeExpiredAutosaves,
   registerAutosaveOwner,
   setAutosave,
   type AutosaveRecord,
@@ -78,8 +78,7 @@ const Autosave = ({
     setStatus('idle');
     registerAutosaveOwner({ instanceId, userId });
 
-    purgeExpiredAutosaves()
-      .then(() => getAutosave(key))
+    getAutosave(key)
       .then((record) => {
         if (!active) {
           return;
@@ -129,6 +128,10 @@ const Autosave = ({
               setSavedAt(nextSavedAt);
               setStatus('saved');
             }
+
+            // Trimming is a storage concern, not part of this backup: a failure here must not
+            // report the backup as lost, and the document being edited is never evicted.
+            return evictAutosavesOverQuota({ protectedKey: key }).catch(() => undefined);
           })
           .catch(() => {
             if (generation === writeGeneration.current) {

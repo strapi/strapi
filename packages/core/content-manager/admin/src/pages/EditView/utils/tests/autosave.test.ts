@@ -6,8 +6,7 @@ import {
   getOrCreateAutosaveSessionId,
   isAutosaveEnabled,
   createAutosaveLogoutMiddleware,
-  purgeAutosavesForOwner,
-  purgeExpiredAutosaves,
+  evictAutosavesOverQuota,
   registerAutosaveOwner,
   setAutosave,
   type AutosaveRecord,
@@ -161,26 +160,48 @@ describe('autosave storage', () => {
     expect(otherLocale).not.toBe(first);
   });
 
-  it('purges expired and malformed autosaves while retaining recent records', async () => {
-    const now = new Date('2026-09-01T12:00:00.000Z').getTime();
-    records.set('expired', {
-      key: 'expired',
-      data: {},
-      savedAt: '2026-08-25T11:59:59.999Z',
-    });
-    records.set('recent', {
-      key: 'recent',
-      data: {},
-      savedAt: '2026-08-25T12:00:00.001Z',
-    });
-    records.set('malformed', { key: 'malformed', data: {}, savedAt: 'invalid' });
+  it('keeps every backup while the store stays within its budgets', async () => {
+    records.set('old', { key: 'old', data: {}, savedAt: '2020-01-01T00:00:00.000Z' });
+    records.set('older', { key: 'older', data: {}, savedAt: '2010-01-01T00:00:00.000Z' });
 
-    await purgeExpiredAutosaves(now);
+    await evictAutosavesOverQuota();
 
-    expect([...records.keys()]).toEqual(['recent']);
+    expect([...records.keys()]).toEqual(['old', 'older']);
   });
 
-  it('purges only the selected user on explicit cleanup and logout', async () => {
+  it('evicts the least recently backed up documents once over budget', async () => {
+    records.set('oldest', { key: 'oldest', data: {}, savedAt: '2026-01-01T00:00:00.000Z' });
+    records.set('middle', { key: 'middle', data: {}, savedAt: '2026-02-01T00:00:00.000Z' });
+    records.set('newest', { key: 'newest', data: {}, savedAt: '2026-03-01T00:00:00.000Z' });
+
+    await evictAutosavesOverQuota({ maxRecords: 2 });
+
+    expect([...records.keys()]).toEqual(['middle', 'newest']);
+  });
+
+  it('never evicts the document being edited, even when it is the oldest', async () => {
+    records.set('active', { key: 'active', data: {}, savedAt: '2026-01-01T00:00:00.000Z' });
+    records.set('other', { key: 'other', data: {}, savedAt: '2026-02-01T00:00:00.000Z' });
+
+    await evictAutosavesOverQuota({ protectedKey: 'active', maxRecords: 1 });
+
+    expect([...records.keys()]).toEqual(['active']);
+  });
+
+  it('evicts by size when a few large backups exceed the byte budget', async () => {
+    records.set('small', { key: 'small', data: {}, savedAt: '2026-01-01T00:00:00.000Z' });
+    records.set('large', {
+      key: 'large',
+      data: { body: 'x'.repeat(500) },
+      savedAt: '2026-02-01T00:00:00.000Z',
+    });
+
+    await evictAutosavesOverQuota({ maxBytes: 400 });
+
+    expect([...records.keys()]).toEqual(['large']);
+  });
+
+  it('purges only the signed-out user on logout', async () => {
     const owner = { instanceId: 'instance', userId: 1 };
     records.set('owner', {
       key: createAutosaveKey({
@@ -202,18 +223,6 @@ describe('autosave storage', () => {
       savedAt: new Date().toISOString(),
     });
 
-    await purgeAutosavesForOwner(owner);
-    expect([...records.keys()]).toEqual(['other-user']);
-
-    records.set('owner-again', {
-      key: createAutosaveKey({
-        ...owner,
-        model: 'api::article.article',
-        documentId: 'three',
-      }),
-      data: {},
-      savedAt: new Date().toISOString(),
-    });
     registerAutosaveOwner(owner);
     const next = jest.fn();
     const dispatch = createAutosaveLogoutMiddleware()({
