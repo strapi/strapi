@@ -34,9 +34,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const can = (action: string, entity?: Entity, field: string) => {
+    const can = (action: string, entity?: Entity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -48,9 +46,7 @@ const createPermissionChecker =
       );
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const cannot = (action: string, entity?: Entity, field: string) => {
+    const cannot = (action: string, entity?: Entity, field?: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
