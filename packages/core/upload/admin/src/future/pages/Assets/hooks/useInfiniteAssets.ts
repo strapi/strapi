@@ -4,6 +4,10 @@ import { useDispatch, useStore } from 'react-redux';
 
 import { uploadApi } from '../../../services/api';
 import { useGetAssetsQuery } from '../../../services/assets';
+import { useTypedSelector } from '../../../store/hooks';
+import { selectCompletedUploads } from '../../../store/uploadProgress';
+import { getRelationId } from '../../../utils/getRelationId';
+import { mergeUploadedAssets } from '../utils/mergeUploadedAssets';
 
 import type { File, Pagination } from '../../../../../../shared/contracts/files';
 
@@ -140,14 +144,15 @@ const useInfiniteAssets = ({
     setPageState({ queryKey, page: 1 });
   }
 
-  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery(
-    {
-      ...queryArgs,
-      page,
-      pageSize: PAGE_SIZE,
-    },
-    { skip: !enabled }
-  );
+  const { currentData, isLoading, isFetching, error, startedTimeStamp, fulfilledTimeStamp } =
+    useGetAssetsQuery(
+      {
+        ...queryArgs,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+      { skip: !enabled }
+    );
 
   const isSameQuery = accumulated.queryKey === queryKey;
 
@@ -257,7 +262,7 @@ const useInfiniteAssets = ({
   // of the outgoing folder's assets under the incoming folder's header.
   const isChangingList = accumulated.listKey !== listKey;
 
-  const assets = useMemo(
+  const loadedAssets = useMemo(
     () => (isChangingList ? [] : flattenPages(accumulated.pages)),
     [isChangingList, accumulated.pages]
   );
@@ -265,6 +270,55 @@ const useInfiniteAssets = ({
   // Deliberately the live value, not the stale-tolerant one below: paging must
   // never be driven by a total that belongs to the previous query.
   const hasNextPage = currentData ? page < currentData.pagination.pageCount : false;
+
+  const completedUploads = useTypedSelector(selectCompletedUploads);
+
+  // Only an unfiltered, unsearched list can place an upload locally: deciding
+  // whether an asset satisfies a filter means reimplementing the server's
+  // filter semantics client-side. Filtered views still refresh on the
+  // end-of-batch invalidation, as they did before.
+  const canPlaceUploads = !search && (filters?.length ?? 0) === 0;
+
+  // When the loaded data came back from a request that started after a given
+  // upload — i.e. the server had already stored it when asked. Past that point
+  // the list is the authority on whether the asset is there at all, so bridging
+  // must stop: otherwise a later delete or move, which refetches without it,
+  // would have it re-inserted.
+  const listAnsweredAfter =
+    fulfilledTimeStamp !== undefined &&
+    startedTimeStamp !== undefined &&
+    // A refetch in flight leaves `fulfilledTimeStamp` on the previous response,
+    // which predates this request — so only settled data counts.
+    fulfilledTimeStamp > startedTimeStamp
+      ? startedTimeStamp
+      : undefined;
+
+  const assets = useMemo(() => {
+    if (!canPlaceUploads || completedUploads.length === 0) {
+      return loadedAssets;
+    }
+
+    const bridging = completedUploads.filter(
+      ({ asset, completedAt }) =>
+        getRelationId(asset.folder) === folder &&
+        (listAnsweredAfter === undefined || completedAt > listAnsweredAfter)
+    );
+
+    return mergeUploadedAssets({
+      assets: loadedAssets,
+      uploaded: bridging.map(({ asset }) => asset),
+      sort,
+      hasNextPage,
+    });
+  }, [
+    canPlaceUploads,
+    completedUploads,
+    loadedAssets,
+    folder,
+    sort,
+    hasNextPage,
+    listAnsweredAfter,
+  ]);
   const isFetchingMore = isFetching && page > 1;
 
   const fetchNextPage = useCallback(() => {

@@ -19,12 +19,12 @@ const getMainField = async (targetUid: UID.Schema): Promise<string> => {
 };
 
 /**
- * Returns the display label for a relation.
- * Matches the logic of the getRelationLabel function in the content-manager plugin.
+ * Returns the display label for a relation in form state.
+ * Empty configured values stay untranslated so the admin can provide its localized fallback.
  */
 const getRelationLabel = (relation: Record<string, unknown>, mainField: string): string => {
   const label = relation[mainField];
-  if (typeof label === 'string') return label;
+  if (label === null || typeof label === 'string') return label ?? '';
   return String(relation.documentId ?? '');
 };
 

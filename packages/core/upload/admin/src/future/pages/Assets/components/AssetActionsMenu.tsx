@@ -111,7 +111,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
 
     let res;
     try {
-      res = await replaceAsset({ id: asset.id, file });
+      res = await replaceAsset({ id: asset.id, file, fileInfo: { name: asset.name } });
     } finally {
       releaseBusy();
     }

@@ -2,12 +2,20 @@ import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { render, screen, waitFor } from '@tests/utils';
 
 import { AssetSelectionProvider, useAssetSelection } from '../../hooks/useAssetSelection';
+import { type ItemKey } from '../../utils/selection';
 import { BulkActionsBar } from '../BulkActionsBar';
 
 import type { File } from '../../../../../../../shared/contracts/files';
 
 const mockToggleNotification = jest.fn();
 const mockAIAvailability = jest.fn(() => false);
+const mockTrackUsage = jest.fn();
+let mockAiMetadataEnabled = false;
+
+jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
+  ...jest.requireActual('../../../../hooks/useAIMetadataEnabled'),
+  useAIMetadataEnabled: () => mockAiMetadataEnabled,
+}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -17,6 +25,18 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useAIAvailability: () => mockAIAvailability(),
+}));
+
+jest.mock('../../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
+let mockIsGeneratingMetadata = false;
+
+jest.mock('../../../../services/assets', () => ({
+  ...jest.requireActual('../../../../services/assets'),
+  useGenerateAiMetadataMutation: () => [jest.fn(), { isLoading: mockIsGeneratingMetadata }],
 }));
 
 jest.mock('../../hooks/useFolderNavigation', () => ({
@@ -33,7 +53,14 @@ const mockAssets: File[] = [
  * "the selection survives" is genuinely asserted rather than faked by a
  * static mock.
  */
-const Harness = () => {
+/**
+ * What the view says is on screen. Passed in rather than derived from the asset
+ * and folder lists, mirroring the real wiring: in mixed mode not every folder is
+ * rendered, so only the view can say.
+ */
+const renderedWithFolder: ItemKey[] = ['folder:9', 'asset:1', 'asset:2'];
+
+const Harness = ({ renderedKeys }: { renderedKeys?: ItemKey[] }) => {
   const { toggle } = useAssetSelection();
   const [, setQuery] = useQueryParams<{ assetId?: string }>();
 
@@ -43,15 +70,16 @@ const Harness = () => {
       <button onClick={() => toggle('asset:2')}>Toggle asset 2</button>
       <button onClick={() => setQuery({ assetId: '1' }, 'push', true)}>Open drawer</button>
       <button onClick={() => setQuery({ assetId: undefined }, 'remove', true)}>Close drawer</button>
-      <BulkActionsBar assets={mockAssets} />
+      <button onClick={() => toggle('folder:9')}>Toggle folder 9</button>
+      <BulkActionsBar assets={mockAssets} renderedKeys={renderedKeys} />
     </>
   );
 };
 
-const setup = (initialEntries?: string[]) =>
+const setup = (initialEntries?: string[], renderedKeys?: ItemKey[]) =>
   render(
     <AssetSelectionProvider>
-      <Harness />
+      <Harness renderedKeys={renderedKeys} />
     </AssetSelectionProvider>,
     { initialEntries }
   );
@@ -59,6 +87,8 @@ const setup = (initialEntries?: string[]) =>
 describe('BulkActionsBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAiMetadataEnabled = false;
+    mockIsGeneratingMetadata = false;
   });
 
   it('is visible with a selection and no details param', async () => {
@@ -71,7 +101,8 @@ describe('BulkActionsBar', () => {
     expect(screen.getByText('2 items selected')).toBeInTheDocument();
   });
 
-  it('is hidden while the details drawer is open', async () => {
+  // jsdom matches no breakpoint, so the base (mobile) rules are what applies here.
+  it('is hidden on mobile while the details drawer is open', async () => {
     const { user } = setup();
 
     await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
@@ -83,6 +114,40 @@ describe('BulkActionsBar', () => {
     await waitFor(() =>
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument()
     );
+  });
+
+  // jsdom matches no breakpoint, so these read the mobile rules.
+  describe('mobile layout with the metadata action', () => {
+    const openBar = async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 2' }));
+
+      return screen.findByRole('region', { name: 'Bulk actions' });
+    };
+
+    it('drops the buttons to their own line when Create metadata is offered', async () => {
+      mockAiMetadataEnabled = true;
+
+      const bar = await openBar();
+
+      // The labelled button plus the icons no longer fit beside the count, so
+      // the count takes a full row and the buttons wrap under it, spread across it.
+      const style = window.getComputedStyle(bar);
+
+      expect(style.flexWrap).toBe('wrap');
+      expect(style.justifyContent).toBe('space-between');
+    });
+
+    it('keeps everything on one line without it', async () => {
+      const bar = await openBar();
+
+      const style = window.getComputedStyle(bar);
+
+      expect(style.flexWrap).not.toBe('wrap');
+      expect(style.justifyContent).not.toBe('space-between');
+    });
   });
 
   it('returns with the selection intact once the drawer closes', async () => {
@@ -122,5 +187,61 @@ describe('BulkActionsBar', () => {
     await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
 
     expect(await screen.findByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+  });
+
+  describe('select all', () => {
+    it('selects every rendered item, folders included', async () => {
+      const { user } = setup(undefined, renderedWithFolder);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      // 2 assets + 1 folder
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+    });
+
+    it('keeps reading Select all once everything is selected', async () => {
+      const { user } = setup(undefined, renderedWithFolder);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Select all' })).toBeInTheDocument();
+    });
+
+    it('lets the clear button deselect a select-all selection', async () => {
+      const { user } = setup(undefined, renderedWithFolder);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+      expect(await screen.findByText('3 items selected')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Clear selection' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument()
+      );
+    });
+
+    it('is disabled while the bar is busy', async () => {
+      mockIsGeneratingMetadata = true;
+      const { user } = setup(undefined, renderedWithFolder);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+
+      expect(await screen.findByRole('button', { name: 'Select all' })).toBeDisabled();
+    });
+
+    it('tracks the select-all action', async () => {
+      const { user } = setup(undefined, renderedWithFolder);
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      expect(mockTrackUsage).not.toHaveBeenCalled();
+
+      await user.click(await screen.findByRole('button', { name: 'Select all' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements');
+    });
   });
 });
