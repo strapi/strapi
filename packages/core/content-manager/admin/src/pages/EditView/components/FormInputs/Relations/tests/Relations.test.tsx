@@ -91,6 +91,14 @@ describe('Relations', () => {
     expect(screen.getByRole('button', { name: 'Relation entity 3' })).toBeInTheDocument();
   });
 
+  it('should not render a page loader whilst the permissions are loading', async () => {
+    render({});
+
+    expect(screen.queryByText('Loading content.')).not.toBeInTheDocument();
+
+    await screen.findByRole('combobox');
+  });
+
   it('should be disabled when the prop is passed', async () => {
     render({ disabled: true });
 

@@ -55,6 +55,12 @@ interface DocumentRBACProps {
   children: React.ReactNode;
   permissions: Permission[] | null;
   model?: string;
+  /**
+   * @default true
+   * @description Whether to replace the children with a full page loader whilst
+   * the permissions resolve. Set to `false` when the consumer isn't a page.
+   */
+  showLoader?: boolean;
 }
 
 /**
@@ -65,7 +71,7 @@ interface DocumentRBACProps {
  * It then creates an list of `can{Action}` that are passed to the context for consumption
  * within the app to enforce RBAC.
  */
-const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
+const DocumentRBAC = ({ children, permissions, model, showLoader = true }: DocumentRBACProps) => {
   const { slug } = useParams<{ slug: string }>();
 
   if (!slug && !model) {
@@ -144,7 +150,7 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
     []
   );
 
-  if (isLoading) {
+  if (isLoading && showLoader) {
     return <Page.Loading />;
   }
 
