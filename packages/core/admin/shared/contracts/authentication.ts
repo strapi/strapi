@@ -27,6 +27,35 @@ export declare namespace Login {
 }
 
 /**
+ * The response `/login` sends instead of `Login.Response` when the account has two-factor
+ * authentication enrolled: no session is created yet, so there is deliberately no cookie and no
+ * access token here. `challengeToken` authorises exactly one follow-up call, `/login/mfa`.
+ */
+export interface MfaChallengeResponse {
+  data: {
+    mfaRequired: true;
+    challengeToken: string;
+    expiresIn: number;
+  };
+}
+
+/**
+ * /login/mfa - Complete a login started by `/login` when `Login.Response` came back as
+ * `MfaChallengeResponse`. Accepts either a TOTP code or a recovery code; on success it issues a
+ * session exactly like `/login` does for an unenrolled account.
+ */
+export declare namespace LoginMfa {
+  export interface Request {
+    body: {
+      challengeToken: string;
+      code: string;
+    };
+  }
+
+  export type Response = Login.Response;
+}
+
+/**
  * /access-token - Exchange a refresh cookie for an access token
  */
 export declare namespace AccessTokenExchange {

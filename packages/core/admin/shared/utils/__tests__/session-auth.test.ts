@@ -1,9 +1,12 @@
+import type { Context } from 'koa';
 import {
   getAccessCookieName,
   getAccessCookiePath,
   getAccessCookieDomain,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
+  issueSession,
+  REFRESH_COOKIE_NAME,
 } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
 import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
@@ -209,5 +212,134 @@ describe('resolveLogoutDeviceId', () => {
     await expect(resolveLogoutDeviceId('42', 'session-1', 'client-device')).resolves.toBe(
       'client-device'
     );
+  });
+});
+
+describe('issueSession', () => {
+  const user = { id: 11, email: 'admin@example.com' } as any;
+  const sanitizedUser = { id: 11, email: 'admin@example.com' };
+  const sanitizeUser = jest.fn(() => sanitizedUser);
+
+  const setStrapi = (sessionManagerFn?: jest.Mock) => {
+    global.strapi = {
+      config: { get: jest.fn(() => undefined) },
+      log: { error: jest.fn(), warn: jest.fn() },
+      admin: { services: { user: { sanitizeUser } } },
+      ...(sessionManagerFn ? { sessionManager: sessionManagerFn } : {}),
+    } as any;
+  };
+
+  const buildSessionManager = (overrides: {
+    generateRefreshToken?: jest.Mock;
+    generateAccessToken?: jest.Mock;
+  }) => {
+    const generateRefreshToken =
+      overrides.generateRefreshToken ??
+      jest.fn(() => Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined }));
+    const generateAccessToken =
+      overrides.generateAccessToken ?? jest.fn(() => Promise.resolve({ token: 'access-token' }));
+    const sessionManagerFn = jest.fn(() => ({ generateRefreshToken, generateAccessToken }));
+
+    return { sessionManagerFn, generateRefreshToken, generateAccessToken };
+  };
+
+  const buildCtx = (body: Record<string, unknown> = {}) => {
+    const cookiesSet = jest.fn();
+    const internalServerError = jest.fn();
+    const ctx = {
+      request: { body, secure: false, headers: {} },
+      cookies: { set: cookiesSet },
+      internalServerError,
+    } as unknown as Context;
+
+    return { ctx, cookiesSet, internalServerError };
+  };
+
+  beforeEach(() => {
+    sanitizeUser.mockClear();
+  });
+
+  test('sets the refresh cookie and returns the access token', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    const { ctx, cookiesSet } = buildCtx();
+
+    await issueSession(ctx, user);
+
+    expect(sessionManagerFn).toHaveBeenCalledWith('admin');
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      expect.any(String),
+      expect.objectContaining({ type: 'session' })
+    );
+    expect(cookiesSet).toHaveBeenCalledWith(
+      REFRESH_COOKIE_NAME,
+      'refresh-token',
+      expect.any(Object)
+    );
+    expect(ctx.body).toEqual({
+      data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
+    });
+    expect(sanitizeUser).toHaveBeenCalledWith(user);
+  });
+
+  test('honours rememberMe from the request body by minting a refresh-type session', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    const { ctx } = buildCtx({ rememberMe: true });
+
+    await issueSession(ctx, user);
+
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      expect.any(String),
+      expect.objectContaining({ type: 'refresh' })
+    );
+  });
+
+  test('lets deviceId/rememberMe options override the request body (reset-password parity)', async () => {
+    const { sessionManagerFn, generateRefreshToken } = buildSessionManager({});
+    setStrapi(sessionManagerFn);
+
+    // Body asks for rememberMe and carries its own deviceId; the explicit options must win over
+    // both, exactly like resetPassword forcing a fresh device id and a session-type cookie.
+    const { ctx } = buildCtx({ rememberMe: true, deviceId: 'body-device' });
+
+    await issueSession(ctx, user, { deviceId: 'forced-device', rememberMe: false });
+
+    expect(generateRefreshToken).toHaveBeenCalledWith(
+      String(user.id),
+      'forced-device',
+      expect.objectContaining({ type: 'session' })
+    );
+  });
+
+  test('falls back to internalServerError when the session manager is unavailable', async () => {
+    setStrapi(undefined);
+
+    const { ctx, internalServerError, cookiesSet } = buildCtx();
+
+    await issueSession(ctx, user);
+
+    expect(internalServerError).toHaveBeenCalled();
+    expect(cookiesSet).not.toHaveBeenCalled();
+    expect(ctx.body).toBeUndefined();
+  });
+
+  test('falls back to internalServerError when generateAccessToken errors, after the cookie is already set', async () => {
+    const { sessionManagerFn } = buildSessionManager({
+      generateAccessToken: jest.fn(() => Promise.resolve({ error: 'boom' } as any)),
+    });
+    setStrapi(sessionManagerFn);
+
+    const { ctx, internalServerError, cookiesSet } = buildCtx();
+
+    await issueSession(ctx, user);
+
+    expect(cookiesSet).toHaveBeenCalled();
+    expect(internalServerError).toHaveBeenCalled();
+    expect(ctx.body).toBeUndefined();
   });
 });

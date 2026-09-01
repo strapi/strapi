@@ -10,6 +10,15 @@ export default [
   },
   {
     method: 'POST',
+    path: '/login/mfa',
+    handler: 'authentication.loginMfa',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
+    method: 'POST',
     path: '/access-token',
     handler: 'authentication.accessToken',
     config: {

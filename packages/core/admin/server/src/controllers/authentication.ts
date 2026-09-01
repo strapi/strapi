@@ -7,12 +7,11 @@ import { getService } from '../utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
-  buildSessionMetadataFromContext,
   getSessionManager,
-  extractDeviceParams,
   generateDeviceId,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
+  issueSession,
 } from '../../../shared/utils/session-auth';
 
 import {
@@ -23,10 +22,13 @@ import {
   validateResetPasswordInput,
   validateLoginSessionInput,
 } from '../validation/authentication';
+import { validateMfaLoginInput } from '../validation/authentication/mfa';
 
 import type {
   ForgotPassword,
   Login,
+  LoginMfa,
+  MfaChallengeResponse,
   Register,
   RegisterAdmin,
   RegistrationInfo,
@@ -34,7 +36,7 @@ import type {
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
 
-const { ApplicationError, ValidationError } = errors;
+const { ApplicationError, RateLimitError, ValidationError } = errors;
 
 export default {
   login: compose([
@@ -75,46 +77,53 @@ export default {
     async (ctx: Context) => {
       const { user } = ctx.state as { user: AdminUser };
 
-      try {
-        const sessionManager = getSessionManager();
-        if (!sessionManager) {
-          return ctx.internalServerError();
-        }
-        const userId = String(user.id);
-        const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+      const mfa = getService('mfa');
 
-        const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-          'admin'
-        ).generateRefreshToken(userId, deviceId, {
-          type: rememberMe ? 'refresh' : 'session',
-          metadata: buildSessionMetadataFromContext(ctx),
-        });
+      if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
+        const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
-        const cookieOptions = buildCookieOptionsWithExpiry(
-          rememberMe ? 'refresh' : 'session',
-          absoluteExpiresAt,
-          ctx.request.secure
-        );
-        ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-        const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-        if ('error' in accessResult) {
-          return ctx.internalServerError();
-        }
-
-        const { token: accessToken } = accessResult;
-
+        // Deliberately no cookie and no access token here: the challenge token authorises
+        // exactly one endpoint (`/login/mfa`) and mints nothing on its own. A cookie set
+        // alongside this response would make the whole feature a silent no-op.
         ctx.body = {
-          data: {
-            token: accessToken,
-            accessToken,
-            user: getService('user').sanitizeUser(ctx.state.user),
-          },
-        } satisfies Login.Response;
-      } catch (error) {
-        strapi.log.error('Failed to create admin refresh session', error);
-        return ctx.internalServerError();
+          data: { mfaRequired: true, challengeToken, expiresIn },
+        } satisfies MfaChallengeResponse;
+        return;
       }
+
+      return issueSession(ctx, user);
+    },
+  ]),
+
+  loginMfa: compose([
+    async (ctx: Context, next: Next) => {
+      await validateMfaLoginInput(ctx.request.body ?? {});
+      return next();
+    },
+    async (ctx: Context) => {
+      const mfa = getService('mfa');
+
+      if (!mfa.isEnabled()) {
+        return ctx.notFound();
+      }
+
+      const { challengeToken, code } = ctx.request.body as LoginMfa.Request['body'];
+
+      const result = await mfa.verifyChallenge(challengeToken, code);
+
+      if (!result.ok) {
+        if (result.reason === 'throttled') {
+          throw new RateLimitError();
+        }
+
+        // One generic message for every other outcome ('unusable', 'exhausted', 'invalid') so a
+        // caller cannot tell an expired challenge from a wrong code from an exhausted one.
+        throw new ValidationError('Invalid code');
+      }
+
+      const user = await getService('user').findOne(result.userId);
+
+      return issueSession(ctx, user);
     },
   ]),
 
@@ -139,46 +148,7 @@ export default {
 
     const user = await getService('user').register(input);
 
-    try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-      const userId = String(user.id);
-      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
-
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
-      });
-
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token: accessToken } = accessResult;
-
-      ctx.body = {
-        data: {
-          token: accessToken,
-          accessToken,
-          user: getService('user').sanitizeUser(user),
-        },
-      } satisfies Register.Response;
-    } catch (error) {
-      strapi.log.error('Failed to create admin refresh session during register', error);
-      return ctx.internalServerError();
-    }
+    return issueSession(ctx, user);
   },
 
   async registerAdmin(ctx: Context) {
@@ -190,46 +160,7 @@ export default {
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
-    try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-      const userId = String(user.id);
-      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
-
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
-      });
-
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token: accessToken } = accessResult;
-
-      ctx.body = {
-        data: {
-          token: accessToken,
-          accessToken,
-          user: getService('user').sanitizeUser(user),
-        },
-      } satisfies RegisterAdmin.Response;
-    } catch (error) {
-      strapi.log.error('Failed to create admin refresh session during register-admin', error);
-      return ctx.internalServerError();
-    }
+    return issueSession(ctx, user);
   },
 
   async forgotPassword(ctx: Context) {
@@ -249,51 +180,22 @@ export default {
 
     const user = await getService('auth').resetPassword(input);
 
-    // Issue a new admin refresh session and access token after password reset.
+    const sessionManager = getSessionManager();
+    if (!sessionManager) {
+      return ctx.internalServerError();
+    }
+
     try {
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-
-      const userId = String(user.id);
-      const deviceId = generateDeviceId();
-
-      // Invalidate all existing sessions before creating a new one
-      await sessionManager('admin').invalidateRefreshToken(userId);
-
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-        'admin'
-      ).generateRefreshToken(userId, deviceId, {
-        type: 'session',
-        metadata: buildSessionMetadataFromContext(ctx),
-      });
-
-      // No rememberMe flow here; expire with session by default (session cookie)
-      const cookieOptions = buildCookieOptionsWithExpiry(
-        'session',
-        absoluteExpiresAt,
-        ctx.request.secure
-      );
-      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
-
-      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
-      if ('error' in accessResult) {
-        return ctx.internalServerError();
-      }
-
-      const { token } = accessResult;
-
-      ctx.body = {
-        data: {
-          token,
-          user: getService('user').sanitizeUser(user),
-        },
-      } satisfies ResetPassword.Response;
+      // Invalidate all existing sessions before creating a new one.
+      await sessionManager('admin').invalidateRefreshToken(String(user.id));
     } catch (err) {
       strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
       return ctx.internalServerError();
     }
+
+    // No rememberMe flow here: force a fresh device id and a session-type (non-persistent) cookie
+    // regardless of anything the request body carries.
+    return issueSession(ctx, user, { deviceId: generateDeviceId(), rememberMe: false });
   },
 
   async accessToken(ctx: Context) {
