@@ -195,6 +195,7 @@
   "containers.list.selectedEntriesModal.title": "Items publiceren",
   "containers.list.table-headers.publishedAt": "Status",
   "containers.list.table.row-actions": "Rijacties",
+  "containers.empty-label": "Naamloos",
   "containers.untitled": "Naamloos",
   "dnd.cancel-item": "{item}, losgelaten. Herschikking geannuleerd.",
   "dnd.drop-item": "{item}, losgelaten. Uiteindelijke positie in lijst: {position}.",
