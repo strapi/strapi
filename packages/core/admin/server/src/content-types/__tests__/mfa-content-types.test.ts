@@ -21,14 +21,29 @@ describe('mfa content types', () => {
     }
   );
 
-  test.each(Object.entries(schemas))('%s marks every attribute private', (_, schema) => {
-    for (const [name, attribute] of Object.entries(schema.attributes)) {
-      expect({ name, private: (attribute as { private?: boolean }).private }).toEqual({
-        name,
-        private: true,
-      });
+  test.each(Object.entries(schemas))(
+    '%s marks every attribute private, non-configurable, and non-searchable',
+    (_, schema) => {
+      for (const [name, attribute] of Object.entries(schema.attributes)) {
+        const attr = attribute as {
+          private?: boolean;
+          configurable?: boolean;
+          searchable?: boolean;
+        };
+        expect({
+          name,
+          private: attr.private,
+          configurable: attr.configurable,
+          searchable: attr.searchable,
+        }).toEqual({
+          name,
+          private: true,
+          configurable: false,
+          searchable: false,
+        });
+      }
     }
-  });
+  );
 
   test('challenge token is unique so it can be looked up directly', () => {
     expect(challenge.attributes.token.unique).toBe(true);
