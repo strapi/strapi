@@ -615,11 +615,18 @@ describe('AssetsPage search', () => {
 });
 
 describe('AssetsPage main-area context menu', () => {
-  const rightClickBackground = () =>
-    fireEvent.contextMenu(screen.getByTestId('assets-context-menu-area'), {
-      clientX: 200,
-      clientY: 300,
-    });
+  // The menu listens on the scrolling column the admin layout marks, so this is
+  // also the strip below the list that no descendant of the page covers.
+  const rightClickBackground = () => {
+    // eslint-disable-next-line testing-library/no-node-access
+    const column = document.querySelector('[data-strapi-main-content]');
+
+    if (!column) {
+      throw new Error('the admin layout did not render its main column');
+    }
+
+    fireEvent.contextMenu(column, { clientX: 200, clientY: 300 });
+  };
 
   /**
    * The menu is gated on `assets.create`, which is `false` until the RBAC check

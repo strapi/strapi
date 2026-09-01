@@ -6,15 +6,14 @@ const onCreateFolder = jest.fn();
 const onImportFiles = jest.fn();
 const onImportFromUrl = jest.fn();
 
+/**
+ * Mirrors the admin layout: the column marked `data-strapi-main-content` is what
+ * scrolls and what the menu listens on. `scroll-root` stands in for the strip of
+ * that column which no descendant covers — its own bottom padding.
+ */
 const setup = (props: Partial<React.ComponentProps<typeof MainAreaContextMenu>> = {}) =>
   render(
-    <MainAreaContextMenu
-      disabled={false}
-      onCreateFolder={onCreateFolder}
-      onImportFiles={onImportFiles}
-      onImportFromUrl={onImportFromUrl}
-      {...props}
-    >
+    <div data-strapi-main-content data-testid="scroll-root">
       <div data-testid="background">
         {/* Stands in for an asset card / folder card / table row. */}
         <div data-testid="item" data-native-context-menu>
@@ -22,7 +21,14 @@ const setup = (props: Partial<React.ComponentProps<typeof MainAreaContextMenu>> 
         </div>
         <button type="button">Add assets</button>
       </div>
-    </MainAreaContextMenu>
+      <MainAreaContextMenu
+        disabled={false}
+        onCreateFolder={onCreateFolder}
+        onImportFiles={onImportFiles}
+        onImportFromUrl={onImportFromUrl}
+        {...props}
+      />
+    </div>
   );
 
 const rightClick = (element: Element) =>
@@ -33,11 +39,21 @@ describe('MainAreaContextMenu', () => {
     jest.clearAllMocks();
   });
 
-  it('renders its children with no menu open', () => {
+  it('starts with no menu open', () => {
     setup();
 
-    expect(screen.getByTestId('background')).toBeInTheDocument();
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+  });
+
+  // The column carries a bottom padding no descendant can cover, and that strip
+  // is where a right-click below a full list lands. Listening on the column is
+  // what puts it in reach.
+  it('opens when the scrolling column itself is right-clicked', async () => {
+    setup();
+
+    rightClick(screen.getByTestId('scroll-root'));
+
+    expect(await screen.findAllByRole('menuitem')).toHaveLength(3);
   });
 
   // The design system's Menu is a dropdown, so the popover needs a trigger to

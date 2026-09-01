@@ -460,24 +460,6 @@ const SearchSlot = styled(Box)`
   }
 `;
 
-// The main column normally ends with its content, which left the right-click
-// area stopping at the last row — the one place the gesture is most natural.
-// These two give the column a height to hand down to `MainAreaContextMenu`.
-// `min-height`, never `height`, so a long list still grows past the fold; and
-// if the percentage can't resolve, the chain degrades to `auto` and the layout
-// is exactly what it was.
-const FullHeightMain = styled(Page.Main)`
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-`;
-
-const PageBody = styled(Box)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-`;
-
 // Toggle labels are hidden below desktop — icons only (buttons keep aria-label).
 const ToggleLabel = styled.span`
   display: none;
@@ -731,8 +713,8 @@ export const AssetsPage = () => {
                   />
                 }
               >
-                <FullHeightMain>
-                  <PageBody ref={uploadDropZoneRef}>
+                <Page.Main>
+                  <Box ref={uploadDropZoneRef}>
                     <VisuallyHidden>
                       <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
                     </VisuallyHidden>
@@ -742,160 +724,157 @@ export const AssetsPage = () => {
                     <Box ref={headerSentinelRef} height={0} aria-hidden />
                     <Box ref={scrollAnchorRef} height={0} aria-hidden />
 
-                    {/* Right-clicking the empty parts of the area offers the same
-                        creation actions as the "New" menu, acting on the folder
-                        currently open. Wraps the header too: its empty band reads
-                        as part of the same surface, and its controls are already
-                        excluded — as is the table's own header row, which will
-                        become interactive once columns are sortable. Items keep
-                        the browser's own menu — see MainAreaContextMenu. */}
+                    {/* Renders no wrapper: it listens on the scrolling column
+                        itself, so the header band and the padding below the list
+                        are both in the hit area. Interactive controls, the table
+                        header row and the list items are excluded — see
+                        MainAreaContextMenu. */}
                     <MainAreaContextMenu
                       disabled={!canCreate}
                       onCreateFolder={() => setIsCreateFolderDialogOpen(true)}
                       onImportFiles={handleFileSelect}
                       onImportFromUrl={() => setIsUrlDialogOpen(true)}
-                    >
-                      <StickyHeader $compact={isHeaderCompact}>
-                        <TitleRow>
-                          <Typography variant="alpha" tag="h1">
-                            {pageHeaderTitle}
-                          </Typography>
-                          {canCreate && (
-                            <SimpleMenu
-                              popoverPlacement="bottom-end"
-                              variant="default"
-                              endIcon={<ChevronDown />}
-                              label={formatMessage({
-                                id: getTranslationKey('new'),
-                                defaultMessage: 'New',
-                              })}
+                    />
+                    <StickyHeader $compact={isHeaderCompact}>
+                      <TitleRow>
+                        <Typography variant="alpha" tag="h1">
+                          {pageHeaderTitle}
+                        </Typography>
+                        {canCreate && (
+                          <SimpleMenu
+                            popoverPlacement="bottom-end"
+                            variant="default"
+                            endIcon={<ChevronDown />}
+                            label={formatMessage({
+                              id: getTranslationKey('new'),
+                              defaultMessage: 'New',
+                            })}
+                          >
+                            <MenuItem
+                              onSelect={() => setIsCreateFolderDialogOpen(true)}
+                              startIcon={<FolderIcon />}
                             >
-                              <MenuItem
-                                onSelect={() => setIsCreateFolderDialogOpen(true)}
-                                startIcon={<FolderIcon />}
-                              >
-                                {formatMessage({
-                                  id: getTranslationKey('folder.create.title'),
-                                  defaultMessage: 'New folder',
-                                })}
-                              </MenuItem>
-                              <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                                {formatMessage({
-                                  id: getTranslationKey('import-files'),
-                                  defaultMessage: 'File upload',
-                                })}
-                              </MenuItem>
-                              <MenuItem
-                                onSelect={() => setIsUrlDialogOpen(true)}
-                                startIcon={<Link />}
-                              >
-                                {formatMessage({
-                                  id: getTranslationKey('import-from-url'),
-                                  defaultMessage: 'File upload from URL',
-                                })}
-                              </MenuItem>
-                            </SimpleMenu>
-                          )}
-                        </TitleRow>
+                              {formatMessage({
+                                id: getTranslationKey('folder.create.title'),
+                                defaultMessage: 'New folder',
+                              })}
+                            </MenuItem>
+                            <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                              {formatMessage({
+                                id: getTranslationKey('import-files'),
+                                defaultMessage: 'File upload',
+                              })}
+                            </MenuItem>
+                            <MenuItem
+                              onSelect={() => setIsUrlDialogOpen(true)}
+                              startIcon={<Link />}
+                            >
+                              {formatMessage({
+                                id: getTranslationKey('import-from-url'),
+                                defaultMessage: 'File upload from URL',
+                              })}
+                            </MenuItem>
+                          </SimpleMenu>
+                        )}
+                      </TitleRow>
 
-                        <Toolbar $compact={isHeaderCompact}>
-                          <FilterSearchGroup>
-                            <Box>
-                              <FilterMenu listFilters={listFilters} />
-                            </Box>
-                            <SearchSlot>
-                              <AssetsSearchInput />
-                            </SearchSlot>
-                          </FilterSearchGroup>
-                          <SortToggleGroup>
-                            <Box>
-                              <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-                            </Box>
-                            <StyledToggleGroup
-                              type="single"
-                              value={isGridView ? 'grid' : 'table'}
-                              onValueChange={(value) =>
-                                value &&
-                                setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                              }
+                      <Toolbar $compact={isHeaderCompact}>
+                        <FilterSearchGroup>
+                          <Box>
+                            <FilterMenu listFilters={listFilters} />
+                          </Box>
+                          <SearchSlot>
+                            <AssetsSearchInput />
+                          </SearchSlot>
+                        </FilterSearchGroup>
+                        <SortToggleGroup>
+                          <Box>
+                            <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
+                          </Box>
+                          <StyledToggleGroup
+                            type="single"
+                            value={isGridView ? 'grid' : 'table'}
+                            onValueChange={(value) =>
+                              value &&
+                              setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
+                            }
+                            aria-label={formatMessage({
+                              id: getTranslationKey('view.switch.label'),
+                              defaultMessage: 'View options',
+                            })}
+                          >
+                            <StyledToggleItem
+                              value="table"
                               aria-label={formatMessage({
-                                id: getTranslationKey('view.switch.label'),
-                                defaultMessage: 'View options',
+                                id: getTranslationKey('view.table'),
+                                defaultMessage: 'Table view',
                               })}
                             >
-                              <StyledToggleItem
-                                value="table"
-                                aria-label={formatMessage({
+                              <List />
+                              <ToggleLabel>
+                                {formatMessage({
                                   id: getTranslationKey('view.table'),
                                   defaultMessage: 'Table view',
                                 })}
-                              >
-                                <List />
-                                <ToggleLabel>
-                                  {formatMessage({
-                                    id: getTranslationKey('view.table'),
-                                    defaultMessage: 'Table view',
-                                  })}
-                                </ToggleLabel>
-                              </StyledToggleItem>
-                              <StyledToggleItem
-                                value="grid"
-                                aria-label={formatMessage({
+                              </ToggleLabel>
+                            </StyledToggleItem>
+                            <StyledToggleItem
+                              value="grid"
+                              aria-label={formatMessage({
+                                id: getTranslationKey('view.grid'),
+                                defaultMessage: 'Grid view',
+                              })}
+                            >
+                              <GridIcon />
+                              <ToggleLabel>
+                                {formatMessage({
                                   id: getTranslationKey('view.grid'),
                                   defaultMessage: 'Grid view',
                                 })}
-                              >
-                                <GridIcon />
-                                <ToggleLabel>
-                                  {formatMessage({
-                                    id: getTranslationKey('view.grid'),
-                                    defaultMessage: 'Grid view',
-                                  })}
-                                </ToggleLabel>
-                              </StyledToggleItem>
-                            </StyledToggleGroup>
-                          </SortToggleGroup>
-                        </Toolbar>
+                              </ToggleLabel>
+                            </StyledToggleItem>
+                          </StyledToggleGroup>
+                        </SortToggleGroup>
+                      </Toolbar>
 
-                        <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
-                      </StickyHeader>
+                      <FilterBadges listFilters={listFilters} compact={isHeaderCompact} />
+                    </StickyHeader>
 
-                      <Layouts.Content>
-                        <BetaNotice />
-                        {/* Renders nothing — keeps every loaded page's query subscribed
-                            so a rename/delete refreshes the whole list. */}
-                        {assetPageSubscribers}
-                        <DropZoneWithOverlay>
-                          <DropFilesMessage
-                            uploadDropZoneRef={uploadDropZoneRef}
-                            folderName={title}
-                          />
-                          <AssetsView
-                            view={view}
-                            folders={folders}
-                            isLoadingFolders={isLoadingFolders}
-                            assets={assets}
-                            isLoadingAssets={isLoadingAssets}
-                            isFetchingMore={isFetchingMore}
-                            hasNextPage={hasNextPage}
-                            fetchNextPage={fetchNextPage}
-                            error={assetsError}
-                            locations={itemLocations}
-                            searchQuery={searchQuery}
-                            assetsSort={listSort.assetsSort}
-                            foldersPosition={listSort.foldersPosition}
-                            hasActiveFilters={listFilters.filters.length > 0}
-                            onClearFilters={listFilters.clearFilters}
-                            onAssetItemClick={openDetails}
-                            onAddAssets={handleFileSelect}
-                            canAddAssets={canCreate}
-                            onClearSearch={clearSearch}
-                          />
-                        </DropZoneWithOverlay>
-                      </Layouts.Content>
-                    </MainAreaContextMenu>
-                  </PageBody>
-                </FullHeightMain>
+                    <Layouts.Content>
+                      <BetaNotice />
+                      {/* Renders nothing — keeps every loaded page's query subscribed
+                          so a rename/delete refreshes the whole list. */}
+                      {assetPageSubscribers}
+                      <DropZoneWithOverlay>
+                        <DropFilesMessage
+                          uploadDropZoneRef={uploadDropZoneRef}
+                          folderName={title}
+                        />
+                        <AssetsView
+                          view={view}
+                          folders={folders}
+                          isLoadingFolders={isLoadingFolders}
+                          assets={assets}
+                          isLoadingAssets={isLoadingAssets}
+                          isFetchingMore={isFetchingMore}
+                          hasNextPage={hasNextPage}
+                          fetchNextPage={fetchNextPage}
+                          error={assetsError}
+                          locations={itemLocations}
+                          searchQuery={searchQuery}
+                          assetsSort={listSort.assetsSort}
+                          foldersPosition={listSort.foldersPosition}
+                          hasActiveFilters={listFilters.filters.length > 0}
+                          onClearFilters={listFilters.clearFilters}
+                          onAssetItemClick={openDetails}
+                          onAddAssets={handleFileSelect}
+                          canAddAssets={canCreate}
+                          onClearSearch={clearSearch}
+                        />
+                      </DropZoneWithOverlay>
+                    </Layouts.Content>
+                  </Box>
+                </Page.Main>
               </Layouts.Root>
             </AssetsDndProvider>
           </BusyAssetsProvider>

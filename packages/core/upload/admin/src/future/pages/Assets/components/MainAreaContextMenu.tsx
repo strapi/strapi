@@ -1,14 +1,21 @@
-import { useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 
 import { Menu } from '@strapi/design-system';
 import { Files, Folder as FolderIcon, Link } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
-import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
+
+/**
+ * The admin layout marks the element that scrolls the main column. Listening on
+ * it rather than a wrapper of our own is what makes the whole column part of the
+ * hit area: it carries a responsive `padding-bottom` (16 / 24 / 40px) that no
+ * descendant can cover, and that strip is exactly where a right-click "below the
+ * list" lands.
+ */
+const SCROLL_ROOT_SELECTOR = '[data-strapi-main-content]';
 
 /**
  * Subtrees that keep the browser's own context menu instead of opening the
@@ -35,19 +42,6 @@ const NATIVE_CONTEXT_MENU_SELECTOR = [
 ].join(', ');
 
 /**
- * Fills the main column so the empty space below the last row still belongs to
- * the menu's hit area — right-clicking under a short list is the whole point of
- * the gesture. `flex: 1` only bites once an ancestor has a height to give; when
- * it doesn't, this collapses to its content and the area is just the list, as
- * it was before.
- */
-const ContextMenuArea = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-`;
-
-/**
  * The menu is anchored to a zero-sized element parked at the cursor, because
  * the design system's `Menu` is a dropdown: it positions its content against a
  * trigger, and there is no real trigger for a right-click on empty space.
@@ -69,13 +63,14 @@ const CURSOR_ANCHOR_STYLE: CSSProperties = {
   pointerEvents: 'none',
 };
 
+const LOCATOR_STYLE: CSSProperties = { height: 0 };
+
 interface CursorPosition {
   x: number;
   y: number;
 }
 
 interface MainAreaContextMenuProps {
-  children: ReactNode;
   /** Opens the "new folder" dialog in the folder currently on screen. */
   onCreateFolder: () => void;
   /** Opens the native file picker — same entry point as the header "New" menu. */
@@ -95,14 +90,14 @@ interface MainAreaContextMenuProps {
  * same creation actions the header "New" menu offers, acting on the folder
  * currently open.
  *
+ * Renders no wrapper — it finds the scrolling column and listens there, so the
+ * hit area is the whole column including the padding below the list.
+ *
  * Deliberately background-only. Right-clicking an asset, a folder or a table
  * row is left alone — those carry `data-native-context-menu` and keep the
  * browser's menu (which is what you want over a thumbnail or a filename).
- * Item-level context menus would be a separate feature; the "..." menus are
- * the row-scoped affordance today.
  */
 export const MainAreaContextMenu = ({
-  children,
   onCreateFolder,
   onImportFiles,
   onImportFromUrl,
@@ -110,37 +105,41 @@ export const MainAreaContextMenu = ({
 }: MainAreaContextMenuProps) => {
   const { formatMessage } = useIntl();
   const [position, setPosition] = useState<CursorPosition | null>(null);
+  const [locator, setLocator] = useState<HTMLElement | null>(null);
 
-  const handleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
-    if (disabled) {
+  const anchorRef = useCallback((node: HTMLElement | null) => setLocator(node), []);
+
+  useEffect(() => {
+    const container = locator?.closest<HTMLElement>(SCROLL_ROOT_SELECTOR);
+
+    if (!container || disabled) {
       return;
     }
 
-    // Portaled content (this menu, the dialogs a row's "..." menu opens) bubbles
-    // through the React tree without ever being a DOM descendant. Same guard the
-    // cards and rows use for their own handlers.
-    if (!isEventFromWithin(event)) {
-      return;
-    }
+    const handleContextMenu = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
 
-    if (!(event.target instanceof Element)) {
-      return;
-    }
+      if (event.target.closest(NATIVE_CONTEXT_MENU_SELECTOR)) {
+        return;
+      }
 
-    if (event.target.closest(NATIVE_CONTEXT_MENU_SELECTOR)) {
-      return;
-    }
+      event.preventDefault();
+      // A right-click while the menu is open reaches Radix's dismiss listener
+      // first, which closes it; re-anchoring here reopens it under the new
+      // cursor rather than leaving the user with a menu that just vanished.
+      setPosition({ x: event.clientX, y: event.clientY });
+    };
 
-    event.preventDefault();
-    // A right-click while the menu is open reaches Radix's dismiss listener
-    // first, which closes it; re-anchoring here reopens it under the new cursor
-    // rather than leaving the user with a menu that just vanished.
-    setPosition({ x: event.clientX, y: event.clientY });
-  };
+    container.addEventListener('contextmenu', handleContextMenu);
+
+    return () => container.removeEventListener('contextmenu', handleContextMenu);
+  }, [locator, disabled]);
 
   return (
-    <ContextMenuArea onContextMenu={handleContextMenu} data-testid="assets-context-menu-area">
-      {children}
+    <>
+      <div ref={anchorRef} style={LOCATOR_STYLE} aria-hidden />
       {/* Non-modal, like the row-level menus: a right-click elsewhere is both
           "close this" and "open that", which a modal layer would swallow.
           Skipped entirely without the permission — the anchor is a real
@@ -199,6 +198,6 @@ export const MainAreaContextMenu = ({
           </ActionsMenuContent>
         </Menu.Root>
       )}
-    </ContextMenuArea>
+    </>
   );
 };
