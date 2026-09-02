@@ -8,7 +8,14 @@ import path from 'node:path';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+// The real implementation, not a canned mock: used wherever a test needs to prove that
+// `sanitizeUser` actually strips a field (e.g. the MFA columns) from an `admin.auth.*` event
+// payload. A mock that always returns the same fixed object would make that kind of assertion
+// vacuous -- it would pass even if the controller emitted the raw user. Mirrors
+// `authentication.test.ts`.
 import userService from '../../services/user';
+
+const { sanitizeUser: realSanitizeUser } = userService;
 
 const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
@@ -48,6 +55,62 @@ const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = de
   return ctx;
 };
 
+/**
+ * A working `resetPassword` double: an mfa service reporting `enrolled`, a session manager that
+ * can both invalidate and (on the ungated path) mint a session, plus `eventHub`/`log`/`config`
+ * for `issueSession`'s cookie-building path. `sanitizeUser` is always the real implementation
+ * (not a canned mock) so any test can assert on what actually reaches an emitted payload or
+ * `ctx.body`. Mirrors `buildIssuingStrapi` in `authentication.test.ts`, scoped to what
+ * `resetPassword` reads.
+ */
+const buildResetStrapi = ({
+  enrolled,
+  resetPassword,
+}: {
+  enrolled: boolean;
+  resetPassword: jest.Mock;
+}) => {
+  const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+  const isEnrolled = jest.fn(() => Promise.resolve(enrolled));
+  const createChallenge = jest.fn(() =>
+    Promise.resolve({ token: 'reset-challenge-token', expiresIn: 300 })
+  );
+  const generateRefreshToken = jest.fn(() =>
+    Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
+  );
+  const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
+  const sanitizeUser = jest.fn(realSanitizeUser);
+  const emit = jest.fn();
+
+  setStrapi({
+    eventHub: { emit },
+    log: { error: jest.fn(), warn: jest.fn() },
+    config: { get: jest.fn(() => undefined) },
+    sessionManager: jest.fn(() => ({
+      invalidateRefreshToken,
+      generateRefreshToken,
+      generateAccessToken,
+    })),
+    admin: {
+      services: {
+        auth: { resetPassword },
+        mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
+        user: { sanitizeUser },
+      },
+    },
+  });
+
+  return {
+    invalidateRefreshToken,
+    isEnrolled,
+    createChallenge,
+    generateRefreshToken,
+    generateAccessToken,
+    sanitizeUser,
+    emit,
+  };
+};
+
 describe('session issuing paths', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -64,6 +127,17 @@ describe('session issuing paths', () => {
     expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
 
     expect(controller).not.toMatch(/generateRefreshToken\(/);
+
+    // `issueSession` isn't the only way to mint tokens: `accessToken` (the refresh-token
+    // exchange) calls the session manager's rotate/generate primitives directly, bypassing
+    // `issueSession` entirely because it isn't authenticating a user, just renewing an existing
+    // session. `accessToken` is the one decided call site for each -- a second call site would
+    // be a new way to mint a token outside both `issueSession` and this decision.
+    const rotateSites = [...controller.matchAll(/rotateRefreshToken\(/g)];
+    const generateAccessTokenSites = [...controller.matchAll(/generateAccessToken\(/g)];
+
+    expect(rotateSites.length).toBe(1);
+    expect(generateAccessTokenSites.length).toBe(1);
   });
 
   test('an enrolled user resetting their password gets a challenge, not a session', async () => {
@@ -71,43 +145,23 @@ describe('session issuing paths', () => {
       id: 9,
       email: 'reset-mfa@example.com',
       isActive: true,
-      // Carried on the fixture so the real `sanitizeUser` below has something non-vacuous to
-      // strip -- present here (and only here) matters because this test asserts on the exact
-      // emitted payload.
+      // Carried on the fixture so the real `sanitizeUser` (see `buildResetStrapi`) has
+      // something non-vacuous to strip -- present here (and only here) matters because this
+      // test asserts on the exact emitted payload.
       mfaSecret: 'encrypted-secret-ciphertext',
       mfaEnabledAt: '2026-01-01T00:00:00.000Z',
       mfaLastUsedStep: 3,
     };
-    const sanitizedUser = { id: 9, email: 'reset-mfa@example.com', isActive: true };
 
     const resetPassword = jest.fn(() => Promise.resolve(user));
-    const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-    const isEnrolled = jest.fn(() => Promise.resolve(true));
-    const createChallenge = jest.fn(() =>
-      Promise.resolve({ token: 'reset-challenge-token', expiresIn: 300 })
-    );
-    const generateRefreshToken = jest.fn();
-    const generateAccessToken = jest.fn();
-    const sanitizeUser = jest.fn(() => sanitizedUser);
-    const emit = jest.fn();
-
-    setStrapi({
-      eventHub: { emit },
-      log: { error: jest.fn(), warn: jest.fn() },
-      config: { get: jest.fn(() => undefined) },
-      sessionManager: jest.fn(() => ({
-        invalidateRefreshToken,
-        generateRefreshToken,
-        generateAccessToken,
-      })),
-      admin: {
-        services: {
-          auth: { resetPassword },
-          mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
-          user: { sanitizeUser },
-        },
-      },
-    });
+    const {
+      invalidateRefreshToken,
+      isEnrolled,
+      createChallenge,
+      generateRefreshToken,
+      generateAccessToken,
+      emit,
+    } = buildResetStrapi({ enrolled: true, resetPassword });
 
     const cookiesSet = jest.fn();
     const ctx = buildResetCtx(cookiesSet);
@@ -127,46 +181,36 @@ describe('session issuing paths', () => {
     });
 
     // Same audit visibility as the login gate, and for the same reason: a gated reset must not
-    // look like a completed one.
+    // look like a completed one. The exact-shape match below only means something because
+    // `sanitizeUser` is the real implementation (see `buildResetStrapi`) -- a mock returning a
+    // fixed object would pass whether or not the controller ever sanitized anything.
     expect(emit).toHaveBeenCalledWith('admin.auth.mfa_required', {
-      user: sanitizedUser,
+      user: { id: user.id, email: user.email, isActive: user.isActive },
       provider: 'local',
     });
+
+    const [, mfaRequiredPayload] = emit.mock.calls.find(
+      ([eventName]) => eventName === 'admin.auth.mfa_required'
+    )!;
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaSecret');
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaEnabledAt');
+    expect(mfaRequiredPayload.user).not.toHaveProperty('mfaLastUsedStep');
+
     expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
   });
 
   test('a user with no mfa resetting their password still gets a session', async () => {
     const user = { id: 11, email: 'reset-no-mfa@example.com', isActive: true };
-    const sanitizedUser = { id: 11, email: 'reset-no-mfa@example.com', isActive: true };
 
     const resetPassword = jest.fn(() => Promise.resolve(user));
-    const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-    const isEnrolled = jest.fn(() => Promise.resolve(false));
-    const createChallenge = jest.fn();
-    const generateRefreshToken = jest.fn(() =>
-      Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
-    );
-    const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
-    const sanitizeUser = jest.fn(() => sanitizedUser);
-    const emit = jest.fn();
-
-    setStrapi({
-      eventHub: { emit },
-      log: { error: jest.fn(), warn: jest.fn() },
-      config: { get: jest.fn(() => undefined) },
-      sessionManager: jest.fn(() => ({
-        invalidateRefreshToken,
-        generateRefreshToken,
-        generateAccessToken,
-      })),
-      admin: {
-        services: {
-          auth: { resetPassword },
-          mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
-          user: { sanitizeUser },
-        },
-      },
-    });
+    const {
+      invalidateRefreshToken,
+      isEnrolled,
+      createChallenge,
+      generateRefreshToken,
+      generateAccessToken,
+      emit,
+    } = buildResetStrapi({ enrolled: false, resetPassword });
 
     const cookiesSet = jest.fn();
     const ctx = buildResetCtx(cookiesSet);
@@ -184,7 +228,11 @@ describe('session issuing paths', () => {
       expect.any(Object)
     );
     expect(ctx.body).toEqual({
-      data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
+      data: {
+        token: 'access-token',
+        accessToken: 'access-token',
+        user: { id: user.id, email: user.email, isActive: user.isActive },
+      },
     });
 
     expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
@@ -197,30 +245,9 @@ describe('session issuing paths', () => {
     const runReset = async (enrolled: boolean) => {
       const user = { id: enrolled ? 21 : 22, email: 'x@example.com', isActive: true };
       const resetPassword = jest.fn(() => Promise.resolve(user));
-      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-      const isEnrolled = jest.fn(() => Promise.resolve(enrolled));
-      const createChallenge = jest.fn(() => Promise.resolve({ token: 't', expiresIn: 1 }));
-      const generateRefreshToken = jest.fn(() =>
-        Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
-      );
-      const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
-
-      setStrapi({
-        eventHub: { emit: jest.fn() },
-        log: { error: jest.fn(), warn: jest.fn() },
-        config: { get: jest.fn(() => undefined) },
-        sessionManager: jest.fn(() => ({
-          invalidateRefreshToken,
-          generateRefreshToken,
-          generateAccessToken,
-        })),
-        admin: {
-          services: {
-            auth: { resetPassword },
-            mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
-            user: { sanitizeUser: jest.fn(() => ({})) },
-          },
-        },
+      const { invalidateRefreshToken, createChallenge, generateRefreshToken } = buildResetStrapi({
+        enrolled,
+        resetPassword,
       });
 
       const ctx = buildResetCtx(jest.fn());
