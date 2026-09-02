@@ -100,6 +100,32 @@ describe('Audit logs service', () => {
     expect(registerSpy).toHaveBeenCalled();
   });
 
+  it('routes mfa change events and the gated-login notice into the audit log', async () => {
+    // Mock Strapi EE feature to be enabled for this test
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
+    const saveEvent = jest.fn();
+    // Only this one call to `strapi.get('audit-logs')` -- inside `createAuditLogsLifecycleService`
+    // below -- gets the `saveEvent` spy; every other test keeps the base double.
+    strapi.get.mockReturnValueOnce({ deleteExpiredEvents: jest.fn(), saveEvent });
+
+    const lifecycle = createAuditLogsLifecycleService(strapi);
+    await lifecycle.register();
+
+    // The handler `strapi.eventHub.subscribe` was just given -- the most recent registration,
+    // since `mockSubscribe`'s call history is shared across this file's tests.
+    const [handleEvent] = mockSubscribe.mock.calls[mockSubscribe.mock.calls.length - 1];
+
+    await handleEvent('admin.mfa.enabled', { userId: '1' });
+    await handleEvent('admin.mfa.disabled', { userId: '1' });
+    await handleEvent('admin.mfa.reset', { userId: '1' });
+    await handleEvent('admin.mfa.challenge.failed', { userId: '1' });
+    await handleEvent('admin.auth.mfa_required', { userId: '1' });
+
+    // All five are on the allow-list, so all five produce a saved audit event -- an event name
+    // eventMap doesn't recognise resolves to `undefined` and is silently dropped instead.
+    expect(saveEvent).toHaveBeenCalledTimes(5);
+  });
+
   it('should create a cron job that executed one time a day', async () => {
     // Mock Strapi EE feature to be enabled for this test
     jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);

@@ -6,7 +6,7 @@ import {
   base32Encode,
   errors,
 } from '@strapi/utils';
-import createMfaService from '../mfa';
+import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
 import { MFA_DEFAULTS } from '../../config/mfa';
 
 const DEFAULT_USER_TABLE = 'admin_users';
@@ -176,6 +176,13 @@ const asComparable = (value: unknown): number => {
  */
 const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknown> = {}): boolean =>
   Object.entries(where).every(([field, condition]) => {
+    // `$or` is the one logical combinator this mock understands: any one of the nested `where`
+    // fragments matching is enough. Everything else in `where` still combines with AND, exactly
+    // like every other top-level key here -- `pruneEvents`' deleteMany relies on both at once.
+    if (field === '$or') {
+      return (condition as Array<Record<string, unknown>>).some((sub) => matchesWhere(row, sub));
+    }
+
     if (condition === null || condition === undefined) {
       return row[field] === null || row[field] === undefined;
     }
@@ -522,13 +529,40 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     count: jest.fn(
       async ({ where }: any = {}) => events.filter((e) => matchesWhere(e, where)).length
     ),
-    findMany: jest.fn(async ({ where }: any = {}) =>
-      events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }))
-    ),
     // `orderBy` accepts either a single `{ field: direction }` clause or an array of them,
-    // evaluated left to right until a clause actually distinguishes two rows -- the same shape
-    // `areCodesAcknowledged` asks for (`createdAt` desc, `id` desc as a tiebreaker for rows
-    // created in the same millisecond, which a real store's clock resolution cannot rule out).
+    // evaluated left to right until a clause actually distinguishes two rows. `offset`/`limit` are
+    // honoured on top of it -- `pruneEvents` finds the cutoff row with exactly this combination
+    // (`ORDER BY createdAt DESC, id DESC OFFSET n LIMIT 1`), and a stub that ignored `offset` could
+    // never distinguish "cap not reached yet" from "reached", since both would report the newest
+    // row as the cutoff.
+    findMany: jest.fn(async ({ where, orderBy, offset, limit }: any = {}) => {
+      const matches = events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }));
+      let clauses: Array<Record<string, string>> = [];
+      if (Array.isArray(orderBy)) {
+        clauses = orderBy;
+      } else if (orderBy) {
+        clauses = [orderBy];
+      }
+
+      matches.sort((a, b) => {
+        for (const clause of clauses) {
+          for (const [field, direction] of Object.entries(clause as Record<string, string>)) {
+            const left = asComparable(a[field]);
+            const right = asComparable(b[field]);
+            if (left !== right) {
+              return direction === 'desc' ? right - left : left - right;
+            }
+          }
+        }
+        return 0;
+      });
+
+      const sliced = matches.slice(offset ?? 0);
+      return typeof limit === 'number' ? sliced.slice(0, limit) : sliced;
+    }),
+    // `orderBy` shape mirrors `findMany` above -- `areCodesAcknowledged` asks for it (`createdAt`
+    // desc, `id` desc as a tiebreaker for rows created in the same millisecond, which a real
+    // store's clock resolution cannot rule out).
     findOne: jest.fn(async ({ where, orderBy }: any = {}) => {
       const matches = events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }));
       let clauses: Array<Record<string, string>> = [];
@@ -552,6 +586,19 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       });
 
       return matches[0] ?? null;
+    }),
+    // Mutates the live rows (not a snapshot), same as the recovery/challenge `deleteMany`s above:
+    // `pruneEvents` tests need to observe the write through the same `events` array the fixture
+    // hands back, not a copy that silently diverges from it.
+    deleteMany: jest.fn(async ({ where }: any) => {
+      let count = 0;
+      for (let i = events.length - 1; i >= 0; i -= 1) {
+        if (matchesWhere(events[i], where)) {
+          events.splice(i, 1);
+          count += 1;
+        }
+      }
+      return { count };
     }),
     // Mutates the live rows (not a snapshot), same as `deleteMany` above: `markEventsSeen` /
     // `acknowledgeCodes` tests need to observe the write through the same `events` array the
@@ -589,6 +636,18 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     },
     features: { future: { isEnabled: jest.fn(() => true) } },
     log: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
+    // `notify`'s eventHub emit is unconditional and synchronous -- every test that reaches a
+    // `challenge_failed` fallthrough (the whole challenge-lifecycle suite included) now goes
+    // through it, so a real jest mock has to be here unconditionally, not only in the tests that
+    // are actually about `notify`.
+    eventHub: { emit: jest.fn() },
+    // Same reasoning for the fire-and-forget email half of `notify`: a resolving default means
+    // every incidental notify (e.g. a challenge_failed-adjacent enrolment test) settles quietly
+    // instead of logging a caught error nobody asked about. Tests about `notify` itself override
+    // this via `strapiOverrides`.
+    plugin: jest.fn(() => ({
+      service: jest.fn(() => ({ sendTemplatedEmail: jest.fn().mockResolvedValue(undefined) })),
+    })),
     db: {
       query: jest.fn((uid: string) => {
         switch (uid) {
@@ -1848,5 +1907,183 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(recoveryRows.filter((r) => r.userId === '1')).toHaveLength(codesBefore);
       expect(challenges.filter((c) => c.userId === '1')).toHaveLength(challengesBefore);
     });
+  });
+});
+
+describe('mfa notifications', () => {
+  const setup = (strapiOverrides: Record<string, unknown> = {}) => {
+    const fixture = buildMfaFixture({ strapiOverrides });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service };
+  };
+
+  /** Lets the fire-and-forget email half of `notify` run to completion before assertions. */
+  const flushMicrotasks = () =>
+    new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+
+  test('a throwing email provider does not fail the operation', async () => {
+    const sendTemplatedEmail = jest.fn().mockRejectedValue(new Error('smtp down'));
+    const { strapi, service } = setup({
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+    });
+
+    // Synchronous and non-throwing: the caller (e.g. `verifyChallenge`) must never see this
+    // rejection, which is exactly why `notify` is `void`, not `Promise<void>`.
+    expect(() => service.notify('1', 'enabled')).not.toThrow();
+    await flushMicrotasks();
+
+    expect(sendTemplatedEmail).toHaveBeenCalled();
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'Failed to send the two-factor change notification',
+      expect.any(Error)
+    );
+  });
+
+  test('emits the eventHub event even when the email plugin is entirely missing', async () => {
+    const { strapi, service } = setup({ plugin: undefined });
+
+    expect(() => service.notify('1', 'enabled')).not.toThrow();
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.enabled', { userId: '1' });
+
+    // `strapi.plugin` being undefined throws inside the fire-and-forget block (many self-hosted
+    // instances never configure a provider at all) -- caught and logged, never escaping `notify`.
+    await flushMicrotasks();
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'Failed to send the two-factor change notification',
+      expect.any(Error)
+    );
+  });
+
+  test('never includes a code or secret in the event payload', async () => {
+    const { strapi, service } = setup();
+
+    service.notify('1', 'reset');
+    await flushMicrotasks();
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.reset', { userId: '1' });
+    const [, payload] = (strapi.eventHub.emit as jest.Mock).mock.calls[0];
+    // Exactly `{ userId }` -- not a subset match: a mutant that also attached the code, the
+    // secret or the otpauth URI onto this payload must fail here, not just onto a `toMatchObject`
+    // that would let extra keys through unnoticed.
+    expect(payload).toEqual({ userId: '1' });
+  });
+
+  test('challenge_failed emits an eventHub event but sends no email', async () => {
+    const sendTemplatedEmail = jest.fn().mockResolvedValue(undefined);
+    const { strapi, service } = setup({
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+    });
+
+    service.notify('1', 'challenge_failed');
+    await flushMicrotasks();
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.challenge.failed', {
+      userId: '1',
+    });
+    // The property the email-only-for-changes rule exists for: a failed challenge is a notice,
+    // not a change, and mailing every wrong code would let anyone who merely knows the password
+    // flood the account holder's inbox.
+    expect(sendTemplatedEmail).not.toHaveBeenCalled();
+  });
+});
+
+describe('mfa service: event pruning', () => {
+  const setup = () => {
+    const fixture = buildMfaFixture();
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service };
+  };
+
+  const NOW = Date.now();
+
+  /** A synthetic `admin::mfa-event` row, `secondsAgo` seconds older than `NOW`. */
+  const seedEvent = (
+    events: EventRow[],
+    userId: string,
+    type: string,
+    secondsAgo: number
+  ): EventRow => {
+    const row: EventRow = {
+      id: events.length + 1,
+      userId,
+      type,
+      metadata: {},
+      seenAt: null,
+      createdAt: new Date(NOW - secondsAgo * 1000),
+    };
+    events.push(row);
+    return row;
+  };
+
+  test('under the cap, pruning deletes nothing', async () => {
+    const { service, events } = setup();
+    for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
+      seedEvent(events, '1', 'enabled', i);
+    }
+
+    await service.pruneEvents('1');
+
+    expect(events).toHaveLength(MAX_EVENTS_PER_USER);
+  });
+
+  test('over the cap, exactly the oldest non-protected row is removed from a mixed set', async () => {
+    const { service, events } = setup();
+    const types = ['enabled', 'disabled', 'recovery_code_used'];
+    for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
+      seedEvent(events, '1', types[i % types.length], i);
+    }
+    // The 501st row, and the oldest of all of them.
+    const oldest = seedEvent(events, '1', 'enabled', MAX_EVENTS_PER_USER);
+
+    await service.pruneEvents('1');
+
+    expect(events).toHaveLength(MAX_EVENTS_PER_USER);
+    expect(events.find((e) => e.id === oldest.id)).toBeUndefined();
+  });
+
+  test("a challenge_failed row beyond the cap survives while it is within the account's attempt window", async () => {
+    const { service, events } = setup();
+    for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
+      seedEvent(events, '1', 'enabled', i);
+    }
+    // Oldest of all (rank MAX+1, so a deletion candidate by rank alone), but well inside the
+    // default 900s `userAttemptWindow` -- `isAccountThrottled` still needs to count it.
+    const young = seedEvent(events, '1', 'challenge_failed', MAX_EVENTS_PER_USER + 1);
+
+    await service.pruneEvents('1');
+
+    // Not merely "not yet deleted": this is the only row past the cap, so its survival is the
+    // whole outcome of this prune.
+    expect(events).toHaveLength(MAX_EVENTS_PER_USER + 1);
+    expect(events.find((e) => e.id === young.id)).toBeDefined();
+  });
+
+  test('the recovery_codes_issued marker survives no matter how old', async () => {
+    const { service, events } = setup();
+    for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
+      seedEvent(events, '1', 'enabled', i);
+    }
+    // Far older than any plausible userAttemptWindow -- the marker's exemption has nothing to do
+    // with age, unlike `challenge_failed`'s.
+    const marker = seedEvent(events, '1', 'recovery_codes_issued', 10_000_000);
+
+    await service.pruneEvents('1');
+
+    expect(events).toHaveLength(MAX_EVENTS_PER_USER + 1);
+    expect(events.find((e) => e.id === marker.id)).toBeDefined();
+  });
+
+  test('recordEvent runs the prune after every insert', async () => {
+    const { service, events } = setup();
+    for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
+      seedEvent(events, '1', 'enabled', i + 1);
+    }
+
+    // The insert that tips the account over the cap.
+    await service.recordEvent('1', 'enabled');
+
+    expect(events).toHaveLength(MAX_EVENTS_PER_USER);
   });
 });

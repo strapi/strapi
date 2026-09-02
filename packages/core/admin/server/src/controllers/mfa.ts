@@ -75,6 +75,7 @@ export default {
 
     const { recoveryCodes } = await mfa.completeEnrolment(userId, code);
     await mfa.recordEvent(userId, 'enabled', buildSessionMetadataFromContext(ctx));
+    mfa.notify(userId, 'enabled');
 
     ctx.body = { data: { recoveryCodes } } satisfies VerifyEnrolment.Response;
   },
@@ -124,6 +125,7 @@ export default {
     await mfa.assertPasswordAndFactor(userId, password, code);
     await mfa.disable(userId);
     await mfa.recordEvent(userId, 'disabled', buildSessionMetadataFromContext(ctx));
+    mfa.notify(userId, 'disabled');
 
     // Evict every OTHER *device* -- not by session row, and not this one. `listSessions` only
     // ever returns active rows, but a refresh rotation leaves the just-superseded row behind as

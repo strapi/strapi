@@ -11,6 +11,7 @@ import {
 } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
+import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
@@ -36,6 +37,15 @@ const MAX_TOTP_CODE_LENGTH = 8;
 const RECOVERY_CODE_LENGTH = 10;
 
 /**
+ * The per-user cap `pruneEvents` enforces on `admin::mfa-event` rows. Comfortably above anything
+ * `maxUserAttempts`/`userAttemptWindow` could produce on their own (10 failures per 900s by
+ * default), so the exemptions in `pruneEvents` are the actual guarantee for `isAccountThrottled`
+ * -- this cap only keeps the table bounded for an account that keeps generating other kinds of
+ * event (enable/disable/reset/recovery-code-use) indefinitely.
+ */
+export const MAX_EVENTS_PER_USER = 500;
+
+/**
  * Security notices surfaced in-app, and — for `challenge_failed` — the stored counter the
  * account-scoped throttle reads. Never carries the code, secret or URI it is about.
  *
@@ -52,6 +62,19 @@ export type MfaEventType =
   | 'challenge_failed'
   | 'recovery_code_used'
   | 'recovery_codes_issued';
+
+/**
+ * The only shape `recordEvent`'s `metadata` may carry, enforced at the type level rather than by
+ * convention -- a compile error is a much stronger guarantee than a comment nobody happens to
+ * violate yet. `userAgent`/`ip` are neutral request context; `via: 'cli'` is how the CLI reset
+ * (Task 12) marks an event it recorded outside any HTTP request. None of the three can ever be a
+ * code, a secret or an otpauth URI.
+ */
+export type MfaEventMetadata = {
+  userAgent?: string;
+  ip?: string;
+  via?: 'cli';
+};
 
 /**
  * `unusable`  — no such challenge, already spent, or expired. Nothing was evaluated.
@@ -100,6 +123,9 @@ export interface MfaServiceDeps {
  *    `acknowledgeCodes` — the in-app notice feed and recovery-code acknowledgement — plus
  *    `assertPasswordAndFactor` and `disable`, the shared re-authentication gate and its one
  *    consumer that turns two-factor authentication off.
+ *  - Outbound notices (Task 11): `notify` — the eventHub event and best-effort change email
+ *    layered on top of `recordEvent` — and `pruneEvents`, the per-user retention cap on
+ *    `admin::mfa-event` that `recordEvent` runs after every insert.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -450,9 +476,118 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const recordEvent = async (
     userId: string,
     type: MfaEventType,
-    metadata: Record<string, unknown> = {}
+    metadata: MfaEventMetadata = {}
   ): Promise<void> => {
     await eventQuery().create({ data: { userId: String(userId), type, metadata, seenAt: null } });
+    await pruneEvents(userId);
+  };
+
+  /**
+   * The four notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
+   * `recovery_code_used` and `recovery_codes_issued` never reach here: both are already fully
+   * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
+   * respectively), and an emailed notice on every recovery-code use would mean an attacker who has
+   * already stolen one credential now also learns, by email, that the account holder is about to
+   * find out. Keeping this union out of `notify`'s own signature, rather than reusing
+   * `MfaEventType` and rejecting the other two at runtime, turns passing either of them into a
+   * compile error.
+   */
+  type MfaChangeNotice = 'enabled' | 'disabled' | 'reset' | 'challenge_failed';
+
+  /**
+   * Fire and forget. Strapi's own forgotPassword does exactly this: send, catch, log server side,
+   * let the operation succeed. Many self-hosted instances never configure a provider, so email
+   * cannot be a hard dependency of a security control. The primary channel is the in-app notice
+   * built from unseen mfa events.
+   *
+   * The eventHub event fires for all four notice types -- `admin.mfa.<type>`, `_` replaced by `.`
+   * so `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is
+   * cheap and synchronous and EE audit logs depend on it for every one of the four. The email is
+   * sent only for an actual change (`enabled`/`disabled`/`reset`): a failed challenge is a notice,
+   * not a change, and mailing every wrong code would let anyone who merely knows the password
+   * flood the account holder's inbox.
+   */
+  const notify = (userId: string, type: MfaChangeNotice): void => {
+    strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId });
+
+    if (type === 'challenge_failed') {
+      return;
+    }
+
+    (async () => {
+      try {
+        const user = await userQuery().findOne({ where: { id: userId } });
+        if (!user?.email) return;
+
+        await strapi
+          .plugin('email')
+          .service('email')
+          .sendTemplatedEmail(
+            {
+              to: user.email,
+              from: strapi.config.get('admin.forgotPassword.from'),
+              replyTo: strapi.config.get('admin.forgotPassword.replyTo'),
+            },
+            strapi.config.get('admin.auth.mfa.emailTemplate', mfaChangedTemplate),
+            {
+              user: { email: user.email, firstname: user.firstname },
+              change: type,
+              changedAt: new Date().toISOString(),
+            }
+          );
+      } catch (error) {
+        strapi.log.error('Failed to send the two-factor change notification', error);
+      }
+    })();
+  };
+
+  /**
+   * Caps how many `admin::mfa-event` rows a single account can accumulate, run after every insert
+   * so the table cannot grow without bound. Two kinds of row are exempt no matter how old they
+   * are:
+   *  - `recovery_codes_issued`, the acknowledgement marker `areCodesAcknowledged` reads
+   *    indefinitely (see `MfaEventType` above) -- pruning it out from under a still-unacknowledged
+   *    set would make "have I saved my codes?" unanswerable.
+   *  - a `challenge_failed` row younger than `config().userAttemptWindow` seconds -- exactly the
+   *    rows `isAccountThrottled`'s rolling window counts. Removing one of those early would let an
+   *    attacker outlast the account-scoped throttle by generating enough other traffic (failed
+   *    challenges included) to push it past the cap before the window naturally clears it.
+   *
+   * The cutoff -- the `createdAt` of the `MAX_EVENTS_PER_USER`th-newest row -- is found with a
+   * plain, ordered read; the actual deletion is the one `deleteMany` below, whose `where` encodes
+   * both exemptions directly rather than filtering candidates in application code.
+   */
+  const pruneEvents = async (userId: string): Promise<void> => {
+    const total = await eventQuery().count({ where: { userId: String(userId) } });
+    if (total <= MAX_EVENTS_PER_USER) {
+      return;
+    }
+
+    // `findOne` is typed without `offset` (it is meant for a unique-ish lookup, not the Nth row of
+    // an ordered set), so the cutoff read goes through `findMany` with `limit: 1` instead --
+    // exactly the `ORDER BY createdAt DESC, id DESC OFFSET n LIMIT 1` this needs, fully typed.
+    const [cutoff] = await eventQuery().findMany({
+      where: { userId: String(userId) },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      offset: MAX_EVENTS_PER_USER - 1,
+      limit: 1,
+    });
+
+    if (!cutoff) {
+      return;
+    }
+
+    const { userAttemptWindow } = config();
+    const attemptWindowStart = new Date(Date.now() - userAttemptWindow * 1000);
+
+    await eventQuery().deleteMany({
+      where: {
+        userId: String(userId),
+        createdAt: { $lt: new Date(cutoff.createdAt) },
+        type: { $ne: 'recovery_codes_issued' },
+        $or: [{ type: { $ne: 'challenge_failed' } }, { createdAt: { $lte: attemptWindowStart } }],
+      },
+    });
   };
 
   /**
@@ -709,6 +844,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // is what `isAccountThrottled` counts. A path that charges one tier but not the other is a
     // hole in the other.
     await recordEvent(challenge.userId, 'challenge_failed');
+    notify(challenge.userId, 'challenge_failed');
     return { ok: false as const, reason: 'invalid' as const };
   };
 
@@ -763,6 +899,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // Reached whether a check ran and failed or the code matched no factor's shape at all -- one
     // spent attempt at the account-scoped tier, mirroring `verifyChallenge`.
     await recordEvent(userId, 'challenge_failed');
+    notify(userId, 'challenge_failed');
     throw new ValidationError('Invalid code');
   };
 
@@ -817,6 +954,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     consumeRecoveryCode,
     countUnusedRecoveryCodes,
     recordEvent,
+    notify,
+    pruneEvents,
     unseenEvents,
     markEventsSeen,
     areCodesAcknowledged,

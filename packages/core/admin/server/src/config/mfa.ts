@@ -1,6 +1,8 @@
 import type { Core } from '@strapi/types';
 
-export type MfaConfig = Required<Omit<NonNullable<Core.Config.Admin['auth']['mfa']>, 'issuer'>> & {
+export type MfaConfig = Required<
+  Omit<NonNullable<Core.Config.Admin['auth']['mfa']>, 'issuer' | 'emailTemplate'>
+> & {
   issuer?: string;
 };
 

@@ -47,6 +47,20 @@ export interface Mfa {
   userAttemptWindow?: number;
   recoveryCodeCount?: number;
   issuer?: string;
+  /**
+   * Template for the best-effort "your two-factor settings changed" notification email. Same
+   * shape `ForgotPassword.emailTemplate` should be -- a subject/text/html triple -- not the bare
+   * `string` that field is actually typed as (a pre-existing inaccuracy, left alone here).
+   * Optional because the built-in template (`config/email-templates/mfa-changed.ts`) is applied
+   * as a call-site default (`strapi.config.get('admin.auth.mfa.emailTemplate', mfaChangedTemplate)`),
+   * not merged into `MFA_DEFAULTS` -- this field only needs to exist so an operator's own
+   * `config/admin.ts` can override it without a type error.
+   */
+  emailTemplate?: {
+    subject: string;
+    text: string;
+    html: string;
+  };
 }
 
 export interface Auth {

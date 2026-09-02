@@ -63,14 +63,17 @@ const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) =>
     invalidateRefreshToken,
     listSessions,
   }));
+  // A default so every test reaching a successful `disable` doesn't have to supply its own --
+  // only the one test asserting on the call needs to read it back off the return value.
+  const notify = jest.fn();
 
   setStrapi({
     sessionManager: sessionManagerFn,
     log: { error: jest.fn(), warn: jest.fn() },
-    admin: { services: { mfa: mfaOverrides } },
+    admin: { services: { mfa: { notify, ...mfaOverrides } } },
   });
 
-  return { invalidateRefreshToken, listSessions, sessionManagerFn };
+  return { invalidateRefreshToken, listSessions, sessionManagerFn, notify };
 };
 
 describe('mfa controller', () => {
@@ -155,15 +158,18 @@ describe('mfa controller', () => {
     expect(beginEnrolment).not.toHaveBeenCalled();
   });
 
-  test('enrol/verify returns recovery codes exactly once', async () => {
+  test('enrol/verify returns recovery codes exactly once, and notifies of the change', async () => {
     const completeEnrolment = jest.fn(() =>
       Promise.resolve({ recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'] })
     );
     const recordEvent = jest.fn(() => Promise.resolve());
+    const notify = jest.fn();
 
     setStrapi({
       admin: {
-        services: { mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent } },
+        services: {
+          mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent, notify },
+        },
       },
     });
 
@@ -173,9 +179,13 @@ describe('mfa controller', () => {
 
     expect(completeEnrolment).toHaveBeenCalledWith('7', '123456');
     expect(ctx.body).toEqual({ data: { recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'] } });
-    // Recorded, never notified -- `mfa.notify` does not exist until Task 11, so a controller that
-    // called it here would reject with a "not a function" error and fail this test.
     expect(recordEvent).toHaveBeenCalledWith('7', 'enabled', expect.any(Object));
+    // Notified after being recorded: `notify` is the eventHub/best-effort-email half (Task 11),
+    // `recordEvent` is the in-app notice feed -- both run, in that order.
+    expect(notify).toHaveBeenCalledWith('7', 'enabled');
+    expect(recordEvent.mock.invocationCallOrder[0]).toBeLessThan(
+      notify.mock.invocationCallOrder[0]
+    );
   });
 
   test('a second call to enrol/verify does not return codes again', async () => {
@@ -187,10 +197,13 @@ describe('mfa controller', () => {
       .mockResolvedValueOnce({ recoveryCodes: ['AAAAA-BBBBB'] })
       .mockRejectedValueOnce(new errors.ValidationError('Invalid code'));
     const recordEvent = jest.fn(() => Promise.resolve());
+    const notify = jest.fn();
 
     setStrapi({
       admin: {
-        services: { mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent } },
+        services: {
+          mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent, notify },
+        },
       },
     });
 
@@ -204,6 +217,7 @@ describe('mfa controller', () => {
     });
     expect(secondCtx.body).toBeUndefined();
     expect(recordEvent).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledTimes(1);
   });
 
   test('disable requires both the password and a valid code', async () => {
@@ -292,7 +306,7 @@ describe('mfa controller', () => {
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
     const disableFn = jest.fn(() => Promise.resolve());
     const recordEvent = jest.fn(() => Promise.resolve());
-    const { invalidateRefreshToken, listSessions, sessionManagerFn } =
+    const { invalidateRefreshToken, listSessions, sessionManagerFn, notify } =
       buildStrapiWithSessionManager({
         isEnabled: jest.fn(() => true),
         assertPasswordAndFactor,
@@ -320,6 +334,7 @@ describe('mfa controller', () => {
     expect(assertPasswordAndFactor).toHaveBeenCalledWith('7', 'Password123', '123456');
     expect(disableFn).toHaveBeenCalledWith('7');
     expect(recordEvent).toHaveBeenCalledWith('7', 'disabled', expect.any(Object));
+    expect(notify).toHaveBeenCalledWith('7', 'disabled');
     expect(sessionManagerFn).toHaveBeenCalledWith('admin');
     expect(listSessions).toHaveBeenCalledWith('7');
     // One call per other device -- not per session row, and each one carries a deviceId.
