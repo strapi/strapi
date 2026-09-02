@@ -4,6 +4,8 @@ import {
   listMediaOutputSchema,
   getMediaOutputSchema,
   listFoldersOutputSchema,
+  updateMediaInputSchema,
+  updateMediaOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -65,6 +67,105 @@ describe('upload MCP schemas', () => {
 
     test('requires the id', () => {
       expect(getMediaInputSchema.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('update_media input', () => {
+    test('accepts the three writable metadata fields', () => {
+      const parsed = updateMediaInputSchema.safeParse({
+        id: 1,
+        name: 'renamed.jpg',
+        alternativeText: 'alt',
+        caption: 'caption',
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a partial patch', () => {
+      expect(updateMediaInputSchema.safeParse({ id: 1, caption: 'only this' }).success).toBe(true);
+    });
+
+    test('accepts null on the nullable text fields, to clear them', () => {
+      expect(
+        updateMediaInputSchema.safeParse({ id: 1, alternativeText: null, caption: null }).success
+      ).toBe(true);
+    });
+
+    test('rejects a null name — an asset cannot be left unnamed', () => {
+      expect(updateMediaInputSchema.safeParse({ id: 1, name: null }).success).toBe(false);
+      expect(updateMediaInputSchema.safeParse({ id: 1, name: '' }).success).toBe(false);
+    });
+
+    test('requires the numeric id', () => {
+      expect(updateMediaInputSchema.safeParse({ name: 'renamed.jpg' }).success).toBe(false);
+      expect(
+        updateMediaInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b', name: 'x' }).success
+      ).toBe(false);
+    });
+
+    test('rejects folder — moving an asset belongs to move_media', () => {
+      expect(updateMediaInputSchema.safeParse({ id: 1, folder: 3 }).success).toBe(false);
+      expect(updateMediaInputSchema.safeParse({ id: 1, folderId: 3 }).success).toBe(false);
+      expect(updateMediaInputSchema.safeParse({ id: 1, folderPath: '/1/2' }).success).toBe(false);
+    });
+
+    test.each([
+      ['url', '/uploads/evil.jpg'],
+      ['provider', 'aws-s3'],
+      ['provider_metadata', { secretKey: 'leak' }],
+      ['hash', 'forced_hash'],
+      ['mime', 'text/html'],
+      ['size', 1],
+      ['width', 10],
+      ['height', 10],
+      ['ext', '.png'],
+      ['formats', { thumbnail: {} }],
+    ])('rejects the provider-owned field %s', (field, value) => {
+      expect(
+        updateMediaInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: value }).success
+      ).toBe(false);
+    });
+
+    test.each(['file', 'files', 'data', 'buffer', 'filepath', 'focalPoint'])(
+      'rejects the out-of-scope field %s',
+      (field) => {
+        // File content is out of MCP scope entirely — MCP is text-only.
+        expect(
+          updateMediaInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: 'x' }).success
+        ).toBe(false);
+      }
+    );
+
+    test('reports the unrecognised key by name, so an agent can correct itself', () => {
+      const parsed = updateMediaInputSchema.safeParse({ id: 1, name: 'x', folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/folder/);
+    });
+  });
+
+  describe('update_media output', () => {
+    test('returns the asset in the same shape as the read tools', () => {
+      const parsed = updateMediaOutputSchema.safeParse({
+        data: {
+          id: 1,
+          name: 'renamed.jpg',
+          alternativeText: 'alt',
+          caption: null,
+          url: '/uploads/photo.jpg',
+          mime: 'image/jpeg',
+          size: 12.5,
+          folder: null,
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('requires data — a successful write always returns the updated asset', () => {
+      expect(updateMediaOutputSchema.safeParse({ data: null }).success).toBe(false);
+      expect(updateMediaOutputSchema.safeParse({}).success).toBe(false);
     });
   });
 

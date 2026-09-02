@@ -8,15 +8,18 @@ import {
   listMediaOutputSchema,
   getMediaOutputSchema,
   listFoldersOutputSchema,
+  updateMediaInputSchema,
+  updateMediaOutputSchema,
 } from './schemas';
 import {
   createListMediaHandler,
   createGetMediaHandler,
   createListFoldersHandler,
+  createUpdateMediaHandler,
 } from './handlers';
 
 /**
- * The Media Library MCP read tools.
+ * The Media Library MCP tools.
  *
  * Exported separately from registration so unit tests can assert the definitions (names, auth
  * policies, schemas) without booting Strapi or an MCP server.
@@ -25,10 +28,13 @@ import {
  * everything on `documentId`, which does not exist on files, so the distinction is spelled out
  * per tool rather than left to be inferred.
  *
- * `plugin::upload.read` is registered in the `plugins` section with no subject (see the upload
- * plugin bootstrap), so the policies carry an action only — a subject-less grant registers as
- * CASL `subject: 'all'`. The per-model check still happens inside the handlers, where the
- * permissions manager is bound to the file or folder UID.
+ * The Media Library actions are registered in the `plugins` section with no subject (see the
+ * upload plugin bootstrap), so the policies carry an action only — a subject-less grant
+ * registers as CASL `subject: 'all'`. The per-model check still happens inside the handlers,
+ * where the permissions manager is bound to the file or folder UID.
+ *
+ * Read tools are gated on `plugin::upload.read`; writes take the separate
+ * `plugin::upload.assets.update`, so a read-only token never gains an editing tool.
  */
 export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
   {
@@ -62,6 +68,17 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     auth: { policies: [{ action: ACTIONS.read }] },
     resolveOutputSchema: () => listFoldersOutputSchema,
     createHandler: createListFoldersHandler,
+  },
+  {
+    name: 'update_media',
+    title: 'Media: update asset metadata',
+    description:
+      "Update the editable metadata of a Media Library asset, identified by its numeric id. Only name, alternativeText and caption can be written: use move_media to change an asset's folder, and note that url, mime, size and the file contents are owned by the upload provider and cannot be edited over MCP.",
+    telemetry: { source: 'upload', name: 'update' },
+    auth: { policies: [{ action: ACTIONS.update }] },
+    resolveInputSchema: () => updateMediaInputSchema,
+    resolveOutputSchema: () => updateMediaOutputSchema,
+    createHandler: createUpdateMediaHandler,
   },
 ];
 

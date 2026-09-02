@@ -16,18 +16,19 @@ const makeStrapi = (options: { isEnabled?: boolean; withAi?: boolean } = {}) => 
   return { strapi, registerTool };
 };
 
+const READ_TOOLS = ['list_media', 'get_media', 'list_folders'];
+
 describe('upload MCP tool registration', () => {
   describe('gating', () => {
-    test('registers every read tool when the MCP server is enabled', () => {
+    test('registers every tool when the MCP server is enabled', () => {
       const { strapi, registerTool } = makeStrapi({ isEnabled: true });
 
       registerUploadMcpTools({ strapi });
 
-      expect(registerTool).toHaveBeenCalledTimes(3);
+      expect(registerTool).toHaveBeenCalledTimes(4);
       expect(registerTool.mock.calls.map(([tool]) => tool.name)).toEqual([
-        'list_media',
-        'get_media',
-        'list_folders',
+        ...READ_TOOLS,
+        'update_media',
       ]);
     });
 
@@ -54,9 +55,14 @@ describe('upload MCP tool registration', () => {
     test('gates every read tool on plugin::upload.read', () => {
       // `plugin::upload.read` is registered without a subject, so the policy carries an action
       // only. The per-model check lives in the handlers, via the permissions manager.
-      for (const tool of tools) {
-        expect(tool.auth.policies).toEqual([{ action: ACTIONS.read }]);
+      for (const name of READ_TOOLS) {
+        expect(byName[name].auth.policies).toEqual([{ action: ACTIONS.read }]);
       }
+    });
+
+    test('gates update_media on plugin::upload.assets.update, not on read', () => {
+      // A read-only token must never reach a write tool, so the write action is the gate.
+      expect(byName.update_media.auth.policies).toEqual([{ action: ACTIONS.update }]);
     });
 
     test('does not pin a policy to a subject the action was never registered with', () => {
@@ -68,9 +74,17 @@ describe('upload MCP tool registration', () => {
     });
 
     test('never gates a read tool on a write action', () => {
-      const actions = tools.flatMap((tool) => tool.auth.policies.map((policy) => policy.action));
+      const actions = READ_TOOLS.flatMap((name) =>
+        byName[name].auth.policies.map((policy) => policy.action)
+      );
 
       expect(actions).not.toContain(ACTIONS.update);
+      expect(actions).not.toContain(ACTIONS.create);
+    });
+
+    test('never gates a tool on the create action — uploading is out of scope', () => {
+      const actions = tools.flatMap((tool) => tool.auth.policies.map((policy) => policy.action));
+
       expect(actions).not.toContain(ACTIONS.create);
     });
 
@@ -89,7 +103,30 @@ describe('upload MCP tool registration', () => {
     test('exposes an input schema for the tools that take arguments, and none for the folder tree', () => {
       expect(byName.list_media.resolveInputSchema).toBeDefined();
       expect(byName.get_media.resolveInputSchema).toBeDefined();
+      expect(byName.update_media.resolveInputSchema).toBeDefined();
       expect(byName.list_folders.resolveInputSchema).toBeUndefined();
+    });
+
+    test('points update_media at the right tool for a folder change', () => {
+      // An agent that wants to move an asset must be steered from the tool description alone.
+      expect(byName.update_media.description).toMatch(/move_media/);
+      expect(byName.update_media.description).toMatch(/numeric id/i);
+    });
+
+    test('publishes update_media as a plain object schema the registry can expose', () => {
+      // A `.refine()` would make this a ZodEffects, which the tool registry cannot convert to
+      // an input JSON Schema — the "at least one field" rule lives in the handler instead.
+      const schema = byName.update_media.resolveInputSchema?.(
+        {} as Parameters<NonNullable<typeof byName.update_media.resolveInputSchema>>[0]
+      );
+
+      expect(schema?.shape).toBeDefined();
+      expect(Object.keys(schema?.shape ?? {}).sort()).toEqual([
+        'alternativeText',
+        'caption',
+        'id',
+        'name',
+      ]);
     });
   });
 });

@@ -8,6 +8,7 @@ import { createMediaSeeder } from './utils/media-seed';
 const UPLOAD_ACTIONS = {
   read: 'plugin::upload.read',
   settingsRead: 'plugin::upload.settings.read',
+  assetsUpdate: 'plugin::upload.assets.update',
 } as const;
 
 const READ_TOOLS = ['list_media', 'get_media', 'list_folders'] as const;
@@ -23,7 +24,7 @@ const FORBIDDEN_ASSET_FIELDS = [
   'related',
 ] as const;
 
-describe('MCP upload read tools RBAC (api)', () => {
+describe('MCP upload tools RBAC (api)', () => {
   let strapi: Core.Strapi;
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
   let mcp: ReturnType<typeof createMcpClient>;
@@ -93,6 +94,16 @@ describe('MCP upload read tools RBAC (api)', () => {
     return token;
   };
 
+  /** A session that can both write metadata and read it back for verification. */
+  const createUpdateTokenSession = async (): Promise<AdminToken> => {
+    const token = await createAdminToken([
+      permission(UPLOAD_ACTIONS.read),
+      permission(UPLOAD_ACTIONS.assetsUpdate),
+    ]);
+    await mcp.initializeSession(token.accessKey);
+    return token;
+  };
+
   // ---------------------------------------------------------------------------
   // Tool exposure
   // ---------------------------------------------------------------------------
@@ -136,6 +147,13 @@ describe('MCP upload read tools RBAC (api)', () => {
       expect(toolNames.filter((name) => /media|folders/.test(name)).sort()).toEqual(
         [...READ_TOOLS].sort()
       );
+      expect(toolNames).not.toContain('update_media');
+    });
+
+    test('a token with plugin::upload.assets.update sees the metadata tool', async () => {
+      const token = await createUpdateTokenSession();
+
+      expect(await mcp.listToolNames(token.accessKey)).toContain('update_media');
     });
   });
 
@@ -361,6 +379,225 @@ describe('MCP upload read tools RBAC (api)', () => {
       const response = await mcp.callTool(token.accessKey, 'list_folders', {});
 
       expect(response.result?.structuredContent?.data).toEqual([]);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // update_media
+  // ---------------------------------------------------------------------------
+
+  describe('update_media', () => {
+    const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
+      response.result?.structuredContent?.data as Record<string, unknown>;
+
+    const readBack = async (accessKey: string, id: number) => {
+      const response = await mcp.callTool(accessKey, 'get_media', { id });
+      expect(response.error).toBeUndefined();
+      return response.result?.structuredContent?.data as Record<string, unknown>;
+    };
+
+    test('round-trips a metadata update, confirmed by get_media', async () => {
+      const seeded = await seeder.seedAsset({ name: 'before.jpg', alternativeText: 'old alt' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        name: 'after.jpg',
+        alternativeText: 'new alt',
+        caption: 'new caption',
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(response.result?.isError).not.toBe(true);
+
+      // The write response is authoritative on its own — no follow-up read required.
+      expect(structured(response)).toMatchObject({
+        id: seeded.id,
+        name: 'after.jpg',
+        alternativeText: 'new alt',
+        caption: 'new caption',
+      });
+
+      // ...and the change is actually persisted, not just echoed back.
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
+        name: 'after.jpg',
+        alternativeText: 'new alt',
+        caption: 'new caption',
+      });
+    });
+
+    test('leaves the fields the caller omitted untouched', async () => {
+      const seeded = await seeder.seedAsset({
+        name: 'keep.jpg',
+        alternativeText: 'keep alt',
+        caption: 'keep caption',
+      });
+      const token = await createUpdateTokenSession();
+
+      await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        caption: 'only the caption changed',
+      });
+
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
+        name: 'keep.jpg',
+        alternativeText: 'keep alt',
+        caption: 'only the caption changed',
+      });
+    });
+
+    test('clears a text field passed as null', async () => {
+      const seeded = await seeder.seedAsset({
+        name: 'clear.jpg',
+        alternativeText: 'to be cleared',
+      });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        alternativeText: null,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({ alternativeText: '' });
+    });
+
+    test('does not move the asset or change its url when renaming', async () => {
+      const folder = await seeder.seedFolder('Stays');
+      const seeded = await seeder.seedAsset({ name: 'renamed.jpg', folderId: folder.id });
+      const token = await createUpdateTokenSession();
+
+      const before = await readBack(token.accessKey, seeded.id);
+
+      await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        name: 'new-label.jpg',
+      });
+
+      const after = await readBack(token.accessKey, seeded.id);
+      expect(after).toMatchObject({
+        name: 'new-label.jpg',
+        url: before.url,
+        mime: before.mime,
+        folder: { id: folder.id, name: 'Stays' },
+      });
+    });
+
+    test('returns the sanitized shape, with no provider secrets on the write path either', async () => {
+      const seeded = await seeder.seedAsset({ name: 'sanitized.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        caption: 'a caption',
+      });
+
+      const asset = structured(response);
+      for (const field of FORBIDDEN_ASSET_FIELDS) {
+        expect(asset).not.toHaveProperty(field);
+      }
+    });
+
+    test.each([
+      ['url', '/uploads/evil.jpg'],
+      ['folder', 1],
+      ['folderId', 1],
+      ['folderPath', '/1/2'],
+      ['provider', 'aws-s3'],
+      ['provider_metadata', { secretKey: 'leak' }],
+      ['hash', 'forced_hash'],
+      ['mime', 'text/html'],
+      ['size', 1],
+      ['formats', { thumbnail: {} }],
+      ['file', 'new binary content'],
+      ['files', ['new binary content']],
+      ['focalPoint', { x: 10, y: 10 }],
+    ])('rejects the out-of-scope field %s at the schema level', async (field, value) => {
+      const seeded = await seeder.seedAsset({ name: 'guarded.jpg', alternativeText: 'untouched' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        name: 'attempted.jpg',
+        [field]: value,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+
+      // A rejected call must not partially apply: the legitimate `name` in the same payload
+      // is discarded along with the unrecognised key.
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
+        name: 'guarded.jpg',
+        alternativeText: 'untouched',
+      });
+    });
+
+    test('rejects a patch with no writable field, naming the tool that does move assets', async () => {
+      const seeded = await seeder.seedAsset({ name: 'nothing.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(JSON.stringify(response)).toMatch(/move_media/);
+    });
+
+    test('rejects a documentId in place of a numeric id', async () => {
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: 'z7v8zma53x01r6oceimv922b',
+        name: 'x.jpg',
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('errors for an unknown id', async () => {
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: 999999,
+        name: 'ghost.jpg',
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('denies the write to a token without plugin::upload.assets.update', async () => {
+      const seeded = await seeder.seedAsset({ name: 'readonly.jpg', alternativeText: 'untouched' });
+
+      // A read-granted token: it can see the asset but must not be able to edit it.
+      const token = await createReadTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        name: 'hijacked.jpg',
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
+        name: 'readonly.jpg',
+        alternativeText: 'untouched',
+      });
+    });
+
+    test('denies the write to a token holding an unrelated upload permission', async () => {
+      const seeded = await seeder.seedAsset({ name: 'unrelated.jpg' });
+
+      const token = await createAdminToken([permission(UPLOAD_ACTIONS.settingsRead)]);
+      await mcp.initializeSession(token.accessKey);
+
+      expect(await mcp.listToolNames(token.accessKey)).not.toContain('update_media');
+
+      const response = await mcp.callTool(token.accessKey, 'update_media', {
+        id: seeded.id,
+        name: 'hijacked.jpg',
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
     });
   });
 });
