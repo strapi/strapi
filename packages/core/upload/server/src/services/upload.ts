@@ -495,6 +495,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ext: dbFile.ext,
       });
 
+      // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
+      // '/' while the relation survived — and folder deletion selects by folderPath,
+      // which orphaned the file. An explicitly sent folder still moves it.
+      if (fileInfo?.folder === undefined) {
+        _.assign(fileData, { folderPath: dbFile.folderPath });
+      }
+
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
