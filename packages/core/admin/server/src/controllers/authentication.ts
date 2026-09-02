@@ -68,9 +68,9 @@ export default {
         const query = ctx.state as Login.Request['query'];
         query.user = user;
 
-        const sanitizedUser = getService('user').sanitizeUser(user);
-        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
-
+        // Not `admin.auth.success` here: the second-factor check below can still gate this
+        // login, and that event must fire only when a session is actually issued (see the
+        // next step and `loginMfa`).
         return next();
       })(ctx, next);
     },
@@ -82,6 +82,13 @@ export default {
       if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
         const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
+        // A distinct event, not `admin.auth.success`: the password matched but no session was
+        // issued, so audit consumers (EE audit logs, `admin.auth.events` config hooks) must be
+        // able to see that this login was gated rather than have it look identical to no
+        // attempt at all.
+        const sanitizedUser = getService('user').sanitizeUser(user);
+        strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
+
         // Deliberately no cookie and no access token here: the challenge token authorises
         // exactly one endpoint (`/login/mfa`) and mints nothing on its own. A cookie set
         // alongside this response would make the whole feature a silent no-op.
@@ -90,6 +97,9 @@ export default {
         } satisfies MfaChallengeResponse;
         return;
       }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
       return issueSession(ctx, user);
     },
@@ -109,7 +119,9 @@ export default {
 
       const { challengeToken, code } = ctx.request.body as LoginMfa.Request['body'];
 
-      const result = await mfa.verifyChallenge(challengeToken, code);
+      // The validator no longer trims `code` (see validation/authentication/mfa.ts): trim it
+      // here instead, after validation and before it reaches `verifyChallenge`.
+      const result = await mfa.verifyChallenge(challengeToken, code.trim());
 
       if (!result.ok) {
         if (result.reason === 'throttled') {
@@ -122,6 +134,21 @@ export default {
       }
 
       const user = await getService('user').findOne(result.userId);
+
+      // `/login` is gated by the local passport strategy's `checkCredentials`
+      // (services/auth.ts), which rejects a missing user or `isActive !== true`.
+      // `verifyChallenge` above has no equivalent gate, and a challenge can outlive an account
+      // being disabled during its (default five-minute) `challengeTtl` window, so the same
+      // account check is repeated here. Mirrors `checkCredentials` exactly -- it does not
+      // consult `blocked` -- and reuses its generic message: revealing "this account is
+      // disabled" would be a new enumeration channel on top of the one `verifyChallenge`
+      // already closes.
+      if (!user || user.isActive !== true) {
+        throw new ValidationError('Invalid code');
+      }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
       return issueSession(ctx, user);
     },

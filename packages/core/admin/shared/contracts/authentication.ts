@@ -49,6 +49,8 @@ export declare namespace LoginMfa {
     body: {
       challengeToken: string;
       code: string;
+      deviceId?: string;
+      rememberMe?: boolean;
     };
   }
 

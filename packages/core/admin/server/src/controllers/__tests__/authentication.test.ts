@@ -36,7 +36,7 @@ describe('authentication controller', () => {
   });
 
   describe('login with mfa', () => {
-    const user = { id: 7, email: 'admin@example.com', password: 'hashed' };
+    const user = { id: 7, email: 'admin@example.com', password: 'hashed', isActive: true };
     const sanitizedUser = { id: 7, email: 'admin@example.com' };
 
     /**
@@ -45,28 +45,33 @@ describe('authentication controller', () => {
      * -> `getRefreshCookieOptions` reads config, and `getAccessCookieDomain` logs through
      * `strapi.log.warn` on an invalid (not: absent) configured domain.
      */
-    const buildIssuingStrapi = (mfaOverrides: Record<string, unknown>) => {
+    const buildIssuingStrapi = (
+      mfaOverrides: Record<string, unknown>,
+      userOverrides: Record<string, unknown> = {}
+    ) => {
       const generateRefreshToken = jest.fn(() =>
         Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
       );
       const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
       const sessionManagerFn = jest.fn(() => ({ generateRefreshToken, generateAccessToken }));
       const sanitizeUser = jest.fn(() => sanitizedUser);
+      const emit = jest.fn();
+      const findOne = jest.fn(() => Promise.resolve(user));
 
       setStrapi({
-        eventHub: { emit: jest.fn() },
+        eventHub: { emit },
         log: { error: jest.fn(), warn: jest.fn() },
         config: { get: jest.fn(() => undefined) },
         sessionManager: sessionManagerFn,
         admin: {
           services: {
             mfa: mfaOverrides,
-            user: { sanitizeUser, findOne: jest.fn(() => Promise.resolve(user)) },
+            user: { sanitizeUser, findOne, ...userOverrides },
           },
         },
       });
 
-      return { generateRefreshToken, generateAccessToken, sanitizeUser };
+      return { generateRefreshToken, generateAccessToken, sanitizeUser, emit, findOne };
     };
 
     const buildCtx = (body: Record<string, unknown>) => {
@@ -94,11 +99,12 @@ describe('authentication controller', () => {
       const createChallenge = jest.fn(() =>
         Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
       );
+      const emit = jest.fn();
 
       // Deliberately no sessionManager/config on strapi: reaching for either on this path would
       // throw, which is itself proof that the branch never tries to mint a session.
       setStrapi({
-        eventHub: { emit: jest.fn() },
+        eventHub: { emit },
         log: { error: jest.fn() },
         admin: {
           services: {
@@ -123,11 +129,19 @@ describe('authentication controller', () => {
       });
       expect((ctx.body as any).data.token).toBeUndefined();
       expect((ctx.body as any).data.accessToken).toBeUndefined();
+
+      // A gated login is visible to audit consumers as its own event, and must never look like
+      // a completed login: `admin.auth.success` fires only when a session is actually issued.
+      expect(emit).toHaveBeenCalledWith('admin.auth.mfa_required', {
+        user: sanitizedUser,
+        provider: 'local',
+      });
+      expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
     });
 
     test('a valid code at /login/mfa issues the session', async () => {
       const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
-      const { generateRefreshToken, generateAccessToken } = buildIssuingStrapi({
+      const { generateRefreshToken, generateAccessToken, emit } = buildIssuingStrapi({
         isEnabled: jest.fn(() => true),
         verifyChallenge,
       });
@@ -147,6 +161,139 @@ describe('authentication controller', () => {
       expect(ctx.body).toEqual({
         data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
       });
+      expect(emit).toHaveBeenCalledWith('admin.auth.success', {
+        user: sanitizedUser,
+        provider: 'local',
+      });
+    });
+
+    test('a code with surrounding whitespace reaches verifyChallenge trimmed', async () => {
+      const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+      buildIssuingStrapi({
+        isEnabled: jest.fn(() => true),
+        verifyChallenge,
+      });
+
+      // `.trim()` was dropped from the yup schema (it asserts under `strict: true` instead of
+      // transforming), so the handler must trim `code` itself before calling `verifyChallenge`.
+      const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: ' 123456 ' });
+
+      await authenticationController.loginMfa(ctx, jest.fn());
+
+      expect(verifyChallenge).toHaveBeenCalledWith('challenge-token', '123456');
+    });
+
+    test('rememberMe on /login/mfa mints a refresh-type session', async () => {
+      const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+      const { generateRefreshToken } = buildIssuingStrapi({
+        isEnabled: jest.fn(() => true),
+        verifyChallenge,
+      });
+
+      const { ctx } = buildCtx({
+        challengeToken: 'challenge-token',
+        code: '123456',
+        rememberMe: true,
+      });
+
+      await authenticationController.loginMfa(ctx, jest.fn());
+
+      expect(generateRefreshToken).toHaveBeenCalledWith(
+        String(user.id),
+        expect.any(String),
+        expect.objectContaining({ type: 'refresh' })
+      );
+    });
+
+    test('a challengeToken over 64 characters is rejected before verifyChallenge runs', async () => {
+      const verifyChallenge = jest.fn();
+      buildIssuingStrapi({
+        isEnabled: jest.fn(() => true),
+        verifyChallenge,
+      });
+
+      // 32 random bytes hex-encoded is always exactly 64 characters (see `admin::mfa`).
+      const { ctx } = buildCtx({ challengeToken: 'a'.repeat(65), code: '123456' });
+
+      await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
+      expect(verifyChallenge).not.toHaveBeenCalled();
+    });
+
+    describe('loginMfa re-checks the account before issuing a session', () => {
+      test('a null user (deleted since the challenge was issued) is rejected generically', async () => {
+        const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        const { emit } = buildIssuingStrapi(
+          { isEnabled: jest.fn(() => true), verifyChallenge },
+          { findOne: jest.fn(() => Promise.resolve(null)) }
+        );
+
+        const { ctx, cookiesSet } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+        });
+
+        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+          name: 'ValidationError',
+          message: 'Invalid code',
+        });
+        expect(cookiesSet).not.toHaveBeenCalled();
+        expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
+      });
+
+      test('an account deactivated during the challenge window is rejected generically', async () => {
+        // Mirrors services/auth.ts `checkCredentials`, which rejects on `isActive !== true` --
+        // and nothing else (it does not consult `blocked`).
+        const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        const { emit } = buildIssuingStrapi(
+          { isEnabled: jest.fn(() => true), verifyChallenge },
+          { findOne: jest.fn(() => Promise.resolve({ ...user, isActive: false })) }
+        );
+
+        const { ctx, cookiesSet } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+        });
+
+        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+          name: 'ValidationError',
+          message: 'Invalid code',
+        });
+        expect(cookiesSet).not.toHaveBeenCalled();
+        expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
+      });
+    });
+
+    describe('verifyChallenge failure reasons collapse to two responses (anti-enumeration)', () => {
+      test.each(['unusable', 'exhausted', 'invalid'] as const)(
+        'reason "%s" throws the identical, generic ValidationError',
+        async (reason) => {
+          const verifyChallenge = jest.fn(() => Promise.resolve({ ok: false as const, reason }));
+          buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge });
+
+          const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
+
+          await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+            name: 'ValidationError',
+            message: 'Invalid code',
+            details: {},
+          });
+        }
+      );
+
+      test('reason "throttled" throws RateLimitError instead of ValidationError', async () => {
+        const verifyChallenge = jest.fn(() =>
+          Promise.resolve({ ok: false as const, reason: 'throttled' as const })
+        );
+        buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge });
+
+        const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
+
+        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+          name: 'RateLimitError',
+        });
+      });
     });
 
     test('a user without mfa logs in exactly as before', async () => {
@@ -154,7 +301,7 @@ describe('authentication controller', () => {
 
       const isEnrolled = jest.fn(() => Promise.resolve(false));
       const createChallenge = jest.fn();
-      const { generateRefreshToken, generateAccessToken } = buildIssuingStrapi({
+      const { generateRefreshToken, generateAccessToken, emit } = buildIssuingStrapi({
         isEnabled: jest.fn(() => true),
         isEnrolled,
         createChallenge,
@@ -176,6 +323,15 @@ describe('authentication controller', () => {
       expect(ctx.body).toEqual({
         data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
       });
+
+      // Plain login still emits `admin.auth.success` exactly once, and nothing else on the
+      // `admin.auth.*` channel.
+      const authEvents = emit.mock.calls.filter(([eventName]) =>
+        eventName.startsWith('admin.auth.')
+      );
+      expect(authEvents).toEqual([
+        ['admin.auth.success', { user: sanitizedUser, provider: 'local' }],
+      ]);
     });
 
     test('with the future flag off, an enrolled user logs in with the password alone', async () => {
@@ -183,7 +339,7 @@ describe('authentication controller', () => {
 
       const isEnrolled = jest.fn(() => Promise.resolve(true));
       const createChallenge = jest.fn();
-      const { generateRefreshToken } = buildIssuingStrapi({
+      const { generateRefreshToken, emit } = buildIssuingStrapi({
         isEnabled: jest.fn(() => false),
         isEnrolled,
         createChallenge,
@@ -205,6 +361,11 @@ describe('authentication controller', () => {
       expect(ctx.body).toEqual({
         data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
       });
+      expect(emit).toHaveBeenCalledWith('admin.auth.success', {
+        user: sanitizedUser,
+        provider: 'local',
+      });
+      expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
     });
 
     test('with the future flag off, POST /login/mfa returns 404', async () => {

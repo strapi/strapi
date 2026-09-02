@@ -292,8 +292,12 @@ const AuthProvider = ({
       /**
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
+       *
+       * An MFA-enrolled account resolves `res.data` to the challenge shape instead of a
+       * session: no token exists yet, so there is nothing to persist here until the caller
+       * completes `/login/mfa` and receives a real session response.
        */
-      if ('data' in res) {
+      if ('data' in res && !('mfaRequired' in res.data)) {
         const { token } = res.data;
 
         dispatch(

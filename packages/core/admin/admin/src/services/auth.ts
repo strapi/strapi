@@ -2,6 +2,7 @@ import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
   type AccessTokenExchange,
   type Login,
+  type MfaChallengeResponse,
   type ResetPassword,
   type RegisterAdmin,
   type Register,
@@ -104,13 +105,22 @@ const authService = adminApi
       /**
        * Auth methods
        */
-      login: builder.mutation<Login.Response['data'], Login.Request['body']>({
+      login: builder.mutation<
+        Login.Response['data'] | MfaChallengeResponse['data'],
+        Login.Request['body']
+      >({
         query: (body) => ({
           method: 'POST',
           url: '/admin/login',
           data: body,
         }),
-        transformResponse(res: Login.Response) {
+        transformResponse(res: Login.Response | MfaChallengeResponse) {
+          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
+          // the caller narrow on `mfaRequired` before treating the result as a session.
+          if ('mfaRequired' in res.data) {
+            return res.data;
+          }
+
           return res.data;
         },
         invalidatesTags: ['Me'],
