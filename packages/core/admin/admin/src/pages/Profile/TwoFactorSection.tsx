@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { Alert, Flex, Typography } from '@strapi/design-system';
+import { Alert, Button, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useGetMfaStatusQuery } from '../../services/mfa';
 import { isBaseQueryError } from '../../utils/baseQuery';
 
+import { EnrolDialog } from './EnrolDialog';
 import { Panel } from './Panel';
 
 import type { Me } from '../../../../shared/contracts/mfa';
@@ -68,6 +69,7 @@ const TwoFactorSection = ({ renderActions }: TwoFactorSectionProps) => {
    */
   const [dismissedAck, setDismissedAck] = React.useState(false);
   const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);
+  const [enrolOpen, setEnrolOpen] = React.useState(false);
 
   // 404 means the future flag is off: the feature does not exist on this instance. The UI never
   // reads the flag itself -- a 404 from /admin/mfa/me is the only signal it is off.
@@ -140,8 +142,20 @@ const TwoFactorSection = ({ renderActions }: TwoFactorSectionProps) => {
       ) : null}
       <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
         <TwoFactorStatus status={status} />
-        {renderActions ? <Flex gap={2}>{renderActions(status)}</Flex> : null}
+        {!status.enabled ? (
+          <Flex gap={2}>
+            <Button onClick={() => setEnrolOpen(true)}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.enable',
+                defaultMessage: 'Enable two-factor authentication',
+              })}
+            </Button>
+          </Flex>
+        ) : renderActions ? (
+          <Flex gap={2}>{renderActions(status)}</Flex>
+        ) : null}
       </Flex>
+      <EnrolDialog open={enrolOpen} onClose={() => setEnrolOpen(false)} />
     </Panel>
   );
 };

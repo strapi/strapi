@@ -102,4 +102,19 @@ describe('TwoFactorSection', () => {
     expect(await screen.findByText('Running low on recovery codes')).toBeInTheDocument();
     expect(screen.getByText(/only 3 recovery codes left/i)).toBeInTheDocument();
   });
+
+  it('offers to enable two-factor authentication when not enrolled', async () => {
+    server.use(status());
+    const { user } = renderSection();
+
+    const enableButton = await screen.findByRole('button', {
+      name: 'Enable two-factor authentication',
+    });
+
+    await user.click(enableButton);
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Enable two-factor authentication' })
+    ).toBeInTheDocument();
+  });
 });
