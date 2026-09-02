@@ -60,10 +60,12 @@ import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 import { useInfiniteScrollSentinel } from './hooks/useInfiniteScrollSentinel';
 import { useListFilters } from './hooks/useListFilters';
+import { useListScrollRestoration } from './hooks/useListScrollRestoration';
 import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { buildAssetFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
 import { mergeMixedList } from './utils/mergeMixedList';
+import { buildRenderedKeys } from './utils/renderedKeys';
 
 import type { File, UploadFileInfo } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
@@ -177,6 +179,10 @@ const AssetsView = ({
     [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
   );
 
+  // Derived once here so the table, the grid and the bulk bar all agree on what
+  // is on screen — in mixed mode that is not simply every folder.
+  const renderedKeys = buildRenderedKeys({ folders, assets, mixedItems });
+
   const loadMoreRef = useInfiniteScrollSentinel({
     hasNextPage,
     isFetchingMore,
@@ -222,12 +228,18 @@ const AssetsView = ({
   return (
     <>
       {isGridView ? (
-        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
+        <AssetsGrid
+          folders={folders}
+          assets={assets}
+          renderedKeys={renderedKeys}
+          onAssetItemClick={onAssetItemClick}
+        />
       ) : (
         <AssetsTable
           assets={assets}
           folders={folders}
           mixedItems={mixedItems}
+          renderedKeys={renderedKeys}
           onAssetItemClick={onAssetItemClick}
         />
       )}
@@ -246,7 +258,7 @@ const AssetsView = ({
           assets: the AI metadata action needs their mime types to know what
           the provider can handle. `position: fixed` keeps it visually anchored
           regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} locations={locations} />
+      <BulkActionsBar assets={assets} renderedKeys={renderedKeys} locations={locations} />
     </>
   );
 };
@@ -682,6 +694,8 @@ export const AssetsPage = () => {
     filter: listFilters.serialized || null,
   });
 
+  const scrollAnchorRef = useListScrollRestoration(listQueryKey);
+
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop} disabled={!canCreate}>
@@ -707,6 +721,7 @@ export const AssetsPage = () => {
                     {/* Zero-height marker: leaves the viewport as soon as the list
                       scrolls, flipping the header into its compact state. */}
                     <Box ref={headerSentinelRef} height={0} aria-hidden />
+                    <Box ref={scrollAnchorRef} height={0} aria-hidden />
 
                     <StickyHeader $compact={isHeaderCompact}>
                       <TitleRow>
