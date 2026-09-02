@@ -5,12 +5,18 @@ import { Box, Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import {
+  useDeleteAutosaveMutation,
+  useLazyGetAutosaveQuery,
+  useSaveAutosaveMutation,
+} from '../../../services/autosave';
+import {
   createAutosaveKey,
   deleteAutosave,
   evictAutosavesOverQuota,
   getAutosave,
   registerAutosaveOwner,
   setAutosave,
+  supportsServerAutosave,
   type AutosaveRecord,
 } from '../utils/autosave';
 
@@ -62,9 +68,21 @@ const Autosave = ({
   const timeoutRef = React.useRef<number>();
   const pendingWrite = React.useRef<Promise<unknown>>();
 
+  const [fetchServerAutosave] = useLazyGetAutosaveQuery();
+  const [saveServerAutosave] = useSaveAutosaveMutation();
+  const [deleteServerAutosave] = useDeleteAutosaveMutation();
+
   const key = React.useMemo(
     () => createAutosaveKey({ instanceId, userId, model, documentId, locale }),
     [documentId, instanceId, locale, model, userId]
+  );
+
+  // The browser backup covers crashes and offline edits; the server backup covers a different
+  // device or cleared site data. A document that does not exist yet only has the former.
+  const onServer = supportsServerAutosave(documentId);
+  const serverParams = React.useMemo(
+    () => ({ model, documentId, locale }),
+    [documentId, locale, model]
   );
 
   React.useEffect(() => {
@@ -78,29 +96,60 @@ const Autosave = ({
     setStatus('idle');
     registerAutosaveOwner({ instanceId, userId });
 
-    getAutosave(key)
-      .then((record) => {
-        if (!active) {
-          return;
-        }
+    const readServer = async (): Promise<AutosaveRecord | undefined> => {
+      if (!onServer) {
+        return undefined;
+      }
 
-        loadedKey.current = key;
+      const response = await fetchServerAutosave(serverParams).unwrap();
 
-        if (record && JSON.stringify(record.data) !== JSON.stringify(initialValues)) {
-          setRecovery(record);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          loadedKey.current = key;
-          setStatus('error');
-        }
-      });
+      return response.data
+        ? {
+            key,
+            data: response.data.data,
+            baseVersion: response.data.baseVersion ?? undefined,
+            savedAt: response.data.savedAt,
+          }
+        : undefined;
+    };
+
+    Promise.allSettled([getAutosave(key), readServer()]).then((results) => {
+      if (!active) {
+        return;
+      }
+
+      loadedKey.current = key;
+
+      if (results.every(({ status: state }) => state === 'rejected')) {
+        setStatus('error');
+        return;
+      }
+
+      const serialisedInitialValues = JSON.stringify(initialValues);
+      const [newest] = results
+        .flatMap((result) => (result.status === 'fulfilled' && result.value ? [result.value] : []))
+        .filter((record) => JSON.stringify(record.data) !== serialisedInitialValues)
+        .sort((a, b) => b.savedAt.localeCompare(a.savedAt));
+
+      if (newest) {
+        setRecovery(newest);
+      }
+    });
 
     return () => {
       active = false;
     };
-  }, [baseVersion, enabled, initialValues, instanceId, key, userId]);
+  }, [
+    baseVersion,
+    enabled,
+    fetchServerAutosave,
+    initialValues,
+    instanceId,
+    key,
+    onServer,
+    serverParams,
+    userId,
+  ]);
 
   React.useEffect(() => {
     if (!enabled || loadedKey.current !== key || !modified) {
@@ -117,27 +166,43 @@ const Autosave = ({
           return;
         }
 
-        pendingWrite.current = setAutosave({
-          key,
-          data: values,
-          baseVersion: pendingBaseVersion ?? baseVersion,
-          savedAt: nextSavedAt,
-        })
-          .then(() => {
-            if (generation === writeGeneration.current) {
-              setSavedAt(nextSavedAt);
-              setStatus('saved');
-            }
-
+        const effectiveBaseVersion = pendingBaseVersion ?? baseVersion;
+        const writes: Promise<unknown>[] = [
+          setAutosave({
+            key,
+            data: values,
+            baseVersion: effectiveBaseVersion,
+            savedAt: nextSavedAt,
+          }).then(() =>
             // Trimming is a storage concern, not part of this backup: a failure here must not
             // report the backup as lost, and the document being edited is never evicted.
-            return evictAutosavesOverQuota({ protectedKey: key }).catch(() => undefined);
-          })
-          .catch(() => {
-            if (generation === writeGeneration.current) {
-              setStatus('error');
-            }
-          });
+            evictAutosavesOverQuota({ protectedKey: key }).catch(() => undefined)
+          ),
+        ];
+
+        if (onServer) {
+          writes.push(
+            saveServerAutosave({
+              ...serverParams,
+              data: { data: values, baseVersion: effectiveBaseVersion },
+            }).unwrap()
+          );
+        }
+
+        // One store being unavailable — private browsing, or an offline editor — still leaves
+        // the work backed up somewhere, so only a total failure is worth reporting.
+        pendingWrite.current = Promise.allSettled(writes).then((results) => {
+          if (generation !== writeGeneration.current) {
+            return;
+          }
+
+          if (results.some(({ status: state }) => state === 'fulfilled')) {
+            setSavedAt(nextSavedAt);
+            setStatus('saved');
+          } else {
+            setStatus('error');
+          }
+        });
       },
       isSubmitting ? 0 : 1000
     );
@@ -148,7 +213,30 @@ const Autosave = ({
         timeoutRef.current = undefined;
       }
     };
-  }, [baseVersion, enabled, isSubmitting, key, modified, pendingBaseVersion, values]);
+  }, [
+    baseVersion,
+    enabled,
+    isSubmitting,
+    key,
+    modified,
+    onServer,
+    pendingBaseVersion,
+    saveServerAutosave,
+    serverParams,
+    values,
+  ]);
+
+  const removeBackups = React.useCallback(async () => {
+    // A leftover server backup is harmless — it only resurfaces when it differs from the saved
+    // document — so failing to reach the server must not report the local backup as broken.
+    const server = onServer
+      ? deleteServerAutosave(serverParams)
+          .unwrap()
+          .catch(() => undefined)
+      : Promise.resolve();
+
+    await Promise.all([deleteAutosave(key), server]);
+  }, [deleteServerAutosave, key, onServer, serverParams]);
 
   React.useEffect(() => {
     if (!enabled) {
@@ -162,10 +250,10 @@ const Autosave = ({
 
     if (wasModified.current) {
       wasModified.current = false;
-      deleteAutosave(key).catch(() => undefined);
+      removeBackups().catch(() => undefined);
       setStatus('idle');
     }
-  }, [enabled, key, modified]);
+  }, [enabled, modified, removeBackups]);
 
   const clear = React.useCallback(async () => {
     if (!enabled) {
@@ -181,7 +269,7 @@ const Autosave = ({
 
     try {
       await pendingWrite.current;
-      await deleteAutosave(key);
+      await removeBackups();
       wasModified.current = false;
       setPendingBaseVersion(undefined);
       setRecovery(undefined);
@@ -189,7 +277,7 @@ const Autosave = ({
     } catch {
       setStatus('error');
     }
-  }, [enabled, key]);
+  }, [enabled, removeBackups]);
 
   const handleRestore = () => {
     if (recovery) {
@@ -214,14 +302,14 @@ const Autosave = ({
               {status === 'saving'
                 ? formatMessage({
                     id: 'content-manager.autosave.saving',
-                    defaultMessage: 'Saving local backup…',
+                    defaultMessage: 'Saving backup…',
                   })
                 : null}
               {status === 'saved' && savedAt
                 ? formatMessage(
                     {
                       id: 'content-manager.autosave.saved',
-                      defaultMessage: 'Local backup saved at {time}',
+                      defaultMessage: 'Backup saved at {time}',
                     },
                     { time: formatTime(savedAt, { hour: 'numeric', minute: '2-digit' }) }
                   )
@@ -229,7 +317,7 @@ const Autosave = ({
               {status === 'error'
                 ? formatMessage({
                     id: 'content-manager.autosave.error',
-                    defaultMessage: "Couldn't save a local backup",
+                    defaultMessage: "Couldn't save a backup",
                   })
                 : null}
             </Typography>
@@ -247,7 +335,7 @@ const Autosave = ({
                   {formatMessage({
                     id: 'content-manager.autosave.recovery.body',
                     defaultMessage:
-                      'This browser has unsaved changes that differ from the saved document. Restore them?',
+                      'You have unsaved changes that differ from the saved document. Restore them?',
                   })}
                 </Typography>
               </Dialog.Body>

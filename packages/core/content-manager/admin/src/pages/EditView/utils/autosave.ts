@@ -210,6 +210,15 @@ export const createAutosaveLogoutMiddleware = (): Middleware => () => (next) => 
   return next(action);
 };
 
+/**
+ * A document that has never been created has no server-side identity to key a backup on, so the
+ * create flow is browser-only until the first save.
+ */
+export const AUTOSAVE_CREATE_PREFIX = 'create:';
+
+export const supportsServerAutosave = (documentId: string) =>
+  Boolean(documentId) && !documentId.startsWith(AUTOSAVE_CREATE_PREFIX);
+
 export const createAutosaveKey = ({
   instanceId,
   userId,
@@ -261,7 +270,7 @@ export const getAutosaveDocumentId = ({
   }
 
   if (isCreatingDocument) {
-    return `create:${getOrCreateAutosaveSessionId(model, locale)}`;
+    return `${AUTOSAVE_CREATE_PREFIX}${getOrCreateAutosaveSessionId(model, locale)}`;
   }
 
   return isSingleType ? `single:${model}` : '';

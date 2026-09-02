@@ -1,0 +1,112 @@
+import type { Core, Data, UID } from '@strapi/types';
+
+import { AUTOSAVE_UID } from '../constants';
+import type { Autosave } from '../../../../shared/contracts';
+
+interface AutosaveScope {
+  userId: Data.ID;
+  contentType: UID.ContentType;
+  documentId: Data.ID;
+  locale?: string | null;
+}
+
+interface AutosaveRow {
+  id: Data.ID;
+  contentType: UID.ContentType;
+  documentId: Data.ID;
+  locale: string;
+  data: Autosave.AutosaveData;
+  baseVersion: string | null;
+  savedAt: Date | string;
+}
+
+const toEntry = ({
+  contentType,
+  documentId,
+  locale,
+  data,
+  baseVersion,
+  savedAt,
+}: AutosaveRow): Autosave.AutosaveEntry => ({
+  contentType,
+  documentId,
+  locale: locale === '' ? null : locale,
+  data,
+  baseVersion: baseVersion ?? null,
+  savedAt: new Date(savedAt).toISOString(),
+});
+
+const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const query = strapi.db.query(AUTOSAVE_UID);
+
+  const scopeWhere = ({ userId, contentType, documentId, locale }: AutosaveScope) => ({
+    user: { id: userId },
+    contentType,
+    documentId,
+    locale: locale ?? '',
+  });
+
+  return {
+    async findOne(scope: AutosaveScope): Promise<Autosave.AutosaveEntry | null> {
+      const row: AutosaveRow | null = await query.findOne({ where: scopeWhere(scope) });
+
+      return row ? toEntry(row) : null;
+    },
+
+    async save(
+      scope: AutosaveScope,
+      { data, baseVersion }: { data: Autosave.AutosaveData; baseVersion?: string }
+    ): Promise<Autosave.AutosaveEntry> {
+      const where = scopeWhere(scope);
+      const savedAt = new Date();
+
+      return strapi.db.transaction(async () => {
+        const existing: { id: Data.ID }[] = await query.findMany({ select: ['id'], where });
+        const [current, ...duplicates] = existing;
+
+        // A unique index guards the scope, but a database that lost it (or a pre-existing row
+        // from an older version) must not make every later save fail.
+        if (duplicates.length > 0) {
+          await query.deleteMany({ where: { id: { $in: duplicates.map(({ id }) => id) } } });
+        }
+
+        const row: AutosaveRow = current
+          ? await query.update({
+              where: { id: current.id },
+              data: { data, baseVersion: baseVersion ?? null, savedAt },
+            })
+          : await query.create({
+              data: {
+                contentType: scope.contentType,
+                documentId: scope.documentId,
+                locale: scope.locale ?? '',
+                data,
+                baseVersion: baseVersion ?? null,
+                savedAt,
+                user: scope.userId,
+              },
+            });
+
+        return toEntry(row);
+      });
+    },
+
+    async delete(scope: AutosaveScope): Promise<void> {
+      await query.deleteMany({ where: scopeWhere(scope) });
+    },
+
+    async deleteForDocument({
+      contentType,
+      documentId,
+    }: Pick<AutosaveScope, 'contentType' | 'documentId'>): Promise<void> {
+      await query.deleteMany({ where: { contentType, documentId } });
+    },
+
+    async deleteForUser(userId: Data.ID): Promise<void> {
+      await query.deleteMany({ where: { user: { id: userId } } });
+    },
+  };
+};
+
+export { createAutosaveService };
+export type { AutosaveScope };

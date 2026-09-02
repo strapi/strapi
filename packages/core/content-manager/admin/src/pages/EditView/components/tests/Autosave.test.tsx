@@ -1,7 +1,9 @@
 import * as React from 'react';
 
 import { Form, useForm } from '@strapi/admin/strapi-admin';
+import { server } from '@strapi/admin/strapi-admin/test';
 import { render, screen, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import {
   deleteAutosave,
@@ -56,6 +58,27 @@ const ClearBackup = () => {
     </button>
   );
 };
+
+const AUTOSAVE_URL = '/content-manager/autosaves/:model/:documentId';
+
+const serverBackupOf = (data: object, savedAt: string, baseVersion?: string) =>
+  http.get(AUTOSAVE_URL, () =>
+    HttpResponse.json({
+      data: {
+        contentType: 'api::article.article',
+        documentId: 'doc-1',
+        locale: 'en',
+        data,
+        baseVersion: baseVersion ?? null,
+        savedAt,
+      },
+    })
+  );
+
+const unreachableServer = [
+  http.get(AUTOSAVE_URL, () => HttpResponse.error()),
+  http.put(AUTOSAVE_URL, () => HttpResponse.error()),
+];
 
 describe('Autosave', () => {
   beforeEach(() => {
@@ -143,7 +166,7 @@ describe('Autosave', () => {
     expect(await screen.findByText('We recovered unsaved changes')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'This browser has unsaved changes that differ from the saved document. Restore them?'
+        'You have unsaved changes that differ from the saved document. Restore them?'
       )
     ).toBeInTheDocument();
   });
@@ -200,7 +223,7 @@ describe('Autosave', () => {
     await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
     await user.click(screen.getByRole('button', { name: 'Edit title' }));
 
-    expect(screen.getByText('Saving local backup…')).toBeInTheDocument();
+    expect(screen.getByText('Saving backup…')).toBeInTheDocument();
     await waitFor(() => expect(mockedSetAutosave).toHaveBeenCalled(), { timeout: 1500 });
     expect(mockedSetAutosave).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -237,10 +260,8 @@ describe('Autosave', () => {
     await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
     await user.click(screen.getByRole('button', { name: 'Edit title' }));
 
-    await screen.findByText(/Local backup saved/, {
-      timeout: 1500,
-    });
-    expect(screen.queryByText("Couldn't save a local backup")).not.toBeInTheDocument();
+    await screen.findByText(/Backup saved/, {}, { timeout: 1500 });
+    expect(screen.queryByText("Couldn't save a backup")).not.toBeInTheDocument();
   });
 
   it('waits for an in-flight backup before deleting it', async () => {
@@ -310,7 +331,8 @@ describe('Autosave', () => {
     expect(mockedDeleteAutosave).toHaveBeenCalled();
   });
 
-  it('shows an error when IndexedDB cannot be read', async () => {
+  it('shows an error when no backup can be read', async () => {
+    server.use(...unreachableServer);
     mockedGetAutosave.mockRejectedValue(new Error('IndexedDB unavailable'));
 
     render(
@@ -328,10 +350,11 @@ describe('Autosave', () => {
       </Form>
     );
 
-    expect(await screen.findByText("Couldn't save a local backup")).toBeInTheDocument();
+    expect(await screen.findByText("Couldn't save a backup")).toBeInTheDocument();
   });
 
-  it('shows an error when a backup write fails', async () => {
+  it('shows an error when no backup can be written', async () => {
+    server.use(...unreachableServer);
     mockedGetAutosave.mockResolvedValue(undefined);
     mockedSetAutosave.mockRejectedValue(new Error('IndexedDB unavailable'));
 
@@ -354,7 +377,118 @@ describe('Autosave', () => {
     await user.click(screen.getByRole('button', { name: 'Edit title' }));
 
     expect(
-      await screen.findByText("Couldn't save a local backup", {}, { timeout: 1500 })
+      await screen.findByText("Couldn't save a backup", {}, { timeout: 1500 })
     ).toBeInTheDocument();
+  });
+
+  it('keeps backing up to the server when this browser has no storage', async () => {
+    mockedGetAutosave.mockResolvedValue(undefined);
+    mockedSetAutosave.mockRejectedValue(new Error('IndexedDB unavailable'));
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <ChangeTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'Edit title' }));
+
+    expect(await screen.findByText(/Backup saved/, {}, { timeout: 1500 })).toBeInTheDocument();
+  });
+
+  it('offers to restore a backup saved from another device', async () => {
+    server.use(serverBackupOf({ title: 'Backup from my laptop' }, '2026-01-02T00:00:00.000Z'));
+    mockedGetAutosave.mockResolvedValue(undefined);
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <CurrentTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await screen.findByText('We recovered unsaved changes');
+    await user.click(screen.getByRole('button', { name: 'Restore' }));
+
+    expect(screen.getByText('Backup from my laptop')).toBeInTheDocument();
+  });
+
+  it('restores the most recent backup when both stores have one', async () => {
+    server.use(serverBackupOf({ title: 'Older backup' }, '2026-01-01T00:00:00.000Z'));
+    mockedGetAutosave.mockResolvedValue({
+      key: 'autosave:instance-1:1:api::article.article:doc-1:en',
+      data: { title: 'Newer backup' },
+      savedAt: '2026-01-03T00:00:00.000Z',
+    });
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <CurrentTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await screen.findByText('We recovered unsaved changes');
+    await user.click(screen.getByRole('button', { name: 'Restore' }));
+
+    expect(screen.getByText('Newer backup')).toBeInTheDocument();
+  });
+
+  it('does not back up a document that has never been created to the server', async () => {
+    const serverWrites = jest.fn();
+    server.use(
+      http.put(AUTOSAVE_URL, () => {
+        serverWrites();
+        return HttpResponse.json({ data: null });
+      })
+    );
+    mockedGetAutosave.mockResolvedValue(undefined);
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="create:session-1"
+          locale="en"
+        >
+          <ChangeTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'Edit title' }));
+
+    await waitFor(() => expect(mockedSetAutosave).toHaveBeenCalled(), { timeout: 1500 });
+    expect(serverWrites).not.toHaveBeenCalled();
   });
 });
