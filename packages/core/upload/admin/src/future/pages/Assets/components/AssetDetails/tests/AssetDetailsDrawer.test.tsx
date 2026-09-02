@@ -791,6 +791,29 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
   });
 
+  // A right-click is contextual — and on the assets background it opens the
+  // create menu, so dismissing here would fire two outcomes from one press.
+  it.each([
+    ['a right-click', 2],
+    ['a middle-click', 1],
+  ])('stays open on %s outside the panel', async (_label, button) => {
+    const { drawer } = await renderOpenDrawer();
+
+    fireEvent.pointerDown(screen.getByTestId('page-background'), { button });
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'open'));
+  });
+
+  // The primary button must still dismiss — the guard is about which button,
+  // not about disabling dismissal.
+  it('still closes on a primary-button press outside the panel', async () => {
+    const { drawer } = await renderOpenDrawer();
+
+    fireEvent.pointerDown(screen.getByTestId('page-background'), { button: 0 });
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
   // The drawer is a reference panel: operating the list behind it is not
   // leaving it.
   it.each([

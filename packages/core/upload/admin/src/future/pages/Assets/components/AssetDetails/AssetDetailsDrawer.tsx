@@ -1295,8 +1295,18 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * listening through its animation, where dismissing again would re-trigger the
  * unsaved-changes guard for nothing.
  */
-const shouldKeepDrawerOpen = (event: { target: EventTarget | null }, isVisible: boolean) => {
+const shouldKeepDrawerOpen = (
+  event: { target: EventTarget | null; detail: { originalEvent: { button: number } } },
+  isVisible: boolean
+) => {
   if (!isVisible) {
+    return true;
+  }
+
+  // Radix's dismisser fires on any `pointerdown`, secondary buttons included. A
+  // right-click is contextual, and with the create menu on the background one
+  // press would otherwise both close this and open that.
+  if (event.detail.originalEvent.button !== 0) {
     return true;
   }
 
