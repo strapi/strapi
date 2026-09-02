@@ -220,6 +220,24 @@ export default {
       return ctx.internalServerError();
     }
 
+    const mfa = getService('mfa');
+
+    if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
+      const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
+
+      // Same reasoning as `login`'s gate: forgot-password must not be a way to walk past a
+      // second factor, so a reset that lands on an enrolled account gets a challenge instead of
+      // a session. Emits the same audit event as the login gate, for the same reason -- a gated
+      // reset must not look identical to no attempt at all.
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
+
+      ctx.body = {
+        data: { mfaRequired: true, challengeToken, expiresIn },
+      } satisfies MfaChallengeResponse;
+      return;
+    }
+
     // No rememberMe flow here: force a fresh device id and a session-type (non-persistent) cookie
     // regardless of anything the request body carries.
     return issueSession(ctx, user, { deviceId: generateDeviceId(), rememberMe: false });
