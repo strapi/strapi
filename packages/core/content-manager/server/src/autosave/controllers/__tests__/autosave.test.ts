@@ -15,9 +15,16 @@ const autosaveService = {
 
 const permissionChecker = {
   cannot: { read: jest.fn(() => false), update: jest.fn(() => false) },
+  sanitizedQuery: { update: jest.fn(async (query) => query) },
   sanitizeOutput: jest.fn(async (data) => data),
-  sanitizeUpdateInput: jest.fn(async (data) => data),
+  sanitizeUpdateInput: jest.fn(() => async (data: unknown) => data),
 };
+
+const document = { documentId: 'doc-1', title: 'Saved' };
+const findDocument = jest.fn(async () => document);
+const buildPopulate = jest.fn(async () => []);
+const populateFromQuery = jest.fn(() => ({ build: buildPopulate }));
+const populateBuilder = jest.fn(() => ({ populateFromQuery }));
 
 const contentTypeAttributes = {
   title: { type: 'string' },
@@ -45,9 +52,21 @@ describe('autosave controller', () => {
     jest.clearAllMocks();
     permissionChecker.cannot.read.mockReturnValue(false);
     permissionChecker.cannot.update.mockReturnValue(false);
-    jest.mocked(getContentManagerService).mockReturnValue({
-      create: () => permissionChecker,
-    } as any);
+    jest.mocked(getContentManagerService).mockImplementation((serviceName) => {
+      if (serviceName === 'permission-checker') {
+        return { create: () => permissionChecker } as any;
+      }
+
+      if (serviceName === 'populate-builder') {
+        return populateBuilder as any;
+      }
+
+      if (serviceName === 'document-manager') {
+        return { findOne: findDocument } as any;
+      }
+
+      throw new Error(`Unexpected service: ${serviceName}`);
+    });
     jest.mocked(getService).mockReturnValue(autosaveService as any);
   });
 
@@ -80,7 +99,7 @@ describe('autosave controller', () => {
   });
 
   it('strips fields the author is not allowed to edit before storing them', async () => {
-    permissionChecker.sanitizeUpdateInput.mockResolvedValue({ title: 'Draft' });
+    permissionChecker.sanitizeUpdateInput.mockReturnValue(async () => ({ title: 'Draft' }));
     autosaveService.save.mockResolvedValue({ savedAt: '2026-01-01T00:00:00.000Z' });
 
     await controller.save(
@@ -94,14 +113,38 @@ describe('autosave controller', () => {
       })
     );
 
-    expect(permissionChecker.sanitizeUpdateInput).toHaveBeenCalledWith({
-      title: 'Draft',
-      secret: 'nope',
-    });
+    expect(permissionChecker.sanitizeUpdateInput).toHaveBeenCalledWith(document);
+    expect(permissionChecker.sanitizeUpdateInput.mock.results[0].value).toBeInstanceOf(Function);
     expect(autosaveService.save).toHaveBeenCalledWith(expect.any(Object), {
       data: { title: 'Draft' },
       schema: { title: { type: 'string' }, body: { type: 'text' } },
       baseVersion: '2026-01-01T00:00:00.000Z',
+    });
+    expect(findDocument).toHaveBeenCalledWith('doc-1', 'api::article.article', {
+      populate: [],
+      locale: 'en',
+      status: 'draft',
+    });
+  });
+
+  it('passes the backup payload to the entity-aware sanitizer', async () => {
+    const sanitize = jest.fn(async () => ({ title: 'Draft' }));
+    permissionChecker.sanitizeUpdateInput.mockReturnValue(sanitize);
+    autosaveService.save.mockResolvedValue({ savedAt: '2026-01-01T00:00:00.000Z' });
+
+    await controller.save(
+      createContext({
+        request: {
+          body: {
+            data: { title: 'Draft', secret: 'nope' },
+          },
+        },
+      })
+    );
+
+    expect(sanitize).toHaveBeenCalledWith({
+      title: 'Draft',
+      secret: 'nope',
     });
   });
 

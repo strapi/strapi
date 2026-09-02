@@ -277,6 +277,25 @@ describe('relation parent updates', () => {
     expect(mockClearAutosave).toHaveBeenCalled();
   });
 
+  it('offers conflict resolution when a restored backup is stale', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+    mockUpdate.mockResolvedValueOnce({
+      error: {
+        status: 409,
+        name: 'ConflictError',
+        message: 'The document has changed since it was loaded',
+      },
+    });
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(
+      await screen.findByText('This document was updated by someone else')
+    ).toBeInTheDocument();
+  });
+
   it('uses the recovered backup version when publishing restored changes', async () => {
     mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
 

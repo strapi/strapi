@@ -48,7 +48,7 @@ describe('autosave service', () => {
 
     expect(findOne).toHaveBeenCalledWith({
       where: {
-        user: { id: 1 },
+        user_id: 1,
         contentType: 'api::article.article',
         documentId: 'doc-1',
         locale: 'en',
@@ -151,6 +151,6 @@ describe('autosave service', () => {
     });
 
     await service.deleteForUser(1);
-    expect(deleteMany).toHaveBeenCalledWith({ where: { user: { id: 1 } } });
+    expect(deleteMany).toHaveBeenCalledWith({ where: { user_id: 1 } });
   });
 });

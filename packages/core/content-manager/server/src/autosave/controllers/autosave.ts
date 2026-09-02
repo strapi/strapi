@@ -86,9 +86,34 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
 
       await validateSaveAutosave(body);
 
+      // sanitizeUpdateInput is entity-aware: it returns a sanitizer for the specific document
+      // version being edited. Load that draft first so conditional and field permissions are
+      // evaluated against the real document rather than the backup payload.
+      const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
+      const populate = await getContentManagerService('populate-builder')(scope.contentType)
+        .populateFromQuery(permissionQuery)
+        .build();
+      const document = await getContentManagerService('document-manager').findOne(
+        scope.documentId,
+        scope.contentType,
+        {
+          populate,
+          locale: scope.locale ?? undefined,
+          status: 'draft',
+        }
+      );
+
+      if (!document) {
+        throw new errors.NotFoundError();
+      }
+
+      if (permissionChecker.cannot.update(document)) {
+        throw new errors.ForbiddenError();
+      }
+
       // Never let a backup carry fields the author is not allowed to edit: it is restored
       // straight into the form, and from there into the shared draft.
-      const data = await permissionChecker.sanitizeUpdateInput(body.data);
+      const data = await permissionChecker.sanitizeUpdateInput(document)(body.data);
       const { schema: _schema, ...entry } = await getService(strapi, 'autosave').save(scope, {
         data,
         // Recorded alongside the payload so a later Content-Type Builder change can be detected

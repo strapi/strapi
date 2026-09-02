@@ -47,7 +47,10 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(AUTOSAVE_UID);
 
   const scopeWhere = ({ userId, contentType, documentId, locale }: AutosaveScope) => ({
-    user: { id: userId },
+    // Filtering through the relation (`user: { id }`) makes deleteMany add an admin_users join.
+    // Both tables have document_id, which produces an ambiguous-column failure on SQLite. This
+    // model owns the FK column, so scope it directly and keep every operation join-free.
+    user_id: userId,
     contentType,
     documentId,
     locale: locale ?? '',
@@ -119,7 +122,7 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async deleteForUser(userId: Data.ID): Promise<void> {
-      await query.deleteMany({ where: { user: { id: userId } } });
+      await query.deleteMany({ where: { user_id: userId } });
     },
   };
 };
