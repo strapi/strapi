@@ -18,33 +18,20 @@ const ASSET_DETAILS_TRIGGER_ATTRIBUTE = 'data-asset-details-trigger';
  */
 export const ASSET_DETAILS_TRIGGER_PROPS = { [ASSET_DETAILS_TRIGGER_ATTRIBUTE]: '' };
 
-/** Matches an element carrying {@link ASSET_DETAILS_TRIGGER_PROPS}. */
-export const ASSET_DETAILS_TRIGGER_SELECTOR = `[${ASSET_DETAILS_TRIGGER_ATTRIBUTE}]`;
+const ASSET_ITEM_CONTROL_ATTRIBUTE = 'data-asset-item-control';
 
 /**
- * Controls whose press must not dismiss the asset details drawer — the user is
- * operating the list, not leaving it.
- *
- * Roles as well as tags: the design system's checkbox is a Radix button with
- * `role="checkbox"`, and `menuitem`/`option` cover the sort and filter menus,
- * which portal out of the page and so count as outside the panel.
+ * Spread onto the controls inside an asset card or row that act on the item
+ * rather than opening it — its selection checkbox and its actions menu. They
+ * stop the card's own click, so no details switch follows them.
  */
-export const INTERACTIVE_ELEMENT_SELECTOR = [
-  'a',
-  'button',
-  'input',
-  'textarea',
-  'select',
-  'label',
-  '[role="checkbox"]',
-  '[role="combobox"]',
-  '[role="menuitem"]',
-  '[role="menuitemcheckbox"]',
-  '[role="menuitemradio"]',
-  '[role="option"]',
-  '[role="tab"]',
-  '[contenteditable="true"]',
-].join(', ');
+export const ASSET_ITEM_CONTROL_PROPS = { [ASSET_ITEM_CONTROL_ATTRIBUTE]: '' };
+
+/** Matches an element carrying {@link ASSET_ITEM_CONTROL_PROPS}. */
+export const ASSET_ITEM_CONTROL_SELECTOR = `[${ASSET_ITEM_CONTROL_ATTRIBUTE}]`;
+
+/** Matches an element carrying {@link ASSET_DETAILS_TRIGGER_PROPS}. */
+export const ASSET_DETAILS_TRIGGER_SELECTOR = `[${ASSET_DETAILS_TRIGGER_ATTRIBUTE}]`;
 
 interface TableHeader {
   name: string;

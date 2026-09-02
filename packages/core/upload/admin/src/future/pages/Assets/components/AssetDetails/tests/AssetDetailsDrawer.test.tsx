@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { ASSET_DETAILS_TRIGGER_PROPS } from '../../../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
 import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
@@ -757,13 +757,25 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
   const renderOpenDrawer = async () => {
     const result = render(
       <>
-        {/* Inert canvas — the only thing behind that dismisses. */}
+        {/* Plain page background. */}
         <div data-testid="page-background">Background</div>
         {/* Stands in for a grid card/table row, whose click switches the drawer. */}
-        <button type="button" data-testid="other-asset" {...ASSET_DETAILS_TRIGGER_PROPS}>
+        <div data-testid="other-asset" {...ASSET_DETAILS_TRIGGER_PROPS}>
           Other asset
-        </button>
-        {/* The list's own controls, which must not dismiss it. */}
+          {/* Its own controls, which act on the item rather than opening it. */}
+          <span {...ASSET_ITEM_CONTROL_PROPS}>
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked="false"
+              data-testid="item-checkbox"
+            />
+            <button type="button" data-testid="item-actions">
+              Actions
+            </button>
+          </span>
+        </div>
+        {/* The list's own controls, which dismiss it like any other outside press. */}
         <button type="button" data-testid="toolbar-button">
           Sort
         </button>
@@ -783,7 +795,7 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     return { ...result, drawer };
   };
 
-  it('closes when the pointer goes down on inert page background', async () => {
+  it('closes when the pointer goes down on the page background', async () => {
     const { user, drawer } = await renderOpenDrawer();
 
     await user.click(screen.getByTestId('page-background'));
@@ -814,19 +826,19 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
   });
 
-  // The drawer is a reference panel: operating the list behind it is not
-  // leaving it.
+  // Anywhere behind the panel dismisses it, controls included — pressing one is
+  // still leaving the drawer.
   it.each([
     ['a toolbar button', 'toolbar-button'],
     ['the select-all checkbox', 'select-all'],
     ['the search field', 'search'],
     ['an option in a menu portaled out of the page', 'menu-option'],
-  ])('stays open when the pointer goes down on %s', async (_label, testId) => {
+  ])('closes when the pointer goes down on %s', async (_label, testId) => {
     const { user, drawer } = await renderOpenDrawer();
 
     await user.click(screen.getByTestId(testId));
 
-    expect(drawer).toHaveAttribute('data-state', 'open');
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
   });
 
   it('stays open when the pointer goes down inside the panel', async () => {
@@ -845,6 +857,19 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     await user.click(screen.getByTestId('other-asset'));
 
     expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // The card is exempt because its click switches the drawer — but its checkbox
+  // selects the asset and stops that click, so nothing switches and it closes.
+  it.each([
+    ["the asset's own checkbox", 'item-checkbox'],
+    ["the asset's own actions menu", 'item-actions'],
+  ])('closes when the pointer goes down on %s', async (_label, testId) => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId(testId));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
   });
 
   // The delete confirmation is portaled to the body but rendered from inside

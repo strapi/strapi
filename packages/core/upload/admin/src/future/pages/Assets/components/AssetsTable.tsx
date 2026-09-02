@@ -24,7 +24,7 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
-import { ASSET_DETAILS_TRIGGER_PROPS, TABLE_HEADERS } from '../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS, TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -342,7 +342,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {/* No checkbox without the update permission (nothing selectable can be
           acted on). Shown at every viewport width otherwise. */}
       {canUpdate && (
-        <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
+        <CheckboxTd {...ASSET_ITEM_CONTROL_PROPS} onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
               checked={selected}
@@ -412,7 +412,12 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would open the details drawer). */}
-      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
+      <StyledTd
+        {...ASSET_ITEM_CONTROL_PROPS}
+        onClick={stopRowEvent}
+        onKeyDown={stopRowEvent}
+        onPointerDown={stopRowEvent}
+      >
         <Flex justifyContent="flex-end">
           <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>

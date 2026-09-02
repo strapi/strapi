@@ -10,7 +10,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
-import { ASSET_DETAILS_TRIGGER_PROPS } from '../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
@@ -494,7 +494,10 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
     >
       <StyledCardHeader>
         {canUpdate && (
-          <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <CheckboxOverlay
+            {...ASSET_ITEM_CONTROL_PROPS}
+            onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+          >
             <Checkbox
               checked={selected}
               onClick={handleCheckboxClick}
@@ -523,7 +526,12 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
           <NameButton type="button" onClick={handleNameClick}>
             <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
-          <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+          <Flex
+            {...ASSET_ITEM_CONTROL_PROPS}
+            onClick={stopCardEvent}
+            onKeyDown={stopCardEvent}
+            onPointerDown={stopCardEvent}
+          >
             <AssetActionsMenu asset={asset} dragData={dragData} />
           </Flex>
         </CardFooter>

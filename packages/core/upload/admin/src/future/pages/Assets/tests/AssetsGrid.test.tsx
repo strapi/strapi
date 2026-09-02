@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { AssetsGrid } from '../components/AssetsGrid';
 import { BulkActionsBar } from '../components/BulkActionsBar';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../constants';
 import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 const mockNavigateToFolder = jest.fn();
@@ -197,6 +198,24 @@ describe('AssetsGrid', () => {
 
     // Folder cards are deliberately unmarked: opening a folder should close
     // the drawer, not switch it.
+    // The drawer keeps itself open for a press that switches it, so the card's
+    // own controls have to be distinguishable from the rest of the card.
+    it("marks the asset card's own controls as item-scoped", async () => {
+      setup({ assets: [createMockAsset(7, 'photo.png')] });
+
+      const checkbox = await screen.findByRole('checkbox', { name: 'Select photo.png' });
+      const actions = await screen.findAllByRole('button', { name: 'More actions' });
+
+      /* eslint-disable testing-library/no-node-access */
+      expect(checkbox.closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+      expect(actions[0].closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+
+      const card = checkbox.closest(ASSET_DETAILS_TRIGGER_SELECTOR);
+      expect(card).not.toBeNull();
+      expect(card?.matches(ASSET_ITEM_CONTROL_SELECTOR)).toBe(false);
+      /* eslint-enable testing-library/no-node-access */
+    });
+
     it('marks asset cards — and only asset cards — as asset details triggers', () => {
       setup({
         assets: [createMockAsset(7, 'photo.png')],
