@@ -10,9 +10,15 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
+import { getScanRoots } from './staticFiles';
 import type { BaseContext } from './types';
 
 interface BaseOptions {
+  /**
+   * Vite development server only: it serves `admin/src`, so Tailwind scans source and not `dist`.
+   * Keep the flag in this object. Rollup folds a literal `dev: false` argument into every consumer
+   */
+  dev?: boolean;
   stats?: boolean;
   minify?: boolean;
   sourcemap?: boolean;
@@ -38,6 +44,8 @@ interface BuildContext extends BaseContext {
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
+  /** The directories Tailwind scans. Computed once: the stylesheet, Vite and the watcher share it */
+  scanRoots: string[];
 }
 
 interface CreateBuildContextArgs extends CLIContext {
@@ -156,6 +164,13 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
+  const scanRoots = await getScanRoots(
+    { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
+    options.dev === true
+  );
+
+  logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+
   const buildContext: BuildContext = {
     appDir,
     adminPath,
@@ -172,6 +187,7 @@ const createBuildContext = async ({
     options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,
+    scanRoots,
     strapi: strapiInstance,
     target,
     tsconfig,
