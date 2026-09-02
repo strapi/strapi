@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { ResetPassword } from '../../../../../shared/contracts/authentication';
+import * as AuthenticationContracts from '../../../../../shared/contracts/authentication';
 import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
@@ -111,7 +111,7 @@ const ResetPassword = () => {
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 
-  const handleSubmit = async (body: ResetPassword.Request['body']) => {
+  const handleSubmit = async (body: AuthenticationContracts.ResetPassword.Request['body']) => {
     const res = await resetPassword(body);
 
     if ('data' in res) {

@@ -1907,4 +1907,4 @@ const app = {
 type Admin = typeof admin;
 type App = typeof app;
 
-export { admin, Admin, app, App };
+export { admin, type Admin, app, type App };

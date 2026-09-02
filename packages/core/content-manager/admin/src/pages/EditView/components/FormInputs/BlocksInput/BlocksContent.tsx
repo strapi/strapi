@@ -645,4 +645,4 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   );
 };
 
-export { BlocksContent, BlocksContentProps };
+export { BlocksContent, type BlocksContentProps };
