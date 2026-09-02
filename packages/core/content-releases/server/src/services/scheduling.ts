@@ -22,6 +22,12 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const taskName = `publishRelease_${id}`;
 
+      // Cancel first: strapi.cron.remove(name) stops every job with that name,
+      // and Croner also rejects duplicate names if the scheduler assigns them.
+      if (scheduledJobs.has(id)) {
+        this.cancel(id);
+      }
+
       strapi.cron.add({
         [taskName]: {
           async task() {
@@ -30,10 +36,6 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
           options: scheduleDate,
         },
       });
-
-      if (scheduledJobs.has(id)) {
-        this.cancel(id);
-      }
 
       scheduledJobs.set(id, taskName);
 
