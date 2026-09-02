@@ -2,6 +2,7 @@ import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
   type AccessTokenExchange,
   type Login,
+  type LoginMfa,
   type MfaChallengeResponse,
   type ResetPassword,
   type RegisterAdmin,
@@ -121,6 +122,22 @@ const authService = adminApi
             return res.data;
           }
 
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /**
+       * Completes a login that `/login` answered with `MfaChallengeResponse`. The response is
+       * the same session shape `/login` returns for an unenrolled account; `features/Auth.tsx`
+       * persists its token exactly as it does for `login`.
+       */
+      loginMfa: builder.mutation<Login.Response['data'], LoginMfa.Request['body']>({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa',
+          data: body,
+        }),
+        transformResponse(res: Login.Response) {
           return res.data;
         },
         invalidatesTags: ['Me'],
@@ -256,6 +273,7 @@ const {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
@@ -279,6 +297,7 @@ export {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
