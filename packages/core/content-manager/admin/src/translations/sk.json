@@ -189,6 +189,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Konfigurovať nastavenia pre všetky Vaše kolekcie a skupiny",
   "containers.SettingsView.list.subtitle": "Konfigurovať rozloženie a zobrazenie stránky Vaších kolekcií a skupín",
   "containers.SettingsView.list.title": "Zobraziť nastavenia",
+  "containers.empty-label": "Bez názvu",
   "containers.untitled": "Bez názvu",
   "dnd.cancel-item": "{item}, pustené. Zmena poradia zrušená.",
   "dnd.drop-item": "{item}, pustené. Konečná pozícia v zozname: {position}.",

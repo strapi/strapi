@@ -106,7 +106,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     return {
       action: name,
       date: new Date().toISOString(),
-      payload: { ...(getPayload(...args) || {}), origin },
+      payload: { ...getPayload(...args), origin },
       userId: user.id,
     };
   };

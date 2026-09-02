@@ -111,7 +111,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
 
     let res;
     try {
-      res = await replaceAsset({ id: asset.id, file });
+      res = await replaceAsset({ id: asset.id, file, fileInfo: { name: asset.name } });
     } finally {
       releaseBusy();
     }
@@ -209,6 +209,11 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
         <input
           ref={fileInputRef}
           type="file"
+          // Replacing swaps the bytes of an existing asset, so the picker offers
+          // only its own type. Without this the picker accepted anything and a
+          // JPG could come back as PNG bytes still served under a `.jpg` url,
+          // since replace preserves hash and ext by design.
+          accept={asset.mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden

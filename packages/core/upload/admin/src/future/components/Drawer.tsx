@@ -147,6 +147,17 @@ const CollapsibleContent = styled(Box)<CollapsibleContentProps>`
     overflow: hidden;
     min-height: 0;
   }
+
+  /* The scroll area wraps its children in a div styled inline as
+     display: table, min-width: 100%. A table box grows to its content, so a
+     single unbreakable string (a long file name) widens it past the scrollport
+     and the panel gains a horizontal scrollbar — with nothing left to clamp the
+     row, the name never truncates. Overriding to a block box makes the
+     scrollport the width again, which is what the vertical-only list wants.
+     Inline styles, hence the important. */
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+  }
 `;
 
 const CloseIconButton = styled(IconButton)`

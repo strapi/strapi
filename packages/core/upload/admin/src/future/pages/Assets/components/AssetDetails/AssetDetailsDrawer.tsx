@@ -8,6 +8,7 @@ import {
   useForm,
   useNotification,
   useQueryParams,
+  withEncodedUserParams,
   getDisplayName,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -123,7 +124,10 @@ const useAssetOperation = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 export const useAssetDetailsParam = () => {
-  const [{ query }, setQuery] = useQueryParams<{ [ASSET_DETAILS_URL_PARAM]?: string }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    [ASSET_DETAILS_URL_PARAM]?: string;
+    _q?: string;
+  }>();
 
   const assetId = parseAssetDetailsId(query?.[ASSET_DETAILS_URL_PARAM]);
   const hasValidId = assetId !== null;
@@ -155,14 +159,18 @@ export const useAssetDetailsParam = () => {
 
   const openDetails = React.useCallback(
     (id: number) => {
-      setQuery({ [ASSET_DETAILS_URL_PARAM]: String(id) }, 'push', true);
+      setQuery(
+        withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: String(id) }),
+        'push',
+        true
+      );
     },
-    [setQuery]
+    [query, setQuery]
   );
 
   const closeDetails = React.useCallback(() => {
-    setQuery({ [ASSET_DETAILS_URL_PARAM]: undefined }, 'remove', true);
-  }, [setQuery]);
+    setQuery(withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: undefined }), 'push', true);
+  }, [query, setQuery]);
 
   return {
     assetId: hasValidId ? assetId : displayAssetId.current,
@@ -787,7 +795,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // Owns the replace upload so isReplacing can drive the busy overlay.
   const handleReplace = React.useCallback(
     async (file: globalThis.File) => {
-      const res = await replaceMutation({ id: asset.id, file });
+      const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
         notify({
           type: 'danger',
@@ -810,7 +818,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
+    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -1169,6 +1177,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
  * DrawerHeader
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * The icon's size lives in SVG attributes, which flex is free to override, so a
+ * long asset name would squash it. Matches the grid and table rows, where the
+ * file-type icon is shrink-proof and the name is what truncates.
+ */
+const HeaderIcon = styled(Flex)`
+  flex-shrink: 0;
+`;
+
+const HeaderTitle = styled(Typography)`
+  min-width: 0;
+`;
+
 interface DrawerHeaderProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
@@ -1187,11 +1208,13 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
       borderStyle="solid"
       borderWidth="0 0 1px 0"
     >
-      <DocIcon width={20} height={20} />
+      <HeaderIcon>
+        <DocIcon width={20} height={20} />
+      </HeaderIcon>
       <Drawer.Title asChild>
-        <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+        <HeaderTitle variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
           {asset.name}
-        </Typography>
+        </HeaderTitle>
       </Drawer.Title>
       <Box marginLeft="auto">
         <Drawer.CloseButton onClose={closeDetails}>

@@ -319,9 +319,14 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Request (see admin-test-utils request-body-stash), so `request.formData()`
     // reliably returns the picked file here instead of relying on undici's
     // cross-realm multipart serialization (which yields a `text/plain` body).
-    let captured: { id: string | null; file: FormDataEntryValue | null } = {
+    let captured: {
+      id: string | null;
+      file: FormDataEntryValue | null;
+      fileInfo: FormDataEntryValue | null;
+    } = {
       id: null,
       file: null,
+      fileInfo: null,
     };
     server.use(
       http.post('/upload/files/:id/replace', async ({ request, params }) => {
@@ -329,6 +334,7 @@ describe('AssetDetails (asset details drawer body)', () => {
         captured = {
           id: String(params.id),
           file: body.get('files'),
+          fileInfo: body.get('fileInfo'),
         };
         return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
       })
@@ -358,6 +364,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(captured.id).toBe('1'));
     expect(captured.file).toBeInstanceOf(File);
     expect((captured.file as File).name).toBe('replacement.png');
+    expect(JSON.parse(String(captured.fileInfo))).toMatchObject({ name: 'photo.png' });
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);

@@ -10,7 +10,10 @@ import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
-import { useQueryParams } from '../../../../../../../admin/src/hooks/useQueryParams';
+import {
+  useQueryParams,
+  withEncodedUserParams,
+} from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
@@ -31,7 +34,15 @@ const ListPage = () => {
     isLoading: isLoadingRBAC,
   } = useRBAC(permissions?.auditLogs?.read || []);
 
-  const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    id?: AuditLog['id'];
+    filters?: unknown;
+    _q?: unknown;
+  }>();
+
+  const openLog = (id: AuditLog['id']) =>
+    setQuery(withEncodedUserParams(query, { id }), 'push', true);
+  const closeLog = () => setQuery(withEncodedUserParams(query, { id: undefined }), 'push', true);
   const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
     auditLogs,
@@ -147,7 +158,7 @@ const ListPage = () => {
             <Table.Loading />
             <Table.Body>
               {results.map((log) => (
-                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id }, 'push', true)}>
+                <Table.Row key={log.id} onClick={() => openLog(log.id)}>
                   {headers.map((header) => {
                     const { name, cellFormatter } = header;
 
@@ -196,7 +207,7 @@ const ListPage = () => {
                   <Table.Cell onClick={(e) => e.stopPropagation()}>
                     <Flex justifyContent="end">
                       <IconButton
-                        onClick={() => setQuery({ id: log.id }, 'push', true)}
+                        onClick={() => openLog(log.id)}
                         withTooltip={false}
                         label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
@@ -219,12 +230,7 @@ const ListPage = () => {
           <Pagination.Links />
         </Pagination.Root>
       </Layouts.Content>
-      {query?.id && (
-        <Modal
-          handleClose={() => setQuery({ id: '' }, 'remove', true)}
-          logId={query.id.toString()}
-        />
-      )}
+      {query?.id && <Modal handleClose={closeLog} logId={query.id.toString()} />}
     </Page.Main>
   );
 };

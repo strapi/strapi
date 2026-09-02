@@ -182,6 +182,18 @@ const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetad
 };
 
 /**
+ * Re-attaches the folder an upload targeted.
+ *
+ * The create response is built from `db.query().create()` with no populate, so
+ * it comes back without the folder relation it was just given. The list needs
+ * it to tell whether a freshly uploaded asset belongs to the folder on screen.
+ */
+const withTargetFolder = (
+  file: UploadedFile,
+  folder: number | string | null | undefined
+): UploadedFile => (file.folder != null ? file : { ...file, folder: folder ?? null });
+
+/**
  * Kicks off AI metadata generation for a freshly uploaded file.
  *
  * Deliberately fire-and-forget — the caller must NOT await it:
@@ -298,7 +310,14 @@ const runUploadPool = async ({
       );
       batcher.cancel();
       uploaded.push(file);
-      dispatch(setFileComplete({ index, file, uploadId }));
+      dispatch(
+        setFileComplete({
+          index,
+          file: withTargetFolder(file, entry.fileInfo?.folder),
+          uploadId,
+          completedAt: Date.now(),
+        })
+      );
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -484,11 +503,13 @@ const processSSEStream = async ({
   dispatch,
   uploadId,
   generateAiMetadata,
+  folderId,
 }: {
   response: Response;
   dispatch: Dispatch;
   uploadId: number;
   generateAiMetadata: boolean;
+  folderId?: number | null;
 }): Promise<CreateFilesStream.Response | null> => {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -534,7 +555,14 @@ const processSSEStream = async ({
         }
         case 'file:complete': {
           const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
-          dispatch(setFileComplete({ index, file: payload.file, uploadId }));
+          dispatch(
+            setFileComplete({
+              index,
+              file: withTargetFolder(payload.file, folderId),
+              uploadId,
+              completedAt: Date.now(),
+            })
+          );
 
           // Same fire-and-forget semantics as the file flow.
           maybeGenerateMetadata({
@@ -843,6 +871,7 @@ const uploadApi = adminApi
               dispatch,
               uploadId,
               generateAiMetadata,
+              folderId,
             });
 
             unregisterAbortController(uploadId);

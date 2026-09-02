@@ -133,6 +133,19 @@ describe('AssetsTable', () => {
       expect(screen.getByText('image2.png')).toBeInTheDocument();
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
+
+    // The page's background context menu reads this attribute to tell an item
+    // apart from empty space — see MainAreaContextMenu. The header row is not
+    // marked: it is matched by the `thead` half of the same rule.
+    it('opts every item row out of the background context menu', () => {
+      setup({ assets: [mockAssets[0]], folders: [createMockFolder(1, 'Photos')] });
+
+      const [headerRow, ...itemRows] = screen.getAllByRole('row');
+
+      expect(headerRow).not.toHaveAttribute('data-native-context-menu');
+      expect(itemRows).toHaveLength(2);
+      itemRows.forEach((row) => expect(row).toHaveAttribute('data-native-context-menu'));
+    });
   });
 
   describe('AssetPreviewCell', () => {
