@@ -138,6 +138,82 @@ describe('AssetCropEditor focus on open', () => {
   });
 });
 
+describe('AssetCropEditor focal point bounds', () => {
+  it('bounds the focal inputs to the crop, so an out-of-range value cannot be typed', async () => {
+    await renderEditor();
+
+    // The fields display pixels of the current crop area while the stored value
+    // is a percentage, so an unbounded field silently relocated the focal point
+    // to an edge: 320 on a 600px-tall crop clamped to y: 100 with no feedback.
+    // The numeric panel is hidden below the tablet breakpoint and jsdom matches
+    // no media query, so these are out of the accessibility tree — queried by
+    // label rather than by role.
+    const focalY = screen.getByLabelText('Focal point Y (px)');
+    const focalX = screen.getByLabelText('Focal point X (px)');
+
+    expect(focalY).toHaveAttribute('max', String(NATURAL.height));
+    expect(focalY).toHaveAttribute('min', '0');
+    expect(focalX).toHaveAttribute('max', String(NATURAL.width));
+    expect(focalX).toHaveAttribute('min', '0');
+  });
+});
+
+describe('AssetCropEditor focal point bounds', () => {
+  it('advertises the crop as the focal inputs range', async () => {
+    await renderEditor();
+
+    // The numeric panel is hidden below the tablet breakpoint and jsdom matches
+    // no media query, so these are out of the accessibility tree — queried by
+    // label rather than by role.
+    const focalY = screen.getByLabelText('Focal point Y (px)');
+    const focalX = screen.getByLabelText('Focal point X (px)');
+
+    // Bounds are the crop's dimensions, not the file's — the displayed pixels
+    // are relative to the crop area.
+    expect(focalX).toHaveAttribute('min', '0');
+    expect(focalX).toHaveAttribute('max', String(NATURAL.width));
+    expect(focalY).toHaveAttribute('min', '0');
+    expect(focalY).toHaveAttribute('max', String(NATURAL.height));
+  });
+
+  it('corrects an out-of-range entry to the edge it was clamped to', async () => {
+    const { focalHandle } = await renderEditor();
+
+    fireEvent.change(screen.getByLabelText('Focal point Y (px)'), {
+      target: { value: '9999' },
+    });
+    fireEvent.blur(screen.getByLabelText('Focal point Y (px)'));
+
+    // The stored focal point is a percentage and was already clamped to the
+    // bottom edge; before this fix the field kept showing the typed number
+    // (reformatted to "9,999"), so the user never saw that it had not been
+    // honoured. Re-queried because the field remounts to drop its edit string.
+    expect(screen.getByLabelText('Focal point Y (px)')).toHaveValue('600');
+    expect(focalHandle).toHaveStyle({ top: '100%' });
+  });
+
+  it('leaves an in-range entry alone', async () => {
+    const { focalHandle } = await renderEditor();
+
+    fireEvent.change(screen.getByLabelText('Focal point Y (px)'), {
+      target: { value: '150' },
+    });
+    fireEvent.blur(screen.getByLabelText('Focal point Y (px)'));
+
+    // 150 of 600 is 25%, which round-trips back to the same pixel.
+    expect(screen.getByLabelText('Focal point Y (px)')).toHaveValue('150');
+    expect(focalHandle).toHaveStyle({ top: '25%' });
+  });
+
+  it('moves the bound with the crop rather than the original file', async () => {
+    await renderEditor();
+
+    fireEvent.change(screen.getByLabelText('Height (px)'), { target: { value: '150' } });
+
+    expect(screen.getByLabelText('Focal point Y (px)')).toHaveAttribute('max', '150');
+  });
+});
+
 describe('AssetCropEditor pointer drags', () => {
   it('follows the pointer for the whole focal-point drag', async () => {
     const { focalHandle } = await renderEditor();

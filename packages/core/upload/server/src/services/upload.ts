@@ -484,6 +484,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { fileInfo } = data;
       fileData = await enhanceAndValidateFile(file, fileInfo);
 
+      // Replacing a file writes new bytes just like creating one, so it has to
+      // respect sizeLimit too. Checked before any provider write, and measured on
+      // the same post-optimization file as the create path (uploadFileAndPersist).
+      await getService('provider').checkFileSize(fileData);
+
       // keep a constant hash and extension so the file url doesn't change when the file is replaced
       _.assign(fileData, {
         hash: dbFile.hash,

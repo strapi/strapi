@@ -1,18 +1,10 @@
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Checkbox,
-  Flex,
-  Grid,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Card, CardBody, CardHeader, Checkbox, Flex, Grid } from '@strapi/design-system';
 import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { TruncatedText } from '../../../components/TruncatedText';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
@@ -21,6 +13,7 @@ import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -66,6 +59,7 @@ const StyledCard = styled(Card)<{
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
+  isolation: isolate;
   cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
   /* No opacity change while busy — the overlay does the dimming, and stacking
@@ -143,7 +137,7 @@ const FolderIconContainer = styled(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-const FolderName = styled(Typography)`
+const FolderName = styled(TruncatedText)`
   flex: 1;
   min-width: 0;
 `;
@@ -257,9 +251,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
-      <FolderName textColor="neutral800" ellipsis>
-        {folder.name}
-      </FolderName>
+      <FolderName textColor="neutral800">{folder.name}</FolderName>
       <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
         <FolderActionsMenu folder={folder} dragData={dragData} />
       </Flex>
@@ -375,7 +367,7 @@ const FileTypeIcon = styled(Flex)`
   flex-shrink: 0;
 `;
 
-const FileName = styled(Typography)`
+const FileName = styled(TruncatedText)`
   flex: 1;
   min-width: 0;
 `;
@@ -521,9 +513,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
             <TypeIcon width={20} height={20} />
           </FileTypeIcon>
           <NameButton type="button" onClick={handleNameClick}>
-            <FileName textColor="primary800" ellipsis>
-              {asset.name}
-            </FileName>
+            <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
           <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
             <AssetActionsMenu asset={asset} dragData={dragData} />
@@ -541,18 +531,22 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  /** Keys of the rendered items, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
+export const AssetsGrid = ({
+  assets,
+  folders = [],
+  renderedKeys,
+  onAssetItemClick,
+}: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
   // range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  const orderedItemKeys: ItemKey[] = renderedKeys ?? buildRenderedKeys({ folders, assets });
 
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.

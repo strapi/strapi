@@ -1,4 +1,4 @@
-import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
@@ -9,14 +9,17 @@ import {
   RawTh,
   RawThead,
   RawTr,
+  Tooltip,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Folder as FolderIcon } from '@strapi/icons';
+import { Folder as FolderIcon, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
+import { TruncatedText } from '../../../components/TruncatedText';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -26,6 +29,7 @@ import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -43,6 +47,17 @@ const StyledTable = styled(RawTable)`
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: 4px;
   overflow: hidden;
+
+  /* An auto layout lets every column but the name size itself to its content,
+     so the dates never wrap. The name cell is what absorbs the leftover and
+     ellipsizes — see NameTd. */
+  table-layout: auto;
+
+  & td:last-child,
+  & th:last-child {
+    width: 5.6rem;
+    white-space: nowrap;
+  }
 `;
 
 const StyledThead = styled(RawThead)`
@@ -53,15 +68,48 @@ const StyledThead = styled(RawThead)`
   }
 `;
 
-const StyledTh = styled(RawTh)`
+/**
+ * Column sizing, applied to the header and body cells alike.
+ *
+ * `hug` shrinks a column to its content: `width: 1%` is a floor the content
+ * overrides, and `nowrap` stops a date breaking across lines.
+ *
+ * `flex` claims everything left over. `width: 100%` asks for all of it and
+ * `max-width: 0` is what allows the cell to be narrower than its content, which
+ * is what lets the name inside ellipsize instead of widening the table.
+ */
+const hugColumn = css`
+  width: 1%;
+  white-space: nowrap;
+`;
+
+const flexColumn = css`
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+`;
+
+const StyledTh = styled(RawTh)<{ $flex?: boolean }>`
   height: 40px;
   padding: 0 ${({ theme }) => theme.spaces[4]};
   text-align: left;
+
+  ${({ $flex }) => ($flex ? flexColumn : hugColumn)}
 `;
 
 const StyledTd = styled(RawTd)`
   padding: 0 ${({ theme }) => theme.spaces[4]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+/** The name column: takes whatever the others leave and ellipsizes. */
+const NameTd = styled(StyledTd)`
+  ${flexColumn}
+`;
+
+/** Every other column: as wide as its content, never wrapping. */
+const HugTd = styled(StyledTd)`
+  ${hugColumn}
 `;
 
 const StyledTr = styled.tr<{
@@ -110,16 +158,30 @@ const StyledTr = styled.tr<{
   }
 `;
 
-// Leading checkbox column. Narrow + centred so the control sits flush against the
-// row's left edge.
+// Leading checkbox column. Fixed narrow width so it holds its own column under
+// the mobile fixed table-layout (a 1% width would collapse and let the name
+// cell's preview overlap the control).
 const CheckboxTd = styled(StyledTd)`
-  width: 1%;
+  width: 5.6rem;
   white-space: nowrap;
 `;
 
 const CheckboxTh = styled(StyledTh)`
-  width: 1%;
+  width: 5.6rem;
   white-space: nowrap;
+`;
+
+// Flags an asset whose caption or alternative text is empty — mirrors the
+// per-field warning shown in the details drawer. Pushed to the far end of the
+// name cell (shrink 0 so a long name never crowds it out).
+const MetadataWarning = styled(WarningCircle)`
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+
+  path {
+    fill: ${({ theme }) => theme.colors.warning500};
+  }
 `;
 
 // The asset filename is its own interactive element: clicking it opens the
@@ -184,7 +246,7 @@ interface AssetRowProps {
 }
 
 const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
@@ -194,6 +256,14 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
+
+  // Caption and alternative text apply to every file type — same "empty =
+  // falsy" rule as the drawer's per-field warning.
+  const isMetadataMissing = !asset.caption || !asset.alternativeText;
+  const metadataMissingLabel = formatMessage({
+    id: getTranslationKey('list.table.row.metadata-missing'),
+    defaultMessage: 'This asset is missing metadata (caption or alternative text).',
+  });
 
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
@@ -265,9 +335,9 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
         }
       }}
     >
-      {/* No checkbox column on mobile (multi-select deferred) or without the
-          update permission (nothing selectable can be acted on). */}
-      {!isMobile && canUpdate && (
+      {/* No checkbox without the update permission (nothing selectable can be
+          acted on). Shown at every viewport width otherwise. */}
+      {canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -284,49 +354,56 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </Flex>
         </CheckboxTd>
       )}
-      <StyledTd>
-        <Flex gap={3} alignItems="center">
-          {/* The row is dimmed and inert while busy; the spinner in place of the
-              thumbnail is what says so positively. Its label carries the reason
-              to screen readers — the row itself has no other announcement. */}
-          {busyMessage !== null ? (
-            <Flex justifyContent="center" width="3.2rem" height="3.2rem">
-              <Loader small>{busyMessage}</Loader>
-            </Flex>
-          ) : (
-            <AssetPreviewCell asset={asset} />
-          )}
-          <Flex direction="column" alignItems="flex-start" minWidth={0}>
-            <NameButton type="button" onClick={handleNameClick}>
-              <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
-                {asset.name}
-              </Typography>
-            </NameButton>
-            {isMobile && (
-              <Typography textColor="neutral600" variant="pi">
-                {asset.size ? formatBytes(asset.size, 1) : '-'}
-              </Typography>
+      <NameTd>
+        <Flex alignItems="center" justifyContent="space-between" gap={2} minWidth={0}>
+          <Flex gap={3} alignItems="center" minWidth={0}>
+            {/* The row is dimmed and inert while busy; the spinner in place of the
+                thumbnail is what says so positively. Its label carries the reason
+                to screen readers — the row itself has no other announcement. */}
+            {busyMessage !== null ? (
+              <Flex justifyContent="center" width="3.2rem" height="3.2rem">
+                <Loader small>{busyMessage}</Loader>
+              </Flex>
+            ) : (
+              <AssetPreviewCell asset={asset} />
             )}
+            <Flex direction="column" alignItems="flex-start" minWidth={0}>
+              <NameButton type="button" onClick={handleNameClick}>
+                <TruncatedText textColor="neutral800" fontWeight="semiBold">
+                  {asset.name}
+                </TruncatedText>
+              </NameButton>
+              {!isDesktop && (
+                <Typography textColor="neutral600" variant="pi">
+                  {asset.size ? formatBytes(asset.size, 1) : '-'}
+                </Typography>
+              )}
+            </Flex>
           </Flex>
+          {isMetadataMissing && (
+            <Tooltip label={metadataMissingLabel}>
+              <MetadataWarning aria-label={metadataMissingLabel} role="img" />
+            </Tooltip>
+          )}
         </Flex>
-      </StyledTd>
-      {!isMobile && (
+      </NameTd>
+      {isDesktop && (
         <>
-          <StyledTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.size ? formatBytes(asset.size, 1) : '-'}
             </Typography>
-          </StyledTd>
+          </HugTd>
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
@@ -352,7 +429,7 @@ interface FolderRowProps {
 }
 
 const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isSelected, toggle, selectRange } = useAssetSelection();
@@ -440,7 +517,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
         }
       }}
     >
-      {!isMobile && canUpdate && (
+      {canUpdate && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
@@ -457,8 +534,8 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           </Flex>
         </CheckboxTd>
       )}
-      <StyledTd>
-        <Flex gap={3} alignItems="center">
+      <NameTd>
+        <Flex gap={3} alignItems="center" minWidth={0}>
           <Flex
             justifyContent="center"
             alignItems="center"
@@ -470,30 +547,30 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           >
             <FolderIcon width={20} height={20} />
           </Flex>
-          <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+          <TruncatedText textColor="neutral800" fontWeight="semiBold">
             {folder.name}
-          </Typography>
+          </TruncatedText>
         </Flex>
-      </StyledTd>
-      {!isMobile && (
+      </NameTd>
+      {isDesktop && (
         <>
-          <StyledTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {folder.createdAt
                 ? formatDate(new Date(folder.createdAt), { dateStyle: 'long' })
                 : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {folder.updatedAt
                 ? formatDate(new Date(folder.updatedAt), { dateStyle: 'long' })
                 : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">-</Typography>
-          </StyledTd>
+          </HugTd>
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
@@ -515,6 +592,8 @@ interface AssetsTableProps {
    * order instead of folders-first. Range selection follows the same order.
    */
   mixedItems?: MixedItem[] | null;
+  /** Keys of the rendered rows, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
@@ -522,42 +601,40 @@ export const AssetsTable = ({
   assets,
   folders = [],
   mixedItems = null,
+  renderedKeys,
   onAssetItemClick,
 }: AssetsTableProps) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { formatMessage } = useIntl();
   const { selectedKeys, selectAll, clear } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const { trackUsage } = useTracking();
 
-  const visibleHeaders = isMobile
-    ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
-    : TABLE_HEADERS;
+  // Below the desktop breakpoint only the name (and actions) column is kept —
+  // the date/size columns don't fit; size moves under the name as a subtitle.
+  const visibleHeaders = isDesktop
+    ? TABLE_HEADERS
+    : TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions');
 
   // The checkbox column is a dedicated structural column (not part of
-  // TABLE_HEADERS). Hidden on mobile (multi-select deferred) and without the
-  // update permission — every bulk action needs `assets.update`, so a
-  // read-only user has nothing to select for.
-  const showCheckboxColumn = !isMobile && canUpdate;
+  // TABLE_HEADERS). Hidden only without the update permission — every bulk
+  // action needs `assets.update`, so a read-only user has nothing to select for.
+  const showCheckboxColumn = canUpdate;
   const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;
 
   // Render order — folders first by default, or the interleaved mixed order.
   // Range selection follows it.
-  const orderedItemKeys: ItemKey[] = mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
-    : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
-      ];
+  const orderedItemKeys: ItemKey[] =
+    renderedKeys ?? buildRenderedKeys({ folders, assets, mixedItems });
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {
     if (allSelected) {
       clear();
     } else {
+      trackUsage('didSelectAllMediaLibraryElements');
       selectAll(orderedItemKeys);
     }
   };
@@ -593,7 +670,7 @@ export const AssetsTable = ({
 
             if (isVisuallyHidden) {
               return (
-                <StyledTh key={header.name}>
+                <StyledTh key={header.name} $flex={header.name === 'name'}>
                   <VisuallyHidden>
                     {formatMessage({
                       id: getTranslationKey('table.header.actions'),
@@ -605,7 +682,7 @@ export const AssetsTable = ({
             }
 
             return (
-              <StyledTh key={header.name}>
+              <StyledTh key={header.name} $flex={header.name === 'name'}>
                 <Typography textColor="neutral600" variant="sigma">
                   {tableHeaderLabel}
                 </Typography>

@@ -18,6 +18,7 @@ import {
   useIsMobile,
   useClipboard,
   tours,
+  withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -85,6 +86,7 @@ type ListViewQuery = {
   page?: string;
   pageSize?: string;
   sort?: string;
+  _q?: string;
 };
 
 const ListViewPage = () => {
@@ -231,9 +233,9 @@ const ListViewPage = () => {
         .map((s) => s.trim())
         .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
         .join(',');
-      setQuery({ sort: cleaned || undefined }, 'push', true);
+      setQuery(withEncodedUserParams(query, { sort: cleaned || undefined }), 'push', true);
     }
-  }, [hasStatusFilter, query.sort, setQuery]);
+  }, [hasStatusFilter, query, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {

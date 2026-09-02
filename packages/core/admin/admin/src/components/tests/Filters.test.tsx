@@ -96,6 +96,33 @@ describe('Filters', () => {
     });
   };
 
+  const renderWithSearch = (search: string) =>
+    renderRTL(
+      <Filters.Root options={DEFAULT_FILTERS}>
+        <Filters.Trigger />
+        <Filters.Popover />
+        <Filters.List />
+        <LocationSpy />
+      </Filters.Root>,
+      { initialEntries: [{ search }] }
+    );
+
+  const addNameFilter = async (user: ReturnType<typeof render>['user'], value: string) => {
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), value);
+    fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+  };
+
+  const URL_ENCODING_CASES = [
+    ['a literal percent sign', '100%'],
+    ['a percent sign mid-string', '50%off'],
+    ['a trailing percent sign', 'discount%'],
+    ['an ampersand', 'a&b'],
+    ['a plus sign', 'a+b'],
+    ['a hash', 'a#b'],
+    ['text that merely looks pre-encoded', 'a%26b'],
+  ] as const;
+
   it('should open the popover when the trigger is clicked', async () => {
     const { user } = render();
 
@@ -489,5 +516,132 @@ describe('Filters', () => {
     });
     expect(screen.queryByText(/hello world/)).not.toBeInTheDocument();
     expect(screen.queryAllByText(/hello there/)).toHaveLength(1);
+  });
+
+  it.each(URL_ENCODING_CASES)('should show %s on the chip as typed', async (_label, value) => {
+    const { user } = render();
+
+    await addNameFilter(user, value);
+
+    expect(await screen.findByText(`Name $eq ${value}`)).toBeInTheDocument();
+  });
+
+  it.each(URL_ENCODING_CASES)('should store %s url-encoded in the query', async (_label, value) => {
+    const { user } = render();
+
+    await addNameFilter(user, value);
+    await screen.findByText(`Name $eq ${value}`);
+
+    await waitFor(() => {
+      expect(currentSearch).toContain(`filters[$and][0][name][$eq]=${encodeURIComponent(value)}`);
+    });
+  });
+
+  it.each(URL_ENCODING_CASES)(
+    'should open the edit form pre-filled with %s without crashing',
+    async (_label, value) => {
+      const { user } = render();
+
+      await addNameFilter(user, value);
+
+      // Clicking the chip is what used to throw `URI malformed` while rendering the form.
+      await user.click(await screen.findByText(`Name $eq ${value}`));
+
+      expect(await screen.findByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue(value);
+    }
+  );
+
+  it('should edit a percent value and keep the new one', async () => {
+    const { user } = render();
+
+    await addNameFilter(user, '100%');
+    await user.click(await screen.findByText('Name $eq 100%'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByRole('textbox', { name: 'Name' });
+    await user.clear(nameInput);
+    await user.type(nameInput, '75%');
+    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+    expect(await screen.findByText('Name $eq 75%')).toBeInTheDocument();
+    expect(screen.queryByText('Name $eq 100%')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(currentSearch).toContain('filters[$and][0][name][$eq]=75%25');
+    });
+  });
+
+  const SEARCH_TERMS = [
+    ['a percent sign', '100%'],
+    ['an ampersand', 'a&b'],
+    ['a hash', 'a#b'],
+  ] as const;
+
+  it.each(SEARCH_TERMS)(
+    'should keep a sibling $or filter containing %s when a filter is added',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      const { user } = renderWithSearch(`?filters[$or][0][name][$eq]=${encodedTerm}`);
+
+      await addNameFilter(user, 'jimbob');
+      await screen.findByText('Name $eq jimbob');
+
+      await waitFor(() => {
+        expect(currentSearch).toContain(`filters[$or][0][name][$eq]=${encodedTerm}`);
+      });
+    }
+  );
+
+  it.each(SEARCH_TERMS)(
+    'should keep a search term containing %s when a filter is added',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      const { user } = renderWithSearch(`?_q=${encodedTerm}`);
+
+      await addNameFilter(user, 'jimbob');
+      await screen.findByText('Name $eq jimbob');
+
+      await waitFor(() => {
+        expect(currentSearch).toContain(`_q=${encodedTerm}`);
+      });
+      expect(new URLSearchParams(currentSearch).get('_q')).toBe(term);
+    }
+  );
+
+  it.each(SEARCH_TERMS)(
+    'should keep a search term containing %s when a filter is removed',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      renderWithSearch(`?_q=${encodedTerm}&filters[$and][0][name][$eq]=jimbob`);
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Name $eq jimbob' }));
+
+      await waitFor(() => {
+        expect(getAppliedFilters()).toHaveLength(0);
+      });
+      expect(currentSearch).toContain(`_q=${encodedTerm}`);
+      expect(new URLSearchParams(currentSearch).get('_q')).toBe(term);
+    }
+  );
+
+  it('should remove the right chip when a percent value is applied twice', async () => {
+    const { user } = render();
+
+    await addNameFilter(user, '100%');
+    await screen.findByText('Name $eq 100%');
+    await addNameFilter(user, '100%');
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(2);
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Name $eq 100%' })[0]);
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(1);
+    });
   });
 });

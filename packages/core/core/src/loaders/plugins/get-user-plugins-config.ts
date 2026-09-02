@@ -3,6 +3,12 @@ import fse from 'fs-extra';
 import { merge } from 'lodash/fp';
 import { loadConfigFile } from '../../utils/load-config-file';
 
+export interface PluginDeclaration {
+  enabled: boolean;
+  resolve: string;
+  isModule: boolean;
+}
+
 /**
  * Return user defined plugins' config
  * first load config from `config/plugins.js`
@@ -16,7 +22,7 @@ export const getUserPluginsConfig = async () => {
     process.env.NODE_ENV as string,
     'plugins.js'
   );
-  let config = {};
+  let config: Record<string, PluginDeclaration | boolean> = {};
 
   // assign global user config if exists
   if (await fse.pathExists(globalUserConfigPath)) {

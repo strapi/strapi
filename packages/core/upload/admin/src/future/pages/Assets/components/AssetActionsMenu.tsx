@@ -14,6 +14,7 @@ import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from 
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -21,6 +22,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
+import { assetKey } from '../utils/selection';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
 import { BulkMoveDialog } from './BulkMoveDialog';
@@ -46,15 +48,18 @@ interface AssetActionsMenuProps {
  * drawer versions render as `IconButton`s and report through its in-drawer toast
  * slot, neither of which fits a menu item on a row.
  *
- * Any successful move or delete clears the whole selection: a delete only
- * invalidates RTK tags, so without it an `asset:<id>` key for a file that no
- * longer exists would linger in the selection.
+ * A successful move or delete deselects this one asset and leaves the rest of
+ * the selection intact: the mutations only invalidate RTK tags, so without it an
+ * `asset:<id>` key for a file that has been deleted — or has moved out of this
+ * list — would linger. The other selected rows are untouched, which is the whole
+ * point of the menu being a single-item affordance.
  */
 export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
-  const { clear } = useAssetSelection();
+  const { deselect } = useAssetSelection();
   // Absent in the asset picker and in unit tests: the replace still runs, it
   // just renders no row-level overlay.
   const markBusy = useBusyAssetsOptional()?.markBusy ?? (() => () => {});
@@ -106,23 +111,21 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
 
     let res;
     try {
-      res = await replaceAsset({ id: asset.id, file });
+      res = await replaceAsset({ id: asset.id, file, fileInfo: { name: asset.name } });
     } finally {
       releaseBusy();
     }
 
     if ('error' in res) {
-      // `fetchBaseQuery` already unwraps the API envelope, so a server-sent
-      // reason (file too large, unsupported type) lands directly on `message`.
-      const { message } = res.error as { message?: string };
       toggleNotification({
         type: 'danger',
-        message:
-          message ??
+        message: getErrorMessage(
+          res.error,
           formatMessage({
             id: getTranslationKey('asset-details.replace.error'),
             defaultMessage: 'Failed to replace the file.',
-          }),
+          })
+        ),
       });
       return;
     }
@@ -206,6 +209,11 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
         <input
           ref={fileInputRef}
           type="file"
+          // Replacing swaps the bytes of an existing asset, so the picker offers
+          // only its own type. Without this the picker accepted anything and a
+          // JPG could come back as PNG bytes still served under a `.jpg` url,
+          // since replace preserves hash and ext by design.
+          accept={asset.mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden
@@ -330,7 +338,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           open
           onClose={() => setIsMoveOpen(false)}
           items={moveItems}
-          onSuccess={clear}
+          onSuccess={() => deselect(assetKey(asset.id))}
         />
       )}
       {/* Both dialogs live inside the row, so a background refetch that drops the
@@ -342,7 +350,7 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
           open
           onClose={() => setIsDeleteOpen(false)}
           target={{ fileIds: [asset.id], folderIds: [] }}
-          onSuccess={clear}
+          onSuccess={() => deselect(assetKey(asset.id))}
         />
       )}
     </>

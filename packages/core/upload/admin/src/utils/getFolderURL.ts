@@ -1,3 +1,4 @@
+import { deepEncodeQueryValues } from '@strapi/admin/strapi-admin';
 import { stringify } from 'qs';
 
 import type { Query } from '../../../shared/contracts/files';
@@ -10,7 +11,7 @@ export const getFolderURL = (
   const { _q, ...queryParamsWithoutQ } = currentQuery;
   const queryParamsString = stringify(
     {
-      ...queryParamsWithoutQ,
+      ...deepEncodeQueryValues(queryParamsWithoutQ),
       folder,
       folderPath,
     },

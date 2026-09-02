@@ -72,6 +72,19 @@ yarn setup                    # clean + build all packages; hints to run ai:sync
 yarn ai:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
 
+### New worktree bootstrap
+
+- In a newly created worktree, check whether `.claude/skills/git-conventions` resolves to the
+  repository's `.ai/skills/git-conventions`. If the link is absent or stale, run
+  `yarn setup:worktree`.
+- If `.brain` exists, do not initialize or refresh it.
+- If `.brain` is absent, look for the user-level `brain-start` skill.
+  - If unavailable, continue silently; this is the normal external-contributor path.
+  - If available, read it, resolve the CMS Brain CLI from its canonical host checkout, and run
+    `"$BRAIN_CLI" refresh --project strapi/strapi`.
+- If CMS Brain is installed and refresh fails, report the failure and follow the bootstrap skill's
+  remediation. Only the absence of the optional skill is a clean no-op.
+
 ---
 
 ## Development

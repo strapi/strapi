@@ -151,6 +151,26 @@ describe('AssetsGrid', () => {
     jest.clearAllMocks();
   });
 
+  describe('Card stacking', () => {
+    it('keeps the card overlays from painting over the page header', () => {
+      setup();
+
+      // The checkbox and busy overlays carry their own z-index. Without a
+      // stacking context on the card they compete with the page's sticky header
+      // and, being later in document order, win — so a busy card's spinner
+      // draws over the header as the card scrolls under it.
+      // Reading the compiled CSS: `toHaveStyleRule` is not typed in this suite,
+      // and the rule under test is on the styled component rather than an
+      // attribute of the rendered node.
+      // eslint-disable-next-line testing-library/no-node-access
+      const css = Array.from(document.querySelectorAll('style'))
+        .map((style) => style.textContent ?? '')
+        .join('\n');
+
+      expect(css).toContain('isolation:isolate');
+    });
+  });
+
   describe('Grid rendering', () => {
     it('renders asset cards in a grid', () => {
       setup();

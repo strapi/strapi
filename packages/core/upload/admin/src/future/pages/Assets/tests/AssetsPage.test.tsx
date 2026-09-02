@@ -388,6 +388,27 @@ describe('AssetsPage search', () => {
       expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
     });
 
+    it('brings the loaded pages back when a folder is re-entered, without scrolling again', async () => {
+      respondWithPagedAssets();
+
+      const { user } = renderPage('?folder=1');
+
+      expect(await screen.findByText('page-one-0.png')).toBeInTheDocument();
+
+      await scrollToLoadMore();
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to root' }));
+      expect(await screen.findByText('root.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to folder 1' }));
+
+      // No second `scrollToLoadMore` on purpose: coming back shows what had been
+      // read, not page 1 with all the scrolling to do over.
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+      expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
+    });
+
     it('refetches an earlier page after a mutation invalidation (the subscribers node is rendered)', async () => {
       // Page-level guard for the "caller must render `subscribers`" contract: if
       // AssetsPage drops that node, page 1 stops being subscribed, so the rename

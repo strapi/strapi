@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import {
   maxGreaterThanMin,
   maxLengthGreaterThanMinLength,
+  validateUpdateSchema,
   verifyDraftAndPublishReservedAttributes,
 } from '../schema';
 
@@ -24,6 +25,69 @@ describe('Schema', () => {
       // so it can be ran many time inside the same test
       ctx.addIssue.mockClear();
     };
+  });
+
+  describe('validateUpdateSchema', () => {
+    const schemaWithOptionalDefaults = (includeUndefined: boolean) => ({
+      data: {
+        components: [
+          {
+            action: 'create',
+            uid: 'shared.hero',
+            displayName: 'Hero',
+            category: 'shared',
+            attributes: [],
+            ...(includeUndefined ? { config: undefined } : {}),
+          },
+        ],
+        contentTypes: [
+          {
+            action: 'create',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            draftAndPublish: true,
+            singularName: 'article',
+            pluralName: 'articles',
+            kind: 'singleType',
+            attributes: [],
+            ...(includeUndefined ? { options: undefined, pluginOptions: undefined } : {}),
+          },
+        ],
+      },
+    });
+
+    test('reports a missing schema', () => {
+      expect(() => validateUpdateSchema(undefined)).toThrow('Schema is required');
+    });
+
+    test('reports a schema with the wrong type', () => {
+      expect(() => validateUpdateSchema('invalid')).toThrow(
+        'Invalid schema, expected an object with a data property'
+      );
+    });
+
+    test('applies collection defaults when keys are absent or undefined', () => {
+      expect(validateUpdateSchema({ data: {} })).toEqual({
+        data: { components: [], contentTypes: [] },
+      });
+      expect(
+        validateUpdateSchema({ data: { components: undefined, contentTypes: undefined } })
+      ).toEqual({
+        data: { components: [], contentTypes: [] },
+      });
+    });
+
+    test.each([
+      ['absent', false],
+      ['present with undefined', true],
+    ])('applies nested object defaults when keys are %s', (_label, includeUndefined) => {
+      expect(validateUpdateSchema(schemaWithOptionalDefaults(includeUndefined))).toMatchObject({
+        data: {
+          components: [{ config: {} }],
+          contentTypes: [{ options: {}, pluginOptions: {} }],
+        },
+      });
+    });
   });
 
   describe('maxLengthGreaterThanMinLength', () => {
