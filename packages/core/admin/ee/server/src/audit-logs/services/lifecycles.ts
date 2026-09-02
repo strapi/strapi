@@ -88,7 +88,22 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
     const user = requestState?.user;
-    if ((!isUsingAdminAuth && !isMcpAdminAction) || !user) {
+    if (!isUsingAdminAuth && !isMcpAdminAction) {
+      return null;
+    }
+
+    // `/login/mfa` challenges a second factor before `ctx.state.user` exists -- it is only
+    // populated on a successful login (`issueSession`, called after the challenge passes) -- so a
+    // failed second factor during login has no session-context user to attribute the row to, even
+    // though it is exactly the row an audit log most wants for a failed login. `admin::mfa`'s
+    // `notify` already names the account being challenged in the event payload (`{ userId }`), so
+    // fall back to that for `admin.mfa.*` names only; every other event still requires
+    // `requestState.user` exactly as before.
+    let actorId = user?.id;
+    if (actorId === undefined && name.startsWith('admin.mfa.')) {
+      actorId = args[0]?.userId;
+    }
+    if (actorId === undefined) {
       return null;
     }
 
@@ -112,7 +127,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       action: name,
       date: new Date().toISOString(),
       payload: { ...getPayload(...args), origin },
-      userId: user.id,
+      userId: actorId,
     };
   };
 

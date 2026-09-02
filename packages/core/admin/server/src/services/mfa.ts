@@ -64,15 +64,21 @@ export type MfaEventType =
   | 'recovery_codes_issued';
 
 /**
- * The only shape `recordEvent`'s `metadata` may carry, enforced at the type level rather than by
- * convention -- a compile error is a much stronger guarantee than a comment nobody happens to
- * violate yet. `userAgent`/`ip` are neutral request context; `via: 'cli'` is how the CLI reset
- * (Task 12) marks an event it recorded outside any HTTP request. None of the three can ever be a
- * code, a secret or an otpauth URI.
+ * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
+ * actually returns (`loginAt`, and `deviceName` when the user-agent maps to one; see
+ * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI reset (Task 12) marks
+ * an event it recorded outside any HTTP request. None of the three can ever be a code, a secret or
+ * an otpauth URI.
+ *
+ * This only turns an undeclared field into a compile error for an object literal passed directly
+ * to `recordEvent` -- every field below is optional, so a `Record<string, unknown>` value (exactly
+ * what `buildSessionMetadataFromContext` returns) is still assignable here with no
+ * excess-property check. The guarantee is "nothing declared here can be a secret", not "nothing
+ * but these three keys can ever reach the database".
  */
 export type MfaEventMetadata = {
-  userAgent?: string;
-  ip?: string;
+  loginAt?: string;
+  deviceName?: string;
   via?: 'cli';
 };
 
@@ -479,7 +485,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     metadata: MfaEventMetadata = {}
   ): Promise<void> => {
     await eventQuery().create({ data: { userId: String(userId), type, metadata, seenAt: null } });
-    await pruneEvents(userId);
+
+    // Retention housekeeping must never fail the security operation that triggered it -- the same
+    // principle `notify`'s email applies. `issueRecoveryCodes` calls `recordEvent` for its
+    // `recovery_codes_issued` marker from inside `strapi.db.transaction`, so an uncaught failure
+    // here (the `count`, the cutoff read, or the `deleteMany`) would roll back the recovery codes
+    // just written and fail enrolment or a regenerate over nothing but a pruning error. Kept
+    // awaited rather than detached: a fire-and-forget promise started inside an ambient
+    // transaction context would either escape it unexpectedly or dangle past it, neither of which
+    // beats simply catching the failure here.
+    try {
+      await pruneEvents(userId);
+    } catch (error) {
+      strapi.log.error('Failed to prune admin::mfa-event rows', error);
+    }
   };
 
   /**
@@ -502,10 +521,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    *
    * The eventHub event fires for all four notice types -- `admin.mfa.<type>`, `_` replaced by `.`
    * so `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is
-   * cheap and synchronous and EE audit logs depend on it for every one of the four. The email is
-   * sent only for an actual change (`enabled`/`disabled`/`reset`): a failed challenge is a notice,
-   * not a change, and mailing every wrong code would let anyone who merely knows the password
-   * flood the account holder's inbox.
+   * cheap and synchronous and is the one mechanism EE audit logging (where licensed) can observe
+   * any of the four through; whether a given emission ends up as a persisted audit row is entirely
+   * that feature's own decision (its allow-list, licensing, request context), not this function's.
+   * The email is sent only for an actual change (`enabled`/`disabled`/`reset`): a failed challenge
+   * is a notice, not a change, and mailing every wrong code would let anyone who merely knows the
+   * password flood the account holder's inbox.
    */
   const notify = (userId: string, type: MfaChangeNotice): void => {
     strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId });
@@ -516,7 +537,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     (async () => {
       try {
-        const user = await userQuery().findOne({ where: { id: userId } });
+        // Only the two fields the email actually needs -- not the password hash or the encrypted
+        // TOTP secret sitting on the same row.
+        const user = await userQuery().findOne({
+          where: { id: userId },
+          select: ['email', 'firstname'],
+        });
         if (!user?.email) return;
 
         await strapi
@@ -545,9 +571,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * Caps how many `admin::mfa-event` rows a single account can accumulate, run after every insert
    * so the table cannot grow without bound. Two kinds of row are exempt no matter how old they
    * are:
-   *  - `recovery_codes_issued`, the acknowledgement marker `areCodesAcknowledged` reads
-   *    indefinitely (see `MfaEventType` above) -- pruning it out from under a still-unacknowledged
-   *    set would make "have I saved my codes?" unanswerable.
+   *  - the *newest* `recovery_codes_issued` row -- `areCodesAcknowledged` (below) reads only this
+   *    one, by the same `createdAt` desc, `id` desc ordering, so it is the only marker actually
+   *    protecting anything. An older marker from a prior enrolment or regenerate protects nothing
+   *    and is prunable like any other row -- exempting every marker ever issued would let an
+   *    account that regenerates repeatedly accumulate them forever, exactly the unbounded growth
+   *    this function exists to stop.
    *  - a `challenge_failed` row younger than `config().userAttemptWindow` seconds -- exactly the
    *    rows `isAccountThrottled`'s rolling window counts. Removing one of those early would let an
    *    attacker outlast the account-scoped throttle by generating enough other traffic (failed
@@ -577,6 +606,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return;
     }
 
+    // The same lookup `areCodesAcknowledged` does: the newest marker, if any, is the only one
+    // worth protecting.
+    const newestMarker = await eventQuery().findOne({
+      where: { userId: String(userId), type: 'recovery_codes_issued' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
     const { userAttemptWindow } = config();
     const attemptWindowStart = new Date(Date.now() - userAttemptWindow * 1000);
 
@@ -584,8 +620,19 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       where: {
         userId: String(userId),
         createdAt: { $lt: new Date(cutoff.createdAt) },
-        type: { $ne: 'recovery_codes_issued' },
-        $or: [{ type: { $ne: 'challenge_failed' } }, { createdAt: { $lte: attemptWindowStart } }],
+        $and: [
+          newestMarker
+            ? {
+                $or: [{ type: { $ne: 'recovery_codes_issued' } }, { id: { $ne: newestMarker.id } }],
+              }
+            : { type: { $ne: 'recovery_codes_issued' } },
+          {
+            $or: [
+              { type: { $ne: 'challenge_failed' } },
+              { createdAt: { $lte: attemptWindowStart } },
+            ],
+          },
+        ],
       },
     });
   };

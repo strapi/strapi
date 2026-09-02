@@ -126,6 +126,54 @@ describe('Audit logs service', () => {
     expect(saveEvent).toHaveBeenCalledTimes(5);
   });
 
+  it('audits a failed second-factor login using the payload userId, even though ctx.state.user is not set yet', async () => {
+    // `/login/mfa` challenges a second factor before `ctx.state.user` exists -- `issueSession`
+    // (controllers/authentication.ts) only populates it on a successful login -- so this is
+    // exactly the request-context shape a failed challenge during login actually has: an
+    // admin-authenticated route, but no session-context user yet.
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
+    const saveEvent = jest.fn();
+    strapi.get.mockReturnValueOnce({ deleteExpiredEvents: jest.fn(), saveEvent });
+    const originalGet = strapi.requestContext.get;
+    strapi.requestContext.get = () => ({ state: { route: { info: { type: 'admin' } } } });
+
+    try {
+      const lifecycle = createAuditLogsLifecycleService(strapi);
+      await lifecycle.register();
+      const [handleEvent] = mockSubscribe.mock.calls[mockSubscribe.mock.calls.length - 1];
+
+      await handleEvent('admin.mfa.challenge.failed', { userId: '42' });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'admin.mfa.challenge.failed', userId: '42' })
+      );
+    } finally {
+      strapi.requestContext.get = originalGet;
+    }
+  });
+
+  it('still drops a non-mfa event when ctx.state.user is not set', async () => {
+    // The control for the test above: the payload-userId fallback is scoped to `admin.mfa.*`
+    // names only, so anything else with no session-context user is dropped exactly as before.
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
+    const saveEvent = jest.fn();
+    strapi.get.mockReturnValueOnce({ deleteExpiredEvents: jest.fn(), saveEvent });
+    const originalGet = strapi.requestContext.get;
+    strapi.requestContext.get = () => ({ state: { route: { info: { type: 'admin' } } } });
+
+    try {
+      const lifecycle = createAuditLogsLifecycleService(strapi);
+      await lifecycle.register();
+      const [handleEvent] = mockSubscribe.mock.calls[mockSubscribe.mock.calls.length - 1];
+
+      await handleEvent('admin.auth.success', { userId: '42' });
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    } finally {
+      strapi.requestContext.get = originalGet;
+    }
+  });
+
   it('should create a cron job that executed one time a day', async () => {
     // Mock Strapi EE feature to be enabled for this test
     jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);

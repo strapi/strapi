@@ -176,11 +176,15 @@ const asComparable = (value: unknown): number => {
  */
 const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknown> = {}): boolean =>
   Object.entries(where).every(([field, condition]) => {
-    // `$or` is the one logical combinator this mock understands: any one of the nested `where`
-    // fragments matching is enough. Everything else in `where` still combines with AND, exactly
-    // like every other top-level key here -- `pruneEvents`' deleteMany relies on both at once.
+    // `$or`/`$and` are the two logical combinators this mock understands: any one of the nested
+    // `where` fragments matching is enough for `$or`, every one must match for `$and`. Everything
+    // else in `where` still combines with AND by default, exactly like every other top-level key
+    // here -- `pruneEvents`' deleteMany nests both an `$and` of two `$or`s at once.
     if (field === '$or') {
       return (condition as Array<Record<string, unknown>>).some((sub) => matchesWhere(row, sub));
+    }
+    if (field === '$and') {
+      return (condition as Array<Record<string, unknown>>).every((sub) => matchesWhere(row, sub));
     }
 
     if (condition === null || condition === undefined) {
@@ -698,7 +702,17 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ...options.strapiOverrides,
   };
 
-  return { strapi, users, metadataGet, recoveryRows, recoveryMocks, challenges, events };
+  return {
+    strapi,
+    users,
+    userMocks,
+    metadataGet,
+    recoveryRows,
+    recoveryMocks,
+    challenges,
+    events,
+    eventMocks,
+  };
 };
 
 /** Adapter keeping the enrolment suite's call shape onto the merged fixture above. */
@@ -1970,6 +1984,20 @@ describe('mfa notifications', () => {
     expect(payload).toEqual({ userId: '1' });
   });
 
+  test('the user lookup selects only the two columns the email needs', async () => {
+    const { service, userMocks } = setup();
+
+    service.notify('1', 'enabled');
+    await flushMicrotasks();
+
+    // Not the password hash, not the encrypted TOTP secret sitting on the same row -- just enough
+    // to address and greet the recipient.
+    expect(userMocks.findOne).toHaveBeenCalledWith({
+      where: { id: '1' },
+      select: ['email', 'firstname'],
+    });
+  });
+
   test('challenge_failed emits an eventHub event but sends no email', async () => {
     const sendTemplatedEmail = jest.fn().mockResolvedValue(undefined);
     const { strapi, service } = setup({
@@ -2060,19 +2088,25 @@ describe('mfa service: event pruning', () => {
     expect(events.find((e) => e.id === young.id)).toBeDefined();
   });
 
-  test('the recovery_codes_issued marker survives no matter how old', async () => {
+  test('only the newest recovery_codes_issued marker survives -- an older one is pruned like any other row', async () => {
     const { service, events } = setup();
+    // The entire cap, all newer than either marker below, so both markers rank past the cutoff by
+    // age alone and are deletion candidates on rank -- the only question is the exemption.
     for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
-      seedEvent(events, '1', 'enabled', i);
+      seedEvent(events, '1', 'enabled', i + 1);
     }
-    // Far older than any plausible userAttemptWindow -- the marker's exemption has nothing to do
-    // with age, unlike `challenge_failed`'s.
-    const marker = seedEvent(events, '1', 'recovery_codes_issued', 10_000_000);
+    // The newest of the two markers -- still older than every 'enabled' row above, but the one
+    // `areCodesAcknowledged` actually reads. Must survive.
+    const newestMarker = seedEvent(events, '1', 'recovery_codes_issued', MAX_EVENTS_PER_USER + 1);
+    // An older, superseded marker from an earlier enrolment/regenerate. Protects nothing, so it is
+    // fair game like any other row past the cutoff.
+    const olderMarker = seedEvent(events, '1', 'recovery_codes_issued', MAX_EVENTS_PER_USER + 2);
 
     await service.pruneEvents('1');
 
     expect(events).toHaveLength(MAX_EVENTS_PER_USER + 1);
-    expect(events.find((e) => e.id === marker.id)).toBeDefined();
+    expect(events.find((e) => e.id === newestMarker.id)).toBeDefined();
+    expect(events.find((e) => e.id === olderMarker.id)).toBeUndefined();
   });
 
   test('recordEvent runs the prune after every insert', async () => {
@@ -2085,5 +2119,26 @@ describe('mfa service: event pruning', () => {
     await service.recordEvent('1', 'enabled');
 
     expect(events).toHaveLength(MAX_EVENTS_PER_USER);
+  });
+
+  test('a throwing prune does not fail recordEvent, and the event row is still written', async () => {
+    const { strapi, service, events, eventMocks } = setup();
+
+    // `eventQuery()` returns this same object reference on every call, so mutating its `count`
+    // here reaches every `count` call `pruneEvents` makes -- without needing to actually reach
+    // the cap, or to reconstruct the service against a different `strapi.db.query`.
+    eventMocks.count = jest.fn(async () => {
+      throw new Error('connection dropped');
+    });
+
+    await expect(service.recordEvent('1', 'enabled')).resolves.toBeUndefined();
+
+    // The insert itself is unaffected: `recordEvent` still writes the row before `pruneEvents`
+    // ever runs, and the prune failure is caught rather than propagated.
+    expect(events.some((e) => e.userId === '1' && e.type === 'enabled')).toBe(true);
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'Failed to prune admin::mfa-event rows',
+      expect.any(Error)
+    );
   });
 });
