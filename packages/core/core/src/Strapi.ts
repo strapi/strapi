@@ -38,6 +38,7 @@ import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+import { createContentAPISchemaRegistry } from './core-api/routes/validation/schema-registry';
 
 // Lazy: only resolved when `useTypescriptMigrations` is true (default false)
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
@@ -243,6 +244,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('content-api');
   }
 
+  get contentAPISchemaRegistry(): Core.ContentAPISchemaRegistry {
+    return this.get('content-api-schema-registry');
+  }
+
   get sanitizers() {
     return this.get('sanitizers');
   }
@@ -281,6 +286,7 @@ class Strapi extends Container implements Core.Strapi {
     this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
+      .add('content-api-schema-registry', () => createContentAPISchemaRegistry())
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
@@ -348,7 +354,7 @@ class Strapi extends Container implements Core.Strapi {
       try {
         await utils.openBrowser(this.config);
         this.telemetry.send('didOpenTab');
-      } catch (e) {
+      } catch {
         this.telemetry.send('didNotOpenTab');
       }
     }
@@ -584,13 +590,20 @@ class Strapi extends Container implements Core.Strapi {
   getModel(uid: UID.ContentType): Schema.ContentType;
   getModel(uid: UID.Component): Schema.Component;
   getModel<TUID extends UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component | undefined {
-    if (uid in this.contentTypes) {
-      return this.contentTypes[uid as UID.ContentType];
+    // Looked up on the registries directly rather than through the `contentTypes` /
+    // `components` getters. Those getters call `getAll()`, and the content-type registry
+    // builds a fresh copy of every registered schema on each call. Reading `uid in
+    // this.contentTypes` and then `this.contentTypes[uid]` therefore built that copy
+    // twice per lookup, and a component uid built it four times over. `getModel` runs
+    // once per relation, component, media and dynamic-zone node of every sanitized
+    // response, which made this the single hottest path in a REST request.
+    const contentType = this.get('content-types').get(uid as UID.ContentType);
+
+    if (contentType !== undefined) {
+      return contentType;
     }
 
-    if (uid in this.components) {
-      return this.components[uid as UID.Component];
-    }
+    return this.get('components').get(uid as UID.Component);
   }
 
   /**

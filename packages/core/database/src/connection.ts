@@ -7,16 +7,18 @@ const clientMap = {
   postgres: 'pg',
 };
 
-function isClientValid(config: { client?: unknown }): config is { client: keyof typeof clientMap } {
-  return Object.keys(clientMap).includes(config.client as string);
+type ClientKind = keyof typeof clientMap;
+
+export function isDatabaseClientKind(client: unknown): client is ClientKind {
+  return (client as string) in clientMap;
 }
 
 export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial<Knex.Config>) => {
-  if (!isClientValid(userConfig)) {
+  if (!isDatabaseClientKind(userConfig.client)) {
     throw new Error(`Unsupported database client ${userConfig.client}`);
   }
 
-  const knexConfig: Knex.Config = { ...userConfig, client: (clientMap as any)[userConfig.client] };
+  const knexConfig: Knex.Config = { ...userConfig, client: clientMap[userConfig.client] };
 
   // initialization code to run upon opening a new connection
   if (strapiConfig?.pool?.afterCreate) {

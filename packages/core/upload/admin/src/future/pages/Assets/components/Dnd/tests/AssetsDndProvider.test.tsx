@@ -1,9 +1,12 @@
 import { act, render, screen, waitFor } from '@tests/utils';
 
+import { emptyItemLocations, type ItemLocations } from '../../../../../utils/itemLocations';
+import { AssetSelectionProvider, useAssetSelection } from '../../../hooks/useAssetSelection';
+import { assetKey, folderKey } from '../../../utils/selection';
 import { AssetsDndProvider, useAssetsDnd } from '../AssetsDndProvider';
 
 import type { FolderNode } from '../../../../../../../../shared/contracts/folders';
-import type { DragEndEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
 const mockToggleNotification = jest.fn();
 const mockBulkMoveUnwrap = jest.fn().mockResolvedValue({});
@@ -30,17 +33,33 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
 
+let triggerDragStart: ((event: DragStartEvent) => void) | undefined;
 let triggerDragEnd: ((event: DragEndEvent) => void) | undefined;
+let triggerDragCancel: (() => void) | undefined;
 
 jest.mock('@dnd-kit/core', () => {
   const actual = jest.requireActual('@dnd-kit/core');
 
   return {
     ...actual,
-    DndContext: ({ onDragEnd, ...props }: React.ComponentProps<typeof actual.DndContext>) => {
+    DndContext: ({
+      onDragStart,
+      onDragEnd,
+      onDragCancel,
+      ...props
+    }: React.ComponentProps<typeof actual.DndContext>) => {
+      triggerDragStart = onDragStart;
       triggerDragEnd = onDragEnd;
+      triggerDragCancel = onDragCancel;
 
-      return <actual.DndContext onDragEnd={onDragEnd} {...props} />;
+      return (
+        <actual.DndContext
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragCancel={onDragCancel}
+          {...props}
+        />
+      );
     },
   };
 });
@@ -49,6 +68,44 @@ const MovePendingProbe = () => {
   const { isMovePending } = useAssetsDnd();
 
   return <div data-testid="move-pending">{String(isMovePending)}</div>;
+};
+
+const ValidityProbe = ({ targetId }: { targetId: number | null }) => {
+  const { isValidDropTarget } = useAssetsDnd();
+
+  return <div data-testid="valid-target">{String(isValidDropTarget(targetId))}</div>;
+};
+
+const RootValidityProbe = () => {
+  const { isValidDropTarget } = useAssetsDnd();
+
+  return <div data-testid="valid-root-target">{String(isValidDropTarget(null))}</div>;
+};
+
+const SelectionProbe = () => {
+  const { selectedKeys } = useAssetSelection();
+
+  return <div data-testid="selection-size">{selectedKeys.size}</div>;
+};
+
+const SeedSelection = ({ keys }: { keys: string[] }) => {
+  const { toggle, selectedKeys } = useAssetSelection();
+
+  return (
+    <button
+      type="button"
+      data-testid="seed-selection"
+      onClick={() => {
+        keys.forEach((key) => {
+          if (!selectedKeys.has(key as never)) {
+            toggle(key as never);
+          }
+        });
+      }}
+    >
+      seed
+    </button>
+  );
 };
 
 const validDragEndEvent: DragEndEvent = {
@@ -81,11 +138,36 @@ const validDragEndEvent: DragEndEvent = {
   },
 };
 
-const setup = () =>
+const fileDragStartEvent: DragStartEvent = {
+  activatorEvent: new Event('pointerdown'),
+  active: validDragEndEvent.active,
+};
+
+/** Minimal stand-in for a loaded list: only the ids given are known. */
+const locationsOf = (
+  files: Record<number, number | null>,
+  folders: Record<number, number | null>
+): ItemLocations => ({
+  fileFolderId: (id) => (id in files ? files[id] : undefined),
+  folderParentId: (id) => (id in folders ? folders[id] : undefined),
+});
+
+const setup = (
+  ui?: React.ReactNode,
+  options?: Parameters<typeof render>[1],
+  locations: ItemLocations = emptyItemLocations
+) =>
   render(
-    <AssetsDndProvider>
-      <MovePendingProbe />
-    </AssetsDndProvider>
+    <AssetSelectionProvider>
+      <AssetsDndProvider locations={locations}>
+        <MovePendingProbe />
+        <ValidityProbe targetId={2} />
+        <RootValidityProbe />
+        <SelectionProbe />
+        {ui}
+      </AssetsDndProvider>
+    </AssetSelectionProvider>,
+    options
   );
 
 describe('AssetsDndProvider', () => {
@@ -93,7 +175,9 @@ describe('AssetsDndProvider', () => {
     jest.clearAllMocks();
     mockIsMovePending = false;
     mockBulkMoveUnwrap.mockResolvedValue({});
+    triggerDragStart = undefined;
     triggerDragEnd = undefined;
+    triggerDragCancel = undefined;
   });
 
   describe('isMovePending', () => {
@@ -118,6 +202,7 @@ describe('AssetsDndProvider', () => {
       setup();
 
       await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
         triggerDragEnd?.(validDragEndEvent);
       });
 
@@ -130,6 +215,7 @@ describe('AssetsDndProvider', () => {
       setup();
 
       await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
         triggerDragEnd?.(validDragEndEvent);
       });
 
@@ -143,11 +229,196 @@ describe('AssetsDndProvider', () => {
     });
   });
 
+  describe('Success messaging', () => {
+    it('announces the rich move message with source and destination leaf names', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      // Source is the dragged file's own folder (5 → "Sibling"), not the folder
+      // currently open; destination folder 2 resolves to its leaf name "2023".
+      await waitFor(() => {
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: '1 element has been moved from Sibling to 2023',
+        });
+      });
+    });
+
+    it('falls back to the shared move error message when the server sends no message', async () => {
+      mockBulkMoveUnwrap.mockRejectedValueOnce({});
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      await waitFor(() => {
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while moving the items.',
+        });
+      });
+    });
+  });
+
+  describe('Selection-aware multi-drag', () => {
+    it('moves the full selection when dragging a selected item', async () => {
+      const { user } = setup(<SeedSelection keys={[assetKey(10), assetKey(20), folderKey(3)]} />);
+
+      await user.click(screen.getByTestId('seed-selection'));
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('3');
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: expect.arrayContaining([10, 20]),
+          folderIds: [3],
+          destinationFolderId: 2,
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selection-size')).toHaveTextContent('0');
+      });
+    });
+
+    it('locates the rest of the selection from the loaded rows, not the folder currently open', async () => {
+      // Selected from a root-level search, folder 3 really lives under folder 1
+      // — so dropping the selection onto folder 1 is a no-op for it. Deriving
+      // its parent from `?folder=` (root) would have let the move through.
+      const { user } = setup(
+        <SeedSelection keys={[assetKey(10), folderKey(3)]} />,
+        undefined,
+        locationsOf({ 10: 5 }, { 3: 1 })
+      );
+
+      await user.click(screen.getByTestId('seed-selection'));
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          over: {
+            id: 'folder-target:1',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 1,
+                name: 'Marketing',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('moves only the unselected item and preserves the unrelated selection', async () => {
+      const { user } = setup(<SeedSelection keys={[assetKey(20), folderKey(3)]} />);
+
+      await user.click(screen.getByTestId('seed-selection'));
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: [10],
+          folderIds: [],
+          destinationFolderId: 2,
+        });
+      });
+
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+    });
+
+    it('preserves selection when the drag is cancelled', async () => {
+      const { user } = setup(<SeedSelection keys={[assetKey(10), assetKey(20)]} />);
+
+      await user.click(screen.getByTestId('seed-selection'));
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragCancel?.();
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+    });
+
+    it('preserves selection when the move fails', async () => {
+      mockBulkMoveUnwrap.mockRejectedValueOnce(new Error('boom'));
+      const { user } = setup(<SeedSelection keys={[assetKey(10), assetKey(20)]} />);
+
+      await user.click(screen.getByTestId('seed-selection'));
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.(validDragEndEvent);
+      });
+
+      await waitFor(() => {
+        expect(mockToggleNotification).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'danger' })
+        );
+      });
+
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+    });
+  });
+
+  describe('Centralized target validity', () => {
+    it('exposes O(1) validity for the active drag set', async () => {
+      setup();
+
+      expect(screen.getByTestId('valid-target')).toHaveTextContent('false');
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('valid-target')).toHaveTextContent('true');
+      });
+    });
+  });
+
   describe('Invalid drop guard', () => {
     it('does not call bulkMove when dropping a folder onto a descendant', async () => {
       setup();
 
       await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            id: 'folder:1',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 1,
+                name: 'Marketing',
+                parentId: null,
+              },
+            },
+            rect: { current: { initial: null, translated: null } },
+          },
+        });
         triggerDragEnd?.({
           ...validDragEndEvent,
           active: {
@@ -182,9 +453,24 @@ describe('AssetsDndProvider', () => {
     });
 
     it('does not call bulkMove when dropping a file onto its current folder', async () => {
-      setup();
+      // The current folder is 2, so a drop onto folder 2 is a no-op.
+      setup(undefined, { initialEntries: [{ search: '?folder=2' }] });
 
       await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            ...validDragEndEvent.active,
+            data: {
+              current: {
+                kind: 'file',
+                id: 10,
+                name: 'hero.png',
+                folderId: 2,
+              },
+            },
+          },
+        });
         triggerDragEnd?.({
           ...validDragEndEvent,
           active: {
@@ -205,6 +491,250 @@ describe('AssetsDndProvider', () => {
                 kind: 'folder-target',
                 id: 2,
                 name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Sidebar tree drop targets', () => {
+    it('calls bulkMove when dropping onto a sidebar folder row', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          over: {
+            id: 'folder-tree-target:2',
+            data: {
+              current: {
+                kind: 'folder-tree-target',
+                id: 2,
+                name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: [10],
+          folderIds: [],
+          destinationFolderId: 2,
+        });
+      });
+    });
+
+    it('calls bulkMove with null destination when dropping onto Home', async () => {
+      // The current folder is 5, so dropping onto Home (root) is a real move.
+      setup(undefined, { initialEntries: [{ search: '?folder=5' }] });
+
+      await act(async () => {
+        triggerDragStart?.(fileDragStartEvent);
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          over: {
+            id: 'folder-tree-target:home',
+            data: {
+              current: {
+                kind: 'folder-tree-target',
+                id: null,
+                name: 'Home',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: [10],
+          folderIds: [],
+          destinationFolderId: null,
+        });
+      });
+    });
+
+    it('treats Home as a valid drop when dragging items out of a subfolder', async () => {
+      // The dragged folder's row carries its populated parent (2), so Home
+      // (root) is a legitimate destination.
+      setup(undefined, { initialEntries: [{ search: '?folder=2' }] });
+
+      await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: 2,
+              },
+            },
+            rect: { current: { initial: null, translated: null } },
+          },
+        });
+      });
+
+      // Home highlights as a valid target for the current drag set.
+      await waitFor(() => {
+        expect(screen.getByTestId('valid-root-target')).toHaveTextContent('true');
+      });
+
+      await act(async () => {
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: 2,
+              },
+            },
+          },
+          over: {
+            id: 'folder-tree-target:home',
+            data: {
+              current: {
+                kind: 'folder-tree-target',
+                id: null,
+                name: 'Home',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockBulkMove).toHaveBeenCalledWith({
+          fileIds: [],
+          folderIds: [3],
+          destinationFolderId: null,
+        });
+      });
+    });
+
+    it('rejects dropping a select-all set (with a folder active) back onto its current folder', async () => {
+      // Select-all in folder 2, then grab a folder tile. Both the active row
+      // and the loaded lookup say the set already lives in folder 2, so the
+      // no-op guard must match.
+      const { user } = setup(
+        <SeedSelection keys={[folderKey(3), assetKey(10)]} />,
+        { initialEntries: [{ search: '?folder=2' }] },
+        locationsOf({ 10: 2 }, { 3: 2 })
+      );
+
+      await user.click(screen.getByTestId('seed-selection'));
+      expect(screen.getByTestId('selection-size')).toHaveTextContent('2');
+
+      await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: 2,
+              },
+            },
+            rect: { current: { initial: null, translated: null } },
+          },
+        });
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            id: 'folder:3',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 3,
+                name: 'Campaign',
+                parentId: 2,
+              },
+            },
+          },
+          over: {
+            id: 'folder-target:2',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 2,
+                name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('does not call bulkMove when dropping a root item onto Home', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragStart?.({
+          activatorEvent: new Event('pointerdown'),
+          active: {
+            ...validDragEndEvent.active,
+            data: {
+              current: {
+                kind: 'file',
+                id: 10,
+                name: 'hero.png',
+                folderId: null,
+              },
+            },
+          },
+        });
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            data: {
+              current: {
+                kind: 'file',
+                id: 10,
+                name: 'hero.png',
+                folderId: null,
+              },
+            },
+          },
+          over: {
+            id: 'folder-tree-target:home',
+            data: {
+              current: {
+                kind: 'folder-tree-target',
+                id: null,
+                name: 'Home',
               },
             },
             rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },

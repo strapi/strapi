@@ -14,10 +14,21 @@ const auditLogsService = adminApi.injectEndpoints({
     getAuditLog: builder.query<AuditLogs.Get.Response, AuditLogs.Get.Params['id']>({
       query: (id) => `/admin/audit-logs/${id}`,
     }),
+    getAuditLogUsers: builder.query<
+      AuditLogs.GetUsers.Response,
+      AuditLogs.GetUsers.Request['query']
+    >({
+      query: (params) => ({
+        url: `/admin/audit-logs/users`,
+        config: {
+          params,
+        },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
-const { useGetAuditLogsQuery, useGetAuditLogQuery } = auditLogsService;
+const { useGetAuditLogsQuery, useGetAuditLogQuery, useGetAuditLogUsersQuery } = auditLogsService;
 
-export { useGetAuditLogsQuery, useGetAuditLogQuery };
+export { useGetAuditLogsQuery, useGetAuditLogQuery, useGetAuditLogUsersQuery };
