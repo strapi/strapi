@@ -45,23 +45,37 @@ const ErrorMessage = ({ error }: { error?: string }) => {
 
 /**
  * Three steps: current password (re-authentication), scan the QR code and confirm with a code,
- * then save the recovery codes. Everything sensitive lives in `step` and is dropped when the
- * dialog closes; closing early on the scan step leaves the account un-enrolled (the server only
- * flips enrolment on verify), and closing on the codes step leaves it enrolled but
- * unacknowledged, which the profile section then warns about.
+ * then save the recovery codes.
  *
- * Each step that submits (password, scan) wraps its own `Modal.Body` *and* `Modal.Footer` in one
- * `<form>` so a real browser still submits on Enter in the text field. The footer button itself
- * is `type="button"` with its own `onClick` calling the same handler, rather than `type="submit"`
- * relying on the form's native submit-activation: this project's shared Jest setup
+ * State lives in two places, and both are cleared on every close path (Cancel, Escape, overlay
+ * click, or a successful acknowledge):
+ * - `step`/`password`/`code`/`error` are local React state, cleared by `reset()`.
+ * - `{ secret, otpauthUri }` and `{ recoveryCodes }` also land in the Redux store, because RTK
+ *   Query keeps every mutation's `data` in `state.adminApi.mutations` for as long as the
+ *   triggering hook stays mounted -- and this dialog (`<EnrolDialog>` in `TwoFactorSection.tsx`)
+ *   is mounted for the whole profile-page session, not just while `open`. Each of the three
+ *   mutations below is given a `fixedCacheKey` specifically so `reset()` can synchronously delete
+ *   its entry (`removeMutationResult`) the moment the dialog closes; without a `fixedCacheKey`,
+ *   RTK Query only drops a mutation result on unmount (which never happens here) or once a
+ *   *newer* call supersedes it, and even then only after the default un-subscribe delay -- so the
+ *   secret/URI/codes would otherwise sit in the store indefinitely.
+ *
+ * `handlePassword`/`handleVerify` are called from both the `<form onSubmit>` (a real browser
+ * submitting on Enter in the text field) and the footer button's `onClick` (see below), so each
+ * guards itself against re-entrancy (`isEnrolling`/`isVerifying`, plus the same length checks the
+ * buttons use for `disabled`) -- otherwise pressing Enter twice while a request is in flight posts
+ * twice, and a too-short code typed then submitted via Enter would reach the rate-limited verify
+ * endpoint despite the button refusing it.
+ *
+ * The footer buttons themselves don't need `type="submit"`: this project's shared Jest setup
  * (`packages/admin-test-utils/src/setup.ts`) polyfills `window.PointerEvent` with a class that
  * does not extend `MouseEvent` (jsdom has no native `PointerEvent`, see jsdom/jsdom#2666 and
  * radix-ui/primitives#1822), and `@testing-library/user-event` dispatches `click` as a
  * `PointerEvent` -- so jsdom's activation-behaviour check (`MouseEvent.isImpl`) never matches and
  * a submit button's native form-submission silently never fires under `user.click()` anywhere in
- * this suite (confirmed with a minimal repro outside this component). `onClick` sidesteps that
- * entirely and still can't double-submit: a `type="button"` never triggers native submission on
- * its own.
+ * this suite. `onClick` calling the same handler sidesteps that; the design system's `Button`
+ * already defaults its own `type` to `"button"` (confirmed by reading its source), so there's
+ * nothing to opt out of and no risk of it also firing a native submit.
  */
 const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
   const { formatMessage } = useIntl();
@@ -71,15 +85,24 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
 
-  const [enrol, { isLoading: isEnrolling }] = useEnrolMfaMutation();
-  const [verify, { isLoading: isVerifying }] = useVerifyMfaEnrolmentMutation();
-  const [acknowledge] = useAcknowledgeRecoveryCodesMutation();
+  const [enrol, { isLoading: isEnrolling, reset: resetEnrol }] = useEnrolMfaMutation({
+    fixedCacheKey: 'mfa-enrol-password',
+  });
+  const [verify, { isLoading: isVerifying, reset: resetVerify }] = useVerifyMfaEnrolmentMutation({
+    fixedCacheKey: 'mfa-enrol-verify',
+  });
+  const [acknowledge, { reset: resetAck }] = useAcknowledgeRecoveryCodesMutation({
+    fixedCacheKey: 'mfa-enrol-acknowledge',
+  });
 
   const reset = () => {
     setStep({ name: 'password' });
     setPassword('');
     setCode('');
     setError(undefined);
+    resetEnrol();
+    resetVerify();
+    resetAck();
   };
 
   const close = () => {
@@ -94,6 +117,9 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
 
   const handlePassword = async (event?: React.FormEvent) => {
     event?.preventDefault();
+    if (isEnrolling || password.length === 0) {
+      return;
+    }
     setError(undefined);
     const res = await enrol({ password });
     if ('error' in res) {
@@ -106,6 +132,9 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
 
   const handleVerify = async (event?: React.FormEvent) => {
     event?.preventDefault();
+    if (isVerifying || code.trim().length < 6) {
+      return;
+    }
     setError(undefined);
     const res = await verify({ code });
     if ('error' in res) {
@@ -117,7 +146,12 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
   };
 
   const handleAcknowledged = async () => {
-    await acknowledge({});
+    setError(undefined);
+    const res = await acknowledge({});
+    if ('error' in res) {
+      setError(toMessage(res.error));
+      return;
+    }
     close();
   };
 
@@ -174,7 +208,6 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Button
-                type="button"
                 onClick={() => handlePassword()}
                 loading={isEnrolling}
                 disabled={password.length === 0}
@@ -244,7 +277,6 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Button
-                type="button"
                 onClick={() => handleVerify()}
                 loading={isVerifying}
                 disabled={code.trim().length < 6}
@@ -257,7 +289,10 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
 
         {step.name === 'codes' ? (
           <Modal.Body>
-            <RecoveryCodes codes={step.recoveryCodes} onAcknowledged={handleAcknowledged} />
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              <ErrorMessage error={error} />
+              <RecoveryCodes codes={step.recoveryCodes} onAcknowledged={handleAcknowledged} />
+            </Flex>
           </Modal.Body>
         ) : null}
       </Modal.Content>

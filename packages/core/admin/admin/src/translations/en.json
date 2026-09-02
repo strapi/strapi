@@ -242,6 +242,7 @@
   "Settings.profile.form.section.experience.mode.option-system-label": "Use system settings",
   "Settings.profile.form.section.experience.title": "Experience",
   "Settings.profile.form.section.head.title": "User profile",
+  "Settings.profile.form.section.mfa.codes.copied": "Recovery codes copied",
   "Settings.profile.form.section.mfa.codes.copy": "Copy",
   "Settings.profile.form.section.mfa.codes.done": "I have saved my recovery codes",
   "Settings.profile.form.section.mfa.codes.download": "Download",

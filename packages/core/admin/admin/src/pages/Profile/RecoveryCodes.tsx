@@ -4,6 +4,8 @@ import { Box, Button, Checkbox, Flex, Grid, Link, Typography } from '@strapi/des
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useNotification } from '../../features/Notifications';
+
 interface RecoveryCodesProps {
   codes: string[];
   onAcknowledged: () => Promise<void> | void;
@@ -21,11 +23,30 @@ const CodeTypography = styled(Typography)`
  */
 const RecoveryCodes = ({ codes, onAcknowledged, acknowledgeLabel }: RecoveryCodesProps) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const [saved, setSaved] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
 
   const text = codes.join('\n');
   const href = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'Settings.profile.form.section.mfa.codes.copied',
+          defaultMessage: 'Recovery codes copied',
+        }),
+      });
+    } catch {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+  };
 
   const handleAcknowledge = async () => {
     setSubmitting(true);
@@ -57,7 +78,7 @@ const RecoveryCodes = ({ codes, onAcknowledged, acknowledgeLabel }: RecoveryCode
         </Grid.Root>
       </Box>
       <Flex gap={2}>
-        <Button variant="secondary" onClick={() => navigator.clipboard.writeText(text)}>
+        <Button variant="secondary" onClick={handleCopy}>
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.codes.copy',
             defaultMessage: 'Copy',
