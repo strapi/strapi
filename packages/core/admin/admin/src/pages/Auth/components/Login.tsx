@@ -61,8 +61,11 @@ const Login = ({ children }: LoginProps) => {
 
       setApiError(message);
     } else if ('mfaRequired' in res.data) {
-      // No session yet: hand the challenge to the second-factor screen through router state
-      // only. Nothing is written to storage, so a refresh simply restarts at the login form.
+      // No session yet: hand the challenge to the second-factor screen through router state.
+      // react-router's browser history keeps this in `window.history.state.usr` for the life of
+      // this history entry (and restores it on a full reload), so `MfaChallenge` is what
+      // actually clears it — by replacing the entry with `state: null` right after reading it —
+      // to make a refresh, direct visit, or back/forward land back on the login form.
       const state: MfaChallengeLocationState = {
         challengeToken: res.data.challengeToken,
         expiresIn: res.data.expiresIn,

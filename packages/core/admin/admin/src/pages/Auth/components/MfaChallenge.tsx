@@ -18,8 +18,13 @@ import { translatedErrors } from '../../../utils/translatedErrors';
 import { getRedirectTo } from '../utils';
 
 /**
- * What `Login` hands over when `/login` answers with a challenge instead of a session. Lives in
- * router state only: nothing here is persisted, so a page refresh returns to the login form.
+ * What `Login` hands over when `/login` answers with a challenge instead of a session, via
+ * router state. `createBrowserRouter` persists this in `window.history.state.usr` for the life
+ * of the history entry it's attached to, and restores it on a full page reload — so the state
+ * itself is not where the "refresh returns to login" guarantee comes from. `MfaChallenge` reads
+ * it once on mount and immediately replaces that history entry with `state: null` (see the
+ * effect below); that's what actually keeps a refresh, a direct visit, or a back/forward
+ * navigation from resurrecting the challenge token.
  */
 export interface MfaChallengeLocationState {
   challengeToken: string;
@@ -31,6 +36,7 @@ const isChallengeState = (value: unknown): value is MfaChallengeLocationState =>
   typeof value === 'object' &&
   value !== null &&
   typeof (value as MfaChallengeLocationState).challengeToken === 'string' &&
+  typeof (value as MfaChallengeLocationState).expiresIn === 'number' &&
   typeof (value as MfaChallengeLocationState).rememberMe === 'boolean';
 
 // Same bounds as the server's validator: a 6-8 digit TOTP code or a 10-character recovery code
@@ -50,21 +56,48 @@ const MFA_SCHEMA = yup.object().shape({
 const MfaChallenge = () => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
-  const { search, state } = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
   const { loginMfa } = useAuth('MfaChallenge', (auth) => auth);
 
-  if (!isChallengeState(state)) {
-    return <Navigate to={{ pathname: '/auth/login', search }} replace />;
+  // Captured once, on mount, from whatever `location.state` was at that moment. The effect below
+  // clears `location.state` right after, so every later render (including the one that clearing
+  // navigate itself triggers) must keep working from this in-memory copy rather than reading
+  // `location.state` again — otherwise the guard below would see the state disappear and bounce
+  // the user back to login immediately after it successfully validated the challenge.
+  const [challenge] = React.useState<MfaChallengeLocationState | null>(() =>
+    isChallengeState(location.state) ? location.state : null
+  );
+
+  const hasClearedHistoryStateRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!challenge || hasClearedHistoryStateRef.current) {
+      return;
+    }
+    hasClearedHistoryStateRef.current = true;
+
+    // Replace this history entry with the same URL but `state: null`. Without this,
+    // `window.history.state.usr` (which `createBrowserRouter` restores on a full page reload)
+    // would still carry the challenge token after the user refreshes, opens this URL again from
+    // history, or navigates back/forward to it.
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: null }
+    );
+  }, [challenge, location.pathname, location.search, navigate]);
+
+  if (!challenge) {
+    return <Navigate to={{ pathname: '/auth/login', search: location.search }} replace />;
   }
 
   const handleSubmit = async ({ code }: { code: string }) => {
     setApiError(undefined);
 
     const res = await loginMfa({
-      challengeToken: state.challengeToken,
+      challengeToken: challenge.challengeToken,
       code,
-      rememberMe: state.rememberMe,
+      rememberMe: challenge.rememberMe,
     });
 
     if ('error' in res) {
@@ -72,7 +105,7 @@ const MfaChallenge = () => {
       return;
     }
 
-    navigate(getRedirectTo(search));
+    navigate(getRedirectTo(location.search));
   };
 
   return (
