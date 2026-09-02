@@ -1,11 +1,19 @@
 /* eslint-env jest */
 
 import passport from 'koa-passport';
+import { errors } from '@strapi/utils';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+// The real implementation, not a canned mock: used wherever a test needs to prove that a field
+// `sanitizeUser` is supposed to strip (e.g. the MFA columns) actually never reaches an
+// `admin.auth.*` event payload. A mock that always returns the same fixed object would make
+// that kind of assertion vacuous -- it would pass even if the controller emitted the raw user.
+import userService from '../../services/user';
+
+const { sanitizeUser: realSanitizeUser } = userService;
 
 jest.mock('koa-passport', () => ({
   authenticate: jest.fn(),
@@ -36,7 +44,18 @@ describe('authentication controller', () => {
   });
 
   describe('login with mfa', () => {
-    const user = { id: 7, email: 'admin@example.com', password: 'hashed', isActive: true };
+    const user = {
+      id: 7,
+      email: 'admin@example.com',
+      password: 'hashed',
+      isActive: true,
+      // Carried on every fixture so a test that switches to `realSanitizeUser` (below) has a
+      // non-vacuous fixture to strip them from -- present here, and only here, matters for
+      // tests that actually invoke the real sanitizer.
+      mfaSecret: 'encrypted-secret-ciphertext',
+      mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+      mfaLastUsedStep: 42,
+    };
     const sanitizedUser = { id: 7, email: 'admin@example.com' };
 
     /**
@@ -103,13 +122,17 @@ describe('authentication controller', () => {
 
       // Deliberately no sessionManager/config on strapi: reaching for either on this path would
       // throw, which is itself proof that the branch never tries to mint a session.
+      //
+      // `sanitizeUser` is the real implementation here, not a canned mock: `user` carries the
+      // MFA columns, so the emit assertion below only means something if a leak would actually
+      // survive it.
       setStrapi({
         eventHub: { emit },
         log: { error: jest.fn() },
         admin: {
           services: {
             mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
-            user: { sanitizeUser: jest.fn(() => sanitizedUser) },
+            user: { sanitizeUser: jest.fn(realSanitizeUser) },
           },
         },
       });
@@ -133,22 +156,36 @@ describe('authentication controller', () => {
       // A gated login is visible to audit consumers as its own event, and must never look like
       // a completed login: `admin.auth.success` fires only when a session is actually issued.
       expect(emit).toHaveBeenCalledWith('admin.auth.mfa_required', {
-        user: sanitizedUser,
+        user: { id: user.id, email: user.email, isActive: user.isActive },
         provider: 'local',
       });
+
+      const [, mfaRequiredPayload] = emit.mock.calls.find(
+        ([eventName]) => eventName === 'admin.auth.mfa_required'
+      )!;
+      expect(mfaRequiredPayload.user).not.toHaveProperty('mfaSecret');
+      expect(mfaRequiredPayload.user).not.toHaveProperty('mfaEnabledAt');
+      expect(mfaRequiredPayload.user).not.toHaveProperty('mfaLastUsedStep');
+
       expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
     });
 
     test('a valid code at /login/mfa issues the session', async () => {
       const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
-      const { generateRefreshToken, generateAccessToken, emit } = buildIssuingStrapi({
-        isEnabled: jest.fn(() => true),
-        verifyChallenge,
-      });
+      // `sanitizeUser` is overridden to the real implementation here (the fixture `user` carries
+      // the MFA columns), so the assertions below prove they never reach `ctx.body` or the
+      // `admin.auth.success` payload, rather than trusting a canned mock that would pass either
+      // way.
+      const { generateRefreshToken, generateAccessToken, emit } = buildIssuingStrapi(
+        { isEnabled: jest.fn(() => true), verifyChallenge },
+        { sanitizeUser: jest.fn(realSanitizeUser) }
+      );
 
       const { ctx, cookiesSet } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
 
       await authenticationController.loginMfa(ctx, jest.fn());
+
+      const expectedUser = { id: user.id, email: user.email, isActive: user.isActive };
 
       expect(verifyChallenge).toHaveBeenCalledWith('challenge-token', '123456');
       expect(generateRefreshToken).toHaveBeenCalled();
@@ -159,10 +196,14 @@ describe('authentication controller', () => {
         expect.any(Object)
       );
       expect(ctx.body).toEqual({
-        data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
+        data: { token: 'access-token', accessToken: 'access-token', user: expectedUser },
       });
+      expect((ctx.body as any).data.user).not.toHaveProperty('mfaSecret');
+      expect((ctx.body as any).data.user).not.toHaveProperty('mfaEnabledAt');
+      expect((ctx.body as any).data.user).not.toHaveProperty('mfaLastUsedStep');
+
       expect(emit).toHaveBeenCalledWith('admin.auth.success', {
-        user: sanitizedUser,
+        user: expectedUser,
         provider: 'local',
       });
     });
@@ -274,11 +315,19 @@ describe('authentication controller', () => {
 
           const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
 
-          await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
-            name: 'ValidationError',
-            message: 'Invalid code',
-            details: {},
-          });
+          const error = await authenticationController
+            .loginMfa(ctx, jest.fn())
+            .catch((e: unknown) => e);
+
+          // Strict assertions, not `rejects.toMatchObject`: `toMatchObject` does a subset match
+          // on nested objects, so `details: {}` there would still pass even if `details` were
+          // `{ reason: 'unusable' }` -- exactly the enumeration leak this test exists to catch.
+          // `toEqual({})` fails on any extra key.
+          expect(error).toBeInstanceOf(errors.ValidationError);
+          expect((error as InstanceType<typeof errors.ValidationError>).message).toBe(
+            'Invalid code'
+          );
+          expect((error as InstanceType<typeof errors.ValidationError>).details).toEqual({});
         }
       );
 

@@ -40,6 +40,14 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      // Private two-factor-auth columns (Task 4 added them to the content-type schema; the
+      // `AdminUser` contract type declares them only so this omit list can name them). Omitting
+      // the ciphertext, the enrolment timestamp and the last-used TOTP step keeps them out of
+      // every sanitized payload -- login responses, `/users/me`, user listings, and the
+      // `admin.auth.*` event payloads EE audit logs persist.
+      'mfaSecret',
+      'mfaEnabledAt',
+      'mfaLastUsedStep',
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

@@ -59,6 +59,30 @@ describe('User', () => {
         roles: [],
       });
     });
+
+    test('Removes the MFA columns (mfaSecret, mfaEnabledAt, mfaLastUsedStep)', () => {
+      const res = sanitizeUser({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        password: '$5IAZUDB871',
+        resetPasswordToken: '3456-5678-6789-789',
+        mfaSecret: 'encrypted-secret-ciphertext',
+        mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+        mfaLastUsedStep: 12345,
+        roles: [],
+      } as any);
+
+      expect(res).toEqual({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        roles: [],
+      });
+      expect(res).not.toHaveProperty('mfaSecret');
+      expect(res).not.toHaveProperty('mfaEnabledAt');
+      expect(res).not.toHaveProperty('mfaLastUsedStep');
+    });
   });
 
   describe('create', () => {

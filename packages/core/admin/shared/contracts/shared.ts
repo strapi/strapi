@@ -31,6 +31,14 @@ export interface AdminUser extends Entity {
   roles: AdminRole[];
   blocked: boolean;
   preferedLanguage?: string;
+  // Private columns backing native two-factor authentication (see
+  // `server/src/content-types/User.ts`, all three `private: true`). Declared here only so
+  // `SanitizedAdminUser` can omit them by name -- they must never reach a sanitized payload:
+  // `mfaSecret` is AES-256-GCM ciphertext, and enrolment status/last-use timing are otherwise
+  // enumerable from any user-bearing response.
+  mfaSecret?: string | null;
+  mfaEnabledAt?: string | Date | null;
+  mfaLastUsedStep?: number | null;
 }
 
 export type AdminUserCreationPayload = Omit<
@@ -46,7 +54,13 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
 
 export type SanitizedAdminUser = Omit<
   AdminUser,
-  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'roles'
+  | 'password'
+  | 'resetPasswordToken'
+  | 'resetPasswordTokenExpiresAt'
+  | 'roles'
+  | 'mfaSecret'
+  | 'mfaEnabledAt'
+  | 'mfaLastUsedStep'
 > & {
   roles: SanitizedAdminRole[];
 };
