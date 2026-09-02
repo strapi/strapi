@@ -15,6 +15,7 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
+    'vitest.config.ts',
   ],
 };
 

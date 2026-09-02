@@ -2,6 +2,9 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": [],
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -9,11 +12,8 @@
     "resolveJsonModule": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "skipLibCheck": true,
     "noEmit": true,
-    "types": [],
     "noUncheckedSideEffectImports": true,
     "erasableSyntaxOnly": true
   }
