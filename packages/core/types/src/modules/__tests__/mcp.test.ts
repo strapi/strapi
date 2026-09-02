@@ -12,12 +12,11 @@ type ExpectedContextKeys =
   | '_meta'
   | 'requestInfo';
 
-export type ContextHasOnlyRetainedKeys = Assert<
-  IsEqual<keyof McpCapabilityHandlerContext, ExpectedContextKeys>
->;
-export const contextWithEveryMemberAbsent = {} satisfies McpCapabilityHandlerContext;
+true satisfies Assert<IsEqual<keyof McpCapabilityHandlerContext, ExpectedContextKeys>>;
 
-export const readRetainedMembers = (context: McpCapabilityHandlerContext) => ({
+const contextWithEveryMemberAbsent = {} satisfies McpCapabilityHandlerContext;
+
+const readRetainedMembers = (context: McpCapabilityHandlerContext) => ({
   cancelled: context.signal?.aborted,
   requestId: context.requestId,
   sessionId: context.sessionId,
@@ -26,7 +25,7 @@ export const readRetainedMembers = (context: McpCapabilityHandlerContext) => ({
   authorization: context.requestInfo?.headers.authorization,
 });
 
-export const assertExcludedMembersStayExcluded = (context: McpCapabilityHandlerContext) => [
+const assertExcludedMembersStayExcluded = (context: McpCapabilityHandlerContext) => [
   // @ts-expect-error Server-initiated notifications are not part of Strapi's contract.
   context.sendNotification,
   // @ts-expect-error Server-initiated requests are not part of Strapi's contract.
@@ -48,3 +47,6 @@ export const assertExcludedMembersStayExcluded = (context: McpCapabilityHandlerC
   // @ts-expect-error No generic SDK context escape hatch exists.
   context.sdkContext,
 ];
+
+readRetainedMembers(contextWithEveryMemberAbsent);
+assertExcludedMembersStayExcluded(contextWithEveryMemberAbsent);

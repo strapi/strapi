@@ -173,7 +173,35 @@ const greet = ai.mcp.defineTool({
 strapi.ai.mcp.registerTool(greet);
 ```
 
-`registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning a `GetPromptResult`, and `uri`/`metadata`/`createHandler` returning a `ReadResourceResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
+`registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning an `McpPromptResult`, and `uri`/`metadata`/`createHandler` returning an `McpResourceReadResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
+
+### Capability results
+
+Strapi owns every value a capability author constructs, so no result requires naming an MCP SDK
+type. All of them live in `@strapi/types` (`Modules.MCP`):
+
+| Type                         | What it describes                                                        |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `McpToolResult`              | Tool content plus either successful structured data or an `isError` flag |
+| `McpPromptResult`            | A prompt's description and messages                                      |
+| `McpResourceReadResult`      | What a resource read returns                                             |
+| `McpResourceListingMetadata` | What a resource advertises at registration, before anyone reads it       |
+| `McpContentBlock`            | One block of tool or prompt content                                      |
+
+`McpToolHandlerReturn` remains an alias of `McpToolResult`, so existing handler annotations keep
+compiling unchanged.
+
+`McpContentBlock` is a five-variant union: `text`, `image`, `audio`, `resource_link`, and
+`resource` (an embedded resource). Resource contents come in a `text` or a base64 `blob` form.
+Protocol extension metadata (`_meta`) and arbitrary extension fields on prompt and resource read
+results reach the client unchanged.
+
+`services/mcp/utils/toSdkMcpCapabilityResult.ts` is the outbound counterpart to the handler-context
+translator: it maps each Strapi-owned variant onto the protocol shape the SDK transports. A variant
+the protocol gains later becomes available to capability authors only once Strapi adds it to the
+owned contract, so an SDK change cannot alter Strapi's public API on its own. The SDK remains the
+final protocol validator, and structured-output validation is unchanged: a successful tool result
+must still satisfy the advertised output schema.
 
 ### Handler context
 

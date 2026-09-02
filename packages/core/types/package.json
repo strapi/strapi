@@ -59,7 +59,6 @@
     "@casl/ability": "6.7.5",
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
-    "@modelcontextprotocol/server": "2.0.0",
     "@strapi/database": "5.52.3",
     "@strapi/logger": "5.52.3",
     "@strapi/permissions": "5.52.3",

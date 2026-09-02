@@ -8,6 +8,10 @@ import {
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import {
+  toSdkResourceListingMetadata,
+  toSdkResourceReadResult,
+} from './utils/toSdkMcpCapabilityResult';
 
 /**
  * Defines a Strapi MCP resource with full type inference, ready to pass to
@@ -99,11 +103,18 @@ export class McpResourceRegistry
             'resource',
             name,
             definition.telemetry,
-            (uri: URL, context: ServerContext) =>
-              safeHandler(uri, createMcpCapabilityHandlerContext(context))
+            async (uri: URL, context: ServerContext) =>
+              toSdkResourceReadResult(
+                await safeHandler(uri, createMcpCapabilityHandlerContext(context))
+              )
           );
 
-          return mcpServer.registerResource(name, uri, metadata, sdkHandler);
+          return mcpServer.registerResource(
+            name,
+            uri,
+            toSdkResourceListingMetadata(metadata),
+            sdkHandler
+          );
         },
       });
     });

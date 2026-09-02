@@ -1,11 +1,5 @@
 import type { Ability } from '@casl/ability';
 import { z } from '@strapi/utils';
-import type {
-  ContentBlock,
-  GetPromptResult,
-  ReadResourceResult,
-  ResourceMetadata,
-} from '@modelcontextprotocol/server';
 import type * as Core from '../core';
 
 /** A single CASL permission check: action + optional subject. */
@@ -97,6 +91,175 @@ export type McpCapabilityHandlerContext = {
 };
 
 /**
+ * Who a piece of MCP content is authored by or intended for.
+ */
+export type McpRole = 'user' | 'assistant';
+
+/**
+ * Hints a capability can attach to content so clients can decide how to surface it.
+ */
+export type McpContentAnnotations = {
+  audience?: McpRole[];
+  /** Relative importance between 0 and 1. */
+  priority?: number;
+  /** ISO 8601 timestamp with offset. */
+  lastModified?: string;
+};
+
+/**
+ * An icon a capability can advertise alongside a resource.
+ */
+export type McpIcon = {
+  src: string;
+  mimeType?: string;
+  sizes?: string[];
+  theme?: 'light' | 'dark';
+};
+
+/**
+ * Protocol extension metadata. Strapi carries these keys to the client untouched.
+ */
+export type McpMetadata = Record<string, unknown>;
+
+/** Text content in a tool or prompt result. */
+export type McpTextContent = {
+  type: 'text';
+  text: string;
+  annotations?: McpContentAnnotations;
+  _meta?: McpMetadata;
+};
+
+/** Base64-encoded image content in a tool or prompt result. */
+export type McpImageContent = {
+  type: 'image';
+  data: string;
+  mimeType: string;
+  annotations?: McpContentAnnotations;
+  _meta?: McpMetadata;
+};
+
+/** Base64-encoded audio content in a tool or prompt result. */
+export type McpAudioContent = {
+  type: 'audio';
+  data: string;
+  mimeType: string;
+  annotations?: McpContentAnnotations;
+  _meta?: McpMetadata;
+};
+
+/** The textual contents of a resource. */
+export type McpTextResourceContents = {
+  uri: string;
+  mimeType?: string;
+  text: string;
+  _meta?: McpMetadata;
+};
+
+/** The binary contents of a resource, base64-encoded. */
+export type McpBlobResourceContents = {
+  uri: string;
+  mimeType?: string;
+  blob: string;
+  _meta?: McpMetadata;
+};
+
+/** The contents of a resource, in either of its two representations. */
+export type McpResourceContents = McpTextResourceContents | McpBlobResourceContents;
+
+/**
+ * Facts advertised about a resource before it is read: identity is supplied at
+ * registration, so only the listing attributes belong here.
+ *
+ * Distinct from {@link McpResourceReadResult}, which carries what a read returns.
+ */
+export type McpResourceListingMetadata = {
+  title?: string;
+  description?: string;
+  mimeType?: string;
+  size?: number;
+  icons?: McpIcon[];
+  annotations?: McpContentAnnotations;
+  _meta?: McpMetadata;
+};
+
+/** A pointer to a resource, embedded in a tool or prompt result. */
+export type McpResourceLinkContent = McpResourceListingMetadata & {
+  type: 'resource_link';
+  name: string;
+  uri: string;
+};
+
+/** Resource contents inlined into a tool or prompt result. */
+export type McpEmbeddedResourceContent = {
+  type: 'resource';
+  resource: McpResourceContents;
+  annotations?: McpContentAnnotations;
+  _meta?: McpMetadata;
+};
+
+/**
+ * A single block of human-readable content in a tool or prompt result.
+ *
+ * Strapi owns this union: a variant the MCP protocol gains later becomes available
+ * to capability authors only once Strapi adds it here.
+ */
+export type McpContentBlock =
+  | McpTextContent
+  | McpImageContent
+  | McpAudioContent
+  | McpResourceLinkContent
+  | McpEmbeddedResourceContent;
+
+/**
+ * The value a Strapi MCP tool handler returns.
+ *
+ * A successful result must carry structured data matching the advertised output
+ * schema; a failed result is marked with `isError` and carries none.
+ */
+export type McpToolResult<
+  OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
+> =
+  | {
+      content: McpContentBlock[];
+      structuredContent?: never;
+      isError: true;
+    }
+  | {
+      content: McpContentBlock[];
+      structuredContent: z.infer<OutputSchema>;
+      isError?: never;
+    };
+
+/** A single message in a prompt result. */
+export type McpPromptMessage = {
+  role: McpRole;
+  content: McpContentBlock;
+};
+
+/**
+ * The value a Strapi MCP prompt handler returns.
+ *
+ * Extension fields beyond the declared members reach the client unchanged.
+ */
+export type McpPromptResult = {
+  description?: string;
+  messages: McpPromptMessage[];
+  _meta?: McpMetadata;
+  [extensionField: string]: unknown;
+};
+
+/**
+ * The value a Strapi MCP resource handler returns when a resource is read.
+ *
+ * Extension fields beyond the declared members reach the client unchanged.
+ */
+export type McpResourceReadResult = {
+  contents: McpResourceContents[];
+  _meta?: McpMetadata;
+  [extensionField: string]: unknown;
+};
+
+/**
  * Handler function for Strapi MCP tools.
  * Receives a single object parameter `{ args, extra }`.
  * When InputSchema is a ZodObject, `args` is typed as its inferred shape.
@@ -116,21 +279,12 @@ export type McpToolHandler<
 ) => Promise<McpToolHandlerReturn<OutputSchema>>;
 
 /**
- * Return type for Strapi MCP tool handlers.
+ * Established name for {@link McpToolResult}, kept so existing handler
+ * annotations continue to compile with the same meaning.
  */
 export type McpToolHandlerReturn<
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
-> =
-  | {
-      content: ContentBlock[];
-      structuredContent?: never;
-      isError: true;
-    }
-  | {
-      content: ContentBlock[];
-      structuredContent: z.infer<OutputSchema>;
-      isError?: never;
-    };
+> = McpToolResult<OutputSchema>;
 
 export type McpToolSchemaResolver<Schema> = (context: McpHandlerContext) => Schema;
 
@@ -210,8 +364,8 @@ export interface McpToolBuilder {
  */
 export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined> =
   ArgsSchema extends z.ZodTypeAny
-    ? (args: z.infer<ArgsSchema>, extra: McpCapabilityHandlerContext) => Promise<GetPromptResult>
-    : (extra: McpCapabilityHandlerContext) => Promise<GetPromptResult>;
+    ? (args: z.infer<ArgsSchema>, extra: McpCapabilityHandlerContext) => Promise<McpPromptResult>
+    : (extra: McpCapabilityHandlerContext) => Promise<McpPromptResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP prompt definition.
@@ -275,7 +429,7 @@ export interface McpPromptBuilder {
 export type McpResourceCallback = (
   uri: URL,
   extra: McpCapabilityHandlerContext
-) => Promise<ReadResourceResult>;
+) => Promise<McpResourceReadResult>;
 
 /**
  * Access-agnostic fields of a Strapi MCP resource definition.
@@ -285,7 +439,7 @@ export type McpResourceCallback = (
 export type McpResourceDefinitionFields<Name extends string = string> = {
   name: Name;
   uri: string;
-  metadata: ResourceMetadata;
+  metadata: McpResourceListingMetadata;
   telemetry?: McpCapabilityTelemetry;
   createHandler: (strapi: Core.Strapi) => McpResourceCallback;
 };

@@ -9,6 +9,7 @@ import {
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import { toSdkPromptResult } from './utils/toSdkMcpCapabilityResult';
 
 /**
  * Defines a Strapi MCP prompt with full type inference, ready to pass to
@@ -102,7 +103,8 @@ export class McpPromptRegistry
               'prompt',
               name,
               definition.telemetry,
-              (context: Modules.MCP.McpCapabilityHandlerContext) => handler(context)
+              async (context: Modules.MCP.McpCapabilityHandlerContext) =>
+                toSdkPromptResult(await handler(context))
             );
 
             return mcpServer.registerPrompt(
@@ -125,10 +127,10 @@ export class McpPromptRegistry
             'prompt',
             name,
             definition.telemetry,
-            (
+            async (
               args: Parameters<typeof handler>[0],
               context: Modules.MCP.McpCapabilityHandlerContext
-            ) => handler(args, context)
+            ) => toSdkPromptResult(await handler(args, context))
           );
 
           return mcpServer.registerPrompt(

@@ -10072,7 +10072,6 @@ __metadata:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:12.0.2"
-    "@modelcontextprotocol/server": "npm:2.0.0"
     "@strapi/database": "npm:5.52.3"
     "@strapi/logger": "npm:5.52.3"
     "@strapi/permissions": "npm:5.52.3"

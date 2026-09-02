@@ -8,6 +8,7 @@ import {
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import { toSdkToolResult } from './utils/toSdkMcpCapabilityResult';
 import type { McpAdminTokenAbility } from './authentication';
 
 /**
@@ -124,11 +125,13 @@ export class McpToolRegistry
               'tool',
               name,
               definition.telemetry,
-              (args: unknown, context: ServerContext) =>
-                safeHandler({
-                  args,
-                  extra: createMcpCapabilityHandlerContext(context),
-                } as Parameters<typeof safeHandler>[0])
+              async (args: unknown, context: ServerContext) =>
+                toSdkToolResult(
+                  await safeHandler({
+                    args,
+                    extra: createMcpCapabilityHandlerContext(context),
+                  } as Parameters<typeof safeHandler>[0])
+                )
             );
 
             return mcpServer.registerTool(
@@ -143,10 +146,12 @@ export class McpToolRegistry
             'tool',
             name,
             definition.telemetry,
-            (context: ServerContext) =>
-              safeHandler({
-                extra: createMcpCapabilityHandlerContext(context),
-              } as Parameters<typeof safeHandler>[0])
+            async (context: ServerContext) =>
+              toSdkToolResult(
+                await safeHandler({
+                  extra: createMcpCapabilityHandlerContext(context),
+                } as Parameters<typeof safeHandler>[0])
+              )
           );
 
           return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
