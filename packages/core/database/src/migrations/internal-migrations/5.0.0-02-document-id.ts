@@ -173,7 +173,14 @@ const migrateDocumentIdsWithLocalizations = async (
 
     const pendingMembers = members.filter((id) => pendingIdSet.has(id));
     if (pendingMembers.length > 0) {
-      writeGroups.set(documentId, pendingMembers);
+      // Two distinct clusters resolving to the same document_id is only possible via a
+      // cuid collision, but merge rather than overwrite so neither group's writes vanish.
+      const existingGroup = writeGroups.get(documentId);
+      if (existingGroup) {
+        existingGroup.push(...pendingMembers);
+      } else {
+        writeGroups.set(documentId, pendingMembers);
+      }
     }
   }
 

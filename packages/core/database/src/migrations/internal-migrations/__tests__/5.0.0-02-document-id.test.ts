@@ -555,6 +555,28 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
 
       expect(h.updateCalls.some((c) => c.id === 2)).toBe(false);
     });
+
+    it('merges rather than overwrites when two unrelated clusters resolve to the same document_id', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 1 }, { id: 3 }],
+        // two disjoint clusters — 1<->2 and 3<->4 — that happen to adopt the same id
+        links: [
+          { [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 },
+          { [snakeCase('category_id')]: 3, [snakeCase('inv_category_id')]: 4 },
+        ],
+        existingDocumentIds: { 2: 'doc-shared', 4: 'doc-shared' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      // both clusters' pending rows must be written, merged into the same write group —
+      // a plain Map.set(documentId, ...) per cluster would let the second overwrite the first
+      expect(h.updateCalls.sort((a, b) => a.id - b.id)).toEqual([
+        { id: 1, document_id: 'doc-shared' },
+        { id: 3, document_id: 'doc-shared' },
+      ]);
+      expect(h.groupedUpdateCalls).toHaveLength(1);
+    });
   });
 
   it('writes one whereIn per cluster instead of one update per row', async () => {
