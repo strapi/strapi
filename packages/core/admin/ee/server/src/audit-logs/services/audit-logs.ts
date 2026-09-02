@@ -39,17 +39,29 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       const auditLog: Log = { ...rest, user: userId };
 
       // Save to database
-      await strapi.db?.query('admin::audit-log').create({ data: auditLog });
+      await strapi.db.query('admin::audit-log').create({ data: auditLog });
 
       return this;
     },
 
     async findMany(query: unknown) {
-      const { results, pagination } = await strapi.db.query('admin::audit-log').findPage({
-        populate: ['user'],
-        select: ['action', 'date', 'payload'],
+      // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
+      // See: https://github.com/strapi/strapi/issues/27399
+      const { results: logRows, pagination } = await strapi.db.query('admin::audit-log').findPage({
         ...strapi.get('query-params').transform('admin::audit-log', query),
+        select: ['id'],
       });
+
+      const ids = logRows.map((log) => log.id);
+      const logs = ids.length
+        ? await strapi.db.query('admin::audit-log').findMany({
+            where: { id: { $in: ids } },
+            populate: ['user'],
+            select: ['action', 'date', 'payload'],
+          })
+        : [];
+      const logsById = new Map(logs.map((log) => [log.id, log]));
+      const results = ids.map((id) => logsById.get(id)).filter(Boolean);
 
       const sanitizedResults = results.map((result: any) => {
         const { user, ...rest } = result;
@@ -101,7 +113,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     async findOne(id: unknown) {
-      const result: any = await strapi.db?.query('admin::audit-log').findOne({
+      const result: any = await strapi.db.query('admin::audit-log').findOne({
         where: { id },
         populate: ['user'],
         select: ['action', 'date', 'payload'],
@@ -119,7 +131,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     deleteExpiredEvents(expirationDate: Date) {
-      return strapi.db?.query('admin::audit-log').deleteMany({
+      return strapi.db.query('admin::audit-log').deleteMany({
         where: {
           date: {
             $lt: expirationDate.toISOString(),
