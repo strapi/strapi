@@ -12,7 +12,7 @@ import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exc
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
-import { toGlobPath } from '../staticFiles';
+import { toGlobPath } from '../core/scan-roots';
 import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
 

@@ -68,8 +68,8 @@ const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> =
 };
 
 /**
- * An `@source` value is a glob, and a glob separator is a forward slash on every platform. Split on
- * both separators, so the result does not depend on the platform that runs the build
+ * An `@source` value is a glob, and a glob separator is a forward slash on every platform. Replace
+ * every backslash, so the result does not depend on the platform that runs the build
  */
 const toGlobPath = (value: string): string => value.replace(/\\/g, '/');
 
