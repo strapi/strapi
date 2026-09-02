@@ -20,25 +20,47 @@ const DEFAULT_USER = { id: 7, mfaEnabledAt: null, mfaSecret: null, mfaLastUsedSt
  */
 const buildCtx = (
   body: Record<string, unknown> = {},
-  userOverrides: Record<string, unknown> = {}
+  userOverrides: Record<string, unknown> = {},
+  stateOverrides: Record<string, unknown> = {}
 ) => {
   const notFound = jest.fn();
+  const internalServerError = jest.fn();
   const ctx = createContext(
     { body },
     {
-      state: { user: { ...DEFAULT_USER, ...userOverrides } },
+      state: { user: { ...DEFAULT_USER, ...userOverrides }, ...stateOverrides },
       notFound,
+      internalServerError,
       request: { query: {}, body, headers: { 'user-agent': 'jest' }, secure: false },
     }
   ) as any;
 
-  return { ctx, notFound };
+  return { ctx, notFound, internalServerError };
 };
 
-/** A working strapi double for the paths that reach the session manager (disable). */
+/**
+ * A working strapi double for the paths that reach the session manager (disable): `listSessions`
+ * defaults to empty (nothing to revoke) and `invalidateRefreshToken`/`revokeSessionById` resolve,
+ * matching `OriginSessionManagerService`'s real shape (`shared/utils/session-auth.ts`'s
+ * `getSessionManager` reads `strapi.sessionManager`).
+ */
+interface FakeSessionEntry {
+  sessionId: string;
+  userId: string;
+  deviceId: string;
+  origin: string;
+  expiresAt: Date;
+}
+
 const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) => {
   const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-  const sessionManagerFn = jest.fn(() => ({ invalidateRefreshToken }));
+  const listSessions = jest.fn((): Promise<FakeSessionEntry[]> => Promise.resolve([]));
+  const revokeSessionById = jest.fn(() => Promise.resolve(true));
+  const sessionManagerFn = jest.fn(() => ({
+    invalidateRefreshToken,
+    listSessions,
+    revokeSessionById,
+  }));
 
   setStrapi({
     sessionManager: sessionManagerFn,
@@ -46,7 +68,7 @@ const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) =>
     admin: { services: { mfa: mfaOverrides } },
   });
 
-  return { invalidateRefreshToken, sessionManagerFn };
+  return { invalidateRefreshToken, listSessions, revokeSessionById, sessionManagerFn };
 };
 
 describe('mfa controller', () => {
@@ -188,12 +210,13 @@ describe('mfa controller', () => {
     );
     const disableFn = jest.fn();
     const recordEvent = jest.fn();
-    const { invalidateRefreshToken } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      assertPasswordAndFactor,
-      disable: disableFn,
-      recordEvent,
-    });
+    const { invalidateRefreshToken, listSessions, revokeSessionById } =
+      buildStrapiWithSessionManager({
+        isEnabled: jest.fn(() => true),
+        assertPasswordAndFactor,
+        disable: disableFn,
+        recordEvent,
+      });
 
     // Missing code entirely -- rejected by the validator before the service is even reached.
     const { ctx: missingCodeCtx } = buildCtx({ password: 'Password123' });
@@ -218,20 +241,76 @@ describe('mfa controller', () => {
     expect(disableFn).not.toHaveBeenCalled();
     expect(recordEvent).not.toHaveBeenCalled();
     expect(invalidateRefreshToken).not.toHaveBeenCalled();
+    expect(listSessions).not.toHaveBeenCalled();
+    expect(revokeSessionById).not.toHaveBeenCalled();
   });
 
-  test('disable invalidates the user other sessions', async () => {
+  test('disable returns 500 and touches nothing when the session manager is unavailable', async () => {
+    // Checked before `assertPasswordAndFactor` runs: a broken deployment must not be allowed to
+    // spend the caller's password/code attempt, or actually disable two-factor authentication,
+    // only to then discover it cannot evict sessions.
+    const assertPasswordAndFactor = jest.fn();
+    const disableFn = jest.fn();
+    const recordEvent = jest.fn();
+
+    setStrapi({
+      log: { error: jest.fn() },
+      admin: {
+        services: {
+          mfa: {
+            isEnabled: jest.fn(() => true),
+            assertPasswordAndFactor,
+            disable: disableFn,
+            recordEvent,
+          },
+        },
+      },
+      // No `sessionManager` at all.
+    });
+
+    const { ctx, internalServerError } = buildCtx({ password: 'Password123', code: '123456' });
+
+    await mfaController.disable(ctx);
+
+    expect(internalServerError).toHaveBeenCalled();
+    expect(assertPasswordAndFactor).not.toHaveBeenCalled();
+    expect(disableFn).not.toHaveBeenCalled();
+    expect(recordEvent).not.toHaveBeenCalled();
+    expect(ctx.status).not.toBe(204);
+  });
+
+  test('disable invalidates the user other sessions, but not the one making this request', async () => {
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
     const disableFn = jest.fn(() => Promise.resolve());
     const recordEvent = jest.fn(() => Promise.resolve());
-    const { invalidateRefreshToken, sessionManagerFn } = buildStrapiWithSessionManager({
+    const { listSessions, revokeSessionById, sessionManagerFn } = buildStrapiWithSessionManager({
       isEnabled: jest.fn(() => true),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
     });
+    const activeSession = (sessionId: string) => ({
+      sessionId,
+      userId: '7',
+      deviceId: sessionId,
+      origin: 'admin',
+      expiresAt: new Date(),
+    });
+    listSessions.mockImplementation(() =>
+      Promise.resolve([
+        activeSession('current-session'),
+        activeSession('other-session-1'),
+        activeSession('other-session-2'),
+      ])
+    );
 
-    const { ctx } = buildCtx({ password: 'Password123', code: '123456' });
+    // `ctx.state.session` mirrors what the admin auth strategy sets from the access token
+    // backing this very request (`strategies/admin.ts`).
+    const { ctx } = buildCtx(
+      { password: 'Password123', code: '123456' },
+      {},
+      { session: { id: 'current-session' } }
+    );
 
     await mfaController.disable(ctx);
 
@@ -239,7 +318,33 @@ describe('mfa controller', () => {
     expect(disableFn).toHaveBeenCalledWith('7');
     expect(recordEvent).toHaveBeenCalledWith('7', 'disabled', expect.any(Object));
     expect(sessionManagerFn).toHaveBeenCalledWith('admin');
+    expect(listSessions).toHaveBeenCalledWith('7');
+    expect(revokeSessionById).toHaveBeenCalledWith('7', 'other-session-1');
+    expect(revokeSessionById).toHaveBeenCalledWith('7', 'other-session-2');
+    // The property this fix exists for: the session this very request is authenticated with must
+    // survive, or a successful disable would silently log the acting admin out.
+    expect(revokeSessionById).not.toHaveBeenCalledWith('7', 'current-session');
+    expect(ctx.status).toBe(204);
+  });
+
+  test('disable falls back to evicting every session when the current one cannot be identified', async () => {
+    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
+    const disableFn = jest.fn(() => Promise.resolve());
+    const recordEvent = jest.fn(() => Promise.resolve());
+    const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
+      isEnabled: jest.fn(() => true),
+      assertPasswordAndFactor,
+      disable: disableFn,
+      recordEvent,
+    });
+
+    // No `session` on `ctx.state` -- fails closed rather than guessing which session is current.
+    const { ctx } = buildCtx({ password: 'Password123', code: '123456' });
+
+    await mfaController.disable(ctx);
+
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
+    expect(listSessions).not.toHaveBeenCalled();
     expect(ctx.status).toBe(204);
   });
 

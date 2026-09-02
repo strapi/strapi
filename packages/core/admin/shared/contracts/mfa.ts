@@ -85,7 +85,9 @@ export declare namespace AcknowledgeRecoveryCodes {
 
 /**
  * /mfa/disable - Turn two-factor authentication off. Requires the current password and a valid
- * second factor, and evicts every other admin session for the account. No response body.
+ * second factor, and evicts every *other* admin session for the account -- the one making this
+ * request survives, so a successful disable does not also log the caller out. Falls back to
+ * evicting everything if the current session cannot be identified. No response body.
  */
 export declare namespace Disable {
   export interface Request {
@@ -126,7 +128,10 @@ export declare namespace Notices {
 export declare namespace MarkNoticesSeen {
   export interface Request {
     body: {
-      ids?: Data.ID[];
+      // Narrower than `Data.ID` (which also admits strings) because the validator behind this
+      // endpoint (`validateMfaNoticesSeenInput`) is `yup.number().integer()`, run strict: a
+      // string id would typecheck against this field yet always 400 at runtime.
+      ids?: number[];
     };
   }
 }

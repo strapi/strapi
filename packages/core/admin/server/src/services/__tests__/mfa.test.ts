@@ -182,12 +182,16 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
 
     if (typeof condition === 'object' && !(condition instanceof Date)) {
       return Object.entries(condition as Record<string, unknown>).every(([operator, value]) => {
-        // `$in`'s `value` is an array, not a single orderable bound, so it must be handled before
-        // `asComparable` -- which every other operator here relies on -- ever sees it.
+        // `$in`/`$ne`'s `value` isn't a single orderable bound (an array, or the excluded value
+        // itself), so both must be handled before `asComparable` -- which every other operator
+        // here relies on -- ever sees them.
         if (operator === '$in') {
           return (
             Array.isArray(value) && value.map((item) => String(item)).includes(String(row[field]))
           );
+        }
+        if (operator === '$ne') {
+          return String(row[field]) !== String(value);
         }
 
         const current = asComparable(row[field]);
@@ -355,6 +359,8 @@ interface FixtureOptions {
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
   mfaConfig?: Record<string, unknown>;
   recoveryOverrides?: Record<string, jest.Mock>;
+  /** Lets a test swap in a throwing `update` etc. to exercise `disable`'s transaction. */
+  userOverrides?: Record<string, jest.Mock>;
   strapiOverrides?: Record<string, unknown>;
 }
 
@@ -434,6 +440,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       // return value must not be left holding a window onto later writes.
       return { ...user };
     }),
+    ...options.userOverrides,
   };
 
   // A real store (not an inert no-op), so `completeEnrolment`'s recovery codes are genuinely
@@ -518,6 +525,34 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     findMany: jest.fn(async ({ where }: any = {}) =>
       events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }))
     ),
+    // `orderBy` accepts either a single `{ field: direction }` clause or an array of them,
+    // evaluated left to right until a clause actually distinguishes two rows -- the same shape
+    // `areCodesAcknowledged` asks for (`createdAt` desc, `id` desc as a tiebreaker for rows
+    // created in the same millisecond, which a real store's clock resolution cannot rule out).
+    findOne: jest.fn(async ({ where, orderBy }: any = {}) => {
+      const matches = events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }));
+      let clauses: Array<Record<string, string>> = [];
+      if (Array.isArray(orderBy)) {
+        clauses = orderBy;
+      } else if (orderBy) {
+        clauses = [orderBy];
+      }
+
+      matches.sort((a, b) => {
+        for (const clause of clauses) {
+          for (const [field, direction] of Object.entries(clause as Record<string, string>)) {
+            const left = asComparable(a[field]);
+            const right = asComparable(b[field]);
+            if (left !== right) {
+              return direction === 'desc' ? right - left : left - right;
+            }
+          }
+        }
+        return 0;
+      });
+
+      return matches[0] ?? null;
+    }),
     // Mutates the live rows (not a snapshot), same as `deleteMany` above: `markEventsSeen` /
     // `acknowledgeCodes` tests need to observe the write through the same `events` array the
     // fixture hands back, not a copy that silently diverges from it.
@@ -576,12 +611,30 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         throw new Error(`Unexpected table in mock connection: ${table}`);
       }),
       metadata: { get: metadataGet },
-      // The service's own transaction usage (`issueRecoveryCodes`) is exercised here as a plain
-      // pass-through: the fixtures above already mutate a shared in-memory store synchronously,
-      // so there is nothing for a fake commit/rollback to add. What this stub does prove is the
-      // ordering in `completeEnrolment` — if the callback throws (a `createMany` override that
-      // throws), `transaction` rejects and propagates, exactly like the real implementation.
-      transaction: jest.fn(async (run: (args: { trx: unknown }) => unknown) => run({ trx: {} })),
+      // A real commit/rollback, not a bare pass-through: `disable` (Task 10 fix round 1) wraps
+      // three statements in one transaction specifically so a failure on the last one (the user
+      // update) undoes the first two (the recovery-code and challenge deletes) rather than
+      // stranding the account mid-teardown. Proving that requires the mock to actually roll back
+      // on a thrown callback -- snapshot every store this suite touches before running the
+      // callback, and restore all four wholesale if it rejects. On success nothing extra happens:
+      // the stores already hold whatever the callback wrote, exactly like a committed transaction.
+      transaction: jest.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
+        const usersSnapshot = new Map(Array.from(users.entries(), ([id, row]) => [id, { ...row }]));
+        const recoverySnapshot = recoveryRows.map((row) => ({ ...row }));
+        const challengesSnapshot = challenges.map((row) => ({ ...row }));
+        const eventsSnapshot = events.map((row) => ({ ...row }));
+
+        try {
+          return await run({ trx: {} });
+        } catch (error) {
+          users.clear();
+          for (const [id, row] of usersSnapshot) users.set(id, row);
+          recoveryRows.splice(0, recoveryRows.length, ...recoverySnapshot);
+          challenges.splice(0, challenges.length, ...challengesSnapshot);
+          events.splice(0, events.length, ...eventsSnapshot);
+          throw error;
+        }
+      }),
     },
     ...options.strapiOverrides,
   };
@@ -1489,21 +1542,42 @@ describe('mfa service: notices and acknowledgement', () => {
 
     const notices = await service.unseenEvents('1');
 
+    // Mapped to the public shape, not the raw row: no `userId` (redundant -- it is always the
+    // caller's own), and `createdAt` serialised to a string.
     expect(notices).toHaveLength(1);
-    expect(notices[0]).toMatchObject({ userId: '1', type: 'enabled', seenAt: null });
+    expect(notices[0]).toMatchObject({ type: 'enabled', seenAt: null });
+    expect(notices[0]).not.toHaveProperty('userId');
+    expect(typeof notices[0].createdAt).toBe('string');
   });
 
-  test("markEventsSeen with no ids marks every one of the caller's rows, and no one else's", async () => {
+  test('unseenEvents never returns the recovery_codes_issued acknowledgement marker', async () => {
+    const { service } = setup();
+    // `issueRecoveryCodes` records a `recovery_codes_issued` marker as a side effect.
+    await service.issueRecoveryCodes('1');
+    await service.recordEvent('1', 'enabled');
+
+    const notices = await service.unseenEvents('1');
+
+    expect(notices).toHaveLength(1);
+    expect(notices[0].type).toBe('enabled');
+  });
+
+  test("markEventsSeen with no ids marks every one of the caller's notices, and no one else's, but never the marker", async () => {
     const { service, events } = setup();
     await service.recordEvent('1', 'enabled');
     await service.recordEvent('1', 'challenge_failed');
+    await service.issueRecoveryCodes('1'); // a recovery_codes_issued marker for user '1'
     await service.recordEvent('2', 'enabled');
 
     await service.markEventsSeen('1');
 
-    expect(events.filter((e) => e.userId === '1').every((e) => e.seenAt instanceof Date)).toBe(
-      true
+    const callerNotices = events.filter(
+      (e) => e.userId === '1' && e.type !== 'recovery_codes_issued'
     );
+    expect(callerNotices.every((e) => e.seenAt instanceof Date)).toBe(true);
+    expect(
+      events.find((e) => e.userId === '1' && e.type === 'recovery_codes_issued')!.seenAt
+    ).toBeNull();
     expect(events.find((e) => e.userId === '2')!.seenAt).toBeNull();
   });
 
@@ -1533,9 +1607,31 @@ describe('mfa service: notices and acknowledgement', () => {
     expect(events.find((e) => e.id === foreignEvent.id)!.seenAt).toBeNull();
   });
 
-  test('areCodesAcknowledged is false until the enabled event is marked seen, then stays true', async () => {
+  test("markEventsSeen with the marker row's own id in ids does not acknowledge it", async () => {
+    const { service, events } = setup();
+    await service.issueRecoveryCodes('1');
+    const marker = events.find((e) => e.type === 'recovery_codes_issued')!;
+
+    await service.markEventsSeen('1', [marker.id]);
+
+    expect(events.find((e) => e.id === marker.id)!.seenAt).toBeNull();
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
+  });
+
+  test('a fresh recovery-code issuance is unacknowledged', async () => {
     const { service } = setup();
-    await service.recordEvent('1', 'enabled');
+    await service.issueRecoveryCodes('1');
+
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
+  });
+
+  test('completing enrolment leaves the freshly issued codes unacknowledged, and acknowledging flips it', async () => {
+    const { strapi } = buildMfaFixture();
+    const service = createMfaService(defaultDeps(strapi));
+
+    const { secret } = await service.beginEnrolment('1', 'pw');
+    const code = generateTotp({ secret: base32Decode(secret) });
+    await service.completeEnrolment('1', code);
 
     expect(await service.areCodesAcknowledged('1')).toBe(false);
 
@@ -1544,15 +1640,32 @@ describe('mfa service: notices and acknowledgement', () => {
     expect(await service.areCodesAcknowledged('1')).toBe(true);
   });
 
+  test('regenerating issues a fresh marker, so the new codes read as unacknowledged again', async () => {
+    const { service } = setup();
+    await service.issueRecoveryCodes('1');
+    await service.acknowledgeCodes('1');
+    expect(await service.areCodesAcknowledged('1')).toBe(true);
+
+    await service.issueRecoveryCodes('1'); // regenerate
+
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
+  });
+
   test("areCodesAcknowledged for one account is unaffected by another account's acknowledgement", async () => {
     const { service } = setup();
-    await service.recordEvent('1', 'enabled');
-    await service.recordEvent('2', 'enabled');
+    await service.issueRecoveryCodes('1');
+    await service.issueRecoveryCodes('2');
 
     await service.acknowledgeCodes('2');
 
     expect(await service.areCodesAcknowledged('1')).toBe(false);
     expect(await service.areCodesAcknowledged('2')).toBe(true);
+  });
+
+  test('areCodesAcknowledged is false for an account that has never had codes issued', async () => {
+    const { service } = setup();
+
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
   });
 });
 
@@ -1704,6 +1817,36 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
 
       expect(recoveryRows.filter((r) => r.userId === '2').length).toBeGreaterThan(0);
       expect(challenges.filter((c) => c.userId === '2')).toHaveLength(1);
+    });
+
+    test('a failing user update rolls back the recovery-code and challenge deletes (Finding 1: no permanent lockout)', async () => {
+      // The third of `disable`'s three statements is made to reject. Without a transaction the
+      // first two (the deletes) would already have committed by the time this throws, leaving
+      // the account with `mfaEnabledAt`/`mfaSecret` still set (a code is still demanded) and zero
+      // recovery codes -- and `beginEnrolment` refuses to re-enrol while `mfaEnabledAt` is set, so
+      // that combination is a permanent lockout with no path back but the CLI reset.
+      const { strapi, recoveryRows, challenges } = buildMfaFixture({
+        userOverrides: {
+          update: jest.fn(async () => {
+            throw new Error('connection dropped');
+          }),
+        },
+      });
+      const service = createMfaService(defaultDeps(strapi));
+
+      await service.issueRecoveryCodes('1');
+      await service.createChallenge('1');
+      const codesBefore = recoveryRows.filter((r) => r.userId === '1').length;
+      const challengesBefore = challenges.filter((c) => c.userId === '1').length;
+      expect(codesBefore).toBeGreaterThan(0);
+      expect(challengesBefore).toBeGreaterThan(0);
+
+      await expect(service.disable('1')).rejects.toThrow(/connection dropped/);
+
+      // Rolled back, not merely "not yet deleted": a real transaction undoes the earlier deletes
+      // too when the final statement fails.
+      expect(recoveryRows.filter((r) => r.userId === '1')).toHaveLength(codesBefore);
+      expect(challenges.filter((c) => c.userId === '1')).toHaveLength(challengesBefore);
     });
   });
 });

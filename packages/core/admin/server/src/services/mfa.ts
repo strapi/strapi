@@ -11,6 +11,7 @@ import {
 } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
+import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -37,13 +38,20 @@ const RECOVERY_CODE_LENGTH = 10;
 /**
  * Security notices surfaced in-app, and — for `challenge_failed` — the stored counter the
  * account-scoped throttle reads. Never carries the code, secret or URI it is about.
+ *
+ * `recovery_codes_issued` is the odd one out: it is an acknowledgement marker, not a notice.
+ * Every call to `issueRecoveryCodes` (enrolment and regenerate alike) records a fresh one, and
+ * `areCodesAcknowledged` reads only the newest row of this type — see `issueRecoveryCodes`,
+ * `areCodesAcknowledged` and `acknowledgeCodes` below. It is deliberately excluded from
+ * `unseenEvents`/`markEventsSeen`, which surface and clear notices, not this marker.
  */
 export type MfaEventType =
   | 'enabled'
   | 'disabled'
   | 'reset'
   | 'challenge_failed'
-  | 'recovery_code_used';
+  | 'recovery_code_used'
+  | 'recovery_codes_issued';
 
 /**
  * `unusable`  — no such challenge, already spent, or expired. Nothing was evaluated.
@@ -301,9 +309,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     // Regenerating replaces the whole set: previously issued codes must stop working, so the old
     // rows are deleted rather than left around as consumable leftovers. Wrapped in a transaction
-    // so the delete and the insert either both land or neither does — a `createMany` failure
-    // (constraint violation, dropped connection) must never strand the delete having already
-    // committed, which would leave the account with zero recovery codes and no way to get any.
+    // so the delete, the insert and the acknowledgement marker below either all land or none does
+    // — a `createMany` failure (constraint violation, dropped connection) must never strand the
+    // delete having already committed, which would leave the account with zero recovery codes and
+    // no way to get any.
     await strapi.db.transaction(async () => {
       await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
 
@@ -313,6 +322,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       if (data.length > 0) {
         await recoveryQuery().createMany({ data });
       }
+
+      // A fresh, unacknowledged marker every time codes are (re)issued -- enrolment
+      // (`completeEnrolment`) and regenerate both go through here, so `areCodesAcknowledged`
+      // always reflects the newest set, never a stale acknowledgement of codes the caller
+      // already replaced. Inside the same transaction as the codes themselves: a marker for a
+      // set that never landed (or codes with no marker to eventually acknowledge) are both wrong.
+      await recordEvent(userId, 'recovery_codes_issued');
     });
 
     return codes;
@@ -440,20 +456,49 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Notices surfaced in-app (GET /mfa/notices): the caller's own events not yet marked seen.
-   * Ordering is left to whatever the store returns -- this is drained by an authenticated
-   * self-service endpoint, not a paginated feed.
+   * A `where` fragment excluding the `recovery_codes_issued` acknowledgement marker: it is not a
+   * security notice, so it must never surface from `unseenEvents` or be touched by
+   * `markEventsSeen` -- including when a caller passes the marker's own id in `ids`. Only
+   * `acknowledgeCodes` (and, transitively, `/mfa/recovery-codes/ack`) may ever clear it.
    */
-  const unseenEvents = (userId: string) =>
-    eventQuery().findMany({ where: { userId: String(userId), seenAt: null } });
+  const NOT_ACKNOWLEDGEMENT_MARKER = { $ne: 'recovery_codes_issued' as const };
 
   /**
-   * Marks the caller's own event rows seen. `userId` is always part of the `where`, and `ids`
+   * Notices surfaced in-app (GET /mfa/notices): the caller's own events not yet marked seen.
+   * Ordering is left to whatever the store returns -- this is drained by an authenticated
+   * self-service endpoint, not a paginated feed. Mapped to the public shape rather than returned
+   * as raw rows: `userId` is redundant (it is always the caller's own) and dates are serialised
+   * to ISO strings, matching `MfaEventNotice`.
+   */
+  const unseenEvents = async (userId: string): Promise<MfaEventNotice[]> => {
+    const rows = await eventQuery().findMany({
+      where: { userId: String(userId), seenAt: null, type: NOT_ACKNOWLEDGEMENT_MARKER },
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      type: row.type,
+      metadata: row.metadata ?? {},
+      createdAt: new Date(row.createdAt).toISOString(),
+      seenAt: row.seenAt ? new Date(row.seenAt).toISOString() : null,
+    }));
+  };
+
+  /**
+   * Marks the caller's own notice rows seen. `userId` is always part of the `where`, and `ids`
    * -- when given -- only narrows it further, so a foreign id slipped into `ids` can never reach
-   * another user's row. An absent `ids` marks every one of the caller's rows.
+   * another user's row. An absent `ids` marks every one of the caller's notices.
+   *
+   * The `recovery_codes_issued` marker is excluded unconditionally, even when its own id is
+   * included in `ids`: it is an acknowledgement marker, not a notice, and only
+   * `POST /mfa/recovery-codes/ack` may clear it -- otherwise dismissing the notice feed would be
+   * indistinguishable from confirming the recovery codes were saved.
    */
   const markEventsSeen = async (userId: string, ids?: Data.ID[]): Promise<void> => {
-    const where: Record<string, unknown> = { userId: String(userId) };
+    const where: Record<string, unknown> = {
+      userId: String(userId),
+      type: NOT_ACKNOWLEDGEMENT_MARKER,
+    };
     if (ids) {
       where.id = { $in: ids };
     }
@@ -462,21 +507,31 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Acknowledgement of the current recovery-code set needs no column of its own: enrolling
-   * already records one `enabled` event per account, and "the user confirmed they saved their
-   * codes" is exactly what marking that event seen means.
+   * Whether the *current* recovery-code set has been acknowledged. Reads only the newest
+   * `recovery_codes_issued` marker (each call to `issueRecoveryCodes` -- enrolment and regenerate
+   * alike -- records a fresh one): an older, already-acknowledged marker must never make a
+   * just-regenerated set read as acknowledged. Ordered by `createdAt` then `id`, both descending:
+   * two markers can share a millisecond-resolution timestamp, and `id` is the only thing that
+   * still orders them correctly when they do. No row at all (a pre-Task-10 account, or one that
+   * has never had codes issued) means "not acknowledged", not an error.
    */
   const areCodesAcknowledged = async (userId: string): Promise<boolean> => {
-    const enabledEvents = await eventQuery().findMany({
-      where: { userId: String(userId), type: 'enabled' },
+    const latest = await eventQuery().findOne({
+      where: { userId: String(userId), type: 'recovery_codes_issued' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
 
-    return enabledEvents.some((event) => Boolean(event.seenAt));
+    return Boolean(latest?.seenAt);
   };
 
+  /**
+   * One conditional UPDATE, not read-then-write: `seenAt: null` is part of the `where` itself, so
+   * there is nothing to decide first. Scoped to `type: 'recovery_codes_issued'` only -- this must
+   * never touch an ordinary notice, which is exactly what `markEventsSeen` is for.
+   */
   const acknowledgeCodes = async (userId: string): Promise<void> => {
     await eventQuery().updateMany({
-      where: { userId: String(userId), type: 'enabled' },
+      where: { userId: String(userId), type: 'recovery_codes_issued', seenAt: null },
       data: { seenAt: new Date() },
     });
   };
@@ -714,13 +769,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /**
    * Clears enrolment entirely. Recovery codes and outstanding challenges go too, so a later
    * re-enrolment starts clean rather than inheriting stale rows.
+   *
+   * Wrapped in a transaction, same reasoning as `issueRecoveryCodes`: these three statements must
+   * all land or none does. Without it, a failure on the user `update` (the last of the three)
+   * would leave `mfaEnabledAt`/`mfaSecret` still set -- so a code is still demanded on every
+   * future request -- with the recovery codes already deleted, and `beginEnrolment` refuses to
+   * re-enrol while `mfaEnabledAt` is set. That is a permanent lockout with no way back in short of
+   * the CLI reset.
    */
   const disable = async (userId: string): Promise<void> => {
-    await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
-    await challengeQuery().deleteMany({ where: { userId: String(userId) } });
-    await userQuery().update({
-      where: { id: userId },
-      data: { mfaSecret: null, mfaEnabledAt: null, mfaLastUsedStep: null },
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+      await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      await userQuery().update({
+        where: { id: userId },
+        data: { mfaSecret: null, mfaEnabledAt: null, mfaLastUsedStep: null },
+      });
     });
   };
 

@@ -106,6 +106,15 @@ export default {
     const mfa = requireEnabled(ctx);
     if (!mfa) return;
 
+    // Checked before anything else runs, including `assertPasswordAndFactor`: eviction is not
+    // optional for a disable, so a deployment that cannot evict sessions must not be allowed to
+    // spend the caller's password/code attempt, let alone actually turn two-factor authentication
+    // off, only to fail on the step that matters most for the threat this endpoint exists for.
+    const sessionManager = getSessionManager();
+    if (!sessionManager) {
+      return ctx.internalServerError();
+    }
+
     await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});
     const { password, code } = ctx.request.body as Disable.Request['body'];
     const userId = String(ctx.state.user.id);
@@ -116,10 +125,21 @@ export default {
     await mfa.disable(userId);
     await mfa.recordEvent(userId, 'disabled', buildSessionMetadataFromContext(ctx));
 
-    // Evict every other session: disable is exactly the attacker-holds-a-session scenario, so the
-    // account must not be left reachable through a session minted before this request.
-    const sessionManager = getSessionManager();
-    if (sessionManager) {
+    // Evict every OTHER session -- not this one. `disable` is exactly the
+    // attacker-holds-a-session scenario, so every session minted before this request must stop
+    // working, but the request completing this action is, definitionally, the legitimate admin's;
+    // silently logging them out on success would be a surprising and unrequested side effect.
+    // `ctx.state.session` is set by the admin auth strategy from the access token backing this
+    // very request; if it is somehow absent, fail closed and evict everything rather than guess.
+    const currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
+    if (currentSessionId) {
+      const sessions = await sessionManager('admin').listSessions(userId);
+      await Promise.all(
+        sessions
+          .filter((session) => session.sessionId !== currentSessionId)
+          .map((session) => sessionManager('admin').revokeSessionById(userId, session.sessionId))
+      );
+    } else {
       await sessionManager('admin').invalidateRefreshToken(userId);
     }
 
