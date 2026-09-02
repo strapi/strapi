@@ -1,16 +1,13 @@
 import type { ReactNode } from 'react';
 
-import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
-import { ExternalLink, WarningCircle } from '@strapi/icons';
+import { Flex, Tooltip, Typography } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
-
-const BILLING_SELF_HOSTED_URL = 'mailto:sales@strapi.io';
-const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -37,14 +34,20 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, type } = license;
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats, seats } = license;
 
-  if (!permittedSeats) {
+  // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
+  // usable, so fall back to the retained `seats` to keep showing the count on an expired
+  // licence. Enforcement itself (`licenseLimitStatus`, `shouldStopCreate`) still runs off
+  // `permittedSeats` server-side and is untouched by this.
+  const seatLimit = permittedSeats ?? seats;
+
+  if (!seatLimit) {
     return null;
   }
 
   return (
-    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+    <Flex direction="column" alignItems="start" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.admin-seats',
@@ -60,12 +63,12 @@ export const AdminSeatInfoEE = () => {
                 defaultMessage: '<text>{enforcementUserCount}</text>/{permittedSeats}',
               },
               {
-                permittedSeats,
+                permittedSeats: seatLimit,
                 enforcementUserCount,
                 text: (chunks: ReactNode) => (
                   <Typography
                     fontWeight="semiBold"
-                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
+                    textColor={enforcementUserCount > seatLimit ? 'danger500' : undefined}
                   >
                     {chunks}
                   </Typography>
@@ -85,21 +88,6 @@ export const AdminSeatInfoEE = () => {
           </Tooltip>
         )}
       </Flex>
-      {type === 'gold' ? (
-        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.support',
-            defaultMessage: 'Contact sales',
-          })}
-        </Link>
-      ) : (
-        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />} target="_blank">
-          {formatMessage({
-            id: 'Settings.application.ee.admin-seats.add-seats',
-            defaultMessage: 'Manage subscription',
-          })}
-        </Link>
-      )}
-    </Grid.Item>
+    </Flex>
   );
 };

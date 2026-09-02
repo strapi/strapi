@@ -48,10 +48,24 @@ export interface Strapi extends Container {
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
+    expireAt?: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
     subscriptionId?: string | null | undefined;
     planPriceId?: string | null | undefined;
+    licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+    renewalDate: number | null;
+    planFeatureCatalog: string[];
+    retainedLicense: {
+      features?: Array<{ name: string; [key: string]: any } | string>;
+      expireAt?: string;
+      seats?: number;
+      type?: string;
+      isTrial?: boolean;
+      subscriptionId?: string;
+      planPriceId?: string;
+      renewalDate?: number;
+    } | null;
     getTrialEndDate: ({
       strapi,
     }: {
@@ -61,6 +75,20 @@ export interface Strapi extends Container {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
       get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
+    };
+    entitlements: {
+      register: (input: {
+        feature: string;
+        limits: Array<{
+          key: string;
+          unit?: 'days' | 'count';
+          get: () => number | null | undefined;
+        }>;
+      }) => void;
+      list: () => Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
     };
   };
   features: Modules.Features.FeaturesService;
@@ -102,6 +130,27 @@ export interface Strapi extends Container {
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
+  // Keep this shape in sync with `detectCustomizations` in
+  // @strapi/core (packages/core/core/src/utils/detect-customizations.ts).
+  getCustomizations: () => {
+    apis: Array<{
+      uid: string;
+      customController: boolean;
+      customService: boolean;
+      customRoutes: boolean;
+    }>;
+    counts: { customControllers: number; customServices: number; customRoutes: number };
+    srcIndex: {
+      present: boolean;
+      registerDefined: boolean;
+      registerNonEmpty: boolean;
+      bootstrapDefined: boolean;
+      bootstrapNonEmpty: boolean;
+      destroyDefined: boolean;
+      destroyNonEmpty: boolean;
+      beyondTemplate: boolean;
+    };
+  };
   openAdmin({ isInitialized }: { isInitialized: boolean }): void;
   postListen(): Promise<void>;
   listen(): Promise<void>;

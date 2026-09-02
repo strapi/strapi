@@ -14,6 +14,11 @@ interface LicenseInfo {
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
   subscriptionId?: string;
   planPriceId?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  renewalDate?: number;
+  // Present on the payload at runtime; declared here so the type reflects reality.
+  licenseKey?: string;
+  customerId?: string;
 }
 
 const DEFAULT_FEATURES = {
@@ -28,6 +33,24 @@ const DEFAULT_FEATURES = {
     { name: 'cms-content-releases' },
     { name: 'cms-content-history', options: { retentionDays: 99999 } },
     { name: 'cms-advanced-preview' },
+  ],
+};
+
+/**
+ * Features that can appear on a plan, in the order the admin panel lists them.
+ * Used to render entitlement rows for features a plan supports but this license
+ * does not include. `cms-ai` is deliberately absent: AI usage has its own panel.
+ */
+export const PLAN_FEATURE_CATALOG: Record<'bronze' | 'silver' | 'gold', string[]> = {
+  bronze: [],
+  silver: ['sso', 'cms-advanced-preview', 'cms-content-releases', 'cms-content-history'],
+  gold: [
+    'sso',
+    'cms-advanced-preview',
+    'cms-content-releases',
+    'review-workflows',
+    'cms-content-history',
+    'audit-logs',
   ],
 };
 

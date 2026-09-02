@@ -23,6 +23,13 @@ const menu = [
         permissions: [],
         hasNotification: true,
       },
+      {
+        intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
+        to: '/settings/webhooks',
+        id: 'webhooks',
+        isDisplayed: true,
+        permissions: [],
+      },
     ],
   },
   {

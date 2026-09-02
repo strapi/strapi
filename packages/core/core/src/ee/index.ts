@@ -8,23 +8,39 @@ import {
   fetchLicense,
   LicenseCheckError,
   LICENSE_REGISTRY_URI,
+  PLAN_FEATURE_CATALOG,
 } from './license';
+import { createEntitlementsRegistry } from './entitlements';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
 
+interface LicenseInfoState {
+  licenseKey?: string;
+  features?: Array<{ name: string; [key: string]: any } | string>;
+  expireAt?: string;
+  seats?: number;
+  type?: string;
+  isTrial: boolean;
+  subscriptionId?: string;
+  planPriceId?: string;
+  /** End of the subscription term, epoch milliseconds. */
+  renewalDate?: number;
+}
+
+type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
+
 interface EE {
   enabled: boolean;
-  licenseInfo: {
-    licenseKey?: string;
-    features?: Array<{ name: string; [key: string]: any } | string>;
-    expireAt?: string;
-    seats?: number;
-    type?: string;
-    isTrial: boolean;
-    subscriptionId?: string;
-    planPriceId?: string;
-  };
+  licenseInfo: LicenseInfoState;
+  /**
+   * Display-only copy of the last known license, retained when a license exists but is
+   * not usable (expired / could not be validated) so the admin panel can explain why.
+   * NEVER read by enforcement paths (features.list/get/isEnabled, isEE) and never holds
+   * the license key.
+   */
+  retainedLicense: Omit<LicenseInfoState, 'licenseKey'> | null;
+  licenseStatus: LicenseStatus;
   logger?: Logger;
 }
 
@@ -33,13 +49,36 @@ const ee: EE = {
   licenseInfo: {
     isTrial: false,
   },
+  retainedLicense: null,
+  licenseStatus: 'none',
 };
 
-const disable = (message: string) => {
+const disable = (message: string, status: 'expired' | 'unknown' = 'unknown') => {
   // Prevent emitting ee.disable if it was already disabled
   const shouldEmitEvent = ee.enabled !== false;
 
   ee.logger?.warn(`${message} Switching to CE.`);
+
+  // Retain a display-only snapshot (never the key) BEFORE wiping, so the admin panel can
+  // still show which license this instance has and why it is unusable. Guarded on `type`
+  // so a repeat disable() call cannot overwrite the snapshot with an already-wiped one.
+  if (ee.licenseInfo.type) {
+    ee.retainedLicense = pick(
+      [
+        'features',
+        'expireAt',
+        'seats',
+        'type',
+        'isTrial',
+        'subscriptionId',
+        'planPriceId',
+        'renewalDate',
+      ],
+      ee.licenseInfo
+    );
+  }
+  ee.licenseStatus = status;
+
   // Only keep the license key and isTrial for potential re-enabling during a later check
   ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
 
@@ -58,6 +97,8 @@ const enable = () => {
   const shouldEmitEvent = ee.enabled !== true;
 
   ee.enabled = true;
+  ee.licenseStatus = 'active';
+  ee.retainedLicense = null;
 
   if (shouldEmitEvent) {
     // Notify EE features that they should be disabled
@@ -130,6 +171,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`
         );
+        result.error = error.message; // record why we fell back so usingCachedLicense is derivable
         return storedInfo.license;
       }
 
@@ -204,7 +246,7 @@ const validateInfo = () => {
   const expirationTime = new Date(ee.licenseInfo.expireAt).getTime();
 
   if (expirationTime < new Date().getTime()) {
-    return disable('License expired.');
+    return disable('License expired.', 'expired');
   }
 
   enable();
@@ -271,6 +313,8 @@ const list = () => {
 
 const get = (featureName: string) => list().find((feature) => feature.name === featureName);
 
+const entitlements = createEntitlementsRegistry();
+
 export default Object.freeze({
   init,
   checkLicense,
@@ -280,12 +324,42 @@ export default Object.freeze({
     return ee.enabled;
   },
 
+  get licenseStatus() {
+    return ee.licenseStatus;
+  },
+
+  /** Display-only; see EE.retainedLicense. Never use for feature gating. */
+  get retainedLicense() {
+    return ee.retainedLicense;
+  },
+
   get seats() {
     return ee.licenseInfo.seats;
   },
 
   get type() {
     return ee.licenseInfo.type;
+  },
+
+  get expireAt() {
+    return ee.licenseInfo.expireAt;
+  },
+
+  /** Null when the registry does not provide it yet; survives expiry via the retained snapshot. */
+  get renewalDate() {
+    return ee.licenseInfo.renewalDate ?? ee.retainedLicense?.renewalDate ?? null;
+  },
+
+  /**
+   * Every feature the current plan supports, in display order, regardless of whether this
+   * license includes it. Falls back to the retained license's type so an expired license
+   * still lists rows. See `PLAN_FEATURE_CATALOG` in `./license`.
+   */
+  get planFeatureCatalog(): string[] {
+    const type = ee.licenseInfo.type ?? ee.retainedLicense?.type;
+    return type && type in PLAN_FEATURE_CATALOG
+      ? PLAN_FEATURE_CATALOG[type as keyof typeof PLAN_FEATURE_CATALOG]
+      : [];
   },
 
   get isTrial() {
@@ -304,5 +378,14 @@ export default Object.freeze({
     list,
     get,
     isEnabled: (featureName: string) => get(featureName) !== undefined,
+  }),
+
+  entitlements: Object.freeze({
+    register: entitlements.register,
+    // Resolvers are registered during `register()`, before the license is validated, and each
+    // falls back to a built-in default when the feature is absent. Without this gate an
+    // instance whose license was disabled would still report generous limits, which reads as
+    // "these are your granted limits". No license, no entitlements.
+    list: () => (ee.enabled ? entitlements.list() : []),
   }),
 });

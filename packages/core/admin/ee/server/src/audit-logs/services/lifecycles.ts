@@ -1,6 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 const defaultEvents = [
   'entry.create',

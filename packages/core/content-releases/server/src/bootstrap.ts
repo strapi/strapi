@@ -30,6 +30,20 @@ const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyPar
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
+    strapi.ee.entitlements.register({
+      feature: 'cms-content-releases',
+      limits: [
+        {
+          key: 'maximumReleases',
+          unit: 'count',
+          get() {
+            const featureCfg = strapi.ee.features.get('cms-content-releases');
+            return (typeof featureCfg === 'object' && featureCfg?.options?.maximumReleases) || 3;
+          },
+        },
+      ],
+    });
+
     const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes).filter(
       (uid: any) => strapi.contentTypes[uid]?.options?.draftAndPublish
     );
