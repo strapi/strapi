@@ -135,6 +135,68 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.delete).not.toHaveBeenCalled();
   });
 
+  test('keeps the file in its folder', async () => {
+    currentDbFile = {
+      id: 4,
+      hash: 'in_folder_abc',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    await uploadService.replace(4, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    // Left to `formatFileInfo` this became '/', contradicting the surviving
+    // relation — and `folder.deleteByIds` selects by folderPath, so deleting the
+    // folder left the file behind, invisible and never freed from storage.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folderPath: '/7' });
+  });
+
+  test('moves the file when a folder is sent explicitly', async () => {
+    currentDbFile = {
+      id: 5,
+      hash: 'moving_def',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    fileServiceMock.getFolderPath.mockImplementationOnce(async () => '/9');
+
+    // Replace-and-move in one request is a supported call, so an explicit folder
+    // still wins over the file's current location.
+    await uploadService.replace(5, {
+      data: { fileInfo: { folder: 9 } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: 9, folderPath: '/9' });
+  });
+
+  test('sends the file to the root when the folder is explicitly cleared', async () => {
+    currentDbFile = {
+      id: 6,
+      hash: 'to_root_ghi',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    // `null` is a deliberate move to the root, unlike an absent folder.
+    await uploadService.replace(6, {
+      data: { fileInfo: { folder: null } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: null, folderPath: '/' });
+  });
+
   test('checks the file size before writing anything to the provider', async () => {
     currentDbFile = {
       id: 3,
