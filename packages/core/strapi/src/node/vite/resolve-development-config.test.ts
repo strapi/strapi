@@ -58,6 +58,9 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
+    expect(config.build?.rollupOptions?.input).toEqual({
+      strapi: expect.stringMatching(/index\.html$/),
+    });
   });
 
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {

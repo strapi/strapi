@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import tailwindcss from '@tailwindcss/vite';
 import type { InlineConfig, UserConfig } from 'vite';
 
@@ -181,7 +183,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       sourcemap: sourcemaps,
       rollupOptions: {
         input: {
-          strapi: ctx.entry,
+          strapi: path.join(ctx.runtimeDir, 'index.html'),
         },
       },
     },
