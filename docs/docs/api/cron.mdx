@@ -196,7 +196,7 @@ cron.destroy();
   - <Type>Object</Type>
 
     - `job`: [<Type>Cron</Type>](https://github.com/Hexagon/croner) - Job object from croner
-    - `options`: <Type>String</Type> | <Type>Date</Type> - Cron expression string (5- or 6-field) or a one-shot `Date`
+    - `options`: <Type>String</Type> | <Type>Number</Type> | <Type>Date</Type> | <Type>Object</Type> - Cron string, timestamp, one-shot `Date`, or `{ rule, tz?, start?, end? }`
     - `name`: <Type>String</Type> - The name of the task associated to the job
 
 An array of the cron jobs added to the service.
