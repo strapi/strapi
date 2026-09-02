@@ -58,6 +58,9 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
+    expect(config.build?.rollupOptions?.input).toEqual({
+      strapi: expect.stringMatching(/index\.html$/),
+    });
   });
 
   it.each([true, false])(
