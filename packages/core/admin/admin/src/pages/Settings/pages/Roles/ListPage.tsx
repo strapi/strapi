@@ -112,6 +112,8 @@ const ListPage = () => {
     navigate(`duplicate/${role.id}`);
   };
 
+  const handleClickEdit = (role: AdminRole) => () => navigate(role.id.toString());
+
   const rowCount = roles.length + 1;
   const colCount = 6;
 
@@ -240,7 +242,7 @@ const ListPage = () => {
                         } satisfies RoleRowProps['icons'][number]),
                       canUpdate &&
                         ({
-                          onClick: () => navigate(role.id.toString()),
+                          onClick: handleClickEdit(role),
                           label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
                           children: <Pencil />,
                         } satisfies RoleRowProps['icons'][number]),
@@ -253,7 +255,7 @@ const ListPage = () => {
                     ].filter(Boolean) as RoleRowProps['icons']
                   }
                   rowIndex={index + 2}
-                  canUpdate={canUpdate}
+                  onRowClick={canUpdate ? handleClickEdit(role) : undefined}
                 />
               ))}
             </Tbody>
