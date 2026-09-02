@@ -7,6 +7,7 @@ export {
   mediaListAssetsInputSchema,
   mediaGetAssetInputSchema,
   mediaListFoldersInputSchema,
+  updateMediaInputSchema,
 } from './input-schemas';
 export {
   mediaAssetOutputSchema,
@@ -14,5 +15,6 @@ export {
   mediaListAssetsOutputSchema,
   mediaFolderNodeSchema,
   mediaListFoldersOutputSchema,
+  updateMediaOutputSchema,
   type MediaFolderNode,
 } from './output-schemas';
