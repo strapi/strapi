@@ -131,7 +131,7 @@
     "@strapi/utils": "5.52.3",
     "@vitejs/plugin-react-swc": "3.11.0",
     "boxen": "5.1.2",
-    "browserslist": "^4.23.0",
+    "browserslist": "^4.28.7",
     "browserslist-to-esbuild": "2.1.1",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
