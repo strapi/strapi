@@ -125,19 +125,35 @@ export default {
     await mfa.disable(userId);
     await mfa.recordEvent(userId, 'disabled', buildSessionMetadataFromContext(ctx));
 
-    // Evict every OTHER session -- not this one. `disable` is exactly the
-    // attacker-holds-a-session scenario, so every session minted before this request must stop
-    // working, but the request completing this action is, definitionally, the legitimate admin's;
-    // silently logging them out on success would be a surprising and unrequested side effect.
+    // Evict every OTHER *device* -- not by session row, and not this one. `listSessions` only
+    // ever returns active rows, but a refresh rotation leaves the just-superseded row behind as
+    // `status: 'rotated'` with its original `expiresAt` intact, and `isSessionActive` (the only
+    // check the admin auth strategy applies to an access token) does not consult status -- so an
+    // attacker holding an access token minted before their session rotated would keep
+    // authenticating with it, unrevoked, until it expired on its own, if only the active row for
+    // their device were removed. `invalidateRefreshToken(userId, deviceId)` deletes every row for
+    // that device, active or rotated, closing that gap. The one row this deliberately never
+    // touches is a rotated row on the *caller's own* device -- acceptable, since that device is
+    // the legitimate admin's.
+    //
     // `ctx.state.session` is set by the admin auth strategy from the access token backing this
-    // very request; if it is somehow absent, fail closed and evict everything rather than guess.
+    // very request; if it is absent, or its session id is not (any longer) in `listSessions`,
+    // fail closed and evict every device rather than guess which one is the caller's.
     const currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
-    if (currentSessionId) {
-      const sessions = await sessionManager('admin').listSessions(userId);
-      await Promise.all(
+    const sessions = currentSessionId ? await sessionManager('admin').listSessions(userId) : [];
+    const currentSession = sessions.find((session) => session.sessionId === currentSessionId);
+
+    if (currentSession?.deviceId) {
+      const otherDeviceIds = new Set(
         sessions
-          .filter((session) => session.sessionId !== currentSessionId)
-          .map((session) => sessionManager('admin').revokeSessionById(userId, session.sessionId))
+          .filter((session) => session.deviceId !== currentSession.deviceId)
+          .map((session) => session.deviceId)
+      );
+
+      await Promise.all(
+        Array.from(otherDeviceIds)
+          .filter((deviceId): deviceId is string => Boolean(deviceId))
+          .map((deviceId) => sessionManager('admin').invalidateRefreshToken(userId, deviceId))
       );
     } else {
       await sessionManager('admin').invalidateRefreshToken(userId);

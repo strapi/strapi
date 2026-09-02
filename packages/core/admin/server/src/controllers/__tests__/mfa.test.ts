@@ -40,9 +40,13 @@ const buildCtx = (
 
 /**
  * A working strapi double for the paths that reach the session manager (disable): `listSessions`
- * defaults to empty (nothing to revoke) and `invalidateRefreshToken`/`revokeSessionById` resolve,
- * matching `OriginSessionManagerService`'s real shape (`shared/utils/session-auth.ts`'s
- * `getSessionManager` reads `strapi.sessionManager`).
+ * defaults to empty (nothing to invalidate) and `invalidateRefreshToken` resolves, matching
+ * `OriginSessionManagerService`'s real shape (`shared/utils/session-auth.ts`'s
+ * `getSessionManager` reads `strapi.sessionManager`). `disable` revokes by device
+ * (`invalidateRefreshToken(userId, deviceId)`), not by session row -- see Finding 6: a session
+ * row disappearing from `listSessions` (because its refresh token rotated) does not mean the
+ * device is gone, only that its *active* row changed shape, and only invalidating by device
+ * reaches the rotated row too.
  */
 interface FakeSessionEntry {
   sessionId: string;
@@ -55,11 +59,9 @@ interface FakeSessionEntry {
 const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) => {
   const invalidateRefreshToken = jest.fn(() => Promise.resolve());
   const listSessions = jest.fn((): Promise<FakeSessionEntry[]> => Promise.resolve([]));
-  const revokeSessionById = jest.fn(() => Promise.resolve(true));
   const sessionManagerFn = jest.fn(() => ({
     invalidateRefreshToken,
     listSessions,
-    revokeSessionById,
   }));
 
   setStrapi({
@@ -68,7 +70,7 @@ const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) =>
     admin: { services: { mfa: mfaOverrides } },
   });
 
-  return { invalidateRefreshToken, listSessions, revokeSessionById, sessionManagerFn };
+  return { invalidateRefreshToken, listSessions, sessionManagerFn };
 };
 
 describe('mfa controller', () => {
@@ -210,13 +212,12 @@ describe('mfa controller', () => {
     );
     const disableFn = jest.fn();
     const recordEvent = jest.fn();
-    const { invalidateRefreshToken, listSessions, revokeSessionById } =
-      buildStrapiWithSessionManager({
-        isEnabled: jest.fn(() => true),
-        assertPasswordAndFactor,
-        disable: disableFn,
-        recordEvent,
-      });
+    const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
+      isEnabled: jest.fn(() => true),
+      assertPasswordAndFactor,
+      disable: disableFn,
+      recordEvent,
+    });
 
     // Missing code entirely -- rejected by the validator before the service is even reached.
     const { ctx: missingCodeCtx } = buildCtx({ password: 'Password123' });
@@ -242,7 +243,6 @@ describe('mfa controller', () => {
     expect(recordEvent).not.toHaveBeenCalled();
     expect(invalidateRefreshToken).not.toHaveBeenCalled();
     expect(listSessions).not.toHaveBeenCalled();
-    expect(revokeSessionById).not.toHaveBeenCalled();
   });
 
   test('disable returns 500 and touches nothing when the session manager is unavailable', async () => {
@@ -279,28 +279,31 @@ describe('mfa controller', () => {
     expect(ctx.status).not.toBe(204);
   });
 
-  test('disable invalidates the user other sessions, but not the one making this request', async () => {
+  /** A `SessionEntry` fixture row, sharing the shape `listSessions` really returns. */
+  const sessionRow = (sessionId: string, deviceId: string) => ({
+    sessionId,
+    userId: '7',
+    deviceId,
+    origin: 'admin',
+    expiresAt: new Date(),
+  });
+
+  test("disable invalidates the user's other devices, but not the one making this request", async () => {
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
     const disableFn = jest.fn(() => Promise.resolve());
     const recordEvent = jest.fn(() => Promise.resolve());
-    const { listSessions, revokeSessionById, sessionManagerFn } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      assertPasswordAndFactor,
-      disable: disableFn,
-      recordEvent,
-    });
-    const activeSession = (sessionId: string) => ({
-      sessionId,
-      userId: '7',
-      deviceId: sessionId,
-      origin: 'admin',
-      expiresAt: new Date(),
-    });
+    const { invalidateRefreshToken, listSessions, sessionManagerFn } =
+      buildStrapiWithSessionManager({
+        isEnabled: jest.fn(() => true),
+        assertPasswordAndFactor,
+        disable: disableFn,
+        recordEvent,
+      });
     listSessions.mockImplementation(() =>
       Promise.resolve([
-        activeSession('current-session'),
-        activeSession('other-session-1'),
-        activeSession('other-session-2'),
+        sessionRow('current-session', 'device-current'),
+        sessionRow('other-session-1', 'device-1'),
+        sessionRow('other-session-2', 'device-2'),
       ])
     );
 
@@ -319,15 +322,54 @@ describe('mfa controller', () => {
     expect(recordEvent).toHaveBeenCalledWith('7', 'disabled', expect.any(Object));
     expect(sessionManagerFn).toHaveBeenCalledWith('admin');
     expect(listSessions).toHaveBeenCalledWith('7');
-    expect(revokeSessionById).toHaveBeenCalledWith('7', 'other-session-1');
-    expect(revokeSessionById).toHaveBeenCalledWith('7', 'other-session-2');
-    // The property this fix exists for: the session this very request is authenticated with must
-    // survive, or a successful disable would silently log the acting admin out.
-    expect(revokeSessionById).not.toHaveBeenCalledWith('7', 'current-session');
+    // One call per other device -- not per session row, and each one carries a deviceId.
+    expect(invalidateRefreshToken).toHaveBeenCalledTimes(2);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-1');
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-2');
+    // The property this fix exists for: the device making this very request must survive, and
+    // eviction is never done "for everyone" (a call with no deviceId) in this branch -- that
+    // would take the caller's own device down too.
+    expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7', 'device-current');
+    expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7');
     expect(ctx.status).toBe(204);
   });
 
-  test('disable falls back to evicting every session when the current one cannot be identified', async () => {
+  test('two other sessions sharing one device are invalidated with a single call', async () => {
+    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
+    const disableFn = jest.fn(() => Promise.resolve());
+    const recordEvent = jest.fn(() => Promise.resolve());
+    const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
+      isEnabled: jest.fn(() => true),
+      assertPasswordAndFactor,
+      disable: disableFn,
+      recordEvent,
+    });
+    listSessions.mockImplementation(() =>
+      Promise.resolve([
+        sessionRow('current-session', 'device-current'),
+        // Two distinct session rows, the same device -- exactly the shape a rotated-then-active
+        // pair would never produce (`listSessions` only ever returns the active one -- Finding
+        // 6), but this proves the de-duplication holds regardless of how two rows for one device
+        // arise.
+        sessionRow('other-session-1', 'device-shared'),
+        sessionRow('other-session-2', 'device-shared'),
+      ])
+    );
+
+    const { ctx } = buildCtx(
+      { password: 'Password123', code: '123456' },
+      {},
+      { session: { id: 'current-session' } }
+    );
+
+    await mfaController.disable(ctx);
+
+    expect(invalidateRefreshToken).toHaveBeenCalledTimes(1);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-shared');
+    expect(ctx.status).toBe(204);
+  });
+
+  test('disable falls back to evicting every device when the current session cannot be identified', async () => {
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
     const disableFn = jest.fn(() => Promise.resolve());
     const recordEvent = jest.fn(() => Promise.resolve());
@@ -338,13 +380,42 @@ describe('mfa controller', () => {
       recordEvent,
     });
 
-    // No `session` on `ctx.state` -- fails closed rather than guessing which session is current.
+    // No `session` on `ctx.state` -- fails closed rather than guessing which device is current.
     const { ctx } = buildCtx({ password: 'Password123', code: '123456' });
 
     await mfaController.disable(ctx);
 
-    expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
     expect(listSessions).not.toHaveBeenCalled();
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
+    expect(ctx.status).toBe(204);
+  });
+
+  test('disable falls back to evicting every device when the caller session is not in the list', async () => {
+    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
+    const disableFn = jest.fn(() => Promise.resolve());
+    const recordEvent = jest.fn(() => Promise.resolve());
+    const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
+      isEnabled: jest.fn(() => true),
+      assertPasswordAndFactor,
+      disable: disableFn,
+      recordEvent,
+    });
+    listSessions.mockImplementation(() =>
+      Promise.resolve([sessionRow('some-other-session', 'device-1')])
+    );
+
+    // `ctx.state.session.id` names a session that `listSessions` no longer returns -- e.g. it was
+    // revoked between the access-token check and this call. Fails closed rather than guessing.
+    const { ctx } = buildCtx(
+      { password: 'Password123', code: '123456' },
+      {},
+      { session: { id: 'stale-session' } }
+    );
+
+    await mfaController.disable(ctx);
+
+    expect(listSessions).toHaveBeenCalledWith('7');
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
     expect(ctx.status).toBe(204);
   });
 

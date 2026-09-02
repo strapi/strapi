@@ -85,9 +85,11 @@ export declare namespace AcknowledgeRecoveryCodes {
 
 /**
  * /mfa/disable - Turn two-factor authentication off. Requires the current password and a valid
- * second factor, and evicts every *other* admin session for the account -- the one making this
- * request survives, so a successful disable does not also log the caller out. Falls back to
- * evicting everything if the current session cannot be identified. No response body.
+ * second factor, and evicts every *other device* for the account -- by device rather than by
+ * session row, so a device whose refresh token has since rotated is fully removed rather than
+ * leaving its superseded row usable. The device making this request survives, so a successful
+ * disable does not also log the caller out. Falls back to evicting every device if the current
+ * one cannot be identified. No response body.
  */
 export declare namespace Disable {
   export interface Request {
