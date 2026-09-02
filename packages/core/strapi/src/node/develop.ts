@@ -138,6 +138,7 @@ const develop = async ({
         cwd,
         logger,
         tsconfig,
+        // This path builds the admin as a bundle and serves no source, so Tailwind scans `dist`
         options,
       });
       const contextDuration = timer.end('createBuildContext');
@@ -239,7 +240,8 @@ const develop = async ({
           logger,
           strapi,
           tsconfig,
-          options,
+          // The Vite development server serves `admin/src`, so Tailwind scans the same directory
+          options: { ...options, dev: true },
         });
         const contextDuration = timer.end('createBuildContext');
         contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
