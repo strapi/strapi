@@ -45,13 +45,16 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     const nameField = page.getByRole('textbox', { name: 'name' }).first();
     const slugField = page.getByRole('textbox', { name: 'slug' });
     const countries = page.getByRole('combobox', { name: 'countries' });
+    const variationNames = ['Small', 'Medium', 'Large'];
 
-    // Default locale: shared field editable; localized + relation fields editable
+    // Default locale: shared scalar and nested fields editable; localized + relation fields editable
     await expect(isAvailable).not.toBeDisabled();
     await expect(isAvailable).toBeChecked();
     await expect(nameField).not.toBeDisabled();
     await expect(slugField).not.toBeDisabled();
     await expect(countries).not.toBeDisabled();
+    await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add an entry' })).not.toBeDisabled();
 
     // Regression of #24890 / Mathilde review on #27184: shared fields must NOT show
     // a Globe / "common to all locales" icon on the default locale.
@@ -68,6 +71,24 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     await expect(nameField).not.toBeDisabled();
     await expect(slugField).not.toBeDisabled();
     await expect(countries).not.toBeDisabled();
+
+    await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add an entry' })).toBeDisabled();
+
+    for (const [index, name] of variationNames.entries()) {
+      await page.getByRole('button', { name, exact: true }).click();
+      const nestedName = page.locator(`input[name="variations.${index}.name"]`);
+      await expect(nestedName).toHaveValue(name);
+      await expect(nestedName).toBeDisabled();
+    }
+
+    for (const action of ['Delete', 'Drag']) {
+      const buttons = page.getByRole('button', { name: action, exact: true });
+      await expect(buttons).toHaveCount(3);
+      for (let index = 0; index < 3; index += 1) {
+        await expect(buttons.nth(index)).toBeDisabled();
+      }
+    }
 
     // Lock tooltip explains how to edit the shared value
     const isAvailableLabelAction = page
@@ -102,6 +123,11 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     ).toBeVisible();
     await expect(isAvailable).not.toBeDisabled();
     await expect(isAvailable).toBeChecked();
+    await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add an entry' })).not.toBeDisabled();
+    for (const name of variationNames) {
+      await expect(page.getByRole('button', { name, exact: true })).toBeVisible();
+    }
 
     // Editing the shared field on the default locale syncs to the secondary locale
     await isAvailable.uncheck();
