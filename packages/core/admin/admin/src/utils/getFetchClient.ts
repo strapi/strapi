@@ -347,18 +347,27 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       return { data: result };
     } catch (error) {
-      // An empty 200 body causes `response.json()` to throw a `SyntaxError`. We treat
-      // it as success and return an empty payload. We match on `error.name` rather
-      // than `instanceof SyntaxError` because constructor identity differs across JS
-      // realms — a Response from a different realm (e.g. undici under jsdom in tests,
-      // a service worker or iframe in browsers) throws a `SyntaxError` whose
-      // constructor is not the same identity as the one this module closes over. Name
-      // comparison is realm-agnostic.
-      if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
-        return { data: {}, status: response.status } as FetchResponse<TData>;
-      } else {
-        throw error;
+      // A body-less response causes `response.json()` to throw a `SyntaxError`. We match on
+      // `error.name` rather than `instanceof SyntaxError` because constructor identity differs
+      // across JS realms — a Response from a different realm (e.g. undici under jsdom in tests,
+      // a service worker or iframe in browsers) throws a `SyntaxError` whose constructor is not
+      // the same identity as the one this module closes over. Name comparison is realm-agnostic.
+      if ((error as Error | null)?.name === 'SyntaxError') {
+        // An empty 200 (or otherwise accepted) body: treat it as success with an empty payload.
+        if (response.ok || validateStatus?.(response.status)) {
+          return { data: {}, status: response.status } as FetchResponse<TData>;
+        }
+
+        // An empty non-2xx body (e.g. a route that 404s with no JSON error payload) would
+        // otherwise surface as a raw parsing `SyntaxError` with no `status`. Normalise it to a
+        // `FetchError` carrying `status`, the same shape callers get for a non-JSON-shaped
+        // error body.
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
       }
+
+      throw error;
     }
   };
 
