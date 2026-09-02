@@ -30,3 +30,52 @@ const mfaLoginSchema = yup
   .noUnknown();
 
 export const validateMfaLoginInput = validateYupSchema(mfaLoginSchema);
+
+/**
+ * /mfa/enrol - only a password is needed to start enrolment; nothing about the second factor
+ * exists yet at this point.
+ */
+const enrolSchema = yup
+  .object()
+  .shape({ password: yup.string().required() })
+  .required()
+  .noUnknown();
+
+/**
+ * The `code` field here is copied verbatim from `mfaLoginSchema` above: same bounds, same
+ * no-`.trim()` reasoning (a pasted code with surrounding whitespace must not be rejected by the
+ * validator itself), same shape-based dispatch left entirely to the service.
+ */
+const codeOnlySchema = yup
+  .object()
+  .shape({ code: yup.string().min(6).max(32).required() })
+  .required()
+  .noUnknown();
+
+/**
+ * The shared re-authentication gate for /mfa/recovery-codes and /mfa/disable: both require the
+ * current password on top of an existing second factor, so a stolen session alone is never
+ * enough to regenerate codes or turn two-factor authentication off.
+ */
+const passwordAndCodeSchema = yup
+  .object()
+  .shape({
+    password: yup.string().required(),
+    code: yup.string().min(6).max(32).required(),
+  })
+  .required()
+  .noUnknown();
+
+/**
+ * /mfa/notices/seen - `ids` is optional: absent means "every unseen notice for the caller".
+ */
+const noticesSeenSchema = yup
+  .object()
+  .shape({ ids: yup.array().of(yup.number().integer().required()).optional() })
+  .required()
+  .noUnknown();
+
+export const validateMfaEnrolInput = validateYupSchema(enrolSchema);
+export const validateMfaCodeInput = validateYupSchema(codeOnlySchema);
+export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCodeSchema);
+export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);

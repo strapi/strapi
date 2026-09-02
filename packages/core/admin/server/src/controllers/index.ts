@@ -6,6 +6,7 @@ import adminToken from './admin-token';
 import authenticatedUser from './authenticated-user';
 import authenticatedSession from './authenticated-session';
 import authentication from './authentication';
+import mfa from './mfa';
 import permission from './permission';
 import role from './role';
 import transfer from './transfer';
@@ -22,6 +23,7 @@ export default {
   'authenticated-user': authenticatedUser,
   'authenticated-session': authenticatedSession,
   authentication,
+  mfa,
   permission,
   role,
   transfer,

@@ -9,7 +9,7 @@ import {
   normaliseRecoveryCode,
   verifyTotp,
 } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
@@ -88,6 +88,10 @@ export interface MfaServiceDeps {
  *  - Challenge lifecycle (Task 7): `createChallenge`, `verifyChallenge`, `recordEvent`,
  *    `isAccountThrottled`, `sweepExpiredChallenges` — the only code that decides whether a second
  *    factor was satisfied, and the two-tier attempt limiting that stops brute force.
+ *  - Self-service management (Task 10): `unseenEvents`, `markEventsSeen`, `areCodesAcknowledged`,
+ *    `acknowledgeCodes` — the in-app notice feed and recovery-code acknowledgement — plus
+ *    `assertPasswordAndFactor` and `disable`, the shared re-authentication gate and its one
+ *    consumer that turns two-factor authentication off.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -436,6 +440,48 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * Notices surfaced in-app (GET /mfa/notices): the caller's own events not yet marked seen.
+   * Ordering is left to whatever the store returns -- this is drained by an authenticated
+   * self-service endpoint, not a paginated feed.
+   */
+  const unseenEvents = (userId: string) =>
+    eventQuery().findMany({ where: { userId: String(userId), seenAt: null } });
+
+  /**
+   * Marks the caller's own event rows seen. `userId` is always part of the `where`, and `ids`
+   * -- when given -- only narrows it further, so a foreign id slipped into `ids` can never reach
+   * another user's row. An absent `ids` marks every one of the caller's rows.
+   */
+  const markEventsSeen = async (userId: string, ids?: Data.ID[]): Promise<void> => {
+    const where: Record<string, unknown> = { userId: String(userId) };
+    if (ids) {
+      where.id = { $in: ids };
+    }
+
+    await eventQuery().updateMany({ where, data: { seenAt: new Date() } });
+  };
+
+  /**
+   * Acknowledgement of the current recovery-code set needs no column of its own: enrolling
+   * already records one `enabled` event per account, and "the user confirmed they saved their
+   * codes" is exactly what marking that event seen means.
+   */
+  const areCodesAcknowledged = async (userId: string): Promise<boolean> => {
+    const enabledEvents = await eventQuery().findMany({
+      where: { userId: String(userId), type: 'enabled' },
+    });
+
+    return enabledEvents.some((event) => Boolean(event.seenAt));
+  };
+
+  const acknowledgeCodes = async (userId: string): Promise<void> => {
+    await eventQuery().updateMany({
+      where: { userId: String(userId), type: 'enabled' },
+      data: { seenAt: new Date() },
+    });
+  };
+
+  /**
    * The account-scoped tier. Being a `COUNT` over a rolling window it is approximate under
    * concurrency — a handful of simultaneous requests can each see the same pre-write count — and
    * that is acceptable here: it is a backstop against sustained recycling, while the exact limit
@@ -612,6 +658,73 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * The shared re-authentication gate for the self-service operations that need more than an
+   * active session: disabling two-factor authentication and regenerating recovery codes. Both are
+   * exactly the "attacker holds a session" scenario, so both demand the password again, plus a
+   * still-working second factor -- either a TOTP code or a recovery code, dispatched by the
+   * submitted code's own shape, for the same reason `verifyChallenge` does: letting the caller
+   * declare which factor they are presenting is the classic factor-switching bypass.
+   *
+   * Calls `verifyTotpForUser` directly rather than `attemptTotp`: `attemptTotp`'s error-swallowing
+   * is deliberately scoped to the unauthenticated challenge path, and here the actionable "secret
+   * could not be read" error must keep propagating rather than collapse into "Invalid code". A
+   * recovery-shaped code never reaches the TOTP branch at all (the shape dispatch below), so an
+   * account whose secret cannot be decrypted can still be disabled with a recovery code -- Task 5
+   * noted that `mfaEnabledAt` set with `mfaSecret` null is otherwise un-enrollable except via the
+   * CLI.
+   */
+  const assertPasswordAndFactor = async (
+    userId: string,
+    password: string,
+    code: string
+  ): Promise<void> => {
+    const user = await loadUser(userId);
+
+    // Wrong password is not a second-factor attempt: it charges neither throttle tier.
+    if (!(await auth.validatePassword(password, user.password))) {
+      throw new ValidationError('Invalid credentials');
+    }
+
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
+    const normalised = normaliseRecoveryCode(code);
+
+    if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
+      const totpResult = await verifyTotpForUser(userId, code);
+      if (totpResult.valid && (await consumeTotpStep(userId, totpResult.step))) {
+        return;
+      }
+    }
+
+    if (normalised.length === RECOVERY_CODE_LENGTH && (await consumeRecoveryCode(userId, code))) {
+      // Recorded on consumption, same as `verifyChallenge`: the code is spent either way, and the
+      // notice is about a recovery code having been used on the account.
+      await recordEvent(userId, 'recovery_code_used');
+      return;
+    }
+
+    // Reached whether a check ran and failed or the code matched no factor's shape at all -- one
+    // spent attempt at the account-scoped tier, mirroring `verifyChallenge`.
+    await recordEvent(userId, 'challenge_failed');
+    throw new ValidationError('Invalid code');
+  };
+
+  /**
+   * Clears enrolment entirely. Recovery codes and outstanding challenges go too, so a later
+   * re-enrolment starts clean rather than inheriting stale rows.
+   */
+  const disable = async (userId: string): Promise<void> => {
+    await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+    await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+    await userQuery().update({
+      where: { id: userId },
+      data: { mfaSecret: null, mfaEnabledAt: null, mfaLastUsedStep: null },
+    });
+  };
+
+  /**
    * Housekeeping, not enforcement: expired challenges are already rejected on read, so this only
    * keeps the table from growing. Nothing depends on it having run.
    *
@@ -640,9 +753,15 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     consumeRecoveryCode,
     countUnusedRecoveryCodes,
     recordEvent,
+    unseenEvents,
+    markEventsSeen,
+    areCodesAcknowledged,
+    acknowledgeCodes,
     isAccountThrottled,
     createChallenge,
     verifyChallenge,
+    assertPasswordAndFactor,
+    disable,
     sweepExpiredChallenges,
   };
 };

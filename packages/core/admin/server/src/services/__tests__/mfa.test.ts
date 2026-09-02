@@ -182,6 +182,14 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
 
     if (typeof condition === 'object' && !(condition instanceof Date)) {
       return Object.entries(condition as Record<string, unknown>).every(([operator, value]) => {
+        // `$in`'s `value` is an array, not a single orderable bound, so it must be handled before
+        // `asComparable` -- which every other operator here relies on -- ever sees it.
+        if (operator === '$in') {
+          return (
+            Array.isArray(value) && value.map((item) => String(item)).includes(String(row[field]))
+          );
+        }
+
         const current = asComparable(row[field]);
         const bound = asComparable(value);
         switch (operator) {
@@ -510,6 +518,19 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     findMany: jest.fn(async ({ where }: any = {}) =>
       events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }))
     ),
+    // Mutates the live rows (not a snapshot), same as `deleteMany` above: `markEventsSeen` /
+    // `acknowledgeCodes` tests need to observe the write through the same `events` array the
+    // fixture hands back, not a copy that silently diverges from it.
+    updateMany: jest.fn(async ({ where, data }: any) => {
+      let count = 0;
+      for (const event of events) {
+        if (matchesWhere(event, where)) {
+          Object.assign(event, data);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
   };
 
   const userConnection = buildConnection(users, userTable, resolveUserKey);
@@ -1448,5 +1469,241 @@ describe('mfa service: challenge lifecycle', () => {
     // Housekeeping only: nothing to do a second time, and it never touches a usable challenge.
     await expect(service.sweepExpiredChallenges()).resolves.toBe(0);
     expect(challenges.map((c) => c.token)).toEqual([live]);
+  });
+});
+
+describe('mfa service: notices and acknowledgement', () => {
+  const setup = () => {
+    const fixture = buildMfaFixture();
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service };
+  };
+
+  test("unseenEvents returns only the caller's events that have not been marked seen", async () => {
+    const { service, events } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('1', 'disabled');
+    await service.recordEvent('2', 'enabled');
+    // Already seen: must not come back from `unseenEvents`.
+    events.find((e) => e.userId === '1' && e.type === 'disabled')!.seenAt = new Date();
+
+    const notices = await service.unseenEvents('1');
+
+    expect(notices).toHaveLength(1);
+    expect(notices[0]).toMatchObject({ userId: '1', type: 'enabled', seenAt: null });
+  });
+
+  test("markEventsSeen with no ids marks every one of the caller's rows, and no one else's", async () => {
+    const { service, events } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('1', 'challenge_failed');
+    await service.recordEvent('2', 'enabled');
+
+    await service.markEventsSeen('1');
+
+    expect(events.filter((e) => e.userId === '1').every((e) => e.seenAt instanceof Date)).toBe(
+      true
+    );
+    expect(events.find((e) => e.userId === '2')!.seenAt).toBeNull();
+  });
+
+  test("markEventsSeen with ids only touches the calling user's rows, even when a foreign id is included", async () => {
+    const { service, events } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('2', 'enabled');
+    const callerEvent = events.find((e) => e.userId === '1')!;
+    // An id genuinely belonging to another user, deliberately included in the caller's own
+    // request -- the property this test exists to prove is that `userId` is always part of the
+    // `where`, so an `ids` array can only ever narrow the caller's own rows, never reach past them.
+    const foreignEvent = events.find((e) => e.userId === '2')!;
+
+    await service.markEventsSeen('1', [callerEvent.id, foreignEvent.id]);
+
+    expect(events.find((e) => e.id === callerEvent.id)!.seenAt).toBeInstanceOf(Date);
+    expect(events.find((e) => e.id === foreignEvent.id)!.seenAt).toBeNull();
+  });
+
+  test('markEventsSeen with only a foreign id touches nothing', async () => {
+    const { service, events } = setup();
+    await service.recordEvent('2', 'enabled');
+    const foreignEvent = events.find((e) => e.userId === '2')!;
+
+    await service.markEventsSeen('1', [foreignEvent.id]);
+
+    expect(events.find((e) => e.id === foreignEvent.id)!.seenAt).toBeNull();
+  });
+
+  test('areCodesAcknowledged is false until the enabled event is marked seen, then stays true', async () => {
+    const { service } = setup();
+    await service.recordEvent('1', 'enabled');
+
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
+
+    await service.acknowledgeCodes('1');
+
+    expect(await service.areCodesAcknowledged('1')).toBe(true);
+  });
+
+  test("areCodesAcknowledged for one account is unaffected by another account's acknowledgement", async () => {
+    const { service } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('2', 'enabled');
+
+    await service.acknowledgeCodes('2');
+
+    expect(await service.areCodesAcknowledged('1')).toBe(false);
+    expect(await service.areCodesAcknowledged('2')).toBe(true);
+  });
+});
+
+describe('mfa service: assertPasswordAndFactor and disable', () => {
+  const CORRECT_PASSWORD = 'correct-password';
+
+  const setup = (options: { unreadableSecret?: boolean } = {}) => {
+    const fixture = buildMfaFixture();
+    const secret = generateTotpSecret();
+    const user = fixture.users.get('1')!;
+    user.password = 'hashed-password';
+    user.mfaSecret = `enc:${base32Encode(secret)}`;
+    user.mfaEnabledAt = new Date();
+
+    const decrypt = jest.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
+    // Doubles as both the account-password check (`hash === 'hashed-password'`) and
+    // `consumeRecoveryCode`'s candidate comparison (`hash === 'h:' + plain`, matching
+    // `hashPassword` below) -- `assertPasswordAndFactor` genuinely goes through both paths.
+    const validatePassword = jest.fn(
+      async (plain: string, hash: string) =>
+        (hash === 'hashed-password' && plain === CORRECT_PASSWORD) || hash === `h:${plain}`
+    );
+
+    const service = createMfaService({
+      strapi: fixture.strapi as unknown as Core.Strapi,
+      encryption: { encrypt: (v: string) => `enc:${v}`, decrypt },
+      auth: { validatePassword, hashPassword: async (plain: string) => `h:${plain}` },
+    });
+
+    return {
+      ...fixture,
+      service,
+      secret,
+      validCode: () => generateTotp({ secret }),
+    };
+  };
+
+  describe('assertPasswordAndFactor', () => {
+    test('rejects a wrong password before evaluating any factor, and records nothing', async () => {
+      const { service, events } = setup();
+
+      await expect(
+        service.assertPasswordAndFactor('1', 'wrong-password', '123456')
+      ).rejects.toThrow(/invalid credentials/i);
+      expect(events).toHaveLength(0);
+    });
+
+    test('accepts the correct password with a valid totp code', async () => {
+      const { service, validCode } = setup();
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, validCode())
+      ).resolves.toBeUndefined();
+    });
+
+    test('accepts the correct password with a valid recovery code and records its use', async () => {
+      const { service, events } = setup();
+      const [code] = await service.issueRecoveryCodes('1');
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, code)
+      ).resolves.toBeUndefined();
+      expect(events.filter((e) => e.type === 'recovery_code_used')).toHaveLength(1);
+    });
+
+    test('rejects a wrong code and records a challenge_failed event', async () => {
+      const { service, events } = setup();
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, '000000')
+      ).rejects.toThrow(/invalid code/i);
+      expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    });
+
+    test('a spent totp step cannot be replayed here either', async () => {
+      const { service, validCode } = setup();
+      const code = validCode();
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, code)
+      ).resolves.toBeUndefined();
+      await expect(service.assertPasswordAndFactor('1', CORRECT_PASSWORD, code)).rejects.toThrow(
+        /invalid code/i
+      );
+    });
+
+    test('a totp-shaped code against an unreadable secret propagates the actionable error, charging neither tier', async () => {
+      const { service, events } = setup({ unreadableSecret: true });
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, '123456')
+      ).rejects.toThrow(/could not be read/i);
+      // Unlike an ordinary wrong code, this never reaches the record-and-throw fallthrough: the
+      // fault is the deployment's (a rotated ENCRYPTION_KEY), not an attacker's guess.
+      expect(events).toHaveLength(0);
+    });
+
+    test('a recovery code still works when the totp secret is unreadable', async () => {
+      const { service, events } = setup({ unreadableSecret: true });
+      const [code] = await service.issueRecoveryCodes('1');
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, code)
+      ).resolves.toBeUndefined();
+      expect(events.filter((e) => e.type === 'recovery_code_used')).toHaveLength(1);
+    });
+
+    test('is throttled once the account-wide failure cap is reached, before any code is evaluated', async () => {
+      const { service } = setup();
+      const cap = MFA_DEFAULTS.maxUserAttempts;
+
+      for (let i = 0; i < cap; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await expect(
+          service.assertPasswordAndFactor('1', CORRECT_PASSWORD, '000000')
+        ).rejects.toThrow(/invalid code/i);
+      }
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, '000000')
+      ).rejects.toBeInstanceOf(errors.RateLimitError);
+    });
+  });
+
+  describe('disable', () => {
+    test('clears the secret, enrolment timestamp and last-used step, and deletes recovery codes and challenges', async () => {
+      const { service, users, recoveryRows, challenges } = setup();
+      await service.issueRecoveryCodes('1');
+      await service.createChallenge('1');
+
+      await service.disable('1');
+
+      const user = users.get('1')!;
+      expect(user.mfaSecret).toBeNull();
+      expect(user.mfaEnabledAt).toBeNull();
+      expect(user.mfaLastUsedStep).toBeNull();
+      expect(recoveryRows.filter((r) => r.userId === '1')).toHaveLength(0);
+      expect(challenges.filter((c) => c.userId === '1')).toHaveLength(0);
+    });
+
+    test("disabling one account leaves another account's recovery codes and challenges alone", async () => {
+      const { service, recoveryRows, challenges } = setup();
+      await service.issueRecoveryCodes('1');
+      await service.createChallenge('1');
+      await service.issueRecoveryCodes('2');
+      await service.createChallenge('2');
+
+      await service.disable('1');
+
+      expect(recoveryRows.filter((r) => r.userId === '2').length).toBeGreaterThan(0);
+      expect(challenges.filter((c) => c.userId === '2')).toHaveLength(1);
+    });
   });
 });

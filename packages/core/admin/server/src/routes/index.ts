@@ -1,5 +1,6 @@
 import admin from './admin';
 import authentication from './authentication';
+import mfa from './mfa';
 import permissions from './permissions';
 import users from './users';
 import roles from './roles';
@@ -17,6 +18,7 @@ const routes = {
     routes: [
       ...admin,
       ...authentication,
+      ...mfa,
       ...permissions,
       ...users,
       ...roles,
