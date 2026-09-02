@@ -1,5 +1,5 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
+import { cloneDeep, omit, pick } from 'lodash/fp';
 import type { z } from 'zod/v4';
 
 import { constants, getNonWritableAttributes } from '../content-types';
@@ -75,7 +75,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeInput');
     }
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       return Promise.all(
         data.map((entry) => sanitizeInput(entry, schema, { auth, strictParams, route }))
       );
@@ -155,7 +155,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeOutput');
     }
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       const res: unknown[] = Array.from({ length: data.length });
       for (let i = 0; i < data.length; i += 1) {
         res[i] = await sanitizeOutput(data[i], schema, { auth });
@@ -243,7 +243,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeFilters');
     }
-    if (isArray(filters)) {
+    if (Array.isArray(filters)) {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
 

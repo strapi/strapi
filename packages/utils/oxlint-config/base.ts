@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'oxlint';
 
+import { lodashImportPatterns, lodashSelectors } from 'lint-policy/lodash';
+
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -19,6 +21,8 @@ import type { OxlintConfig } from 'oxlint';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
+  // ESLint's own rule implementations, for rules OxLint has no native equivalent of.
+  jsPlugins: [{ name: 'eslint-js', specifier: 'oxlint-plugin-eslint' }],
   categories: {
     // Phase 1: correctness only (definitely-wrong code, lowest noise).
     // TODO @Nico Phase 2 — port the ESLint/Airbnb policy surface here
@@ -32,6 +36,11 @@ export const base = {
     'unicorn/no-thenable': 'off',
     // Behavioral / intentional deps; revisit when enabling broader react-hooks.
     'react/exhaustive-deps': 'off',
+    // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js.
+    // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js`
+    // JS plugin declared above, which is why this key carries the plugin prefix.
+    'no-restricted-imports': ['error', { patterns: [...lodashImportPatterns] }],
+    'eslint-js/no-restricted-syntax': ['error', ...lodashSelectors],
   },
   ignorePatterns: [
     '**/dist/**',

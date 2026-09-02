@@ -91,7 +91,7 @@ function toRow(meta: Meta, data: Rec | Rec[] | null): Row | Row[] | null {
     return data;
   }
 
-  if (_.isArray(data)) {
+  if (Array.isArray(data)) {
     return data.map((datum) => toSingleRow(meta, datum));
   }
 
