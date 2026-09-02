@@ -60,6 +60,13 @@ const union = (parent: Map<number, number>, a: number, b: number): void => {
 // (one hop), so a chain of locale links (A<->B, B<->C, but no direct A<->C row) could be
 // split across two document ids instead of clustered together. Union-find naturally
 // follows transitive links. See https://github.com/strapi/strapi/issues/20948, 24544.
+//
+// Retry-safety: a previous run can crash between clusters, leaving some rows in a
+// locale group already assigned a document_id while their siblings are still NULL. On
+// retry those NULL rows must adopt the sibling's existing document_id instead of minting
+// a fresh one, or a document that used to be one splits into two. To support this, the
+// link fetch and the clustering below include already-migrated neighbor rows, not just
+// pending ones — but only pending (NULL) rows are ever written.
 const migrateDocumentIdsWithLocalizations = async (
   db: Database,
   knex: Knex,
@@ -82,31 +89,61 @@ const migrateDocumentIdsWithLocalizations = async (
 
   const pendingIdSet = new Set(pendingIds);
 
-  // Fetch every relevant link in batches — passing all ids in a single `whereIn` can
-  // exceed the database driver's bound-parameter limit on large tables.
+  // Fetch every link touching a pending id, on *either* side of the join — a pending
+  // row's sibling may already be migrated, in which case it appears as the other column.
+  // Batched because passing all ids in a single `whereIn` can exceed the database
+  // driver's bound-parameter limit on large tables.
   const links: Array<Record<string, number>> = [];
   for (let i = 0; i < pendingIds.length; i += batchSize) {
     const idChunk = pendingIds.slice(i, i + batchSize);
     const chunkLinks = await knex(joinTableName)
       .select(joinColumn, inverseJoinColumn)
-      .whereIn(joinColumn, idChunk);
+      .whereIn(joinColumn, idChunk)
+      .orWhereIn(inverseJoinColumn, idChunk);
     links.push(...chunkLinks);
+  }
+
+  // Ids referenced by a link that aren't pending are already-migrated neighbors — look up
+  // their document_id so a retry can adopt it instead of minting a new one.
+  const neighborIds = new Set<number>();
+  for (const link of links) {
+    const a = link[joinColumn];
+    const b = link[inverseJoinColumn];
+    if (!pendingIdSet.has(a)) neighborIds.add(a);
+    if (!pendingIdSet.has(b)) neighborIds.add(b);
+  }
+
+  const existingDocumentIds = new Map<number, string>();
+  const neighborIdList = [...neighborIds];
+  for (let i = 0; i < neighborIdList.length; i += batchSize) {
+    const idChunk = neighborIdList.slice(i, i + batchSize);
+    const rows: Array<{ id: number; document_id: string | null }> = await knex(meta.tableName)
+      .select('id', 'document_id')
+      .whereIn('id', idChunk);
+    for (const row of rows) {
+      if (row.document_id) {
+        existingDocumentIds.set(row.id, row.document_id);
+      }
+    }
   }
 
   const parent = new Map<number, number>();
   for (const id of pendingIds) {
     parent.set(id, id);
   }
+  for (const id of neighborIds) {
+    parent.set(id, id);
+  }
   for (const link of links) {
     const a = link[joinColumn];
     const b = link[inverseJoinColumn];
-    if (pendingIdSet.has(a) && pendingIdSet.has(b)) {
+    if (parent.has(a) && parent.has(b)) {
       union(parent, a, b);
     }
   }
 
   const clusters = new Map<number, number[]>();
-  for (const id of pendingIds) {
+  for (const id of parent.keys()) {
     const root = find(parent, id);
     const cluster = clusters.get(root);
     if (cluster) {
@@ -116,27 +153,44 @@ const migrateDocumentIdsWithLocalizations = async (
     }
   }
 
-  const updates: Array<{ id: number; documentId: string }> = [];
-  for (const ids of clusters.values()) {
-    const documentId = createId();
-    for (const id of ids) {
-      updates.push({ id, documentId });
+  // Group pending writes by target document_id — one write per cluster instead of one
+  // per row shrinks the window for a crash to leave a cluster half-written.
+  const writeGroups = new Map<string, number[]>();
+  for (const members of clusters.values()) {
+    const existingIdsInCluster = new Set<string>();
+    for (const id of members) {
+      const existing = existingDocumentIds.get(id);
+      if (existing) {
+        existingIdsInCluster.add(existing);
+      }
+    }
+
+    // A cluster normally carries at most one existing document_id. More than one means an
+    // earlier inconsistent partial write — unify onto a single deterministic id rather
+    // than minting a third.
+    const documentId =
+      existingIdsInCluster.size > 0 ? [...existingIdsInCluster].sort()[0] : createId();
+
+    const pendingMembers = members.filter((id) => pendingIdSet.has(id));
+    if (pendingMembers.length > 0) {
+      writeGroups.set(documentId, pendingMembers);
     }
   }
 
+  const groupEntries = [...writeGroups.entries()];
   let processed = 0;
-  for (let i = 0; i < updates.length; i += batchSize) {
-    const batch = updates.slice(i, i + batchSize);
+  for (let i = 0; i < groupEntries.length; i += batchSize) {
+    const slice = groupEntries.slice(i, i + batchSize);
     await Promise.all(
-      batch.map(({ id, documentId }) =>
-        knex(meta.tableName).where('id', id).update({ document_id: documentId })
+      slice.map(([documentId, ids]) =>
+        knex(meta.tableName).whereIn('id', ids).update({ document_id: documentId })
       )
     );
-    processed += batch.length;
+    processed += slice.reduce((sum, [, ids]) => sum + ids.length, 0);
     const rowsProcessed = processed;
     heartbeat.tick(
       (elapsedSeconds) =>
-        `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${rowsProcessed}/${updates.length} rows processed`
+        `[document-id] still running (${elapsedSeconds}s) · ${meta.tableName} ${rowsProcessed}/${pendingIds.length} rows processed`
     );
   }
 };

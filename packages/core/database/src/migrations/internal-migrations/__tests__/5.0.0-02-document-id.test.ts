@@ -270,6 +270,7 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
       singularName?: string;
       pendingRows?: Array<{ id: number }>;
       links?: Link[];
+      existingDocumentIds?: Record<number, string>;
       client?: string;
     } = {}
   ) => {
@@ -278,6 +279,7 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
       singularName = 'category',
       pendingRows = [],
       links = [],
+      existingDocumentIds = {},
       client = 'postgres',
     } = options;
 
@@ -285,32 +287,52 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
     const inverseJoinColumn = snakeCase(`inv_${singularName}_id`);
     const joinTableName = snakeCase(`${tableName}_localizations_links`);
 
-    const updateCalls: UpdateCall[] = [];
+    const groupedUpdateCalls: Array<{ ids: number[]; document_id: string }> = [];
     const linkWhereInChunkSizes: number[] = [];
 
     const knexBuilder: any = jest.fn((table: string) => {
       if (table === joinTableName) {
+        const conditions: Array<{ column: string; values: number[] }> = [];
         const builder: any = {
           select: jest.fn(() => builder),
-          whereIn: jest.fn(async (column: string, chunk: number[]) => {
+          whereIn: jest.fn((column: string, chunk: number[]) => {
             linkWhereInChunkSizes.push(chunk.length);
-            const chunkSet = new Set(chunk);
-            return links.filter((link) => chunkSet.has(link[joinColumn]));
+            conditions.push({ column, values: chunk });
+            return builder;
+          }),
+          orWhereIn: jest.fn((column: string, chunk: number[]) => {
+            conditions.push({ column, values: chunk });
+            return Promise.resolve(
+              links.filter((link) => conditions.some((c) => new Set(c.values).has(link[c.column])))
+            );
           }),
         };
         return builder;
       }
 
       if (table === tableName) {
+        let selected = false;
         const builder: any = {
-          select: jest.fn(() => builder),
+          select: jest.fn(() => {
+            selected = true;
+            return builder;
+          }),
           whereNull: jest.fn(async () => pendingRows),
-          where: jest.fn((_column: string, id: number) => ({
-            update: jest.fn(async (data: { document_id: string }) => {
-              updateCalls.push({ id, document_id: data.document_id });
-              return 1;
-            }),
-          })),
+          whereIn: jest.fn((_column: string, ids: number[]) => {
+            if (selected) {
+              return Promise.resolve(
+                ids
+                  .filter((id) => existingDocumentIds[id] !== undefined)
+                  .map((id) => ({ id, document_id: existingDocumentIds[id] }))
+              );
+            }
+            return {
+              update: jest.fn(async (data: { document_id: string }) => {
+                groupedUpdateCalls.push({ ids: [...ids], document_id: data.document_id });
+                return ids.length;
+              }),
+            };
+          }),
         };
         return builder;
       }
@@ -341,8 +363,13 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
     return {
       knex: knexBuilder as unknown as Knex.Transaction,
       db,
-      get updateCalls() {
-        return updateCalls;
+      get updateCalls(): UpdateCall[] {
+        return groupedUpdateCalls.flatMap((group) =>
+          group.ids.map((id) => ({ id, document_id: group.document_id }))
+        );
+      },
+      get groupedUpdateCalls() {
+        return groupedUpdateCalls;
       },
       get linkWhereInChunkSizes() {
         return linkWhereInChunkSizes;
@@ -423,10 +450,10 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
     ]);
   });
 
-  it('ignores links pointing at ids outside the pending set', async () => {
+  it('ignores links pointing at a genuinely missing id (no row, no document_id) — does not throw or merge into it', async () => {
     const h = buildLocalizedHarness({
       pendingRows: [{ id: 1 }, { id: 2 }],
-      // 999 is not in pendingRows (e.g. already migrated) — must not throw or merge into it
+      // 999 has no row with an existing document_id — must not throw or merge into it
       links: [{ [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 999 }],
     });
 
@@ -434,6 +461,113 @@ describe('createdDocumentId migration — localized tables (union-find clusterin
 
     const clusters = clusterByDocumentId(h.updateCalls).sort((a, b) => a[0] - b[0]);
     expect(clusters).toEqual([[1], [2]]);
+  });
+
+  describe('retry: mixed pending/already-migrated rows', () => {
+    it('adopts an already-migrated direct sibling instead of minting a new document_id', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 1 }],
+        // 2 already has a document_id — a retry after a partial prior run
+        links: [{ [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 }],
+        existingDocumentIds: { 2: 'doc-existing' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      expect(h.updateCalls).toEqual([{ id: 1, document_id: 'doc-existing' }]);
+    });
+
+    it('adopts the existing document_id when the pending row is on the inverse join column', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 2 }],
+        // migrated hub (1) is on joinColumn, pending row (2) is on inverseJoinColumn
+        links: [{ [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 }],
+        existingDocumentIds: { 1: 'doc-existing' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      expect(h.updateCalls).toEqual([{ id: 2, document_id: 'doc-existing' }]);
+    });
+
+    it('propagates an existing document_id across a chain reached only through an already-migrated middle row (A-C via migrated B)', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 1 }, { id: 3 }],
+        links: [
+          { [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 },
+          { [snakeCase('category_id')]: 2, [snakeCase('inv_category_id')]: 3 },
+        ],
+        existingDocumentIds: { 2: 'doc-existing' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      const clusters = clusterByDocumentId(h.updateCalls);
+      expect(clusters).toEqual([[1, 3]]);
+      expect(h.updateCalls.every((c) => c.document_id === 'doc-existing')).toBe(true);
+    });
+
+    it('handles leftover NULLs after a partial cluster write: one cluster adopts, an unrelated cluster still mints', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 1 }, { id: 3 }, { id: 4 }],
+        links: [
+          // cluster A: 1 (pending) <-> 2 (already migrated) — must adopt
+          { [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 },
+          // cluster B: 3 <-> 4, both still pending — must mint fresh, shared
+          { [snakeCase('category_id')]: 3, [snakeCase('inv_category_id')]: 4 },
+        ],
+        existingDocumentIds: { 2: 'doc-existing' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      const byId = new Map(h.updateCalls.map((c) => [c.id, c.document_id]));
+      expect(byId.get(1)).toBe('doc-existing');
+      expect(byId.get(3)).toBe(byId.get(4));
+      expect(byId.get(3)).not.toBe('doc-existing');
+    });
+
+    it('unifies onto one deterministic id when a cluster already carries more than one existing document_id', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 2 }],
+        // an inconsistent prior partial write left 1 and 3 with two different ids
+        links: [
+          { [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 },
+          { [snakeCase('category_id')]: 2, [snakeCase('inv_category_id')]: 3 },
+        ],
+        existingDocumentIds: { 1: 'doc-b', 3: 'doc-a' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      // deterministic: lexicographically smallest of the conflicting ids
+      expect(h.updateCalls).toEqual([{ id: 2, document_id: 'doc-a' }]);
+    });
+
+    it('never overwrites a row that already has a document_id', async () => {
+      const h = buildLocalizedHarness({
+        pendingRows: [{ id: 1 }],
+        links: [{ [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 }],
+        existingDocumentIds: { 2: 'doc-existing' },
+      });
+
+      await createdDocumentId.up(h.knex, h.db);
+
+      expect(h.updateCalls.some((c) => c.id === 2)).toBe(false);
+    });
+  });
+
+  it('writes one whereIn per cluster instead of one update per row', async () => {
+    const h = buildLocalizedHarness({
+      pendingRows: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      links: [{ [snakeCase('category_id')]: 1, [snakeCase('inv_category_id')]: 2 }],
+    });
+
+    await createdDocumentId.up(h.knex, h.db);
+
+    // cluster {1,2} + cluster {3} => 2 write calls, not 3
+    expect(h.groupedUpdateCalls).toHaveLength(2);
+    expect(h.updateCalls).toHaveLength(3);
   });
 
   it('fetches links in batches rather than a single unbounded whereIn (avoids exceeding the driver bound-parameter limit)', async () => {
