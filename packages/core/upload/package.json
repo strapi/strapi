@@ -1,6 +1,7 @@
 {
   "name": "@strapi/upload",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "homepage": "https://strapi.io",
   "bugs": {

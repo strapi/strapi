@@ -1,6 +1,7 @@
 {
   "name": "@strapi/review-workflows",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Review workflows for your content",
   "homepage": "https://strapi.io",
   "bugs": {

@@ -1,6 +1,7 @@
 {
   "name": "vitest-config",
   "version": "5.52.2",
+  "type": "commonjs",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "exports": {

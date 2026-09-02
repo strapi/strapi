@@ -1,6 +1,7 @@
 {
   "name": "@strapi/admin",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Strapi Admin",
   "homepage": "https://strapi.io",
   "bugs": {

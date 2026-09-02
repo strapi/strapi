@@ -1,6 +1,7 @@
 {
   "name": "@strapi/plugin-cloud",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Instructions to deploy your local project to Strapi Cloud",
   "homepage": "https://strapi.io",
   "bugs": {

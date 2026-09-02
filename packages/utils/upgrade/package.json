@@ -1,6 +1,7 @@
 {
   "name": "@strapi/upgrade",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",

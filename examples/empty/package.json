@@ -1,6 +1,7 @@
 {
   "name": "empty",
   "version": "0.0.0",
+  "type": "commonjs",
   "private": true,
   "description": "A Strapi application",
   "scripts": {

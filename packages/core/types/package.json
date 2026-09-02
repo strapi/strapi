@@ -1,6 +1,7 @@
 {
   "name": "@strapi/types",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"

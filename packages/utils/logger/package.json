@@ -1,6 +1,7 @@
 {
   "name": "@strapi/logger",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {

@@ -1,6 +1,7 @@
 {
   "name": "@strapi/provider-email-sendmail",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",

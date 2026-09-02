@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6"
+    "module": "node20",
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "types": ["node"]
   },
   "exclude": ["node_modules", "dist"]
 }

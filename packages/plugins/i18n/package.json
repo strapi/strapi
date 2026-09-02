@@ -1,6 +1,7 @@
 {
   "name": "@strapi/i18n",
   "version": "5.52.2",
+  "type": "commonjs",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "homepage": "https://strapi.io",
   "bugs": {
