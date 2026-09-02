@@ -131,13 +131,13 @@ const authService = adminApi
        * the same session shape `/login` returns for an unenrolled account; `features/Auth.tsx`
        * persists its token exactly as it does for `login`.
        */
-      loginMfa: builder.mutation<Login.Response['data'], LoginMfa.Request['body']>({
+      loginMfa: builder.mutation<LoginMfa.Response['data'], LoginMfa.Request['body']>({
         query: (body) => ({
           method: 'POST',
           url: '/admin/login/mfa',
           data: body,
         }),
-        transformResponse(res: Login.Response) {
+        transformResponse(res: LoginMfa.Response) {
           return res.data;
         },
         invalidatesTags: ['Me'],

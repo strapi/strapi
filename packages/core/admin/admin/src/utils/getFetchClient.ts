@@ -347,21 +347,27 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       return { data: result };
     } catch (error) {
-      // A body-less response causes `response.json()` to throw a `SyntaxError`. We match on
-      // `error.name` rather than `instanceof SyntaxError` because constructor identity differs
-      // across JS realms — a Response from a different realm (e.g. undici under jsdom in tests,
-      // a service worker or iframe in browsers) throws a `SyntaxError` whose constructor is not
-      // the same identity as the one this module closes over. Name comparison is realm-agnostic.
+      // An unparseable body — empty (no content) or non-JSON (plain text, HTML) — causes
+      // `response.json()` to throw a `SyntaxError`. This isn't only the "no body at all" case:
+      // Koa's default plain-text error pages ("Unauthorized", "Forbidden") and an intermediary
+      // proxy's HTML error page hit it too. We match on `error.name` rather than `instanceof
+      // SyntaxError` because constructor identity differs across JS realms — a Response from a
+      // different realm (e.g. undici under jsdom in tests, a service worker or iframe in
+      // browsers) throws a `SyntaxError` whose constructor is not the same identity as the one
+      // this module closes over. Name comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError') {
-        // An empty 200 (or otherwise accepted) body: treat it as success with an empty payload.
+        // A 200 (or otherwise accepted) response with an unparseable body: treat it as success
+        // with an empty payload.
         if (response.ok || validateStatus?.(response.status)) {
           return { data: {}, status: response.status } as FetchResponse<TData>;
         }
 
-        // An empty non-2xx body (e.g. a route that 404s with no JSON error payload) would
-        // otherwise surface as a raw parsing `SyntaxError` with no `status`. Normalise it to a
-        // `FetchError` carrying `status`, the same shape callers get for a non-JSON-shaped
-        // error body.
+        // A non-2xx response with an unparseable body (e.g. a route that 404s with no JSON
+        // error payload, or a 401 rendered as plain text) would otherwise surface as a raw
+        // parsing `SyntaxError` with no `status`. Normalise it to a `FetchError` carrying
+        // `status` — the same shape callers get for a non-JSON-shaped error body — so a status
+        // this specific (401, in particular `withTokenRefresh` below, and `baseQuery.ts`'s
+        // session-expiry handling) still gets acted on regardless of what the body looked like.
         const fetchError = new FetchError('Unknown Server Error');
         fetchError.status = response.status;
         throw fetchError;

@@ -1,5 +1,6 @@
 import {
   getFetchClient,
+  isFetchError,
   setOnSessionExpired,
   setOnTokenUpdate,
   triggerSessionExpired,
@@ -159,6 +160,37 @@ describe('getFetchClient', () => {
 
       const delResult = await fetchClient.del('/test');
       expect(delResult).toEqual({ data: {}, status: 204 });
+    });
+  });
+
+  describe('unparseable non-2xx response body', () => {
+    it('should reject with a FetchError carrying the response status for a body-less non-2xx response', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(new Response(null, { status: 404 }))
+      );
+
+      const fetchClient = getFetchClient();
+
+      let caughtError: unknown;
+      try {
+        await fetchClient.get('/test');
+      } catch (err) {
+        caughtError = err;
+      }
+
+      expect(isFetchError(caughtError)).toBe(true);
+      expect((caughtError as { status?: number }).status).toBe(404);
+    });
+
+    it('should resolve to an empty payload for a body-less non-2xx response accepted by validateStatus', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(new Response(null, { status: 404 }))
+      );
+
+      const fetchClient = getFetchClient();
+      const result = await fetchClient.get('/test', { validateStatus: () => true });
+
+      expect(result).toEqual({ data: {}, status: 404 });
     });
   });
 
@@ -360,6 +392,54 @@ describe('getFetchClient', () => {
         2,
         'http://localhost:1337/admin/access-token',
         expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('should refresh token and retry on a 401 with a non-JSON (plain text) body', async () => {
+      // First call returns 401 with a plain-text body, e.g. Koa's default error page —
+      // response.json() throws a SyntaxError, which must still be treated as a 401.
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve(
+            new Response('Unauthorized', { status: 401, headers: { 'content-type': 'text/plain' } })
+          )
+        )
+        // Token refresh call succeeds
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: { token: 'new-token' },
+              }),
+          })
+        )
+        // Retry call succeeds
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenCalledTimes(3);
+
+      // Verify token refresh was called, and the original request was retried
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST' })
+      );
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        3,
+        'http://localhost:1337/api/test',
+        expect.anything()
       );
     });
 
