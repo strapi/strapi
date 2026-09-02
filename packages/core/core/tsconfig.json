@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["node", "jest"]
   },
-  "include": ["src", "vitest.config.ts"],
+  "include": ["src"],
   "exclude": ["**/__tests__/**"]
 }
