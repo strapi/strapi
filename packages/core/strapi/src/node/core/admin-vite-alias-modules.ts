@@ -13,6 +13,9 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   'styled-components',
   'react-redux',
   '@reduxjs/toolkit',
+  // Aliased as an exact match, not as a prefix. See `getBaseAliases` in `vite/config.ts`: the
+  // design system publishes `next/styles.css` out of `dist/`, so a prefix rewrite of that subpath
+  // skips the exports map and names a file that does not exist
   '@strapi/design-system',
   '@radix-ui/react-tooltip',
   'lodash',
