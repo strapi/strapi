@@ -18,6 +18,7 @@ jest.mock('../core/admin-customisations', () => ({
 
 jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
+  stat: jest.fn().mockResolvedValue({ isDirectory: () => true }),
 }));
 
 const buildStrapiMock = (
