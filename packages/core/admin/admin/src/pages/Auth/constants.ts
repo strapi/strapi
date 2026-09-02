@@ -2,12 +2,14 @@ import type { ComponentType } from 'react';
 
 import { ForgotPassword } from './components/ForgotPassword';
 import { ForgotPasswordSuccess } from './components/ForgotPasswordSuccess';
+import { MfaChallenge } from './components/MfaChallenge';
 import { Oops } from './components/Oops';
 import { Register, RegisterProps } from './components/Register';
 import { ResetPassword } from './components/ResetPassword';
 
 export const AUTH_TYPES = {
   LOGIN: 'login',
+  MFA: 'mfa',
   REGISTER: 'register',
   REGISTER_ADMIN: 'register-admin',
   FORGOT_PASSWORD: 'forgot-password',
@@ -35,6 +37,7 @@ export const FORMS = {
   // the `Component` attribute is set after all forms and CE/EE components are loaded, but since we
   // are here outside of a React component we can not use the hook directly
   [AUTH_TYPES.LOGIN]: () => null,
+  [AUTH_TYPES.MFA]: MfaChallenge,
   [AUTH_TYPES.OOPS]: Oops,
   [AUTH_TYPES.REGISTER]: Register,
   [AUTH_TYPES.REGISTER_ADMIN]: Register,

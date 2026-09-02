@@ -18,6 +18,7 @@ import {
 import { translatedErrors } from '../../../utils/translatedErrors';
 import { getRedirectTo } from '../utils';
 
+import type { MfaChallengeLocationState } from './MfaChallenge';
 import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
@@ -59,6 +60,15 @@ const Login = ({ children }: LoginProps) => {
       }
 
       setApiError(message);
+    } else if ('mfaRequired' in res.data) {
+      // No session yet: hand the challenge to the second-factor screen through router state
+      // only. Nothing is written to storage, so a refresh simply restarts at the login form.
+      const state: MfaChallengeLocationState = {
+        challengeToken: res.data.challengeToken,
+        expiresIn: res.data.expiresIn,
+        rememberMe: body.rememberMe,
+      };
+      navigate({ pathname: '/auth/mfa', search: searchString }, { state });
     } else {
       navigate(getRedirectTo(searchString));
     }

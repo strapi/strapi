@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Login } from '../../../shared/contracts/authentication';
+import { Login, type LoginMfa } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
@@ -20,6 +20,7 @@ import {
   useGetMeQuery,
   useGetMyPermissionsQuery,
   useLazyCheckPermissionsQuery,
+  useLoginMfaMutation,
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
@@ -48,6 +49,13 @@ interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
+  /**
+   * Completes a login that `login` answered with the challenge shape. Persists the resulting
+   * session token exactly as `login` does; `rememberMe` decides between cookie and localStorage.
+   */
+  loginMfa: (
+    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code'> & { rememberMe: boolean }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
   logout: () => Promise<void>;
   /**
    * @alpha
@@ -143,6 +151,7 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
+  const [loginMfaMutation] = useLoginMfaMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -313,6 +322,19 @@ const AuthProvider = ({
     [dispatch, loginMutation]
   );
 
+  const loginMfa = React.useCallback<AuthContextValue['loginMfa']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
+
+      if ('data' in res) {
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaMutation]
+  );
+
   const logout = React.useCallback(async () => {
     await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
@@ -407,6 +429,7 @@ const AuthProvider = ({
       token={token}
       user={user}
       login={login}
+      loginMfa={loginMfa}
       logout={logout}
       permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
