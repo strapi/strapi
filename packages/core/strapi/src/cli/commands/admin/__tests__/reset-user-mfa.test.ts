@@ -93,6 +93,55 @@ describe('admin:reset-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
+  // F6: `notify` emits the eventHub event synchronously then starts the email send. The command
+  // used to call `notify(...)` and immediately `process.exit(0)` without waiting for it, so the
+  // process could tear down before the detached email promise ever settled and the reset email
+  // would silently never send. `notify` now returns that promise, and the command must await it
+  // before exiting.
+  test('awaits notify before exiting, so the reset email cannot be dropped by an early exit', async () => {
+    const email = 'kai@doe.com';
+    findOne.mockResolvedValue({ id: 1, email });
+
+    let releaseNotify: (() => void) | undefined;
+    notify.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseNotify = resolve;
+        })
+    );
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    const run = resetUserMfaCommand({ email });
+
+    // Drains every pending microtask (the chain of already-resolved awaits ahead of `notify` in
+    // the command) without waiting on `notify`'s own still-unresolved promise: a macrotask
+    // boundary (`setImmediate`) only runs once the microtask queue is empty, and the only thing
+    // keeping it non-empty here is that promise.
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+
+    // `notify` was called, but its promise has not resolved yet -- `process.exit` must not have
+    // run before it does.
+    expect(notify).toHaveBeenCalledWith('1', 'reset');
+    expect(mockExit).not.toHaveBeenCalled();
+
+    releaseNotify!();
+    await run;
+
+    expect(mockExit).toHaveBeenCalledWith(0);
+    // Direct ordering evidence, not just "eventually both happened": notify's own call happens
+    // before exit, and (via the not-yet-called assertion above) exit could not have run until the
+    // returned promise resolved.
+    expect(notify.mock.invocationCallOrder[0]).toBeLessThan(mockExit.mock.invocationCallOrder[0]);
+
+    mockExit.mockRestore();
+    consoleLog.mockRestore();
+    notify.mockReset();
+  });
+
   test('invalidates the user sessions as well', async () => {
     // otherwise an attacker holding a live session survives the reset meant to evict them
     const email = 'kai@doe.com';

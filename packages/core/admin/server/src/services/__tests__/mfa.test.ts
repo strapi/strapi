@@ -792,6 +792,33 @@ describe('mfa service: enrolment', () => {
     expect(users.get('1')).toEqual(snapshot);
   });
 
+  // M1: `isEnrolled` requires both `mfaEnabledAt` AND `mfaSecret`, but `beginEnrolment` used to
+  // gate on `mfaEnabledAt` alone. A half-written row (`mfaEnabledAt` set, `mfaSecret` null --
+  // reachable through direct DB tampering, a partial write elsewhere, or a hand-edited row) is not
+  // enrolled for login purposes (`isEnrolled` would say false, so no challenge is ever issued) but
+  // could never re-enrol either, since the old guard refused on `mfaEnabledAt` alone -- a
+  // permanent lockout with no path back except the CLI reset. Gating on `isEnrolled` itself closes
+  // that gap while still refusing a genuinely enrolled account (both columns set, the case above).
+  test('allows re-enrolment for a half-written row (mfaEnabledAt set, mfaSecret null)', async () => {
+    const { strapi, users } = buildStrapi();
+    const existing = users.get('1')!;
+    existing.mfaSecret = null;
+    existing.mfaEnabledAt = new Date('2026-01-01T00:00:00.000Z');
+
+    const service = createMfaService(defaultDeps(strapi));
+
+    await expect(service.beginEnrolment('1', 'pw')).resolves.toEqual(
+      expect.objectContaining({
+        secret: expect.stringMatching(/^[A-Z2-7]+$/),
+        otpauthUri: expect.stringContaining('otpauth://totp/'),
+      })
+    );
+    // A fresh secret was actually issued, not just accepted without writing -- `mfaEnabledAt` is
+    // reset to null on the way in (see `beginEnrolment`), same as any other fresh enrolment.
+    expect(users.get('1')!.mfaEnabledAt).toBeNull();
+    expect(String(users.get('1')!.mfaSecret)).toMatch(/^enc:/);
+  });
+
   test('begins enrolment successfully for a never-enrolled user', async () => {
     const { strapi, users } = buildStrapi();
     const service = createMfaService(defaultDeps(strapi));
@@ -1582,6 +1609,26 @@ describe('mfa service: challenge lifecycle', () => {
     expect(validatePassword).toHaveBeenCalled();
   });
 
+  // M2: the shape dispatch normalises the submitted code (via `normaliseRecoveryCode`) only to
+  // decide *which* branch to take -- it used to then hand the TOTP branch the raw, un-normalised
+  // `code`, and `verifyTotp` only `.trim()`s (leading/trailing whitespace), not internal
+  // whitespace. A display-formatted code like "123 456" (some authenticator apps group digits)
+  // would therefore dispatch correctly (6 digits once spaces are stripped, so
+  // `normalised.length <= MAX_TOTP_CODE_LENGTH`) but then fail `verifyTotp`'s own digit check,
+  // because "123 456" is 7 characters, not 6. Rejecting a genuinely valid code is the finding.
+  test('a totp code typed with a display-format space still verifies', async () => {
+    const { service, validCode } = setup();
+    const code = validCode();
+    const spaced = `${code.slice(0, 3)} ${code.slice(3)}`;
+
+    const { token } = await service.createChallenge('1');
+
+    await expect(service.verifyChallenge(token, spaced)).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+  });
+
   test('sweeping removes expired challenges and leaves live ones alone', async () => {
     const { service, challenges } = setup();
 
@@ -1813,6 +1860,20 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
     });
 
+    // M2: same fix as `verifyChallenge` -- the dispatch normalises the code to decide which branch
+    // to take, but used to pass the raw, un-normalised code to `verifyTotpForUser`, so a
+    // display-formatted code with an internal space failed `verifyTotp`'s digit check even though
+    // it dispatched to the right branch.
+    test('a totp code typed with a display-format space still verifies', async () => {
+      const { service, validCode } = setup();
+      const code = validCode();
+      const spaced = `${code.slice(0, 3)} ${code.slice(3)}`;
+
+      await expect(
+        service.assertPasswordAndFactor('1', CORRECT_PASSWORD, spaced)
+      ).resolves.toBeUndefined();
+    });
+
     test('a spent totp step cannot be replayed here either', async () => {
       const { service, validCode } = setup();
       const code = validCode();
@@ -1943,9 +2004,13 @@ describe('mfa notifications', () => {
       plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
     });
 
-    // Synchronous and non-throwing: the caller (e.g. `verifyChallenge`) must never see this
-    // rejection, which is exactly why `notify` is `void`, not `Promise<void>`.
+    // Non-throwing and never rejecting: the caller (e.g. `verifyChallenge`) must never see this
+    // failure. `notify` now returns the email promise (F6, so a caller that needs to know the
+    // email settled -- the CLI reset, which must not `process.exit` before it does -- can await
+    // it), but the internal try/catch still guarantees that promise always resolves, never
+    // rejects, so every existing fire-and-forget call site keeps working unchanged.
     expect(() => service.notify('1', 'enabled')).not.toThrow();
+    await expect(service.notify('1', 'enabled')).resolves.toBeUndefined();
     await flushMicrotasks();
 
     expect(sendTemplatedEmail).toHaveBeenCalled();
@@ -1953,6 +2018,51 @@ describe('mfa notifications', () => {
       'Failed to send the two-factor change notification',
       expect.any(Error)
     );
+  });
+
+  // F6: `notify`'s email used to be an untracked, detached async IIFE -- nothing about the
+  // returned value ever told a caller when (or whether) it had settled. The CLI reset command
+  // calls `notify` and then `process.exit(0)` immediately after, which can tear the process down
+  // before that detached promise ever resolves, so the reset email silently never sends. Awaiting
+  // the promise `notify` now returns is what lets the CLI wait for it before exiting.
+  test("notify's returned promise resolves only after the email settles", async () => {
+    let releaseEmail: (() => void) | undefined;
+    const sendTemplatedEmail = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseEmail = resolve;
+        })
+    );
+    const { service } = setup({
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+    });
+
+    let settled = false;
+    const notifyPromise = service.notify('1', 'enabled').then(() => {
+      settled = true;
+    });
+
+    await flushMicrotasks();
+    expect(settled).toBe(false);
+
+    releaseEmail!();
+    await notifyPromise;
+    expect(settled).toBe(true);
+  });
+
+  test("notify's returned promise still resolves (never rejects) when the email provider rejects", async () => {
+    const sendTemplatedEmail = jest.fn().mockRejectedValue(new Error('smtp down'));
+    const { service } = setup({
+      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+    });
+
+    await expect(service.notify('1', 'enabled')).resolves.toBeUndefined();
+  });
+
+  test("notify's returned promise resolves immediately for challenge_failed, which sends no email", async () => {
+    const { service } = setup();
+
+    await expect(service.notify('1', 'challenge_failed')).resolves.toBeUndefined();
   });
 
   test('emits the eventHub event even when the email plugin is entirely missing', async () => {

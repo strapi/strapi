@@ -24,13 +24,31 @@ interface Logger {
 
 const PREFIX = '[admin.auth.mfa]';
 
+/** A non-null, non-array object -- anything else spreads into indexed keys instead of settings. */
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Validates the MFA config. Every outcome is a warning: values that would break authenticator
  * interoperability fall back to the default, values that merely weaken security are honoured
  * because that is the operator's decision to make.
  */
 export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
-  const input = (raw ?? {}) as Partial<MfaConfig>;
+  // A string or an array is truthy and passes straight through `raw ?? {}` below, then gets cast
+  // to `Partial<MfaConfig>` and spread over the defaults -- which does not merge settings, it
+  // spreads characters/elements onto indexed string keys ("0", "1", ...) of the result. Caught
+  // here, before that spread, rather than letting it produce a config nobody asked for.
+  let safeRaw: unknown = raw;
+  if (raw !== undefined && raw !== null && !isPlainObject(raw)) {
+    logger.warn(
+      `${PREFIX} config must be a plain object. Got ${
+        Array.isArray(raw) ? 'an array' : typeof raw
+      }, using the defaults.`
+    );
+    safeRaw = {};
+  }
+
+  const input = (safeRaw ?? {}) as Partial<MfaConfig>;
   const result: MfaConfig = {
     ...MFA_DEFAULTS,
     ...input,
@@ -78,16 +96,26 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
     result.challengeTtl = MFA_DEFAULTS.challengeTtl;
   }
 
-  if (!Number.isFinite(result.maxChallengeAttempts) || result.maxChallengeAttempts < 0) {
+  // Zero is rejected alongside negative and non-finite values, deliberately -- a `< 0` floor (the
+  // same class of bug `challengeTtl`/`userAttemptWindow` are guarded against above) would let a
+  // config typo of `0` straight through. `maxChallengeAttempts: 0` makes the per-challenge
+  // conditional increment's own cap condition (`attempts < 0`) impossible to satisfy, so every
+  // verify reports `exhausted` before a code is ever checked.
+  if (!Number.isFinite(result.maxChallengeAttempts) || result.maxChallengeAttempts < 1) {
     logger.warn(
-      `${PREFIX} maxChallengeAttempts must be a non-negative number. Got ${result.maxChallengeAttempts}, using ${MFA_DEFAULTS.maxChallengeAttempts}.`
+      `${PREFIX} maxChallengeAttempts must be a positive number; anything else rejects every code on every challenge before it is checked, since the per-challenge attempt cap can never be satisfied. Got ${result.maxChallengeAttempts}, using ${MFA_DEFAULTS.maxChallengeAttempts}.`
     );
     result.maxChallengeAttempts = MFA_DEFAULTS.maxChallengeAttempts;
   }
 
-  if (!Number.isFinite(result.maxUserAttempts) || result.maxUserAttempts < 0) {
+  // Same reasoning as `maxChallengeAttempts` above, for the account-scoped tier:
+  // `maxUserAttempts: 0` makes `isAccountThrottled`'s `failures >= maxUserAttempts` true for every
+  // account (0 recorded failures >= 0), so every challenge create returns 429 and every verify
+  // reports `throttled` -- an enrolled admin is locked out by a config typo before ever presenting
+  // a code.
+  if (!Number.isFinite(result.maxUserAttempts) || result.maxUserAttempts < 1) {
     logger.warn(
-      `${PREFIX} maxUserAttempts must be a non-negative number. Got ${result.maxUserAttempts}, using ${MFA_DEFAULTS.maxUserAttempts}.`
+      `${PREFIX} maxUserAttempts must be a positive number; anything else throttles every account immediately, since the account-scoped failure count is never below it. Got ${result.maxUserAttempts}, using ${MFA_DEFAULTS.maxUserAttempts}.`
     );
     result.maxUserAttempts = MFA_DEFAULTS.maxUserAttempts;
   }

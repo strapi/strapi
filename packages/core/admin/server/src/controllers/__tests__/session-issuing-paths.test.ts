@@ -34,6 +34,32 @@ const DECIDED_CALL_SITES = [
   'resetPassword', // gated: issues a challenge instead
 ];
 
+/**
+ * Recursive `.ts` file listing, shared by every static-scan test in this file (the registration
+ * token guard below, and the F4/F5 call-site inventory) so all of them walk the tree the same way
+ * rather than risking two subtly different notions of "every file".
+ */
+const walk = (dir: string): string[] =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      return walk(entryPath);
+    }
+    return entryPath.endsWith('.ts') ? [entryPath] : [];
+  });
+
+/**
+ * The three source roots a session can be minted from. `server/src` is the CE package this file
+ * lives in; `ee/server/src` carries the SSO callback (a documented exemption -- see the F4/F5
+ * describe block below); `shared` carries `issueSession`'s own implementation, which every CE flow
+ * funnels through. `admin/src` (the React app) is deliberately out of scope: nothing there can
+ * mint a server-side session.
+ */
+const ADMIN_ROOT = path.join(__dirname, '..', '..', '..', '..');
+const SERVER_SRC = path.join(ADMIN_ROOT, 'server', 'src');
+const EE_SERVER_SRC = path.join(ADMIN_ROOT, 'ee', 'server', 'src');
+const SHARED_DIR = path.join(ADMIN_ROOT, 'shared');
+
 const defaultResetBody = { resetPasswordToken: 'reset-token', password: 'NewPassword123' };
 
 /**
@@ -278,17 +304,6 @@ describe('session issuing paths', () => {
     // a future change lets an admin re-issue a registration token to an already-active,
     // possibly-enrolled user, `/admin/register` becomes an mfa-skipping account takeover.
 
-    const SERVER_SRC = path.join(__dirname, '..', '..');
-
-    const walk = (dir: string): string[] =>
-      fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-        const entryPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          return walk(entryPath);
-        }
-        return entryPath.endsWith('.ts') ? [entryPath] : [];
-      });
-
     // Content-type and validation-schema files declare *shape* (a field exists, or a payload
     // may carry it) rather than performing a runtime write, so they're excluded on purpose.
     // Everything else that assigns `registrationToken:` as an object-literal value is either a
@@ -337,5 +352,90 @@ describe('session issuing paths', () => {
       42,
       expect.objectContaining({ registrationToken: null, isActive: true })
     );
+  });
+});
+
+/**
+ * F4: the enumeration above (`no undecided call site mints an admin session`) only ever read
+ * `controllers/authentication.ts`, so it could never see a mint site anywhere else in the admin
+ * package -- including `ee/server/src/controllers/authentication-utils/middlewares.ts`'s SSO
+ * callback, which calls the session manager's `generateRefreshToken` directly (it has already
+ * completed its own authentication dance via passport and has no request body for
+ * `extractDeviceParams` to read, so it does not go through `issueSession`). This scans the whole
+ * surface -- `server/src`, `ee/server/src`, and `shared` (where `issueSession` itself is
+ * implemented) -- for both ways a session gets minted, and pins the exact, decided set: exactly
+ * the CE controller's five `issueSession(` calls (`DECIDED_CALL_SITES` above), `issueSession`'s
+ * own `generateRefreshToken(` call in `shared/utils/session-auth.ts`, and the EE SSO callback's
+ * `generateRefreshToken(` call. A new call site anywhere in this surface -- a helper that mints a
+ * session outside `issueSession`, or a second EE integration that mints one directly -- changes
+ * this set and must fail here until a reviewer explicitly adds it with its own documented
+ * decision, the same discipline `DECIDED_CALL_SITES` already applies to `controllers/authentication.ts`
+ * alone.
+ */
+describe('generateRefreshToken / issueSession call-site inventory (F4)', () => {
+  const PATTERNS = ['issueSession(', 'generateRefreshToken('] as const;
+
+  test('generateRefreshToken( and issueSession( occur only at the exact, decided sites', () => {
+    const roots = [SERVER_SRC, EE_SERVER_SRC, SHARED_DIR];
+
+    const found: Record<string, number> = {};
+
+    for (const root of roots) {
+      const files = walk(root).filter((file) => !file.includes(`${path.sep}__tests__${path.sep}`));
+
+      for (const file of files) {
+        const contents = fs.readFileSync(file, 'utf8');
+        const relative = path.relative(ADMIN_ROOT, file);
+
+        for (const pattern of PATTERNS) {
+          const count = [...contents.matchAll(new RegExp(pattern.replace('(', '\\('), 'g'))].length;
+          if (count > 0) {
+            found[`${relative} :: ${pattern}`] = count;
+          }
+        }
+      }
+    }
+
+    expect(found).toEqual({
+      // The five decided CE call sites (`login`, `loginMfa`, `register`, `registerAdmin`,
+      // `resetPassword`) -- already enumerated and reasoned about individually above.
+      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueSession(`]:
+        DECIDED_CALL_SITES.length,
+      // `issueSession`'s own implementation: every CE flow above funnels through this one call.
+      [`${path.join('shared', 'utils', 'session-auth.ts')} :: generateRefreshToken(`]: 1,
+      // The SSO callback: deliberately exempt from `issueSession` (see the block comment above)
+      // per the session-path table this branch's earlier tasks documented.
+      [`${path.join('ee', 'server', 'src', 'controllers', 'authentication-utils', 'middlewares.ts')} :: generateRefreshToken(`]: 1,
+    });
+  });
+});
+
+/**
+ * F5: API token and transfer token requests must succeed for an mfa-enrolled user presenting no
+ * code at all -- those strategies authenticate a *token*, not an interactive admin session, and
+ * there is nothing resembling a second factor to check. That is exactly the kind of property a
+ * later refactor breaks silently: someone "helpfully" adding an mfa check to a shared auth
+ * strategy file would lock out every API/transfer-token integration for any org whose
+ * service-account owner happens to be mfa-enrolled, and nothing in an interactive/browser-driven
+ * test suite would ever exercise a token-authenticated request from an enrolled account to catch
+ * it. Asserted structurally rather than behaviourally: no strategy file may mention `mfa` in any
+ * form at all.
+ */
+describe('programmatic-auth strategies stay mfa-free (F5)', () => {
+  test('no file under server/src/strategies references mfa in any form', () => {
+    const STRATEGIES_DIR = path.join(SERVER_SRC, 'strategies');
+    const files = walk(STRATEGIES_DIR).filter(
+      (file) => !file.includes(`${path.sep}__tests__${path.sep}`)
+    );
+
+    // Sanity check on the scan itself: an empty file list would make the assertion below
+    // vacuously pass.
+    expect(files.length).toBeGreaterThan(0);
+
+    const offenders = files
+      .filter((file) => /mfa/i.test(fs.readFileSync(file, 'utf8')))
+      .map((file) => path.relative(SERVER_SRC, file));
+
+    expect(offenders).toEqual([]);
   });
 });

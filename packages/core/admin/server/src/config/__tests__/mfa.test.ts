@@ -141,6 +141,47 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
   });
 
+  // F1: `maxChallengeAttempts`/`maxUserAttempts` used to guard with `< 0`, so `0` passed through
+  // unwarned. `maxUserAttempts: 0` makes `isAccountThrottled` (`failures >= 0`) true for every
+  // account before a single failure is ever recorded, so every challenge create returns 429 and
+  // every verify reports `throttled`. `maxChallengeAttempts: 0` makes the per-challenge conditional
+  // increment's own cap condition (`attempts < 0`) impossible to satisfy, so every verify reports
+  // `exhausted`. Either way a config typo of `0` silently locks out every enrolled admin -- the
+  // same class of lockout `challengeTtl`/`userAttemptWindow` already guard against with `<=`/`<`
+  // floors, so these two get the same `< 1` floor rather than `< 0`.
+  test('falls back to the default maxChallengeAttempts and warns when it is exactly 0', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ maxChallengeAttempts: 0 }, logger);
+    expect(result.maxChallengeAttempts).toBe(MFA_DEFAULTS.maxChallengeAttempts);
+    expect(logger.warnings.join(' ')).toContain('maxChallengeAttempts');
+  });
+
+  test('falls back to the default maxUserAttempts and warns when it is exactly 0', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig({ maxUserAttempts: 0 }, logger);
+    expect(result.maxUserAttempts).toBe(MFA_DEFAULTS.maxUserAttempts);
+    expect(logger.warnings.join(' ')).toContain('maxUserAttempts');
+  });
+
+  // F1: `raw` used to be cast straight to `Partial<MfaConfig>` and spread over the defaults with
+  // no shape check, so a string or array (both truthy, both objects to `typeof`... except a string
+  // isn't) got spread character-by-character / index-by-index into the result as extra indexed
+  // keys instead of being read as settings -- silently producing a config that is neither the
+  // caller's intent nor the documented defaults.
+  test('falls back to the defaults and warns once when the config is a string', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig('nonsense' as unknown, logger);
+    expect(result).toEqual(MFA_DEFAULTS);
+    expect(logger.warnings.join(' ')).toMatch(/plain object/i);
+  });
+
+  test('falls back to the defaults and warns once when the config is an array', () => {
+    const logger = makeLogger();
+    const result = validateMfaConfig(['enabled'] as unknown, logger);
+    expect(result).toEqual(MFA_DEFAULTS);
+    expect(logger.warnings.join(' ')).toMatch(/plain object/i);
+  });
+
   test('MFA_DEFAULTS cannot be mutated through config export', () => {
     // Save original values
     const originalDigits = MFA_DEFAULTS.digits;

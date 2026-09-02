@@ -214,7 +214,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // holding just the password disable 2FA on someone else's account by starting enrolment and
     // never finishing it (mfaEnabledAt gets reset to null below) — the exact bypass 2FA exists
     // to prevent. The user must disable two-factor authentication first, then enrol again.
-    if (user.mfaEnabledAt) {
+    //
+    // Gated on `isEnrolled` (mfaEnabledAt AND mfaSecret), not `mfaEnabledAt` alone: a half-written
+    // row (enabledAt set, secret null) is not enrolled for login -- `isEnrolled` would say false,
+    // so no challenge is ever issued -- but refusing on `mfaEnabledAt` alone would leave that row
+    // unable to ever re-enrol either, a permanent lockout with no path back except the CLI reset.
+    // The bypass this refusal exists to prevent needs both columns set to succeed.
+    if (await isEnrolled(userId)) {
       throw new ValidationError(
         'Two-factor authentication is already enabled for this account. Disable it first, then enrol again.'
       );
@@ -514,10 +520,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   type MfaChangeNotice = 'enabled' | 'disabled' | 'reset' | 'challenge_failed';
 
   /**
-   * Fire and forget. Strapi's own forgotPassword does exactly this: send, catch, log server side,
-   * let the operation succeed. Many self-hosted instances never configure a provider, so email
-   * cannot be a hard dependency of a security control. The primary channel is the in-app notice
-   * built from unseen mfa events.
+   * Fire and forget by default -- Strapi's own forgotPassword does exactly this: send, catch, log
+   * server side, let the operation succeed. Many self-hosted instances never configure a
+   * provider, so email cannot be a hard dependency of a security control. The primary channel is
+   * the in-app notice built from unseen mfa events.
    *
    * The eventHub event fires for all four notice types -- `admin.mfa.<type>`, `_` replaced by `.`
    * so `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is
@@ -527,15 +533,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * The email is sent only for an actual change (`enabled`/`disabled`/`reset`): a failed challenge
    * is a notice, not a change, and mailing every wrong code would let anyone who merely knows the
    * password flood the account holder's inbox.
+   *
+   * Returns the email's promise rather than staying `void` (F6): a fire-and-forget caller can
+   * still ignore it exactly as before, but the CLI reset command needs to `await` it -- it calls
+   * `notify` and then `process.exit(0)`, which can tear the process down before a truly detached
+   * promise ever resolves, silently dropping the reset email. The internal try/catch still
+   * guarantees this promise never rejects, so nothing about the fire-and-forget call sites
+   * (`verifyChallenge`, `assertPasswordAndFactor`, `controllers/mfa.ts`) needs to change.
    */
-  const notify = (userId: string, type: MfaChangeNotice): void => {
+  const notify = (userId: string, type: MfaChangeNotice): Promise<void> => {
     strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId });
 
     if (type === 'challenge_failed') {
-      return;
+      return Promise.resolve();
     }
 
-    (async () => {
+    return (async () => {
       try {
         // Only the two fields the email actually needs -- not the password hash or the encrypted
         // TOTP secret sitting on the same row.
@@ -865,8 +878,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // The attempt caps bound the total, but there is no reason to hand out the amplifier.
     const normalised = normaliseRecoveryCode(code);
 
+    // The submitted code is normalised above only to decide which branch to take -- the TOTP
+    // branch itself must still receive a whitespace-stripped code, not the raw submission:
+    // `verifyTotp` only trims leading/trailing whitespace, so a display-formatted code like
+    // "123 456" (some authenticator apps group digits) would dispatch here correctly (6 digits
+    // once spaces are stripped) and then fail the digit check on the untouched original, rejecting
+    // a genuinely valid code.
     if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
-      const totpResult = await attemptTotp(challenge.userId, code);
+      const totpResult = await attemptTotp(challenge.userId, code.replace(/\s+/g, ''));
 
       // `consumeTotpStep` is what makes a code single-use across the whole account rather than
       // within one challenge, so a code spent on an earlier challenge cannot be replayed against a
@@ -929,8 +948,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const normalised = normaliseRecoveryCode(code);
 
+    // Same reasoning as `verifyChallenge`'s dispatch: the TOTP branch needs the whitespace-stripped
+    // code, not the raw submission, or a display-formatted code with an internal space dispatches
+    // correctly but then fails `verifyTotp`'s digit check.
     if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
-      const totpResult = await verifyTotpForUser(userId, code);
+      const totpResult = await verifyTotpForUser(userId, code.replace(/\s+/g, ''));
       if (totpResult.valid && (await consumeTotpStep(userId, totpResult.step))) {
         return;
       }

@@ -28,7 +28,10 @@ interface Answers {
 interface MfaService {
   disable(userId: string): Promise<void>;
   recordEvent(userId: string, type: 'reset', metadata?: { via?: 'cli' }): Promise<void>;
-  notify(userId: string, type: 'reset'): void;
+  // Returns the (never-rejecting) email promise rather than `void`: this command awaits it below
+  // so `process.exit` cannot tear the process down before a detached email send has a chance to
+  // run, silently dropping the reset notification (F6).
+  notify(userId: string, type: 'reset'): Promise<void>;
 }
 
 const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
@@ -60,7 +63,11 @@ async function resetMfa({ email }: CmdOptions) {
   await app.sessionManager('admin').invalidateRefreshToken(String(user.id));
 
   await mfa.recordEvent(String(user.id), 'reset', { via: 'cli' });
-  mfa.notify(String(user.id), 'reset');
+  // Awaited, unlike every other caller of `notify`: those are HTTP request handlers that return
+  // long before a detached email would need to complete, but this command's very next line is
+  // `process.exit(0)`, which can tear the process down mid-send if the promise is not waited on
+  // first (F6).
+  await mfa.notify(String(user.id), 'reset');
 
   console.log(`Two-factor authentication reset for ${email}. All sessions were invalidated.`);
   process.exit(0);

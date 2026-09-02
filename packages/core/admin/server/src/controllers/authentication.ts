@@ -106,17 +106,23 @@ export default {
   ]),
 
   loginMfa: compose([
+    // The flag check runs before body validation, matching `controllers/mfa.ts`'s
+    // `requireEnabled` ordering: validating first would make flag-off return 400 for a malformed
+    // body and 404 for a well-formed one, and that difference is itself a feature-presence tell on
+    // a route that is supposed to behave as though it does not exist.
     async (ctx: Context, next: Next) => {
-      await validateMfaLoginInput(ctx.request.body ?? {});
-      return next();
-    },
-    async (ctx: Context) => {
       const mfa = getService('mfa');
 
       if (!mfa.isEnabled()) {
         return ctx.notFound();
       }
 
+      return next();
+    },
+    async (ctx: Context) => {
+      await validateMfaLoginInput(ctx.request.body ?? {});
+
+      const mfa = getService('mfa');
       const { challengeToken, code } = ctx.request.body as LoginMfa.Request['body'];
 
       // The validator no longer trims `code` (see validation/authentication/mfa.ts): trim it

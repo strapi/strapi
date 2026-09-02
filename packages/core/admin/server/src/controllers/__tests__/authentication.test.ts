@@ -417,7 +417,13 @@ describe('authentication controller', () => {
       expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
     });
 
-    test('with the future flag off, POST /login/mfa returns 404', async () => {
+    // M3: the flag check must run before body validation, matching `controllers/mfa.ts`'s
+    // `requireEnabled` ordering -- otherwise flag-off returns 400 for a malformed body and 404 for
+    // a well-formed one, which is itself a feature-presence tell (a 400 on a route that is
+    // supposed to not exist reveals the validator behind it exists). A malformed body here (no
+    // `code` at all) would throw a `ValidationError` if validation ran first; with the flag
+    // checked first it must still be a plain 404, with validation never even reached.
+    test('with the future flag off, POST /login/mfa returns 404 even for a malformed body', async () => {
       const verifyChallenge = jest.fn();
 
       setStrapi({
@@ -430,9 +436,11 @@ describe('authentication controller', () => {
         },
       });
 
-      const { ctx, notFound } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
+      // Missing `challengeToken` and `code` entirely -- `validateMfaLoginInput` would reject this
+      // if it ever ran.
+      const { ctx, notFound } = buildCtx({});
 
-      await authenticationController.loginMfa(ctx, jest.fn());
+      await expect(authenticationController.loginMfa(ctx, jest.fn())).resolves.toBeUndefined();
 
       expect(notFound).toHaveBeenCalled();
       expect(verifyChallenge).not.toHaveBeenCalled();
