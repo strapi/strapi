@@ -45,6 +45,10 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       state.isInitialized = true;
     },
+
+    async destroy() {
+      state.isInitialized = false;
+    },
   };
 };
 

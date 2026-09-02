@@ -33,6 +33,13 @@ const autosave: Model = {
     data: {
       type: 'json',
     },
+    /**
+     * The attributes the payload was captured against, so a backup taken before a
+     * Content-Type Builder change is not restored into a form that no longer has those fields.
+     */
+    schema: {
+      type: 'json',
+    },
     baseVersion: {
       type: 'string',
     },

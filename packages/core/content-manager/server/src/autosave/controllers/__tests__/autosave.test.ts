@@ -19,8 +19,15 @@ const permissionChecker = {
   sanitizeUpdateInput: jest.fn(async (data) => data),
 };
 
+const contentTypeAttributes = {
+  title: { type: 'string' },
+  body: { type: 'text' },
+  updatedAt: { type: 'datetime' },
+};
+
 const strapi = {
   contentTypes: { 'api::article.article': { uid: 'api::article.article' } },
+  getModel: jest.fn(() => ({ uid: 'api::article.article', attributes: contentTypeAttributes })),
 } as any;
 
 const createContext = (overrides: Record<string, any> = {}) => ({
@@ -93,8 +100,65 @@ describe('autosave controller', () => {
     });
     expect(autosaveService.save).toHaveBeenCalledWith(expect.any(Object), {
       data: { title: 'Draft' },
+      schema: { title: { type: 'string' }, body: { type: 'text' } },
       baseVersion: '2026-01-01T00:00:00.000Z',
     });
+  });
+
+  it('drops fields the content type no longer has and reports what changed', async () => {
+    autosaveService.findOne.mockResolvedValue({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: 'en',
+      data: { title: 'Draft', tagline: 'Gone' },
+      schema: { title: { type: 'string' }, tagline: { type: 'string' } },
+      baseVersion: null,
+      savedAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    const response = await controller.find(createContext());
+
+    expect(response.data.data).toEqual({ title: 'Draft' });
+    expect(response.meta).toEqual({
+      unknownAttributes: {
+        added: { body: { type: 'text' } },
+        removed: { tagline: { type: 'string' } },
+      },
+    });
+  });
+
+  it('reports no change when the backup still matches the content type', async () => {
+    autosaveService.findOne.mockResolvedValue({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: 'en',
+      data: { title: 'Draft' },
+      schema: { title: { type: 'string' }, body: { type: 'text' } },
+      baseVersion: null,
+      savedAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    const response = await controller.find(createContext());
+
+    expect(response.data.data).toEqual({ title: 'Draft' });
+    expect(response).not.toHaveProperty('meta');
+  });
+
+  it('takes a backup stored without a schema at face value', async () => {
+    autosaveService.findOne.mockResolvedValue({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: 'en',
+      data: { title: 'Draft', tagline: 'Kept' },
+      schema: null,
+      baseVersion: null,
+      savedAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    const response = await controller.find(createContext());
+
+    expect(response.data.data).toEqual({ title: 'Draft', tagline: 'Kept' });
+    expect(response).not.toHaveProperty('meta');
   });
 
   it('rejects a malformed payload', async () => {

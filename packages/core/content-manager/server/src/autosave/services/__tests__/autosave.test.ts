@@ -59,8 +59,23 @@ describe('autosave service', () => {
       documentId: 'doc-1',
       locale: 'en',
       data: { title: 'Recovered' },
+      schema: null,
       baseVersion: '2026-01-01T00:00:00.000Z',
       savedAt: '2026-01-02T00:00:00.000Z',
+    });
+  });
+
+  it('stores the schema the backup was captured against', async () => {
+    findMany.mockResolvedValue([]);
+    create.mockImplementation(({ data }: any) => data);
+
+    await service.save(scope, {
+      data: { title: 'Draft' } as any,
+      schema: { title: { type: 'string' } } as any,
+    });
+
+    expect(create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ schema: { title: { type: 'string' } } }),
     });
   });
 

@@ -13,6 +13,9 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => ({
   bootstrap({ strapi }) {
     getService(strapi, 'autosave-lifecycles').bootstrap();
   },
+  destroy({ strapi }) {
+    getService(strapi, 'autosave-lifecycles').destroy();
+  },
   controllers,
   services,
   routes,

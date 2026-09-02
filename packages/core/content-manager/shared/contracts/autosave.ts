@@ -1,4 +1,4 @@
-import type { Data, UID } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -25,6 +25,15 @@ export interface AutosaveEntry {
   savedAt: string;
 }
 
+/**
+ * Attributes the content type gained (`added`) or lost (`removed`) since the backup was taken.
+ * Empty on both sides when the backup still matches the content type.
+ */
+export interface AutosaveSchemaDiff {
+  added: Struct.SchemaAttributes;
+  removed: Struct.SchemaAttributes;
+}
+
 type ErrorResponse = {
   data?: never;
   error: errors.ApplicationError;
@@ -47,6 +56,10 @@ export declare namespace GetAutosave {
   export type Response =
     | {
         data: AutosaveEntry | null;
+        /**
+         * Only present when a backup was found and the content type has changed since.
+         */
+        meta?: { unknownAttributes: AutosaveSchemaDiff };
         error?: never;
       }
     | ErrorResponse;

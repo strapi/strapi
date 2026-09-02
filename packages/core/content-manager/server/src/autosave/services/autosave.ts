@@ -1,4 +1,4 @@
-import type { Core, Data, UID } from '@strapi/types';
+import type { Core, Data, Struct, UID } from '@strapi/types';
 
 import { AUTOSAVE_UID } from '../constants';
 import type { Autosave } from '../../../../shared/contracts';
@@ -16,8 +16,13 @@ interface AutosaveRow {
   documentId: Data.ID;
   locale: string;
   data: Autosave.AutosaveData;
+  schema: Struct.SchemaAttributes | null;
   baseVersion: string | null;
   savedAt: Date | string;
+}
+
+interface AutosaveSnapshot extends Autosave.AutosaveEntry {
+  schema: Struct.SchemaAttributes | null;
 }
 
 const toEntry = ({
@@ -25,13 +30,15 @@ const toEntry = ({
   documentId,
   locale,
   data,
+  schema,
   baseVersion,
   savedAt,
-}: AutosaveRow): Autosave.AutosaveEntry => ({
+}: AutosaveRow): AutosaveSnapshot => ({
   contentType,
   documentId,
   locale: locale === '' ? null : locale,
   data,
+  schema: schema ?? null,
   baseVersion: baseVersion ?? null,
   savedAt: new Date(savedAt).toISOString(),
 });
@@ -47,7 +54,7 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
   });
 
   return {
-    async findOne(scope: AutosaveScope): Promise<Autosave.AutosaveEntry | null> {
+    async findOne(scope: AutosaveScope): Promise<AutosaveSnapshot | null> {
       const row: AutosaveRow | null = await query.findOne({ where: scopeWhere(scope) });
 
       return row ? toEntry(row) : null;
@@ -55,8 +62,16 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async save(
       scope: AutosaveScope,
-      { data, baseVersion }: { data: Autosave.AutosaveData; baseVersion?: string }
-    ): Promise<Autosave.AutosaveEntry> {
+      {
+        data,
+        schema,
+        baseVersion,
+      }: {
+        data: Autosave.AutosaveData;
+        schema?: Struct.SchemaAttributes;
+        baseVersion?: string;
+      }
+    ): Promise<AutosaveSnapshot> {
       const where = scopeWhere(scope);
       const savedAt = new Date();
 
@@ -73,7 +88,7 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
         const row: AutosaveRow = current
           ? await query.update({
               where: { id: current.id },
-              data: { data, baseVersion: baseVersion ?? null, savedAt },
+              data: { data, schema: schema ?? null, baseVersion: baseVersion ?? null, savedAt },
             })
           : await query.create({
               data: {
@@ -81,6 +96,7 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
                 documentId: scope.documentId,
                 locale: scope.locale ?? '',
                 data,
+                schema: schema ?? null,
                 baseVersion: baseVersion ?? null,
                 savedAt,
                 user: scope.userId,
@@ -109,4 +125,4 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
 };
 
 export { createAutosaveService };
-export type { AutosaveScope };
+export type { AutosaveScope, AutosaveSnapshot };
