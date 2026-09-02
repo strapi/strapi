@@ -120,8 +120,12 @@ export default {
       )
       .catch(() => null);
 
+    // disable() wipes the live type on expiry but keeps it on the retained snapshot, so resolve
+    // it once here: an expired offline gold license must still report `offline` (and show its
+    // real expiry) rather than the online check-in line.
+    const licenseType = strapi.ee.type ?? retained?.type ?? null;
     const licenseMode: 'online' | 'offline' =
-      strapi.ee.type === 'gold' && process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true'
+      licenseType === 'gold' && process.env.STRAPI_DISABLE_LICENSE_PING?.toLowerCase() === 'true'
         ? 'offline'
         : 'online';
 
@@ -176,7 +180,7 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type ?? retained?.type ?? null,
+      type: licenseType,
       isTrial: strapi.ee.isTrial,
       // `features.list()` is loosely typed at the source (`{ name: string; [k]: any }[]`);
       // narrow it to the contract's named-feature union so consumers (e.g. useLicenseLimits) keep their types.

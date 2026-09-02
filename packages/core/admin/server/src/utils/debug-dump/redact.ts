@@ -82,11 +82,25 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return proto === Object.prototype || proto === null;
 };
 
+// Accept either separator regardless of the host platform: `os.homedir()` and the app root come
+// back with backslashes on Windows, and a dump may also carry POSIX-style paths (e.g. from
+// config values), so a POSIX-only prefix check would ship absolute Windows paths verbatim.
+const isPathPrefix = (value: string, prefix: string): boolean => {
+  if (value === prefix) {
+    return true;
+  }
+  if (!value.startsWith(prefix)) {
+    return false;
+  }
+  const next = value.charAt(prefix.length);
+  return next === '/' || next === '\\';
+};
+
 const relativize = (value: string, appRoot?: string, homeDir?: string): string => {
-  if (appRoot && (value === appRoot || value.startsWith(`${appRoot}/`))) {
+  if (appRoot && isPathPrefix(value, appRoot)) {
     return `<app>${value.slice(appRoot.length)}`;
   }
-  if (homeDir && (value === homeDir || value.startsWith(`${homeDir}/`))) {
+  if (homeDir && isPathPrefix(value, homeDir)) {
     return `<home>${value.slice(homeDir.length)}`;
   }
   return value;
