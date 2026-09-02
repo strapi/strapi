@@ -1,4 +1,4 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
 
 /**
  * Sort state for the assets list, backed by URL query params so the current
@@ -92,7 +92,11 @@ export interface ListSort {
 }
 
 export const useListSort = (): ListSort => {
-  const [{ query }, setQuery] = useQueryParams<{ sort?: string; folders?: string }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    sort?: string;
+    folders?: string;
+    _q?: string;
+  }>();
 
   const { sortBy, direction, isExplicit } = parseSortParam(query?.sort);
   const foldersPosition: FoldersPosition = query?.folders === 'mixed' ? 'mixed' : 'top';
@@ -106,9 +110,9 @@ export const useListSort = (): ListSort => {
     const serialized = serializeSort(nextSortBy, nextDirection);
 
     if (nextSortBy === DEFAULT_SORT_BY && nextDirection === null) {
-      setQuery({ sort: '' }, 'remove');
+      setQuery(withEncodedUserParams(query, { sort: undefined }));
     } else {
-      setQuery({ sort: serialized });
+      setQuery(withEncodedUserParams(query, { sort: serialized }));
     }
   };
 
@@ -118,9 +122,9 @@ export const useListSort = (): ListSort => {
 
   const setFoldersPosition = (position: FoldersPosition) => {
     if (position === 'mixed') {
-      setQuery({ folders: 'mixed' });
+      setQuery(withEncodedUserParams(query, { folders: 'mixed' }));
     } else {
-      setQuery({ folders: '' }, 'remove');
+      setQuery(withEncodedUserParams(query, { folders: undefined }));
     }
   };
 

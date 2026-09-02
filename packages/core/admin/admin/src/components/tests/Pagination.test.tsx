@@ -8,7 +8,7 @@ const LocationDisplay = () => {
 
   return (
     <ul>
-      <li data-testId="location">{location.search}</li>
+      <li data-testid="location">{location.search}</li>
     </ul>
   );
 };
@@ -115,6 +115,20 @@ describe('Pagination', () => {
         await user.click(getByRole('option', { name: '50' }));
 
         expect(getByRole('combobox')).toHaveTextContent('50');
+      });
+
+      it('should keep an applied filter when the user selects a new value', async () => {
+        const encoded = `filters[$and][0][name][$eq]=${encodeURIComponent('a&b')}`;
+        const { user } = render({ initialEntries: [{ search: `?${encoded}` }] });
+
+        await user.click(screen.getByRole('combobox'));
+        await user.click(screen.getByRole('option', { name: '10' }));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('location')).toHaveTextContent('pageSize=10');
+        });
+
+        expect(screen.getByTestId('location')).toHaveTextContent(encoded);
       });
     });
   });
