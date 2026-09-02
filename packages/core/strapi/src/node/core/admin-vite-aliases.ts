@@ -1,5 +1,15 @@
-import { ADMIN_VITE_ALIAS_MODULES, ADMIN_VITE_SINGLETON_MODULES } from './admin-vite-alias-modules';
+import escapeRegExp from 'lodash/escapeRegExp';
+import type { Alias } from 'vite';
+
+import {
+  ADMIN_VITE_ALIAS_MODULES,
+  ADMIN_VITE_EXACT_ALIAS_MODULES,
+  ADMIN_VITE_SINGLETON_MODULES,
+} from './admin-vite-alias-modules';
 import { getModulePath, getModulePathFrom } from './resolve-module';
+
+// Match the bare name only, so Vite resolves the subpaths through the exports map
+const exactFind = (mod: string) => new RegExp(`^${escapeRegExp(mod)}$`);
 
 /**
  * Vite resolve.alias entries for the admin bundle.
@@ -10,11 +20,13 @@ import { getModulePath, getModulePathFrom } from './resolve-module';
  *
  * @internal
  */
-export const buildAdminViteResolveAliases = (): Record<string, string> =>
-  Object.fromEntries([
-    ...ADMIN_VITE_ALIAS_MODULES.map((mod) => [mod, getModulePath(mod)] as const),
-    ...buildSingletonAliasEntries(),
-  ]);
+export const buildAdminViteResolveAliases = (): Alias[] => [
+  ...ADMIN_VITE_ALIAS_MODULES.map((mod) => ({
+    find: ADMIN_VITE_EXACT_ALIAS_MODULES.some((exact) => exact === mod) ? exactFind(mod) : mod,
+    replacement: getModulePath(mod),
+  })),
+  ...buildSingletonAliasEntries().map(([mod, replacement]) => ({ find: mod, replacement })),
+];
 
 /**
  * Resolve the CodeMirror singleton aliases from @strapi/design-system's closure, skipping any
