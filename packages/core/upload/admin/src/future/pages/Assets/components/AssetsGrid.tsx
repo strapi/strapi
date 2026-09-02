@@ -232,6 +232,9 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       }}
       role="listitem"
       tabIndex={0}
+      // Right-clicking an item is not the background gesture: the folder keeps
+      // the browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
     >
       {canUpdate && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
@@ -475,6 +478,9 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       $isSelected={selected}
       tabIndex={0}
       role="listitem"
+      // Right-clicking an item is not the background gesture: the card keeps
+      // the browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e) => e.preventDefault()}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}

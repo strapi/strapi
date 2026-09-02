@@ -50,6 +50,7 @@ import { FilterMenu } from './components/FilterMenu';
 import { FolderFormDialog } from './components/FolderFormDialog';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
+import { MainAreaContextMenu } from './components/MainAreaContextMenu';
 import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
 import { useAssetSearch } from './hooks/useAssetSearch';
@@ -60,6 +61,7 @@ import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 import { useInfiniteScrollSentinel } from './hooks/useInfiniteScrollSentinel';
 import { useListFilters } from './hooks/useListFilters';
+import { useListScrollRestoration } from './hooks/useListScrollRestoration';
 import { useListSort, type FoldersPosition } from './hooks/useListSort';
 import { buildAssetFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
@@ -693,6 +695,8 @@ export const AssetsPage = () => {
     filter: listFilters.serialized || null,
   });
 
+  const scrollAnchorRef = useListScrollRestoration(listQueryKey);
+
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop} disabled={!canCreate}>
@@ -718,7 +722,19 @@ export const AssetsPage = () => {
                     {/* Zero-height marker: leaves the viewport as soon as the list
                       scrolls, flipping the header into its compact state. */}
                     <Box ref={headerSentinelRef} height={0} aria-hidden />
+                    <Box ref={scrollAnchorRef} height={0} aria-hidden />
 
+                    {/* Renders no wrapper: it listens on the scrolling column
+                        itself, so the header band and the padding below the list
+                        are both in the hit area. Interactive controls, the table
+                        header row and the list items are excluded — see
+                        MainAreaContextMenu. */}
+                    <MainAreaContextMenu
+                      disabled={!canCreate}
+                      onCreateFolder={() => setIsCreateFolderDialogOpen(true)}
+                      onImportFiles={handleFileSelect}
+                      onImportFromUrl={() => setIsUrlDialogOpen(true)}
+                    />
                     <StickyHeader $compact={isHeaderCompact}>
                       <TitleRow>
                         <Typography variant="alpha" tag="h1">
@@ -746,7 +762,7 @@ export const AssetsPage = () => {
                             <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
                               {formatMessage({
                                 id: getTranslationKey('import-files'),
-                                defaultMessage: 'Import files',
+                                defaultMessage: 'File upload',
                               })}
                             </MenuItem>
                             <MenuItem
@@ -755,7 +771,7 @@ export const AssetsPage = () => {
                             >
                               {formatMessage({
                                 id: getTranslationKey('import-from-url'),
-                                defaultMessage: 'Import from URL',
+                                defaultMessage: 'File upload from URL',
                               })}
                             </MenuItem>
                           </SimpleMenu>
@@ -827,7 +843,7 @@ export const AssetsPage = () => {
                     <Layouts.Content>
                       <BetaNotice />
                       {/* Renders nothing — keeps every loaded page's query subscribed
-                      so a rename/delete refreshes the whole list. */}
+                          so a rename/delete refreshes the whole list. */}
                       {assetPageSubscribers}
                       <DropZoneWithOverlay>
                         <DropFilesMessage
