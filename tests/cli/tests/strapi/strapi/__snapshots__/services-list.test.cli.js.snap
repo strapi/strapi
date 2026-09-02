@@ -13,6 +13,8 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::content-manager.permission                   │
 │ plugin::content-manager.populate-builder             │
 │ plugin::content-manager.uid                          │
+│ plugin::content-manager.autosave                     │
+│ plugin::content-manager.autosave-lifecycles          │
 │ plugin::content-manager.preview                      │
 │ plugin::content-manager.preview-config               │
 │ plugin::content-manager.homepage                     │
