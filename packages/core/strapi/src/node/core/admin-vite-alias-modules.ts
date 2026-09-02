@@ -13,9 +13,6 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   'styled-components',
   'react-redux',
   '@reduxjs/toolkit',
-  // Aliased as an exact match, not as a prefix. See `getBaseAliases` in `vite/config.ts`: the
-  // design system publishes `next/styles.css` out of `dist/`, so a prefix rewrite of that subpath
-  // skips the exports map and names a file that does not exist
   '@strapi/design-system',
   '@radix-ui/react-tooltip',
   'lodash',
@@ -104,4 +101,13 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   'invariant',
   'react-dnd',
   'react-dnd-html5-backend',
+] as const satisfies readonly AdminViteAliasModule[];
+
+/**
+ * Alias modules matched on the bare name only. A string alias is a prefix match and skips the
+ * exports map, so Vite must resolve the subpaths of these packages itself
+ */
+export const ADMIN_VITE_EXACT_ALIAS_MODULES = [
+  // `next/source.css` lives in `src/`, a prefix rewrite names a file that does not exist
+  '@strapi/design-system',
 ] as const satisfies readonly AdminViteAliasModule[];
