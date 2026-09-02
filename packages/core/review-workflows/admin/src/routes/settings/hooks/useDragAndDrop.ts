@@ -261,8 +261,8 @@ const useDragAndDrop = <
 
 export {
   useDragAndDrop,
-  UseDragAndDropReturn,
-  UseDragAndDropOptions,
+  type UseDragAndDropReturn,
+  type UseDragAndDropOptions,
   DIRECTIONS,
   DROP_SENSITIVITY,
 };
