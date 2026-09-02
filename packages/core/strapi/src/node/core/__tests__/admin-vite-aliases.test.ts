@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import fs from 'node:fs';
+import path from 'node:path';
+
 import readPkgUp from 'read-pkg-up';
+import type { Alias } from 'vite';
 
 import {
   ADMIN_PINNED_ALIAS_MODULES,
   ADMIN_VITE_ALIAS_MODULES,
   ADMIN_VITE_DEDUPE_MODULES,
   ADMIN_VITE_DEDUPE_ONLY_MODULES,
+  ADMIN_VITE_EXACT_ALIAS_MODULES,
   ADMIN_VITE_SINGLETON_MODULES,
 } from '../admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../admin-vite-aliases';
@@ -31,6 +36,11 @@ const DND_SINGLETON_MODULES = ['react-dnd', 'react-dnd-html5-backend'] as const;
  * either — resolve.alias bypasses their exports map (@strapi/icons publishes ./symbols).
  */
 const PNPM_UNSAFE_DEDUPE_MODULES = ['@strapi/icons', 'react-intl'] as const;
+
+const entryFor = (alias: readonly Alias[], mod: string) =>
+  alias.find((entry) => (entry.find instanceof RegExp ? entry.find.test(mod) : entry.find === mod));
+
+const replacementFor = (alias: readonly Alias[], mod: string) => entryFor(alias, mod)?.replacement;
 
 describe('ADMIN_VITE_ALIAS_MODULES contract', () => {
   it.each(PNPM_OPTIMIZE_ALIAS_MODULES)(
@@ -98,7 +108,7 @@ describe('buildAdminViteResolveAliases', () => {
     const alias = buildAdminViteResolveAliases();
 
     for (const mod of ADMIN_VITE_ALIAS_MODULES) {
-      expect(alias[mod]).toBe(getModulePath(mod));
+      expect(replacementFor(alias, mod)).toBe(getModulePath(mod));
     }
   });
 
@@ -106,7 +116,7 @@ describe('buildAdminViteResolveAliases', () => {
     const alias = buildAdminViteResolveAliases();
 
     for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
-      expect(alias[mod]).toBe(getModulePathFrom('@strapi/design-system', mod));
+      expect(replacementFor(alias, mod)).toBe(getModulePathFrom('@strapi/design-system', mod));
     }
   });
 
@@ -125,7 +135,7 @@ describe('buildAdminViteResolveAliases', () => {
     (mod) => {
       const alias = buildAdminViteResolveAliases();
 
-      expect(alias).not.toHaveProperty(mod);
+      expect(replacementFor(alias, mod)).toBeUndefined();
     }
   );
 
@@ -133,9 +143,68 @@ describe('buildAdminViteResolveAliases', () => {
     'aliases %s to the version pinned by @strapi/admin',
     (mod) => {
       const alias = buildAdminViteResolveAliases();
-      const pkg = readPkgUp.sync({ cwd: alias[mod] });
+      expect(replacementFor(alias, mod)).toBeDefined();
+
+      const pkg = readPkgUp.sync({ cwd: replacementFor(alias, mod) });
 
       expect(pkg?.packageJson?.version).toBe(adminDeps[mod]);
     }
   );
+});
+
+/**
+ * A subpath key that resolves to no file at the package root is remapped by the `exports` map, so
+ * a prefix alias would rewrite the import to a path that does not exist
+ */
+const getRemappedSubpathKeys = (mod: string): string[] => {
+  const root = getModulePath(mod);
+  const { exports: exportsMap }: { exports?: unknown } = require(path.join(root, 'package.json'));
+
+  if (typeof exportsMap !== 'object' || exportsMap === null) {
+    return [];
+  }
+
+  const subpathKeys = Object.keys(exportsMap).filter(
+    (key) => key.startsWith('./') && key !== './package.json' && !key.includes('*')
+  );
+
+  return subpathKeys.filter((key) => {
+    const target = path.join(root, key);
+    const candidates = [
+      target,
+      `${target}.js`,
+      `${target}.mjs`,
+      `${target}.cjs`,
+      path.join(target, 'index.js'),
+      path.join(target, 'index.mjs'),
+      path.join(target, 'index.cjs'),
+      path.join(target, 'package.json'),
+    ];
+
+    return !candidates.some((candidate) => fs.existsSync(candidate));
+  });
+};
+
+describe('ADMIN_VITE_EXACT_ALIAS_MODULES contract', () => {
+  // Two-way on purpose: an exact entry no package needs fails the same as a missing one
+  it.each(ADMIN_VITE_ALIAS_MODULES)(
+    '%s is exact-matched when its exports map remaps a subpath',
+    (mod) => {
+      const remappedKeys = getRemappedSubpathKeys(mod);
+      const listed = ADMIN_VITE_EXACT_ALIAS_MODULES.some((exact) => exact === mod);
+
+      expect({ mod, remappedKeys, listed }).toEqual({
+        mod,
+        remappedKeys,
+        listed: remappedKeys.length > 0,
+      });
+    }
+  );
+
+  it.each(ADMIN_VITE_EXACT_ALIAS_MODULES)('%s matches the bare name only', (mod) => {
+    const find = entryFor(buildAdminViteResolveAliases(), mod)?.find;
+
+    expect(find).toBeInstanceOf(RegExp);
+    expect(find instanceof RegExp && find.test(`${mod}/x`)).toBe(false);
+  });
 });

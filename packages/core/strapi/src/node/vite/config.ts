@@ -1,6 +1,5 @@
-import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
-import type { Alias, InlineConfig, UserConfig } from 'vite';
+import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
@@ -12,21 +11,8 @@ import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exc
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
-import { toGlobPath } from '../core/scan-roots';
 import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
-
-const toAliasArray = (aliases: Record<string, string>): Alias[] =>
-  Object.entries(aliases).map(([find, replacement]) => ({ find, replacement }));
-
-const getBaseAliases = (): Alias[] =>
-  toAliasArray(buildAdminViteResolveAliases()).map((alias) =>
-    // A string alias is a prefix match, so it rewrites a subpath import to
-    // `<packageRoot>/<subpath>` and skips the exports map. The design system publishes
-    // `next/styles.css` from `dist/`, so the rewritten path does not exist. Pin the bare
-    // specifier only and let the exports map resolve the subpaths
-    alias.find === '@strapi/design-system' ? { ...alias, find: /^@strapi\/design-system$/ } : alias
-  );
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
@@ -171,7 +157,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       dedupe: [...ADMIN_VITE_DEDUPE_MODULES],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
-      alias: getBaseAliases(),
+      alias: buildAdminViteResolveAliases(),
     },
     plugins: [tailwindcss(), react(), buildFilesPlugin(ctx)],
   };
@@ -205,16 +191,15 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const baseConfig = await resolveBaseConfig(ctx);
+  // A static import of Vite makes the CJS build print the Vite CJS deprecation warning
+  const { mergeAlias } = await import('vite');
 
   return {
     ...baseConfig,
     mode: 'development',
     resolve: {
       ...baseConfig.resolve,
-      // The base aliases are an array of `{ find, replacement }`. A spread of that array into an
-      // object gives the keys `0`, `1`, ..., and Vite then reads each key as a `find` that never
-      // matches. Merge the two lists as arrays
-      alias: [...getBaseAliases(), ...toAliasArray(getMonorepoAliases({ monorepo }))],
+      alias: mergeAlias(baseConfig.resolve?.alias, getMonorepoAliases({ monorepo })),
     },
     server: {
       cors: false,
@@ -225,22 +210,6 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       allowedHosts: true,
       middlewareMode: true,
       open: ctx.options.open,
-      /**
-       * Vite ignores `node_modules`, so chokidar reports nothing inside an installed plugin that
-       * the Tailwind build scans. This line un-ignores those roots. A root outside `node_modules`
-       * needs no entry, because Vite watches it already.
-       *
-       * Two undocumented behaviours hold the negation up, and a Vite upgrade must test both.
-       * `resolveChokidarOptions` appends this list after its own defaults, so a later `!` pattern
-       * wins in picomatch; and `ignored` accepts a glob, which chokidar 4 dropped in favour of a
-       * path or a function. Either change fails silently: the watcher keeps working and only the
-       * plugin roots stop reporting
-       */
-      watch: {
-        ignored: ctx.scanRoots
-          .filter((dir) => dir.split(path.sep).includes('node_modules'))
-          .map((dir) => `!${toGlobPath(dir)}/**`),
-      },
       hmr: {
         overlay: false,
         /**
