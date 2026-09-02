@@ -183,6 +183,17 @@ describe('AssetsGrid', () => {
       setup({ assets: [], folders: [] });
       expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
     });
+
+    // The page's background context menu reads this attribute to tell an item
+    // apart from empty space — see MainAreaContextMenu.
+    it('opts every card out of the background context menu', () => {
+      setup({ assets: [mockAssets[0]], folders: [createMockFolder(1, 'Photos')] });
+
+      const cards = screen.getAllByRole('listitem');
+
+      expect(cards).toHaveLength(2);
+      cards.forEach((card) => expect(card).toHaveAttribute('data-native-context-menu'));
+    });
   });
 
   describe('AssetCard', () => {

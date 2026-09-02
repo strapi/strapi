@@ -382,6 +382,9 @@ export const BulkActionsBar = ({
         $isStacked={isAiMetadataEnabled}
         tag="section"
         role="region"
+        // The bar floats over the list but is not part of its background: a
+        // right-click on it keeps the browser's own menu. See MainAreaContextMenu.
+        data-native-context-menu
         aria-label={formatMessage({
           id: getTranslationKey('list.bulk-actions.label'),
           defaultMessage: 'Bulk actions',

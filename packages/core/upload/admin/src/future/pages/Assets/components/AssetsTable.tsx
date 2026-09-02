@@ -326,6 +326,9 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       $isSelected={selected}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
@@ -504,6 +507,9 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e: React.DragEvent) => {
         if (isEventFromWithin(e)) {
           e.preventDefault();
