@@ -37,6 +37,14 @@ type ContentTypeEntry = {
 type FixtureSpec = {
   locales: string[];
   mediaFiles: number;
+  localizedDocumentIdRecovery: {
+    tableName: string;
+    joinTableName: string;
+    joinColumn: string;
+    inverseJoinColumn: string;
+    existingDocumentId: string;
+    rows: Array<{ locale: string; marker: string }>;
+  };
   contentTypes: Record<string, ContentTypeEntry>;
 };
 
@@ -44,6 +52,19 @@ const spec: FixtureSpec = {
   locales: ['en', 'fr'],
 
   mediaFiles: 10,
+
+  localizedDocumentIdRecovery: {
+    tableName: 'basic_dp_i18ns',
+    joinTableName: 'basic_dp_i_18_ns_localizations_links',
+    joinColumn: 'basic_dp_i_18_n_id',
+    inverseJoinColumn: 'inv_basic_dp_i_18_n_id',
+    existingDocumentId: 'migration-existing-document-id',
+    rows: [
+      { locale: 'en', marker: 'migration-retry-a' },
+      { locale: 'fr', marker: 'migration-retry-b' },
+      { locale: 'de', marker: 'migration-retry-c' },
+    ],
+  },
 
   contentTypes: {
     'api::basic.basic': {
