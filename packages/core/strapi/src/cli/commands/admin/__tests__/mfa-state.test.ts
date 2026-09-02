@@ -8,13 +8,21 @@ const isEnrolled = jest.fn();
 const countUnusedRecoveryCodes = jest.fn();
 const config = jest.fn();
 
+const mfaServiceInstance = {
+  isEnrolled,
+  countUnusedRecoveryCodes,
+  config,
+};
+
+// Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
+// `admin.services.mfa` is the raw, uninstantiated FACTORY function -- only the services registry
+// ever calls it. A command that reads `app.admin.services.mfa.isEnrolled(...)` directly would be
+// calling `.isEnrolled` on this function itself (undefined), not on the service.
+const mfaFactory = jest.fn(() => mfaServiceInstance);
+
 const admin = {
   services: {
-    mfa: {
-      isEnrolled,
-      countUnusedRecoveryCodes,
-      config,
-    },
+    mfa: mfaFactory,
   },
 };
 
@@ -22,10 +30,16 @@ const db = {
   query: jest.fn(() => ({ findOne })),
 };
 
+// Mirrors `Strapi.service(uid)` (`packages/core/core/src/Strapi.ts`): resolves the already
+// instantiated service for a known uid, `undefined` for anything else. The command must go
+// through this, never through `admin.services.mfa` directly.
+const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInstance : undefined));
+
 const mock = {
   load,
   admin,
   db,
+  service,
 };
 
 jest.mock('@strapi/core', () => {
@@ -43,6 +57,8 @@ describe('admin:mfa-state command', () => {
     countUnusedRecoveryCodes.mockClear();
     config.mockClear();
     db.query.mockClear();
+    mfaFactory.mockClear();
+    service.mockClear();
 
     config.mockReturnValue({ recoveryCodeCount: 10, step: 30 });
   });
@@ -62,6 +78,7 @@ describe('admin:mfa-state command', () => {
 
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);
+    expect(service).not.toHaveBeenCalled();
     expect(isEnrolled).not.toHaveBeenCalled();
 
     mockExit.mockRestore();
@@ -86,6 +103,9 @@ describe('admin:mfa-state command', () => {
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await mfaStateCommand({ email });
+
+    expect(service).toHaveBeenCalledWith('admin::mfa');
+    expect(mfaFactory).not.toHaveBeenCalled();
 
     expect(findOne).toHaveBeenCalledWith({
       where: { email },

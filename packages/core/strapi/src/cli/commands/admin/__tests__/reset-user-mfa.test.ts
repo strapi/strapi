@@ -9,13 +9,21 @@ const notify = jest.fn();
 const invalidateRefreshToken = jest.fn();
 const sessionManager = jest.fn(() => ({ invalidateRefreshToken }));
 
+const mfaServiceInstance = {
+  disable,
+  recordEvent,
+  notify,
+};
+
+// Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
+// `admin.services.mfa` is the raw, uninstantiated FACTORY function -- only the services registry
+// ever calls it. A command that reads `app.admin.services.mfa.disable(...)` directly would be
+// calling `.disable` on this function itself (undefined), not on the service.
+const mfaFactory = jest.fn(() => mfaServiceInstance);
+
 const admin = {
   services: {
-    mfa: {
-      disable,
-      recordEvent,
-      notify,
-    },
+    mfa: mfaFactory,
   },
 };
 
@@ -23,11 +31,17 @@ const db = {
   query: jest.fn(() => ({ findOne })),
 };
 
+// Mirrors `Strapi.service(uid)` (`packages/core/core/src/Strapi.ts`): resolves the already
+// instantiated service for a known uid, `undefined` for anything else. The command must go
+// through this, never through `admin.services.mfa` directly.
+const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInstance : undefined));
+
 const mock = {
   load,
   admin,
   db,
   sessionManager,
+  service,
 };
 
 jest.mock('@strapi/core', () => {
@@ -49,6 +63,8 @@ describe('admin:reset-user-mfa command', () => {
     invalidateRefreshToken.mockClear();
     sessionManager.mockClear();
     db.query.mockClear();
+    mfaFactory.mockClear();
+    service.mockClear();
   });
 
   afterEach(() => {
@@ -67,6 +83,8 @@ describe('admin:reset-user-mfa command', () => {
     expect(load).toHaveBeenCalled();
     expect(db.query).toHaveBeenCalledWith('admin::user');
     expect(findOne).toHaveBeenCalledWith({ where: { email } });
+    expect(service).toHaveBeenCalledWith('admin::mfa');
+    expect(mfaFactory).not.toHaveBeenCalled();
     expect(disable).toHaveBeenCalledWith('1');
     expect(mockExit).toHaveBeenCalledWith(0);
     expect(consoleLog).toHaveBeenCalled();
@@ -85,6 +103,8 @@ describe('admin:reset-user-mfa command', () => {
 
     await resetUserMfaCommand({ email });
 
+    expect(service).toHaveBeenCalledWith('admin::mfa');
+    expect(mfaFactory).not.toHaveBeenCalled();
     expect(sessionManager).toHaveBeenCalledWith('admin');
     expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
 
@@ -121,6 +141,7 @@ describe('admin:reset-user-mfa command', () => {
 
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);
+    expect(service).not.toHaveBeenCalled();
     expect(disable).not.toHaveBeenCalled();
     expect(invalidateRefreshToken).not.toHaveBeenCalled();
     expect(recordEvent).not.toHaveBeenCalled();
@@ -162,6 +183,7 @@ describe('admin:reset-user-mfa command', () => {
     ]);
     expect(mockExit).toHaveBeenCalledWith(0);
     expect(load).not.toHaveBeenCalled();
+    expect(service).not.toHaveBeenCalled();
     expect(disable).not.toHaveBeenCalled();
     expect(invalidateRefreshToken).not.toHaveBeenCalled();
 

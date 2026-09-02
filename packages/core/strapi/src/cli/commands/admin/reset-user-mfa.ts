@@ -16,6 +16,21 @@ interface Answers {
   confirm: boolean;
 }
 
+/**
+ * `admin::mfa` is registered as a factory (`{ strapi } => createMfaService(...)`, see
+ * `packages/core/admin/server/src/services/index.ts`), not a pre-built object like `admin::user`.
+ * It is only instantiated when resolved through the services registry, i.e.
+ * `strapi.service('admin::mfa')` -- `app.admin!.services.mfa` is the raw, uninstantiated factory
+ * function and calling any method on it throws. Typed locally (rather than importing
+ * `@strapi/admin`'s own, private `src/utils` service type) naming only the methods this command
+ * calls, to avoid a deep cross-package import into another package's internals.
+ */
+interface MfaService {
+  disable(userId: string): Promise<void>;
+  recordEvent(userId: string, type: 'reset', metadata?: { via?: 'cli' }): Promise<void>;
+  notify(userId: string, type: 'reset'): void;
+}
+
 const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   {
@@ -36,14 +51,16 @@ async function resetMfa({ email }: CmdOptions) {
     process.exit(1);
   }
 
-  await app.admin!.services.mfa.disable(String(user.id));
+  const mfa = app.service('admin::mfa') as MfaService;
+
+  await mfa.disable(String(user.id));
 
   // Sessions are evicted before the event is recorded and the notice is sent: a failing event
   // write must never leave an attacker holding a live session past this reset.
   await app.sessionManager('admin').invalidateRefreshToken(String(user.id));
 
-  await app.admin!.services.mfa.recordEvent(String(user.id), 'reset', { via: 'cli' });
-  app.admin!.services.mfa.notify(String(user.id), 'reset');
+  await mfa.recordEvent(String(user.id), 'reset', { via: 'cli' });
+  mfa.notify(String(user.id), 'reset');
 
   console.log(`Two-factor authentication reset for ${email}. All sessions were invalidated.`);
   process.exit(0);

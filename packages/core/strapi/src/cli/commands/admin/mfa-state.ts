@@ -9,6 +9,21 @@ interface CmdOptions {
   email?: string;
 }
 
+/**
+ * `admin::mfa` is registered as a factory (`{ strapi } => createMfaService(...)`, see
+ * `packages/core/admin/server/src/services/index.ts`), not a pre-built object like `admin::user`.
+ * It is only instantiated when resolved through the services registry, i.e.
+ * `strapi.service('admin::mfa')` -- `app.admin!.services.mfa` is the raw, uninstantiated factory
+ * function and calling any method on it throws. Typed locally (rather than importing
+ * `@strapi/admin`'s own, private `src/utils` service type) naming only the methods this command
+ * calls, to avoid a deep cross-package import into another package's internals.
+ */
+interface MfaService {
+  isEnrolled(userId: string): Promise<boolean>;
+  countUnusedRecoveryCodes(userId: string): Promise<number>;
+  config(): { recoveryCodeCount: number; step: number };
+}
+
 async function printMfaState({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
@@ -24,11 +39,11 @@ async function printMfaState({ email }: CmdOptions) {
     process.exit(1);
   }
 
-  const enrolled = await app.admin!.services.mfa.isEnrolled(String(user.id));
-  const unusedRecoveryCodes = await app.admin!.services.mfa.countUnusedRecoveryCodes(
-    String(user.id)
-  );
-  const { recoveryCodeCount, step } = app.admin!.services.mfa.config();
+  const mfa = app.service('admin::mfa') as MfaService;
+
+  const enrolled = await mfa.isEnrolled(String(user.id));
+  const unusedRecoveryCodes = await mfa.countUnusedRecoveryCodes(String(user.id));
+  const { recoveryCodeCount, step } = mfa.config();
 
   console.log(`email:             ${user.email}`);
   console.log(`enrolled:          ${enrolled ? 'yes' : 'no'}`);
