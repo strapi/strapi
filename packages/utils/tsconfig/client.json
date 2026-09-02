@@ -19,6 +19,7 @@
     "jsx": "react-jsx",
     "types": [],
     "noUncheckedSideEffectImports": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "moduleDetection": "force"
   }
 }
