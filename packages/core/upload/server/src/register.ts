@@ -33,7 +33,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   sharp.cache(cache);
   sharp.concurrency(concurrency);
 
-  strapi.plugin('upload').provider = createProvider(uploadConfig);
+  strapi.plugin('upload').provider = await createProvider({ strapi, config: uploadConfig });
 
   await registerUploadMiddleware({ strapi });
 
@@ -53,11 +53,17 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   }
 }
 
-const createProvider = (config: Config) => {
+type UploadProvider = {
+  init: (config: Record<string, unknown>) => Record<string, any>;
+};
+
+const createProvider = async ({ strapi, config }: { strapi: Core.Strapi; config: Config }) => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
-  let provider;
+  let providerModule:
+    | UploadProvider
+    | ((params: { strapi: Core.Strapi }) => Promise<UploadProvider>);
 
   let modulePath;
   try {
@@ -76,7 +82,7 @@ const createProvider = (config: Config) => {
   }
 
   try {
-    provider = require(modulePath);
+    providerModule = require(modulePath);
   } catch (err) {
     const newError = new Error(`Could not load upload provider "${providerName}".`);
 
@@ -86,6 +92,9 @@ const createProvider = (config: Config) => {
 
     throw newError;
   }
+
+  const provider =
+    typeof providerModule === 'function' ? await providerModule({ strapi }) : providerModule;
 
   const providerInstance = provider.init(providerOptions);
 

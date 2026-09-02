@@ -59,6 +59,14 @@
     "vitest": "catalog:",
     "vitest-config": "5.52.2"
   },
+  "peerDependencies": {
+    "@strapi/types": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@strapi/types": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"

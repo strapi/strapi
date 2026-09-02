@@ -9910,6 +9910,11 @@ __metadata:
     tsconfig: "npm:5.52.2"
     vitest: "catalog:"
     vitest-config: "npm:5.52.2"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10223,10 +10228,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@strapi/types": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
