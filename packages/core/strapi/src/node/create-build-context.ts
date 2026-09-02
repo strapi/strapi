@@ -10,15 +10,10 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
-import { getScanRoots } from './staticFiles';
+import { getScanRoots } from './core/scan-roots';
 import type { BaseContext } from './types';
 
 interface BaseOptions {
-  /**
-   * Vite development server only: it serves `admin/src`, so Tailwind scans source and not `dist`.
-   * Keep the flag in this object. Rollup folds a literal `dev: false` argument into every consumer
-   */
-  dev?: boolean;
   stats?: boolean;
   minify?: boolean;
   sourcemap?: boolean;
@@ -51,6 +46,8 @@ interface BuildContext extends BaseContext {
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Core.Strapi;
   options?: BaseOptions;
+  /** True for the Vite development server, which serves `admin/src`. Tailwind then scans source and not `dist` */
+  dev?: boolean;
 }
 
 const DEFAULT_BROWSERSLIST = [
@@ -66,6 +63,7 @@ const createBuildContext = async ({
   tsconfig,
   strapi,
   options = {},
+  dev = false,
 }: CreateBuildContextArgs): Promise<BuildContext> => {
   /**
    * If you make a new strapi instance when one already exists,
@@ -166,7 +164,7 @@ const createBuildContext = async ({
 
   const scanRoots = await getScanRoots(
     { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
-    options.dev === true
+    dev
   );
 
   logger.debug('Tailwind scan roots', os.EOL, scanRoots);

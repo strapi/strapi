@@ -18,8 +18,9 @@ jest.mock('../core/admin-customisations', () => ({
 
 jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
-  stat: jest.fn().mockResolvedValue({ isDirectory: () => true }),
 }));
+
+jest.mock('../core/scan-roots', () => ({ getScanRoots: jest.fn().mockResolvedValue([]) }));
 
 const buildStrapiMock = (
   cookieName?: string,
