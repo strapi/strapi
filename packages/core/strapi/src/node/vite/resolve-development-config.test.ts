@@ -27,7 +27,7 @@ describe('Vite admin configuration', () => {
       bundler: 'vite' as const,
       options: {
         minify: true,
-        sourcemaps: false,
+        sourcemap: false,
       },
       plugins: [],
       tsconfig: undefined,
