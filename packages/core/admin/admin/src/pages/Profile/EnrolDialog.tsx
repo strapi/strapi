@@ -26,6 +26,19 @@ const ManualKey = styled(Typography)`
   font-family: monospace;
 `;
 
+/**
+ * `fixedCacheKey`s for the three mutations below. These key `state.adminApi.mutations`
+ * store-globally -- RTK Query shares one cached result across every component that triggers a
+ * mutation with the same `fixedCacheKey`, regardless of which component instance called it. There
+ * is only one consumer of these three mutations today (this dialog); if a future one reuses these
+ * exact strings, it will silently share (and can clobber) this dialog's cached results.
+ */
+const MFA_ENROL_CACHE_KEYS = {
+  password: 'mfa-enrol-password',
+  verify: 'mfa-enrol-verify',
+  acknowledge: 'mfa-enrol-acknowledge',
+} as const;
+
 type Step =
   | { name: 'password' }
   | { name: 'scan'; secret: string; otpauthUri: string }
@@ -48,24 +61,32 @@ const ErrorMessage = ({ error }: { error?: string }) => {
  * then save the recovery codes.
  *
  * State lives in two places, and both are cleared on every close path (Cancel, Escape, overlay
- * click, or a successful acknowledge):
+ * click, or a successful acknowledge) *and* on unmount:
  * - `step`/`password`/`code`/`error` are local React state, cleared by `reset()`.
  * - `{ secret, otpauthUri }` and `{ recoveryCodes }` also land in the Redux store, because RTK
  *   Query keeps every mutation's `data` in `state.adminApi.mutations` for as long as the
  *   triggering hook stays mounted -- and this dialog (`<EnrolDialog>` in `TwoFactorSection.tsx`)
  *   is mounted for the whole profile-page session, not just while `open`. Each of the three
- *   mutations below is given a `fixedCacheKey` specifically so `reset()` can synchronously delete
- *   its entry (`removeMutationResult`) the moment the dialog closes; without a `fixedCacheKey`,
- *   RTK Query only drops a mutation result on unmount (which never happens here) or once a
+ *   mutations below is given a `fixedCacheKey` (see `MFA_ENROL_CACHE_KEYS`) specifically so
+ *   `reset()` can synchronously delete its entry (`removeMutationResult`) the moment the dialog
+ *   closes; without a `fixedCacheKey`, RTK Query only drops a mutation result on unmount or once a
  *   *newer* call supersedes it, and even then only after the default un-subscribe delay -- so the
  *   secret/URI/codes would otherwise sit in the store indefinitely.
+ *
+ *   `fixedCacheKey` cuts both ways, though: RTK Query's own unmount cleanup explicitly *skips*
+ *   resetting a mutation that has one (it's meant to survive a remount), so if the whole page
+ *   unmounts this dialog without `close()` ever running -- browser Back, or an app redirect, while
+ *   it's sitting open on the scan or codes step -- the secret/URI/codes would otherwise survive in
+ *   the store for the rest of the SPA session. The effect right after the mutation hooks below
+ *   covers exactly that path; calling the three resets again on an already-`close()`d dialog is a
+ *   harmless no-op (deleting an already-absent store entry does nothing).
  *
  * `handlePassword`/`handleVerify` are called from both the `<form onSubmit>` (a real browser
  * submitting on Enter in the text field) and the footer button's `onClick` (see below), so each
  * guards itself against re-entrancy (`isEnrolling`/`isVerifying`, plus the same length checks the
  * buttons use for `disabled`) -- otherwise pressing Enter twice while a request is in flight posts
- * twice, and a too-short code typed then submitted via Enter would reach the rate-limited verify
- * endpoint despite the button refusing it.
+ * twice, and a too-short code (or an empty password) typed then submitted via Enter would reach
+ * the rate-limited endpoints despite the button refusing it.
  *
  * The footer buttons themselves don't need `type="submit"`: this project's shared Jest setup
  * (`packages/admin-test-utils/src/setup.ts`) polyfills `window.PointerEvent` with a class that
@@ -86,14 +107,29 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
   const [error, setError] = React.useState<string>();
 
   const [enrol, { isLoading: isEnrolling, reset: resetEnrol }] = useEnrolMfaMutation({
-    fixedCacheKey: 'mfa-enrol-password',
+    fixedCacheKey: MFA_ENROL_CACHE_KEYS.password,
   });
   const [verify, { isLoading: isVerifying, reset: resetVerify }] = useVerifyMfaEnrolmentMutation({
-    fixedCacheKey: 'mfa-enrol-verify',
+    fixedCacheKey: MFA_ENROL_CACHE_KEYS.verify,
   });
   const [acknowledge, { reset: resetAck }] = useAcknowledgeRecoveryCodesMutation({
-    fixedCacheKey: 'mfa-enrol-acknowledge',
+    fixedCacheKey: MFA_ENROL_CACHE_KEYS.acknowledge,
   });
+
+  // Unmount-only safety net: a `fixedCacheKey` mutation is deliberately *not*
+  // cleared by RTK Query's own unmount cleanup (it's meant to survive a remount), so if this
+  // component unmounts without `close()` having run first, nothing else would ever clear these
+  // three cache entries. `removeMutationResult` keys on `fixedCacheKey`, not `requestId` (see the
+  // mutations above), so the closures captured on mount delete the right store entries regardless
+  // of which render produced them -- the effect intentionally never needs to re-run.
+  React.useEffect(() => {
+    return () => {
+      resetEnrol();
+      resetVerify();
+      resetAck();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only, see the comment above
+  }, []);
 
   const reset = () => {
     setStep({ name: 'password' });

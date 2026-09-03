@@ -95,7 +95,11 @@ describe('EnrolDialog', () => {
     expect(await screen.findByRole('img', { name: /scan this qr code/i })).toBeInTheDocument();
     expect(screen.getByText(SECRET)).toBeInTheDocument();
     expect(screen.queryByText(URI)).not.toBeInTheDocument();
-    expect(document.body.innerHTML).not.toContain(URI);
+    // `document.body.innerHTML` serialises `&` as `&amp;`, so an attribute leak of the full
+    // URI would render as `...secret=...&amp;issuer=Strapi` and asserting on the raw `URI`
+    // string (with a literal `&`) would pass even though the secret leaked. Assert on the
+    // `otpauth://totp/...?secret=...` prefix instead, which contains no character HTML escapes.
+    expect(document.body.innerHTML).not.toContain(URI.split('&')[0]);
 
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     await user.click(screen.getByRole('button', { name: 'Verify' }));
@@ -134,6 +138,56 @@ describe('EnrolDialog', () => {
 
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByText(SECRET)).toBeInTheDocument();
+  });
+
+  it('does not post the enrol request twice when Enter is pressed again while one is pending', async () => {
+    let enrolRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol', async () => {
+        enrolRequestCount += 1;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    const passwordInput = screen.getByLabelText('Current password*');
+    await user.type(passwordInput, 'Testing123!');
+    const form = passwordInput.closest('form');
+    if (!form) {
+      throw new Error('expected the password field to live inside a <form>');
+    }
+
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await screen.findByText(SECRET);
+    expect(enrolRequestCount).toBe(1);
+  });
+
+  it('ignores an Enter-key submit on the password step when the password is empty', async () => {
+    let enrolRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol', async () => {
+        enrolRequestCount += 1;
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+
+    renderDialog({ open: true, onClose: jest.fn() });
+    const passwordInput = screen.getByLabelText('Current password*');
+    const form = passwordInput.closest('form');
+    if (!form) {
+      throw new Error('expected the password field to live inside a <form>');
+    }
+
+    fireEvent.submit(form);
+
+    // See the analogous scan-step test below for why this needs a real wait rather than an
+    // immediate assertion.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(enrolRequestCount).toBe(0);
+    expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
   });
 
   it('does not post the verify request twice when Enter is pressed again while one is pending', async () => {
@@ -267,5 +321,20 @@ describe('EnrolDialog', () => {
     );
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
     expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
+  });
+
+  it('does not leak the secret into the store when the dialog unmounts without closing', async () => {
+    // Simulates the whole page unmounting the dialog directly -- browser Back, or an app
+    // redirect -- while it's open on the scan step, i.e. `close()` never runs at all. The
+    // captured store outlives the unmounted component tree, so this reads it after `unmount()`.
+    const { user, unmount } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await screen.findByText(SECRET);
+
+    unmount();
+
+    expect(hasLeakedMfaSecrets()).toBe(false);
   });
 });
