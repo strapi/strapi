@@ -19,13 +19,10 @@ jest.mock('../monorepo', () => ({ loadStrapiMonorepo: jest.fn(async () => undefi
 const MONOREPO = '/repo';
 const APP = '/app';
 
-/** `getScanRoots` reads this with a bare `require.resolve`, which this file does not mock */
+/** This file mocks `createRequire` only, so a bare `require.resolve` still works */
 const HOST_MANIFEST_PATH = require.resolve('@strapi/strapi/package.json');
 
-/**
- * One resolution table per `createRequire` base. An empty entry table proves that the host packages
- * come from the `@strapi/strapi` manifest, which is the only place strict pnpm resolves them
- */
+/** One resolution table per `createRequire` base */
 const HOST_RESOLVED: Record<string, string> = Object.fromEntries(
   HOST_ADMIN_PACKAGES.map((name) => [
     `${name}/strapi-admin`,
@@ -56,8 +53,6 @@ const fakeRequire = (table: Record<string, string>) =>
 
       return resolved;
     },
-    // A `NodeRequire` carries `cache`, `main` and `extensions`; the code under test calls
-    // `resolve` alone
   }) as unknown as NodeRequire;
 
 const modulePlugin = (name: string, modulePath: string): PluginMeta => ({
@@ -72,7 +67,6 @@ const scanContext = (plugins: PluginMeta[], customisations?: { path: string }) =
     cwd: APP,
     runtimeDir: path.join(APP, '.strapi', 'client'),
     plugins,
-    // The fixture supplies the `path` the code reads; the real type also carries `modulePath`
     customisations: customisations as BuildContext['customisations'],
   }) satisfies Parameters<typeof getScanRoots>[0];
 
@@ -179,10 +173,6 @@ describe('getScanRoots', () => {
   });
 });
 
-/**
- * The hand-written host list and the imports in `src/admin.ts` must not drift. Drift is the one way
- * the list can miss a package
- */
 describe('the host admin packages', () => {
   const packageRoot = path.dirname(HOST_MANIFEST_PATH);
 
