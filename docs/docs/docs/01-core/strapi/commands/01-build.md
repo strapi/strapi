@@ -96,7 +96,7 @@ interface BuildContext {
   /**
    * The build options
    */
-  options: Pick<BuildOptions, 'minify' | 'sourcemap' | 'stats'> & Pick<DevelopOptions, 'open'>;
+  options: BaseOptions;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
@@ -119,6 +119,18 @@ interface BuildContext {
    */
   target: string[];
   tsconfig?: CLIContext['tsconfig'];
+}
+```
+
+`options` holds the flags shared by `build` and `develop`, named exactly as the CLI declares them:
+
+```ts
+interface BaseOptions {
+  stats?: boolean;
+  minify?: boolean;
+  sourcemap?: boolean;
+  bundler?: 'webpack' | 'vite';
+  open?: boolean;
 }
 ```
 
