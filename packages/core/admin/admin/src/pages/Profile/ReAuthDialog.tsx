@@ -202,7 +202,7 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
 
   const handleAcknowledged = async () => {
     setError(undefined);
-    const res = await acknowledge({});
+    const res = await acknowledge();
     if ('error' in res) {
       setError(toMessage(res.error));
       return;

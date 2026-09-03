@@ -52,7 +52,7 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
   const result: MfaConfig = {
     ...MFA_DEFAULTS,
     ...input,
-    window: { ...MFA_DEFAULTS.window, ...(input.window ?? {}) },
+    window: { ...MFA_DEFAULTS.window, ...input.window },
   };
 
   // Interop breakers: warn and fall back.

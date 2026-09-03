@@ -1,7 +1,6 @@
 import { adminApi } from './api';
 
 import type {
-  AcknowledgeRecoveryCodes,
   Disable,
   Enrol,
   MarkNoticesSeen,
@@ -44,7 +43,8 @@ const mfaService = adminApi
         transformResponse(res: VerifyEnrolment.Response) {
           return res.data;
         },
-        invalidatesTags: ['Mfa'],
+        // Also invalidates `MfaNotices`: the server raises an `enabled` notice for this event.
+        invalidatesTags: ['Mfa', 'MfaNotices'],
       }),
       regenerateRecoveryCodes: builder.mutation<
         RegenerateRecoveryCodes.Response['data'],
@@ -56,13 +56,17 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Mfa'],
       }),
-      acknowledgeRecoveryCodes: builder.mutation<void, AcknowledgeRecoveryCodes.Request['body']>({
+      // `AcknowledgeRecoveryCodes.Request['body']` is `{}` -- the server reads nothing from the
+      // request body for this endpoint -- so the mutation argument is typed `void` rather than
+      // carrying a body type it never sends; callers invoke it as `acknowledge()`.
+      acknowledgeRecoveryCodes: builder.mutation<void, void>({
         query: () => ({ method: 'POST', url: '/admin/mfa/recovery-codes/ack' }),
         invalidatesTags: ['Mfa'],
       }),
       disableMfa: builder.mutation<void, Disable.Request['body']>({
         query: (body) => ({ method: 'POST', url: '/admin/mfa/disable', data: body }),
-        invalidatesTags: ['Mfa'],
+        // Also invalidates `MfaNotices`: the server raises a `disabled` notice for this event.
+        invalidatesTags: ['Mfa', 'MfaNotices'],
       }),
       getMfaNotices: builder.query<Notices.Response['data'], void>({
         query: () => ({ method: 'GET', url: '/admin/mfa/notices' }),

@@ -2,7 +2,12 @@ import * as React from 'react';
 
 import { type IntlFormatters, useIntl } from 'react-intl';
 
-import { useGetMfaNoticesQuery, useMarkMfaNoticesSeenMutation } from '../services/mfa';
+import {
+  useGetMfaNoticesQuery,
+  useGetMfaStatusQuery,
+  useMarkMfaNoticesSeenMutation,
+} from '../services/mfa';
+import { isBaseQueryError } from '../utils/baseQuery';
 
 import { useNotification } from './Notifications';
 
@@ -59,20 +64,41 @@ export const formatMfaNotice = (
  * exactly those rows seen; the profile section (`TwoFactorSection`) lists the same notices, so
  * nothing is lost if the toast is left to sit or times out.
  *
- * Stays silent while loading, when the future flag is off (a 404 from `/admin/mfa/notices`, same
- * signal `TwoFactorSection` uses for `/admin/mfa/me`), and when there are no unseen notices.
+ * Stays silent while loading, when the future flag is off, and when there are no unseen notices.
+ * The flag-off signal is a 404 from `useGetMfaStatusQuery` (`/admin/mfa/me`) -- the same query
+ * `TwoFactorSection` already runs and RTK Query caches, so checking it here costs no extra
+ * request -- which then `skip`s `useGetMfaNoticesQuery` entirely. This deliberately does NOT
+ * factor in `status.enabled`: `disabled`/`reset` notices are raised exactly when a user stops
+ * being enrolled, so notices must keep flowing for a not-currently-enrolled user too.
  *
  * `announced` caps this at one toast per mount: RTK Query caches `getMfaNotices`, so it does not
  * refire on every route change, but a later refetch -- e.g. the `MfaNotices` tag invalidation that
  * follows `markMfaNoticesSeen` -- hands back a new array reference for `notices`, which would
  * otherwise re-run the effect below and toast again for events already dismissed.
+ *
+ * The toast is `blockTransition: true` (`duration: Infinity`), and `Toaster` is rendered once for
+ * the whole app, above the router -- while this component lives inside `AdminLayout`, below it. An
+ * in-SPA logout unmounts `AdminLayout` (and this component) without ever unmounting `Toaster`, so
+ * without the cleanup effect below the toast would survive on the login screen, and a fresh one
+ * would stack on top of it after the next login. `toast.dismiss` does not run the `Alert`'s
+ * `onClose`, so unmounting this way deliberately does NOT mark the notices seen -- the user never
+ * actually saw them.
  */
 const MfaNotices = () => {
   const { formatMessage } = useIntl();
-  const { toggleNotification } = useNotification();
-  const { data: notices } = useGetMfaNoticesQuery();
+  const { toggleNotification, dismissNotification } = useNotification();
+  const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
+  const statusIsNotFound = Boolean(
+    (statusError &&
+      isBaseQueryError(statusError) &&
+      'status' in statusError &&
+      statusError.status === 404) ||
+      statusLoading
+  );
+  const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: statusIsNotFound });
   const [markSeen] = useMarkMfaNoticesSeenMutation();
   const announced = React.useRef(false);
+  const toastId = React.useRef<string | number>();
 
   React.useEffect(() => {
     if (announced.current || !notices || notices.length === 0) {
@@ -81,7 +107,7 @@ const MfaNotices = () => {
     announced.current = true;
     const ids = notices.map((notice) => Number(notice.id));
 
-    toggleNotification({
+    toastId.current = toggleNotification({
       type: 'warning',
       blockTransition: true,
       title: formatMessage({
@@ -101,6 +127,14 @@ const MfaNotices = () => {
       },
     });
   }, [formatMessage, markSeen, notices, toggleNotification]);
+
+  React.useEffect(() => {
+    return () => {
+      if (toastId.current !== undefined) {
+        dismissNotification(toastId.current);
+      }
+    };
+  }, [dismissNotification]);
 
   return null;
 };

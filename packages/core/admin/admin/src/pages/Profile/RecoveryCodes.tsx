@@ -9,7 +9,6 @@ import { useNotification } from '../../features/Notifications';
 interface RecoveryCodesProps {
   codes: string[];
   onAcknowledged: () => Promise<void> | void;
-  acknowledgeLabel?: string;
 }
 
 const CodeTypography = styled(Typography)`
@@ -21,7 +20,7 @@ const CodeTypography = styled(Typography)`
  * so acknowledging is mandatory: the confirming button stays disabled until the checkbox is
  * ticked. Copy and download are conveniences; nothing here is stored by the app.
  */
-const RecoveryCodes = ({ codes, onAcknowledged, acknowledgeLabel }: RecoveryCodesProps) => {
+const RecoveryCodes = ({ codes, onAcknowledged }: RecoveryCodesProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const [saved, setSaved] = React.useState(false);
@@ -99,11 +98,10 @@ const RecoveryCodes = ({ codes, onAcknowledged, acknowledgeLabel }: RecoveryCode
       </Checkbox>
       <Flex justifyContent="flex-end">
         <Button disabled={!saved} loading={submitting} onClick={handleAcknowledge}>
-          {acknowledgeLabel ??
-            formatMessage({
-              id: 'Settings.profile.form.section.mfa.codes.done',
-              defaultMessage: 'I have saved my recovery codes',
-            })}
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.codes.done',
+            defaultMessage: 'I have saved my recovery codes',
+          })}
         </Button>
       </Flex>
     </Flex>

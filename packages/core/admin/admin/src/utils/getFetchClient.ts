@@ -366,7 +366,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         // error payload, or a 401 rendered as plain text) would otherwise surface as a raw
         // parsing `SyntaxError` with no `status`. Normalise it to a `FetchError` carrying
         // `status` — the same shape callers get for a non-JSON-shaped error body — so a status
-        // this specific (401, in particular `withTokenRefresh` below, and `baseQuery.ts`'s
+        // like this one (401, in particular `withTokenRefresh` below, and `baseQuery.ts`'s
         // session-expiry handling) still gets acted on regardless of what the body looked like.
         const fetchError = new FetchError('Unknown Server Error');
         fetchError.status = response.status;

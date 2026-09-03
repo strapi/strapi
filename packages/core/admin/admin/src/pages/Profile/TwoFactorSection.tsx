@@ -51,7 +51,7 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
         {formatMessage(
           {
             id: 'Settings.profile.form.section.mfa.status.codes',
-            defaultMessage: '{count} recovery codes left',
+            defaultMessage: '{count, plural, one {# recovery code} other {# recovery codes}} left',
           },
           { count: status.recoveryCodesRemaining }
         )}
@@ -84,7 +84,7 @@ const RecentSecurityEvents = ({
           defaultMessage: 'Recent security events',
         })}
       </Typography>
-      <Flex tag="ul" direction="column" alignItems="stretch" gap={1}>
+      <Flex tag="ul" role="list" direction="column" alignItems="stretch" gap={1}>
         {notices.map((notice) => (
           <Typography key={`${notice.id}`} tag="li" textColor="neutral600">
             {formatMfaNotice(notice, formatMessage, formatDate)}
@@ -110,8 +110,8 @@ const TwoFactorSection = () => {
   const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
   /**
    * Dismissing a warning only hides it for the lifetime of this component instance -- nothing is
-   * persisted, so the warning comes back the next time the profile page is visited (or as soon as
-   * the underlying condition changes again, since the query re-running resets this state).
+   * persisted, so the warning comes back the next time the profile page is visited (this state
+   * only resets on remount; the status query re-running while mounted does not reset it).
    */
   const [dismissedAck, setDismissedAck] = React.useState(false);
   const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);
@@ -182,7 +182,7 @@ const TwoFactorSection = () => {
             {
               id: 'Settings.profile.form.section.mfa.warning.low.body',
               defaultMessage:
-                'You have only {count} recovery codes left. Regenerate them before you run out.',
+                'You have only {count, plural, one {# recovery code} other {# recovery codes}} left. Regenerate them before you run out.',
             },
             { count: status.recoveryCodesRemaining }
           )}
@@ -216,7 +216,7 @@ const TwoFactorSection = () => {
           </Flex>
         )}
       </Flex>
-      {status.enabled && notices && notices.length > 0 ? (
+      {notices && notices.length > 0 ? (
         <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
       ) : null}
       {/*

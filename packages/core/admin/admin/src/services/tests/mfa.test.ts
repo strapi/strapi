@@ -1,7 +1,13 @@
 import { renderHook, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { useGetMfaStatusQuery, useMarkMfaNoticesSeenMutation, useGetMfaNoticesQuery } from '../mfa';
+import {
+  useGetMfaStatusQuery,
+  useMarkMfaNoticesSeenMutation,
+  useGetMfaNoticesQuery,
+  useVerifyMfaEnrolmentMutation,
+  useDisableMfaMutation,
+} from '../mfa';
 
 describe('mfa service', () => {
   it('exposes the /mfa/me status shape', async () => {
@@ -70,6 +76,58 @@ describe('mfa service', () => {
     await waitFor(() => expect(result.current.notices.data).toHaveLength(1));
     await result.current.markSeen({ ids: [1] });
     await waitFor(() => expect(result.current.notices.data).toHaveLength(0));
+    expect(calls).toBe(2);
+  });
+
+  /**
+   * Minor (b): `verifyMfaEnrolment` creates an `enabled` notice server-side, and `disableMfa`
+   * creates a `disabled` one -- neither mutation invalidated the `MfaNotices` tag, so a
+   * still-mounted `useGetMfaNoticesQuery` (e.g. `MfaNotices`, `TwoFactorSection`) would not learn
+   * about the new notice until some unrelated refetch happened to occur.
+   */
+  it('verifying enrolment invalidates the notices list', async () => {
+    let calls = 0;
+    server.use(
+      http.get('/admin/mfa/notices', () => {
+        calls += 1;
+        return HttpResponse.json({ data: calls === 1 ? [] : [{ id: 1 }] });
+      }),
+      http.post('/admin/mfa/enrol/verify', () =>
+        HttpResponse.json({ data: { recoveryCodes: ['ABCDE12345'] } })
+      )
+    );
+
+    const { result } = renderHook(() => {
+      const notices = useGetMfaNoticesQuery();
+      const [verify] = useVerifyMfaEnrolmentMutation();
+      return { notices, verify };
+    });
+
+    await waitFor(() => expect(result.current.notices.data).toHaveLength(0));
+    await result.current.verify({ code: '123456' });
+    await waitFor(() => expect(result.current.notices.data).toHaveLength(1));
+    expect(calls).toBe(2);
+  });
+
+  it('disabling mfa invalidates the notices list', async () => {
+    let calls = 0;
+    server.use(
+      http.get('/admin/mfa/notices', () => {
+        calls += 1;
+        return HttpResponse.json({ data: calls === 1 ? [] : [{ id: 1 }] });
+      }),
+      http.post('/admin/mfa/disable', () => new HttpResponse(null, { status: 204 }))
+    );
+
+    const { result } = renderHook(() => {
+      const notices = useGetMfaNoticesQuery();
+      const [disable] = useDisableMfaMutation();
+      return { notices, disable };
+    });
+
+    await waitFor(() => expect(result.current.notices.data).toHaveLength(0));
+    await result.current.disable({ password: 'Testing123!', code: '123456' });
+    await waitFor(() => expect(result.current.notices.data).toHaveLength(1));
     expect(calls).toBe(2);
   });
 });

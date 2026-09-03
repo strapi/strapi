@@ -23,14 +23,21 @@ const resetMfaStoreProbe = () => {
   capturedStore = undefined;
 };
 
-/** True if any cached mutation result still carries one of the given secret substrings. */
+/**
+ * True if any cached mutation entry still carries one of the given secret substrings, anywhere in
+ * the entry -- not just its response `data`. RTK Query's mutation cache entry also keeps
+ * `originalArgs` (the request body a component passed in, e.g. `enrol({ password })` or
+ * `regenerateRecoveryCodes({ password, code })`), which a `data`-only check would miss entirely:
+ * a password or a submitted TOTP/recovery code could sit in `originalArgs` long after the
+ * response it was sent for, undetected. `JSON.stringify` of the whole entry pins both halves.
+ */
 const hasLeakedMfaSecrets = (...secrets: string[]) => {
   const state = capturedStore!.getState() as RootState;
   return Object.values(state.adminApi.mutations).some((entry) => {
-    if (!entry?.data) {
+    if (!entry) {
       return false;
     }
-    const json = JSON.stringify(entry.data);
+    const json = JSON.stringify(entry);
     return secrets.some((secret) => json.includes(secret));
   });
 };

@@ -87,6 +87,21 @@ describe('TwoFactorSection', () => {
     expect(screen.queryByText('Running low on recovery codes')).not.toBeInTheDocument();
   });
 
+  /** Minor (a): the count strings are ICU plural, not bare `{count}` -- "1 recovery code left". */
+  it('shows the singular recovery code count when exactly 1 remains', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 1,
+        codesAcknowledged: true,
+      })
+    );
+    renderSection();
+
+    expect(await screen.findByText('1 recovery code left')).toBeInTheDocument();
+  });
+
   it('warns when the recovery codes were never acknowledged', async () => {
     server.use(
       status({
@@ -115,6 +130,21 @@ describe('TwoFactorSection', () => {
 
     expect(await screen.findByText('Running low on recovery codes')).toBeInTheDocument();
     expect(screen.getByText(/only 3 recovery codes left/i)).toBeInTheDocument();
+  });
+
+  it('uses the singular low-codes warning when exactly 1 recovery code remains', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 1,
+        codesAcknowledged: true,
+      })
+    );
+    renderSection();
+
+    expect(await screen.findByText('Running low on recovery codes')).toBeInTheDocument();
+    expect(screen.getByText(/only 1 recovery code left/i)).toBeInTheDocument();
   });
 
   it('offers to enable two-factor authentication when not enrolled', async () => {
@@ -205,28 +235,38 @@ describe('TwoFactorSection', () => {
     await waitFor(() => expect(seenBody).toEqual({}));
   });
 
-  it('does not list security events when not enrolled', async () => {
+  /**
+   * F1: `disabled` and `reset` events are recorded exactly when the user stops being enrolled, so
+   * gating the list on `status.enabled` hid it in precisely the case it exists for -- after a
+   * self-disable or a CLI-driven reset, the section showed only "Not enabled" with no way to see
+   * why, and "Mark all as seen" was unreachable.
+   */
+  it('lists security events even when not currently enrolled (e.g. after a reset)', async () => {
+    const notice: MfaEventNotice = {
+      id: 1,
+      type: 'reset',
+      metadata: {},
+      createdAt: '2026-09-01T10:00:00.000Z',
+      seenAt: null,
+    };
+    let seenBody: unknown;
     server.use(
       status(),
-      http.get('/admin/mfa/notices', () =>
-        HttpResponse.json({
-          data: [
-            {
-              id: 1,
-              type: 'challenge_failed',
-              metadata: {},
-              createdAt: '2026-09-01T10:00:00.000Z',
-              seenAt: null,
-            },
-          ],
-        })
-      )
+      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [notice] })),
+      http.post('/admin/mfa/notices/seen', async ({ request }) => {
+        seenBody = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      })
     );
-    renderSection();
+    const { user } = renderSection();
 
     await screen.findByText('Not enabled');
     expect(
-      screen.queryByRole('heading', { name: 'Recent security events' })
-    ).not.toBeInTheDocument();
+      await screen.findByRole('heading', { name: 'Recent security events' })
+    ).toBeInTheDocument();
+    expect(screen.getByText(expectFormattedNotice(notice))).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
+    await waitFor(() => expect(seenBody).toEqual({}));
   });
 });
