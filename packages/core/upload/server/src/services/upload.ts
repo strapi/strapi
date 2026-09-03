@@ -222,7 +222,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ApplicationError('File is not a valid image');
       }
       if (await isOptimizableImage(currentFile)) {
-        return optimize(currentFile);
+        try {
+          return optimize(currentFile);
+        } catch {
+          return currentFile;
+        }
       }
     }
 
@@ -319,18 +323,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+      try {
+        const thumbnailFile = await generateThumbnail(fileData);
+        if (thumbnailFile) {
+          uploadPromises.push(uploadThumbnail(thumbnailFile));
+        }
+      } catch {
+        // Keep the original upload when derivative generation fails.
       }
 
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          // eslint-disable-next-line no-continue
-          if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+      try {
+        const formats = await generateResponsiveFormats(fileData);
+        if (Array.isArray(formats) && formats.length > 0) {
+          for (const format of formats) {
+            // eslint-disable-next-line no-continue
+            if (!format) continue;
+            uploadPromises.push(uploadResponsiveFormat(format));
+          }
         }
+      } catch {
+        // Keep the original upload when derivative generation fails.
       }
     }
     // Wait for all uploads to finish

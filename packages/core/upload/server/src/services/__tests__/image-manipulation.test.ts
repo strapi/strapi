@@ -229,5 +229,32 @@ describe('Image manipulation - animated images', () => {
       expect(result.width).toBeDefined();
       expect(result.height).toBeDefined();
     });
+
+    test('returns original file when EXIF/metadata processing fails', async () => {
+      (global.strapi as any).plugins.upload.services.upload.getSettings = () => ({
+        sizeOptimization: false,
+        autoOrientation: true,
+      });
+
+      const corruptPath = path.join(tmpDir, 'corrupt-exif.jpg');
+      await fse.writeFile(corruptPath, Buffer.from('not-a-valid-image'));
+
+      const file = makeFile(corruptPath, '.jpg', 'image/jpeg', 800, 600);
+      const result = await imageManipulation.optimize(file);
+
+      expect(result.filepath).toBe(corruptPath);
+      expect(result.width).toBe(800);
+      expect(result.height).toBe(600);
+    });
+
+    test('getDimensions falls back to existing file dimensions when metadata read fails', async () => {
+      const corruptPath = path.join(tmpDir, 'corrupt-dimensions.jpg');
+      await fse.writeFile(corruptPath, Buffer.from('not-a-valid-image'));
+
+      const file = makeFile(corruptPath, '.jpg', 'image/jpeg', 640, 480);
+      const dimensions = await imageManipulation.getDimensions(file);
+
+      expect(dimensions).toEqual({ width: 640, height: 480 });
+    });
   });
 });
