@@ -158,6 +158,14 @@ await build(args);
 ```ts
 interface BuildOptions extends CLIContext {
   /**
+   * The directory to build the command was ran from
+   */
+  cwd: string;
+  /**
+   * The logger to use.
+   */
+  logger: Logger;
+  /**
    * Which bundler to use for building.
    *
    * @default vite
@@ -183,17 +191,6 @@ interface BuildOptions extends CLIContext {
    * @default false
    */
   installDeps?: boolean;
-}
-
-interface CLIContext {
-  /**
-   * The directory the command was ran from
-   */
-  cwd: string;
-  /**
-   * The logger to use.
-   */
-  logger: Logger;
   /**
    * The tsconfig to use for the build. If undefined, this is not a TS project.
    */
