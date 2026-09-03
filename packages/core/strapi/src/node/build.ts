@@ -9,7 +9,7 @@ interface BuildOptions extends CLIContext {
   /**
    * Which bundler to use for building.
    *
-   * @default webpack
+   * @default vite
    */
   bundler?: 'webpack' | 'vite';
   /**

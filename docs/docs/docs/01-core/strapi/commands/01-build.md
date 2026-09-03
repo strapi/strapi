@@ -21,13 +21,14 @@ strapi build
 Build the strapi admin app
 
 Options:
-  -d, --debug        Enable debugging mode with verbose logs (default: false)
-  --minify           Minify the output (default: true)
-  --no-optimization  [deprecated]: use minify instead
-  --silent           Don't log anything (default: false)
-  --sourcemap        Produce sourcemaps (default: false)
-  --stats            Print build statistics to the console (default: false)
-  -h, --help         Display help for command
+  --bundler [bundler]  Bundler to use (webpack or vite) (default: "vite")
+  -d, --debug          Enable debugging mode with verbose logs (default: false)
+  --minify             Minify the output (default: true)
+  --silent             Don't log anything (default: false)
+  --sourcemap          Produce sourcemaps (default: false)
+  --stats              Print build statistics to the console (default: false)
+  --install-deps       Auto-install missing admin dependencies (default: false)
+  -h, --help           display help for command
 ```
 
 ## How it works
@@ -58,7 +59,28 @@ We run a prompt to encourage the user to install these deps – however, this fu
 The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to preapre any bundler. It's shape looks like:
 
 ```ts
-interface BuildContext {
+interface BuildContext extends BaseContext {
+  /**
+   * The customisations defined by the user in their app.js file
+   */
+  customisations?: AppFile;
+  /**
+   * Features object with future flags
+   */
+  features?: Modules.Features.FeaturesService['config'];
+  /**
+   * The build options
+   */
+  options: Pick<BuildOptions, 'bundler' | 'minify' | 'sourcemap' | 'stats'> &
+    Pick<DevelopOptions, 'open'>;
+  /**
+   * The plugins to be included in the JS bundle
+   * incl. internal plugins, third party plugins & local plugins
+   */
+  plugins: PluginMeta[];
+}
+
+interface BaseContext {
   /**
    * The absolute path to the app directory defined by the Strapi instance
    */
@@ -69,9 +91,13 @@ interface BuildContext {
    */
   basePath: string;
   /**
-   * The customisations defined by the user in their app.js file
+   * internal path to serve the admin panel
    */
-  customisations?: AppFile;
+  adminPath: string;
+  /**
+   * The bundler to use for building & watching
+   */
+  bundler: 'webpack' | 'vite';
   /**
    * The current working directory
    */
@@ -94,43 +120,59 @@ interface BuildContext {
   env: Record<string, string>;
   logger: CLIContext['logger'];
   /**
-   * The build options
-   */
-  options: BaseOptions;
-  /**
-   * The plugins to be included in the JS bundle
-   * incl. internal plugins, third party plugins & local plugins
-   */
-  plugins: Array<{
-    path: string;
-    name: string;
-    importName: string;
-  }>;
-  /**
    * The absolute path to the runtime directory
    */
   runtimeDir: string;
   /**
    * The Strapi instance
    */
-  strapi: Strapi;
+  strapi: Core.Strapi;
   /**
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */
   target: string[];
   tsconfig?: CLIContext['tsconfig'];
 }
-```
 
-`options` holds the flags shared by `build` and `develop`, named exactly as the CLI declares them:
+type PluginMeta = LocalPluginMeta | ModulePluginMeta;
 
-```ts
-interface BaseOptions {
-  stats?: boolean;
-  minify?: boolean;
-  sourcemap?: boolean;
-  bundler?: 'webpack' | 'vite';
-  open?: boolean;
+interface LocalPluginMeta {
+  name: string;
+  /**
+   * camelCased version of the plugin name
+   */
+  importName: string;
+  /**
+   * The path to the plugin, relative to the app's root directory
+   * in system format
+   */
+  path: string;
+  /**
+   * The path to the plugin, relative to the runtime directory
+   * in module format (i.e. with forward slashes) because thats
+   * where it should be used as an import
+   */
+  modulePath: string;
+  type: 'local';
+}
+
+interface ModulePluginMeta {
+  name: string;
+  /**
+   * camelCased version of the plugin name
+   */
+  importName: string;
+  /**
+   * Modules don't have a path because we never resolve them to their node_modules
+   * because we simply do not require it.
+   */
+  path?: never;
+  /**
+   * The path to the plugin, relative to the app's root directory
+   * in module format (i.e. with forward slashes)
+   */
+  modulePath: string;
+  type: 'module';
 }
 ```
 
@@ -145,10 +187,13 @@ We currently support both `webpack` & `vite` bundlers, with `vite` being the def
 ## Node Usage
 
 ```ts
-import { build, BuildOptions } from '@strapi/admin/_internal';
+// `node/build` has no entry in the @strapi/strapi exports map, so it is only
+// reachable from inside the package – see cli/commands/build.ts for the CLI wiring
+import { build, type BuildOptions } from '../../node/build';
 
 const args: BuildOptions = {
-  // ...
+  cwd: process.cwd(),
+  logger,
 };
 
 await build(args);
@@ -159,13 +204,11 @@ await build(args);
 ```ts
 interface BuildOptions extends CLIContext {
   /**
-   * The directory to build the command was ran from
+   * Which bundler to use for building.
+   *
+   * @default vite
    */
-  cwd: string;
-  /**
-   * The logger to use.
-   */
-  logger: Logger;
+  bundler?: 'webpack' | 'vite';
   /**
    * Minify the output
    *
@@ -181,6 +224,23 @@ interface BuildOptions extends CLIContext {
    */
   stats?: boolean;
   /**
+   * Auto-install missing admin dependencies
+   *
+   * @default false
+   */
+  installDeps?: boolean;
+}
+
+interface CLIContext {
+  /**
+   * The directory the command was ran from
+   */
+  cwd: string;
+  /**
+   * The logger to use.
+   */
+  logger: Logger;
+  /**
    * The tsconfig to use for the build. If undefined, this is not a TS project.
    */
   tsconfig?: TsConfig;
@@ -191,10 +251,15 @@ interface Logger {
   errors: number;
   debug: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
+  success: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
-  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text'>;
+  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text' | 'isSpinning'>;
+  progressBar: (
+    totalSize: number,
+    text: string
+  ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
 
 interface TsConfig {
