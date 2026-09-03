@@ -15,7 +15,10 @@ const autosaveService = {
 
 const permissionChecker = {
   cannot: { read: jest.fn(() => false), update: jest.fn(() => false) },
-  sanitizedQuery: { update: jest.fn(async (query) => query) },
+  sanitizedQuery: {
+    read: jest.fn(async (query) => query),
+    update: jest.fn(async (query) => query),
+  },
   sanitizeOutput: jest.fn(async (data) => data),
   sanitizeUpdateInput: jest.fn(() => async (data: unknown) => data),
 };
@@ -89,6 +92,31 @@ describe('autosave controller', () => {
 
     await expect(controller.find(createContext())).rejects.toThrow(errors.ForbiddenError);
     expect(autosaveService.findOne).not.toHaveBeenCalled();
+  });
+
+  it('sanitizes a backup against the localized document being read', async () => {
+    autosaveService.findOne.mockResolvedValue({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: 'en',
+      data: { title: 'Draft' },
+      schema: { title: { type: 'string' }, body: { type: 'text' } },
+      baseVersion: null,
+      savedAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    await controller.find(createContext());
+
+    expect(findDocument).toHaveBeenCalledWith('doc-1', 'api::article.article', {
+      populate: [],
+      locale: 'en',
+      status: 'draft',
+    });
+    expect(permissionChecker.cannot.read).toHaveBeenLastCalledWith(document);
+    expect(permissionChecker.sanitizeOutput).toHaveBeenCalledWith(
+      { title: 'Draft' },
+      { subject: document }
+    );
   });
 
   it('refuses to write a backup of a document the user cannot edit', async () => {

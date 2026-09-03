@@ -50,6 +50,28 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.ForbiddenError();
       }
 
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+      const populate = await getContentManagerService('populate-builder')(scope.contentType)
+        .populateFromQuery(permissionQuery)
+        .build();
+      const document = await getContentManagerService('document-manager').findOne(
+        scope.documentId,
+        scope.contentType,
+        {
+          populate,
+          locale: scope.locale ?? undefined,
+          status: 'draft',
+        }
+      );
+
+      if (!document) {
+        throw new errors.NotFoundError();
+      }
+
+      if (permissionChecker.cannot.read(document)) {
+        throw new errors.ForbiddenError();
+      }
+
       const snapshot = await getService(strapi, 'autosave').findOne(scope);
 
       if (!snapshot) {
@@ -70,7 +92,10 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
         Object.keys(unknownAttributes.removed).length > 0;
 
       return {
-        data: { ...entry, data: await permissionChecker.sanitizeOutput(data) },
+        data: {
+          ...entry,
+          data: await permissionChecker.sanitizeOutput(data, { subject: document }),
+        },
         ...(hasChanged ? { meta: { unknownAttributes } } : {}),
       } satisfies Autosave.GetAutosave.Response;
     },
