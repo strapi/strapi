@@ -257,11 +257,15 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                      * regardless of the admin theme (dark mode would otherwise put dark modules
                      * flush against this `Box`'s dark `background`, which real authenticator
                      * apps commonly fail to read). `level="M"` gives it a bit of error-correction
-                     * headroom, the usual choice for a screen-displayed TOTP code.
+                     * headroom, the usual choice for a screen-displayed TOTP code. Realistic
+                     * account labels (an issuer plus a work email) push the encoded otpauth URI
+                     * to QR version 8-9 at that error-correction level, so `size={260}` is what
+                     * keeps each module above the ~4px practical scan floor once the quiet zone
+                     * is included.
                      */}
                     <QRCodeSVG
                       value={step.otpauthUri}
-                      size={220}
+                      size={260}
                       marginSize={4}
                       level="M"
                       role="img"

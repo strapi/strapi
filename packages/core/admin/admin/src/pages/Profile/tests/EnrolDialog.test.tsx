@@ -116,8 +116,8 @@ describe('EnrolDialog', () => {
     // up as the foreground path starting at "M4 " (never "M0 "). Without a quiet zone the dark
     // modules run flush to the SVG's edge, and framed by this dialog's dark `Box` in dark mode a
     // real authenticator app commonly fails to scan it.
-    expect(svg).toHaveAttribute('width', '220');
-    expect(svg).toHaveAttribute('height', '220');
+    expect(svg).toHaveAttribute('width', '260');
+    expect(svg).toHaveAttribute('height', '260');
 
     const paths = svg.querySelectorAll('path');
     expect(paths).toHaveLength(2);
