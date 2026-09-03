@@ -12,13 +12,12 @@ import { getTrad, prefixPluginTranslations } from './utils';
 
 import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type { Plugin } from '@strapi/types';
+import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 
 const name = pluginPkg.strapi.name;
 
-const admin: Plugin.Config.AdminInput = {
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     /**
      * The beta Media Library owns `plugins/upload` outright when the flag is on:
      * the legacy app is not registered at all, so there is exactly one Media

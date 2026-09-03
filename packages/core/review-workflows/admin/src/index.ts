@@ -6,11 +6,10 @@ import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { addColumnToTableHook, addFilterToListViewHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
-import type { Plugin } from '@strapi/types';
+import type { PluginDefinition, WidgetArgs } from '@strapi/admin/strapi-admin';
 
-const admin: Plugin.Config.AdminInput = {
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     if (window.strapi.features.isEnabled(FEATURE_ID)) {
       app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
       app.registerHook('Admin/CM/pages/ListView/inject-in-filters', addFilterToListViewHook);
@@ -76,7 +75,7 @@ const admin: Plugin.Config.AdminInput = {
       });
     }
   },
-  bootstrap(app: StrapiApp) {
+  bootstrap(app) {
     if (window.strapi.features.isEnabled(FEATURE_ID)) {
       app.getPlugin('content-manager').injectComponent('preview', 'actions', {
         name: 'review-workflows-assignee',
