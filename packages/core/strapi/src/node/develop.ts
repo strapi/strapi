@@ -240,7 +240,6 @@ const develop = async ({
           strapi,
           tsconfig,
           options,
-          // The Vite development server serves admin/src, so Tailwind scans the same directory
           dev: true,
         });
         const contextDuration = timer.end('createBuildContext');
