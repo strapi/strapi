@@ -96,7 +96,7 @@ interface BuildContext {
   /**
    * The build options
    */
-  options: Pick<BuildOptions, 'minify' | 'sourcemaps' | 'stats'> & Pick<DevelopOptions, 'open'>;
+  options: Pick<BuildOptions, 'minify' | 'sourcemap' | 'stats'> & Pick<DevelopOptions, 'open'>;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
@@ -163,7 +163,7 @@ interface BuildOptions extends CLIContext {
   /**
    * Generate sourcemaps – useful for debugging bugs in the admin panel UI.
    */
-  sourcemaps?: boolean;
+  sourcemap?: boolean;
   /**
    * Print stats for build
    */

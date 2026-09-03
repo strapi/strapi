@@ -40,6 +40,41 @@ describe('Vite admin configuration', () => {
     expect(config.publicDir).toBe(false);
   });
 
+  it.each([true, false])(
+    'passes options.sourcemap through to the production build config (%s)',
+    async (sourcemap) => {
+      const ctx = {
+        cwd: process.cwd(),
+        target: ['last 3 major versions'],
+        basePath: '/admin',
+        adminPath: '/admin',
+        distDir: 'dist/build',
+        appDir: process.cwd(),
+        entry: '.strapi/client/app.js',
+        distPath: `${process.cwd()}/dist/build`,
+        env: {},
+        runtimeDir: `${process.cwd()}/.strapi/client`,
+        logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+        strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
+        bundler: 'vite' as const,
+        // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`.
+        // Reading `options.sourcemaps` here silently produced `undefined` and no .map files (#22632).
+        options: {
+          minify: true,
+          sourcemap,
+        },
+        plugins: [],
+        tsconfig: undefined,
+        customisations: undefined,
+        features: undefined,
+      } as unknown as BuildContext;
+
+      const config = await resolveProductionConfig(ctx);
+
+      expect(config.build?.sourcemap).toBe(sourcemap);
+    }
+  );
+
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
     const ctx = {
