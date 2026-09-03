@@ -197,6 +197,67 @@ describe('Upload service - replace()', () => {
     expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: null, folderPath: '/' });
   });
 
+  test('forwards the path meta to the provider', async () => {
+    currentDbFile = {
+      id: 7,
+      hash: 'prefixed_jkl',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    // `path` is the provider storage prefix, not a `files` column, so the provider
+    // call is the only place it shows up.
+    await uploadService.replace(7, {
+      data: { fileInfo: {} as any, path: 'baz/qux' },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+  });
+
+  test('forwards the relation metas', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_mno',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+      },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      related: [{ id: 12, __type: 'api::article.article', __pivot: { field: 'cover' } }],
+    });
+  });
+
+  test('does not invent a path or a relation when no metas are sent', async () => {
+    currentDbFile = {
+      id: 9,
+      hash: 'no_path_pqr',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(9, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).not.toHaveProperty('path');
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
   test('checks the file size before writing anything to the provider', async () => {
     currentDbFile = {
       id: 3,
