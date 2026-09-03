@@ -38,7 +38,7 @@ import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
-import { getAutosaveDocumentId, isAutosaveEnabled } from './utils/autosave';
+import { getAutosaveDocumentId, getAutosaveLocale, isAutosaveEnabled } from './utils/autosave';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -97,6 +97,12 @@ const EditViewPage = () => {
   } = doc;
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
+  const autosaveLocale = getAutosaveLocale({
+    isLocalized:
+      (schema?.pluginOptions?.i18n as { localized?: boolean } | undefined)?.localized === true,
+    documentLocale: typeof document?.locale === 'string' ? document.locale : undefined,
+    activeLocale,
+  });
 
   useOnce(() => {
     /**
@@ -130,9 +136,9 @@ const EditViewPage = () => {
         isCreatingDocument,
         isSingleType,
         model,
-        locale: activeLocale,
+        locale: autosaveLocale,
       }),
-    [activeLocale, document?.documentId, isCreatingDocument, isSingleType, model]
+    [autosaveLocale, document?.documentId, isCreatingDocument, isSingleType, model]
   );
 
   const {
@@ -220,7 +226,7 @@ const EditViewPage = () => {
           userId={userId ?? ''}
           model={model}
           documentId={autosaveDocumentId}
-          locale={typeof document?.locale === 'string' ? document.locale : activeLocale}
+          locale={autosaveLocale}
           baseVersion={typeof document?.updatedAt === 'string' ? document.updatedAt : undefined}
         >
           <>

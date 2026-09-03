@@ -2,6 +2,7 @@ import {
   createAutosaveKey,
   deleteAutosave,
   getAutosaveDocumentId,
+  getAutosaveLocale,
   getAutosave,
   getOrCreateAutosaveSessionId,
   isAutosaveEnabled,
@@ -149,6 +150,30 @@ describe('autosave storage', () => {
         documentId: 'document',
       })
     ).toBe('autosave:instance:admin:api::article.article:document:default');
+  });
+
+  it('scopes backups by locale only for localized content types', () => {
+    expect(
+      getAutosaveLocale({
+        isLocalized: false,
+        activeLocale: 'fr',
+      })
+    ).toBeUndefined();
+
+    expect(
+      getAutosaveLocale({
+        isLocalized: true,
+        documentLocale: 'fr',
+        activeLocale: 'en',
+      })
+    ).toBe('fr');
+
+    expect(
+      getAutosaveLocale({
+        isLocalized: true,
+        activeLocale: 'en',
+      })
+    ).toBe('en');
   });
 
   it('reuses one create-session ID per model and locale', () => {

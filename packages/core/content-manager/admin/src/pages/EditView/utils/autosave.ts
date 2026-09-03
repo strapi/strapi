@@ -233,6 +233,16 @@ export const createAutosaveKey = ({
   locale?: string;
 }) => `autosave:${instanceId}:${userId}:${model}:${documentId}:${locale ?? 'default'}`;
 
+export const getAutosaveLocale = ({
+  isLocalized,
+  documentLocale,
+  activeLocale,
+}: {
+  isLocalized: boolean;
+  documentLocale?: string;
+  activeLocale?: string;
+}) => (isLocalized ? (documentLocale ?? activeLocale) : undefined);
+
 export const getOrCreateAutosaveSessionId = (model: string, locale?: string) => {
   const storageKey = `strapi-autosave-session:${model}:${locale ?? 'default'}`;
   const sessionId = crypto.randomUUID();
