@@ -20,8 +20,9 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const isEnabled = (): boolean => {
     const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
-    const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    return configEnabled && licenseEnabled;
+    const isStrapiManagedAiEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
+    const isByokAiEnabled = strapi.ee?.features?.isEnabled('cms-ai-byok') === true;
+    return configEnabled && (isStrapiManagedAiEnabled || isByokAiEnabled);
   };
 
   const getAiFeatureConfig = async () => {

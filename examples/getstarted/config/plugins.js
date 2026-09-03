@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = () => ({
+module.exports = ({ env }) => ({
   graphql: {
     enabled: true,
     config: {
@@ -34,5 +34,17 @@ module.exports = () => ({
   todo: {
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
+  },
+  'ai-byok': {
+    enabled: true,
+    resolve: '../../node_modules/@strapi-enterprise/plugin-ai-byok',
+    config: {
+      enabled: env.bool('STRAPI_AI_BYOK_ENABLED', false),
+      connection: {
+        apiKey: env('STRAPI_AI_PROVIDER_API_KEY'),
+        baseURL: env('STRAPI_AI_PROVIDER_BASE_URL', 'https://api.openai.com/v1'),
+      },
+      models: { translations: env('STRAPI_AI_TRANSLATIONS_MODEL', 'gpt-4.1-mini') },
+    },
   },
 });

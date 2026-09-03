@@ -296,10 +296,10 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       let aiResult = null;
       try {
         aiResult = await strapi.ai.service.generateLocalizations({
-          document,
+          sourceLocale: document.locale,
           targetLocales,
-          translateableContent,
-          minimalContentTypeSchema,
+          content: translateableContent,
+          contentTypeSchema: minimalContentTypeSchema,
         });
       } catch (error) {
         await aiLocalizationJobsService.upsertJobForDocument({
@@ -325,6 +325,8 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale: document.locale,
         populate: deepPopulate,
       });
+
+      console.log('aiResult', JSON.stringify(aiResult, null, 2));
 
       const results = await Promise.allSettled(
         aiResult.localizations.map(async (localization) => {

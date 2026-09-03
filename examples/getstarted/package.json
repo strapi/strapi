@@ -13,6 +13,8 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi-enterprise/ai-workflows": "link:/Users/vfurmane/Documents/repos/strapi-enterprise/packages/ai-workflows",
+    "@strapi-enterprise/plugin-ai-byok": "link:/Users/vfurmane/Documents/repos/strapi-enterprise/packages/plugin-ai-byok",
     "@strapi/blocks-react-renderer": "1.0.2",
     "@strapi/icons": "2.2.4",
     "@strapi/plugin-color-picker": "workspace:*",

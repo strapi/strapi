@@ -1,3 +1,4 @@
+// TODO right import?
 import type * as Documents from './documents';
 import type * as MCP from './mcp';
 
@@ -29,23 +30,37 @@ export type AiAdminService = {
 
 export interface AiService {
   generateLocalizations: ({
-    document,
+    sourceLocale,
     targetLocales,
-    translateableContent,
-    minimalContentTypeSchema,
+    content,
+    contentTypeSchema,
   }: {
     document: Documents.AnyDocument;
+    // TODO both any types
+    sourceLocale: any;
     targetLocales: any[];
     // TODO right type?
-    translateableContent: Record<string, unknown>;
-    minimalContentTypeSchema: Record<string, Record<string, unknown>>;
+    content: Record<string, unknown>;
+    contentTypeSchema: Record<string, Record<string, unknown>>;
   }) => Promise<{
     localizations: Array<{ content: Record<string, unknown>; locale: string }>;
   }>;
 }
 
+export interface AiProvidersRegistry {
+  register: (provider: AiService) => void;
+  // TODO no-op for now, I'd like to get rid of it
+  activate: () => void;
+  // TODO weird that provider registry returns an AiService;
+  //      in theory, the AiService forwards the calls to a provider, so both types should be the same.
+  getDefault: () => AiService;
+}
+
 export type AiNamespace = {
   admin: AiAdminService;
+  // TODO rename?
+  // TODO consider merging with AiAdminService (the former becomes irrelevant once we introduce abstraction)
   service: AiService;
+  providers: AiProvidersRegistry;
   mcp: MCP.McpService;
 };

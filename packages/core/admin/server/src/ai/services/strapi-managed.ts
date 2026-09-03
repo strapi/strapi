@@ -13,6 +13,8 @@ const createStrapiManagedAiProvider = ({
       const tokenData = await strapi.ai.admin.getAiToken();
       token = tokenData.token;
     } catch (error) {
+      // TODO upsertJob => failed
+
       throw new Error('Failed to retrieve AI token', {
         cause: error instanceof Error ? error : undefined,
       });
@@ -21,12 +23,7 @@ const createStrapiManagedAiProvider = ({
     return token;
   };
   return {
-    async generateLocalizations({
-      document,
-      targetLocales,
-      translateableContent,
-      minimalContentTypeSchema,
-    }) {
+    async generateLocalizations({ sourceLocale, targetLocales, content, contentTypeSchema }) {
       const token = await getAiToken();
 
       strapi.log.http('Contacting AI Server for localizations generation');
@@ -38,7 +35,7 @@ const createStrapiManagedAiProvider = ({
         },
         body: JSON.stringify({
           content: translateableContent,
-          sourceLocale: document.locale,
+          sourceLocale,
           targetLocales,
           contentTypeSchema: minimalContentTypeSchema,
         }),
