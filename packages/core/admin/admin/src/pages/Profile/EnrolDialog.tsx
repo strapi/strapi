@@ -5,17 +5,14 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useEnrolMfaMutation,
   useVerifyMfaEnrolmentMutation,
 } from '../../services/mfa';
-import { BaseQueryError, isBaseQueryError } from '../../utils/baseQuery';
 
+import { ErrorMessage, useToMessage } from './DialogUtils';
 import { RecoveryCodes } from './RecoveryCodes';
-
-import type { SerializedError } from '@reduxjs/toolkit';
 
 interface EnrolDialogProps {
   open: boolean;
@@ -43,18 +40,6 @@ type Step =
   | { name: 'password' }
   | { name: 'scan'; secret: string; otpauthUri: string }
   | { name: 'codes'; recoveryCodes: string[] };
-
-const ErrorMessage = ({ error }: { error?: string }) => {
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <Typography role="alert" textColor="danger600">
-      {error}
-    </Typography>
-  );
-};
 
 /**
  * Three steps: current password (re-authentication), scan the QR code and confirm with a code,
@@ -100,7 +85,7 @@ const ErrorMessage = ({ error }: { error?: string }) => {
  */
 const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
   const { formatMessage } = useIntl();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const toMessage = useToMessage();
   const [step, setStep] = React.useState<Step>({ name: 'password' });
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
@@ -146,11 +131,6 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
     onClose();
   };
 
-  const toMessage = (err: BaseQueryError | SerializedError) =>
-    isBaseQueryError(err)
-      ? formatAPIError(err)
-      : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' });
-
   const handlePassword = async (event?: React.FormEvent) => {
     event?.preventDefault();
     if (isEnrolling || password.length === 0) {
@@ -172,7 +152,7 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
       return;
     }
     setError(undefined);
-    const res = await verify({ code });
+    const res = await verify({ code: code.trim() });
     if ('error' in res) {
       setError(toMessage(res.error));
       return;

@@ -4,17 +4,14 @@ import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/desig
 import { useIntl } from 'react-intl';
 
 import { useNotification } from '../../features/Notifications';
-import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useDisableMfaMutation,
   useRegenerateRecoveryCodesMutation,
 } from '../../services/mfa';
-import { BaseQueryError, isBaseQueryError } from '../../utils/baseQuery';
 
+import { ErrorMessage, useToMessage } from './DialogUtils';
 import { RecoveryCodes } from './RecoveryCodes';
-
-import type { SerializedError } from '@reduxjs/toolkit';
 
 interface ReAuthDialogProps {
   open: boolean;
@@ -23,10 +20,9 @@ interface ReAuthDialogProps {
 }
 
 /**
- * `fixedCacheKey`s for the three mutations below. Same rationale as `MFA_ENROL_CACHE_KEYS` in
- * `EnrolDialog.tsx`: these key `state.adminApi.mutations` store-globally, so a future consumer
- * that reuses one of these exact strings would silently share (and could clobber) this dialog's
- * cached results. Must not collide with `MFA_ENROL_CACHE_KEYS`.
+ * `fixedCacheKey`s for the three mutations below -- see `MFA_ENROL_CACHE_KEYS` in
+ * `EnrolDialog.tsx` for the full rationale (store-global keys into `state.adminApi.mutations`).
+ * Must not collide with `MFA_ENROL_CACHE_KEYS`.
  */
 const MFA_REAUTH_CACHE_KEYS = {
   regenerate: 'mfa-reauth-regenerate',
@@ -35,18 +31,6 @@ const MFA_REAUTH_CACHE_KEYS = {
 } as const;
 
 type Step = { name: 'form' } | { name: 'codes'; recoveryCodes: string[] };
-
-const ErrorMessage = ({ error }: { error?: string }) => {
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <Typography role="alert" textColor="danger600">
-      {error}
-    </Typography>
-  );
-};
 
 const COPY = {
   regenerate: {
@@ -84,9 +68,9 @@ const COPY = {
 /**
  * One form, two intents: re-authenticate with the current password plus a second factor (a TOTP
  * code or an unused recovery code), then either regenerate the recovery-code set or disable MFA
- * entirely. Modeled on `EnrolDialog` -- same `Modal` skeleton, same `ErrorMessage`/`toMessage`,
- * same reset-on-close and unmount-safety-net pattern; see that file for the full rationale, only
- * summarised here.
+ * entirely. Modeled on `EnrolDialog` -- same `Modal` skeleton, same reset-on-close and
+ * unmount-safety-net pattern (see that file for the full rationale); `ErrorMessage`/`useToMessage`
+ * are shared with it via `DialogUtils.tsx`.
  *
  * `regenerate` and `disable` share this dialog because they share the same re-authentication gate
  * (`RegenerateRecoveryCodes`/`Disable` in `shared/contracts/mfa.ts` both take `{ password, code
@@ -94,39 +78,41 @@ const COPY = {
  * `intent`.
  *
  * State lives in two places, both cleared on every close path (Cancel, Escape, overlay click, a
- * successful disable, or a successful acknowledge) *and* on unmount:
- * - `step`/`password`/`code`/`error` are local React state, cleared by `reset()`.
- * - The freshly issued recovery-code set (on the `regenerate` path) also lands in the Redux store,
- *   because RTK Query keeps a mutation's `data` in `state.adminApi.mutations` for as long as the
- *   triggering hook stays mounted -- and this dialog is mounted for the whole profile-page
- *   session (see `TwoFactorSection.tsx`), not just while `open`. Each of the three mutations below
- *   is given a `fixedCacheKey` (`MFA_REAUTH_CACHE_KEYS`) specifically so `reset()` can
- *   synchronously delete its entry (`removeMutationResult`) the moment the dialog closes.
+ * successful disable, or a successful acknowledge) *and* on unmount, exactly as in `EnrolDialog`:
+ * local state via `reset()`, and the freshly issued recovery-code set (which also lands in the
+ * Redux store as a mutation result) via a `fixedCacheKey` per mutation (`MFA_REAUTH_CACHE_KEYS`)
+ * plus the mount-only unmount effect below as the safety net for a dialog torn down without
+ * `close()` ever running.
  *
- *   `fixedCacheKey` cuts both ways: RTK Query's own unmount cleanup explicitly *skips* resetting
- *   a mutation that has one (it's meant to survive a remount), so if the whole page unmounts this
- *   dialog without `close()` ever running -- browser Back, or an app redirect, while it's sitting
- *   open on the codes step -- the recovery codes would otherwise survive in the store for the
- *   rest of the SPA session. The effect right after the mutation hooks below covers exactly that
- *   path; calling the three resets again on an already-`close()`d dialog is a harmless no-op.
+ * Unlike `EnrolDialog` (one field per form step), this form has *two* blocking fields (password
+ * and code) in the same `<form>`. Per the HTML spec's implicit-submission algorithm
+ * (4.10.22.2), a form with more than one field that blocks implicit submission needs an actual
+ * submit button for Enter to do anything at all -- so the footer button below carries
+ * `type="submit"`, and `onClick` still calls the same handler directly (jsdom's `PointerEvent`
+ * polyfill, see `EnrolDialog.tsx`'s comment, means a `user.click()` in this test suite never
+ * reaches the button's native form-submission default action, only its `onClick`).
  *
- * `handleSubmit` is called from both the `<form onSubmit>` (a real browser submitting on Enter in
- * either field) and the footer button's `onClick`, so it guards itself against re-entrancy
- * (`isSubmitting`, plus the same length checks the button uses for `disabled`) -- otherwise
- * pressing Enter twice while a request is in flight posts twice.
- *
- * The footer button doesn't need `type="submit"`: see `EnrolDialog.tsx`'s comment on this
- * project's `PointerEvent` polyfill -- `onClick` calling the same handler sidesteps it, and the
- * design system's `Button` already defaults its own `type` to `"button"`.
+ * That `type="submit"` reintroduces a re-entrancy hazard `EnrolDialog` doesn't have: a *real*
+ * click (`fireEvent.click`, or a real browser) on a submit button both fires the React `onClick`
+ * handler and triggers the browser's native default action of submitting the form, which fires
+ * `onSubmit` too -- both synchronously, before either the click or the submit handler's `await`
+ * resolves, and before React re-renders with `isLoading` reflecting the first call. A state-based
+ * guard (checking the mutation hook's `isLoading`) is therefore stale for the second,
+ * near-simultaneous call. `handleSubmit` instead guards with a synchronous `inFlightRef`
+ * (`React.useRef`, flipped in the same tick the first call starts, before either handler yields to
+ * the event loop), plus the same length checks the button uses for `disabled`.
  */
 const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const toMessage = useToMessage();
   const [step, setStep] = React.useState<Step>({ name: 'form' });
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
+  // Synchronous re-entrancy guard for `handleSubmit` -- see the class doc comment above for why
+  // this can't be the mutation hook's `isLoading` state.
+  const inFlightRef = React.useRef(false);
 
   const [regenerateRecoveryCodes, { isLoading: isRegenerating, reset: resetRegenerate }] =
     useRegenerateRecoveryCodesMutation({
@@ -169,45 +155,49 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
     onClose();
   };
 
-  const toMessage = (err: BaseQueryError | SerializedError) =>
-    isBaseQueryError(err)
-      ? formatAPIError(err)
-      : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' });
-
   const isSubmitting = intent === 'regenerate' ? isRegenerating : isDisabling;
 
   const handleSubmit = async (event?: React.FormEvent) => {
     event?.preventDefault();
-    if (isSubmitting || password.length === 0 || code.trim().length < 6) {
+    if (inFlightRef.current || password.length === 0 || code.trim().length < 6) {
       return;
     }
+    inFlightRef.current = true;
     setError(undefined);
 
-    if (intent === 'regenerate') {
-      const res = await regenerateRecoveryCodes({ password, code });
+    try {
+      // The server treats a code with surrounding whitespace as wrong rather than trimming it
+      // itself (a pasted TOTP or recovery code commonly picks up a trailing space/newline).
+      const trimmedCode = code.trim();
+
+      if (intent === 'regenerate') {
+        const res = await regenerateRecoveryCodes({ password, code: trimmedCode });
+        if ('error' in res) {
+          setError(toMessage(res.error));
+          return;
+        }
+        setPassword('');
+        setCode('');
+        setStep({ name: 'codes', recoveryCodes: res.data.recoveryCodes });
+        return;
+      }
+
+      const res = await disableMfa({ password, code: trimmedCode });
       if ('error' in res) {
         setError(toMessage(res.error));
         return;
       }
-      setPassword('');
-      setCode('');
-      setStep({ name: 'codes', recoveryCodes: res.data.recoveryCodes });
-      return;
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'Settings.profile.form.section.mfa.disable.success',
+          defaultMessage: 'Two-factor authentication is disabled.',
+        }),
+      });
+      close();
+    } finally {
+      inFlightRef.current = false;
     }
-
-    const res = await disableMfa({ password, code });
-    if ('error' in res) {
-      setError(toMessage(res.error));
-      return;
-    }
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.profile.form.section.mfa.disable.success',
-        defaultMessage: 'Two-factor authentication is disabled.',
-      }),
-    });
-    close();
   };
 
   const handleAcknowledged = async () => {
@@ -279,6 +269,7 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Button
+                type="submit"
                 variant={intent === 'disable' ? 'danger' : undefined}
                 onClick={() => handleSubmit()}
                 loading={isSubmitting}

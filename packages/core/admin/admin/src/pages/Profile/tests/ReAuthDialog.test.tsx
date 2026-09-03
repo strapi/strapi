@@ -87,7 +87,7 @@ describe('ReAuthDialog', () => {
     expect(hasLeakedMfaSecrets(...CODES)).toBe(false);
   });
 
-  it('disables and closes on success', async () => {
+  it('disables, shows the success toast, and closes', async () => {
     const onClose = jest.fn();
     const { user } = renderDialog({ open: true, onClose, intent: 'disable' });
 
@@ -95,6 +95,7 @@ describe('ReAuthDialog', () => {
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     await user.click(screen.getByRole('button', { name: 'Disable two-factor authentication' }));
 
+    expect(await screen.findByText('Two-factor authentication is disabled.')).toBeInTheDocument();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
@@ -107,6 +108,84 @@ describe('ReAuthDialog', () => {
 
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('trims surrounding whitespace off the code before sending it to regenerate recovery codes', async () => {
+    let capturedBody: { password?: string; code?: string } | undefined;
+    server.use(
+      http.post('/admin/mfa/recovery-codes', async ({ request }) => {
+        capturedBody = (await request.json()) as { password?: string; code?: string };
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn(), intent: 'regenerate' });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    // A pasted TOTP or recovery code commonly picks up a stray leading/trailing space.
+    await user.type(screen.getByLabelText('Authentication code*'), ' 123456 ');
+    await user.click(screen.getByRole('button', { name: 'Generate new recovery codes' }));
+
+    await screen.findByText(CODES[0]);
+    expect(capturedBody?.code).toBe('123456');
+  });
+
+  it('trims surrounding whitespace off the code before sending it to disable', async () => {
+    let capturedBody: { password?: string; code?: string } | undefined;
+    server.use(
+      http.post('/admin/mfa/disable', async ({ request }) => {
+        capturedBody = (await request.json()) as { password?: string; code?: string };
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+
+    const onClose = jest.fn();
+    const { user } = renderDialog({ open: true, onClose, intent: 'disable' });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), ' 123456 ');
+    await user.click(screen.getByRole('button', { name: 'Disable two-factor authentication' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(capturedBody?.code).toBe('123456');
+  });
+
+  it('shows the acknowledge error and stays on the codes step when saving fails, then closes once it succeeds', async () => {
+    const onClose = jest.fn();
+    let shouldFail = true;
+    server.use(
+      http.post('/admin/mfa/recovery-codes/ack', () =>
+        shouldFail
+          ? HttpResponse.json(
+              {
+                error: {
+                  status: 400,
+                  name: 'ValidationError',
+                  message: 'Could not save the acknowledgement',
+                  details: {},
+                },
+              },
+              { status: 400 }
+            )
+          : new HttpResponse(null, { status: 204 })
+      )
+    );
+
+    const { user } = renderDialog({ open: true, onClose, intent: 'regenerate' });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Generate new recovery codes' }));
+
+    for (const code of CODES) expect(await screen.findByText(code)).toBeInTheDocument();
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+
+    expect(await screen.findByText('Could not save the acknowledgement')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    for (const code of CODES) expect(screen.getByText(code)).toBeInTheDocument();
+
+    shouldFail = false;
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
   it('does not leak the recovery codes into the store when the dialog unmounts before acknowledging', async () => {
@@ -130,7 +209,35 @@ describe('ReAuthDialog', () => {
     expect(hasLeakedMfaSecrets(...CODES)).toBe(false);
   });
 
-  it('does not post the disable request twice when Enter is pressed again while one is pending', async () => {
+  it('submits once when Enter is pressed in the code field', async () => {
+    // This form has two blocking fields (password and code) and, unlike EnrolDialog's
+    // single-field forms, needs the submit button's `type="submit"` for Enter to do anything at
+    // all -- see ReAuthDialog.tsx's comment on the HTML implicit-submission algorithm. Regression
+    // test for that: before the fix, this Enter press submitted nothing.
+    let disableRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/disable', async () => {
+        disableRequestCount += 1;
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+
+    const onClose = jest.fn();
+    const { user } = renderDialog({ open: true, onClose, intent: 'disable' });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), '123456{Enter}');
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(disableRequestCount).toBe(1);
+  });
+
+  it('does not post the disable request twice when the submit button is clicked twice while one is pending', async () => {
+    // `fireEvent.click` dispatches a real `MouseEvent` (unlike `user.click`'s `PointerEvent`, see
+    // EnrolDialog.tsx's comment on this suite's polyfill), so on this `type="submit"` button it
+    // also reaches the form's native submit default action -- a single real click already fires
+    // `handleSubmit` via both `onClick` and `onSubmit`. Clicking twice compounds that with a
+    // genuine double-click, which is what the synchronous `inFlightRef` guard exists for (a
+    // state-based `isLoading` guard is stale for calls this close together, see ReAuthDialog.tsx).
     let disableRequestCount = 0;
     server.use(
       http.post('/admin/mfa/disable', async () => {
@@ -142,19 +249,12 @@ describe('ReAuthDialog', () => {
 
     const onClose = jest.fn();
     const { user } = renderDialog({ open: true, onClose, intent: 'disable' });
-    const passwordInput = screen.getByLabelText('Current password*');
-    await user.type(passwordInput, 'Testing123!');
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
-    const form = passwordInput.closest('form');
-    if (!form) {
-      throw new Error('expected the password field to live inside a <form>');
-    }
 
-    // Simulates pressing Enter twice in a row: `fireEvent.submit` dispatches a real `submit`
-    // event, which is how a real browser (not `user.click`, see EnrolDialog.tsx's comment on
-    // this suite's `PointerEvent` polyfill) reacts to Enter in a text field.
-    fireEvent.submit(form);
-    fireEvent.submit(form);
+    const submit = screen.getByRole('button', { name: 'Disable two-factor authentication' });
+    fireEvent.click(submit);
+    fireEvent.click(submit);
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(disableRequestCount).toBe(1);

@@ -121,6 +121,26 @@ describe('EnrolDialog', () => {
     expect(screen.getByText(SECRET)).toBeInTheDocument();
   });
 
+  it('trims surrounding whitespace off the code before sending it to verify', async () => {
+    let capturedBody: { code?: string } | undefined;
+    server.use(
+      http.post('/admin/mfa/enrol/verify', async ({ request }) => {
+        capturedBody = (await request.json()) as { code?: string };
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    // A pasted TOTP or recovery code commonly picks up a stray leading/trailing space.
+    await user.type(await screen.findByLabelText('Authentication code*'), ' 123456 ');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    await screen.findByText(CODES[0]);
+    expect(capturedBody?.code).toBe('123456');
+  });
+
   it('does not post the enrol request twice when Enter is pressed again while one is pending', async () => {
     let enrolRequestCount = 0;
     server.use(
