@@ -59,28 +59,7 @@ We run a prompt to encourage the user to install these deps – however, this fu
 The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to preapre any bundler. It's shape looks like:
 
 ```ts
-interface BuildContext extends BaseContext {
-  /**
-   * The customisations defined by the user in their app.js file
-   */
-  customisations?: AppFile;
-  /**
-   * Features object with future flags
-   */
-  features?: Modules.Features.FeaturesService['config'];
-  /**
-   * The build options
-   */
-  options: Pick<BuildOptions, 'bundler' | 'minify' | 'sourcemap' | 'stats'> &
-    Pick<DevelopOptions, 'open'>;
-  /**
-   * The plugins to be included in the JS bundle
-   * incl. internal plugins, third party plugins & local plugins
-   */
-  plugins: PluginMeta[];
-}
-
-interface BaseContext {
+interface BuildContext {
   /**
    * The absolute path to the app directory defined by the Strapi instance
    */
@@ -98,6 +77,10 @@ interface BaseContext {
    * The bundler to use for building & watching
    */
   bundler: 'webpack' | 'vite';
+  /**
+   * The customisations defined by the user in their app.js file
+   */
+  customisations?: AppFile;
   /**
    * The current working directory
    */
@@ -118,7 +101,21 @@ interface BaseContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
+  /**
+   * Features object with future flags
+   */
+  features?: Modules.Features.FeaturesService['config'];
   logger: CLIContext['logger'];
+  /**
+   * The build options
+   */
+  options: Pick<BuildOptions, 'bundler' | 'minify' | 'sourcemap' | 'stats'> &
+    Pick<DevelopOptions, 'open'>;
+  /**
+   * The plugins to be included in the JS bundle
+   * incl. internal plugins, third party plugins & local plugins
+   */
+  plugins: PluginMeta[];
   /**
    * The absolute path to the runtime directory
    */
@@ -133,47 +130,6 @@ interface BaseContext {
   target: string[];
   tsconfig?: CLIContext['tsconfig'];
 }
-
-type PluginMeta = LocalPluginMeta | ModulePluginMeta;
-
-interface LocalPluginMeta {
-  name: string;
-  /**
-   * camelCased version of the plugin name
-   */
-  importName: string;
-  /**
-   * The path to the plugin, relative to the app's root directory
-   * in system format
-   */
-  path: string;
-  /**
-   * The path to the plugin, relative to the runtime directory
-   * in module format (i.e. with forward slashes) because thats
-   * where it should be used as an import
-   */
-  modulePath: string;
-  type: 'local';
-}
-
-interface ModulePluginMeta {
-  name: string;
-  /**
-   * camelCased version of the plugin name
-   */
-  importName: string;
-  /**
-   * Modules don't have a path because we never resolve them to their node_modules
-   * because we simply do not require it.
-   */
-  path?: never;
-  /**
-   * The path to the plugin, relative to the app's root directory
-   * in module format (i.e. with forward slashes)
-   */
-  modulePath: string;
-  type: 'module';
-}
 ```
 
 ### Static Files
@@ -187,13 +143,11 @@ We currently support both `webpack` & `vite` bundlers, with `vite` being the def
 ## Node Usage
 
 ```ts
-// `node/build` has no entry in the @strapi/strapi exports map, so it is only
-// reachable from inside the package – see cli/commands/build.ts for the CLI wiring
+// internal to @strapi/strapi – the CLI command imports it directly
 import { build, type BuildOptions } from '../../node/build';
 
 const args: BuildOptions = {
-  cwd: process.cwd(),
-  logger,
+  // ...
 };
 
 await build(args);
