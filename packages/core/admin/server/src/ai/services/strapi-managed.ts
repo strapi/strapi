@@ -4,7 +4,7 @@ const createStrapiManagedAiProvider = ({
   strapi,
 }: {
   strapi: Core.Strapi;
-}): Modules.AI.AiService => {
+}): Modules.AI.AiProvider => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   const getAiToken = async () => {
@@ -13,8 +13,6 @@ const createStrapiManagedAiProvider = ({
       const tokenData = await strapi.ai.admin.getAiToken();
       token = tokenData.token;
     } catch (error) {
-      // TODO upsertJob => failed
-
       throw new Error('Failed to retrieve AI token', {
         cause: error instanceof Error ? error : undefined,
       });
@@ -22,6 +20,7 @@ const createStrapiManagedAiProvider = ({
 
     return token;
   };
+
   return {
     async generateLocalizations({ sourceLocale, targetLocales, content, contentTypeSchema }) {
       const token = await getAiToken();
@@ -34,10 +33,10 @@ const createStrapiManagedAiProvider = ({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          content: translateableContent,
+          content,
           sourceLocale,
           targetLocales,
-          contentTypeSchema: minimalContentTypeSchema,
+          contentTypeSchema,
         }),
       });
 

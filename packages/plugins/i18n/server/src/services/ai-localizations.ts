@@ -295,7 +295,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let aiResult = null;
       try {
-        aiResult = await strapi.ai.service.generateLocalizations({
+        aiResult = await strapi.ai.admin.generateLocalizations({
           sourceLocale: document.locale,
           targetLocales,
           content: translateableContent,

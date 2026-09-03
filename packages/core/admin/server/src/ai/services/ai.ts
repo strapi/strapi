@@ -1,8 +1,10 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
+import { createStrapiManagedAiProvider } from './strapi-managed';
+import { createAiProvidersRegistry } from '../providers-registry';
 
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -18,10 +20,20 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   >();
 
+  // TODO also test when no license at all;
+  //  -> I am wondering what happens if you call admin.generateLocalizations(): is it no-op or does it throw, should it be guarded, is it the case?
+  //  -> same with EE but byok not configured
   const isEnabled = (): boolean => {
+    // TODO is this the place to actually check the license?
     const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
     const isStrapiManagedAiEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    const isByokAiEnabled = strapi.ee?.features?.isEnabled('cms-ai-byok') === true;
+    console.log(strapi.ee?.features?.isEnabled('cms-ai-byok'));
+    console.log(strapi.config.get<boolean>('plugin.ai-byok.enabled', false));
+    const isByokAiEnabled =
+      strapi.ee?.features?.isEnabled('cms-ai-byok') === true &&
+      // TODO why `<boolean>` is needed?
+      // TODO calling a plugin config is not good
+      strapi.config.get<boolean>('plugin.ai-byok.enabled', false) === true;
     return configEnabled && (isStrapiManagedAiEnabled || isByokAiEnabled);
   };
 
@@ -282,11 +294,22 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
+  const providersRegistry = createAiProvidersRegistry();
+  if (strapi.ee?.features?.isEnabled('cms-ai')) {
+    providersRegistry.register(createStrapiManagedAiProvider({ strapi }));
+  }
+
   return {
     isEnabled,
     getAiFeatureConfig,
     getAiToken,
     getAiUsage,
+    registerProvider: providersRegistry.register,
+    async generateLocalizations(
+      ...args: Parameters<Modules.AI.AiAdminService['generateLocalizations']>
+    ) {
+      return providersRegistry.get().generateLocalizations(...args);
+    },
   };
 };
 

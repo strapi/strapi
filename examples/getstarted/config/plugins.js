@@ -35,6 +35,7 @@ module.exports = ({ env }) => ({
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
   },
+  // TODO rename cms-ai-byok to cms-byok-ai (also inside the plugin code)
   'ai-byok': {
     enabled: true,
     resolve: '../../node_modules/@strapi-enterprise/plugin-ai-byok',
