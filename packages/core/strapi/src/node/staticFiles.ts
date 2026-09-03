@@ -10,12 +10,8 @@ import { toGlobPath } from './core/scan-roots';
 import type { BuildContext } from './create-build-context';
 
 /**
- * Tailwind keeps an `@source` value as written and decodes no backslash escape. So quote the path
- * with a character it does not hold. A real path holds one quote character at most
- *
- * A glob metacharacter in the path needs no escape either, and must not get one. Probe, this
- * worktree: a root holding `(x86)` scans correctly as written, and the same root with `\(x86\)`
- * scans nothing. Both the oxide `Scanner` and the `@source` CSS layer agree
+ * Quote an `@source` path with a quote character the path does not hold. Tailwind decodes no
+ * backslash escape, so an escape breaks both the path and any glob metacharacter such as `(x86)`
  */
 const toCssString = (value: string): string => {
   if (!value.includes('"')) {

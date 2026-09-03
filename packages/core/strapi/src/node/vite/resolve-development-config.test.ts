@@ -128,8 +128,6 @@ describe('Vite admin configuration', () => {
 
   it('keeps the design system regex alias after the monorepo merge', async () => {
     const mockHttpServer = http.createServer();
-    // A partial BuildContext: the config builder reads a handful of fields, and a whole one would
-    // need a live Strapi instance
     const ctx = {
       cwd: process.cwd(),
       target: ['last 3 major versions'],
@@ -162,8 +160,7 @@ describe('Vite admin configuration', () => {
     )?.find;
 
     expect(designSystem).toBeInstanceOf(RegExp);
-    // A prefix match would rewrite the subpath and skip the exports map, so `next/source.css`
-    // must miss
+    // A prefix match would skip the exports map, so `next/source.css` must miss
     expect(
       designSystem instanceof RegExp && designSystem.test('@strapi/design-system/next/source.css')
     ).toBe(false);

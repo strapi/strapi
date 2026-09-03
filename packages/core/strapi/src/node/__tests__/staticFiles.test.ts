@@ -3,7 +3,6 @@ import { getStylesheet } from '../staticFiles';
 import type { BuildContext } from '../create-build-context';
 
 describe('getStylesheet', () => {
-  // `getStylesheet` reads `scanRoots` alone, so a whole `BuildContext` would be noise
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
 
   test('quotes a path that holds an apostrophe, and adds no backslash', () => {

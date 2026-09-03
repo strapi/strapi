@@ -1,4 +1,3 @@
-import escapeRegExp from 'lodash/escapeRegExp';
 import type { Alias } from 'vite';
 
 import {
@@ -7,6 +6,8 @@ import {
   ADMIN_VITE_SINGLETON_MODULES,
 } from './admin-vite-alias-modules';
 import { getModulePath, getModulePathFrom } from './resolve-module';
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Match the bare name only, so Vite resolves the subpaths through the exports map
 const exactFind = (mod: string) => new RegExp(`^${escapeRegExp(mod)}$`);
