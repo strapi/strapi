@@ -251,9 +251,19 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                 </Typography>
                 <Flex justifyContent="center">
                   <Box background="neutral0" padding={3} hasRadius>
+                    {/*
+                     * `marginSize` draws the QR spec's required 4-module quiet zone inside the
+                     * SVG itself, on its own white `bgColor` -- so the code stays scannable
+                     * regardless of the admin theme (dark mode would otherwise put dark modules
+                     * flush against this `Box`'s dark `background`, which real authenticator
+                     * apps commonly fail to read). `level="M"` gives it a bit of error-correction
+                     * headroom, the usual choice for a screen-displayed TOTP code.
+                     */}
                     <QRCodeSVG
                       value={step.otpauthUri}
-                      size={180}
+                      size={220}
+                      marginSize={4}
+                      level="M"
                       role="img"
                       aria-label={formatMessage({
                         id: 'Settings.profile.form.section.mfa.enrol.scan.qr',

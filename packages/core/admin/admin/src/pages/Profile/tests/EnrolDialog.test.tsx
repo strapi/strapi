@@ -99,6 +99,33 @@ describe('EnrolDialog', () => {
     expect(hasLeakedMfaSecrets()).toBe(false);
   });
 
+  it('renders the QR code with a scannable quiet zone and a larger size', async () => {
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const svg = await screen.findByRole('img', { name: /scan this qr code/i });
+
+    // qrcode.react (node_modules/qrcode.react/lib/esm/index.js) renders
+    // `<svg width={size} height={size} viewBox="0 0 numCells numCells">` with a background
+    // <path> covering the whole viewBox followed by a foreground <path> whose `d` comes from
+    // `generatePath(cells, margin)`. That function's very first drawing command is
+    // `M${start + margin} ${y + margin}h...`, and the top-left finder pattern always makes
+    // module (0,0) dark -- so a `marginSize` of 4 (the QR spec's required quiet zone) must show
+    // up as the foreground path starting at "M4 " (never "M0 "). Without a quiet zone the dark
+    // modules run flush to the SVG's edge, and framed by this dialog's dark `Box` in dark mode a
+    // real authenticator app commonly fails to scan it.
+    expect(svg).toHaveAttribute('width', '220');
+    expect(svg).toHaveAttribute('height', '220');
+
+    const paths = svg.querySelectorAll('path');
+    expect(paths).toHaveLength(2);
+    const [backgroundPath, foregroundPath] = paths;
+    expect(backgroundPath).toHaveAttribute('d', expect.stringMatching(/^M0,0/));
+    expect(foregroundPath).toHaveAttribute('d', expect.stringMatching(/^M4[ ,]/));
+  });
+
   it('shows the credentials error on a wrong password and stays on step 1', async () => {
     const { user } = renderDialog({ open: true, onClose: jest.fn() });
 
