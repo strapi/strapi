@@ -3,14 +3,19 @@ import * as React from 'react';
 import { Alert, Button, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useGetMfaStatusQuery } from '../../services/mfa';
+import { formatMfaNotice } from '../../features/MfaNotices';
+import {
+  useGetMfaNoticesQuery,
+  useGetMfaStatusQuery,
+  useMarkMfaNoticesSeenMutation,
+} from '../../services/mfa';
 import { isBaseQueryError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
 import { Panel } from './Panel';
 import { ReAuthDialog } from './ReAuthDialog';
 
-import type { Me } from '../../../../shared/contracts/mfa';
+import type { Me, MfaEventNotice } from '../../../../shared/contracts/mfa';
 
 /** Below this many unused recovery codes the section nags; matches the spec's low-codes warning. */
 export const LOW_RECOVERY_CODES_THRESHOLD = 3;
@@ -55,9 +60,54 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
   );
 };
 
+/**
+ * Lists the same unseen `admin::mfa-event` rows the next-login toast (`MfaNotices`) summarised,
+ * so nothing is lost if that toast was dismissed, timed out, or was never seen because it fired
+ * on a different device. "Mark all as seen" clears every unseen notice at once (an absent `ids`
+ * in the request body, per `MarkNoticesSeen.Request`), unlike the toast's dismiss which only
+ * marks the ones it announced.
+ */
+const RecentSecurityEvents = ({
+  notices,
+  onMarkAllSeen,
+}: {
+  notices: MfaEventNotice[];
+  onMarkAllSeen: () => void;
+}) => {
+  const { formatMessage, formatDate } = useIntl();
+
+  return (
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Typography variant="delta" tag="h3">
+        {formatMessage({
+          id: 'Settings.profile.form.section.mfa.notices.title',
+          defaultMessage: 'Recent security events',
+        })}
+      </Typography>
+      <Flex tag="ul" direction="column" alignItems="stretch" gap={1}>
+        {notices.map((notice) => (
+          <Typography key={`${notice.id}`} tag="li" textColor="neutral600">
+            {formatMfaNotice(notice, formatMessage, formatDate)}
+          </Typography>
+        ))}
+      </Flex>
+      <Flex>
+        <Button variant="tertiary" onClick={onMarkAllSeen}>
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.notices.markSeen',
+            defaultMessage: 'Mark all as seen',
+          })}
+        </Button>
+      </Flex>
+    </Flex>
+  );
+};
+
 const TwoFactorSection = () => {
   const { formatMessage } = useIntl();
   const { data: status, error, isLoading } = useGetMfaStatusQuery();
+  const { data: notices } = useGetMfaNoticesQuery();
+  const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
   /**
    * Dismissing a warning only hides it for the lifetime of this component instance -- nothing is
    * persisted, so the warning comes back the next time the profile page is visited (or as soon as
@@ -166,6 +216,9 @@ const TwoFactorSection = () => {
           </Flex>
         )}
       </Flex>
+      {status.enabled && notices && notices.length > 0 ? (
+        <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
+      ) : null}
       {/*
        * All three dialogs are mounted unconditionally (only `open` toggles), same as
        * `EnrolDialog` above: the `Mfa` tag invalidation that follows a successful regenerate or

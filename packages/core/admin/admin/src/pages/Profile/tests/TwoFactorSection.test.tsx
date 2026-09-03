@@ -1,7 +1,21 @@
 import { render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
+import { createIntl } from 'react-intl';
 
+import { formatMfaNotice } from '../../../features/MfaNotices';
 import { TwoFactorSection } from '../TwoFactorSection';
+
+import type { MfaEventNotice } from '../../../../../shared/contracts/mfa';
+
+/**
+ * A standalone `IntlShape` (no `messages`, so every id falls back to its `defaultMessage`,
+ * matching the real app's `LanguageProvider messages={{}}` in `@tests/utils`) lets us build the
+ * exact string `formatMfaNotice` produces, so the assertions below don't hardcode copy that
+ * already lives in `MfaNotices.tsx`.
+ */
+const intl = createIntl({ locale: 'en', messages: {} });
+const expectFormattedNotice = (notice: MfaEventNotice) =>
+  formatMfaNotice(notice, intl.formatMessage, intl.formatDate);
 
 const status = (overrides = {}) =>
   http.get('/admin/mfa/me', () =>
@@ -146,5 +160,73 @@ describe('TwoFactorSection', () => {
     expect(
       await screen.findByRole('dialog', { name: 'Disable two-factor authentication' })
     ).toBeInTheDocument();
+  });
+
+  it('lists unseen security events when enrolled and marks them all as seen', async () => {
+    const notices: MfaEventNotice[] = [
+      {
+        id: 1,
+        type: 'challenge_failed',
+        metadata: {},
+        createdAt: '2026-09-01T10:00:00.000Z',
+        seenAt: null,
+      },
+      {
+        id: 2,
+        type: 'recovery_code_used',
+        metadata: {},
+        createdAt: '2026-09-01T11:00:00.000Z',
+        seenAt: null,
+      },
+    ];
+    let seenBody: unknown;
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 7,
+        codesAcknowledged: true,
+      }),
+      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: notices })),
+      http.post('/admin/mfa/notices/seen', async ({ request }) => {
+        seenBody = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+    const { user } = renderSection();
+
+    expect(
+      await screen.findByRole('heading', { name: 'Recent security events' })
+    ).toBeInTheDocument();
+    expect(screen.getByText(expectFormattedNotice(notices[0]))).toBeInTheDocument();
+    expect(screen.getByText(expectFormattedNotice(notices[1]))).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
+    await waitFor(() => expect(seenBody).toEqual({}));
+  });
+
+  it('does not list security events when not enrolled', async () => {
+    server.use(
+      status(),
+      http.get('/admin/mfa/notices', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              type: 'challenge_failed',
+              metadata: {},
+              createdAt: '2026-09-01T10:00:00.000Z',
+              seenAt: null,
+            },
+          ],
+        })
+      )
+    );
+    renderSection();
+
+    await screen.findByText('Not enabled');
+    expect(
+      screen.queryByRole('heading', { name: 'Recent security events' })
+    ).not.toBeInTheDocument();
   });
 });

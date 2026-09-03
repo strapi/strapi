@@ -18,6 +18,7 @@ import { UpsellBanner } from '../components/UpsellBanner';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
+import { MfaNotices } from '../features/MfaNotices';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
@@ -102,6 +103,7 @@ const AdminLayout = () => {
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
     >
       <NpsSurvey />
+      <MfaNotices />
       <PluginsInitializer>
         <DndProvider backend={HTML5Backend}>
           <Box background="neutral100">
