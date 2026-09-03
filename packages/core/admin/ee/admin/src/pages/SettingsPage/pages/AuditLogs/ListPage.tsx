@@ -101,8 +101,8 @@ const ListPage = () => {
         defaultMessage: 'User',
       }),
       sortable: false,
-      // In this case, the passed parameter cannot and shouldn't be something else than User
-      cellFormatter: ({ user }) => (user ? user.displayName : ''),
+      // System actions, such as a scheduled release publish, have no user
+      cellFormatter: ({ user }) => (user ? user.displayName : '-'),
     },
   ];
 
