@@ -461,7 +461,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -481,8 +481,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
-      fileData = await enhanceAndValidateFile(file, fileInfo);
+      // Same shape as `upload`: everything besides `fileInfo` is metas.
+      const { fileInfo, ...metas } = data;
+      fileData = await enhanceAndValidateFile(file, fileInfo, metas);
 
       // Replacing a file writes new bytes just like creating one, so it has to
       // respect sizeLimit too. Checked before any provider write, and measured on
