@@ -97,6 +97,36 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await expect(assetsPage.getMoveSuccessNotification()).not.toBeVisible();
     });
 
+    for (const view of ['grid', 'table'] as const) {
+      test(`keeps the drag preview under the cursor in ${view} view`, async ({ page }) => {
+        const assetsPage = new AssetsPage(page);
+        await assetsPage.goto();
+
+        await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
+        await assetsPage.waitForUploadSuccess();
+
+        if (view === 'grid') {
+          await assetsPage.switchToGridView();
+        } else {
+          await assetsPage.switchToTableView();
+        }
+
+        const pointer = await assetsPage.grabItemAndHold('test-image.jpg', view);
+
+        await expect(assetsPage.dragOverlayChip).toBeVisible();
+
+        const chipBox = await assetsPage.dragOverlayChip.boundingBox();
+        expect(chipBox).not.toBeNull();
+
+        expect(pointer.x).toBeGreaterThanOrEqual(chipBox!.x);
+        expect(pointer.x).toBeLessThanOrEqual(chipBox!.x + chipBox!.width);
+        expect(pointer.y).toBeGreaterThanOrEqual(chipBox!.y);
+        expect(pointer.y).toBeLessThanOrEqual(chipBox!.y + chipBox!.height);
+
+        await page.mouse.up();
+      });
+    }
+
     test('shows success toast and removes item from current view after drop', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();

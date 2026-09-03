@@ -571,6 +571,53 @@ export class AssetsPage {
   }
 
   /**
+   * The floating preview rendered by the dnd-kit DragOverlay while a drag is active.
+   */
+  get dragOverlayChip() {
+    return this.page.getByTestId('drag-overlay-chip');
+  }
+
+  /**
+   * Grab an item at its center and hold the pointer away from the item, without
+   * dropping. Returns the pointer position so the caller can assert the overlay
+   * follows the cursor. The mouse button is left DOWN — release it in the test.
+   */
+  async grabItemAndHold(
+    itemName: string,
+    view: 'grid' | 'table' = 'grid',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+
+    const itemBox = await item.boundingBox();
+
+    if (!itemBox) {
+      throw new Error(`Could not resolve drag source "${itemName}"`);
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    // Held well clear of the grab point so a preview anchored to the item's own
+    // origin would sit a whole card away from the pointer.
+    const holdX = startX + 60;
+    const holdY = startY + 60;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(holdX, holdY, { steps: 12 });
+
+    return { x: holdX, y: holdY };
+  }
+
+  /**
    * Drag a folder row/card onto itself (invalid shallow drop).
    */
   async dragFolderToSelf(folderName: string, view: 'grid' | 'table' = 'table') {
