@@ -87,6 +87,8 @@ interface DocumentActionDescription {
    */
   position?: DocumentActionPosition | DocumentActionPosition[];
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
+  dialogOpen?: boolean;
+  onDialogClose?: () => void;
   /**
    * @default 'secondary'
    */
@@ -332,8 +334,21 @@ const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActi
     };
   }, [action.type, action.dialog, action.id, action.publishConfirmScope]);
 
+  React.useEffect(() => {
+    if (action.dialogOpen) {
+      setDialogId(action.id);
+    }
+  }, [action.dialogOpen, action.id]);
+
   const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
+
+    // Save actions are rendered as submit buttons inside the edit form, but the action itself
+    // performs the update. Prevent native submission before the first await; doing it afterwards
+    // is too late and can unmount this button before a conflict dialog is opened.
+    if (buttonType === 'submit') {
+      e.preventDefault();
+    }
 
     const muteDialog = await onClick(e);
 
@@ -358,6 +373,7 @@ const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActi
 
   const handleClose = () => {
     setDialogId(null);
+    action.onDialogClose?.();
   };
 
   return (
@@ -944,15 +960,9 @@ const PublishAction: DocumentActionComponent = ({
         data
       );
 
-      if (
-        'error' in res &&
-        isBaseQueryError(res.error) &&
-        'status' in res.error &&
-        res.error.status === 409
-      ) {
+      if ('error' in res && 'status' in res.error && res.error.status === 409) {
         setHasPublishConflict(true);
-        openPublishConfirmDialog(publishConfirmScope);
-        return false;
+        return true;
       }
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
@@ -1163,6 +1173,8 @@ const PublishAction: DocumentActionComponent = ({
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
     publishConfirmScope: supportsDraftRelationWarning ? publishConfirmScope : undefined,
+    dialogOpen: hasPublishConflict,
+    onDialogClose: () => setHasPublishConflict(false),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -1297,6 +1309,7 @@ const UpdateAction: DocumentActionComponent = ({
     data: object;
     values: object;
   }>();
+  const [hasUpdateConflict, setHasUpdateConflict] = React.useState(false);
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -1447,13 +1460,14 @@ const UpdateAction: DocumentActionComponent = ({
           data
         );
 
-        if ('error' in res && isBaseQueryError(res.error)) {
+        if ('error' in res) {
           if ('status' in res.error && res.error.status === 409) {
             pendingConflict.current = { data, values: latestValues };
-            return false;
+            setHasUpdateConflict(true);
+            return true;
           }
 
-          if (res.error.name === 'ValidationError') {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
             setErrors(formatValidationErrors(res.error));
           }
         } else {
@@ -1605,6 +1619,7 @@ const UpdateAction: DocumentActionComponent = ({
       await clearAutosave();
       resetForm(pending.values);
       pendingConflict.current = undefined;
+      setHasUpdateConflict(false);
     }
   };
 
@@ -1646,6 +1661,8 @@ const UpdateAction: DocumentActionComponent = ({
     }),
     onClick: handleUpdate,
     position: ['panel', 'preview', 'relation-modal'],
+    dialogOpen: hasUpdateConflict,
+    onDialogClose: () => setHasUpdateConflict(false),
     dialog: {
       type: 'dialog',
       title: formatMessage({

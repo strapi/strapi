@@ -10,6 +10,17 @@ const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
 const mockClearAutosave = jest.fn();
+const conflictError = {
+  status: 409,
+  data: {
+    data: null,
+    error: {
+      status: 409,
+      name: 'ConflictError',
+      message: 'The document has changed since it was loaded',
+    },
+  },
+};
 let mockPendingBaseVersion: string | undefined;
 let parentInitialFormValues: Record<string, unknown> | undefined;
 let currentDocumentSchema: { options: { draftAndPublish: boolean } } = {
@@ -165,6 +176,25 @@ const ExistingDocumentActionHarness = () => {
   return action ? <DocumentActions actions={[{ ...action, id: 'update' }]} /> : null;
 };
 
+const ExistingDocumentFormHarness = () => {
+  const [submitted, setSubmitted] = React.useState(false);
+
+  if (submitted) {
+    return <span>Native form submitted</span>;
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        setSubmitted(true);
+      }}
+    >
+      <ExistingDocumentActionHarness />
+    </form>
+  );
+};
+
 const ExistingPublishActionHarness = () => {
   const action = PublishAction({
     activeTab: 'draft',
@@ -237,11 +267,7 @@ describe('relation parent updates', () => {
 
   it('offers Reload and Overwrite when the saved version is stale', async () => {
     mockUpdate.mockResolvedValueOnce({
-      error: {
-        status: 409,
-        name: 'ConflictError',
-        message: 'The document has changed since it was loaded',
-      },
+      error: conflictError,
     });
 
     const { user } = render(<ExistingDocumentActionHarness />);
@@ -263,6 +289,21 @@ describe('relation parent updates', () => {
     );
   });
 
+  it('prevents native form submission while waiting to open a conflict dialog', async () => {
+    mockUpdate.mockResolvedValueOnce({
+      error: conflictError,
+    });
+
+    const { user } = render(<ExistingDocumentFormHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.queryByText('Native form submitted')).not.toBeInTheDocument();
+    expect(
+      await screen.findByText('This document was updated by someone else')
+    ).toBeInTheDocument();
+  });
+
   it('uses the recovered backup version when saving restored changes', async () => {
     mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
 
@@ -280,11 +321,7 @@ describe('relation parent updates', () => {
   it('offers conflict resolution when a restored backup is stale', async () => {
     mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
     mockUpdate.mockResolvedValueOnce({
-      error: {
-        status: 409,
-        name: 'ConflictError',
-        message: 'The document has changed since it was loaded',
-      },
+      error: conflictError,
     });
 
     const { user } = render(<ExistingDocumentActionHarness />);
@@ -313,11 +350,7 @@ describe('relation parent updates', () => {
   it('offers Reload and Overwrite when publishing a stale draft', async () => {
     mockPublish
       .mockResolvedValueOnce({
-        error: {
-          status: 409,
-          name: 'ConflictError',
-          message: 'The document has changed since it was loaded',
-        },
+        error: conflictError,
       })
       .mockResolvedValueOnce({ data: { documentId: 'child', locale: 'en' } });
 
