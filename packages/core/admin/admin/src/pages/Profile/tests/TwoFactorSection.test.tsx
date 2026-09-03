@@ -117,4 +117,34 @@ describe('TwoFactorSection', () => {
       await screen.findByRole('dialog', { name: 'Enable two-factor authentication' })
     ).toBeInTheDocument();
   });
+
+  it('offers to regenerate recovery codes and to disable two-factor authentication when enrolled', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 7,
+        codesAcknowledged: true,
+      })
+    );
+    const { user } = renderSection();
+
+    const regenerateButton = await screen.findByRole('button', {
+      name: 'Generate new recovery codes',
+    });
+    const disableButton = screen.getByRole('button', {
+      name: 'Disable two-factor authentication',
+    });
+
+    await user.click(regenerateButton);
+    expect(
+      await screen.findByRole('dialog', { name: 'Generate new recovery codes' })
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    await user.click(disableButton);
+    expect(
+      await screen.findByRole('dialog', { name: 'Disable two-factor authentication' })
+    ).toBeInTheDocument();
+  });
 });

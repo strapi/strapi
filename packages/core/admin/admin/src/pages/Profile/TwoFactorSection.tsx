@@ -8,6 +8,7 @@ import { isBaseQueryError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
 import { Panel } from './Panel';
+import { ReAuthDialog } from './ReAuthDialog';
 
 import type { Me } from '../../../../shared/contracts/mfa';
 
@@ -15,11 +16,6 @@ import type { Me } from '../../../../shared/contracts/mfa';
 export const LOW_RECOVERY_CODES_THRESHOLD = 3;
 
 type MfaStatus = Me.Response['data'];
-
-interface TwoFactorSectionProps {
-  /** Filled by the enrol / regenerate / disable dialogs in later tasks. */
-  renderActions?: (status: MfaStatus) => React.ReactNode;
-}
 
 const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
   const { formatMessage, formatDate } = useIntl();
@@ -59,7 +55,7 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
   );
 };
 
-const TwoFactorSection = ({ renderActions }: TwoFactorSectionProps) => {
+const TwoFactorSection = () => {
   const { formatMessage } = useIntl();
   const { data: status, error, isLoading } = useGetMfaStatusQuery();
   /**
@@ -70,6 +66,8 @@ const TwoFactorSection = ({ renderActions }: TwoFactorSectionProps) => {
   const [dismissedAck, setDismissedAck] = React.useState(false);
   const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);
   const [enrolOpen, setEnrolOpen] = React.useState(false);
+  const [regenerateOpen, setRegenerateOpen] = React.useState(false);
+  const [disableOpen, setDisableOpen] = React.useState(false);
 
   // 404 means the future flag is off: the feature does not exist on this instance. The UI never
   // reads the flag itself -- a 404 from /admin/mfa/me is the only signal it is off.
@@ -151,11 +149,37 @@ const TwoFactorSection = ({ renderActions }: TwoFactorSectionProps) => {
               })}
             </Button>
           </Flex>
-        ) : renderActions ? (
-          <Flex gap={2}>{renderActions(status)}</Flex>
-        ) : null}
+        ) : (
+          <Flex gap={2}>
+            <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.regenerate.title',
+                defaultMessage: 'Generate new recovery codes',
+              })}
+            </Button>
+            <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.disable.title',
+                defaultMessage: 'Disable two-factor authentication',
+              })}
+            </Button>
+          </Flex>
+        )}
       </Flex>
+      {/*
+       * All three dialogs are mounted unconditionally (only `open` toggles), same as
+       * `EnrolDialog` above: the `Mfa` tag invalidation that follows a successful regenerate or
+       * disable (see services/mfa.ts) refetches this section's status query, and mounting a
+       * dialog only while `status.enabled` is true would unmount it out from under itself the
+       * moment that refetch flips `enabled` to `false` mid-flow.
+       */}
       <EnrolDialog open={enrolOpen} onClose={() => setEnrolOpen(false)} />
+      <ReAuthDialog
+        open={regenerateOpen}
+        onClose={() => setRegenerateOpen(false)}
+        intent="regenerate"
+      />
+      <ReAuthDialog open={disableOpen} onClose={() => setDisableOpen(false)} intent="disable" />
     </Panel>
   );
 };

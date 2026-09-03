@@ -1,51 +1,32 @@
 import { render, server, screen, waitFor, fireEvent } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { useTypedStore } from '../../../core/store/hooks';
 import { EnrolDialog } from '../EnrolDialog';
 
-import type { RootState } from '../../../core/store/configure';
+import {
+  MfaStoreProbe,
+  resetMfaStoreProbe,
+  hasLeakedMfaSecrets as hasLeakedSecrets,
+} from './MfaStoreProbe';
 
 const SECRET = 'JBSWY3DPEHPK3PXP';
 const URI = `otpauth://totp/Strapi:test%40testing.com?secret=${SECRET}&issuer=Strapi`;
 const CODES = ['ABCDE12345', 'FGHJK67890'];
 
-/**
- * Renders `<EnrolDialog>` alongside a probe that captures the real Redux store instance from the
- * same `Provider` tree, so a test can inspect `state.adminApi.mutations` directly -- this is how
- * we prove the secret/otpauth URI/recovery codes don't outlive the dialog in the store, not just
- * in local component state.
- */
-let capturedStore: ReturnType<typeof useTypedStore> | undefined;
-
-const StoreCapture = () => {
-  capturedStore = useTypedStore();
-  return null;
-};
-
 const renderDialog = (props: Parameters<typeof EnrolDialog>[0]) =>
   render(
     <>
-      <StoreCapture />
+      <MfaStoreProbe />
       <EnrolDialog {...props} />
     </>
   );
 
 /** True if any cached mutation result still carries the secret, the otpauth URI, or a code. */
-const hasLeakedMfaSecrets = () => {
-  const state = capturedStore!.getState() as RootState;
-  return Object.values(state.adminApi.mutations).some((entry) => {
-    if (!entry?.data) {
-      return false;
-    }
-    const json = JSON.stringify(entry.data);
-    return json.includes(SECRET) || json.includes(URI) || CODES.some((code) => json.includes(code));
-  });
-};
+const hasLeakedMfaSecrets = () => hasLeakedSecrets(SECRET, URI, ...CODES);
 
 describe('EnrolDialog', () => {
   beforeEach(() => {
-    capturedStore = undefined;
+    resetMfaStoreProbe();
     server.use(
       http.post('/admin/mfa/enrol', async ({ request }) => {
         const body = (await request.json()) as { password?: string };
@@ -309,13 +290,13 @@ describe('EnrolDialog', () => {
     // trivially start clean regardless of whether `reset()` actually clears anything).
     rerender(
       <>
-        <StoreCapture />
+        <MfaStoreProbe />
         <EnrolDialog open={false} onClose={onClose} />
       </>
     );
     rerender(
       <>
-        <StoreCapture />
+        <MfaStoreProbe />
         <EnrolDialog open onClose={onClose} />
       </>
     );
