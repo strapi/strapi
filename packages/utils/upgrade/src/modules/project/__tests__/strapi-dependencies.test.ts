@@ -60,6 +60,28 @@ describe('strapi-dependencies', () => {
 
       expect(unpinned).toEqual([]);
     });
+
+    it('ignores ranged @strapi packages that do not follow Strapi release versions', () => {
+      const strapiVersionRange = '^5.0.0';
+
+      const unpinned = findUnpinnedStrapiDependencies(
+        {
+          '@strapi/strapi': strapiVersionRange,
+          '@strapi/design-system': '^2.2.0',
+        },
+        {
+          '@strapi/icons': '^2.2.0',
+        }
+      );
+
+      expect(unpinned).toEqual([
+        {
+          name: '@strapi/strapi',
+          declaredVersion: strapiVersionRange,
+          section: 'dependencies',
+        },
+      ]);
+    });
   });
 
   describe('pinStrapiDependencies', () => {
