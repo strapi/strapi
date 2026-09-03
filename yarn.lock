@@ -10985,7 +10985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint@npm:8":
+"@types/eslint@npm:8.56.12":
   version: 8.56.12
   resolution: "@types/eslint@npm:8.56.12"
   dependencies:
@@ -28100,7 +28100,7 @@ __metadata:
     "@swc/core": "npm:1.13.5"
     "@swc/helpers": "npm:0.5.17"
     "@swc/jest": "npm:0.2.39"
-    "@types/eslint": "npm:8"
+    "@types/eslint": "npm:8.56.12"
     "@types/fs-extra": "npm:11.0.4"
     "@types/git-url-parse": "npm:9.0.3"
     "@types/prompts": "npm:2.4.9"
