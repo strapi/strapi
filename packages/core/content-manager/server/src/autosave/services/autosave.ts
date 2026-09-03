@@ -117,8 +117,15 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
     async deleteForDocument({
       contentType,
       documentId,
-    }: Pick<AutosaveScope, 'contentType' | 'documentId'>): Promise<void> {
-      await query.deleteMany({ where: { contentType, documentId } });
+      locale,
+    }: Pick<AutosaveScope, 'contentType' | 'documentId' | 'locale'>): Promise<void> {
+      await query.deleteMany({
+        where: {
+          contentType,
+          documentId,
+          ...(typeof locale === 'string' ? { locale } : {}),
+        },
+      });
     },
 
     async deleteForUser(userId: Data.ID): Promise<void> {

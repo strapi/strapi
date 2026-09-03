@@ -72,7 +72,12 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.ForbiddenError();
       }
 
-      const snapshot = await getService(strapi, 'autosave').findOne(scope);
+      const autosaveScope = {
+        ...scope,
+        locale:
+          scope.locale ?? (typeof document.locale === 'string' ? document.locale : scope.locale),
+      };
+      const snapshot = await getService(strapi, 'autosave').findOne(autosaveScope);
 
       if (!snapshot) {
         return { data: null } satisfies Autosave.GetAutosave.Response;
@@ -139,13 +144,21 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
       // Never let a backup carry fields the author is not allowed to edit: it is restored
       // straight into the form, and from there into the shared draft.
       const data = await permissionChecker.sanitizeUpdateInput(document)(body.data);
-      const { schema: _schema, ...entry } = await getService(strapi, 'autosave').save(scope, {
-        data,
-        // Recorded alongside the payload so a later Content-Type Builder change can be detected
-        // when the backup is read back.
-        schema: omit(FIELDS_TO_IGNORE, strapi.getModel(scope.contentType).attributes),
-        baseVersion: body.baseVersion,
-      });
+      const autosaveScope = {
+        ...scope,
+        locale:
+          scope.locale ?? (typeof document.locale === 'string' ? document.locale : scope.locale),
+      };
+      const { schema: _schema, ...entry } = await getService(strapi, 'autosave').save(
+        autosaveScope,
+        {
+          data,
+          // Recorded alongside the payload so a later Content-Type Builder change can be detected
+          // when the backup is read back.
+          schema: omit(FIELDS_TO_IGNORE, strapi.getModel(scope.contentType).attributes),
+          baseVersion: body.baseVersion,
+        }
+      );
 
       return { data: entry } satisfies Autosave.SaveAutosave.Response;
     },

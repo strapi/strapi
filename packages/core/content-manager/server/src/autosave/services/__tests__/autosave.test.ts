@@ -141,7 +141,19 @@ describe('autosave service', () => {
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 7 } }));
   });
 
-  it('removes backups for a deleted document and for a deleted user', async () => {
+  it('removes only the deleted locale backups when a localized document version is deleted', async () => {
+    await service.deleteForDocument({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: 'fr',
+    });
+
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { contentType: 'api::article.article', documentId: 'doc-1', locale: 'fr' },
+    });
+  });
+
+  it('removes every locale backup for a fully deleted document and every backup for a user', async () => {
     await service.deleteForDocument({
       contentType: 'api::article.article',
       documentId: 'doc-1',

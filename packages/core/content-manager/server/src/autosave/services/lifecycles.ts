@@ -23,6 +23,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
             .deleteForDocument({
               contentType: context.contentType.uid,
               documentId: context.params.documentId,
+              locale: context.params.locale,
             })
             .catch((error: unknown) => {
               strapi.log.error(

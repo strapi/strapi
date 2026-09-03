@@ -176,6 +176,18 @@ describe('autosave controller', () => {
     });
   });
 
+  it('uses the resolved default locale when a save request omits the locale query', async () => {
+    findDocument.mockResolvedValueOnce({ ...document, locale: 'en' } as any);
+    autosaveService.save.mockResolvedValue({ savedAt: '2026-01-01T00:00:00.000Z' });
+
+    await controller.save(createContext({ query: {} }));
+
+    expect(autosaveService.save).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: 'en' }),
+      expect.any(Object)
+    );
+  });
+
   it('drops fields the content type no longer has and reports what changed', async () => {
     autosaveService.findOne.mockResolvedValue({
       contentType: 'api::article.article',
