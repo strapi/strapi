@@ -46,7 +46,7 @@ interface BuildContext extends BaseContext {
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Core.Strapi;
   options?: BaseOptions;
-  /** True for the Vite development server, which serves `admin/src`. Tailwind then scans source and not `dist` */
+  /** If true, Tailwind scans source and not `dist`. E.g. for Vite development server, which serves `admin/src` */
   dev?: boolean;
 }
 
