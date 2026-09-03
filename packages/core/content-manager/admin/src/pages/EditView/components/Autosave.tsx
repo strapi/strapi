@@ -56,14 +56,14 @@ const Autosave = ({
   const values = useForm('Autosave', (state) => state.values);
   const initialValues = useForm('Autosave', (state) => state.initialValues);
   const modified = useForm('Autosave', (state) => state.modified);
-  const isSubmitting = useForm('Autosave', (state) => state.isSubmitting);
   const setValues = useForm('Autosave', (state) => state.setValues);
   const [status, setStatus] = React.useState<AutosaveStatus>('idle');
   const [savedAt, setSavedAt] = React.useState<string>();
   const [recovery, setRecovery] = React.useState<AutosaveRecord>();
   const [pendingBaseVersion, setPendingBaseVersion] = React.useState<string>();
-  const loadedKey = React.useRef<string>();
+  const [loadedKey, setLoadedKey] = React.useState<string>();
   const wasModified = React.useRef(false);
+  const writesSuspended = React.useRef(false);
   const writeGeneration = React.useRef(0);
   const timeoutRef = React.useRef<number>();
   const pendingWrite = React.useRef<Promise<unknown>>();
@@ -91,7 +91,7 @@ const Autosave = ({
     }
 
     let active = true;
-    loadedKey.current = undefined;
+    setLoadedKey(undefined);
     setRecovery(undefined);
     setStatus('idle');
     registerAutosaveOwner({ instanceId, userId });
@@ -118,7 +118,7 @@ const Autosave = ({
         return;
       }
 
-      loadedKey.current = key;
+      setLoadedKey(key);
 
       if (results.every(({ status: state }) => state === 'rejected')) {
         setStatus('error');
@@ -152,60 +152,57 @@ const Autosave = ({
   ]);
 
   React.useEffect(() => {
-    if (!enabled || loadedKey.current !== key || !modified) {
+    if (!enabled || loadedKey !== key || !modified || writesSuspended.current) {
       return;
     }
 
     const generation = writeGeneration.current;
     setStatus('saving');
-    timeoutRef.current = window.setTimeout(
-      () => {
-        const nextSavedAt = new Date().toISOString();
+    timeoutRef.current = window.setTimeout(() => {
+      const nextSavedAt = new Date().toISOString();
 
+      if (generation !== writeGeneration.current) {
+        return;
+      }
+
+      const effectiveBaseVersion = pendingBaseVersion ?? baseVersion;
+      const writes: Promise<unknown>[] = [
+        setAutosave({
+          key,
+          data: values,
+          baseVersion: effectiveBaseVersion,
+          savedAt: nextSavedAt,
+        }).then(() =>
+          // Trimming is a storage concern, not part of this backup: a failure here must not
+          // report the backup as lost, and the document being edited is never evicted.
+          evictAutosavesOverQuota({ protectedKey: key }).catch(() => undefined)
+        ),
+      ];
+
+      if (onServer) {
+        writes.push(
+          saveServerAutosave({
+            ...serverParams,
+            data: { data: values, baseVersion: effectiveBaseVersion },
+          }).unwrap()
+        );
+      }
+
+      // One store being unavailable — private browsing, or an offline editor — still leaves
+      // the work backed up somewhere, so only a total failure is worth reporting.
+      pendingWrite.current = Promise.allSettled(writes).then((results) => {
         if (generation !== writeGeneration.current) {
           return;
         }
 
-        const effectiveBaseVersion = pendingBaseVersion ?? baseVersion;
-        const writes: Promise<unknown>[] = [
-          setAutosave({
-            key,
-            data: values,
-            baseVersion: effectiveBaseVersion,
-            savedAt: nextSavedAt,
-          }).then(() =>
-            // Trimming is a storage concern, not part of this backup: a failure here must not
-            // report the backup as lost, and the document being edited is never evicted.
-            evictAutosavesOverQuota({ protectedKey: key }).catch(() => undefined)
-          ),
-        ];
-
-        if (onServer) {
-          writes.push(
-            saveServerAutosave({
-              ...serverParams,
-              data: { data: values, baseVersion: effectiveBaseVersion },
-            }).unwrap()
-          );
+        if (results.some(({ status: state }) => state === 'fulfilled')) {
+          setSavedAt(nextSavedAt);
+          setStatus('saved');
+        } else {
+          setStatus('error');
         }
-
-        // One store being unavailable — private browsing, or an offline editor — still leaves
-        // the work backed up somewhere, so only a total failure is worth reporting.
-        pendingWrite.current = Promise.allSettled(writes).then((results) => {
-          if (generation !== writeGeneration.current) {
-            return;
-          }
-
-          if (results.some(({ status: state }) => state === 'fulfilled')) {
-            setSavedAt(nextSavedAt);
-            setStatus('saved');
-          } else {
-            setStatus('error');
-          }
-        });
-      },
-      isSubmitting ? 0 : 1000
-    );
+      });
+    }, 1000);
 
     return () => {
       if (timeoutRef.current) {
@@ -216,8 +213,8 @@ const Autosave = ({
   }, [
     baseVersion,
     enabled,
-    isSubmitting,
     key,
+    loadedKey,
     modified,
     onServer,
     pendingBaseVersion,
@@ -249,6 +246,7 @@ const Autosave = ({
     }
 
     if (wasModified.current) {
+      writesSuspended.current = false;
       wasModified.current = false;
       removeBackups().catch(() => undefined);
       setStatus('idle');
@@ -261,6 +259,7 @@ const Autosave = ({
     }
 
     writeGeneration.current += 1;
+    writesSuspended.current = modified;
 
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
@@ -277,7 +276,7 @@ const Autosave = ({
     } catch {
       setStatus('error');
     }
-  }, [enabled, removeBackups]);
+  }, [enabled, modified, removeBackups]);
 
   const handleRestore = () => {
     if (recovery) {

@@ -10,6 +10,7 @@ import {
   evictAutosavesOverQuota,
   getAutosave,
   setAutosave,
+  type AutosaveRecord,
 } from '../../utils/autosave';
 import { Autosave, useAutosave } from '../Autosave';
 
@@ -39,6 +40,16 @@ const ChangeTitle = () => {
   return (
     <button type="button" onClick={() => setValues({ title: 'Edited title' })}>
       Edit title
+    </button>
+  );
+};
+
+const ChangeTitleAgain = () => {
+  const setValues = useForm('ChangeTitleAgain', (state) => state.setValues);
+
+  return (
+    <button type="button" onClick={() => setValues({ title: 'Refetched title' })}>
+      Refetch title
     </button>
   );
 };
@@ -238,6 +249,41 @@ describe('Autosave', () => {
     );
   });
 
+  it('backs up edits made while existing backups are still loading', async () => {
+    let finishRead: (value: AutosaveRecord | undefined) => void = () => undefined;
+    mockedGetAutosave.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishRead = resolve;
+        })
+    );
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <ChangeTitle />
+        </Autosave>
+      </Form>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Edit title' }));
+    expect(mockedSetAutosave).not.toHaveBeenCalled();
+
+    finishRead(undefined);
+
+    await waitFor(() => expect(mockedSetAutosave).toHaveBeenCalled(), { timeout: 1500 });
+    expect(mockedSetAutosave).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { title: 'Edited title' } })
+    );
+  });
+
   it('keeps the backup when trimming the store fails', async () => {
     mockedGetAutosave.mockResolvedValue(undefined);
     mockedEvictAutosavesOverQuota.mockRejectedValue(new Error('quota failure'));
@@ -329,6 +375,41 @@ describe('Autosave', () => {
 
     expect(mockedSetAutosave).not.toHaveBeenCalled();
     expect(mockedDeleteAutosave).toHaveBeenCalled();
+  });
+
+  it('does not recreate a cleared backup while discarded values are refetching', async () => {
+    mockedGetAutosave.mockResolvedValue(undefined);
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <ChangeTitle />
+          <ChangeTitleAgain />
+          <ClearBackup />
+        </Autosave>
+      </Form>
+    );
+
+    await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'Edit title' }));
+    await waitFor(() => expect(mockedSetAutosave).toHaveBeenCalled(), { timeout: 1500 });
+    await user.click(screen.getByRole('button', { name: 'Clear backup' }));
+    await waitFor(() => expect(mockedDeleteAutosave).toHaveBeenCalled());
+
+    mockedSetAutosave.mockClear();
+    await user.click(screen.getByRole('button', { name: 'Refetch title' }));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1100);
+    });
+
+    expect(mockedSetAutosave).not.toHaveBeenCalled();
   });
 
   it('shows an error when no backup can be read', async () => {
