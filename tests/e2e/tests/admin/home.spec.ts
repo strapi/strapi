@@ -7,19 +7,12 @@ import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-const keyStatisticsTestTitle = 'a super admin should see the key statistics widget';
 
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
-  });
-
-  test.afterEach(async ({}, testInfo) => {
-    if (testInfo.title === keyStatisticsTestTitle) {
-      await resetFiles();
-    }
   });
 
   test('a user should have a personalized homepage', async ({ page }) => {
@@ -57,7 +50,33 @@ test.describe('Home as super admin', () => {
     await expect(profileWidget.getByText('ted.lasso@afcrichmond.co.uk')).toBeVisible();
   });
 
-  test(keyStatisticsTestTitle, async ({ page }) => {
+  test('a super admin should see the deploy now widget', async ({ page }) => {
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
+    await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
+    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
+  });
+});
+
+test.describe('Home as super admin — key statistics', () => {
+  let didWriteSchemaFiles = false;
+
+  test.beforeEach(async ({ page }) => {
+    didWriteSchemaFiles = false;
+    await resetFiles();
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test.afterEach(async () => {
+    if (didWriteSchemaFiles) {
+      await resetFiles();
+    }
+  });
+
+  test('a super admin should see the key statistics widget', async ({ page }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).toBeVisible();
 
@@ -172,6 +191,8 @@ test.describe('Home as super admin', () => {
       initialAssetsMatch &&
       initialEntriesMatch
     ) {
+      didWriteSchemaFiles = true;
+
       // Create an entry
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
@@ -296,14 +317,6 @@ test.describe('Home as super admin', () => {
         String(initialApiTokensCount + 1)
       );
     }
-  });
-
-  test('a super admin should see the deploy now widget', async ({ page }) => {
-    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
-    await expect(deployWidget).toBeVisible();
-    await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
-    await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
-    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
   });
 });
 
