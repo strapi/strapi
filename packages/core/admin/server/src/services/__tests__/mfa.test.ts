@@ -435,7 +435,15 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     }
   });
 
-  const userMocks = {
+  // `load` has no default implementation: only the enforcement-policy suite (which loads roles
+  // for a user row that doesn't carry them) ever sets it, via direct assignment on the returned
+  // fixture -- the annotation exists purely so that assignment type-checks.
+  const userMocks: {
+    findOne: jest.Mock;
+    update: jest.Mock;
+    updateMany: jest.Mock;
+    load?: jest.Mock;
+  } = {
     // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
     // subsequent write elsewhere must not retroactively change what an in-flight read already
     // observed. Spreading into a new object is what makes a read-then-write mutant in
@@ -650,7 +658,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     challengeAttemptsColumn
   );
 
-  const strapi = {
+  const strapiBase = {
     config: {
       get: jest.fn((path: string, defaultValue?: unknown) => {
         if (path === 'admin.auth.mfa') return { enabled: true, ...options.mfaConfig };
@@ -718,6 +726,14 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         }
       }),
     },
+  };
+
+  // `strapiOverrides` introduces keys `strapiBase` above doesn't have (`store`, `ee`, ...) for
+  // suites that need them -- plain object spread would type-check `strapi` as `strapiBase` alone
+  // and silently reject reading those keys back off the fixture, so the merge is typed explicitly
+  // to keep both the known shape and the overrides' own keys.
+  const strapi: typeof strapiBase & Record<string, unknown> = {
+    ...strapiBase,
     ...options.strapiOverrides,
   };
 
@@ -2473,5 +2489,139 @@ describe('mfa service: event pruning', () => {
       'Failed to prune admin::mfa-event rows',
       expect.any(Error)
     );
+  });
+});
+
+describe('mfa service: enforcement policy', () => {
+  type Role = { id: number; mfaRequired: boolean | null };
+
+  const setup = (
+    options: {
+      stored?: unknown;
+      ssoEnabled?: boolean;
+      ssoLockedRoles?: string[];
+      enabled?: boolean;
+    } = {}
+  ) => {
+    const roles = new Map<number, Role>([
+      [1, { id: 1, mfaRequired: null }],
+      [2, { id: 2, mfaRequired: true }],
+    ]);
+    const storeGet = jest.fn(async ({ key }: { key: string }) => {
+      if (key === 'security-settings') return options.stored ?? null;
+      if (key === 'auth') return { providers: { ssoLockedRoles: options.ssoLockedRoles ?? [] } };
+      return null;
+    });
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: jest.fn(() => ({ get: storeGet, set: jest.fn() })),
+        ee: { features: { isEnabled: jest.fn(() => options.ssoEnabled ?? false) } },
+        features: { future: { isEnabled: jest.fn(() => options.enabled ?? true) } },
+      },
+    });
+    // `load(user, 'roles')` is how the resolver fetches roles when the row has none populated.
+    fixture.userMocks.load = jest.fn(async (user: { id: number }, field: string) => {
+      if (field !== 'roles') throw new Error(`unexpected load of ${field}`);
+      const row = fixture.users.get(String(user.id)) as { roleIds?: number[] } | undefined;
+      return (row?.roleIds ?? []).map((id) => ({ ...roles.get(id)! }));
+    });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, roles, storeGet };
+  };
+
+  const user = (overrides: Record<string, unknown> = {}) => ({
+    id: 1,
+    email: 'kai@doe.com',
+    password: 'hashed',
+    mfaSecret: null,
+    mfaEnabledAt: null,
+    ...overrides,
+  });
+
+  test('required mode applies to any password-holding user', async () => {
+    const { service } = setup({ stored: { mfa: { mode: 'required' } } });
+    await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);
+  });
+
+  test('off mode requires nobody, even with a required role', async () => {
+    const { service } = setup({ stored: { mfa: { mode: 'off' } } });
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
+    ).resolves.toBe(false);
+  });
+
+  test('optional mode requires a user holding a flagged role and nobody else', async () => {
+    const { service } = setup();
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
+    ).resolves.toBe(true);
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 1, mfaRequired: null }] }))
+    ).resolves.toBe(false);
+  });
+
+  test('roles are loaded when the row does not carry them (the login path user has none)', async () => {
+    const { service, users, userMocks } = setup();
+    users.set('1', { ...users.get('1')!, roleIds: [2] });
+
+    await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);
+    expect(userMocks.load).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+      'roles',
+      expect.anything()
+    );
+  });
+
+  test('a user with no local password is exempt in every mode', async () => {
+    const { service } = setup({ stored: { mfa: { mode: 'required' } } });
+    await expect(service.isMfaRequiredFor(user({ password: null }))).resolves.toBe(false);
+    await expect(service.isExemptFromMfa(user({ password: null }))).resolves.toBe(true);
+  });
+
+  test('an SSO-locked user is exempt under EE with SSO enabled', async () => {
+    const { service } = setup({
+      stored: { mfa: { mode: 'required' } },
+      ssoEnabled: true,
+      ssoLockedRoles: ['2'],
+    });
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
+    ).resolves.toBe(false);
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 1, mfaRequired: null }] }))
+    ).resolves.toBe(true);
+  });
+
+  test('ssoLockedRoles is ignored when the sso feature is off', async () => {
+    const { service, storeGet } = setup({
+      stored: { mfa: { mode: 'required' } },
+      ssoLockedRoles: ['2'],
+    });
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
+    ).resolves.toBe(true);
+    expect(storeGet).not.toHaveBeenCalledWith({ key: 'auth' });
+  });
+
+  test('the kill switch and the future flag both resolve to not required without reading the store', async () => {
+    const flagOff = setup({ stored: { mfa: { mode: 'required' } }, enabled: false });
+    await expect(flagOff.service.isMfaRequiredFor(user())).resolves.toBe(false);
+    expect(flagOff.storeGet).not.toHaveBeenCalled();
+
+    const killed = buildMfaFixture({
+      mfaConfig: { enabled: false },
+      strapiOverrides: { store: jest.fn() },
+    });
+    const service = createMfaService(defaultDeps(killed.strapi));
+    await expect(service.isMfaRequiredFor(user())).resolves.toBe(false);
+    expect(killed.strapi.store).not.toHaveBeenCalled();
+  });
+
+  test('a pre-read enforcement value is honoured instead of re-reading the store', async () => {
+    const { service, storeGet } = setup({ stored: { mfa: { mode: 'off' } } });
+    await expect(
+      service.isMfaRequiredFor(user(), { mode: 'required', graceDays: 7 })
+    ).resolves.toBe(true);
+    expect(storeGet).not.toHaveBeenCalledWith({ key: 'security-settings' });
   });
 });

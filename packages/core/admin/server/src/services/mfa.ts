@@ -13,6 +13,8 @@ import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
+import { readMfaEnforcement } from './security-settings';
+import type { MfaEnforcement } from '../../../shared/contracts/security-settings';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -103,6 +105,21 @@ export type VerifyChallengeResult =
   | { ok: true; userId: string }
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
+/**
+ * The raw `admin::user` row shape every enforcement function works on. Roles are optional
+ * because `checkCredentials` (the login path) does not populate them; the resolver loads them
+ * when they are absent rather than silently treating "not populated" as "no roles".
+ */
+export type AdminUserRow = {
+  id: Data.ID;
+  password?: string | null;
+  roles?: Array<{ id: Data.ID; mfaRequired?: boolean | null }> | null;
+  mfaSecret?: string | null;
+  mfaEnabledAt?: string | Date | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
+};
+
 interface EncryptionLike {
   encrypt(value: string): string | null;
   decrypt(value: string): string | null;
@@ -175,6 +192,77 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const isEnrolled = async (userId: string): Promise<boolean> => {
     const user = await userQuery().findOne({ where: { id: userId } });
     return Boolean(user?.mfaEnabledAt && user?.mfaSecret);
+  };
+
+  const loadRoles = async (
+    user: AdminUserRow
+  ): Promise<Array<{ id: Data.ID; mfaRequired?: boolean | null }>> => {
+    if (Array.isArray(user.roles)) {
+      return user.roles;
+    }
+    const loaded = await userQuery().load(user, 'roles', { fields: ['id', 'mfaRequired'] });
+    return Array.isArray(loaded) ? loaded : [];
+  };
+
+  /**
+   * Resolver step 0. An account with no local password can only ever log in through EE SSO, and
+   * an SSO-locked account is refused by the local strategy outright, so neither can be graced or
+   * locked on any path -- including `/access-token`, where SSO-minted sessions do arrive. This
+   * single rule is what keeps the guard exemption, the SSO carve-out and the refresh path
+   * consistent. Mirrors `ee/server/src/utils/sso-lock.ts` (CE code cannot import from `ee/`).
+   */
+  const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> => {
+    if (!user.password) {
+      return true;
+    }
+
+    if (!strapi.ee.features.isEnabled('sso')) {
+      return false;
+    }
+
+    const adminStore = strapi.store({ type: 'core', name: 'admin' });
+    const auth = (await adminStore.get({ key: 'auth' })) as
+      | { providers?: { ssoLockedRoles?: Array<string | number> } }
+      | null
+      | undefined;
+    const lockedRoles = auth?.providers?.ssoLockedRoles ?? [];
+    if (lockedRoles.length === 0) {
+      return false;
+    }
+
+    const roles = await loadRoles(user);
+    return lockedRoles.some((lockedId) =>
+      roles.some((role) => String(role.id) === String(lockedId))
+    );
+  };
+
+  /**
+   * The only place enforcement policy is read. Order is cheapest-first; the result is the same in
+   * any order: the feature must be on, the user must be subject to local login at all, then the
+   * mode decides, and only `optional` needs the roles.
+   */
+  const isMfaRequiredFor = async (
+    user: AdminUserRow,
+    enforcement?: MfaEnforcement
+  ): Promise<boolean> => {
+    if (!isEnabled()) {
+      return false;
+    }
+
+    if (await isExemptFromMfa(user)) {
+      return false;
+    }
+
+    const { mode } = enforcement ?? (await readMfaEnforcement(strapi));
+    if (mode === 'off') {
+      return false;
+    }
+    if (mode === 'required') {
+      return true;
+    }
+
+    const roles = await loadRoles(user);
+    return roles.some((role) => role.mfaRequired === true);
   };
 
   /**
@@ -1097,6 +1185,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isEnabled,
     config,
     isEnrolled,
+    isExemptFromMfa,
+    isMfaRequiredFor,
     beginEnrolment,
     completeEnrolment,
     verifyTotpForUser,
