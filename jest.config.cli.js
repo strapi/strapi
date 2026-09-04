@@ -1,6 +1,8 @@
+// @ts-check
 'use strict';
 
-module.exports = {
+/** @type {import('jest').Config} */
+const config = {
   displayName: 'CLI tests',
   testMatch: ['**/?(*.)+(spec|test).cli.(js|ts)'],
   testEnvironment: 'node',
@@ -12,7 +14,9 @@ module.exports = {
     '<rootDir>/test/',
   ],
   transform: {
-    '^.+\\.ts$': ['@swc/jest'],
+    '^.+\\.ts$': ['@swc/jest', {}],
   },
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
 };
+
+module.exports = config;
