@@ -416,6 +416,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "admin::audit-logs.export",
+                "category": "audit logs",
+                "displayName": "Export",
+                "subCategory": "options",
+              },
+              {
                 "action": "admin::audit-logs.read",
                 "category": "audit logs",
                 "displayName": "Read",

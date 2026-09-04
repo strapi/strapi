@@ -1,6 +1,29 @@
+import { Readable } from 'stream';
+
 import type { Core } from '@strapi/types';
 
+import {
+  AUDIT_LOG_EXPORT_EVENT,
+  AUDIT_LOGS_EXPORT_DEFAULT_MAX_ROWS,
+  AUDIT_LOGS_EXPORT_PART_MAX_ROWS,
+  AUDIT_LOGS_EXPORT_PART_ROWS,
+} from '../../../../../shared/utils/audit-log-export';
 import { getDisplayName } from '../utils';
+import { CSV_BOM, serializeCsvLine } from '../utils/csv';
+import { signExportToken, verifyExportToken } from '../utils/export-token';
+
+const EXPORT_CSV_COLUMNS = [
+  'id',
+  'action',
+  'date',
+  'user_id',
+  'user_email',
+  'user_display_name',
+  'origin',
+  'payload',
+];
+const EXPORT_USER_COLUMNS = ['id', 'email', 'username', 'firstname', 'lastname'];
+const EXPORT_BATCH_SIZE = 5000;
 
 interface Event {
   action: string;
@@ -20,6 +43,78 @@ const getSanitizedUser = (user: any) => {
     email: user.email,
     displayName: getDisplayName(user),
   };
+};
+
+const serializeCsvPayload = (payload: unknown) => {
+  if (payload === null || payload === undefined) {
+    return null;
+  }
+
+  return typeof payload === 'string' ? payload : JSON.stringify(payload);
+};
+
+const parseCsvPayload = (payload: unknown): Record<string, unknown> | null => {
+  if (typeof payload === 'string') {
+    try {
+      return JSON.parse(payload);
+    } catch {
+      return null;
+    }
+  }
+
+  return typeof payload === 'object' ? (payload as Record<string, unknown> | null) : null;
+};
+
+interface ExportQuery {
+  cursor?: number;
+  pageSize?: number;
+  until?: number;
+  token?: string;
+  [key: string]: unknown;
+}
+
+const getExportSecret = (strapi: Core.Strapi): string => {
+  const secret = strapi.config.get('admin.auth.secret');
+
+  if (typeof secret !== 'string' || secret.length === 0) {
+    throw new Error(
+      'The audit logs export requires admin.auth.secret to be set in config/admin.js.'
+    );
+  }
+
+  return secret;
+};
+
+const isTrustedExportContinuation = (strapi: Core.Strapi, query: ExportQuery) => {
+  return (
+    query.cursor !== undefined &&
+    query.until !== undefined &&
+    verifyExportToken(getExportSecret(strapi), query.token, query.until, query.filters)
+  );
+};
+
+const buildExportWhere = (filtersWhere: unknown, untilId: number, afterId: number) => ({
+  $and: [
+    filtersWhere ?? {},
+    { id: { $lte: untilId } },
+    ...(afterId > 0 ? [{ id: { $gt: afterId } }] : []),
+  ],
+});
+
+const toCsvLine = (row: any) => {
+  const user = row.user ? getSanitizedUser(row.user) : null;
+  const { payload } = row;
+
+  return serializeCsvLine([
+    row.id,
+    row.action,
+    row.date instanceof Date ? row.date.toISOString() : row.date,
+    user?.id ?? null,
+    user?.email ?? null,
+    user?.displayName ?? null,
+    parseCsvPayload(payload)?.origin ?? null,
+    serializeCsvPayload(payload),
+  ]);
 };
 
 /**
@@ -69,6 +164,137 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       return {
         results: sanitizedResults,
         pagination,
+      };
+    },
+
+    async isExportTooLarge(query: { filters?: unknown }) {
+      const maxRows = strapi.config.get(
+        'admin.auditLogs.exportMaxRows',
+        AUDIT_LOGS_EXPORT_DEFAULT_MAX_ROWS
+      );
+      const { where } = strapi
+        .get('query-params')
+        .transform('admin::audit-log', { filters: query.filters ?? undefined });
+
+      const beyondCap = await strapi.db.query('admin::audit-log').findMany({
+        select: ['id'],
+        where: where ?? {},
+        orderBy: { id: 'asc' },
+        offset: maxRows,
+        limit: 1,
+      });
+
+      return beyondCap.length > 0;
+    },
+
+    isTrustedContinuation(query: ExportQuery) {
+      return isTrustedExportContinuation(strapi, query);
+    },
+
+    async createExportStream(query: ExportQuery) {
+      getExportSecret(strapi);
+
+      const { cursor, pageSize, until, token, page: _page, sort: _sort, ...filtersQuery } = query;
+
+      const configuredPartSize = strapi.config.get(
+        'admin.auditLogs.exportPartRows',
+        AUDIT_LOGS_EXPORT_PART_ROWS
+      );
+      const partSize = Math.max(
+        1,
+        Math.min(pageSize ?? configuredPartSize, AUDIT_LOGS_EXPORT_PART_MAX_ROWS)
+      );
+
+      const { where: filtersWhere } = strapi
+        .get('query-params')
+        .transform('admin::audit-log', filtersQuery);
+
+      const isNewExport = !isTrustedExportContinuation(strapi, query);
+      if (isNewExport) {
+        await strapi.eventHub.emit(AUDIT_LOG_EXPORT_EVENT, {
+          filters: filtersQuery.filters ?? null,
+        });
+      }
+
+      let frozenUntil = isNewExport ? undefined : until;
+      if (frozenUntil === undefined) {
+        const [lastRow] = await strapi.db.query('admin::audit-log').findMany({
+          select: ['id'],
+          orderBy: { id: 'desc' },
+          limit: 1,
+        });
+
+        frozenUntil = lastRow?.id ?? 0;
+      }
+
+      const untilId = frozenUntil ?? 0;
+      const getWhere = (afterId: number) => buildExportWhere(filtersWhere, untilId, afterId);
+
+      const boundary: Array<{ id: number }> = await strapi.db.query('admin::audit-log').findMany({
+        select: ['id'],
+        where: getWhere(cursor ?? 0),
+        orderBy: { id: 'asc' },
+        offset: partSize - 1,
+        limit: 2,
+      });
+
+      const nextCursor = boundary.length > 1 ? boundary[0].id : null;
+
+      const partUpperBound = nextCursor ?? untilId;
+
+      async function* csvChunks() {
+        if (isNewExport) {
+          yield CSV_BOM + serializeCsvLine(EXPORT_CSV_COLUMNS);
+        }
+
+        let lastId = cursor ?? 0;
+        let remaining = partSize;
+
+        while (remaining > 0) {
+          const batchLimit = Math.min(EXPORT_BATCH_SIZE, remaining);
+          const rows: any[] = await strapi.db.query('admin::audit-log').findMany({
+            select: ['id', 'action', 'date', 'payload'],
+            populate: { user: { select: EXPORT_USER_COLUMNS } },
+            where: buildExportWhere(filtersWhere, partUpperBound, lastId),
+            orderBy: { id: 'asc' },
+            limit: batchLimit,
+          });
+
+          if (rows.length === 0) {
+            break;
+          }
+
+          yield rows.map(toCsvLine).join('');
+
+          lastId = rows[rows.length - 1].id;
+          remaining -= rows.length;
+
+          if (rows.length < batchLimit) {
+            break;
+          }
+        }
+      }
+
+      async function* loggedCsvChunks() {
+        try {
+          yield* csvChunks();
+        } catch (error) {
+          strapi.log.error(
+            `Audit logs export failed after the response started, the CSV part is truncated: ${error}`
+          );
+          throw error;
+        }
+      }
+
+      return {
+        stream: Readable.from(loggedCsvChunks(), { objectMode: false, highWaterMark: 64 * 1024 }),
+        nextCursor,
+        until: untilId,
+        isNewExport,
+        partSize,
+        exportToken: isNewExport
+          ? signExportToken(getExportSecret(strapi), untilId, filtersQuery.filters)
+          : (token as string),
       };
     },
 
@@ -137,4 +363,4 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
   };
 };
 
-export { createAuditLogsService };
+export { createAuditLogsService, toCsvLine };
