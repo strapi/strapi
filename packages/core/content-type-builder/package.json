@@ -85,7 +85,7 @@
     "lodash": "4.18.1",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
-    "qs": "6.15.3",
+    "qs": "6.16.0",
     "react-dropzone": "14.3.8",
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
@@ -112,7 +112,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
-    "react-router-dom": "6.30.4",
+    "react-router-dom": "6.30.5",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
     "vitest-config": "5.52.3"
