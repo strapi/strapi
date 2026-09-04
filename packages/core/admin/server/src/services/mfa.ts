@@ -194,14 +194,21 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return Boolean(user?.mfaEnabledAt && user?.mfaSecret);
   };
 
+  /**
+   * Memoises onto the row: `isMfaRequiredFor` can need roles twice in the same call -- once for
+   * the SSO-locked check in `isExemptFromMfa`, again for the `optional`-mode scan -- and both
+   * must see the same answer without querying the database twice.
+   */
   const loadRoles = async (
     user: AdminUserRow
   ): Promise<Array<{ id: Data.ID; mfaRequired?: boolean | null }>> => {
     if (Array.isArray(user.roles)) {
       return user.roles;
     }
-    const loaded = await userQuery().load(user, 'roles', { fields: ['id', 'mfaRequired'] });
-    return Array.isArray(loaded) ? loaded : [];
+    const loaded = await userQuery().load(user, 'roles', { select: ['id', 'mfaRequired'] });
+    const roles = Array.isArray(loaded) ? loaded : [];
+    user.roles = roles;
+    return roles;
   };
 
   /**
@@ -209,7 +216,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * an SSO-locked account is refused by the local strategy outright, so neither can be graced or
    * locked on any path -- including `/access-token`, where SSO-minted sessions do arrive. This
    * single rule is what keeps the guard exemption, the SSO carve-out and the refresh path
-   * consistent. Mirrors `ee/server/src/utils/sso-lock.ts` (CE code cannot import from `ee/`).
+   * consistent. Mirrors `ee/server/src/utils/sso-lock.ts` (CE code cannot import from `ee/`),
+   * including its comparison -- `lockedId === String(role.id)` leaves `lockedId` uncoerced, so a
+   * numeric `ssoLockedRoles` entry that EE's own strict-equality check would fail to match also
+   * fails to match here. This exemption must never be broader than the local-login block SSO
+   * locking actually enforces: coercing both sides would exempt a password-holding user from MFA
+   * that EE never actually locked out of local login.
    */
   const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> => {
     if (!user.password) {
@@ -231,9 +243,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     }
 
     const roles = await loadRoles(user);
-    return lockedRoles.some((lockedId) =>
-      roles.some((role) => String(role.id) === String(lockedId))
-    );
+    return lockedRoles.some((lockedId) => roles.some((role) => lockedId === String(role.id)));
   };
 
   /**

@@ -19,6 +19,7 @@ describe('security-settings: readMfaEnforcement', () => {
 
     await expect(readMfaEnforcement(strapi)).resolves.toEqual(DEFAULT_MFA_ENFORCEMENT);
     expect(store).toHaveBeenCalledWith({ type: 'core', name: 'admin' });
+    expect(strapi.log.warn).not.toHaveBeenCalled();
   });
 
   test('returns the stored mode and grace period', async () => {
@@ -31,6 +32,7 @@ describe('security-settings: readMfaEnforcement', () => {
     const { strapi } = buildStrapi({ mfa: { mode: 'off' } });
 
     await expect(readMfaEnforcement(strapi)).resolves.toEqual({ mode: 'off', graceDays: 7 });
+    expect(strapi.log.warn).not.toHaveBeenCalled();
   });
 
   test('a corrupt stored value is ignored with a warning, never thrown', async () => {

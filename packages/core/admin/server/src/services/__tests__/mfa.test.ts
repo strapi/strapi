@@ -2499,7 +2499,7 @@ describe('mfa service: enforcement policy', () => {
     options: {
       stored?: unknown;
       ssoEnabled?: boolean;
-      ssoLockedRoles?: string[];
+      ssoLockedRoles?: Array<string | number>;
       enabled?: boolean;
     } = {}
   ) => {
@@ -2565,11 +2565,17 @@ describe('mfa service: enforcement policy', () => {
     users.set('1', { ...users.get('1')!, roleIds: [2] });
 
     await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);
-    expect(userMocks.load).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1 }),
-      'roles',
-      expect.anything()
-    );
+    expect(userMocks.load).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }), 'roles', {
+      select: ['id', 'mfaRequired'],
+    });
+  });
+
+  test('roles are cached on the row after the first load, so the SSO check and the mode scan share one query', async () => {
+    const { service, users, userMocks } = setup({ ssoEnabled: true, ssoLockedRoles: ['9'] });
+    users.set('1', { ...users.get('1')!, roleIds: [2] });
+
+    await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);
+    expect(userMocks.load).toHaveBeenCalledTimes(1);
   });
 
   test('a user with no local password is exempt in every mode', async () => {
@@ -2589,6 +2595,20 @@ describe('mfa service: enforcement policy', () => {
     ).resolves.toBe(false);
     await expect(
       service.isMfaRequiredFor(user({ roles: [{ id: 1, mfaRequired: null }] }))
+    ).resolves.toBe(true);
+  });
+
+  test('a numeric ssoLockedRoles entry does not exempt -- EE itself would not lock that role either', async () => {
+    const { service } = setup({
+      stored: { mfa: { mode: 'required' } },
+      ssoEnabled: true,
+      ssoLockedRoles: [2],
+    });
+    await expect(
+      service.isExemptFromMfa(user({ roles: [{ id: 2, mfaRequired: true }] }))
+    ).resolves.toBe(false);
+    await expect(
+      service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
     ).resolves.toBe(true);
   });
 
