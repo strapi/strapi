@@ -21,7 +21,7 @@ export declare namespace Login {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.NotImplementedError;
   }
 }
@@ -37,6 +37,16 @@ export interface MfaChallengeResponse {
     challengeToken: string;
     expiresIn: number;
   };
+}
+
+/**
+ * Present on a session-issuing response (login, register, register-admin, reset-password) only
+ * when the account is required to enrol in two-factor authentication and has not yet: the session
+ * is real, and `mfaGraceUntil` (ISO) is when the account will be locked if it stays unenrolled.
+ */
+export interface MfaEnrolmentRequiredFields {
+  mfaEnrolmentRequired?: true;
+  mfaGraceUntil?: string;
 }
 
 /**
@@ -111,7 +121,7 @@ export declare namespace Register {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -132,7 +142,7 @@ export declare namespace RegisterAdmin {
       token: string;
       accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
     errors?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -163,7 +173,7 @@ export declare namespace ResetPassword {
     data: {
       token: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
-    };
+    } & MfaEnrolmentRequiredFields;
   }
 }
 

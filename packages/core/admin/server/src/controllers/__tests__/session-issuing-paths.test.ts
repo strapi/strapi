@@ -8,6 +8,7 @@ import path from 'node:path';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+import { MfaLockedError } from '../../services/mfa-errors';
 // The real implementation, not a canned mock: used wherever a test needs to prove that
 // `sanitizeUser` actually strips a field (e.g. the MFA columns) from an `admin.auth.*` event
 // payload. A mock that always returns the same fixed object would make that kind of assertion
@@ -120,7 +121,12 @@ const buildResetStrapi = ({
     admin: {
       services: {
         auth: { resetPassword },
-        mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
+        mfa: {
+          isEnabled: jest.fn(() => true),
+          isEnrolled,
+          createChallenge,
+          enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+        },
         user: { sanitizeUser },
       },
     },
@@ -136,6 +142,98 @@ const buildResetStrapi = ({
     emit,
   };
 };
+
+type SessionPath = 'register' | 'registerAdmin' | 'resetPassword';
+
+/** Real, valid bodies (see `validation/authentication/*.ts`) -- the validators actually run. */
+const validRegisterBody = {
+  registrationToken: 'a-real-token',
+  userInfo: { firstname: 'Kai', lastname: 'Doe', password: 'NewPassword123' },
+};
+const validRegisterAdminBody = {
+  email: 'first-admin@example.com',
+  firstname: 'Kai',
+  lastname: 'Doe',
+  password: 'NewPassword123',
+};
+
+/**
+ * A working double for whichever of `register` / `registerAdmin` / `resetPassword` the caller
+ * names, scoped to what each reads: `user.register` / `user.createFirstAdmin` /
+ * `auth.resetPassword` all resolve the same fixture user, `telemetry.send` covers
+ * `registerAdmin`'s bootstrap event, and `invalidateRefreshToken` covers `resetPassword`'s
+ * pre-existing invalidate-all-sessions step. `mfa.isEnabled`/`isEnrolled` default to a state that
+ * never reaches the (unrelated) challenge branch on `resetPassword` -- consistent with a graced
+ * or refused user necessarily being unenrolled -- so every test using this builder is free to
+ * focus purely on `enforce`.
+ */
+const buildPath = (
+  path: SessionPath,
+  mfaOverrides: Record<string, unknown> = {}
+): { ctx: any; generateRefreshToken: jest.Mock } => {
+  const user = { id: 31, email: 'session-path-user@example.com', isActive: true };
+
+  const generateRefreshToken = jest.fn(() =>
+    Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
+  );
+  const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
+  const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+  const sanitizeUser = jest.fn(realSanitizeUser);
+
+  setStrapi({
+    eventHub: { emit: jest.fn() },
+    log: { error: jest.fn(), warn: jest.fn() },
+    config: { get: jest.fn(() => undefined) },
+    telemetry: { send: jest.fn() },
+    sessionManager: jest.fn(() => ({
+      generateRefreshToken,
+      generateAccessToken,
+      invalidateRefreshToken,
+    })),
+    admin: {
+      services: {
+        user: {
+          sanitizeUser,
+          register: jest.fn(() => Promise.resolve(user)),
+          createFirstAdmin: jest.fn(() => Promise.resolve(user)),
+        },
+        auth: {
+          resetPassword: jest.fn(() => Promise.resolve(user)),
+        },
+        mfa: {
+          isEnabled: jest.fn(() => true),
+          isEnrolled: jest.fn(() => Promise.resolve(false)),
+          createChallenge: jest.fn(() =>
+            Promise.resolve({ token: 'path-challenge-token', expiresIn: 300 })
+          ),
+          enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+          ...mfaOverrides,
+        },
+      },
+    },
+  });
+
+  const bodyByPath: Record<SessionPath, Record<string, unknown>> = {
+    register: validRegisterBody,
+    registerAdmin: validRegisterAdminBody,
+    resetPassword: defaultResetBody,
+  };
+  const body = bodyByPath[path];
+
+  const ctx = createContext(
+    { body },
+    {
+      state: {},
+      cookies: { set: jest.fn() },
+      internalServerError: jest.fn(),
+      request: { query: {}, body, headers: {}, secure: false },
+    }
+  ) as any;
+
+  return { ctx, generateRefreshToken };
+};
+
+const invokePath = (path: SessionPath, ctx: any) => authenticationController[path](ctx);
 
 describe('session issuing paths', () => {
   afterEach(() => {
@@ -351,6 +449,38 @@ describe('session issuing paths', () => {
     expect(updateById).toHaveBeenCalledWith(
       42,
       expect.objectContaining({ registrationToken: null, isActive: true })
+    );
+  });
+
+  describe('cycle 2 enforcement runs before every session is minted', () => {
+    const graceUntil = new Date('2026-09-11T10:00:00.000Z');
+
+    test.each(['register', 'registerAdmin', 'resetPassword'] as const)(
+      '%s: a refused user gets no session and a graced user gets the deadline',
+      async (path) => {
+        // Refused
+        {
+          const enforce = jest.fn(() => Promise.resolve({ outcome: 'refused' }));
+          const { ctx, generateRefreshToken } = buildPath(path, { enforce });
+          await expect(invokePath(path, ctx)).rejects.toBeInstanceOf(MfaLockedError);
+          expect(generateRefreshToken).not.toHaveBeenCalled();
+        }
+        // Graced
+        {
+          const enforce = jest.fn(() => Promise.resolve({ outcome: 'grace', graceUntil }));
+          const { ctx, generateRefreshToken } = buildPath(path, { enforce });
+          await invokePath(path, ctx);
+          expect(enforce.mock.invocationCallOrder[0]).toBeLessThan(
+            generateRefreshToken.mock.invocationCallOrder[0]
+          );
+          expect(ctx.body.data).toEqual(
+            expect.objectContaining({
+              mfaEnrolmentRequired: true,
+              mfaGraceUntil: graceUntil.toISOString(),
+            })
+          );
+        }
+      }
     );
   });
 });

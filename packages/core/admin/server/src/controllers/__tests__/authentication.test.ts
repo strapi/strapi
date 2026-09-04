@@ -7,6 +7,7 @@ import { errors } from '@strapi/utils';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+import { MfaLockedError } from '../../services/mfa-errors';
 // The real implementation, not a canned mock: used wherever a test needs to prove that a field
 // `sanitizeUser` is supposed to strip (e.g. the MFA columns) actually never reaches an
 // `admin.auth.*` event payload. A mock that always returns the same fixed object would make
@@ -84,7 +85,7 @@ describe('authentication controller', () => {
         sessionManager: sessionManagerFn,
         admin: {
           services: {
-            mfa: mfaOverrides,
+            mfa: { enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })), ...mfaOverrides },
             user: { sanitizeUser, findOne, ...userOverrides },
           },
         },
@@ -131,7 +132,12 @@ describe('authentication controller', () => {
         log: { error: jest.fn() },
         admin: {
           services: {
-            mfa: { isEnabled: jest.fn(() => true), isEnrolled, createChallenge },
+            mfa: {
+              isEnabled: jest.fn(() => true),
+              isEnrolled,
+              createChallenge,
+              enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+            },
             user: { sanitizeUser: jest.fn(realSanitizeUser) },
           },
         },
@@ -444,6 +450,78 @@ describe('authentication controller', () => {
 
       expect(notFound).toHaveBeenCalled();
       expect(verifyChallenge).not.toHaveBeenCalled();
+    });
+
+    describe('login with enforcement', () => {
+      const user = { id: 7, email: 'admin@example.com', password: 'hashed', isActive: true };
+      const graceUntil = new Date('2026-09-11T10:00:00.000Z');
+
+      test('a graced user gets a session whose body carries the deadline', async () => {
+        mockPassportUser(user);
+        const enforce = jest.fn(() => Promise.resolve({ outcome: 'grace', graceUntil }));
+        const { generateRefreshToken } = buildIssuingStrapi({
+          isEnabled: () => true,
+          isEnrolled: jest.fn(() => Promise.resolve(false)),
+          enforce,
+        });
+        const { ctx } = buildCtx({ email: user.email, password: 'pw' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(enforce).toHaveBeenCalledWith(user);
+        expect(generateRefreshToken).toHaveBeenCalled();
+        expect(ctx.body.data).toEqual(
+          expect.objectContaining({
+            token: 'access-token',
+            mfaEnrolmentRequired: true,
+            mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+          })
+        );
+      });
+
+      test('a locked user is refused with MfaLockedError, no session, admin.auth.error emitted', async () => {
+        mockPassportUser(user);
+        const { generateRefreshToken, emit } = buildIssuingStrapi({
+          isEnabled: () => true,
+          isEnrolled: jest.fn(() => Promise.resolve(false)),
+          enforce: jest.fn(() => Promise.resolve({ outcome: 'refused' })),
+        });
+        const { ctx, cookiesSet } = buildCtx({ email: user.email, password: 'pw' });
+
+        await expect(authenticationController.login(ctx, jest.fn())).rejects.toBeInstanceOf(
+          MfaLockedError
+        );
+
+        expect(generateRefreshToken).not.toHaveBeenCalled();
+        expect(cookiesSet).not.toHaveBeenCalled();
+        expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+          error: expect.any(MfaLockedError),
+          provider: 'local',
+        });
+        expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
+      });
+
+      test('enforcement runs before the challenge branch and an enrolled user still gets a challenge', async () => {
+        mockPassportUser(user);
+        const enforce = jest.fn(() => Promise.resolve({ outcome: 'none' }));
+        const createChallenge = jest.fn(() => Promise.resolve({ token: 'c', expiresIn: 300 }));
+        buildIssuingStrapi({
+          isEnabled: () => true,
+          isEnrolled: jest.fn(() => Promise.resolve(true)),
+          createChallenge,
+          enforce,
+        });
+        const { ctx } = buildCtx({ email: user.email, password: 'pw' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(enforce.mock.invocationCallOrder[0]).toBeLessThan(
+          createChallenge.mock.invocationCallOrder[0]
+        );
+        expect(ctx.body).toEqual({
+          data: { mfaRequired: true, challengeToken: 'c', expiresIn: 300 },
+        });
+      });
     });
   });
 });

@@ -159,7 +159,12 @@ export const buildSessionMetadataFromContext = (ctx: Context) =>
 export const issueSession = async (
   ctx: Context,
   user: AdminUser,
-  options: { deviceId?: string; rememberMe?: boolean } = {}
+  options: {
+    deviceId?: string;
+    rememberMe?: boolean;
+    /** Set by the controllers when cycle 2 enforcement returned a grace outcome. */
+    mfaEnrolment?: { graceUntil: Date };
+  } = {}
 ): Promise<void> => {
   try {
     const sessionManager = getSessionManager();
@@ -200,6 +205,12 @@ export const issueSession = async (
         token: accessToken,
         accessToken,
         user: strapi.service('admin::user').sanitizeUser(user),
+        ...(options.mfaEnrolment
+          ? {
+              mfaEnrolmentRequired: true as const,
+              mfaGraceUntil: options.mfaEnrolment.graceUntil.toISOString(),
+            }
+          : {}),
       },
     };
   } catch (error) {

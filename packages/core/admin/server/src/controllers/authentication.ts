@@ -4,6 +4,7 @@ import compose from 'koa-compose';
 import '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { MfaLockedError } from '../services/mfa-errors';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -37,6 +38,25 @@ import type {
 import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
+
+/**
+ * Cycle 2 enforcement for a user about to receive a session. Throws `MfaLockedError` (403) on
+ * refusal, after emitting `admin.auth.error` like every other failed login; otherwise returns the
+ * `issueSession` options carrying the grace deadline when one applies.
+ */
+const enforceMfaOrThrow = async (
+  user: AdminUser
+): Promise<{ mfaEnrolment?: { graceUntil: Date } }> => {
+  const result = await getService('mfa').enforce(user);
+
+  if (result.outcome === 'refused') {
+    const error = new MfaLockedError();
+    strapi.eventHub.emit('admin.auth.error', { error, provider: 'local' });
+    throw error;
+  }
+
+  return result.outcome === 'grace' ? { mfaEnrolment: { graceUntil: result.graceUntil } } : {};
+};
 
 export default {
   login: compose([
@@ -79,6 +99,11 @@ export default {
 
       const mfa = getService('mfa');
 
+      // Enforcement first: a locked account is refused before anything else, and a graced one
+      // carries its deadline into the session below. Enrolled users come back as `none` and take
+      // the challenge branch exactly as in cycle 1.
+      const sessionOptions = await enforceMfaOrThrow(user);
+
       if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
         const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
@@ -101,7 +126,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user);
+      return issueSession(ctx, user, sessionOptions);
     },
   ]),
 
@@ -181,7 +206,9 @@ export default {
 
     const user = await getService('user').register(input);
 
-    return issueSession(ctx, user);
+    const sessionOptions = await enforceMfaOrThrow(user);
+
+    return issueSession(ctx, user, sessionOptions);
   },
 
   async registerAdmin(ctx: Context) {
@@ -193,7 +220,9 @@ export default {
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
-    return issueSession(ctx, user);
+    const sessionOptions = await enforceMfaOrThrow(user);
+
+    return issueSession(ctx, user, sessionOptions);
   },
 
   async forgotPassword(ctx: Context) {
@@ -226,6 +255,8 @@ export default {
       return ctx.internalServerError();
     }
 
+    const sessionOptions = await enforceMfaOrThrow(user);
+
     const mfa = getService('mfa');
 
     if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
@@ -246,7 +277,11 @@ export default {
 
     // No rememberMe flow here: force a fresh device id and a session-type (non-persistent) cookie
     // regardless of anything the request body carries.
-    return issueSession(ctx, user, { deviceId: generateDeviceId(), rememberMe: false });
+    return issueSession(ctx, user, {
+      deviceId: generateDeviceId(),
+      rememberMe: false,
+      ...sessionOptions,
+    });
   },
 
   async accessToken(ctx: Context) {
