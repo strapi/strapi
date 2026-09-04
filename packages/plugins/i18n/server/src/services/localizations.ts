@@ -64,6 +64,70 @@ const normalizeMediaIds = (
   return data;
 };
 
+const hasTarget = (value: unknown): boolean =>
+  Array.isArray(value) ? value.length > 0 : value != null;
+
+/**
+ * A relation the transform could not resolve for the target locale comes back as
+ * an empty `set`. Anything else, including an explicit connect or disconnect, is
+ * left alone.
+ */
+const resolvedToNothing = (value: unknown): boolean =>
+  typeof value === 'object' &&
+  value !== null &&
+  'set' in value &&
+  Array.isArray((value as { set: unknown[] }).set) &&
+  (value as { set: unknown[] }).set.length === 0;
+
+/**
+ * True when `transformed` lost a relation that `source` had, anywhere inside the
+ * given component or dynamic zone value.
+ */
+const droppedARelation = (
+  schema: Schema.ContentType | Schema.Component,
+  source: any,
+  transformed: any
+): boolean => {
+  if (!schema?.attributes || !source || !transformed || typeof transformed !== 'object') {
+    return false;
+  }
+
+  return Object.entries(schema.attributes).some(([attributeName, attribute]) => {
+    const sourceValue = source[attributeName];
+    const transformedValue = transformed[attributeName];
+
+    if (attribute.type === 'relation') {
+      return hasTarget(sourceValue) && resolvedToNothing(transformedValue);
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      if (attribute.repeatable && Array.isArray(sourceValue) && Array.isArray(transformedValue)) {
+        return sourceValue.some((row, index) =>
+          droppedARelation(componentSchema, row, transformedValue[index])
+        );
+      }
+
+      return droppedARelation(componentSchema, sourceValue, transformedValue);
+    }
+
+    if (
+      attribute.type === 'dynamiczone' &&
+      Array.isArray(sourceValue) &&
+      Array.isArray(transformedValue)
+    ) {
+      return sourceValue.some((row, index) =>
+        row?.__component
+          ? droppedARelation(strapi.getModel(row.__component), row, transformedValue[index])
+          : false
+      );
+    }
+
+    return false;
+  });
+};
+
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
  */
@@ -106,10 +170,35 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
       }
     );
 
+    // A shared field whose relation does not exist in this locale comes back with the
+    // relation emptied. Writing it would clear the field here and, because the field is
+    // shared, in every other locale on the next save. Leave those fields as they are.
+    const dataToWrite = Object.fromEntries(
+      Object.entries(transformedData as Record<string, any>).filter(([attributeName]) => {
+        const attribute = model.attributes[attributeName];
+
+        if (attribute?.type !== 'component' && attribute?.type !== 'dynamiczone') {
+          return true;
+        }
+
+        const dropped = droppedARelation(
+          model,
+          { [attributeName]: normalizedNonLocalizedAttributes[attributeName] },
+          { [attributeName]: (transformedData as Record<string, any>)[attributeName] }
+        );
+
+        if (dropped) {
+          strapi.log.warn(
+            `i18n: skipped syncing "${attributeName}" to locale "${entry.locale}" of ${uid} "${documentId}" because a relation it holds does not exist in that locale.`
+          );
+        }
+
+        return !dropped;
+      })
+    );
+
     // Update or create non localized components for the entry
-    const componentData = await strapi
-      .documents(uid)
-      .updateComponents(entry, transformedData as any);
+    const componentData = await strapi.documents(uid).updateComponents(entry, dataToWrite as any);
 
     // Update every other locale entry of this documentId in the same status
     await strapi.db.query(uid).update({
