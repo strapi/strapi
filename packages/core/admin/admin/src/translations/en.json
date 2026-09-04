@@ -321,6 +321,8 @@
   "Settings.webhooks.events.create": "Create",
   "Settings.webhooks.events.update": "Update",
   "Settings.webhooks.events.delete": "Delete webhook",
+  "Settings.webhooks.form.contentTypes": "Content Types",
+  "Settings.webhooks.form.contentTypes.hint": "Restrict this webhook to the selected content types. Leave empty to fire for every content type.",
   "Settings.webhooks.form.events": "Events",
   "Settings.webhooks.form.headers": "Headers",
   "Settings.webhooks.form.url": "URL",
