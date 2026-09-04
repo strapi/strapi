@@ -196,6 +196,19 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
         // `$in`/`$ne`'s `value` isn't a single orderable bound (an array, or the excluded value
         // itself), so both must be handled before `asComparable` -- which every other operator
         // here relies on -- ever sees them.
+        if (operator === '$notNull') {
+          const present = row[field] !== null && row[field] !== undefined;
+          return value ? present : !present;
+        }
+        if (operator === '$null') {
+          const absent = row[field] === null || row[field] === undefined;
+          return value ? absent : !absent;
+        }
+        if (operator === '$notIn') {
+          return !(value as unknown[]).some(
+            (candidate) => String(candidate) === String(row[field])
+          );
+        }
         if (operator === '$in') {
           return (
             Array.isArray(value) && value.map((item) => String(item)).includes(String(row[field]))
@@ -203,6 +216,12 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
         }
         if (operator === '$ne') {
           return String(row[field]) !== String(value);
+        }
+        if (
+          ['$gt', '$gte', '$lt', '$lte'].includes(operator) &&
+          (row[field] === null || row[field] === undefined)
+        ) {
+          return false;
         }
 
         const current = asComparable(row[field]);
@@ -450,9 +469,25 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
     // returning the stored object directly let two racing reads silently share one mutable
     // object and see each other's write, masking the exact bug Finding 1 exists to catch.
-    findOne: jest.fn(async ({ where }: any) => {
+    // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
+    // subsequent write elsewhere must not retroactively change what an in-flight read already
+    // observed. Spreading into a new object is what makes a read-then-write mutant in
+    // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
+    // returning the stored object directly let two racing reads silently share one mutable
+    // object and see each other's write, masking the exact bug Finding 1 exists to catch.
+    // `populate: ['roles']` is honoured on top of that: `enforce` reloads the row itself and
+    // always asks for roles, so a snapshot that silently dropped an unpopulated `roles` field
+    // would let the enforcement suite pass without ever exercising the real shape.
+    findOne: jest.fn(async ({ where, populate }: any) => {
       const row = users.get(String(where.id));
-      return row ? { ...row } : null;
+      if (!row) return null;
+      const snapshot: UserRow = { ...row };
+      if (Array.isArray(populate) && populate.includes('roles')) {
+        snapshot.roles = Array.isArray(row.roles)
+          ? (row.roles as unknown[]).map((r) => ({ ...(r as object) }))
+          : [];
+      }
+      return snapshot;
     }),
     update: jest.fn(async ({ where, data }: any) => {
       const user = users.get(String(where.id));
@@ -462,19 +497,23 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       // return value must not be left holding a window onto later writes.
       return { ...user };
     }),
-    // `completeEnrolment`'s promotion (Finding 3) is a single conditional statement, not
-    // read-then-write: `where` carries the `mfaPendingSecret` value read at the top of the
-    // function alongside `id`, so a row that changed underneath (a concurrent `disable`, or any
-    // other write) between that read and this call matches nothing and `count` comes back 0. Reuses
-    // `matchesWhere` -- its default branch already stringifies both sides, so `id` compares
-    // correctly whether `where.id` is a string or a number.
+    // The conditional UPDATE every cycle 2 transition uses (`stampGrace`, `lockAccount`,
+    // `unlock`): evaluates `where` against live rows at the moment it runs and reports the true
+    // affected count, so a read-then-write mutant is racy here exactly as against a real database.
+    // `id` is compared as a string on both sides because the service passes `String(user.id)`.
+    //
+    // Also `completeEnrolment`'s promotion (Finding 3): `where` there carries the
+    // `mfaPendingSecret` value read at the top of the function alongside `id`, so a row that
+    // changed underneath (a concurrent `disable`, or any other write) between that read and this
+    // call matches nothing and `count` comes back 0.
     updateMany: jest.fn(async ({ where, data }: any) => {
+      const { id, ...rest } = where ?? {};
       let count = 0;
-      for (const user of users.values()) {
-        if (matchesWhere(user, where)) {
-          Object.assign(user, data);
-          count += 1;
-        }
+      for (const row of users.values()) {
+        if (id !== undefined && String(row.id) !== String(id)) continue;
+        if (!matchesWhere(row, rest)) continue;
+        Object.assign(row, data);
+        count += 1;
       }
       return { count };
     }),
@@ -2643,5 +2682,168 @@ describe('mfa service: enforcement policy', () => {
       service.isMfaRequiredFor(user(), { mode: 'required', graceDays: 7 })
     ).resolves.toBe(true);
     expect(storeGet).not.toHaveBeenCalledWith({ key: 'security-settings' });
+  });
+});
+
+describe('mfa service: enforce', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+
+  const setup = (
+    options: { stored?: unknown; enabled?: boolean; user?: Record<string, unknown> } = {}
+  ) => {
+    const storeGet = jest.fn(async ({ key }: { key: string }) =>
+      key === 'security-settings' ? (options.stored ?? { mfa: { mode: 'required' } }) : null
+    );
+    const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+    const sessionManager = Object.assign(
+      jest.fn(() => ({ invalidateRefreshToken })),
+      {
+        hasOrigin: jest.fn(() => true),
+      }
+    );
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: jest.fn(() => ({ get: storeGet, set: jest.fn() })),
+        ee: { features: { isEnabled: jest.fn(() => false) } },
+        features: { future: { isEnabled: jest.fn(() => options.enabled ?? true) } },
+        sessionManager,
+      },
+    });
+    fixture.users.set('1', { ...fixture.users.get('1')!, roles: [], ...options.user });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, invalidateRefreshToken, storeGet };
+  };
+
+  test('feature off: nothing touched, outcome none, even with stale stamps', async () => {
+    const past = new Date(Date.now() - DAY);
+    const { service, users, storeGet } = setup({ enabled: false, user: { mfaGraceUntil: past } });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
+    expect(users.get('1')!.mfaGraceUntil).toBe(past);
+    expect(storeGet).not.toHaveBeenCalled();
+  });
+
+  test('mode off: dormant, a locked user is not refused and stamps stay', async () => {
+    const lockedAt = new Date(Date.now() - DAY);
+    const { service, users } = setup({
+      stored: { mfa: { mode: 'off' } },
+      user: { mfaLockedAt: lockedAt },
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
+    expect(users.get('1')!.mfaLockedAt).toBe(lockedAt);
+  });
+
+  test('not required in optional mode: stale grace and lock are cleared', async () => {
+    const { service, users } = setup({
+      stored: { mfa: { mode: 'optional' } },
+      user: { mfaGraceUntil: new Date(), mfaLockedAt: new Date() },
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
+    expect(users.get('1')!.mfaGraceUntil).toBeNull();
+    expect(users.get('1')!.mfaLockedAt).toBeNull();
+  });
+
+  test('enrolled: nothing, whatever is stamped', async () => {
+    const { service, users } = setup({
+      user: { mfaSecret: 'enc:x', mfaEnabledAt: new Date(), mfaGraceUntil: new Date(0) },
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
+    expect(users.get('1')!.mfaGraceUntil).toEqual(new Date(0));
+  });
+
+  test('required, first session: stamps grace of graceDays, records grace_started, issues', async () => {
+    const { service, users, events } = setup({
+      stored: { mfa: { mode: 'required', graceDays: 3 } },
+    });
+    const before = Date.now();
+
+    const result = await service.enforce({ id: 1 });
+
+    expect(result.outcome).toBe('grace');
+    const graceUntil = (result as { graceUntil: Date }).graceUntil.getTime();
+    expect(graceUntil).toBeGreaterThanOrEqual(before + 3 * DAY);
+    expect(graceUntil).toBeLessThan(before + 3 * DAY + 5_000);
+    expect(users.get('1')!.mfaGraceUntil).toEqual(new Date(graceUntil));
+    expect(events).toEqual([
+      expect.objectContaining({
+        userId: '1',
+        type: 'grace_started',
+        metadata: { graceUntil: new Date(graceUntil).toISOString() },
+      }),
+    ]);
+  });
+
+  test('required, grace running: issues with the existing deadline and stamps nothing new', async () => {
+    const graceUntil = new Date(Date.now() + DAY);
+    const { service, events } = setup({ user: { mfaGraceUntil: graceUntil } });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'grace', graceUntil });
+    expect(events).toHaveLength(0);
+  });
+
+  test('required, grace expired: locks, invalidates every session, records locked, emits, refuses', async () => {
+    const graceUntil = new Date(Date.now() - 1000);
+    const { service, users, events, invalidateRefreshToken, strapi } = setup({
+      user: { mfaGraceUntil: graceUntil },
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
+
+    expect(users.get('1')!.mfaLockedAt).toBeInstanceOf(Date);
+    expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+    expect(events).toEqual([
+      expect.objectContaining({
+        type: 'locked',
+        metadata: { graceUntil: graceUntil.toISOString() },
+      }),
+    ]);
+    expect((strapi as any).eventHub.emit).toHaveBeenCalledWith('admin.mfa.locked', { userId: '1' });
+  });
+
+  test('required, already locked: refused, no second lock event, no second invalidation', async () => {
+    const { service, events, invalidateRefreshToken } = setup({
+      user: { mfaGraceUntil: new Date(Date.now() - DAY), mfaLockedAt: new Date(Date.now() - DAY) },
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
+    expect(events).toHaveLength(0);
+    expect(invalidateRefreshToken).not.toHaveBeenCalled();
+  });
+
+  test('a missing row is refused', async () => {
+    const { service } = setup();
+    await expect(service.enforce({ id: 999 })).resolves.toEqual({ outcome: 'refused' });
+  });
+
+  test('two concurrent first sessions stamp one grace and record one grace_started', async () => {
+    const { service, events } = setup();
+
+    const results = await Promise.all([service.enforce({ id: 1 }), service.enforce({ id: 1 })]);
+
+    expect(results.map((r) => r.outcome)).toEqual(['grace', 'grace']);
+    expect(events.filter((e) => e.type === 'grace_started')).toHaveLength(1);
+  });
+
+  test('a lock that loses the race to an unlock does not record locked', async () => {
+    const { service, users, events, userMocks } = setup({
+      user: { mfaGraceUntil: new Date(Date.now() - 1000) },
+    });
+    // Simulate an administrator unlocking between the read and the conditional lock: the
+    // precondition (`mfaGraceUntil <= now`) no longer holds at statement time.
+    const realUpdateMany = userMocks.updateMany;
+    userMocks.updateMany = jest.fn(async (args: any) => {
+      users.get('1')!.mfaGraceUntil = null;
+      return realUpdateMany(args);
+    });
+
+    const result = await service.enforce({ id: 1 });
+
+    expect(events.filter((e) => e.type === 'locked')).toHaveLength(0);
+    expect(users.get('1')!.mfaLockedAt).toBeNull();
+    // The re-read sees a required, unenrolled user with no grace: a fresh window starts.
+    expect(result.outcome).toBe('grace');
   });
 });

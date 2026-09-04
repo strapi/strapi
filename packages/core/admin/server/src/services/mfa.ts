@@ -106,6 +106,18 @@ export type VerifyChallengeResult =
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
 /**
+ * The result of `enforce`, cycle 2's session-issue evaluation. `none` covers every case where
+ * nothing further is required of the caller (feature or mode off, not required, already
+ * enrolled). `grace` still issues the session, carrying the deadline for the admin panel to
+ * display. `refused` means the caller must not receive a session: the account is locked, or the
+ * row backing it no longer exists.
+ */
+export type EnforceOutcome =
+  | { outcome: 'none' }
+  | { outcome: 'grace'; graceUntil: Date }
+  | { outcome: 'refused' };
+
+/**
  * The raw `admin::user` row shape every enforcement function works on. Roles are optional
  * because `checkCredentials` (the login path) does not populate them; the resolver loads them
  * when they are absent rather than silently treating "not populated" as "no roles".
@@ -273,6 +285,120 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const roles = await loadRoles(user);
     return roles.some((role) => role.mfaRequired === true);
+  };
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const isEnrolledRow = (user: AdminUserRow): boolean =>
+    Boolean(user.mfaEnabledAt && user.mfaSecret);
+
+  /**
+   * One conditional UPDATE each; the affected count is the decision (cycle 1's atomicity rule).
+   * Read-then-write would let a refresh-path lock race an administrator's unlock and silently win.
+   */
+  const stampGrace = async (userId: string, graceUntil: Date): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaGraceUntil: null, mfaLockedAt: null },
+      data: { mfaGraceUntil: graceUntil },
+    });
+    return count === 1;
+  };
+
+  const lockAccount = async (userId: string, now: Date): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaLockedAt: null, mfaGraceUntil: { $lte: now } },
+      data: { mfaLockedAt: now },
+    });
+    return count === 1;
+  };
+
+  const clearEnforcementStamps = async (userId: string): Promise<void> => {
+    await userQuery().updateMany({
+      where: { id: userId },
+      data: { mfaGraceUntil: null, mfaLockedAt: null },
+    });
+  };
+
+  const invalidateAllSessions = async (userId: string): Promise<void> => {
+    if (strapi.sessionManager?.hasOrigin('admin')) {
+      await strapi.sessionManager('admin').invalidateRefreshToken(userId);
+    }
+  };
+
+  /**
+   * Cycle 2 enforcement, run by every path that mints a session for a password-holding user.
+   * Reloads the row with roles itself so callers may pass a partial user. See the outcome table in
+   * the cycle 2 spec ("Enforcement evaluation"); `retried` bounds the single re-read taken when a
+   * conditional update finds its precondition gone.
+   */
+  const enforce = async (user: { id: Data.ID }, retried = false): Promise<EnforceOutcome> => {
+    if (!isEnabled()) {
+      return { outcome: 'none' };
+    }
+
+    const row = (await userQuery().findOne({
+      where: { id: user.id },
+      populate: ['roles'],
+    })) as AdminUserRow | null;
+    if (!row) {
+      return { outcome: 'refused' };
+    }
+    const userId = String(row.id);
+
+    const enforcement = await readMfaEnforcement(strapi);
+    if (enforcement.mode === 'off') {
+      return { outcome: 'none' };
+    }
+
+    if (!(await isMfaRequiredFor(row, enforcement))) {
+      if (row.mfaGraceUntil || row.mfaLockedAt) {
+        await clearEnforcementStamps(userId);
+      }
+      return { outcome: 'none' };
+    }
+
+    if (isEnrolledRow(row)) {
+      return { outcome: 'none' };
+    }
+
+    if (row.mfaLockedAt) {
+      return { outcome: 'refused' };
+    }
+
+    const now = new Date();
+
+    if (!row.mfaGraceUntil) {
+      const graceUntil = new Date(now.getTime() + enforcement.graceDays * DAY_MS);
+      if (await stampGrace(userId, graceUntil)) {
+        await recordEvent(userId, 'grace_started', { graceUntil: graceUntil.toISOString() });
+        return { outcome: 'grace', graceUntil };
+      }
+      // Lost a race with another first session (or an unlock). The row now says what to do.
+      return retried ? { outcome: 'refused' } : enforce(user, true);
+    }
+
+    const graceUntil = new Date(row.mfaGraceUntil);
+    if (Number.isNaN(graceUntil.getTime())) {
+      // A malformed stamp must fail closed on the lock side, never become a grace that never ends.
+      strapi.log.warn(
+        `Malformed mfaGraceUntil on admin user ${userId}; treating the grace as expired.`
+      );
+    } else if (graceUntil > now) {
+      return { outcome: 'grace', graceUntil };
+    }
+
+    if (await lockAccount(userId, now)) {
+      // Sessions first: a failing event write must never leave a live session past the lock.
+      await invalidateAllSessions(userId);
+      await recordEvent(userId, 'locked', {
+        graceUntil: Number.isNaN(graceUntil.getTime()) ? undefined : graceUntil.toISOString(),
+      });
+      notify(userId, 'locked');
+      return { outcome: 'refused' };
+    }
+
+    // Precondition gone: an unlock landed between the read and the lock. Re-read once.
+    return retried ? { outcome: 'refused' } : enforce(user, true);
   };
 
   /**
@@ -648,31 +774,55 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * The five notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
+   * The notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
    * `recovery_code_used` and `recovery_codes_issued` never reach here: both are already fully
    * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
    * respectively), and an emailed notice on every recovery-code use would mean an attacker who has
    * already stolen one credential now also learns, by email, that the account holder is about to
-   * find out. Keeping this union out of `notify`'s own signature, rather than reusing
-   * `MfaEventType` and rejecting the other two at runtime, turns passing either of them into a
-   * compile error.
+   * find out. `locked` and `unlocked` are cycle 2's own additions -- see `EmailedNotice` below for
+   * why neither ever reaches an inbox. Keeping this union out of `notify`'s own signature, rather
+   * than reusing `MfaEventType` and rejecting the excluded members at runtime, turns passing one of
+   * them into a compile error.
    */
   type MfaChangeNotice =
     | 'enabled'
     | 'disabled'
     | 'reset'
     | 'challenge_failed'
-    | 'authenticator_replaced';
+    | 'authenticator_replaced'
+    | 'locked'
+    | 'unlocked';
+
+  /**
+   * The subset of `MfaChangeNotice` that also sends a change email -- a change to the user's own
+   * second factor. `challenge_failed` is a notice, not a change; `locked`/`unlocked` are cycle 2's
+   * own decision to keep enforcement hub-only (the in-app notice feed carries them instead). Kept
+   * as its own type, rather than an `Exclude<MfaChangeNotice, ...>` of the ever-growing exclusion
+   * list, so `CHANGE_NOTICE_TEXT` below stays exhaustive over exactly the emailed members and a
+   * newly added hub-only notice cannot silently start demanding an email phrase.
+   */
+  type EmailedNotice = 'enabled' | 'disabled' | 'reset' | 'authenticator_replaced';
+
+  const EMAILED_NOTICES: ReadonlySet<MfaChangeNotice> = new Set<EmailedNotice>([
+    'enabled',
+    'disabled',
+    'reset',
+    'authenticator_replaced',
+  ]);
+
+  const isEmailedNotice = (type: MfaChangeNotice): type is EmailedNotice =>
+    EMAILED_NOTICES.has(type);
 
   /**
    * The `<%= change %>` phrase fed to `mfaChangedTemplate` ("Two-factor authentication was
    * <%= change %> on your account..."). `enabled`, `disabled` and `reset` map to themselves, so
    * those three emails read exactly as they did before `authenticator_replaced` existed;
    * `authenticator_replaced` gets its own phrase rather than leaking the raw enum value verbatim
-   * into the sentence. `challenge_failed` never reaches this map -- `notify` returns before
-   * composing an email for it.
+   * into the sentence. Typed over exactly `EmailedNotice`, not `MfaChangeNotice`, so the typecheck
+   * itself keeps this exhaustive -- `challenge_failed`, `locked` and `unlocked` never reach this
+   * map, `notify` returns before composing an email for any of them.
    */
-  const CHANGE_NOTICE_TEXT: Record<Exclude<MfaChangeNotice, 'challenge_failed'>, string> = {
+  const CHANGE_NOTICE_TEXT: Record<EmailedNotice, string> = {
     enabled: 'enabled',
     disabled: 'disabled',
     reset: 'reset',
@@ -685,14 +835,17 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * provider, so email cannot be a hard dependency of a security control. The primary channel is
    * the in-app notice built from unseen mfa events.
    *
-   * The eventHub event fires for all five notice types -- `admin.mfa.<type>`, `_` replaced by `.`
-   * so `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is
-   * cheap and synchronous and is the one mechanism EE audit logging (where licensed) can observe
-   * any of the five through; whether a given emission ends up as a persisted audit row is entirely
-   * that feature's own decision (its allow-list, licensing, request context), not this function's.
-   * The email is sent only for an actual change (`enabled`/`disabled`/`reset`/
-   * `authenticator_replaced`): a failed challenge is a notice, not a change, and mailing every
-   * wrong code would let anyone who merely knows the password flood the account holder's inbox.
+   * The eventHub event fires for every notice type -- `admin.mfa.<type>`, `_` replaced by `.` so
+   * `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is cheap
+   * and synchronous and is the one mechanism EE audit logging (where licensed) can observe any of
+   * them through; whether a given emission ends up as a persisted audit row is entirely that
+   * feature's own decision (its allow-list, licensing, request context), not this function's. The
+   * email is sent only for an actual change to the user's own factor (`EmailedNotice`): a failed
+   * challenge is a notice, not a change, and mailing every wrong code would let anyone who merely
+   * knows the password flood the account holder's inbox. `locked`/`unlocked` are hub-only by the
+   * same reasoning, and by cycle 2's own decision to send no lock emails at all -- the in-app
+   * notice feed is enough, and `extra.byUserId` (carried straight into the eventHub payload, never
+   * emailed) lets `unlocked` name the administrator who acted.
    *
    * Returns the email's promise rather than staying `void` (F6): a fire-and-forget caller can
    * still ignore it exactly as before, but the CLI reset command needs to `await` it -- it calls
@@ -701,16 +854,21 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * guarantees this promise never rejects, so nothing about the fire-and-forget call sites
    * (`verifyChallenge`, `assertPasswordAndFactor`, `controllers/mfa.ts`) needs to change.
    */
-  const notify = (userId: string, type: MfaChangeNotice): Promise<void> => {
-    strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId });
+  const notify = (
+    userId: string,
+    type: MfaChangeNotice,
+    extra: { byUserId?: string } = {}
+  ): Promise<void> => {
+    strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId, ...extra });
 
-    if (type === 'challenge_failed') {
+    if (!isEmailedNotice(type)) {
       return Promise.resolve();
     }
 
     // Resolved outside the closure below while `type` is still narrowed to a `CHANGE_NOTICE_TEXT`
-    // key (the `challenge_failed` check above already returned) -- the template must never
-    // receive the raw enum value (Finding 1: "authenticator_replaced" is not a sentence).
+    // key (the `isEmailedNotice` guard above already returned for anything outside it) -- the
+    // template must never receive the raw enum value (Finding 1: "authenticator_replaced" is not
+    // a sentence).
     const change = CHANGE_NOTICE_TEXT[type];
 
     return (async () => {
@@ -1197,6 +1355,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isEnrolled,
     isExemptFromMfa,
     isMfaRequiredFor,
+    enforce,
     beginEnrolment,
     completeEnrolment,
     verifyTotpForUser,
