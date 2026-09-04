@@ -19,12 +19,12 @@ Source: `packages/core/core/src/services/mcp/`, `packages/core/core/src/provider
 | ------------- | -------------------------------------------------------------------------------------------------------------- |
 | Enable        | `server.mcp.enabled` (default `false`)                                                                         |
 | Endpoint      | `POST /mcp` (fixed path, not configurable)                                                                     |
-| Transport     | MCP SDK `StreamableHTTPServerTransport`, stateless (one server instance per request)                           |
+| Transport     | MCP SDK `NodeStreamableHTTPServerTransport`, stateless (one server instance per request)                       |
 | Auth          | Admin API token (`Authorization: Bearer <token>`) — same store as Settings → API Tokens (admin)                |
 | Authorization | Two layers: coarse session capability gate (CASL ability vs `auth.policies`) + fine-grained handler checks     |
 | Extensibility | Any plugin or app can register tools/prompts/resources via `strapi.ai.mcp.register*` during the register phase |
 | Built-in      | One dev-only `log` tool (core) + one CRUD tool set per displayed content type (content-manager)                |
-| SDK           | `@modelcontextprotocol/sdk@1.29.0`                                                                             |
+| SDK           | `@modelcontextprotocol/server@2.0.0` + `@modelcontextprotocol/node@2.0.0`                                      |
 
 ## Architecture
 
@@ -80,7 +80,7 @@ Routes (`packages/core/core/src/services/mcp/routes.ts`):
 
 All five routes set `config: { auth: false }` — Strapi's own admin/content-API authentication is bypassed at the router level because MCP performs its **own** authentication inside the handler (see below).
 
-The transport is the MCP SDK's `StreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
+The transport is the MCP SDK's `NodeStreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
 
 An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.
 
@@ -115,6 +115,37 @@ Content-manager's derived tools re-run the same `permission-checker` service use
 
 Custom tools should follow the same pattern: use `auth.policies` for the coarse gate, then call into the same policy/permission services your REST controllers use for the fine-grained checks.
 
+## Advertised schema wire contract
+
+The `inputSchema` and optional `outputSchema` returned by `tools/list` are JSON Schema 2020-12
+documents. A schema can declare this dialect with
+`https://json-schema.org/draft/2020-12/schema` or omit `$schema`; the MCP specification defines an
+absent declaration as 2020-12. Capability authors and clients must interpret the document
+structurally as 2020-12. For example, positional tuples use `prefixItems`, and generated recursive
+schemas use `$defs` rather than the older `definitions` container.
+
+Strapi passes each capability's authored Zod schema to the MCP SDK. Zod serializes it and the SDK
+advertises that result. Strapi does not rewrite or re-serialize advertised schemas. This boundary is
+covered by tests that enumerate through a real MCP client and through an authenticated `/mcp`
+request, then compile every advertised input and output schema as 2020-12.
+
+### Current content-manager schema observations
+
+The known SDK conversion hazards are tracked upstream in
+[#2464](https://github.com/modelcontextprotocol/typescript-sdk/issues/2464) and
+[#2636](https://github.com/modelcontextprotocol/typescript-sdk/issues/2636). Authenticated
+enumeration of real content-manager tools currently shows:
+
+- Date, datetime, time, and timestamp write fields are advertised as strings. Content-manager does
+  not author these fields with `z.date()`, so the date conversion failure in #2464 is not present.
+- Content-manager output schemas contain no defaulted fields, so the defaulted-output mismatch in
+  #2464 is not present.
+- Extra-property declarations follow the authored object behavior: strict write-data objects
+  advertise `additionalProperties: false`, loose output objects advertise an open
+  `additionalProperties` schema, and ordinary input objects can omit the keyword. The omission
+  described in #2636 is present, but it remains valid JSON Schema 2020-12 and does not drop any
+  content-manager tool in strict schema validation.
+
 ## Defining and registering capabilities
 
 Public builders are re-exported from `@strapi/core` / `@strapi/strapi` as `ai.mcp.defineTool`, `ai.mcp.definePrompt`, `ai.mcp.defineResource` (`packages/core/core/src/mcp.ts` → `services/mcp/{tool,prompt,resource}-registry.ts`). They are identity functions at runtime — their only job is inferring/narrowing TypeScript types (input/output schema shape, `devModeOnly` vs `auth` access variant).
@@ -142,7 +173,61 @@ const greet = ai.mcp.defineTool({
 strapi.ai.mcp.registerTool(greet);
 ```
 
-`registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning a `GetPromptResult`, and `uri`/`metadata`/`createHandler` returning a `ReadResourceResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
+`registerPrompt` and `registerResource` follow the same shape (`argsSchema`/`createHandler` returning an `McpPromptResult`, and `uri`/`metadata`/`createHandler` returning an `McpResourceReadResult`, respectively). All three throw if called once `strapi.ai.mcp` has left the `idle` status.
+
+### Capability results
+
+Strapi owns every value a capability author constructs, so no result requires naming an MCP SDK
+type. All of them live in `@strapi/types` (`Modules.MCP`):
+
+| Type                         | What it describes                                                        |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `McpToolResult`              | Tool content plus either successful structured data or an `isError` flag |
+| `McpPromptResult`            | A prompt's description and messages                                      |
+| `McpResourceReadResult`      | What a resource read returns                                             |
+| `McpResourceListingMetadata` | What a resource advertises at registration, before anyone reads it       |
+| `McpContentBlock`            | One block of tool or prompt content                                      |
+
+`McpToolHandlerReturn` remains an alias of `McpToolResult`, so existing handler annotations keep
+compiling unchanged.
+
+`McpContentBlock` is a five-variant union: `text`, `image`, `audio`, `resource_link`, and
+`resource` (an embedded resource). Resource contents come in a `text` or a base64 `blob` form.
+Protocol extension metadata (`_meta`) and arbitrary extension fields on prompt and resource read
+results reach the client unchanged.
+
+`services/mcp/utils/toSdkMcpCapabilityResult.ts` is the outbound counterpart to the handler-context
+translator: it maps each Strapi-owned variant onto the protocol shape the SDK transports. A variant
+the protocol gains later becomes available to capability authors only once Strapi adds it to the
+owned contract, so an SDK change cannot alter Strapi's public API on its own. The SDK remains the
+final protocol validator, and structured-output validation is unchanged: a successful tool result
+must still satisfy the advertised output schema.
+
+### Handler context
+
+Capability handlers retain Strapi's positional or `{ args, extra }` API. Strapi owns the `extra`
+handler-context contract and translates the underlying transport's request facts into it. Capability
+authors do not depend on an MCP SDK context type.
+
+Every member is optional because availability varies by request and transport:
+
+| Member        | Meaning                                                  |
+| ------------- | -------------------------------------------------------- |
+| `signal`      | Cancellation signal for the invocation                   |
+| `requestId`   | JSON-RPC request identifier                              |
+| `sessionId`   | Transport session identifier, when session state exists  |
+| `authInfo`    | Information about a token authenticated by the transport |
+| `_meta`       | Complete request metadata                                |
+| `requestInfo` | Originating HTTP request information                     |
+
+Strapi preserves the established meaning of these names. `_meta` includes ordinary request metadata
+and reserved MCP protocol keys, even when the SDK handles those groups separately. `requestInfo`
+uses `{ headers, url? }`; `headers` is a plain mapping, so existing access such as
+`extra.requestInfo?.headers.authorization` continues to work.
+
+Server-initiated client messaging, SSE stream-closing controls, and experimental task facilities are
+not part of Strapi's handler context. There is no escape hatch to the SDK context. Code that reads
+one of these excluded fields fails the TypeScript check instead of receiving `undefined` at runtime.
 
 ### Fault isolation
 
