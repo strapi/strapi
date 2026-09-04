@@ -134,7 +134,7 @@
   "form.input.label.file-name": "File name",
   "form.upload-url.error.url.invalid": "One URL is invalid",
   "form.upload-url.error.url.invalids": "{number} URLs are invalids",
-  "header.actions.add-assets": "Add new assets",
+  "header.actions.add-assets": "Add assets",
   "header.actions.add-folder": "Add new folder",
   "folder.create.title": "New folder",
   "folder.create.title-in": "New folder in {folderName}",
