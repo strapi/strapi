@@ -809,6 +809,66 @@ describe('traverse-entity', () => {
     });
   });
 
+  describe('Sibling parent context (#27474)', () => {
+    // Reproduces the "Invalid key __component at blocks" error: a dynamic-zone
+    // entry whose component/relational key is ordered before __component. The
+    // sibling key must not leak its parent onto the special __component key.
+    const buildDynamicZoneEntity = () => {
+      const mediaComponentSchema = createComponentSchema({
+        authorImage: { type: 'media' },
+      });
+      // schema of the dynamic-zone component entry (shared.quote)
+      const quoteComponentSchema: Model = {
+        ...createComponentSchema({
+          authorImage: { type: 'component', component: 'shared.media' },
+        }),
+        uid: 'shared.quote',
+      };
+      const mediaEntrySchema: Model = {
+        ...createComponentSchema({ image: { type: 'media' } }),
+        uid: 'shared.media',
+      };
+      const rootSchema = createBaseSchema({
+        blocks: { type: 'dynamiczone', components: ['shared.quote'] },
+      });
+      const getModel = (uid: string): Model => {
+        if (uid === 'shared.quote') return quoteComponentSchema;
+        if (uid === 'shared.media') return mediaEntrySchema;
+        return mediaComponentSchema;
+      };
+      // Component key (authorImage) precedes __component: the failing order.
+      const entity = {
+        blocks: [{ authorImage: { image: { id: 1 } }, __component: 'shared.quote' }],
+      };
+      return { rootSchema, getModel, entity };
+    };
+
+    test('__component sees the dynamic-zone parent, not a preceding sibling parent', async () => {
+      const { rootSchema, getModel, entity } = buildDynamicZoneEntity();
+
+      await traverseEntity(mockVisitor, { schema: rootSchema, getModel }, entity);
+
+      const componentCall = mockVisitor.mock.calls.find((c) => c[0].key === '__component');
+      expect(componentCall).toBeDefined();
+      // Before the fix this was the leaked authorImage (component) parent, so
+      // the dynamic-zone key check in validators failed and threw.
+      expect(componentCall[0].parent?.attribute?.type).toBe('dynamiczone');
+    });
+
+    test('the real throwUnrecognizedFields visitor accepts __component after a component sibling', async () => {
+      // End to end against the actual validator that produced
+      // "Invalid key __component at blocks" in the bug report.
+      const throwUnrecognizedFields = (
+        await import('../validate/visitors/throw-unrecognized-fields')
+      ).default;
+      const { rootSchema, getModel, entity } = buildDynamicZoneEntity();
+
+      await expect(
+        traverseEntity(throwUnrecognizedFields, { schema: rootSchema, getModel }, entity)
+      ).resolves.toBeDefined();
+    });
+  });
+
   describe('Curried function export', () => {
     test('should work with curried syntax', async () => {
       const schema = createBaseSchema({
