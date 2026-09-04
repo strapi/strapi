@@ -71,15 +71,15 @@
       "default": "./dist/index.js"
     },
     "./admin": {
-      "types": "./dist/admin.d.ts",
-      "source": "./src/admin.ts",
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
       "import": "./dist/admin.mjs",
       "require": "./dist/admin.js",
       "default": "./dist/admin.js"
     },
     "./admin/test": {
-      "types": "./dist/admin-test.d.ts",
-      "source": "./src/admin-test.ts",
+      "types": "./dist/admin/src/test.d.ts",
+      "source": "./admin/src/test.ts",
       "import": "./dist/admin-test.mjs",
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
@@ -100,10 +100,13 @@
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:ts": "run -T tsc -p tsconfig.json",
+    "test:ts:back": "run -T tsc -p tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"

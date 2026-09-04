@@ -8,17 +8,14 @@ import { PERMISSIONS, PLUGIN_ID } from './constants';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 import type {
   DocumentActionComponent,
   BulkActionComponent,
 } from '@strapi/content-manager/strapi-admin';
-import type { Plugin } from '@strapi/types';
 
-// eslint-disable-next-line import/no-default-export
-const admin: Plugin.Config.AdminInput = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     /**
      * Hook that adds the locale column in the Release Details table
      * @constant
