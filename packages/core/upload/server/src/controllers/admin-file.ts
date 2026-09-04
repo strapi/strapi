@@ -55,6 +55,7 @@ export default {
     } = ctx;
 
     const { pm, file } = await findEntityAndCheckPermissions(
+      strapi,
       userAbility,
       ACTIONS.read,
       FILE_MODEL_UID,
@@ -70,6 +71,7 @@ export default {
     const { userAbility } = ctx.state;
 
     const { pm, file } = await findEntityAndCheckPermissions(
+      strapi,
       userAbility,
       ACTIONS.update,
       FILE_MODEL_UID,

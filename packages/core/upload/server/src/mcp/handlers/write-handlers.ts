@@ -81,7 +81,13 @@ export const createUpdateMediaHandler =
     // Its NotFoundError carries no message, which would reach the agent as a bare "Not Found";
     // rethrowing adds the same wording the read tools use.
     try {
-      await findEntityAndCheckPermissions(context.userAbility, ACTIONS.update, FILE_MODEL_UID, id);
+      await findEntityAndCheckPermissions(
+        strapi,
+        context.userAbility,
+        ACTIONS.update,
+        FILE_MODEL_UID,
+        id
+      );
     } catch (error) {
       if (error instanceof errors.NotFoundError) {
         throw new errors.NotFoundError(MCP_NOT_FOUND_ASSET);

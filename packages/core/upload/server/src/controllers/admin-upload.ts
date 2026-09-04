@@ -28,6 +28,7 @@ export default {
       updates,
       async ({ id, fileInfo }: { id: number; fileInfo: FileInfo }) => {
         const { pm } = await findEntityAndCheckPermissions(
+          strapi,
           userAbility,
           ACTIONS.update,
           FILE_MODEL_UID,
@@ -67,6 +68,7 @@ export default {
 
     const uploadService = getService('upload');
     const { pm } = await findEntityAndCheckPermissions(
+      strapi,
       userAbility,
       ACTIONS.update,
       FILE_MODEL_UID,
@@ -104,6 +106,7 @@ export default {
 
     const uploadService = getService('upload');
     const { pm } = await findEntityAndCheckPermissions(
+      strapi,
       userAbility,
       ACTIONS.update,
       FILE_MODEL_UID,

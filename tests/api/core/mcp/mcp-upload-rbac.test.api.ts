@@ -524,6 +524,10 @@ describe('MCP upload tools RBAC (api)', () => {
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
 
+      if (field === 'folder' || field === 'folderId' || field === 'folderPath') {
+        expect(JSON.stringify(response)).toMatch(/move_media/);
+      }
+
       // A rejected call must not partially apply: the legitimate `name` in the same payload
       // is discarded along with the unrecognised key.
       expect(await readBack(token.accessKey, seeded.id)).toMatchObject({

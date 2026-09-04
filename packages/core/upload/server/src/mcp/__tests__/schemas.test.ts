@@ -104,10 +104,15 @@ describe('upload MCP schemas', () => {
       ).toBe(false);
     });
 
-    test('rejects folder — moving an asset belongs to move_media', () => {
-      expect(updateMediaInputSchema.safeParse({ id: 1, folder: 3 }).success).toBe(false);
-      expect(updateMediaInputSchema.safeParse({ id: 1, folderId: 3 }).success).toBe(false);
-      expect(updateMediaInputSchema.safeParse({ id: 1, folderPath: '/1/2' }).success).toBe(false);
+    test.each([
+      ['folder', 3],
+      ['folderId', 3],
+      ['folderPath', '/1/2'],
+    ])('rejects %s and directs the caller to move_media', (field, value) => {
+      const parsed = updateMediaInputSchema.safeParse({ id: 1, [field]: value });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/move_media/);
     });
 
     test.each([

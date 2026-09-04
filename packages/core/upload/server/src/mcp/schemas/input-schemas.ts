@@ -77,37 +77,51 @@ export const getMediaInputSchema = z.object({
 
 export const listFoldersInputSchema = z.object({});
 
+const FOLDER_INPUT_KEYS = ['folder', 'folderId', 'folderPath'] as const;
+
 /**
  * `update_media` input — the only writable asset metadata.
  *
- * `.strict()` is what turns an out-of-scope field into an actionable error rather than a silent
- * no-op: an agent that guesses `folder` or `url` is told the key is unrecognised instead of
- * getting a success response with nothing changed. The descriptions name the alternative
- * (`move_media`) or the reason a field is not writable, so the agent can recover without
- * a round-trip.
+ * `.strict()` turns an out-of-scope field into an error rather than a silent no-op. The custom
+ * object error directs folder-shaped inputs to `move_media`; other unknown keys are named by
+ * Zod's default error, so the agent can correct the call without a round-trip.
  *
  * The "at least one field" rule is enforced in the handler, not here: a `.refine()` would turn
  * this into a `ZodEffects`, which the MCP tool registry cannot expose as an input schema.
  */
 export const updateMediaInputSchema = z
-  .object({
-    id: mediaIdSchema,
-    name: z
-      .string()
-      .min(1)
-      .optional()
-      .describe(
-        'New asset name as shown in the Media Library. Renames the entry only — the stored file and its URL are unchanged.'
-      ),
-    alternativeText: z
-      .string()
-      .nullable()
-      .optional()
-      .describe('Alt text used by the frontend for accessibility. Pass null to clear it.'),
-    caption: z
-      .string()
-      .nullable()
-      .optional()
-      .describe('Caption shown alongside the asset. Pass null to clear it.'),
-  })
+  .object(
+    {
+      id: mediaIdSchema,
+      name: z
+        .string()
+        .min(1)
+        .optional()
+        .describe(
+          'New asset name as shown in the Media Library. Renames the entry only — the stored file and its URL are unchanged.'
+        ),
+      alternativeText: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('Alt text used by the frontend for accessibility. Pass null to clear it.'),
+      caption: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('Caption shown alongside the asset. Pass null to clear it.'),
+    },
+    {
+      error(issue) {
+        if (
+          issue.code === 'unrecognized_keys' &&
+          FOLDER_INPUT_KEYS.some((key) => issue.keys.includes(key))
+        ) {
+          return 'Folder changes are not supported by update_media. Use move_media to move an asset between folders.';
+        }
+
+        return undefined;
+      },
+    }
+  )
   .strict();
