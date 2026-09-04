@@ -59,3 +59,53 @@ describe('EnumerationInput (via InputRenderer)', () => {
     expect(screen.getByRole('option', { name: 'evening' })).toBeInTheDocument();
   });
 });
+
+/**
+ * Regression test for https://github.com/strapi/strapi/issues/27283
+ *
+ * The empty option that lets you unset the field is selected while the field has
+ * no value, so the select renders its label in the trigger. Forwarding a
+ * `placeholder` down to the select made it render that too, so both strings
+ * ended up in the trigger ("Choose hereChoose here" on Settings > Single Sign-On).
+ */
+describe('EnumerationInput placeholder', () => {
+  const enumerationField = {
+    label: 'Default role',
+    name: 'defaultRole',
+    type: 'enumeration' as const,
+    required: false,
+    options: [{ value: 'editor', label: 'Editor' }],
+  };
+
+  const renderField = (props: Partial<typeof enumerationField> & { placeholder?: string } = {}) =>
+    render(<InputRenderer {...enumerationField} {...props} />, {
+      renderOptions: {
+        wrapper: ({ children }) => <Form method="POST">{children}</Form>,
+      },
+    });
+
+  it('renders the placeholder exactly once when the field has no value', () => {
+    renderField({ placeholder: 'Choose here' });
+
+    const trigger = screen.getByRole('combobox', { name: 'Default role' });
+
+    expect(trigger.textContent?.match(/Choose here/g)).toHaveLength(1);
+  });
+
+  it('uses the placeholder as the label of the empty option', async () => {
+    const { user } = renderField({ placeholder: 'Pick a role' });
+
+    await user.click(screen.getByRole('combobox', { name: 'Default role' }));
+
+    expect(await screen.findByRole('option', { name: 'Pick a role' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to the default placeholder when none is provided', () => {
+    renderField();
+
+    const trigger = screen.getByRole('combobox', { name: 'Default role' });
+
+    expect(trigger.textContent?.match(/Choose here/g)).toHaveLength(1);
+  });
+});
