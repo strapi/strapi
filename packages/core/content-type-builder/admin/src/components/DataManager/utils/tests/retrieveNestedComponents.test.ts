@@ -61,6 +61,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
       {
         component: 'default.dish',
         uidsOfAllParents: ['default.closingperiod'],
+        dzParentUids: [],
       },
     ];
 
@@ -141,6 +142,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
       {
         component: 'default.dish',
         uidsOfAllParents: ['default.closingperiod', 'default.openingperiod'],
+        dzParentUids: [],
       },
     ];
 
