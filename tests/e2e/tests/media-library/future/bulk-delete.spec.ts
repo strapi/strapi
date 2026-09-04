@@ -24,7 +24,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.uploadFilesWithFilePicker([FIXTURE_IMAGE_1, FIXTURE_IMAGE_2]);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectAsset('test-image-1.jpg');
@@ -48,7 +48,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Doomed');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectAsset('Doomed');
@@ -66,7 +66,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectAsset('test-image-1.jpg');

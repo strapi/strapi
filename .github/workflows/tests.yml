@@ -304,6 +304,88 @@ jobs:
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
 
+  # The beta Media Library only exists behind `betaMediaLibrary`, so its specs are
+  # skipped by every other e2e job. This one turns the flag on for the media-library
+  # domain alone, which keeps the blast radius off the legacy suite.
+  #
+  # Chromium only, for two different reasons.
+  #
+  # WebKit is a hard limitation: the drag-and-drop helper builds a DataTransfer,
+  # which WebKit does not implement.
+  #
+  # Firefox is simply unknown. It has never been run against this suite: locally
+  # the admin login does not go through under Firefox, so every test drives a
+  # logged-out app and fails on the first click — which says nothing about the
+  # Media Library itself. CI does run Firefox for the rest of the e2e suite, so
+  # login works there. Adding `firefox` to a matrix here is the way to find out;
+  # it was left out of this PR so an unknown result would not block the review.
+  #
+  # The two folder-move specs are skipped for now. They simulate a pointer drag
+  # through dnd-kit and the move never fires; they fail independently of this flag.
+  #
+  # The filter names their describe blocks (`Drag and Drop Deep` / `Shallow`) rather
+  # than just `Drag and Drop`: the looser pattern also caught
+  # `file-upload.spec.ts › should upload a file via drag and drop`, which works and
+  # has nothing to do with the folder-move problem.
+  #
+  # This is a bigger gap than a broken helper. Nothing else in the e2e suite tests
+  # a pointer drag: the one reordering test we have
+  # (content-manager/relations-ui-management.spec.ts) drives the keyboard
+  # affordance instead, and the Media Library deliberately ships no
+  # `KeyboardSensor` — `AssetsDndProvider` states that pointer drag is a mouse-only
+  # enhancement and `BulkMoveDialog` is the accessible path. So the Content
+  # Manager's workaround does not transfer here.
+  #
+  # Skipping these costs the gesture, not the feature: moving assets between
+  # folders is already covered through the bulk-move dialog in
+  # `bulk-move.spec.ts`, which passes. Drop the filter once someone finds a
+  # pointer-drag simulation that dnd-kit accepts.
+  e2e_media_library_beta:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    timeout-minutes: 45
+    needs: [conditions, build]
+    name: '[CE] e2e beta media library (browser: chromium)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [CE] beta Media Library E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          betaMediaLibrary: true
+          domains: media-library
+          jestOptions: '--project=chromium --grep-invert=Drag.and.Drop.(Deep|Shallow)'
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: failure()
+        with:
+          name: ce-beta-media-library--playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        with:
+          junit-paths: test-apps/junit-reports/*.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
+
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
@@ -698,6 +780,7 @@ jobs:
         unit_front,
         e2e_ce,
         e2e_ee,
+        e2e_media_library_beta,
         cli,
         migration_v5,
         api_ce_pg,

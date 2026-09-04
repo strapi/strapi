@@ -5,6 +5,12 @@ inputs:
     description: 'Should run EE or CE e2e tests'
   jestOptions:
     description: 'Jest options'
+  domains:
+    description: 'Restrict the run to these test domains (space separated). Defaults to every domain.'
+    default: ''
+  betaMediaLibrary:
+    description: 'Serve the beta Media Library instead of the legacy one. Only the dedicated beta job sets this.'
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -12,5 +18,7 @@ runs:
       env:
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
+        DOMAINS: ${{ inputs.domains }}
         STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: true
+        BETA_MEDIA_LIBRARY: ${{ inputs.betaMediaLibrary }}
       shell: bash

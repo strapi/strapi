@@ -47,7 +47,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
 
       const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
       await assetsPage.uploadFilesWithFilePicker(testImagePath);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectAsset('test-image.jpg');
@@ -76,7 +76,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
 
       const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
       await assetsPage.uploadFilesWithFilePicker(testImagePath);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       // Verify asset appears as card
       const assetCard = assetsPage.getAssetCard('test-image');

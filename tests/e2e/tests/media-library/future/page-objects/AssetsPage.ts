@@ -90,10 +90,15 @@ export class AssetsPage {
       return dt;
     }, files);
 
-    // dispatchEvent must fire dragenter first - that's what sets isDraggingOver and shows the overlay
-    await this.dropZone.dispatchEvent('dragenter', { dataTransfer });
-    await this.dropZone.dispatchEvent('dragover', { dataTransfer });
-    await expect(this.getDropZoneMessage()).toBeVisible();
+    // dispatchEvent must fire dragenter first - that's what sets isDraggingOver and shows the overlay.
+    // UploadDropZoneProvider remounts while the assets list is still settling after a
+    // navigation, which resets `isDragging` and silently swallows a single dragenter.
+    // Re-dispatch until the overlay actually shows rather than assuming the first one stuck.
+    await expect(async () => {
+      await this.dropZone.dispatchEvent('dragenter', { dataTransfer });
+      await this.dropZone.dispatchEvent('dragover', { dataTransfer });
+      await expect(this.getDropZoneMessage()).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15_000 });
 
     await this.dropZone.dispatchEvent('drop', { dataTransfer });
   }
@@ -123,8 +128,34 @@ export class AssetsPage {
     return fileChooser;
   }
 
-  async waitForUploadSuccess() {
-    // Wait for the success notification inside the Notifications region
+  /**
+   * Wait for an upload to report success, then dismiss the progress dialog.
+   *
+   * The beta Media Library reports upload completion in the progress dialog — the
+   * legacy library's success toast is gone, and nothing in the beta upload flow
+   * calls `toggleNotification`. Waiting on the Notifications region here only burns
+   * the timeout. The dialog is dismissed before handing back, because callers were
+   * written against a toast and expect feedback that clears itself; left open it
+   * swallows their next click.
+   *
+   * Named for the state change, not the wait: this dismisses the dialog as well as
+   * waiting on it. Use `waitForUploadProgressSuccess()` when you want the wait
+   * alone, and `waitForNotification()` for actions that DO raise a toast — folder
+   * creation, delete, move, crop.
+   */
+  async completeUpload() {
+    await this.waitForUploadProgressSuccess();
+    await this.closeUploadProgressDialog();
+  }
+
+  /**
+   * Wait for any toast in the Notifications region.
+   *
+   * Used after actions that still notify: folder creation, delete, move, crop.
+   * Deliberately not specific to one message — callers only need to know the action
+   * settled before they assert on the resulting view.
+   */
+  async waitForNotification() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
       .getByRole('status')
@@ -263,7 +294,17 @@ export class AssetsPage {
   async getTableRowNames() {
     const rows = this.page.getByRole('grid').getByRole('row');
     const texts = await rows.allInnerTexts();
-    return texts.slice(1).map((text) => text.split('\n').find(Boolean) ?? '');
+    // `innerText` on a row joins its cells with tabs, not newlines — splitting on
+    // newlines alone returns the whole row (mostly tab characters) instead of the
+    // name. The leading cells (checkbox, preview) are empty, so the first
+    // non-blank segment is the file or folder name.
+    return texts.slice(1).map(
+      (text) =>
+        text
+          .split(/[\t\n]+/)
+          .map((part) => part.trim())
+          .find(Boolean) ?? ''
+    );
   }
 
   async switchToTableView() {
@@ -283,8 +324,16 @@ export class AssetsPage {
    */
   async pickFilterOption(fieldName: string, optionName: string) {
     await this.getFilterMenuTrigger().click();
+    // The field row is a plain SubTrigger, so `menuitem` is right here.
     await this.page.getByRole('menuitem', { name: fieldName, exact: true }).hover();
-    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    // The options are not. FilterMenu renders type values as `menuitemcheckbox` and
+    // date presets as `menuitemradio`; those are distinct ARIA roles, so a
+    // `menuitem` lookup never matches them. Accept all three.
+    const option = this.page
+      .getByRole('menuitemcheckbox', { name: optionName, exact: true })
+      .or(this.page.getByRole('menuitemradio', { name: optionName, exact: true }))
+      .or(this.page.getByRole('menuitem', { name: optionName, exact: true }));
+    await option.first().click();
     await this.page.keyboard.press('Escape');
   }
 
@@ -366,7 +415,14 @@ export class AssetsPage {
    * Close the asset details drawer
    */
   async closeAssetDetailsDrawer() {
-    await this.assetDetailsDrawer.getByRole('button', { name: 'Close' }).click();
+    // Two buttons answer to "Close" while the drawer's local toast is showing: the
+    // dialog's own control, and the toast's dismiss (rendered inside the form).
+    // Only the dialog control is a Radix trigger, so it is the one carrying
+    // `data-state`. Without this the click is a strict-mode violation.
+    await this.assetDetailsDrawer
+      .getByRole('button', { name: 'Close' })
+      .and(this.page.locator('[data-state]'))
+      .click();
   }
 
   /**
@@ -513,8 +569,32 @@ export class AssetsPage {
   /**
    * Navigate into a folder by clicking its card/row
    */
+  /**
+   * An item (asset or folder) as shown in the main asset list, in either view.
+   *
+   * Use this rather than a bare `page.getByText(name)`: names also appear in the
+   * sidebar folder tree and in button labels, so an unscoped lookup asserts on the
+   * wrong thing — or trips strict mode.
+   */
+  getListItem(name: string) {
+    return this.page
+      .getByTestId('assets-grid')
+      .getByText(name, { exact: true })
+      .or(
+        this.page
+          .getByRole('grid')
+          .getByRole('row')
+          .filter({ hasText: name })
+          .getByText(name, { exact: true })
+      );
+  }
+
   async navigateIntoFolder(name: string) {
-    await this.page.getByText(name).first().click();
+    // The folder name also appears in the sidebar folder tree, which sits earlier in
+    // the DOM — an unscoped `getByText(name).first()` clicks a tree node rather than
+    // the folder in the list. Scope to the main asset list, whichever view is active:
+    // grid renders a `list` with `data-testid="assets-grid"`, table renders a `grid`.
+    await this.getListItem(name).first().click();
   }
 
   /**
@@ -529,6 +609,28 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
+  async uploadFilesFromUrl(urls: string | string[]) {
+    await this.openImportFromUrlDialog();
+    const urlsArray = Array.isArray(urls) ? urls : [urls];
+    await this.urlTextarea.fill(urlsArray.join('\n'));
+    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  }
+
+  /**
+   * Cancel the whole in-flight upload batch from the progress dialog header.
+   */
+  async cancelUpload() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Cancel all' }).click();
+  }
+
+  /**
+   * Retry whichever files were left in a cancelled state after `cancelUpload()`.
+   * Only visible once at least one file is cancelled.
+   */
+  async retryCancelledUploads() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Retry' }).click();
+  }
+
   /**
    * Drag a file or folder onto a folder target using pointer events (dnd-kit).
    * Moves the pointer more than 8px before dropping to satisfy activation distance.

@@ -55,7 +55,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       // the Media Library root. Wait for the success toast and reload so the
       // assets list (cached by RTK Query) re-renders with the new folder.
       await assetsPage.createFolder('Coaching Staff');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.goto();
 
@@ -78,7 +78,10 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
       await expect(saveButton).toBeEnabled();
       await assetsPage.clickAssetDetailsDrawerSave();
-      await assetsPage.waitForUploadSuccess();
+      // The drawer reports its own result in a local Alert rather than the global
+      // Notifications region, so `waitForNotification()` never sees it. The alert
+      // clears itself after 5s, hence waiting on it rather than asserting later.
+      await expect(assetsPage.assetDetailsDrawer.getByText('File updated')).toBeVisible();
 
       // Drawer stays open; assert the inputs reflect the persisted values after
       // the RTK Query refetch resolves.
@@ -120,7 +123,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
       // Drawer closes after a successful delete, success notification fires.
       await expect(assetsPage.assetDetailsDrawer).not.toBeVisible({ timeout: 5000 });
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       // Asset is gone from the grid view.
       await expect(assetsPage.getAssetCard('ted_lasso_profile.jpeg')).toHaveCount(0);
