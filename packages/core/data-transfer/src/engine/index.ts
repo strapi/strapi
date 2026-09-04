@@ -826,6 +826,7 @@ class TransferEngine<
       await this.init();
 
       await this.integrityCheck();
+      await this.validateStages();
 
       this.#emitTransferUpdate('start');
 
@@ -865,6 +866,18 @@ class TransferEngine<
       destination: this.destinationProvider.results,
       engine: this.progress.data,
     };
+  }
+
+  async validateStages(): Promise<void> {
+    if (!this.sourceProvider.validateStage) {
+      return;
+    }
+
+    for (const stage of TRANSFER_STAGES) {
+      if (!this.shouldSkipStage(stage)) {
+        await this.sourceProvider.validateStage(stage);
+      }
+    }
   }
 
   async beforeTransfer(): Promise<void> {

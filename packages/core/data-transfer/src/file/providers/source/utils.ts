@@ -1,5 +1,47 @@
 import path from 'path';
 
+import type { IFile } from '../../../types';
+
+export const validateAssetMetadata = (metadata: unknown, filename?: string): IFile => {
+  if (metadata === null || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    throw new TypeError('Asset sidecar metadata must be a JSON object');
+  }
+
+  const file = metadata as Record<string, unknown>;
+  const invalidFields: string[] = [];
+
+  if (!Number.isInteger(file.id) || (file.id as number) <= 0) {
+    invalidFields.push('id');
+  }
+  if (!Number.isFinite(file.size) || (file.size as number) < 0) {
+    invalidFields.push('size');
+  }
+  for (const field of ['name', 'hash', 'mime', 'url'] as const) {
+    if (typeof file[field] !== 'string' || file[field].length === 0) {
+      invalidFields.push(field);
+    }
+  }
+  for (const field of ['ext', 'type', 'mainHash'] as const) {
+    if (file[field] != null && typeof file[field] !== 'string') {
+      invalidFields.push(field);
+    }
+  }
+
+  if (invalidFields.length > 0) {
+    throw new TypeError(
+      `Asset sidecar metadata has invalid required fields: ${invalidFields.join(', ')}`
+    );
+  }
+
+  const typedFile = file as unknown as IFile;
+  const extension = typeof typedFile.ext === 'string' ? typedFile.ext : '';
+  if (filename && `${typedFile.hash}${extension}` !== filename) {
+    throw new TypeError(`Asset sidecar metadata does not match upload filename "${filename}"`);
+  }
+
+  return typedFile;
+};
+
 /**
  * Note: in versions of the transfer engine <=4.9.0, exports were generated with windows paths
  * on Windows systems, and posix paths on posix systems.

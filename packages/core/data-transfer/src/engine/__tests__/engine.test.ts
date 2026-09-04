@@ -476,6 +476,41 @@ describe('Transfer engine', () => {
       expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
     });
 
+    test('validates included source stages before preparing the destination', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockImplementation((stage: TransferStage) => {
+          if (stage === 'assets') {
+            throw validationError;
+          }
+        }),
+      };
+      const beforeTransfer = jest.fn();
+      const destination = createDestination({ beforeTransfer });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(source.validateStage).toHaveBeenCalledWith('assets');
+      expect(beforeTransfer).not.toHaveBeenCalled();
+    });
+
+    test('does not validate an excluded source stage', async () => {
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn(),
+      };
+      const engine = createTransferEngine(source, completeDestination, {
+        ...defaultOptions,
+        exclude: ['files'],
+      });
+
+      await engine.transfer();
+
+      expect(source.validateStage).not.toHaveBeenCalledWith('assets');
+    });
+
     test.each<
       // (givenStages, mustBeCalled, mustNotBeCalled)
       [TransferFilterPreset[], (keyof IDestinationProvider)[], (keyof IDestinationProvider)[]]
