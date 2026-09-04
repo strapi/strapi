@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "job_posts",
+  "info": {
+    "singularName": "job-post",
+    "pluralName": "job-posts",
+    "displayName": "Job-Post"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "url": {
+      "type": "text"
+    },
+    "externalId": {
+      "type": "string",
+      "unique": true
+    }
+  }
+}
