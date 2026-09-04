@@ -4,7 +4,7 @@ import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
+
 import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
@@ -72,7 +72,7 @@ const command: StrapiCommand = () => {
     .description("Reset an admin user's password")
     .option('-e, --email <email>', 'The user email')
     .option('-p, --password <password>', 'New password for the user')
-    .action(runAction('admin:reset-user-password', action));
+    .action(action);
 };
 
 export { action, command };

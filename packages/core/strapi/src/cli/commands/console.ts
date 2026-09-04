@@ -3,7 +3,6 @@ import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../types';
-import { runAction } from '../utils/helpers';
 
 const action = async () => {
   const appContext = await compileStrapi();
@@ -28,9 +27,7 @@ const action = async () => {
  * `$ strapi console`
  */
 const command: StrapiCommand = () => {
-  return createCommand('console')
-    .description('Open the Strapi framework console')
-    .action(runAction('console', action));
+  return createCommand('console').description('Open the Strapi framework console').action(action);
 };
 
 export { action, command };
