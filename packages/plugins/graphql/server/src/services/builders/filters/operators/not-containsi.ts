@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$notContainsi',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(NOT_CONTAINSI_FIELD_NAME, { type });
   },
 });

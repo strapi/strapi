@@ -1,7 +1,7 @@
 import { objectType } from 'nexus';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { DELETE_MUTATION_RESPONSE_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return {

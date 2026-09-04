@@ -5,3 +5,7 @@ export type Context = {
   strapi: Core.Strapi;
   registry: TypeRegistry;
 };
+
+export type StrapiContext = {
+  strapi: Core.Strapi;
+};

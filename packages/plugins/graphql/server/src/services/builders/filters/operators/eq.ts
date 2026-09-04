@@ -11,7 +11,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   strapiOperator: '$eq',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     const { GRAPHQL_SCALARS } = strapi.plugin('graphql').service('constants');
 
     if (!GRAPHQL_SCALARS.includes(type)) {

@@ -9,6 +9,7 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type { Services } from '../public';
 
 export interface Strapi extends Container {
   server: Modules.Server.Server;
@@ -67,8 +68,8 @@ export interface Strapi extends Container {
   components: Schema.Components;
   reload: Reloader;
   config: ConfigProvider;
-  services: Record<string, Core.Service>;
-  service(uid: UID.Service): Core.Service;
+  services: Record<UID.Service, Core.Service>;
+  service<S extends UID.Service>(uid: S): Services[S];
   controllers: Record<string, Core.Controller>;
   controller(uid: UID.Controller): Core.Controller;
   contentTypes: Schema.ContentTypes;

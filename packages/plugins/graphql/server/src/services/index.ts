@@ -1,3 +1,4 @@
+import type { StrapiContext } from './types';
 import contentAPI from './content-api';
 import typeRegistry from './type-registry';
 import utils from './utils';
@@ -16,4 +17,4 @@ export const services = {
   internals,
   'type-registry': typeRegistry,
   utils,
-};
+} satisfies Record<string, (args: StrapiContext) => unknown>;

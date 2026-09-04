@@ -1,7 +1,7 @@
 import { objectType } from 'nexus';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { service: getService } = strapi.plugin('graphql');
 
   const { RESPONSE_COLLECTION_META_TYPE_NAME, PAGINATION_TYPE_NAME } = getService('constants');

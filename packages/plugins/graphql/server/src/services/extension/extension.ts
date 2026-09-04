@@ -2,6 +2,7 @@ import * as nexus from 'nexus';
 import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import type * as Nexus from 'nexus';
+import type { IResolvers } from '@graphql-tools/utils';
 
 import createShadowCRUDManager from './shadow-crud-manager';
 
@@ -10,7 +11,7 @@ export type Configuration = {
   typeDefs?: string;
   resolvers?: object;
   resolversConfig?: object;
-  plugins?: Nexus.PluginConfig[];
+  plugins?: Nexus.core.NexusPlugin[];
 };
 
 export type ConfigurationFactory = (options: {
@@ -22,9 +23,9 @@ export type ConfigurationFactory = (options: {
 export type Extension = {
   types: NexusGen[];
   typeDefs: string[];
-  resolvers: object;
+  resolvers: IResolvers;
   resolversConfig: object;
-  plugins: Nexus.PluginConfig[];
+  plugins: Nexus.core.NexusPlugin[];
 };
 
 const getDefaultState = (): Extension => ({

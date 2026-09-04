@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$eqi',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(EQI_FIELD_NAME, { type });
   },
 });
