@@ -454,6 +454,22 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       // return value must not be left holding a window onto later writes.
       return { ...user };
     }),
+    // `completeEnrolment`'s promotion (Finding 3) is a single conditional statement, not
+    // read-then-write: `where` carries the `mfaPendingSecret` value read at the top of the
+    // function alongside `id`, so a row that changed underneath (a concurrent `disable`, or any
+    // other write) between that read and this call matches nothing and `count` comes back 0. Reuses
+    // `matchesWhere` -- its default branch already stringifies both sides, so `id` compares
+    // correctly whether `where.id` is a string or a number.
+    updateMany: jest.fn(async ({ where, data }: any) => {
+      let count = 0;
+      for (const user of users.values()) {
+        if (matchesWhere(user, where)) {
+          Object.assign(user, data);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
     ...options.userOverrides,
   };
 
@@ -811,6 +827,10 @@ describe('mfa service: enrolment', () => {
     const existing = users.get('1')!;
     existing.mfaSecret = null;
     existing.mfaEnabledAt = new Date('2026-01-01T00:00:00.000Z');
+    // Snapshotted before the call: the fixture's `update` mutates `existing` in place, so
+    // asserting against `existing.mfaEnabledAt` *after* the call would silently compare the same
+    // live object with itself and pass even if `beginEnrolment` reset the field.
+    const enabledAtBeforeCall = existing.mfaEnabledAt;
 
     const service = createMfaService(defaultDeps(strapi));
 
@@ -823,7 +843,7 @@ describe('mfa service: enrolment', () => {
     // A fresh secret was actually issued, not just accepted without writing, and to the pending
     // column -- `isEnrolled` is false here (no `mfaSecret`), so this is the fresh-enrolment path,
     // not a replacement, and `mfaEnabledAt` is left exactly as it was (untouched by beginEnrolment).
-    expect(users.get('1')!.mfaEnabledAt).toEqual(existing.mfaEnabledAt);
+    expect(users.get('1')!.mfaEnabledAt).toEqual(enabledAtBeforeCall);
     expect(users.get('1')!.mfaSecret).toBeNull();
     expect(String(users.get('1')!.mfaPendingSecret)).toMatch(/^enc:/);
   });
@@ -876,9 +896,13 @@ describe('mfa service: enrolment', () => {
 
     // `mfaEnabledAt` must never be set on this path: `issueRecoveryCodes` is called before it,
     // specifically so a storage failure here leaves the user free to retry rather than enrolled
-    // with an empty, unrecoverable recovery-code set.
+    // with an empty, unrecoverable recovery-code set. The promotion itself never ran either --
+    // `mfaSecret` stays null and `mfaPendingSecret` is still exactly what `beginEnrolment` wrote,
+    // matching the ordering guarantee documented at the top of the promotion in `completeEnrolment`.
     await expect(service.completeEnrolment('1', code)).rejects.toThrow(/constraint violation/);
     expect(users.get('1')!.mfaEnabledAt).toBeNull();
+    expect(users.get('1')!.mfaSecret).toBeNull();
+    expect(users.get('1')!.mfaPendingSecret).toBe(`enc:${secret}`);
   });
 
   test('rejects an invalid code and leaves enrolment inactive', async () => {
@@ -1004,6 +1028,33 @@ describe('mfa service: enrolment', () => {
     await expect(service.completeEnrolment('1', '123456')).rejects.toThrow(
       /no enrolment in progress/i
     );
+  });
+
+  // Finding 3: the promotion used to be read-then-write (`user` read at the top of
+  // `completeEnrolment`, its `mfaPendingSecret` written back as `mfaSecret` after
+  // `issueRecoveryCodes` resolves). A `disable` racing in that window would be silently undone --
+  // the account comes back enrolled on the very secret `disable` just abandoned. `createMany` is
+  // the hook: it runs, awaited, between the read and the promotion write, so mutating the row
+  // there stands in for a concurrent `disable` landing in exactly that gap.
+  test('a disable landing between the read and the promotion write is not undone, and mfaSecret stays null', async () => {
+    const { strapi, users } = buildStrapi(
+      {},
+      {},
+      {
+        createMany: jest.fn(async () => {
+          users.get('1')!.mfaPendingSecret = null;
+          return { count: 0 };
+        }),
+      }
+    );
+    const service = createMfaService(defaultDeps(strapi));
+    const { secret } = await service.beginEnrolment('1', 'pw');
+    const code = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+
+    await expect(service.completeEnrolment('1', code)).rejects.toThrow(/no enrolment in progress/i);
+
+    expect(users.get('1')!.mfaSecret).toBeNull();
+    expect(users.get('1')!.mfaPendingSecret).toBeNull();
   });
 
   describe('replacing an authenticator', () => {

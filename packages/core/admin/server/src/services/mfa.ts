@@ -336,8 +336,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // account keeps its working authenticator) rather than promote with no recovery codes.
     const recoveryCodes = await issueRecoveryCodes(userId);
 
-    await userQuery().update({
-      where: { id: userId },
+    // A single conditional statement, not read-then-write: `mfaPendingSecret` is part of the
+    // `where` itself, so the promotion only applies to the exact row this call read at the top.
+    // Without that, a `disable` (or anything else) racing in between the read above and this
+    // write would be silently undone -- the account would come back enrolled on the abandoned
+    // pending secret the moment this write lands, no matter what ran in between.
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
       data: {
         mfaSecret: user.mfaPendingSecret,
         mfaPendingSecret: null,
@@ -348,6 +353,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         mfaLockedAt: null,
       },
     });
+
+    if (count !== 1) {
+      throw new ValidationError('No enrolment in progress');
+    }
 
     return { recoveryCodes, replaced };
   };
@@ -541,7 +550,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * The four notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
+   * The five notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
    * `recovery_code_used` and `recovery_codes_issued` never reach here: both are already fully
    * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
    * respectively), and an emailed notice on every recovery-code use would mean an attacker who has
@@ -558,19 +567,34 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     | 'authenticator_replaced';
 
   /**
+   * The `<%= change %>` phrase fed to `mfaChangedTemplate` ("Two-factor authentication was
+   * <%= change %> on your account..."). `enabled`, `disabled` and `reset` map to themselves, so
+   * those three emails read exactly as they did before `authenticator_replaced` existed;
+   * `authenticator_replaced` gets its own phrase rather than leaking the raw enum value verbatim
+   * into the sentence. `challenge_failed` never reaches this map -- `notify` returns before
+   * composing an email for it.
+   */
+  const CHANGE_NOTICE_TEXT: Record<Exclude<MfaChangeNotice, 'challenge_failed'>, string> = {
+    enabled: 'enabled',
+    disabled: 'disabled',
+    reset: 'reset',
+    authenticator_replaced: 'moved to a new authenticator app',
+  };
+
+  /**
    * Fire and forget by default -- Strapi's own forgotPassword does exactly this: send, catch, log
    * server side, let the operation succeed. Many self-hosted instances never configure a
    * provider, so email cannot be a hard dependency of a security control. The primary channel is
    * the in-app notice built from unseen mfa events.
    *
-   * The eventHub event fires for all four notice types -- `admin.mfa.<type>`, `_` replaced by `.`
+   * The eventHub event fires for all five notice types -- `admin.mfa.<type>`, `_` replaced by `.`
    * so `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is
    * cheap and synchronous and is the one mechanism EE audit logging (where licensed) can observe
-   * any of the four through; whether a given emission ends up as a persisted audit row is entirely
+   * any of the five through; whether a given emission ends up as a persisted audit row is entirely
    * that feature's own decision (its allow-list, licensing, request context), not this function's.
-   * The email is sent only for an actual change (`enabled`/`disabled`/`reset`): a failed challenge
-   * is a notice, not a change, and mailing every wrong code would let anyone who merely knows the
-   * password flood the account holder's inbox.
+   * The email is sent only for an actual change (`enabled`/`disabled`/`reset`/
+   * `authenticator_replaced`): a failed challenge is a notice, not a change, and mailing every
+   * wrong code would let anyone who merely knows the password flood the account holder's inbox.
    *
    * Returns the email's promise rather than staying `void` (F6): a fire-and-forget caller can
    * still ignore it exactly as before, but the CLI reset command needs to `await` it -- it calls
@@ -585,6 +609,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     if (type === 'challenge_failed') {
       return Promise.resolve();
     }
+
+    // Resolved outside the closure below while `type` is still narrowed to a `CHANGE_NOTICE_TEXT`
+    // key (the `challenge_failed` check above already returned) -- the template must never
+    // receive the raw enum value (Finding 1: "authenticator_replaced" is not a sentence).
+    const change = CHANGE_NOTICE_TEXT[type];
 
     return (async () => {
       try {
@@ -608,7 +637,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
             strapi.config.get('admin.auth.mfa.emailTemplate', mfaChangedTemplate),
             {
               user: { email: user.email, firstname: user.firstname },
-              change: type,
+              change,
               changedAt: new Date().toISOString(),
             }
           );
