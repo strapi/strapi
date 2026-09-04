@@ -304,6 +304,21 @@ export default {
         return ctx.unauthorized('Invalid refresh token');
       }
 
+      // Cycle 2 enforcement on the refresh path: a required user whose grace expired mid-session
+      // is locked at their next refresh. Handled as a value, never thrown -- this try/catch turns a
+      // throw into a 500. Refusal is a bare 401 (this client never renders a message); every
+      // refresh token for the user is invalidated (the just-rotated one included) and the cookie
+      // is cleared the way `logout` does, or the browser keeps replaying a dead token.
+      const enforcement = await getService('mfa').enforce({ id: rotation.userId });
+      if (enforcement.outcome === 'refused') {
+        await sessionManager('admin').invalidateRefreshToken(rotation.userId);
+        ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
+          ...getRefreshCookieOptions(ctx.request.secure),
+          expires: new Date(0),
+        });
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
       const result = await sessionManager('admin').generateAccessToken(rotation.token);
       if ('error' in result) {
         return ctx.unauthorized('Invalid refresh token');

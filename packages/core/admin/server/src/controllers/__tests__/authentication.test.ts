@@ -524,4 +524,81 @@ describe('authentication controller', () => {
       });
     });
   });
+
+  describe('accessToken with enforcement', () => {
+    const buildRefreshStrapi = (enforceResult: unknown) => {
+      const rotateRefreshToken = jest.fn(() =>
+        Promise.resolve({
+          token: 'rotated',
+          sessionId: 's2',
+          userId: '7',
+          absoluteExpiresAt: undefined,
+          type: 'refresh',
+        })
+      );
+      const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const enforce = jest.fn(() => Promise.resolve(enforceResult));
+      setStrapi({
+        log: { error: jest.fn(), warn: jest.fn() },
+        config: { get: jest.fn(() => undefined) },
+        sessionManager: jest.fn(() => ({
+          rotateRefreshToken,
+          generateAccessToken,
+          invalidateRefreshToken,
+        })),
+        admin: { services: { mfa: { enforce } } },
+      });
+      return { rotateRefreshToken, generateAccessToken, invalidateRefreshToken, enforce };
+    };
+
+    const buildRefreshCtx = () => {
+      const cookiesSet = jest.fn();
+      const unauthorized = jest.fn((message: string) => {
+        ctx.status = 401;
+        ctx.body = { error: message };
+      });
+      const ctx: any = createContext(
+        {},
+        {
+          state: {},
+          cookies: { get: jest.fn(() => 'refresh-token'), set: cookiesSet },
+          unauthorized,
+          internalServerError: jest.fn(),
+          request: { query: {}, body: {}, headers: {}, secure: false },
+        }
+      );
+      return { ctx, cookiesSet, unauthorized };
+    };
+
+    test('a graced or unaffected user gets a fresh access token as before', async () => {
+      const { enforce, generateAccessToken } = buildRefreshStrapi({ outcome: 'none' });
+      const { ctx, cookiesSet } = buildRefreshCtx();
+
+      await authenticationController.accessToken(ctx);
+
+      expect(enforce).toHaveBeenCalledWith({ id: '7' });
+      expect(generateAccessToken).toHaveBeenCalledWith('rotated');
+      expect(cookiesSet).toHaveBeenCalledWith(REFRESH_COOKIE_NAME, 'rotated', expect.any(Object));
+      expect(ctx.body).toEqual({ data: { token: 'access-token' } });
+    });
+
+    test('a refused user: every session invalidated, cookie cleared, bare 401, no access token', async () => {
+      const { generateAccessToken, invalidateRefreshToken } = buildRefreshStrapi({
+        outcome: 'refused',
+      });
+      const { ctx, cookiesSet, unauthorized } = buildRefreshCtx();
+
+      await authenticationController.accessToken(ctx);
+
+      expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
+      expect(generateAccessToken).not.toHaveBeenCalled();
+      expect(cookiesSet).toHaveBeenCalledWith(
+        REFRESH_COOKIE_NAME,
+        '',
+        expect.objectContaining({ expires: new Date(0) })
+      );
+      expect(unauthorized).toHaveBeenCalledWith('Invalid refresh token');
+    });
+  });
 });
