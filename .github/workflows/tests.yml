@@ -320,9 +320,21 @@ jobs:
   # login works there. Adding `firefox` to a matrix here is the way to find out;
   # it was left out of this PR so an unknown result would not block the review.
   #
-  # `Drag and Drop` is excluded while the dnd-kit pointer simulation used to move
-  # assets between folders is being fixed — those specs fail independently of the
-  # flag. Drop the filter once they are green.
+  # `Drag and Drop` is skipped for now. Those specs simulate a pointer drag through
+  # dnd-kit and the move never fires; they fail independently of this flag.
+  #
+  # This is a bigger gap than a broken helper. Nothing else in the e2e suite tests
+  # a pointer drag: the one reordering test we have
+  # (content-manager/relations-ui-management.spec.ts) drives the keyboard
+  # affordance instead, and the Media Library deliberately ships no
+  # `KeyboardSensor` — `AssetsDndProvider` states that pointer drag is a mouse-only
+  # enhancement and `BulkMoveDialog` is the accessible path. So the Content
+  # Manager's workaround does not transfer here.
+  #
+  # Skipping these costs the gesture, not the feature: moving assets between
+  # folders is already covered through the bulk-move dialog in
+  # `bulk-move.spec.ts`, which passes. Drop the filter once someone finds a
+  # pointer-drag simulation that dnd-kit accepts.
   e2e_media_library_beta:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 45
