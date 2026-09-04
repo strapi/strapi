@@ -304,9 +304,24 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return count === 1;
   };
 
-  const lockAccount = async (userId: string, now: Date): Promise<boolean> => {
+  /**
+   * `precondition` is the caller's own read of `mfaGraceUntil`, expressed as a `where` fragment:
+   * `{ mfaGraceUntil: { $lte: now } }` for the ordinary case, or an exact match on the raw stored
+   * value (`{ mfaGraceUntil: row.mfaGraceUntil }`) when that value didn't parse as a date at all.
+   * A malformed column (hand-edited, or a weakly-typed engine like SQLite letting a non-date
+   * string into a datetime column) has no portable ordering against `now` -- what a `$lte`
+   * comparison even does with it is engine-specific -- but it can always be compared for exact
+   * equality, which still gives the precondition its race protection: if anything rewrote the
+   * column between the read and this statement (a fresh grace, a clear, another lock), the value
+   * has changed and the match -- and the lock -- fails.
+   */
+  const lockAccount = async (
+    userId: string,
+    now: Date,
+    precondition: Record<string, unknown>
+  ): Promise<boolean> => {
     const { count } = await userQuery().updateMany({
-      where: { id: userId, mfaLockedAt: null, mfaGraceUntil: { $lte: now } },
+      where: { id: userId, mfaLockedAt: null, ...precondition },
       data: { mfaLockedAt: now },
     });
     return count === 1;
@@ -322,7 +337,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const invalidateAllSessions = async (userId: string): Promise<void> => {
     if (strapi.sessionManager?.hasOrigin('admin')) {
       await strapi.sessionManager('admin').invalidateRefreshToken(userId);
+      return;
     }
+    // The lock and its event still land either way (see the caller): this only means a session
+    // minted before the admin origin was registered survives the lock silently unless someone
+    // reads the logs. User id only, never anything session- or token-shaped.
+    strapi.log.warn(
+      `Admin session origin is not registered; sessions for admin user ${userId} were not invalidated on lock.`
+    );
   };
 
   /**
@@ -378,7 +400,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     }
 
     const graceUntil = new Date(row.mfaGraceUntil);
-    if (Number.isNaN(graceUntil.getTime())) {
+    const malformed = Number.isNaN(graceUntil.getTime());
+    if (malformed) {
       // A malformed stamp must fail closed on the lock side, never become a grace that never ends.
       strapi.log.warn(
         `Malformed mfaGraceUntil on admin user ${userId}; treating the grace as expired.`
@@ -387,11 +410,18 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return { outcome: 'grace', graceUntil };
     }
 
-    if (await lockAccount(userId, now)) {
+    // The ordinary precondition orders the stored deadline against `now`; a malformed value has no
+    // portable ordering (see `lockAccount`'s doc comment), so its own precondition is an exact
+    // match on the raw value just read instead.
+    const lockPrecondition = malformed
+      ? { mfaGraceUntil: row.mfaGraceUntil }
+      : { mfaGraceUntil: { $lte: now } };
+
+    if (await lockAccount(userId, now, lockPrecondition)) {
       // Sessions first: a failing event write must never leave a live session past the lock.
       await invalidateAllSessions(userId);
       await recordEvent(userId, 'locked', {
-        graceUntil: Number.isNaN(graceUntil.getTime()) ? undefined : graceUntil.toISOString(),
+        graceUntil: malformed ? undefined : graceUntil.toISOString(),
       });
       notify(userId, 'locked');
       return { outcome: 'refused' };

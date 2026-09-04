@@ -158,21 +158,38 @@ interface EventRow {
 
 /**
  * Coerces a value to something orderable for the `$gt`/`$lt` family. Deliberately narrow and
- * loud: every comparison the service actually issues through `strapi.db.query` is on a datetime
- * (`expiresAt`, `createdAt`), so anything else reaching here means the mock has drifted from the
- * service. Better to fail the test than to compare as NaN, which would make every filter match
- * nothing and silently turn the throttle tests green.
+ * loud for anything that isn't a plausible datetime: every comparison the service actually issues
+ * through `strapi.db.query` is on a datetime (`expiresAt`, `createdAt`, `mfaGraceUntil`), so a
+ * type this can't even attempt to coerce (an object, a boolean, ...) means the mock has drifted
+ * from the service and should fail the test rather than silently compare as NaN and turn a whole
+ * class of filter into a no-op.
+ *
+ * A string is the one exception: `enforce`'s malformed-stamp guard (`Number.isNaN(new
+ * Date(row.mfaGraceUntil).getTime())`) exists specifically for a hand-edited or corrupted
+ * `mfaGraceUntil` column, and `lockAccount`'s own `$lte` check runs unconditionally regardless of
+ * whether that value parses. Coercing via `new Date(...)` and letting an unparseable string come
+ * back `NaN` -- rather than throwing -- lets every ordering operator below fail closed on it
+ * (`NaN` compares false against anything), exactly mirroring a real `$lte` against a value the
+ * database itself could not read as a date.
  */
 const asComparable = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
   if (typeof value === 'number') return value;
+  if (typeof value === 'string') return new Date(value).getTime();
   throw new Error(`Unsupported comparison value in mock: ${String(value)}`);
 };
 
 /**
- * A minimal `strapi.db.query` where-clause evaluator: plain equality, `null`, plus the
- * `$gt`/`$gte`/`$lt`/`$lte` operators the challenge and event queries use. Unknown operators
- * throw, so a filter the mock cannot honour can never be mistaken for one that matched nothing.
+ * A minimal `strapi.db.query` where-clause evaluator. Understands, at the top level: `$or`/`$and`
+ * (logical combinators over nested `where` fragments), plain equality, and a bare `null`/
+ * `undefined` condition (shorthand for "column is null"). Inside a per-field condition object it
+ * understands `$in`/`$notIn` (membership, both sides compared with `String()`), `$ne`
+ * (inequality), `$notNull`/`$null` (presence -- `admin::role`'s `mfaRequired` scan and cycle 2's
+ * enforcement queries), and the four ordering operators `$gt`/`$gte`/`$lt`/`$lte` (the challenge
+ * and event queries, plus `lockAccount`'s `mfaGraceUntil` check) -- which fail closed (`false`,
+ * never a thrown comparison) against a null/undefined column, mirroring how SQL treats a `NULL`
+ * on either side of an ordering or `NOT IN` comparison. Unknown operators throw, so a filter the
+ * mock cannot honour can never be mistaken for one that matched nothing.
  */
 const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknown> = {}): boolean =>
   Object.entries(where).every(([field, condition]) => {
@@ -193,9 +210,10 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
 
     if (typeof condition === 'object' && !(condition instanceof Date)) {
       return Object.entries(condition as Record<string, unknown>).every(([operator, value]) => {
-        // `$in`/`$ne`'s `value` isn't a single orderable bound (an array, or the excluded value
-        // itself), so both must be handled before `asComparable` -- which every other operator
-        // here relies on -- ever sees them.
+        // `$notNull`/`$null`/`$notIn`/`$in`/`$ne` all take a `value` that isn't a single
+        // orderable bound (a boolean, an array, or the excluded value itself), so every one of
+        // them has to be handled before `asComparable` -- which only the ordering operators below
+        // rely on -- ever sees it.
         if (operator === '$notNull') {
           const present = row[field] !== null && row[field] !== undefined;
           return value ? present : !present;
@@ -205,6 +223,12 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
           return value ? absent : !absent;
         }
         if (operator === '$notIn') {
+          // SQL's `NOT IN` against a `NULL` column is `UNKNOWN`, which a `WHERE` clause treats as
+          // excluding the row -- not matching it -- so a null/undefined column must fail closed
+          // here too, the same as the ordering operators just below.
+          if (row[field] === null || row[field] === undefined) {
+            return false;
+          }
           return !(value as unknown[]).some(
             (candidate) => String(candidate) === String(row[field])
           );
@@ -243,6 +267,25 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
 
     return String(row[field]) === String(condition);
   });
+
+/**
+ * Pins `matchesWhere`'s own SQL fidelity directly, rather than only through whichever service
+ * call happens to route through it: a null/undefined column must fail closed against `$notIn` and
+ * every ordering operator, exactly as a real `NOT IN`/`<=` comparison against `NULL` excludes the
+ * row instead of matching it. Task 7 runs `updateMany` with `$notIn` on roles through this same
+ * fixture, so a regression here would otherwise only surface there, several tasks later.
+ */
+describe('matchesWhere fixture', () => {
+  test('$notIn on a null column is false, not true', () => {
+    expect(matchesWhere({ roleId: null }, { roleId: { $notIn: [1, 2] } })).toBe(false);
+  });
+
+  test('$lte on a null column is false, not true', () => {
+    expect(matchesWhere({ mfaGraceUntil: null }, { mfaGraceUntil: { $lte: new Date() } })).toBe(
+      false
+    );
+  });
+});
 
 /**
  * A knex-shaped builder for the challenge table, backed by the same live `rows` array
@@ -463,12 +506,6 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     updateMany: jest.Mock;
     load?: jest.Mock;
   } = {
-    // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
-    // subsequent write elsewhere must not retroactively change what an in-flight read already
-    // observed. Spreading into a new object is what makes a read-then-write mutant in
-    // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
-    // returning the stored object directly let two racing reads silently share one mutable
-    // object and see each other's write, masking the exact bug Finding 1 exists to catch.
     // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
     // subsequent write elsewhere must not retroactively change what an in-flight read already
     // observed. Spreading into a new object is what makes a read-then-write mutant in
@@ -2689,7 +2726,12 @@ describe('mfa service: enforce', () => {
   const DAY = 24 * 60 * 60 * 1000;
 
   const setup = (
-    options: { stored?: unknown; enabled?: boolean; user?: Record<string, unknown> } = {}
+    options: {
+      stored?: unknown;
+      enabled?: boolean;
+      user?: Record<string, unknown>;
+      hasOrigin?: boolean;
+    } = {}
   ) => {
     const storeGet = jest.fn(async ({ key }: { key: string }) =>
       key === 'security-settings' ? (options.stored ?? { mfa: { mode: 'required' } }) : null
@@ -2698,7 +2740,7 @@ describe('mfa service: enforce', () => {
     const sessionManager = Object.assign(
       jest.fn(() => ({ invalidateRefreshToken })),
       {
-        hasOrigin: jest.fn(() => true),
+        hasOrigin: jest.fn(() => options.hasOrigin ?? true),
       }
     );
     const fixture = buildMfaFixture({
@@ -2743,6 +2785,17 @@ describe('mfa service: enforce', () => {
     await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
     expect(users.get('1')!.mfaGraceUntil).toBeNull();
     expect(users.get('1')!.mfaLockedAt).toBeNull();
+  });
+
+  test('not required in optional mode, nothing stamped: none, and no UPDATE is even attempted', async () => {
+    const { service, userMocks } = setup({ stored: { mfa: { mode: 'optional' } } });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'none' });
+    // Pins the `if (row.mfaGraceUntil || row.mfaLockedAt)` guard in front of
+    // `clearEnforcementStamps`: without it, every optional-mode login would fire a write, and this
+    // is the one test that would catch deleting the guard -- every other "not required" case here
+    // already has a stamp to clear.
+    expect(userMocks.updateMany).not.toHaveBeenCalled();
   });
 
   test('enrolled: nothing, whatever is stamped', async () => {
@@ -2803,6 +2856,20 @@ describe('mfa service: enforce', () => {
     expect((strapi as any).eventHub.emit).toHaveBeenCalledWith('admin.mfa.locked', { userId: '1' });
   });
 
+  test('required, grace expired, admin session origin unregistered: still locks, warns instead of invalidating', async () => {
+    const graceUntil = new Date(Date.now() - 1000);
+    const { service, users, invalidateRefreshToken, strapi } = setup({
+      user: { mfaGraceUntil: graceUntil },
+      hasOrigin: false,
+    });
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
+
+    expect(users.get('1')!.mfaLockedAt).toBeInstanceOf(Date);
+    expect(invalidateRefreshToken).not.toHaveBeenCalled();
+    expect((strapi as any).log.warn).toHaveBeenCalledWith(expect.stringContaining('admin user 1'));
+  });
+
   test('required, already locked: refused, no second lock event, no second invalidation', async () => {
     const { service, events, invalidateRefreshToken } = setup({
       user: { mfaGraceUntil: new Date(Date.now() - DAY), mfaLockedAt: new Date(Date.now() - DAY) },
@@ -2845,5 +2912,32 @@ describe('mfa service: enforce', () => {
     expect(users.get('1')!.mfaLockedAt).toBeNull();
     // The re-read sees a required, unenrolled user with no grace: a fresh window starts.
     expect(result.outcome).toBe('grace');
+  });
+
+  test('a malformed grace stamp fails closed: locks (once), warns, no grace that never ends', async () => {
+    const { service, users, events, strapi } = setup({
+      user: { mfaGraceUntil: 'not-a-date' },
+    });
+
+    const result = await service.enforce({ id: 1 });
+
+    expect(result).toEqual({ outcome: 'refused' });
+    expect(users.get('1')!.mfaLockedAt).toBeInstanceOf(Date);
+    expect(events).toEqual([
+      expect.objectContaining({ type: 'locked', metadata: { graceUntil: undefined } }),
+    ]);
+    // A single attempt, not the two a retry would cost: the equality-based lock precondition
+    // (see `lockAccount`) matches the malformed value on the first try, so there is nothing to
+    // retry and nothing left to warn about a second time.
+    expect((strapi as any).log.warn).toHaveBeenCalledTimes(1);
+    expect((strapi as any).log.warn).toHaveBeenCalledWith(expect.stringContaining('admin user 1'));
+  });
+
+  test('two lost races in a row on a required user with no grace fail closed rather than loop', async () => {
+    const { service, userMocks } = setup();
+    userMocks.updateMany = jest.fn(async () => ({ count: 0 }));
+
+    await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
+    expect(userMocks.updateMany).toHaveBeenCalledTimes(2);
   });
 });
