@@ -231,6 +231,15 @@ const sanitizeUser = (user: any) => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      // Same private MFA columns the CE sanitizer strips (`server/src/services/user.ts`). This
+      // local copy feeds the `user.update` / `user.delete` event payloads that EE audit logs
+      // persist, so a miss here writes TOTP ciphertext into the audit table.
+      'mfaSecret',
+      'mfaEnabledAt',
+      'mfaLastUsedStep',
+      'mfaPendingSecret',
+      'mfaGraceUntil',
+      'mfaLockedAt',
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

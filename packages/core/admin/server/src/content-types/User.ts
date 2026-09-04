@@ -82,6 +82,24 @@ export default {
       private: true,
       searchable: false,
     },
+    mfaPendingSecret: {
+      type: 'string',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
+    mfaGraceUntil: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
+    mfaLockedAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     registrationToken: {
       type: 'string',
       configurable: false,

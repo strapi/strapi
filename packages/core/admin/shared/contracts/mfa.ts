@@ -107,7 +107,16 @@ export declare namespace Disable {
  */
 export interface MfaEventNotice {
   id: Data.ID;
-  type: 'enabled' | 'disabled' | 'reset' | 'challenge_failed' | 'recovery_code_used';
+  type:
+    | 'enabled'
+    | 'disabled'
+    | 'reset'
+    | 'challenge_failed'
+    | 'recovery_code_used'
+    | 'grace_started'
+    | 'locked'
+    | 'unlocked'
+    | 'authenticator_replaced';
   metadata: Record<string, unknown>;
   createdAt: string;
   seenAt: string | null;

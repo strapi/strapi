@@ -39,6 +39,23 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
     id: 'Settings.profile.form.section.mfa.notice.recovery_code_used',
     defaultMessage: 'A recovery code was used to log in',
   },
+  grace_started: {
+    id: 'Settings.profile.form.section.mfa.notice.grace_started',
+    defaultMessage: 'Two-factor authentication is now required for your account',
+  },
+  locked: {
+    id: 'Settings.profile.form.section.mfa.notice.locked',
+    defaultMessage:
+      'Your account was locked because two-factor authentication was not set up in time',
+  },
+  unlocked: {
+    id: 'Settings.profile.form.section.mfa.notice.unlocked',
+    defaultMessage: 'Your account was unlocked by an administrator',
+  },
+  authenticator_replaced: {
+    id: 'Settings.profile.form.section.mfa.notice.authenticator_replaced',
+    defaultMessage: 'Your authenticator app was replaced',
+  },
 };
 
 /**

@@ -3,6 +3,7 @@ import challenge from '../mfa-challenge';
 import recoveryCode from '../mfa-recovery-code';
 import event from '../mfa-event';
 import User from '../User';
+import roleContentType from '../Role';
 
 const schemas = { challenge, recoveryCode, event };
 
@@ -65,5 +66,37 @@ describe('mfa content types', () => {
 
   test('mfa columns are hidden in the user config, like the reset token', () => {
     expect(User.config.attributes.mfaSecret.hidden).toBe(true);
+  });
+
+  describe('cycle 2 enforcement columns', () => {
+    test('admin::user declares the three enforcement columns as private datetimes/strings', () => {
+      const { attributes } = User;
+      expect(attributes.mfaPendingSecret).toEqual({
+        type: 'string',
+        configurable: false,
+        private: true,
+        searchable: false,
+      });
+      expect(attributes.mfaGraceUntil).toEqual({
+        type: 'datetime',
+        configurable: false,
+        private: true,
+        searchable: false,
+      });
+      expect(attributes.mfaLockedAt).toEqual({
+        type: 'datetime',
+        configurable: false,
+        private: true,
+        searchable: false,
+      });
+    });
+
+    test('admin::role declares mfaRequired as a non-configurable boolean defaulting to false', () => {
+      expect(roleContentType.attributes.mfaRequired).toEqual({
+        type: 'boolean',
+        default: false,
+        configurable: false,
+      });
+    });
   });
 });

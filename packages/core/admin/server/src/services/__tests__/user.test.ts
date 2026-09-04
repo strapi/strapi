@@ -60,7 +60,7 @@ describe('User', () => {
       });
     });
 
-    test('Removes the MFA columns (mfaSecret, mfaEnabledAt, mfaLastUsedStep)', () => {
+    test('Removes every MFA column, cycle 1 and cycle 2 alike', () => {
       const res = sanitizeUser({
         id: 1,
         firstname: 'Test',
@@ -70,6 +70,9 @@ describe('User', () => {
         mfaSecret: 'encrypted-secret-ciphertext',
         mfaEnabledAt: '2026-01-01T00:00:00.000Z',
         mfaLastUsedStep: 12345,
+        mfaPendingSecret: 'encrypted-pending-ciphertext',
+        mfaGraceUntil: '2026-09-11T00:00:00.000Z',
+        mfaLockedAt: '2026-09-12T00:00:00.000Z',
         roles: [],
       } as any);
 
@@ -79,9 +82,16 @@ describe('User', () => {
         otherField: 'Hello',
         roles: [],
       });
-      expect(res).not.toHaveProperty('mfaSecret');
-      expect(res).not.toHaveProperty('mfaEnabledAt');
-      expect(res).not.toHaveProperty('mfaLastUsedStep');
+      for (const column of [
+        'mfaSecret',
+        'mfaEnabledAt',
+        'mfaLastUsedStep',
+        'mfaPendingSecret',
+        'mfaGraceUntil',
+        'mfaLockedAt',
+      ]) {
+        expect(res).not.toHaveProperty(column);
+      }
     });
   });
 

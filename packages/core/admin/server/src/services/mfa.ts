@@ -61,14 +61,18 @@ export type MfaEventType =
   | 'reset'
   | 'challenge_failed'
   | 'recovery_code_used'
-  | 'recovery_codes_issued';
+  | 'recovery_codes_issued'
+  | 'grace_started'
+  | 'locked'
+  | 'unlocked'
+  | 'authenticator_replaced';
 
 /**
  * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
  * actually returns (`loginAt`, and `deviceName` when the user-agent maps to one; see
  * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI reset (Task 12) marks
- * an event it recorded outside any HTTP request. None of the three can ever be a code, a secret or
- * an otpauth URI.
+ * an event it recorded outside any HTTP request. None of these can ever be a code, a secret or an
+ * otpauth URI.
  *
  * This only turns an undeclared field into a compile error for an object literal passed directly
  * to `recordEvent` -- every field below is optional, so a `Record<string, unknown>` value (exactly
@@ -80,6 +84,10 @@ export type MfaEventMetadata = {
   loginAt?: string;
   deviceName?: string;
   via?: 'cli';
+  /** ISO deadline carried by `grace_started` and `locked`. Never a secret. */
+  graceUntil?: string;
+  /** The administrator who unlocked the account (`unlocked` only). */
+  byUserId?: string;
 };
 
 /**

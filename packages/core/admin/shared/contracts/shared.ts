@@ -39,6 +39,12 @@ export interface AdminUser extends Entity {
   mfaSecret?: string | null;
   mfaEnabledAt?: string | Date | null;
   mfaLastUsedStep?: number | null;
+  // Cycle 2 (enforcement). `mfaPendingSecret` is ciphertext for a not-yet-verified enrolment;
+  // `mfaGraceUntil` / `mfaLockedAt` are the enforcement stamps. All three are private and are
+  // exposed only by `GET /admin/users/:id` to callers holding `admin::users.update`.
+  mfaPendingSecret?: string | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
 }
 
 export type AdminUserCreationPayload = Omit<
@@ -61,6 +67,9 @@ export type SanitizedAdminUser = Omit<
   | 'mfaSecret'
   | 'mfaEnabledAt'
   | 'mfaLastUsedStep'
+  | 'mfaPendingSecret'
+  | 'mfaGraceUntil'
+  | 'mfaLockedAt'
 > & {
   roles: SanitizedAdminRole[];
 };
@@ -73,6 +82,7 @@ export interface AdminRole extends Entity {
   name: string;
   code: string;
   description?: string;
+  mfaRequired?: boolean | null;
   users: AdminUser[];
   permissions: Permission[];
 }
