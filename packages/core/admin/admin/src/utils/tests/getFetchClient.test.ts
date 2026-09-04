@@ -1,5 +1,6 @@
 import {
   getFetchClient,
+  resetSessionExpiredNotification,
   setOnSessionExpired,
   setOnTokenUpdate,
   triggerSessionExpired,
@@ -597,16 +598,35 @@ describe('getFetchClient', () => {
       const callback = jest.fn();
       setOnSessionExpired(callback);
 
-      triggerSessionExpired();
-
+      expect(triggerSessionExpired()).toBe(true);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    it('should be a no-op when no callback is registered', () => {
+    it('should invoke the callback only once for a single dead session', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      expect(triggerSessionExpired()).toBe(true);
+      expect(triggerSessionExpired()).toBe(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should invoke the callback again after the session is re-armed', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired();
+      resetSessionExpiredNotification();
+      triggerSessionExpired();
+
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('should report that nothing handled the expiry when no callback is registered', () => {
       // Explicit clear in case any prior test left one set.
       setOnSessionExpired(null);
 
-      expect(() => triggerSessionExpired()).not.toThrow();
+      expect(triggerSessionExpired()).toBe(false);
     });
 
     it('should clear the callback when set to null', () => {

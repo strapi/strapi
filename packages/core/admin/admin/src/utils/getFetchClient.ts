@@ -43,6 +43,14 @@ let onTokenUpdate: ((token: string) => void) | null = null;
 let onSessionExpired: (() => void) | null = null;
 
 /**
+ * A 401 after a failed refresh is delivered twice in the common RTK path
+ * (baseQuery, then the store middleware). Concurrent in-flight queries can
+ * add more. Fire the React handler once per dead session; re-arm when a new
+ * token is stored (refresh or login).
+ */
+let sessionExpiredNotified = false;
+
+/**
  * Set the callback that will be called when the token is refreshed.
  * This allows the React layer to update Redux state when a token refresh occurs.
  *
@@ -60,22 +68,46 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
 
 /**
  * Set the callback that will be called when the active session is no longer
- * valid (refresh token rejected by the server, or detected idle on the
- * client). This lets the active tab redirect to /auth/login without waiting
- * for the next user-initiated request to fail.
+ * valid — i.e. the server rejected the refresh token, not merely that the
+ * short-lived access token expired. This lets the tab redirect to /auth/login
+ * (after any unsaved-changes guard) rather than sitting on a dead session.
  *
  * @param callback - Function to call when the session ends, or null to clear
  */
 const setOnSessionExpired = (callback: (() => void) | null): void => {
   onSessionExpired = callback;
+  if (callback === null) {
+    resetSessionExpiredNotification();
+  }
+};
+
+/**
+ * Re-arm session-expired notifications after a new access token is stored
+ * (silent refresh) or after a successful login.
+ */
+const resetSessionExpiredNotification = (): void => {
+  sessionExpiredNotified = false;
 };
 
 /**
  * Trigger the registered session-expired callback, if any. Safe to call from
- * non-React code (e.g., the RTK Query baseQuery 401 handler).
+ * non-React code (e.g., the RTK Query baseQuery 401 handler). Returns `false`
+ * when nothing is listening, so callers can fall back to a hard redirect
+ * instead of leaving the user on a dead page. Subsequent calls during the same
+ * dead session return `true` without invoking the handler again.
  */
-const triggerSessionExpired = (): void => {
-  onSessionExpired?.();
+const triggerSessionExpired = (): boolean => {
+  if (!onSessionExpired) {
+    return false;
+  }
+
+  if (sessionExpiredNotified) {
+    return true;
+  }
+
+  sessionExpiredNotified = true;
+  onSessionExpired();
+  return true;
 };
 
 /**
@@ -96,6 +128,8 @@ const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.tes
  * @internal Exported for testing purposes
  */
 const storeToken = (token: string): void => {
+  resetSessionExpiredNotification();
+
   // Check if the original token was stored in localStorage (persist mode)
   const wasPersistedToLocalStorage = Boolean(localStorage.getItem(STORAGE_KEYS.TOKEN));
 
@@ -551,5 +585,6 @@ export {
   setOnTokenUpdate,
   setOnSessionExpired,
   triggerSessionExpired,
+  resetSessionExpiredNotification,
 };
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
