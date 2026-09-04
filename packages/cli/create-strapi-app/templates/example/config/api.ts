@@ -1,6 +1,6 @@
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
-const config: Core.Config.Api = {
+export default factories.defineApiConfig({
   rest: {
     defaultLimit: 25,
     maxLimit: 100,
@@ -11,6 +11,4 @@ const config: Core.Config.Api = {
     strictParams: true,
     strictRelations: true,
   },
-};
-
-export default config;
+});
