@@ -10,7 +10,7 @@ import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { flushSync } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -216,10 +216,27 @@ interface BlocksEditorProps
     BlocksContentProps {
   disabled?: boolean;
   name: string;
+  /** When true, sync form state on every keystroke (Live Preview popover). */
+  livePreviewSync?: boolean;
+  /** Index of the block that was double-clicked in the live preview. When provided,
+   *  the editor positions the Slate cursor at that block on mount instead of using autoFocus. */
+  blockIndex?: number | null;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
+  (
+    {
+      disabled = false,
+      name,
+      onChange,
+      value,
+      error,
+      livePreviewSync = false,
+      blockIndex,
+      ...contentProps
+    },
+    forwardedRef
+  ) => {
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
@@ -296,12 +313,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * the editor, wiping the pending input (blocks e2e flake).
            */
           incrementSlateUpdatesCount();
+          if (livePreviewSync) {
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            return;
+          }
 
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
-          // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
@@ -309,7 +329,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           }, 300);
         }
       },
-      [editor, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, livePreviewSync, name, onChange]
     );
 
     // Clean up the timeout on unmount
@@ -320,6 +340,54 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         }
       };
     }, []);
+
+    // When opened from a live-preview double-click, position the cursor at the clicked block
+    React.useEffect(() => {
+      if (blockIndex == null) return;
+
+      const targetIndex = Math.min(blockIndex, editor.children.length - 1);
+
+      try {
+        Transforms.select(editor, Editor.start(editor, [targetIndex]));
+      } catch {
+        // Slate tree not yet ready; skip cursor positioning and scroll
+        return;
+      }
+      try {
+        ReactEditor.focus(editor);
+      } catch {
+        // non-fatal — editor DOM not yet committed
+      }
+
+      // Defer scroll past the re-render triggered by Transforms.select above.
+      // Slate's handleScrollSelectionIntoView runs as a layout effect during
+      // that re-render; our rAF fires after it, letting us override the position.
+      const raf = requestAnimationFrame(() => {
+        try {
+          const blockNode = Node.get(editor, [targetIndex]);
+          const domEl = ReactEditor.toDOMNode(editor, blockNode as Element);
+          // Walk to BlocksContent's scroll container via the Slate editor root,
+          // bypassing scrollIntoView which can target overflow:hidden ancestors.
+          const editorDomEl = domEl.closest('[data-slate-editor]');
+          const scrollContainer = editorDomEl?.parentElement as HTMLElement | null;
+          if (scrollContainer) {
+            const blockRect = domEl.getBoundingClientRect();
+            const containerRect = scrollContainer.getBoundingClientRect();
+            // 24px = BlocksContent paddingTop={6} (design-system 4px scale)
+            scrollContainer.scrollTop =
+              blockRect.top - containerRect.top + scrollContainer.scrollTop - 24;
+          } else {
+            domEl.scrollIntoView({ block: 'start' });
+          }
+        } catch (_) {
+          // scroll errors are non-fatal; the cursor is already positioned
+        }
+      });
+
+      return () => cancelAnimationFrame(raf);
+      // `key` is included so that if useResetKey remounts the Slate editor (clearing
+      // editor.selection to null), this effect re-runs and restores the cursor position.
+    }, [blockIndex, editor, key]);
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
@@ -374,6 +442,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               disabled={disabled}
               onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
+              livePreviewSync={livePreviewSync}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
