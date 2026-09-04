@@ -23,7 +23,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Destination');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
 
@@ -40,7 +40,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Grid Destination');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
 
@@ -56,9 +56,9 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Target Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.createFolder('Movable Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToFolder('Movable Folder', 'Target Folder', 'table', 'folder');
@@ -72,9 +72,9 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Grid Target');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.createFolder('Grid Movable');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('Grid Movable', 'Grid Target', 'grid', 'folder');
@@ -88,7 +88,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Self Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToTableView();
       await assetsPage.dragFolderToSelf('Self Folder', 'table');
@@ -102,7 +102,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Toast Target');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
 
