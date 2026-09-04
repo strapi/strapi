@@ -18,6 +18,7 @@ import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
 import createMfaService from './mfa';
+import { createSecuritySettingsService } from './security-settings';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
@@ -55,4 +56,7 @@ export default {
       encryption,
       auth: { validatePassword: auth.validatePassword, hashPassword: auth.hashPassword },
     }),
+  // Factory, same reasoning as `mfa` above: it takes `strapi` explicitly.
+  'security-settings': ({ strapi }: { strapi: Core.Strapi }) =>
+    createSecuritySettingsService({ strapi }),
 };

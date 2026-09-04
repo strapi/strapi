@@ -14,6 +14,7 @@ import user from './user';
 import webhooks from './webhooks';
 import contentApi from './content-api';
 import homepage from './homepage';
+import securitySettings from './security-settings';
 import ai from '../ai/controllers/ai';
 
 export default {
@@ -31,5 +32,6 @@ export default {
   webhooks,
   'content-api': contentApi,
   homepage,
+  'security-settings': securitySettings,
   ai,
 };

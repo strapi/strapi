@@ -25,7 +25,7 @@ import type {
  * The flag is checked per request, not cached, so toggling it does not require a route rebuild:
  * flag off means no route below responds at all, matching every other MFA endpoint.
  */
-const requireEnabled = (ctx: Context) => {
+export const requireEnabled = (ctx: Context) => {
   const mfa = getService('mfa');
   if (!mfa.isEnabled()) {
     ctx.notFound();
