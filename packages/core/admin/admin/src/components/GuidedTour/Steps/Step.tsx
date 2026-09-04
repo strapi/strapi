@@ -251,20 +251,20 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const { formatMessage } = useIntl();
     let content = '';
     if (!('children' in props)) {
-      content = formatMessage({
-        id: props.id,
-        defaultMessage: props.defaultMessage,
-      });
+      // Use FormattedMessage for safe rendering (avoids dangerouslySetInnerHTML / XSS)
+      return (
+        <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
+          <ContentContainer>
+            <Typography tag="div" variant="omega">
+              <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} values={props.values} />
+            </Typography>
+          </ContentContainer>
+        </Box>
+      );
     }
     return (
       <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
-        {'children' in props ? (
-          props.children
-        ) : (
-          <ContentContainer>
-            <Typography tag="div" variant="omega" dangerouslySetInnerHTML={{ __html: content }} />
-          </ContentContainer>
-        )}
+        {props.children}
       </Box>
     );
   },
