@@ -20,14 +20,17 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const { folder, _q, ...paramsExceptFolderAndQ } = query;
+  const { folder, _q, sort, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
+
+  const folderSort = sort?.includes('size') ? 'name:ASC' : sort;
 
   let params: Query;
 
   if (_q) {
     params = {
       ...paramsExceptFolderAndQ,
+      sort: folderSort,
       pagination: {
         pageSize: -1,
       },
@@ -36,6 +39,7 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
   } else {
     params = {
       ...paramsExceptFolderAndQ,
+      sort: folderSort,
       pagination: {
         pageSize: -1,
       },

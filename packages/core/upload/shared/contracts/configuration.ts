@@ -8,7 +8,7 @@ import type { Utils } from '@strapi/types';
 
 type SortOrder = 'ASC' | 'DESC';
 
-type SortKey = 'createdAt' | 'name' | 'updatedAt';
+type SortKey = 'createdAt' | 'name' | 'updatedAt' | 'size';
 
 export interface Configuration {
   pageSize: number;
