@@ -374,4 +374,76 @@ describe('Content API Controller - find / findPage', () => {
       expect(mockUploadService.replace).not.toHaveBeenCalled();
     });
   });
+
+  describe('findOne (GET /files/:id)', () => {
+    it('resolves a file by numeric id', async () => {
+      const file = { id: 1, name: 'a.png', url: '/uploads/a.png' };
+      mockContext.params = { id: '1' } as any;
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockUploadService.findOne).toHaveBeenCalledWith('1', undefined);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('resolves a file by documentId (regression for #24037)', async () => {
+      const documentId = 'qovkpekciob2wt8qyd51mg8k';
+      const file = { id: 1, documentId, name: 'a.png', url: '/uploads/a.png' };
+      mockContext.params = { id: documentId } as any;
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(documentId, undefined);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('returns notFound when the file does not exist', async () => {
+      mockContext.params = { id: 'qovkpekciob2wt8qyd51mg8k' } as any;
+      mockUploadService.findOne.mockResolvedValue(null);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockContext.notFound).toHaveBeenCalledWith('file.notFound');
+    });
+  });
+
+  describe('destroy (DELETE /files/:id)', () => {
+    it('deletes a file by numeric id', async () => {
+      const file = { id: 1, name: 'a.png', url: '/uploads/a.png', provider: 'local' };
+      mockContext.params = { id: '1' } as any;
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockUploadService.findOne).toHaveBeenCalledWith('1');
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('deletes a file by documentId (regression for #24037)', async () => {
+      const documentId = 'qovkpekciob2wt8qyd51mg8k';
+      const file = { id: 1, documentId, name: 'a.png', url: '/uploads/a.png', provider: 'local' };
+      mockContext.params = { id: documentId } as any;
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(documentId);
+      // remove receives the resolved file, so the underlying delete keys off the numeric id
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('returns notFound and does not remove when the file does not exist', async () => {
+      mockContext.params = { id: 'qovkpekciob2wt8qyd51mg8k' } as any;
+      mockUploadService.findOne.mockResolvedValue(null);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockContext.notFound).toHaveBeenCalledWith('file.notFound');
+      expect(mockUploadService.remove).not.toHaveBeenCalled();
+    });
+  });
 });
