@@ -59,6 +59,7 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     // Regression of #24890 / Mathilde review on #27184: shared fields must NOT show
     // a Globe / "common to all locales" icon on the default locale.
     await expect(page.getByText(/This value is common to all locales/i)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Edit shared fields' })).toHaveCount(0);
 
     // Create a Spanish translation
     await page.getByRole('combobox', { name: 'Locales' }).click();
@@ -103,6 +104,28 @@ test.describe('Lock non-localized fields on secondary locales', () => {
         name: 'This value is common to all locales. Edit it in the default locale.',
       })
     ).toBeVisible();
+
+    // Canceling the unlock warning leaves shared fields locked
+    await page.getByRole('button', { name: 'Edit shared fields' }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Edit fields common to all locales?' })
+    ).toBeVisible();
+    await expect(page.getByText(/Saving changes will update English \(en\)/i)).toBeVisible();
+    await page.getByRole('button', { name: 'No, cancel' }).click();
+    await expect(isAvailable).toBeDisabled();
+
+    // Accepting the warning unlocks shared fields for this locale until the editor leaves
+    await page.getByRole('button', { name: 'Edit shared fields' }).click();
+    await page.getByRole('button', { name: 'Yes, edit shared fields' }).click();
+    await expect(isAvailable).not.toBeDisabled();
+    await isAvailableLabelAction.hover();
+    await expect(
+      page.getByRole('tooltip', {
+        name: 'This value is common to all locales. Saving will update every locale.',
+      })
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Keep shared fields locked' }).click();
+    await expect(isAvailable).toBeDisabled();
 
     // Saving only the localized field must not wipe the default-locale shared value
     await nameField.fill('Camiseta Nike Masculina 23/24');

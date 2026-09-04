@@ -1,5 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useI18nSharedFieldsLock } from '@strapi/content-manager/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth, Lock } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -150,6 +151,10 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
 const NonLocalizedLabelAction = () => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { data: locales = [] } = useGetLocalesQuery();
+  const isUnlocked = useI18nSharedFieldsLock(
+    'NonLocalizedLabelAction',
+    (state) => state.isUnlocked
+  );
 
   const currentLocale = query?.plugins?.i18n?.locale;
   const defaultLocale = Array.isArray(locales)
@@ -158,15 +163,19 @@ const NonLocalizedLabelAction = () => {
   const locked = Boolean(currentLocale && defaultLocale && currentLocale !== defaultLocale);
 
   // Default locale: no icon on shared fields (regression of #24890 if we show Earth).
-  // Secondary locale: Lock + tooltip pointing editors at the default locale.
   if (!locked) {
     return null;
   }
 
-  const title: MessageDescriptor = {
-    id: getTranslation('Field.not-localized-locked'),
-    defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
-  };
+  const title: MessageDescriptor = isUnlocked
+    ? {
+        id: getTranslation('Field.not-localized-unlocked'),
+        defaultMessage: 'This value is common to all locales. Saving will update every locale.',
+      }
+    : {
+        id: getTranslation('Field.not-localized-locked'),
+        defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
+      };
 
   return <LabelAction title={title} icon="lock" />;
 };
