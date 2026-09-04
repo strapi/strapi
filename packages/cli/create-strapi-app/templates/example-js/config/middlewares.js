@@ -1,4 +1,8 @@
-module.exports = [
+'use strict';
+
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.defineMiddlewaresConfig([
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
@@ -9,4 +13,4 @@ module.exports = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
-];
+]);
