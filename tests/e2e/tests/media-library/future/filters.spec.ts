@@ -23,7 +23,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.createFolder('a-folder');
     await assetsPage.waitForNotification();
     await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     // Type is Picture: the image stays, the folder section disappears.
@@ -46,7 +46,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     // Just-uploaded asset is within the last week → visible.
@@ -77,7 +77,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
 
     await assetsPage.pickFilterOption('Creation date', '1 week ago');
     await expect(page).toHaveURL(/filters=/);

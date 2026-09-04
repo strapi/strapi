@@ -26,7 +26,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker([FIXTURE_IMAGE_1, FIXTURE_IMAGE_2]);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     // Default state advertised on the trigger.
@@ -54,7 +54,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.createFolder('test-image-15');
     await assetsPage.waitForNotification();
     await assetsPage.uploadFilesWithFilePicker([FIXTURE_IMAGE_1, FIXTURE_IMAGE_2]);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     await assetsPage.pickSortOption('A to Z');
@@ -76,7 +76,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
 
     await assetsPage.pickSortOption('Oldest uploads');
     await expect(page).toHaveURL(/sort=createdAt%3AASC|sort=createdAt:ASC/);

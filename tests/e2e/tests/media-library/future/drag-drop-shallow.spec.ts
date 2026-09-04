@@ -25,7 +25,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolder('Destination');
       await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Destination', 'table');
@@ -42,7 +42,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolder('Grid Destination');
       await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Grid Destination', 'grid');
@@ -104,7 +104,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolder('Toast Target');
       await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Toast Target', 'grid');

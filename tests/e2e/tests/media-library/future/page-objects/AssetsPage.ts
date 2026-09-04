@@ -129,7 +129,7 @@ export class AssetsPage {
   }
 
   /**
-   * Wait for an upload to report success.
+   * Wait for an upload to report success, then dismiss the progress dialog.
    *
    * The beta Media Library reports upload completion in the progress dialog — the
    * legacy library's success toast is gone, and nothing in the beta upload flow
@@ -138,10 +138,12 @@ export class AssetsPage {
    * written against a toast and expect feedback that clears itself; left open it
    * swallows their next click.
    *
-   * For actions that DO raise a toast — folder creation, delete, move, crop — use
-   * `waitForNotification()` instead.
+   * Named for the state change, not the wait: this dismisses the dialog as well as
+   * waiting on it. Use `waitForUploadProgressSuccess()` when you want the wait
+   * alone, and `waitForNotification()` for actions that DO raise a toast — folder
+   * creation, delete, move, crop.
    */
-  async waitForUploadSuccess() {
+  async completeUpload() {
     await this.waitForUploadProgressSuccess();
     await this.closeUploadProgressDialog();
   }
