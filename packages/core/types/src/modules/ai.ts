@@ -42,10 +42,13 @@ export type AiAdminService = {
   }>;
   // TODO with this, did we just allow anyone registering their own provider? effectively bypassing byok plugin?
   registerProvider: AiProvidersRegistry['register'];
+  // TODO this should not be exposed in core, this is an i18n plugin feature
+  //   for fix inspiration, check how the "AI loader icon" is added to the admin UI if that's a plugin feature
   generateLocalizations: AiProvider['generateLocalizations'];
 };
 
 export interface AiProvidersRegistry {
+  isEnabled: () => boolean;
   register: (provider: AiProvider) => void;
   get: () => AiProvider;
 }

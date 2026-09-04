@@ -138,7 +138,6 @@ const mergeUnsupportedFields = async (
 };
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
-  // TODO: add a helper function to get the AI server URL
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   return {
@@ -325,8 +324,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale: document.locale,
         populate: deepPopulate,
       });
-
-      console.log('aiResult', JSON.stringify(aiResult, null, 2));
 
       const results = await Promise.allSettled(
         aiResult.localizations.map(async (localization) => {

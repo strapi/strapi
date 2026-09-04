@@ -36,8 +36,9 @@ module.exports = ({ env }) => ({
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
   },
   // TODO rename cms-ai-byok to cms-byok-ai (also inside the plugin code)
+  // TODO if enabled=true in growth -> double register
   'ai-byok': {
-    enabled: true,
+    enabled: false,
     resolve: '../../node_modules/@strapi-enterprise/plugin-ai-byok',
     config: {
       enabled: env.bool('STRAPI_AI_BYOK_ENABLED', false),

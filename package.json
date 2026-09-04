@@ -214,8 +214,5 @@
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
-  "isStrapiMonorepo": true,
-  "dependencies": {
-    "@strapi-enterprise/plugin-ai-byok": "link:/Users/vfurmane/Documents/repos/strapi-enterprise/packages/plugin-ai-byok"
-  }
+  "isStrapiMonorepo": true
 }

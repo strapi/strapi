@@ -20,21 +20,25 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   >();
 
+  const providersRegistry = createAiProvidersRegistry({ strapi });
+  if (strapi.ee?.features?.isEnabled('cms-ai')) {
+    providersRegistry.register(createStrapiManagedAiProvider({ strapi }));
+  }
+
   // TODO also test when no license at all;
   //  -> I am wondering what happens if you call admin.generateLocalizations(): is it no-op or does it throw, should it be guarded, is it the case?
   //  -> same with EE but byok not configured
   const isEnabled = (): boolean => {
     // TODO is this the place to actually check the license?
     const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
-    const isStrapiManagedAiEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    console.log(strapi.ee?.features?.isEnabled('cms-ai-byok'));
-    console.log(strapi.config.get<boolean>('plugin.ai-byok.enabled', false));
-    const isByokAiEnabled =
-      strapi.ee?.features?.isEnabled('cms-ai-byok') === true &&
-      // TODO why `<boolean>` is needed?
-      // TODO calling a plugin config is not good
-      strapi.config.get<boolean>('plugin.ai-byok.enabled', false) === true;
-    return configEnabled && (isStrapiManagedAiEnabled || isByokAiEnabled);
+    return configEnabled && providersRegistry.isEnabled();
+    // const isStrapiManagedAiEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
+    // const isByokAiEnabled =
+    //   strapi.ee?.features?.isEnabled('cms-ai-byok') === true &&
+    //   // TODO why `<boolean>` is needed?
+    //   // TODO calling a plugin config is not good
+    //   strapi.config.get<boolean>('plugin.ai-byok.enabled', false) === true;
+    // return configEnabled && (isStrapiManagedAiEnabled || isByokAiEnabled);
   };
 
   const getAiFeatureConfig = async () => {
@@ -293,11 +297,6 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
       throw fetchError;
     }
   };
-
-  const providersRegistry = createAiProvidersRegistry();
-  if (strapi.ee?.features?.isEnabled('cms-ai')) {
-    providersRegistry.register(createStrapiManagedAiProvider({ strapi }));
-  }
 
   return {
     isEnabled,

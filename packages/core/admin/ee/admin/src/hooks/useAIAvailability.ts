@@ -1,9 +1,6 @@
 export const useAIAvailability = (): boolean => {
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
-  // TODO do we really need to check license + entitlements when the server returns a boolean for ai.enabled?
-  // const isEE = window.strapi?.isEE;
-  // const isStrapiManagedAiFeatureEnabled = window.strapi.features.isEnabled('cms-ai');
-  // const isByokAiFeatureEnabled = window.strapi.features.isEnabled('cms-ai-byok');
-
-  return isAiEnabled;
+  // TODO the per-feature entitlement (cms-ai / cms-ai-byok) is resolved server-side and
+  // collapsed into ai.enabled. The isEE guard stays because window.strapi.ai defaults to
+  // { enabled: true } and is only corrected once /admin/project-type resolves.
+  return window.strapi?.isEE === true && window.strapi.ai?.enabled === true;
 };
