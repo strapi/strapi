@@ -9401,6 +9401,8 @@ __metadata:
     react-query: "npm:3.39.3"
     react-router-dom: "npm:6.30.4"
     styled-components: "npm:6.4.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.52.0"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
   peerDependencies:
