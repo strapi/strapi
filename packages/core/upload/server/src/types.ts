@@ -1,4 +1,5 @@
 import type { File as FormidableFile } from 'formidable';
+import type { FocalPoint, UploadFile } from '../../shared/contracts/files';
 
 export type InputFile = FormidableFile & {
   path?: string;
@@ -6,43 +7,10 @@ export type InputFile = FormidableFile & {
   provider?: string;
 };
 
-export interface FocalPoint {
-  x: number;
-  y: number;
-}
-
-export interface File {
-  id: number;
-  name: string;
-  alternativeText?: string | null;
-  caption?: string | null;
-  focalPoint?: FocalPoint | null;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
-  hash: string;
-  ext?: string;
-  mime?: string;
-  size?: number;
-  sizeInBytes?: number;
-  url?: string;
-  previewUrl?: string;
-  path?: string | null;
-  provider?: string;
-  provider_metadata?: Record<string, unknown>;
-  isUrlSigned?: boolean;
-  folder?: number | null;
-  folderPath?: string;
-  related?: {
-    id: string | number;
-    __type: string;
-    __pivot: { field: string };
-  }[];
-  createdAt?: string;
-  updatedAt?: string;
-  createdBy?: number;
-  updatedBy?: number;
-}
+/**
+ * @deprecated use {@linkcode UploadFile} instead. {@linkcode File} often gets shadowed by {@linkcode global.File}
+ */
+export type File = UploadFile;
 
 export interface Folder {
   id: number;
