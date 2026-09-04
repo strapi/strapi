@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 /**
  * Builds an admin permissions manager for a media model bound to the MCP session's ability.
@@ -10,6 +10,7 @@ import type { Modules } from '@strapi/types';
  * this second check is what keeps a handler safe if it is ever called from another entry point.
  */
 export const createMediaPermissionsManager = (
+  strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
   model: string
@@ -25,11 +26,12 @@ export const createMediaPermissionsManager = (
  * Mirrors the `if (!pm.isAllowed) return ctx.forbidden()` guard in the admin controllers.
  */
 export const assertMediaPermission = (
+  strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
   model: string
 ) => {
-  const pm = createMediaPermissionsManager(context, action, model);
+  const pm = createMediaPermissionsManager(strapi, context, action, model);
 
   if (!pm.isAllowed) {
     throw new errors.ForbiddenError();
