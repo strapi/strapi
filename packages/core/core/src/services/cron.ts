@@ -18,7 +18,7 @@ interface JobSpec {
   name: string | null;
 }
 
-type TaskFn = ({ strapi }: { strapi: Core.Strapi }, ...args: unknown[]) => Promise<unknown>;
+type TaskFn = ({ strapi }: { strapi: Core.Strapi }, ...args: unknown[]) => Promise<unknown> | void;
 
 type Task =
   | TaskFn

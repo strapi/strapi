@@ -8,7 +8,7 @@ interface JobSpec {
   name: string | null;
 }
 
-type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
+type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown> | void;
 
 export type CronTask =
   | TaskFn
