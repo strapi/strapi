@@ -323,6 +323,8 @@
   "Settings.webhooks.events.delete": "Delete webhook",
   "Settings.webhooks.form.events": "Events",
   "Settings.webhooks.form.headers": "Headers",
+  "Settings.webhooks.form.secret": "Secret",
+  "Settings.webhooks.form.secret.hint": "Used to sign the payload with HMAC-SHA256. When set, deliveries include an X-Strapi-Signature-256 header. Leave empty to disable signing.",
   "Settings.webhooks.form.url": "URL",
   "Settings.webhooks.headers.remove": "Remove header row {number}",
   "Settings.webhooks.key": "Key",
