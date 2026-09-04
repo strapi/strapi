@@ -20,12 +20,12 @@
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "12.8.0",
     "lodash": "4.18.1",
-    "mysql2": "3.20.0",
+    "mysql2": "3.23.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.20.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.30.4",
+    "react-router-dom": "6.30.5",
     "styled-components": "6.4.1"
   },
   "engines": {
