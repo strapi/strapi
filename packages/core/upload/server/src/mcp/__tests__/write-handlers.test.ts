@@ -54,7 +54,6 @@ const setupStrapi = (options: MockOptions = {}) => {
 
   // Shaped for `tests/setup/unit.setup.js`, whose global `strapi` setter derives
   // `strapi.plugin()` from `plugins` and `strapi.service('admin::x')` from `admin.services`.
-  // `permissions.ts` and `getService()` both go through that global.
   const strapi = {
     plugins: {
       upload: { services: { upload: { findOne, updateFileInfo } } },
@@ -74,9 +73,7 @@ const setupStrapi = (options: MockOptions = {}) => {
 
 const context = { userAbility: {}, user: SESSION_USER } as unknown as Modules.MCP.McpHandlerContext;
 
-// The handler resolves services off the instance it is given, not the global, so the fake built
-// by `setupStrapi()` is passed in explicitly. The global is still assigned there, because
-// `findEntityAndCheckPermissions` is shared with the admin controllers and reads it.
+// Pass the fully shaped instance produced by the unit-test setter to the handler explicitly.
 const invoke = (args: Record<string, unknown>) =>
   createUpdateMediaHandler(
     (global as unknown as { strapi: Core.Strapi }).strapi,
