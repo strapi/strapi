@@ -172,6 +172,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/git-url-parse": "9.0.3",
     "@types/inquirer": "9.0.9",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",

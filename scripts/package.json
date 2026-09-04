@@ -1,0 +1,19 @@
+{
+  "name": "scripts",
+  "version": "5.52.3",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "execa": "5.1.1",
+    "fs-extra": "11.3.4",
+    "get-port": "5.1.1",
+    "glob": "13.0.6",
+    "nx": "20.8.4",
+    "yalc": "1.0.0-pre.53",
+    "yargs": "17.7.2"
+  }
+}
