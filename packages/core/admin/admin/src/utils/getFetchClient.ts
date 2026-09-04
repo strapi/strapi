@@ -60,9 +60,9 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
 
 /**
  * Set the callback that will be called when the active session is no longer
- * valid (refresh token rejected by the server, or detected idle on the
- * client). This lets the active tab redirect to /auth/login without waiting
- * for the next user-initiated request to fail.
+ * valid — i.e. the server rejected the refresh token, not merely that the
+ * short-lived access token expired. This lets the tab redirect to /auth/login
+ * (after any unsaved-changes guard) rather than sitting on a dead session.
  *
  * @param callback - Function to call when the session ends, or null to clear
  */
@@ -72,10 +72,17 @@ const setOnSessionExpired = (callback: (() => void) | null): void => {
 
 /**
  * Trigger the registered session-expired callback, if any. Safe to call from
- * non-React code (e.g., the RTK Query baseQuery 401 handler).
+ * non-React code (e.g., the RTK Query baseQuery 401 handler). Returns `false`
+ * when nothing is listening, so callers can fall back to a hard redirect
+ * instead of leaving the user on a dead page.
  */
-const triggerSessionExpired = (): void => {
-  onSessionExpired?.();
+const triggerSessionExpired = (): boolean => {
+  if (!onSessionExpired) {
+    return false;
+  }
+
+  onSessionExpired();
+  return true;
 };
 
 /**
