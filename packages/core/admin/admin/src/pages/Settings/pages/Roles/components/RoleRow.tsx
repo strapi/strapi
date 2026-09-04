@@ -6,7 +6,7 @@ import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | 'usersCount'> {
   icons: Array<Required<Pick<IconButtonProps, 'children' | 'label' | 'onClick'>>>;
   rowIndex: number;
-  canUpdate?: boolean;
+  onRowClick?: IconButtonProps['onClick'];
   cursor?: string;
 }
 
@@ -17,11 +17,10 @@ const RoleRow = ({
   usersCount,
   icons,
   rowIndex,
-  canUpdate,
+  onRowClick,
   cursor,
 }: RoleRowProps) => {
   const { formatMessage } = useIntl();
-  const [, editObject] = icons;
 
   const usersCountText = formatMessage(
     {
@@ -37,7 +36,7 @@ const RoleRow = ({
       aria-rowindex={rowIndex}
       key={id}
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
-      onClick={canUpdate ? editObject.onClick : undefined}
+      onClick={onRowClick}
     >
       <Td maxWidth={`13rem`}>
         <Typography ellipsis textColor="neutral800">
