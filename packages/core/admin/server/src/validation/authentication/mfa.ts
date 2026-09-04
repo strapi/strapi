@@ -32,12 +32,13 @@ const mfaLoginSchema = yup
 export const validateMfaLoginInput = validateYupSchema(mfaLoginSchema);
 
 /**
- * /mfa/enrol - only a password is needed to start enrolment; nothing about the second factor
- * exists yet at this point.
+ * /mfa/enrol - a password starts a fresh enrolment; an already-enrolled account must also send
+ * `code` (a current TOTP code or a recovery code) to replace its authenticator. Same bounds and
+ * no-`.trim()` reasoning as `mfaLoginSchema`.
  */
 const enrolSchema = yup
   .object()
-  .shape({ password: yup.string().required() })
+  .shape({ password: yup.string().required(), code: yup.string().min(6).max(32).optional() })
   .required()
   .noUnknown();
 

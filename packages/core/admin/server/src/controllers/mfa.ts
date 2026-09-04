@@ -59,9 +59,13 @@ export default {
     if (!mfa) return;
 
     await validateMfaEnrolInput(ctx.request.body ?? {});
-    const { password } = ctx.request.body as Enrol.Request['body'];
+    const { password, code } = ctx.request.body as Enrol.Request['body'];
 
-    const { secret, otpauthUri } = await mfa.beginEnrolment(String(ctx.state.user.id), password);
+    const { secret, otpauthUri } = await mfa.beginEnrolment(
+      String(ctx.state.user.id),
+      password,
+      code?.trim()
+    );
     ctx.body = { data: { secret, otpauthUri } } satisfies Enrol.Response;
   },
 
@@ -73,11 +77,12 @@ export default {
     const { code } = ctx.request.body as VerifyEnrolment.Request['body'];
     const userId = String(ctx.state.user.id);
 
-    const { recoveryCodes } = await mfa.completeEnrolment(userId, code);
-    await mfa.recordEvent(userId, 'enabled', buildSessionMetadataFromContext(ctx));
-    mfa.notify(userId, 'enabled');
+    const { recoveryCodes, replaced } = await mfa.completeEnrolment(userId, code);
+    const event = replaced ? 'authenticator_replaced' : 'enabled';
+    await mfa.recordEvent(userId, event, buildSessionMetadataFromContext(ctx));
+    mfa.notify(userId, event);
 
-    ctx.body = { data: { recoveryCodes } } satisfies VerifyEnrolment.Response;
+    ctx.body = { data: { recoveryCodes, replaced } } satisfies VerifyEnrolment.Response;
   },
 
   async regenerateRecoveryCodes(ctx: Context) {

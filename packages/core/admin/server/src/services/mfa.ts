@@ -184,14 +184,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * returning null for every failure mode, and `base32Decode` throws on non-base32 plaintext, so
    * both must be inside the same guard or a malformed stored value becomes an unhandled 500.
    */
-  const readSecret = (user: { mfaSecret?: string | null }): Buffer => {
-    if (!user.mfaSecret) {
+  const readSecret = (ciphertext: string | null | undefined): Buffer => {
+    if (!ciphertext) {
       throw new ValidationError('Two-factor authentication is not set up for this account');
     }
 
     let secret: Buffer | null = null;
     try {
-      const decrypted = encryption.decrypt(user.mfaSecret);
+      const decrypted = encryption.decrypt(ciphertext);
       if (decrypted) {
         secret = base32Decode(decrypted);
       }
@@ -208,7 +208,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return secret;
   };
 
-  const beginEnrolment = async (userId: string, password: string) => {
+  const beginEnrolment = async (userId: string, password: string, code?: string) => {
     const user = await loadUser(userId);
 
     const passwordOk = await auth.validatePassword(password, user.password);
@@ -216,22 +216,19 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       throw new ValidationError('Invalid credentials');
     }
 
-    // Refuse rather than overwrite: for an already-enrolled account, silently replacing the
-    // secret while leaving mfaEnabledAt set would break their existing authenticator while
-    // still demanding a code, locking them out. And doing it unconditionally would let anyone
-    // holding just the password disable 2FA on someone else's account by starting enrolment and
-    // never finishing it (mfaEnabledAt gets reset to null below) — the exact bypass 2FA exists
-    // to prevent. The user must disable two-factor authentication first, then enrol again.
-    //
-    // Gated on `isEnrolled` (mfaEnabledAt AND mfaSecret), not `mfaEnabledAt` alone: a half-written
-    // row (enabledAt set, secret null) is not enrolled for login -- `isEnrolled` would say false,
-    // so no challenge is ever issued -- but refusing on `mfaEnabledAt` alone would leave that row
-    // unable to ever re-enrol either, a permanent lockout with no path back except the CLI reset.
-    // The bypass this refusal exists to prevent needs both columns set to succeed.
-    if (await isEnrolled(userId)) {
-      throw new ValidationError(
-        'Two-factor authentication is already enabled for this account. Disable it first, then enrol again.'
-      );
+    // An enrolled account may replace its authenticator, but only by proving it still holds the
+    // current second factor: a TOTP code from the existing app or an unused recovery code. The
+    // password alone is exactly the credential 2FA exists to back up, so it cannot authorise
+    // swapping the factor. The active secret is untouched until `completeEnrolment` promotes
+    // the pending one, so an abandoned replacement changes nothing.
+    if (user.mfaEnabledAt && user.mfaSecret) {
+      if (!code) {
+        throw new ValidationError(
+          'A current two-factor code or a recovery code is required to replace your authenticator'
+        );
+      }
+      // `assertFactor` is defined with the re-authentication gate below.
+      await assertFactor(userId, code);
     }
 
     const secret = generateTotpSecret();
@@ -244,11 +241,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       );
     }
 
-    // mfaEnabledAt stays null: an issued-but-unverified secret is not an enrolment, and the
-    // next attempt simply overwrites it, so an abandoned flow needs no cleanup.
+    // Pending, never active: an issued-but-unverified secret is not an enrolment. The next
+    // attempt simply overwrites it, so an abandoned flow needs no cleanup, and a fresh account's
+    // `mfaSecret` / `mfaEnabledAt` stay null until verification.
     await userQuery().update({
       where: { id: userId },
-      data: { mfaSecret: encrypted, mfaEnabledAt: null, mfaLastUsedStep: null },
+      data: { mfaPendingSecret: encrypted },
     });
 
     return {
@@ -265,7 +263,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   const verifyTotpForUser = async (userId: string, code: string) => {
     const user = await loadUser(userId);
-    const secret = readSecret(user);
+    const secret = readSecret(user.mfaSecret);
     const { digits, step, window } = config();
 
     return verifyTotp({ secret, code, digits, step, window });
@@ -305,26 +303,53 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   const completeEnrolment = async (userId: string, code: string) => {
-    const result = await verifyTotpForUser(userId, code);
+    const user = await loadUser(userId);
+    if (!user.mfaPendingSecret) {
+      throw new ValidationError('No enrolment in progress');
+    }
+
+    const pending = readSecret(user.mfaPendingSecret);
+    const { digits, step, window } = config();
+    const result = verifyTotp({
+      secret: pending,
+      code: code.replace(/\s+/g, ''),
+      digits,
+      step,
+      window,
+    });
     if (!result.valid) {
       throw new ValidationError('Invalid code');
     }
 
+    // Steps are wall-clock indices shared by the active and the pending secret, so the account's
+    // single replay guard covers both: a code accepted here can never be replayed at login, and a
+    // replacement does not reset `mfaLastUsedStep` (resetting it would reopen exactly that).
     const consumed = await consumeTotpStep(userId, result.step);
     if (!consumed) {
       throw new ValidationError('Invalid code');
     }
 
-    // Issued before `mfaEnabledAt` is flipped, not after: if this throws (a constraint
-    // violation, a dropped connection), the safe direction is to leave the user unenrolled and
-    // free to retry, rather than enrolled with an empty recovery-code set and no way to get one
-    // (no regenerate endpoint exists until Task 10). The consumed TOTP step stays consumed
-    // either way — that is the safe outcome, not something to unwind.
+    const replaced = Boolean(user.mfaEnabledAt && user.mfaSecret);
+
+    // Issued before the promotion, not after: if this throws, the safe direction is to leave the
+    // pending secret pending (a fresh account stays unenrolled and free to retry; a replacing
+    // account keeps its working authenticator) rather than promote with no recovery codes.
     const recoveryCodes = await issueRecoveryCodes(userId);
 
-    await userQuery().update({ where: { id: userId }, data: { mfaEnabledAt: new Date() } });
+    await userQuery().update({
+      where: { id: userId },
+      data: {
+        mfaSecret: user.mfaPendingSecret,
+        mfaPendingSecret: null,
+        mfaEnabledAt: replaced ? user.mfaEnabledAt : new Date(),
+        // Enrolling satisfies any enforcement requirement, so both stamps are cleared. The lock
+        // cannot be set on an account holding a session, this is purely defensive.
+        mfaGraceUntil: null,
+        mfaLockedAt: null,
+      },
+    });
 
-    return { recoveryCodes };
+    return { recoveryCodes, replaced };
   };
 
   // --- Recovery codes ---------------------------------------------------
@@ -525,7 +550,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * `MfaEventType` and rejecting the other two at runtime, turns passing either of them into a
    * compile error.
    */
-  type MfaChangeNotice = 'enabled' | 'disabled' | 'reset' | 'challenge_failed';
+  type MfaChangeNotice =
+    | 'enabled'
+    | 'disabled'
+    | 'reset'
+    | 'challenge_failed'
+    | 'authenticator_replaced';
 
   /**
    * Fire and forget by default -- Strapi's own forgotPassword does exactly this: send, catch, log
@@ -923,33 +953,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * The shared re-authentication gate for the self-service operations that need more than an
-   * active session: disabling two-factor authentication and regenerating recovery codes. Both are
-   * exactly the "attacker holds a session" scenario, so both demand the password again, plus a
-   * still-working second factor -- either a TOTP code or a recovery code, dispatched by the
-   * submitted code's own shape, for the same reason `verifyChallenge` does: letting the caller
-   * declare which factor they are presenting is the classic factor-switching bypass.
-   *
-   * Calls `verifyTotpForUser` directly rather than `attemptTotp`: `attemptTotp`'s error-swallowing
-   * is deliberately scoped to the unauthenticated challenge path, and here the actionable "secret
-   * could not be read" error must keep propagating rather than collapse into "Invalid code". A
-   * recovery-shaped code never reaches the TOTP branch at all (the shape dispatch below), so an
-   * account whose secret cannot be decrypted can still be disabled with a recovery code -- Task 5
-   * noted that `mfaEnabledAt` set with `mfaSecret` null is otherwise un-enrollable except via the
-   * CLI.
+   * The second-factor half of the re-authentication gate: a still-working TOTP code or an unused
+   * recovery code, dispatched by the submitted code's own shape (never by a client-supplied
+   * selector). Throttled and charged exactly like `verifyChallenge`. Shared by
+   * `assertPasswordAndFactor` and by a replacement enrolment (`beginEnrolment` with a code).
    */
-  const assertPasswordAndFactor = async (
-    userId: string,
-    password: string,
-    code: string
-  ): Promise<void> => {
-    const user = await loadUser(userId);
-
-    // Wrong password is not a second-factor attempt: it charges neither throttle tier.
-    if (!(await auth.validatePassword(password, user.password))) {
-      throw new ValidationError('Invalid credentials');
-    }
-
+  const assertFactor = async (userId: string, code: string): Promise<void> => {
     if (await isAccountThrottled(userId)) {
       throw new RateLimitError();
     }
@@ -981,6 +990,37 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * The shared re-authentication gate for the self-service operations that need more than an
+   * active session: disabling two-factor authentication and regenerating recovery codes. Both are
+   * exactly the "attacker holds a session" scenario, so both demand the password again, plus a
+   * still-working second factor -- either a TOTP code or a recovery code, dispatched by the
+   * submitted code's own shape, for the same reason `verifyChallenge` does: letting the caller
+   * declare which factor they are presenting is the classic factor-switching bypass.
+   *
+   * Calls `verifyTotpForUser` directly rather than `attemptTotp`: `attemptTotp`'s error-swallowing
+   * is deliberately scoped to the unauthenticated challenge path, and here the actionable "secret
+   * could not be read" error must keep propagating rather than collapse into "Invalid code". A
+   * recovery-shaped code never reaches the TOTP branch at all (the shape dispatch below), so an
+   * account whose secret cannot be decrypted can still be disabled with a recovery code -- Task 5
+   * noted that `mfaEnabledAt` set with `mfaSecret` null is otherwise un-enrollable except via the
+   * CLI.
+   */
+  const assertPasswordAndFactor = async (
+    userId: string,
+    password: string,
+    code: string
+  ): Promise<void> => {
+    const user = await loadUser(userId);
+
+    // Wrong password is not a second-factor attempt: it charges neither throttle tier.
+    if (!(await auth.validatePassword(password, user.password))) {
+      throw new ValidationError('Invalid credentials');
+    }
+
+    await assertFactor(userId, code);
+  };
+
+  /**
    * Clears enrolment entirely. Recovery codes and outstanding challenges go too, so a later
    * re-enrolment starts clean rather than inheriting stale rows.
    *
@@ -997,7 +1037,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       await challengeQuery().deleteMany({ where: { userId: String(userId) } });
       await userQuery().update({
         where: { id: userId },
-        data: { mfaSecret: null, mfaEnabledAt: null, mfaLastUsedStep: null },
+        data: {
+          mfaSecret: null,
+          mfaPendingSecret: null,
+          mfaEnabledAt: null,
+          mfaLastUsedStep: null,
+        },
       });
     });
   };
@@ -1040,6 +1085,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isAccountThrottled,
     createChallenge,
     verifyChallenge,
+    assertFactor,
     assertPasswordAndFactor,
     disable,
     sweepExpiredChallenges,

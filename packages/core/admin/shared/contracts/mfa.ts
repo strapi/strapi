@@ -24,6 +24,8 @@ export declare namespace Enrol {
   export interface Request {
     body: {
       password: string;
+      /** Required when the account is already enrolled: replaces the authenticator. */
+      code?: string;
     };
   }
 
@@ -49,6 +51,8 @@ export declare namespace VerifyEnrolment {
   export interface Response {
     data: {
       recoveryCodes: string[];
+      /** Whether this call promoted a replacement authenticator rather than a fresh enrolment. */
+      replaced: boolean;
     };
   }
 }

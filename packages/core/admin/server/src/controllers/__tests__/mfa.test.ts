@@ -160,7 +160,7 @@ describe('mfa controller', () => {
 
   test('enrol/verify returns recovery codes exactly once, and notifies of the change', async () => {
     const completeEnrolment = jest.fn(() =>
-      Promise.resolve({ recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'] })
+      Promise.resolve({ recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'], replaced: false })
     );
     const recordEvent = jest.fn(() => Promise.resolve());
     const notify = jest.fn();
@@ -178,7 +178,9 @@ describe('mfa controller', () => {
     await mfaController.verifyEnrolment(ctx);
 
     expect(completeEnrolment).toHaveBeenCalledWith('7', '123456');
-    expect(ctx.body).toEqual({ data: { recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'] } });
+    expect(ctx.body).toEqual({
+      data: { recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'], replaced: false },
+    });
     expect(recordEvent).toHaveBeenCalledWith('7', 'enabled', expect.any(Object));
     // Notified after being recorded: `notify` is the eventHub/best-effort-email half (Task 11),
     // `recordEvent` is the in-app notice feed -- both run, in that order.
@@ -194,7 +196,7 @@ describe('mfa controller', () => {
     // service layer (Task 5). The controller must not paper over that with a second set of codes.
     const completeEnrolment = jest
       .fn()
-      .mockResolvedValueOnce({ recoveryCodes: ['AAAAA-BBBBB'] })
+      .mockResolvedValueOnce({ recoveryCodes: ['AAAAA-BBBBB'], replaced: false })
       .mockRejectedValueOnce(new errors.ValidationError('Invalid code'));
     const recordEvent = jest.fn(() => Promise.resolve());
     const notify = jest.fn();
@@ -209,7 +211,7 @@ describe('mfa controller', () => {
 
     const { ctx: firstCtx } = buildCtx({ code: '123456' });
     await mfaController.verifyEnrolment(firstCtx);
-    expect(firstCtx.body).toEqual({ data: { recoveryCodes: ['AAAAA-BBBBB'] } });
+    expect(firstCtx.body).toEqual({ data: { recoveryCodes: ['AAAAA-BBBBB'], replaced: false } });
 
     const { ctx: secondCtx } = buildCtx({ code: '123456' });
     await expect(mfaController.verifyEnrolment(secondCtx)).rejects.toMatchObject({
@@ -218,6 +220,38 @@ describe('mfa controller', () => {
     expect(secondCtx.body).toBeUndefined();
     expect(recordEvent).toHaveBeenCalledTimes(1);
     expect(notify).toHaveBeenCalledTimes(1);
+  });
+
+  test('enrol forwards a trimmed code so an enrolled user can start a replacement', async () => {
+    const beginEnrolment = jest.fn(() =>
+      Promise.resolve({ secret: 's', otpauthUri: 'otpauth://x' })
+    );
+    setStrapi({ admin: { services: { mfa: { isEnabled: () => true, beginEnrolment } } } });
+    const { ctx } = buildCtx({ password: 'pw', code: ' 123456 ' });
+
+    await mfaController.enrol(ctx);
+
+    expect(beginEnrolment).toHaveBeenCalledWith('7', 'pw', '123456');
+  });
+
+  test('verifyEnrolment records authenticator_replaced when the service reports a replacement', async () => {
+    const recordEvent = jest.fn(() => Promise.resolve());
+    const notify = jest.fn();
+    const completeEnrolment = jest.fn(() =>
+      Promise.resolve({ recoveryCodes: ['A'], replaced: true })
+    );
+    setStrapi({
+      admin: {
+        services: { mfa: { isEnabled: () => true, completeEnrolment, recordEvent, notify } },
+      },
+    });
+    const { ctx } = buildCtx({ code: '123456' });
+
+    await mfaController.verifyEnrolment(ctx);
+
+    expect(recordEvent).toHaveBeenCalledWith('7', 'authenticator_replaced', expect.any(Object));
+    expect(notify).toHaveBeenCalledWith('7', 'authenticator_replaced');
+    expect(ctx.body).toEqual({ data: { recoveryCodes: ['A'], replaced: true } });
   });
 
   test('disable requires both the password and a valid code', async () => {

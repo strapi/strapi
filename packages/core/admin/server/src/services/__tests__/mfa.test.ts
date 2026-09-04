@@ -408,6 +408,9 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     mfaSecret: null,
     mfaEnabledAt: null,
     mfaLastUsedStep: null,
+    mfaPendingSecret: null,
+    mfaGraceUntil: null,
+    mfaLockedAt: null,
   });
 
   const metadataGet = jest.fn((uid: string) => {
@@ -764,7 +767,7 @@ describe('mfa service: enrolment', () => {
     await expect(service.beginEnrolment('1', 'wrong')).rejects.toThrow(/invalid credentials/i);
   });
 
-  test('stores the secret encrypted and leaves enrolment inactive', async () => {
+  test('stores the secret encrypted, pending, and leaves enrolment inactive', async () => {
     const { strapi, users } = buildStrapi();
     const service = createMfaService(defaultDeps(strapi));
 
@@ -773,11 +776,13 @@ describe('mfa service: enrolment', () => {
     expect(result.secret).toMatch(/^[A-Z2-7]+$/);
     expect(result.otpauthUri).toContain('otpauth://totp/');
     const stored = users.get('1')!;
-    expect(String(stored.mfaSecret)).toMatch(/^enc:/);
+    // Pending, not active: `mfaSecret` stays null until `completeEnrolment` promotes it.
+    expect(String(stored.mfaPendingSecret)).toMatch(/^enc:/);
+    expect(stored.mfaSecret).toBeNull();
     expect(stored.mfaEnabledAt).toBeNull();
   });
 
-  test('refuses to begin enrolment when the user is already enrolled, and writes nothing', async () => {
+  test('an enrolled user without a code is refused, and writes nothing', async () => {
     const { strapi, users } = buildStrapi();
     const existing = users.get('1')!;
     existing.mfaSecret = 'enc:existing-secret';
@@ -787,7 +792,9 @@ describe('mfa service: enrolment', () => {
 
     const service = createMfaService(defaultDeps(strapi));
 
-    await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/already enabled/i);
+    // No longer an outright refusal ("disable it first"): an enrolled account may replace its
+    // authenticator, but only by presenting a current second factor alongside the password.
+    await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/current two-factor code/i);
     // Nothing was written: refusing must happen before any update, not just before completion.
     expect(users.get('1')).toEqual(snapshot);
   });
@@ -799,7 +806,7 @@ describe('mfa service: enrolment', () => {
   // could never re-enrol either, since the old guard refused on `mfaEnabledAt` alone -- a
   // permanent lockout with no path back except the CLI reset. Gating on `isEnrolled` itself closes
   // that gap while still refusing a genuinely enrolled account (both columns set, the case above).
-  test('allows re-enrolment for a half-written row (mfaEnabledAt set, mfaSecret null)', async () => {
+  test('allows re-enrolment for a half-written row (mfaEnabledAt set, mfaSecret null), no code required', async () => {
     const { strapi, users } = buildStrapi();
     const existing = users.get('1')!;
     existing.mfaSecret = null;
@@ -813,10 +820,12 @@ describe('mfa service: enrolment', () => {
         otpauthUri: expect.stringContaining('otpauth://totp/'),
       })
     );
-    // A fresh secret was actually issued, not just accepted without writing -- `mfaEnabledAt` is
-    // reset to null on the way in (see `beginEnrolment`), same as any other fresh enrolment.
-    expect(users.get('1')!.mfaEnabledAt).toBeNull();
-    expect(String(users.get('1')!.mfaSecret)).toMatch(/^enc:/);
+    // A fresh secret was actually issued, not just accepted without writing, and to the pending
+    // column -- `isEnrolled` is false here (no `mfaSecret`), so this is the fresh-enrolment path,
+    // not a replacement, and `mfaEnabledAt` is left exactly as it was (untouched by beginEnrolment).
+    expect(users.get('1')!.mfaEnabledAt).toEqual(existing.mfaEnabledAt);
+    expect(users.get('1')!.mfaSecret).toBeNull();
+    expect(String(users.get('1')!.mfaPendingSecret)).toMatch(/^enc:/);
   });
 
   test('begins enrolment successfully for a never-enrolled user', async () => {
@@ -958,6 +967,169 @@ describe('mfa service: enrolment', () => {
     expect(consumed).toBe(true);
     expect(metadataGet).toHaveBeenCalledWith(USER_UID);
     expect(Number(users.get('1')!.mfaLastUsedStep)).toBe(step);
+  });
+
+  test('a fresh enrolment writes the secret to mfaPendingSecret and leaves mfaSecret null', async () => {
+    const { strapi, users } = buildStrapi();
+    const service = createMfaService(defaultDeps(strapi));
+
+    const { secret } = await service.beginEnrolment('1', 'pw');
+
+    const row = users.get('1')!;
+    expect(row.mfaPendingSecret).toBe(`enc:${secret}`);
+    expect(row.mfaSecret).toBeNull();
+    expect(row.mfaEnabledAt).toBeNull();
+  });
+
+  test('completing a fresh enrolment promotes the pending secret and reports replaced: false', async () => {
+    const { strapi, users } = buildStrapi();
+    const service = createMfaService(defaultDeps(strapi));
+    const { secret } = await service.beginEnrolment('1', 'pw');
+    const code = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+
+    const result = await service.completeEnrolment('1', code);
+
+    expect(result.replaced).toBe(false);
+    expect(result.recoveryCodes).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
+    const row = users.get('1')!;
+    expect(row.mfaSecret).toBe(`enc:${secret}`);
+    expect(row.mfaPendingSecret).toBeNull();
+    expect(row.mfaEnabledAt).toBeInstanceOf(Date);
+  });
+
+  test('completing without a pending secret is rejected', async () => {
+    const { strapi } = buildStrapi();
+    const service = createMfaService(defaultDeps(strapi));
+
+    await expect(service.completeEnrolment('1', '123456')).rejects.toThrow(
+      /no enrolment in progress/i
+    );
+  });
+
+  describe('replacing an authenticator', () => {
+    const enrol = async () => {
+      const { strapi, users, recoveryRows, events } = buildStrapi();
+      const service = createMfaService(defaultDeps(strapi));
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      const first = await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+      return {
+        strapi,
+        users,
+        recoveryRows,
+        events,
+        service,
+        secret,
+        firstCodes: first.recoveryCodes,
+      };
+    };
+
+    test('an enrolled user must present a current code to start a replacement', async () => {
+      const { service } = await enrol();
+
+      await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/current two-factor code/i);
+    });
+
+    test('a wrong code is charged to the account-wide window and issues nothing', async () => {
+      const { service, users, events } = await enrol();
+
+      await expect(service.beginEnrolment('1', 'pw', '000000')).rejects.toThrow(/invalid code/i);
+
+      expect(users.get('1')!.mfaPendingSecret).toBeNull();
+      expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    });
+
+    test('a valid TOTP code starts a replacement while the active secret keeps working', async () => {
+      const { service, users, secret } = await enrol();
+      // Step forward so the replacement code is not the one already consumed by enrolment.
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+        const next = await service.beginEnrolment('1', 'pw', current);
+
+        const row = users.get('1')!;
+        expect(row.mfaSecret).toBe(`enc:${secret}`);
+        expect(row.mfaPendingSecret).toBe(`enc:${next.secret}`);
+        expect(row.mfaEnabledAt).toBeInstanceOf(Date);
+        expect(await service.isEnrolled('1')).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    test('a recovery code also authorises a replacement and is consumed', async () => {
+      const { service, users, firstCodes, recoveryRows } = await enrol();
+
+      await service.beginEnrolment('1', 'pw', firstCodes[0]);
+
+      expect(users.get('1')!.mfaPendingSecret).not.toBeNull();
+      expect(recoveryRows.filter((r) => r.usedAt !== null)).toHaveLength(1);
+    });
+
+    test('verifying the replacement promotes it, voids the old recovery codes and reports replaced: true', async () => {
+      const { service, users, secret, recoveryRows, firstCodes } = await enrol();
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+        const next = await service.beginEnrolment('1', 'pw', current);
+
+        jest.setSystemTime(now + 60_000);
+        const newCode = generateTotp({ secret: base32Decode(next.secret), step: 30, digits: 6 });
+        const result = await service.completeEnrolment('1', newCode);
+
+        expect(result.replaced).toBe(true);
+        expect(result.recoveryCodes).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
+        expect(result.recoveryCodes).not.toEqual(firstCodes);
+        const row = users.get('1')!;
+        expect(row.mfaSecret).toBe(`enc:${next.secret}`);
+        expect(row.mfaPendingSecret).toBeNull();
+        // Every stored hash belongs to the new set: none of the first set's rows survive.
+        expect(recoveryRows).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
+        expect(recoveryRows.every((r) => r.usedAt === null)).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    test('a code from the OLD secret does not verify the replacement', async () => {
+      const { service, secret } = await enrol();
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+        await service.beginEnrolment('1', 'pw', current);
+        jest.setSystemTime(now + 60_000);
+        const oldSecretCode = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+
+        await expect(service.completeEnrolment('1', oldSecretCode)).rejects.toThrow(
+          /invalid code/i
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    test('disable clears the pending secret too', async () => {
+      const { service, users, secret } = await enrol();
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        await service.beginEnrolment(
+          '1',
+          'pw',
+          generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+        );
+        await service.disable('1');
+        expect(users.get('1')!.mfaPendingSecret).toBeNull();
+        expect(users.get('1')!.mfaSecret).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 });
 
