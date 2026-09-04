@@ -9,9 +9,9 @@ const makeStrapi = (options: { isEnabled?: boolean; withAi?: boolean } = {}) => 
   const { isEnabled = true, withAi = true } = options;
   const registerTool = jest.fn();
 
-  const strapi = {
-    ...(withAi ? { ai: { mcp: { isEnabled: jest.fn(() => isEnabled), registerTool } } } : {}),
-  } as unknown as Core.Strapi;
+  const strapi = (withAi
+    ? { ai: { mcp: { isEnabled: jest.fn(() => isEnabled), registerTool } } }
+    : {}) as unknown as Core.Strapi;
 
   return { strapi, registerTool };
 };
