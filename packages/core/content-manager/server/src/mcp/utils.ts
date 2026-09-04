@@ -1,6 +1,8 @@
 import type { Modules, UID } from '@strapi/types';
 
+import { getService } from '../utils';
 import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
+import { getPopulateForLocalizations } from '../services/utils/populate';
 import type { GetMetadataOptions } from '../services/document-metadata';
 import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
@@ -20,6 +22,17 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
 
   return `${namespace.toLowerCase()}-${parts.join('_')}`;
 };
+
+/**
+ * Populate for the document a write handler echoes back.
+ * Deliberately skips `countRelations()`: `reduceToIdentity` reduces the resulting `{ count: N }`
+ * to `[]`, which reports a populated to-many relation as empty.
+ */
+export const buildWriteReplyPopulate = async (uid: UID.ContentType) =>
+  getService('populate-builder')(uid)
+    .populateDeep(Infinity)
+    .withPopulateOverride(getPopulateForLocalizations(uid))
+    .build();
 
 type McpPermissionChecker = {
   sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>>;
