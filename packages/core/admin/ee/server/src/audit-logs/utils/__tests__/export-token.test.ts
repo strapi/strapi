@@ -1,4 +1,4 @@
-import { signExportToken, verifyExportToken } from '../export-token';
+import { signExportToken, verifyExportToken, EXPORT_TOKEN_TTL_MS } from '../export-token';
 
 const SECRET = 'test-secret';
 
@@ -40,6 +40,36 @@ describe('Audit logs export token', () => {
     expect(verifyExportToken(SECRET, undefined, 42, undefined)).toBe(false);
     expect(verifyExportToken(SECRET, '', 42, undefined)).toBe(false);
     expect(verifyExportToken(SECRET, 'not-a-signature', 42, undefined)).toBe(false);
+    expect(verifyExportToken(SECRET, 'not-a-timestamp.abc', 42, undefined)).toBe(false);
     expect(verifyExportToken(SECRET, 12345, 42, undefined)).toBe(false);
+  });
+
+  it('rejects a token older than its validity window', () => {
+    const issuedAt = Date.now();
+    const token = signExportToken(SECRET, 42, undefined, issuedAt);
+
+    expect(verifyExportToken(SECRET, token, 42, undefined, issuedAt + EXPORT_TOKEN_TTL_MS)).toBe(
+      true
+    );
+    expect(
+      verifyExportToken(SECRET, token, 42, undefined, issuedAt + EXPORT_TOKEN_TTL_MS + 1)
+    ).toBe(false);
+  });
+
+  it('rejects a tampered issue time', () => {
+    const issuedAt = Date.now();
+    const token = signExportToken(SECRET, 42, undefined, issuedAt);
+    const signature = token.slice(token.indexOf('.') + 1);
+
+    // Backdating or forward-dating the timestamp invalidates the signature
+    expect(verifyExportToken(SECRET, `${issuedAt + 1}.${signature}`, 42, undefined)).toBe(false);
+  });
+
+  it('tolerates small clock drift between nodes but not a future token', () => {
+    const issuedAt = Date.now();
+    const token = signExportToken(SECRET, 42, undefined, issuedAt);
+
+    expect(verifyExportToken(SECRET, token, 42, undefined, issuedAt - 30 * 1000)).toBe(true);
+    expect(verifyExportToken(SECRET, token, 42, undefined, issuedAt - 5 * 60 * 1000)).toBe(false);
   });
 });
