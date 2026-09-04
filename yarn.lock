@@ -14930,7 +14930,7 @@ __metadata:
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.8.0"
-    mysql2: "npm:3.20.0"
+    mysql2: "npm:3.23.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.4"
@@ -18728,7 +18728,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.18.1"
-    mysql2: "npm:3.20.0"
+    mysql2: "npm:3.23.1"
     passport-google-oauth2: "npm:0.2.0"
     pg: "npm:8.20.0"
     react: "npm:18.3.1"
@@ -21483,7 +21483,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.18.1"
-    mysql2: "npm:3.20.0"
+    mysql2: "npm:3.23.1"
     passport-google-oauth2: "npm:0.2.0"
     pg: "npm:8.20.0"
     react: "npm:18.3.1"
@@ -23591,9 +23591,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:3.20.0":
-  version: 3.20.0
-  resolution: "mysql2@npm:3.20.0"
+"mysql2@npm:3.23.1":
+  version: 3.23.1
+  resolution: "mysql2@npm:3.23.1"
   dependencies:
     aws-ssl-profiles: "npm:^1.1.2"
     denque: "npm:^2.1.0"
@@ -23602,10 +23602,10 @@ __metadata:
     long: "npm:^5.3.2"
     lru.min: "npm:^1.1.4"
     named-placeholders: "npm:^1.1.6"
-    sql-escaper: "npm:^1.3.3"
+    sql-escaper: "npm:^1.5.1"
   peerDependencies:
     "@types/node": ">= 8"
-  checksum: 10c0/02d61ae766b847ff398e50b651849947f555983c081d18f47cd66a50bb960aeaaf39cd7171e103ac79e703f9d5852c7e69b0a36f0c05e7643499665100ed4cee
+  checksum: 10c0/67bd75281b6be93a8a8ce6b95640f3596e8bc3de985e56dc5c861a0090dc959cd8b97ee5b3242b1dd4b495a0ddb13683eecc4d0369aaf39058b367937919f9cd
   languageName: node
   linkType: hard
 
@@ -27938,10 +27938,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sql-escaper@npm:^1.3.3":
-  version: 1.3.3
-  resolution: "sql-escaper@npm:1.3.3"
-  checksum: 10c0/aa6545685745f4d457a6993cd7b442ac39d54aae6780d15e5ed1ff929f298f6c10562b9e09ddcbedcdf5c3601161e5ee39d3e8d435b1d168775f121946d1bf44
+"sql-escaper@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "sql-escaper@npm:1.5.1"
+  checksum: 10c0/49986addddfbf86fe041de827abc9a089a6f757d4bec86860576e625468b0fa93a9ee42c5f20ed7d77391c0bbe02c68fb65a73b134367456681fd1a589bed231
   languageName: node
   linkType: hard
 
