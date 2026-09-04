@@ -320,8 +320,13 @@ jobs:
   # login works there. Adding `firefox` to a matrix here is the way to find out;
   # it was left out of this PR so an unknown result would not block the review.
   #
-  # `Drag and Drop` is skipped for now. Those specs simulate a pointer drag through
-  # dnd-kit and the move never fires; they fail independently of this flag.
+  # The two folder-move specs are skipped for now. They simulate a pointer drag
+  # through dnd-kit and the move never fires; they fail independently of this flag.
+  #
+  # The filter names their describe blocks (`Drag and Drop Deep` / `Shallow`) rather
+  # than just `Drag and Drop`: the looser pattern also caught
+  # `file-upload.spec.ts › should upload a file via drag and drop`, which works and
+  # has nothing to do with the folder-move problem.
   #
   # This is a bigger gap than a broken helper. Nothing else in the e2e suite tests
   # a pointer drag: the one reordering test we have
@@ -363,7 +368,7 @@ jobs:
           runEE: false
           betaMediaLibrary: true
           domains: media-library
-          jestOptions: '--project=chromium --grep-invert=Drag.and.Drop'
+          jestOptions: '--project=chromium --grep-invert=Drag.and.Drop.(Deep|Shallow)'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: failure()

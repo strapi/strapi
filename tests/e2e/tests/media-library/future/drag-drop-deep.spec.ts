@@ -25,7 +25,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolder('Tree Destination');
       await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToTreeFolder('test-image.jpg', 'Tree Destination', 'table');
@@ -45,7 +45,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.waitForNotification();
       await assetsPage.getHomeTreeRow().click();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.springLoadFolder('test-image.jpg', 'Parent Folder', 'table');
@@ -63,7 +63,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.waitForNotification();
       await assetsPage.navigateIntoFolder('Nested Home Test');
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToHome('test-image.jpg', 'table');
@@ -100,7 +100,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolder('Selected Folder');
       await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.completeUpload();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectFolder('Selected Folder');
