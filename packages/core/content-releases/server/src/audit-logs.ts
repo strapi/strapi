@@ -1,4 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
+import { emitAudit, type FieldChange } from '@strapi/utils';
 
 import { AUDITED_EVENTS } from './constants';
 
@@ -26,11 +27,6 @@ export interface CreateDetails {
   isScheduled: boolean;
   scheduledAt?: string | null;
   timezone?: string | null;
-}
-
-export interface FieldChange {
-  before: string | boolean | null;
-  after: string | boolean | null;
 }
 
 export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone'] as const;
@@ -128,23 +124,6 @@ export interface EntryUpdateDetails {
 export interface EntryRemoveDetails {
   entry: EntryRef;
 }
-
-/**
- * Emits an audit event and waits for it to be processed.
- * A failed audit write, or a failing listener, is logged here and doesn't affect the
- * operation that emitted the event.
- */
-export const emitAudit = async (
-  { strapi }: { strapi: Core.Strapi },
-  event: string,
-  payload: unknown
-): Promise<void> => {
-  try {
-    await strapi.eventHub.emit(event, payload);
-  } catch (error) {
-    strapi.log.error(`An event listener failed while handling ${event}`, { error });
-  }
-};
 
 /**
  * Emits an audit event for a write that may be part of a bulk transaction.

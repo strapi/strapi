@@ -1,8 +1,8 @@
+import { emitAudit } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import type { Settings } from '../../../shared/contracts/settings';
 import { AUDITED_EVENTS } from '../constants';
-import { emitAudit } from '../audit-logs';
 
 const DEFAULT_SETTINGS = {
   defaultTimezone: null,

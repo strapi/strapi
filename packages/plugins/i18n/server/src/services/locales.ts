@@ -1,5 +1,6 @@
 import { isNil } from 'lodash/fp';
-import { DEFAULT_LOCALE } from '../constants';
+import { emitAudit } from '@strapi/utils';
+import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 
 const find = (params: any = {}) =>
@@ -12,20 +13,38 @@ const findByCode = (code: any) =>
 
 const count = (params: any = {}) => strapi.db.query('plugin::i18n.locale').count({ where: params });
 
-const create = async (locale: any) => {
+const create = async (locale: any, { isDefault = false }: { isDefault?: boolean } = {}) => {
   const result = await strapi.db.query('plugin::i18n.locale').create({ data: locale });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+  if (result?.id) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_CREATE, {
+      localeId: result.id,
+      name: result.name,
+      isDefault,
+    });
+  }
 
   return result;
 };
 
 const update = async (params: any, updates: any) => {
+  const previous = await strapi.db.query('plugin::i18n.locale').findOne({ where: params });
+
   const result = await strapi.db
     .query('plugin::i18n.locale')
     .update({ where: params, data: updates });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+  if (result && previous?.name !== result.name) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_UPDATE, {
+      localeId: result.id,
+      name: result.name,
+      changes: { name: { before: previous?.name ?? null, after: result.name } },
+    });
+  }
 
   return result;
 };
@@ -39,14 +58,43 @@ const deleteFn = async ({ id }: any) => {
 
     getService('metrics').sendDidUpdateI18nLocalesEvent();
 
+    await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_DELETE, {
+      localeId: localeToDelete.id,
+      name: localeToDelete.name,
+    });
+
     return result;
   }
 
   return localeToDelete;
 };
 
-const setDefaultLocale = ({ code }: any) =>
-  getCoreStore().set({ key: 'default_locale', value: code });
+const setDefaultLocale = async ({ code }: any) => {
+  const previousCode = await getDefaultLocale();
+  const hasChanged = previousCode !== code;
+
+  // Look up the rows before the write: if this fails afterwards, the default is already
+  // switched and nothing recorded it.
+  const [previous, next] = hasChanged
+    ? await Promise.all([previousCode ? findByCode(previousCode) : null, findByCode(code)])
+    : [null, null];
+
+  // set() is typed void but resolves to the store row. Returned so callers that used it
+  // keep working.
+  const result = await getCoreStore().set({ key: 'default_locale', value: code });
+
+  if (hasChanged && next?.id) {
+    const before = previousCode ? { id: previous?.id ?? null, code: previousCode } : null;
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_DEFAULT_UPDATE, {
+      localeId: next.id,
+      name: next.name,
+      changes: { defaultLocale: { before, after: { id: next.id, code: next.code } } },
+    });
+  }
+
+  return result;
+};
 
 const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
 

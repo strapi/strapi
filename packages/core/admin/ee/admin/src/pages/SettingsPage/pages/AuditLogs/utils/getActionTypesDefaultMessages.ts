@@ -35,6 +35,10 @@ export const actionTypes = {
   'release.entry.update': 'Change entry on release',
   'release.entry.remove': 'Remove entry from release',
   'release.settings.update': 'Update release settings',
+  'locale.create': 'Create locale',
+  'locale.update': 'Update locale',
+  'locale.delete': 'Delete locale',
+  'locale.default.update': 'Change default locale',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {
