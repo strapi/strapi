@@ -65,14 +65,14 @@ const buildAssetFilters = (args: ListMediaArgs): Record<string, unknown> => {
  * sees the same subset it would through the admin API.
  */
 export const createListMediaHandler =
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { folderId, mime, name, page, pageSize, sort } = args as ListMediaArgs;
-    const pm = assertMediaPermission(context, ACTIONS.read, FILE_MODEL_UID);
+    const pm = assertMediaPermission(strapi, context, ACTIONS.read, FILE_MODEL_UID);
 
     const query = await pm.addPermissionsQueryTo({
       filters: buildAssetFilters({ folderId, mime, name }),
@@ -82,7 +82,7 @@ export const createListMediaHandler =
       populate: { folder: { fields: ['id', 'name'] } },
     });
 
-    const { results, pagination } = await getService('upload').findPage(query);
+    const { results, pagination } = await getService('upload', strapi).findPage(query);
 
     return ok({
       results: results.map(sanitizeMediaAsset),
@@ -97,16 +97,16 @@ export const createListMediaHandler =
  * `pm.isAllowed` only proves the action is permitted on the model, not on this row.
  */
 export const createGetMediaHandler =
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { id } = args as GetMediaArgs;
-    const pm = assertMediaPermission(context, ACTIONS.read, FILE_MODEL_UID);
+    const pm = assertMediaPermission(strapi, context, ACTIONS.read, FILE_MODEL_UID);
 
-    const asset = await getService('upload').findOne(id, {
+    const asset = await getService('upload', strapi).findOne(id, {
       folder: { fields: ['id', 'name'] },
     });
 
@@ -129,11 +129,11 @@ export const createGetMediaHandler =
  * `GET /upload/folder-structure` in the admin API.
  */
 export const createListFoldersHandler =
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async (): Promise<Modules.MCP.McpToolHandlerReturn> => {
-    assertMediaPermission(context, ACTIONS.read, FOLDER_MODEL_UID);
+    assertMediaPermission(strapi, context, ACTIONS.read, FOLDER_MODEL_UID);
 
-    const structure = await getService('folder').getStructure();
+    const structure = await getService('folder', strapi).getStructure();
 
     return ok({ data: sanitizeMediaFolderTree(structure) });
   };

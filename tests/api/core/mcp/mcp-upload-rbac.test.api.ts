@@ -133,7 +133,9 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const toolNames = await mcp.listToolNames(token.accessKey);
 
-      expect(toolNames.filter((name) => /media/.test(name)).sort()).toEqual([...READ_TOOLS].sort());
+      expect(toolNames.filter((name) => /media|folders/.test(name)).sort()).toEqual(
+        [...READ_TOOLS].sort()
+      );
     });
   });
 
