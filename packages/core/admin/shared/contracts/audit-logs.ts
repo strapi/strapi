@@ -75,4 +75,4 @@ namespace GetUsers {
       };
 }
 
-export { AuditLog, GetAll, Get, GetUsers };
+export type { AuditLog, GetAll, Get, GetUsers };

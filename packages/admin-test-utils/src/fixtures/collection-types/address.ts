@@ -420,4 +420,4 @@ const address = {
 
 type Address = typeof address;
 
-export { address, Address };
+export { address, type Address };
