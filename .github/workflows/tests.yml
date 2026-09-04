@@ -308,8 +308,17 @@ jobs:
   # skipped by every other e2e job. This one turns the flag on for the media-library
   # domain alone, which keeps the blast radius off the legacy suite.
   #
-  # Chromium only: the drag-and-drop helper builds a DataTransfer, which WebKit does
-  # not support, and Firefox has not been triaged for this suite yet.
+  # Chromium only, for two different reasons.
+  #
+  # WebKit is a hard limitation: the drag-and-drop helper builds a DataTransfer,
+  # which WebKit does not implement.
+  #
+  # Firefox is simply unknown. It has never been run against this suite: locally
+  # the admin login does not go through under Firefox, so every test drives a
+  # logged-out app and fails on the first click — which says nothing about the
+  # Media Library itself. CI does run Firefox for the rest of the e2e suite, so
+  # login works there. Adding `firefox` to a matrix here is the way to find out;
+  # it was left out of this PR so an unknown result would not block the review.
   #
   # `Drag and Drop` is excluded while the dnd-kit pointer simulation used to move
   # assets between folders is being fixed — those specs fail independently of the
