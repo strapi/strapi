@@ -10,17 +10,19 @@ const tsUtils = (): typeof import('@strapi/typescript-utils') => {
 
 interface Options {
   appDir?: string;
+  tsconfigPath?: string;
   ignoreDiagnostics?: boolean;
 }
 
 export default async function compile(options?: Options) {
-  const { appDir = process.cwd(), ignoreDiagnostics = false } = options ?? {};
+  const { appDir = process.cwd(), ignoreDiagnostics = false, tsconfigPath } = options ?? {};
   const isTSProject = await tsUtils().isUsingTypeScript(appDir);
   const outDir = await tsUtils().resolveOutDir(appDir);
 
   if (isTSProject) {
     try {
       await tsUtils().compile(appDir, {
+        tsconfigPath,
         configOptions: { options: { incremental: true }, ignoreDiagnostics },
       });
     } catch {

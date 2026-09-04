@@ -55,7 +55,6 @@ interface BaseContext {
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */
   target: string[];
-  tsconfig?: CLIContext['tsconfig'];
 }
 
 export type { BaseContext };

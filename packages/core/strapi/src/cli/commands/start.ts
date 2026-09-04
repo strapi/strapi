@@ -3,13 +3,17 @@ import fs from 'fs';
 import path from 'path';
 import { createStrapi } from '@strapi/core';
 
-import type { StrapiCommand } from '../types';
+import type { CLIContext, StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
 import { tryQuickOutDir } from '../utils/try-quick-outdir';
 
-const action = async () => {
-  const appDir = process.cwd();
-  const tsconfigPath = path.join(appDir, 'tsconfig.json');
+interface StartCommandOptions extends CLIContext {
+  tsconfigPath: string;
+}
+
+const action = async (options: StartCommandOptions) => {
+  const appDir = options.cwd;
+  const tsconfigPath = options.tsconfigPath;
 
   let distDir: string;
 
