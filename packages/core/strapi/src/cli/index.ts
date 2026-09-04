@@ -27,7 +27,7 @@ const createCLI = async (argv: string[], command = new Command()) => {
   // Lazy: defer `loadTsConfig` (which loads `typescript`) until first read
   let tsconfig: TsConfig | undefined;
   let loaded = false;
-  const ctx = { cwd, logger } as CLIContext;
+  const ctx: CLIContext = { cwd, logger };
   Object.defineProperty(ctx, 'tsconfig', {
     enumerable: true,
     get() {
