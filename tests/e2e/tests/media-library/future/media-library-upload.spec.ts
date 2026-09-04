@@ -161,10 +161,17 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         // `file-upload.spec.ts`. The server-side fetch blocks loopback and private
         // addresses for SSRF, so neither `page.route` nor a locally served file can
         // replace it without a config option on the upload plugin.
+        const before = await countAssets(page.request);
+
         await assetsPage.uploadFilesFromUrl('https://picsum.photos/200');
         await expect(assetsPage.uploadProgressDialog).toBeVisible();
         await assetsPage.waitForUploadProgressSuccess();
         await assetsPage.closeUploadProgressDialog();
+
+        // The fetched asset lands in the library. Counted rather than matched by
+        // name: the remote host decides the filename, so there is nothing stable
+        // to assert on.
+        expect(await countAssets(page.request)).toBe(before + 1);
       });
 
       await test.step('I cancel and retry an upload', async () => {
@@ -216,7 +223,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
       await test.step('I bulk upload many files', async () => {
         // uploading > 20 files completes with no server crash        [CMS-358]
-        const before = await countAssets(page.request);
+        const beforeBatch = await countAssets(page.request);
         const bigBatch = Array(25).fill(IMAGE);
 
         await assetsPage.uploadFilesWithFilePicker(bigBatch);
@@ -229,7 +236,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
         // The dialog's count comes from the client. Confirm the server kept them:
         // for a "no crash" step, the assets landing is the part that matters.
-        expect(await countAssets(page.request)).toBeGreaterThanOrEqual(before + 25);
+        expect(await countAssets(page.request)).toBeGreaterThanOrEqual(beforeBatch + 25);
       });
 
       // I upload files concurrently                                  [CMS-1111] (backlog)
