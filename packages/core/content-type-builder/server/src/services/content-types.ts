@@ -3,10 +3,15 @@ import { getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { getService } from '../utils';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
 
 const { ApplicationError } = errors;
+
+const pruneFolderReferences = (uids: UID.ContentType[]) => {
+  return getService('content-structure').commitFromUpdate({ deletedUids: new Set(uids) });
+};
 
 export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
@@ -219,6 +224,7 @@ export const editContentType = async (
       });
 
       await builder.writeFiles();
+      await pruneFolderReferences([uid]);
     } catch (error) {
       strapi.log.error(error);
       await apiHandler.rollback(uid);
@@ -251,6 +257,8 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
       await apiHandler.rollback(uid);
     }
   }
+
+  await pruneFolderReferences(uids);
 };
 
 /**
@@ -268,6 +276,7 @@ export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: an
     try {
       await builder.writeFiles();
       await apiHandler.clear(uid);
+      await pruneFolderReferences([uid]);
     } catch {
       await apiHandler.rollback(uid);
     }

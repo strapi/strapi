@@ -3,6 +3,7 @@ import { resetFiles } from '../../../../utils/file-reset';
 import { sharedSetup } from '../../../../utils/setup';
 import { clickAndWait } from '../../../../utils/shared';
 import { waitForRestart } from '../../../../utils/restart';
+import { startCreateContentType } from '../../../../utils/content-types';
 
 test.describe('Content Type UID Generation', () => {
   test.beforeEach(async ({ page }) => {
@@ -21,7 +22,7 @@ test.describe('Content Type UID Generation', () => {
 
   test('Should generate UID from singular name, not display name', async ({ page }) => {
     // Create a new collection type
-    await page.getByRole('button', { name: 'Create new collection type' }).click();
+    await startCreateContentType(page, 'collection');
     await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
 
     // Fill in "Members" as display name
@@ -78,7 +79,7 @@ test.describe('Content Type UID Generation', () => {
     // singular and plural names cannot be the same.
 
     // Create a new collection type
-    await page.getByRole('button', { name: 'Create new collection type' }).click();
+    await startCreateContentType(page, 'collection');
     await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
 
     // Fill in "Cities" as display name

@@ -5,6 +5,7 @@ import type { Core } from '@strapi/types';
 
 import type { IConfiguration } from '../../../types';
 import { enrichProjectSettingsForExport } from '../../utils/project-settings-logos';
+import { readContentStructureForExport } from '../../utils/content-structure';
 
 /**
  * Create a readable stream that export the Strapi app configuration
@@ -42,6 +43,12 @@ export const createConfigurationStream = (strapi: Core.Strapi): Readable => {
 
           yield item;
         }
+      }
+
+      const contentStructure = await readContentStructureForExport(strapi);
+
+      if (contentStructure) {
+        yield { type: 'content-structure', value: contentStructure };
       }
     })()
   );

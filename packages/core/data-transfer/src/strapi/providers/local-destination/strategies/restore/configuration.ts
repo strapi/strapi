@@ -5,6 +5,7 @@ import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
+import { restoreContentStructure } from '../../../../utils/content-structure';
 
 const omitInvalidCreationAttributes = omit(['id']);
 
@@ -36,6 +37,10 @@ export const restoreConfigs = async (strapi: Core.Strapi, config: IConfiguration
   if (config.type === 'webhook') {
     return restoreWebhooks(strapi, config.value as { value: unknown });
   }
+
+  if (config.type === 'content-structure') {
+    return restoreContentStructure(strapi, config.value);
+  }
 };
 
 export const createConfigurationWriteStream = async (
@@ -52,13 +57,13 @@ export const createConfigurationWriteStream = async (
       await transaction?.attach(async () => {
         try {
           await restoreConfigs(strapi, config);
-        } catch {
+        } catch (error) {
+          const id = (config.value as { id?: unknown } | null | undefined)?.id;
+          const label = id === undefined ? config.type : `${config.type} (${id})`;
+          const reason = error instanceof Error ? error.message : String(error);
+
           return callback(
-            new ProviderTransferError(
-              `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
-                config.value.id
-              )}`
-            )
+            new ProviderTransferError(`Failed to import ${chalk.yellowBright(label)}: ${reason}`)
           );
         }
         callback();

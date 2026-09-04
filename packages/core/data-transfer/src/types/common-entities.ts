@@ -125,7 +125,7 @@ interface ICircularLink extends IDefaultLink {
  * Strapi configurations
  */
 export interface IConfiguration<T = unknown> {
-  type: 'core-store' | 'webhook';
+  type: 'core-store' | 'webhook' | 'content-structure';
   value: T;
 }
 
