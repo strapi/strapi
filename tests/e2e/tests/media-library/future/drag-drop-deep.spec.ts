@@ -23,7 +23,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Tree Destination');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
 
@@ -39,10 +39,10 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Parent Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.navigateIntoFolder('Parent Folder');
       await assetsPage.createFolder('Child Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.getHomeTreeRow().click();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
@@ -60,7 +60,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Nested Home Test');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.navigateIntoFolder('Nested Home Test');
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
@@ -77,10 +77,10 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Ancestor');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.navigateIntoFolder('Ancestor');
       await assetsPage.createFolder('Descendant');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.getHomeTreeRow().click();
 
       await assetsPage.switchToTableView();
@@ -96,9 +96,9 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Multi Dest');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.createFolder('Selected Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
       await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
       await assetsPage.waitForUploadSuccess();
 

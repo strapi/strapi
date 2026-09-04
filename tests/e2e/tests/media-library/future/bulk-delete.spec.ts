@@ -48,7 +48,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
 
       await assetsPage.createFolder('Doomed');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToTableView();
       await assetsPage.selectAsset('Doomed');

@@ -128,8 +128,32 @@ export class AssetsPage {
     return fileChooser;
   }
 
+  /**
+   * Wait for an upload to report success.
+   *
+   * The beta Media Library reports upload completion in the progress dialog — the
+   * legacy library's success toast is gone, and nothing in the beta upload flow
+   * calls `toggleNotification`. Waiting on the Notifications region here only burns
+   * the timeout. The dialog is dismissed before handing back, because callers were
+   * written against a toast and expect feedback that clears itself; left open it
+   * swallows their next click.
+   *
+   * For actions that DO raise a toast — folder creation, delete, move, crop — use
+   * `waitForNotification()` instead.
+   */
   async waitForUploadSuccess() {
-    // Wait for the success notification inside the Notifications region
+    await this.waitForUploadProgressSuccess();
+    await this.closeUploadProgressDialog();
+  }
+
+  /**
+   * Wait for any toast in the Notifications region.
+   *
+   * Used after actions that still notify: folder creation, delete, move, crop.
+   * Deliberately not specific to one message — callers only need to know the action
+   * settled before they assert on the resulting view.
+   */
+  async waitForNotification() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
       .getByRole('status')
@@ -268,7 +292,17 @@ export class AssetsPage {
   async getTableRowNames() {
     const rows = this.page.getByRole('grid').getByRole('row');
     const texts = await rows.allInnerTexts();
-    return texts.slice(1).map((text) => text.split('\n').find(Boolean) ?? '');
+    // `innerText` on a row joins its cells with tabs, not newlines — splitting on
+    // newlines alone returns the whole row (mostly tab characters) instead of the
+    // name. The leading cells (checkbox, preview) are empty, so the first
+    // non-blank segment is the file or folder name.
+    return texts.slice(1).map(
+      (text) =>
+        text
+          .split(/[\t\n]+/)
+          .map((part) => part.trim())
+          .find(Boolean) ?? ''
+    );
   }
 
   async switchToTableView() {
@@ -288,8 +322,16 @@ export class AssetsPage {
    */
   async pickFilterOption(fieldName: string, optionName: string) {
     await this.getFilterMenuTrigger().click();
+    // The field row is a plain SubTrigger, so `menuitem` is right here.
     await this.page.getByRole('menuitem', { name: fieldName, exact: true }).hover();
-    await this.page.getByRole('menuitem', { name: optionName, exact: true }).click();
+    // The options are not. FilterMenu renders type values as `menuitemcheckbox` and
+    // date presets as `menuitemradio`; those are distinct ARIA roles, so a
+    // `menuitem` lookup never matches them. Accept all three.
+    const option = this.page
+      .getByRole('menuitemcheckbox', { name: optionName, exact: true })
+      .or(this.page.getByRole('menuitemradio', { name: optionName, exact: true }))
+      .or(this.page.getByRole('menuitem', { name: optionName, exact: true }));
+    await option.first().click();
     await this.page.keyboard.press('Escape');
   }
 
@@ -371,7 +413,14 @@ export class AssetsPage {
    * Close the asset details drawer
    */
   async closeAssetDetailsDrawer() {
-    await this.assetDetailsDrawer.getByRole('button', { name: 'Close' }).click();
+    // Two buttons answer to "Close" while the drawer's local toast is showing: the
+    // dialog's own control, and the toast's dismiss (rendered inside the form).
+    // Only the dialog control is a Radix trigger, so it is the one carrying
+    // `data-state`. Without this the click is a strict-mode violation.
+    await this.assetDetailsDrawer
+      .getByRole('button', { name: 'Close' })
+      .and(this.page.locator('[data-state]'))
+      .click();
   }
 
   /**
@@ -518,8 +567,32 @@ export class AssetsPage {
   /**
    * Navigate into a folder by clicking its card/row
    */
+  /**
+   * An item (asset or folder) as shown in the main asset list, in either view.
+   *
+   * Use this rather than a bare `page.getByText(name)`: names also appear in the
+   * sidebar folder tree and in button labels, so an unscoped lookup asserts on the
+   * wrong thing — or trips strict mode.
+   */
+  getListItem(name: string) {
+    return this.page
+      .getByTestId('assets-grid')
+      .getByText(name, { exact: true })
+      .or(
+        this.page
+          .getByRole('grid')
+          .getByRole('row')
+          .filter({ hasText: name })
+          .getByText(name, { exact: true })
+      );
+  }
+
   async navigateIntoFolder(name: string) {
-    await this.page.getByText(name).first().click();
+    // The folder name also appears in the sidebar folder tree, which sits earlier in
+    // the DOM — an unscoped `getByText(name).first()` clicks a tree node rather than
+    // the folder in the list. Scope to the main asset list, whichever view is active:
+    // grid renders a `list` with `data-testid="assets-grid"`, table renders a `grid`.
+    await this.getListItem(name).first().click();
   }
 
   /**
