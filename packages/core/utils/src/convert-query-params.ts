@@ -442,6 +442,14 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         return subPopulate === true ? { ...acc, [key]: true } : acc;
       }
 
+      // A nil value (e.g. `?populate[relation]` with no value, parsed as `null`
+      // when `strictNullHandling` is on) is not a valid populate directive.
+      // Skip it instead of dereferencing null further down (which threw
+      // "Cannot use 'in' operator" / "Cannot convert undefined or null to object").
+      if (isNil(subPopulate)) {
+        return acc;
+      }
+
       const attribute = attributes[key];
 
       if (!attribute) {

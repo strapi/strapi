@@ -249,6 +249,21 @@ describe('convert-query-params', () => {
       );
     });
 
+    // e.g. `?populate[relation]` with no value parses to `{ relation: null }`
+    // when `strictNullHandling` is on; this used to crash with a 500.
+    test.each<[label: string, key: string]>([
+      ['a relation', 'one_to_one'],
+      ['a dynamic zone', 'dz'],
+      ['a morph relation', 'morph_to_one'],
+    ])('skips a null populate value for %s instead of crashing', (_label, key) => {
+      const result = transformer.private_convertPopulateQueryParams(
+        { [key]: null } as never,
+        models['api::dog.dog']
+      );
+
+      expect(result).toStrictEqual({});
+    });
+
     describe('Fields selection', () => {
       test('should not select documentId when selecting fields for components', () => {
         const populate = {
