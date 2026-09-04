@@ -20,6 +20,8 @@ jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../core/scan-roots', () => ({ getScanRoots: jest.fn().mockResolvedValue([]) }));
+
 const buildStrapiMock = (
   cookieName?: string,
   cookiePath?: string,

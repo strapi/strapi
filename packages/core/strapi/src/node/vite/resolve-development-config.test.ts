@@ -1,5 +1,6 @@
 import http from 'node:http';
 
+import type { Alias, AliasOptions } from 'vite';
 import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
@@ -8,6 +9,24 @@ jest.mock('browserslist-to-esbuild', () => ({
   __esModule: true,
   default: jest.fn(() => ['chrome100']),
 }));
+
+jest.mock('@tailwindcss/vite', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ name: 'tailwindcss' })),
+}));
+
+/** Vite's `AliasOptions` is an array or a record; this config always builds the array form */
+const asAliasArray = (alias: AliasOptions | undefined): Alias[] => {
+  if (!Array.isArray(alias)) {
+    throw new Error('expected an alias array');
+  }
+
+  return alias;
+};
+
+const replacementFor = (alias: Alias[], mod: string) =>
+  alias.find((entry) => (entry.find instanceof RegExp ? entry.find.test(mod) : entry.find === mod))
+    ?.replacement;
 
 describe('Vite admin configuration', () => {
   it('does not copy public files into the admin build output', async () => {
@@ -30,6 +49,7 @@ describe('Vite admin configuration', () => {
         sourcemaps: false,
       },
       plugins: [],
+      scanRoots: [],
       tsconfig: undefined,
       customisations: undefined,
       features: undefined,
@@ -38,6 +58,9 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
+    expect(config.build?.rollupOptions?.input).toEqual({
+      strapi: expect.stringMatching(/index\.html$/),
+    });
   });
 
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
@@ -63,6 +86,7 @@ describe('Vite admin configuration', () => {
         open: false,
       },
       plugins: [],
+      scanRoots: [],
       tsconfig: undefined,
       customisations: undefined,
       features: undefined,
@@ -82,11 +106,11 @@ describe('Vite admin configuration', () => {
       expect.arrayContaining(['invariant', 'lodash', 'prismjs'])
     );
 
-    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014).
-    const alias = config.resolve?.alias as Record<string, string> | undefined;
-    expect(alias?.invariant).toEqual(expect.any(String));
-    expect(alias?.prismjs).toEqual(expect.any(String));
-    expect(alias?.lodash).toEqual(expect.any(String));
+    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014)
+    const alias = asAliasArray(config.resolve?.alias);
+    expect(replacementFor(alias, 'invariant')).toEqual(expect.any(String));
+    expect(replacementFor(alias, 'prismjs')).toEqual(expect.any(String));
+    expect(replacementFor(alias, 'lodash')).toEqual(expect.any(String));
 
     // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
     // field keeps a single instance (JSONInput instanceof checks)
@@ -94,8 +118,55 @@ describe('Vite admin configuration', () => {
       expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
     );
     for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
-      expect(alias?.[mod]).toEqual(expect.any(String));
+      expect(replacementFor(alias, mod)).toEqual(expect.any(String));
     }
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('keeps the design system regex alias after the monorepo merge', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = {
+      cwd: process.cwd(),
+      target: ['last 3 major versions'],
+      basePath: '/admin',
+      adminPath: '/admin',
+      distDir: 'dist/build',
+      appDir: process.cwd(),
+      entry: '.strapi/client/app.js',
+      distPath: `${process.cwd()}/dist/build`,
+      env: {},
+      runtimeDir: `${process.cwd()}/.strapi/client`,
+      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      bundler: 'vite' as const,
+      options: { open: false },
+      plugins: [],
+      scanRoots: [],
+      tsconfig: undefined,
+      customisations: undefined,
+      features: undefined,
+    } as unknown as BuildContext;
+
+    const config = await resolveDevelopmentConfig(ctx);
+    const alias = asAliasArray(config.resolve?.alias);
+    // Pin the entry by the specifier it matches, so a second regex alias cannot take its place
+    const designSystem = alias.find((entry) =>
+      entry.find instanceof RegExp
+        ? entry.find.test('@strapi/design-system')
+        : entry.find === '@strapi/design-system'
+    )?.find;
+
+    expect(designSystem).toBeInstanceOf(RegExp);
+    // A prefix match would skip the exports map, so `next/source.css` must miss
+    expect(
+      designSystem instanceof RegExp && designSystem.test('@strapi/design-system/next/source.css')
+    ).toBe(false);
+
+    // The monorepo aliases survive the merge
+    expect(replacementFor(alias, '@strapi/admin/strapi-admin')).toEqual(expect.any(String));
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
@@ -122,6 +193,7 @@ describe('Vite admin configuration', () => {
         open: false,
       },
       plugins: [],
+      scanRoots: [],
       tsconfig: undefined,
       customisations: undefined,
       features: undefined,

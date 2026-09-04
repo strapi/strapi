@@ -1,3 +1,6 @@
+import path from 'node:path';
+
+import tailwindcss from '@tailwindcss/vite';
 import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
@@ -158,7 +161,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: buildAdminViteResolveAliases(),
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [tailwindcss(), react(), buildFilesPlugin(ctx)],
   };
 };
 
@@ -180,7 +183,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       sourcemap: sourcemaps,
       rollupOptions: {
         input: {
-          strapi: ctx.entry,
+          strapi: path.join(ctx.runtimeDir, 'index.html'),
         },
       },
     },
@@ -190,16 +193,15 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const baseConfig = await resolveBaseConfig(ctx);
+  // A static import of Vite makes the CJS build print the Vite CJS deprecation warning
+  const { mergeAlias } = await import('vite');
 
   return {
     ...baseConfig,
     mode: 'development',
     resolve: {
       ...baseConfig.resolve,
-      alias: {
-        ...baseConfig.resolve?.alias,
-        ...getMonorepoAliases({ monorepo }),
-      },
+      alias: mergeAlias(baseConfig.resolve?.alias, getMonorepoAliases({ monorepo })),
     },
     server: {
       cors: false,
