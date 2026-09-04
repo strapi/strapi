@@ -187,6 +187,33 @@ describe('Bulk actions for folders & files', () => {
       expect(existingfilesIds).toEqual(expect.not.arrayContaining([file.id]));
     });
 
+    test('Deletes a replaced file along with its folder', async () => {
+      const folder = await createFolder('folder-with-replaced-file', null);
+      const file = await createAFile(folder.id);
+
+      await rq({
+        method: 'POST',
+        url: `/upload?id=${file.id}`,
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { folderIds: [folder.id] },
+      });
+
+      // Deletion selects the folder's files by folderPath. Replacing used to
+      // reset that to '/', so the file survived its folder — invisible in the
+      // Media Library and never freed from storage.
+      const resFiles = await rq({ method: 'GET', url: '/upload/files' });
+      const remainingIds = resFiles.body.results.map((f) => f.id);
+
+      expect(remainingIds).not.toContain(file.id);
+    });
+
     test('Can delete only folders', async () => {
       const folder = await createFolder('a random folder', null);
 
