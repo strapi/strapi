@@ -194,15 +194,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     async createExportStream(query: ExportQuery) {
       getExportSecret(strapi);
 
-      const {
-        cursor,
-        pageSize,
-        until,
-        token: _token,
-        page: _page,
-        sort: _sort,
-        ...filtersQuery
-      } = query;
+      const { cursor, pageSize, until, token, page: _page, sort: _sort, ...filtersQuery } = query;
 
       const configuredPartSize = strapi.config.get(
         'admin.auditLogs.exportPartRows',
@@ -300,7 +292,9 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
         until: untilId,
         isNewExport,
         partSize,
-        exportToken: signExportToken(getExportSecret(strapi), untilId, filtersQuery.filters),
+        exportToken: isNewExport
+          ? signExportToken(getExportSecret(strapi), untilId, filtersQuery.filters)
+          : (token as string),
       };
     },
 

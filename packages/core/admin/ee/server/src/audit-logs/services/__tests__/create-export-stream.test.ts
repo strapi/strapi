@@ -2,7 +2,7 @@ import type { Readable } from 'stream';
 
 import { AUDIT_LOG_EXPORT_EVENT } from '../../../../../../shared/utils/audit-log-export';
 import { createAuditLogsService, toCsvLine } from '../audit-logs';
-import { signExportToken } from '../../utils/export-token';
+import { signExportToken, verifyExportToken } from '../../utils/export-token';
 
 const SECRET = 'test-secret';
 
@@ -52,6 +52,21 @@ describe('Audit logs export stream', () => {
     );
   });
 
+  it('echoes the original token on continuations instead of re-signing it', async () => {
+    findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+    const original = continuationToken(50);
+    const service = createAuditLogsService(strapiMock);
+    const { exportToken, stream } = await service.createExportStream({
+      cursor: 10,
+      until: 50,
+      token: original,
+    });
+    await streamToString(stream);
+
+    expect(exportToken).toBe(original);
+  });
+
   it('refuses to export before writing anything when admin.auth.secret is not set', async () => {
     configGet.mockImplementation((key: string, defaultValue?: unknown) =>
       key === 'admin.auth.secret' ? undefined : defaultValue
@@ -79,7 +94,8 @@ describe('Audit logs export stream', () => {
     expect(until).toBe(2);
     expect(isNewExport).toBe(true);
     expect(nextCursor).toBeNull();
-    expect(exportToken).toBe(continuationToken(2));
+    expect(verifyExportToken(SECRET, exportToken, 2, undefined)).toBe(true);
+    expect(verifyExportToken(SECRET, exportToken, 3, undefined)).toBe(false);
 
     const lines = (await streamToString(stream)).split('\r\n');
     expect(lines[0]).toBe(CSV_BOM + CSV_HEADER);
