@@ -597,7 +597,7 @@ describe('useDocument · getInitialFormValues · i18n non-localized inheritance'
     expect(result.current.getInitialFormValues(true)).toEqual({});
   });
 
-  it('does not inherit non-localized component, dynamiczone, or relation fields (these are outside server availableLocales scope)', async () => {
+  it('inherits non-localized component and dynamiczone fields from availableLocales (relations stay excluded)', async () => {
     mockSchema({
       slug: { type: 'string', ...nonLocalized },
       cta: {
@@ -637,9 +637,109 @@ describe('useDocument · getInitialFormValues · i18n non-localized inheritance'
 
     const initial = result.current.getInitialFormValues(true) ?? {};
 
-    // Only non-localized scalar fields should be inherited. Component, dynamiczone,
-    // and relation values are not included, since they are not populated by the server in meta.availableLocales.
-    expect(initial).toEqual({ slug: 'inherited-slug' });
+    expect(initial).toEqual(
+      expect.objectContaining({
+        slug: 'inherited-slug',
+        cta: { label: 'Click me' },
+      })
+    );
+    expect(initial.blocks).toEqual([
+      expect.objectContaining({ __component: 'shared.button', label: 'block-1' }),
+    ]);
+    expect(initial).not.toHaveProperty('categories');
+  });
+
+  it('inherits nested non-localized component trees from availableLocales', async () => {
+    const sharedMidComponent = {
+      uid: 'shared.mid',
+      apiID: 'mid',
+      category: 'shared',
+      isDisplayed: true,
+      options: {},
+      info: { displayName: 'Mid', description: '', icon: 'layer' },
+      attributes: {
+        heading: { type: 'string' },
+        inners: { type: 'component', component: 'shared.button', repeatable: true },
+      },
+    };
+    const sharedOuterComponent = {
+      uid: 'shared.outer',
+      apiID: 'outer',
+      category: 'shared',
+      isDisplayed: true,
+      options: {},
+      info: { displayName: 'Outer', description: '', icon: 'layer' },
+      attributes: {
+        name: { type: 'string' },
+        mid: { type: 'component', component: 'shared.mid', repeatable: false },
+      },
+    };
+
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [sharedButtonComponent, sharedMidComponent, sharedOuterComponent],
+            contentTypes: [
+              {
+                uid: I18N_CT_UID,
+                isDisplayed: true,
+                apiID: 'i18n-bug',
+                kind: 'collectionType',
+                pluginOptions: { i18n: { localized: true } },
+                options: {},
+                info: {
+                  displayName: 'I18n Bug',
+                  singularName: 'i18n-bug',
+                  pluralName: 'i18n-bugs',
+                  description: '',
+                },
+                attributes: {
+                  documentId: { type: 'string' },
+                  profile: {
+                    type: 'component',
+                    component: 'shared.outer',
+                    repeatable: false,
+                    ...nonLocalized,
+                  },
+                  body: { type: 'string', ...localized },
+                },
+              },
+            ],
+            fieldSizes: {},
+          },
+        })
+      )
+    );
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      profile: {
+        name: 'shared-name',
+        mid: { heading: 'keep-heading', inners: [{ label: 'keep-inner' }] },
+      },
+      body: 'should not leak',
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const initial = result.current.getInitialFormValues(true) ?? {};
+
+    expect(initial.profile).toEqual(
+      expect.objectContaining({
+        name: 'shared-name',
+        mid: expect.objectContaining({
+          heading: 'keep-heading',
+          inners: [expect.objectContaining({ label: 'keep-inner' })],
+        }),
+      })
+    );
+    expect(initial).not.toHaveProperty('body');
   });
 });
 

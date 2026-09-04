@@ -405,6 +405,384 @@ describe('content-types service', () => {
         le: {},
       });
     });
+
+    it('fills empty arrays from the related entry (admin create-locale defaults)', () => {
+      const entry = {
+        name: 'fr',
+        variants: [],
+      };
+      const relatedEntry = {
+        name: 'en',
+        variants: [{ name: 'keep-me' }],
+      };
+      const componentModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          name: { pluginOptions: { i18n: { localized: true } } },
+          variants: {
+            type: 'component',
+            component: 'default.variant',
+            repeatable: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      const getModel = jest.fn(() => modelDef);
+      global.strapi = {
+        getModel,
+        components: { 'default.variant': componentModel },
+      } as any;
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.variants).toEqual([{ name: 'keep-me' }]);
+      expect(entry.name).toBe('fr');
+    });
+
+    it('preserves explicit empty arrays for non-component attributes', () => {
+      const modelDef = {
+        attributes: {
+          config: {
+            type: 'json',
+            pluginOptions: { i18n: { localized: false } },
+          },
+          gallery: {
+            type: 'media',
+            multiple: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: jest.fn(() => modelDef),
+        components: {},
+      } as any;
+
+      const entry = {
+        config: [],
+        gallery: [],
+      };
+      const relatedEntry = {
+        config: [{ source: 'default-locale' }],
+        gallery: [{ id: 42, name: 'default.jpg' }],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry).toEqual({
+        config: [],
+        gallery: [],
+      });
+    });
+
+    it('deep-fills nested components when the parent component is present but nested keys are unset', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const midModel = {
+        attributes: {
+          heading: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const outerModel = {
+        attributes: {
+          name: { type: 'string' },
+          mid: {
+            type: 'component',
+            component: 'default.mid',
+            repeatable: false,
+          },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          title: { pluginOptions: { i18n: { localized: true } } },
+          profile: {
+            type: 'component',
+            component: 'default.outer',
+            repeatable: false,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      const getModel = jest.fn(
+        (uid: string) =>
+          ({
+            model: modelDef,
+            'default.outer': outerModel,
+            'default.mid': midModel,
+            'default.inner': innerModel,
+          })[uid]
+      );
+      global.strapi = {
+        getModel,
+        components: {
+          'default.outer': outerModel,
+          'default.mid': midModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        title: 'fr',
+        profile: { name: 'shared-name' },
+      };
+      const relatedEntry = {
+        title: 'en',
+        profile: {
+          name: 'shared-name',
+          mid: { heading: 'keep-heading', inners: [{ label: 'keep-inner' }] },
+        },
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.profile).toEqual({
+        name: 'shared-name',
+        mid: { heading: 'keep-heading', inners: [{ label: 'keep-inner' }] },
+      });
+      expect(entry.title).toBe('fr');
+    });
+
+    it('deep-fills nested empty arrays inside a present non-localized component', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const outerModel = {
+        attributes: {
+          name: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          profile: {
+            type: 'component',
+            component: 'default.outer',
+            repeatable: false,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: (uid: string) =>
+          ({
+            model: modelDef,
+            'default.outer': outerModel,
+            'default.inner': innerModel,
+          })[uid],
+        components: {
+          'default.outer': outerModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        profile: { name: 'shared-name', inners: [] },
+      };
+      const relatedEntry = {
+        profile: {
+          name: 'shared-name',
+          inners: [{ label: 'keep-inner' }],
+        },
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.profile.inners).toEqual([{ label: 'keep-inner' }]);
+    });
+
+    it('fills empty dynamic zones from the related entry', () => {
+      const componentModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          title: { pluginOptions: { i18n: { localized: true } } },
+          blocks: {
+            type: 'dynamiczone',
+            components: ['default.compo'],
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: jest.fn(() => modelDef),
+        components: { 'default.compo': componentModel },
+      } as any;
+
+      const entry = {
+        title: 'fr',
+        blocks: [],
+      };
+      const relatedEntry = {
+        title: 'en',
+        blocks: [{ __component: 'default.compo', name: 'hero' }],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.blocks).toEqual([{ __component: 'default.compo', name: 'hero' }]);
+      expect(entry.title).toBe('fr');
+    });
+
+    it('preserves non-empty repeatable component payloads without positional merging', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const outerModel = {
+        attributes: {
+          name: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          profiles: {
+            type: 'component',
+            component: 'default.outer',
+            repeatable: true,
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: (uid: string) =>
+          ({
+            model: modelDef,
+            'default.outer': outerModel,
+            'default.inner': innerModel,
+          })[uid],
+        components: {
+          'default.outer': outerModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        profiles: [{ name: 'keep-parent', inners: [] }],
+      };
+      const relatedEntry = {
+        profiles: [
+          { name: 'old-parent', inners: [{ label: 'keep-inner' }] },
+          { name: 'intentionally-removed', inners: [{ label: 'do-not-restore' }] },
+        ],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.profiles).toEqual([{ name: 'keep-parent', inners: [] }]);
+    });
+
+    it('preserves non-empty dynamic-zone payloads without positional merging', () => {
+      const innerModel = {
+        attributes: {
+          label: { type: 'string' },
+        },
+      };
+      const heroModel = {
+        attributes: {
+          name: { type: 'string' },
+          inners: {
+            type: 'component',
+            component: 'default.inner',
+            repeatable: true,
+          },
+        },
+      };
+      const otherModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+      const modelDef = {
+        attributes: {
+          blocks: {
+            type: 'dynamiczone',
+            components: ['default.hero', 'default.other'],
+            pluginOptions: { i18n: { localized: false } },
+          },
+        },
+      };
+
+      global.strapi = {
+        getModel: (uid: string) =>
+          ({
+            model: modelDef,
+            'default.hero': heroModel,
+            'default.other': otherModel,
+            'default.inner': innerModel,
+          })[uid],
+        components: {
+          'default.hero': heroModel,
+          'default.other': otherModel,
+          'default.inner': innerModel,
+        },
+      } as any;
+
+      const entry = {
+        blocks: [
+          { __component: 'default.hero', name: 'keep-parent', inners: [] },
+          { __component: 'default.other', name: 'replacement' },
+        ],
+      };
+      const relatedEntry = {
+        blocks: [
+          {
+            __component: 'default.hero',
+            name: 'old-parent',
+            inners: [{ label: 'keep-inner' }],
+          },
+          {
+            __component: 'default.hero',
+            name: 'different-component',
+            inners: [{ label: 'do-not-copy' }],
+          },
+        ],
+      };
+
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+
+      expect(entry.blocks).toEqual([
+        {
+          __component: 'default.hero',
+          name: 'keep-parent',
+          inners: [],
+        },
+        { __component: 'default.other', name: 'replacement' },
+      ]);
+    });
   });
 
   describe('getNestedPopulateOfNonLocalizedAttributes', () => {
