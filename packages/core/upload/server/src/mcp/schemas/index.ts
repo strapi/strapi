@@ -4,15 +4,15 @@ export {
   pageSchema,
   pageSizeSchema,
   sortSchema,
-  listMediaAssetsInputSchema,
-  getMediaAssetInputSchema,
-  listMediaFoldersInputSchema,
+  listMediaInputSchema,
+  getMediaInputSchema,
+  listFoldersInputSchema,
 } from './input-schemas';
 export {
   mediaAssetOutputSchema,
-  getMediaAssetOutputSchema,
-  listMediaAssetsOutputSchema,
+  getMediaOutputSchema,
+  listMediaOutputSchema,
   mediaFolderNodeSchema,
-  listMediaFoldersOutputSchema,
+  listFoldersOutputSchema,
   type MediaFolderNode,
 } from './output-schemas';

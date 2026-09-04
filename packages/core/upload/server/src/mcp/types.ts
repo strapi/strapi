@@ -6,7 +6,7 @@ import type { z } from '@strapi/utils';
  *
  * Mirrors `Modules.MCP.McpToolDefinitionFields` but pins the schema generics to the erased
  * `z.ZodObject<z.ZodRawShape>` so a heterogeneous array of tools stays assignable without a cast.
- * `resolveInputSchema` is optional: `list_media_folders` takes no arguments.
+ * `resolveInputSchema` is optional: `list_folders` takes no arguments.
  */
 export type UploadMcpTool = {
   name: string;

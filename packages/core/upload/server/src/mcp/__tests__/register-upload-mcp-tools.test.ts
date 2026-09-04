@@ -25,9 +25,9 @@ describe('upload MCP tool registration', () => {
 
       expect(registerTool).toHaveBeenCalledTimes(3);
       expect(registerTool.mock.calls.map(([tool]) => tool.name)).toEqual([
-        'list_media_assets',
-        'get_media_asset',
-        'list_media_folders',
+        'list_media',
+        'get_media',
+        'list_folders',
       ]);
     });
 
@@ -82,14 +82,14 @@ describe('upload MCP tool registration', () => {
 
     test('documents that media uses numeric ids, not documentIds', () => {
       // The content-manager tools key on documentId, which files do not have.
-      expect(byName.get_media_asset.description).toMatch(/numeric id/i);
-      expect(byName.get_media_asset.description).toMatch(/not documents/i);
+      expect(byName.get_media.description).toMatch(/numeric id/i);
+      expect(byName.get_media.description).toMatch(/not documents/i);
     });
 
     test('exposes an input schema for the tools that take arguments, and none for the folder tree', () => {
-      expect(byName.list_media_assets.resolveInputSchema).toBeDefined();
-      expect(byName.get_media_asset.resolveInputSchema).toBeDefined();
-      expect(byName.list_media_folders.resolveInputSchema).toBeUndefined();
+      expect(byName.list_media.resolveInputSchema).toBeDefined();
+      expect(byName.get_media.resolveInputSchema).toBeDefined();
+      expect(byName.list_folders.resolveInputSchema).toBeUndefined();
     });
   });
 });
