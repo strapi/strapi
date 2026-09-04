@@ -154,6 +154,15 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       MODE_RANK[input.mfa.mode] < MODE_RANK[previous.mfa.mode] ||
       (input.mfa.mode !== 'required' && removedRoles.length > 0);
     if (isDowngrade) {
+      // A downgrade requires re-authentication, and an account with no local password (SSO-only,
+      // the same condition `isExemptFromMfa` treats as exempt) has no local credential to
+      // present. Refused explicitly, before the password/code checks below: `auth.validatePassword`
+      // would otherwise be asked to compare a password against a null hash.
+      if (!actorRow.password) {
+        throw new ValidationError(
+          'Your account has no local password, so it cannot lower two-factor authentication requirements. Ask an administrator who signs in with a password.'
+        );
+      }
       if (!input.password) {
         throw new ValidationError(
           'Your password is required to lower two-factor authentication requirements'

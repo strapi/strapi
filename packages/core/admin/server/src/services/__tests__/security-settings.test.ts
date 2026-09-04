@@ -219,6 +219,21 @@ describe('security-settings: service', () => {
     ).resolves.toMatchObject({ mfa: { mode: 'required' } });
   });
 
+  test('an exempt (SSO-only) caller has no local password to re-authenticate a downgrade with', async () => {
+    const { service, storeSet } = setup({
+      stored: { mfa: { mode: 'required' } },
+      exempt: true,
+      actor: { password: null },
+    });
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } },
+        actor
+      )
+    ).rejects.toThrow(/no local password/i);
+    expect(storeSet).not.toHaveBeenCalled();
+  });
+
   test('an enrolled caller raises to required and the store and role flags are written together', async () => {
     const { service, roles, storeSet, transaction, emit } = setup({ enrolled: true });
 
@@ -250,9 +265,11 @@ describe('security-settings: service', () => {
     await expect(enrolled.service.updateSettings(body, actor)).rejects.toThrow(
       /password is required/i
     );
+    expect(enrolled.storeSet).not.toHaveBeenCalled();
     await expect(
       enrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
     ).rejects.toThrow(/code is required/i);
+    expect(enrolled.storeSet).not.toHaveBeenCalled();
     await expect(
       enrolled.service.updateSettings({ ...body, password: 'pw', code: '123456' }, actor)
     ).resolves.toMatchObject({ mfa: { mode: 'optional' } });
@@ -265,6 +282,7 @@ describe('security-settings: service', () => {
         actor
       )
     ).rejects.toThrow(/invalid credentials/i);
+    expect(unenrolled.storeSet).not.toHaveBeenCalled();
   });
 
   test('removing a required role is a downgrade too', async () => {
@@ -272,6 +290,21 @@ describe('security-settings: service', () => {
     await expect(
       service.updateSettings({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } }, actor)
     ).rejects.toThrow(/password is required/i);
+  });
+
+  test('dropping every required role while the mode stays required needs no re-authentication', async () => {
+    const { service } = setup({ stored: { mfa: { mode: 'required' } }, enrolled: true });
+    await expect(
+      service.updateSettings({ mfa: { mode: 'required', graceDays: 7, requiredRoles: [] } }, actor)
+    ).resolves.toEqual({ mfa: { mode: 'required', graceDays: 7, requiredRoles: [] } });
+  });
+
+  test('the same role drop is a real downgrade once the mode itself drops to optional', async () => {
+    const { service, storeSet } = setup({ stored: { mfa: { mode: 'required' } }, enrolled: true });
+    await expect(
+      service.updateSettings({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } }, actor)
+    ).rejects.toThrow(/password is required/i);
+    expect(storeSet).not.toHaveBeenCalled();
   });
 
   test('leaving off clears pending grace stamps but not locks', async () => {
@@ -287,10 +320,19 @@ describe('security-settings: service', () => {
     expect(users.find((u) => u.id === 9)!.mfaGraceUntil).toEqual(new Date(0));
   });
 
-  test('staying off or moving between optional and required clears nothing', async () => {
+  test('optional → required clears nothing', async () => {
     const { service, users } = setup({ enrolled: true });
     await service.updateSettings(
       { mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] } },
+      actor
+    );
+    expect(users.find((u) => u.id === 8)!.mfaGraceUntil).not.toBeNull();
+  });
+
+  test('off → off clears nothing', async () => {
+    const { service, users } = setup({ stored: { mfa: { mode: 'off' } }, enrolled: true });
+    await service.updateSettings(
+      { mfa: { mode: 'off', graceDays: 7, requiredRoles: ['2'] } },
       actor
     );
     expect(users.find((u) => u.id === 8)!.mfaGraceUntil).not.toBeNull();
@@ -305,5 +347,15 @@ describe('security-settings: service', () => {
       )
     ).rejects.toThrow(/unknown role/i);
     expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test('duplicate role ids in requiredRoles are de-duplicated', async () => {
+    const { service } = setup();
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '2'] } },
+        actor
+      )
+    ).resolves.toEqual({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } });
   });
 });
