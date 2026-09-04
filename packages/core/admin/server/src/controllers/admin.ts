@@ -16,6 +16,7 @@ import { getService } from '../utils';
 import type {
   Init,
   GetProjectSettings,
+  GetProjectType,
   Information,
   Plugins,
   TelemetryProperties,
@@ -46,9 +47,9 @@ export default {
 
   // NOTE: admin/ee/server overrides this controller, and adds the EE features
   // This returns an empty feature list for CE
-  async getProjectType() {
+  async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+    return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {

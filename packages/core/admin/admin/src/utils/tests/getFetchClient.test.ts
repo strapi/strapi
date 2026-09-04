@@ -32,6 +32,49 @@ describe('getFetchClient', () => {
     jest.clearAllMocks();
   });
 
+  describe('backend URL resolution', () => {
+    const originalStrapi = window.strapi;
+
+    afterEach(() => {
+      window.strapi = originalStrapi;
+    });
+
+    it('throws when no backend URL can be resolved', () => {
+      // @ts-expect-error - reproducing a bootstrap where the global is not assigned
+      delete window.strapi;
+
+      expect(() => getFetchClient()).toThrow(/could not resolve a backend URL/);
+    });
+
+    it('throws rather than prefixing requests with "undefined"', () => {
+      // @ts-expect-error - a malformed global, e.g. the `#strapi` mount element
+      window.strapi = {};
+
+      expect(() => getFetchClient()).toThrow(/could not resolve a backend URL/);
+    });
+
+    const mockOkResponse = () =>
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+      );
+
+    it('accepts an empty backend URL, which makes requests relative', async () => {
+      mockOkResponse();
+
+      await getFetchClient({ backendURL: '' }).get('/admin/foo');
+
+      expect(window.fetch).toHaveBeenCalledWith('/admin/foo', expect.anything());
+    });
+
+    it('prefers an explicit backend URL over the global', async () => {
+      mockOkResponse();
+
+      await getFetchClient({ backendURL: 'http://example.test' }).get('/admin/foo');
+
+      expect(window.fetch).toHaveBeenCalledWith('http://example.test/admin/foo', expect.anything());
+    });
+  });
+
   it('should return the 4 HTTP methods to call GET, POST, PUT and DELETE apis', () => {
     const response = getFetchClient();
     expect(response).toHaveProperty('get');
@@ -361,6 +404,88 @@ describe('getFetchClient', () => {
         'http://localhost:1337/admin/access-token',
         expect.objectContaining({ method: 'POST' })
       );
+    });
+
+    describe('with a client-specific backend URL', () => {
+      const originalStrapi = window.strapi;
+
+      afterEach(() => {
+        window.strapi = originalStrapi;
+      });
+
+      const mock401ThenRefreshThenRetry = () => {
+        (window.fetch as jest.Mock)
+          // First call returns 401
+          .mockImplementationOnce(() =>
+            Promise.resolve({
+              status: 401,
+              ok: false,
+              json: () =>
+                Promise.resolve({
+                  error: { message: 'Unauthorized', status: 401 },
+                }),
+            })
+          )
+          // Token refresh call succeeds
+          .mockImplementationOnce(() =>
+            Promise.resolve({
+              status: 200,
+              ok: true,
+              json: () => Promise.resolve({ data: { token: 'new-token' } }),
+            })
+          )
+          // Retry call succeeds
+          .mockImplementationOnce(() =>
+            Promise.resolve({
+              status: 200,
+              ok: true,
+              json: () => Promise.resolve({ data: 'success after retry' }),
+            })
+          );
+      };
+
+      it('refreshes against the client backend rather than the global one', async () => {
+        // @ts-expect-error - a global pointing at a different backend
+        window.strapi = { backendURL: 'http://global.test' };
+        mock401ThenRefreshThenRetry();
+
+        const fetchClient = getFetchClient({ backendURL: 'http://override.test' });
+        const { data } = await fetchClient.get('/api/test');
+
+        expect(data).toEqual({ data: 'success after retry' });
+        expect(window.fetch).toHaveBeenCalledTimes(3);
+        expect(window.fetch).toHaveBeenNthCalledWith(
+          1,
+          'http://override.test/api/test',
+          expect.anything()
+        );
+        expect(window.fetch).toHaveBeenNthCalledWith(
+          2,
+          'http://override.test/admin/access-token',
+          expect.objectContaining({ method: 'POST' })
+        );
+        expect(window.fetch).toHaveBeenNthCalledWith(
+          3,
+          'http://override.test/api/test',
+          expect.anything()
+        );
+      });
+
+      it('refreshes during bootstrap, before the global is assigned', async () => {
+        // @ts-expect-error - reproducing a bootstrap where the global is not assigned
+        delete window.strapi;
+        mock401ThenRefreshThenRetry();
+
+        const fetchClient = getFetchClient({ backendURL: 'http://override.test' });
+        const { data } = await fetchClient.get('/api/test');
+
+        expect(data).toEqual({ data: 'success after retry' });
+        expect(window.fetch).toHaveBeenNthCalledWith(
+          2,
+          'http://override.test/admin/access-token',
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
     });
 
     it('should not refresh token for auth paths', async () => {

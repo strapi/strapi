@@ -8826,6 +8826,7 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/types": "npm:5.52.0"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
@@ -9205,6 +9206,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa-compress": "npm:4.0.3"
+    "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
@@ -10985,6 +10987,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/eslint@npm:8.56.12":
+  version: 8.56.12
+  resolution: "@types/eslint@npm:8.56.12"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/json-schema": "npm:*"
+  checksum: 10c0/e4ca426abe9d55f82b69a3250bec78b6d340ad1e567f91c97ecc59d3b2d6a1d8494955ac62ad0ea14b97519db580611c02be8277cbea370bdfb0f96aa2910504
+  languageName: node
+  linkType: hard
+
 "@types/estree-jsx@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree-jsx@npm:1.0.5"
@@ -11224,7 +11236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
@@ -11297,6 +11309,15 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/47b6fdddee779ad44721557776bc0dc9fc3945e0a08cf838b441a357dfdf5fcc92c3029e906f5b0bf0ef20abbb5c3297a957b71e2d38398d7cdafc18892a7bab
+  languageName: node
+  linkType: hard
+
+"@types/koa-favicon@npm:2.1.5":
+  version: 2.1.5
+  resolution: "@types/koa-favicon@npm:2.1.5"
+  dependencies:
+    "@types/koa": "npm:*"
+  checksum: 10c0/5b1eeeeaa801b5a870b2d2b6d29bf17406fd82f7e2e94c8e0d5adcd55dde76d03851722867c1778727c388ea507b40f0503b90ad4c03c135c374250e762642d0
   languageName: node
   linkType: hard
 
@@ -28090,6 +28111,7 @@ __metadata:
     "@swc/core": "npm:1.13.5"
     "@swc/helpers": "npm:0.5.17"
     "@swc/jest": "npm:0.2.39"
+    "@types/eslint": "npm:8.56.12"
     "@types/fs-extra": "npm:11.0.4"
     "@types/git-url-parse": "npm:9.0.3"
     "@types/prompts": "npm:2.4.9"
