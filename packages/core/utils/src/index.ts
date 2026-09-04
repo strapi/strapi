@@ -10,6 +10,7 @@ export { createModelCache } from './model-cache';
 export { validateYupSchema, validateYupSchemaSync } from './validators';
 export { formatYupErrors } from './format-yup-error';
 export { isOperator, isOperatorOfType } from './operators';
+export { lazyInit } from './lazy';
 
 export * as queryParams from './convert-query-params';
 export {
