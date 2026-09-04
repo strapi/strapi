@@ -62,6 +62,7 @@ import {
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
@@ -1283,6 +1284,43 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * AssetDetailsDrawer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Whether a pointer press outside the panel should leave the drawer open.
+ *
+ * Anywhere on the page behind dismisses it, controls included. Two exceptions,
+ * neither of which is "the user meant to stay": the part of an asset's card or
+ * row whose `click` switches the drawer rather than closing it — not its own
+ * checkbox or actions menu, which act on the item; and a panel already closing,
+ * which `forceMount` keeps listening through its animation, where dismissing
+ * again would re-trigger the unsaved-changes guard for nothing.
+ */
+const shouldKeepDrawerOpen = (
+  event: { target: EventTarget | null; detail: { originalEvent: { button: number } } },
+  isVisible: boolean
+) => {
+  if (!isVisible) {
+    return true;
+  }
+
+  // Radix's dismisser fires on any `pointerdown`, secondary buttons included. A
+  // right-click is contextual, and with the create menu on the background one
+  // press would otherwise both close this and open that.
+  if (event.detail.originalEvent.button !== 0) {
+    return true;
+  }
+
+  if (!(event.target instanceof Element)) {
+    return false;
+  }
+
+  // The card's own controls — its checkbox, its actions menu — act on the item
+  // and stop the card's click, so no switch follows and the press dismisses.
+  return (
+    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null &&
+    event.target.closest(ASSET_ITEM_CONTROL_SELECTOR) === null
+  );
+};
+
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
@@ -1321,6 +1359,13 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
+        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
+        // as the header's close button, so unsaved edits are still guarded.
+        onPointerDownOutside={(event) => {
+          if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
       >
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />
       </Drawer.Body>

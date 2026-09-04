@@ -4,6 +4,7 @@ import { http, HttpResponse } from 'msw';
 
 import { AssetsTable } from '../components/AssetsTable';
 import { BulkActionsBar } from '../components/BulkActionsBar';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../constants';
 import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -145,6 +146,21 @@ describe('AssetsTable', () => {
       expect(headerRow).not.toHaveAttribute('data-native-context-menu');
       expect(itemRows).toHaveLength(2);
       itemRows.forEach((row) => expect(row).toHaveAttribute('data-native-context-menu'));
+    });
+
+    // Folder rows are deliberately unmarked: opening a folder should close
+    // the drawer, not switch it.
+    it('marks asset rows — and only asset rows — as asset details triggers', () => {
+      setup({
+        assets: [createMockAsset(7, 'photo.png')],
+        folders: [createMockFolder(5, 'Photos')],
+      });
+
+      // [0] is the header row, then folders, then assets.
+      const [, folderRow, assetRow] = screen.getAllByRole('row');
+
+      expect(assetRow).toHaveAttribute('data-asset-details-trigger');
+      expect(folderRow).not.toHaveAttribute('data-asset-details-trigger');
     });
   });
 
@@ -538,6 +554,25 @@ describe('AssetsTable', () => {
 
       await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
       expect(await screen.findByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
+    });
+
+    // The drawer keeps itself open for a press that switches it, so the item's
+    // own controls have to be distinguishable from the rest of the row.
+    it("marks the asset row's own controls as item-scoped", async () => {
+      setup({ assets: mockAssets });
+
+      const checkbox = await screen.findByRole('checkbox', { name: 'Select image1.png' });
+      const actions = await screen.findAllByRole('button', { name: 'More actions' });
+
+      /* eslint-disable testing-library/no-node-access */
+      expect(checkbox.closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+      expect(actions[0].closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+
+      // The row itself must stay outside the marker, or nothing would switch.
+      const row = checkbox.closest(ASSET_DETAILS_TRIGGER_SELECTOR);
+      expect(row).not.toBeNull();
+      expect(row?.matches(ASSET_ITEM_CONTROL_SELECTOR)).toBe(false);
+      /* eslint-enable testing-library/no-node-access */
     });
 
     it('selects folders and assets via the header checkbox and shows indeterminate when partial', async () => {
