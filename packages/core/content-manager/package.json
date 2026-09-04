@@ -26,22 +26,22 @@
   ],
   "exports": {
     "./strapi-admin": {
+      "@strapi/source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./_internal/shared": {
+      "@strapi/source": "./shared/index.ts",
       "types": "./dist/shared/index.d.ts",
-      "source": "./shared/index.ts",
       "import": "./dist/shared/index.mjs",
       "require": "./dist/shared/index.js",
       "default": "./dist/shared/index.js"
     },
     "./strapi-server": {
+      "@strapi/source": "./server/src/index.ts",
       "types": "./dist/server/src/index.d.ts",
-      "source": "./server/src/index.ts",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },

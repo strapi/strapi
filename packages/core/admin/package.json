@@ -26,36 +26,36 @@
   ],
   "exports": {
     "./strapi-admin": {
+      "@strapi/source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-admin/ee": {
+      "@strapi/source": "./admin/src/ee.ts",
       "types": "./dist/admin/src/ee.d.ts",
-      "source": "./admin/src/ee.ts",
       "import": "./dist/admin/ee.mjs",
       "require": "./dist/admin/ee.js",
       "default": "./dist/admin/ee.js"
     },
     "./strapi-admin/test": {
+      "@strapi/source": "./admin/tests/index.ts",
       "types": "./dist/admin/tests/index.d.ts",
-      "source": "./admin/tests/index.ts",
       "import": "./dist/admin/test.mjs",
       "require": "./dist/admin/test.js",
       "default": "./dist/admin/test.js"
     },
     "./_internal": {
+      "@strapi/source": "./_internal/index.ts",
       "types": "./dist/_internal/index.d.ts",
-      "source": "./_internal/index.ts",
       "import": "./dist/_internal.mjs",
       "require": "./dist/_internal.js",
       "default": "./dist/_internal.js"
     },
     "./strapi-server": {
+      "@strapi/source": "./server/src/index.ts",
       "types": "./dist/server/src/index.d.ts",
-      "source": "./server/src/index.js",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"

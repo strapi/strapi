@@ -32,13 +32,17 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "@strapi/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
+    "./dist/*": [
+      "./dist/*.js",
+      "./dist/*/index.js"
+    ],
     "./*": "./*"
   },
   "files": [
