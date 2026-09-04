@@ -31,11 +31,11 @@ export const mediaAssetOutputSchema = z.object({
   updatedAt: z.string().nullable().optional(),
 });
 
-export const getMediaAssetOutputSchema = z.object({
+export const getMediaOutputSchema = z.object({
   data: mediaAssetOutputSchema.nullable(),
 });
 
-export const listMediaAssetsOutputSchema = z.object({
+export const listMediaOutputSchema = z.object({
   results: z.array(mediaAssetOutputSchema),
   pagination: z.object({
     page: z.number(),
@@ -62,6 +62,6 @@ export const mediaFolderNodeSchema: z.ZodType<MediaFolderNode> = z.lazy(() =>
   })
 );
 
-export const listMediaFoldersOutputSchema = z.object({
+export const listFoldersOutputSchema = z.object({
   data: z.array(mediaFolderNodeSchema).describe('Nested folder structure, roots first.'),
 });

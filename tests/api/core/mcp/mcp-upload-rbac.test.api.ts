@@ -10,7 +10,7 @@ const UPLOAD_ACTIONS = {
   settingsRead: 'plugin::upload.settings.read',
 } as const;
 
-const READ_TOOLS = ['list_media_assets', 'get_media_asset', 'list_media_folders'] as const;
+const READ_TOOLS = ['list_media', 'get_media', 'list_folders'] as const;
 
 /** Fields that must never reach an MCP client. */
 const FORBIDDEN_ASSET_FIELDS = [
@@ -138,15 +138,15 @@ describe('MCP upload read tools RBAC (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // list_media_assets
+  // list_media
   // ---------------------------------------------------------------------------
 
-  describe('list_media_assets', () => {
+  describe('list_media', () => {
     test('returns the sanitized asset shape with no provider secrets or private metadata', async () => {
       await seeder.seedAsset({ name: 'listed.jpg', alternativeText: 'alt text' });
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_assets', {});
+      const response = await mcp.callTool(token.accessKey, 'list_media', {});
 
       expect(response.error).toBeUndefined();
       expect(response.result?.isError).not.toBe(true);
@@ -181,7 +181,7 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const token = await createReadTokenSession();
 
-      const inFolder = await mcp.callTool(token.accessKey, 'list_media_assets', {
+      const inFolder = await mcp.callTool(token.accessKey, 'list_media', {
         folderId: folder.id,
       });
       expect(
@@ -190,7 +190,7 @@ describe('MCP upload read tools RBAC (api)', () => {
         )
       ).toEqual(['in-folder.jpg']);
 
-      const atRoot = await mcp.callTool(token.accessKey, 'list_media_assets', {
+      const atRoot = await mcp.callTool(token.accessKey, 'list_media', {
         folderId: null,
       });
       expect(
@@ -206,14 +206,14 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const token = await createReadTokenSession();
 
-      const images = await mcp.callTool(token.accessKey, 'list_media_assets', { mime: 'image' });
+      const images = await mcp.callTool(token.accessKey, 'list_media', { mime: 'image' });
       expect(
         (images.result?.structuredContent?.results as Record<string, unknown>[]).map(
           (asset) => asset.name
         )
       ).toEqual(['photo.jpg']);
 
-      const pdfs = await mcp.callTool(token.accessKey, 'list_media_assets', {
+      const pdfs = await mcp.callTool(token.accessKey, 'list_media', {
         mime: 'application/pdf',
       });
       expect(
@@ -229,7 +229,7 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_assets', { name: 'logo' });
+      const response = await mcp.callTool(token.accessKey, 'list_media', { name: 'logo' });
 
       expect(
         (response.result?.structuredContent?.results as Record<string, unknown>[]).map(
@@ -244,7 +244,7 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_assets', {
+      const response = await mcp.callTool(token.accessKey, 'list_media', {
         sort: 'name:ASC',
         page: 1,
         pageSize: 1,
@@ -264,7 +264,7 @@ describe('MCP upload read tools RBAC (api)', () => {
     test('rejects a sort on a private column', async () => {
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_assets', {
+      const response = await mcp.callTool(token.accessKey, 'list_media', {
         sort: 'folderPath:ASC',
       });
 
@@ -273,10 +273,10 @@ describe('MCP upload read tools RBAC (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // get_media_asset
+  // get_media
   // ---------------------------------------------------------------------------
 
-  describe('get_media_asset', () => {
+  describe('get_media', () => {
     test('returns one sanitized asset by numeric id, including its folder', async () => {
       const folder = await seeder.seedFolder('Docs');
       const seeded = await seeder.seedAsset({
@@ -287,7 +287,7 @@ describe('MCP upload read tools RBAC (api)', () => {
 
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'get_media_asset', { id: seeded.id });
+      const response = await mcp.callTool(token.accessKey, 'get_media', { id: seeded.id });
 
       expect(response.error).toBeUndefined();
       expect(response.result?.isError).not.toBe(true);
@@ -309,7 +309,7 @@ describe('MCP upload read tools RBAC (api)', () => {
     test('errors for an unknown id', async () => {
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'get_media_asset', { id: 999999 });
+      const response = await mcp.callTool(token.accessKey, 'get_media', { id: 999999 });
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
     });
@@ -317,7 +317,7 @@ describe('MCP upload read tools RBAC (api)', () => {
     test('rejects a documentId in place of a numeric id', async () => {
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'get_media_asset', {
+      const response = await mcp.callTool(token.accessKey, 'get_media', {
         id: 'z7v8zma53x01r6oceimv922b',
       });
 
@@ -326,17 +326,17 @@ describe('MCP upload read tools RBAC (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // list_media_folders
+  // list_folders
   // ---------------------------------------------------------------------------
 
-  describe('list_media_folders', () => {
+  describe('list_folders', () => {
     test('returns the nested folder tree without internal path bookkeeping', async () => {
       const parent = await seeder.seedFolder('Parent');
       await seeder.seedFolder('Child', parent.id);
 
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_folders', {});
+      const response = await mcp.callTool(token.accessKey, 'list_folders', {});
 
       expect(response.error).toBeUndefined();
       expect(response.result?.isError).not.toBe(true);
@@ -356,7 +356,7 @@ describe('MCP upload read tools RBAC (api)', () => {
     test('returns an empty tree when there are no folders', async () => {
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'list_media_folders', {});
+      const response = await mcp.callTool(token.accessKey, 'list_folders', {});
 
       expect(response.result?.structuredContent?.data).toEqual([]);
     });
