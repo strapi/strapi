@@ -58,8 +58,11 @@ const createPermissionChecker =
       );
     };
 
-    const sanitizeOutput = (data: Entity, { action = ACTIONS.read }: { action?: string } = {}) => {
-      return permissionsManager.sanitizeOutput(data, { subject: toSubject(data), action });
+    const sanitizeOutput = (
+      data: Entity,
+      { action = ACTIONS.read, subject = data }: { action?: string; subject?: Entity } = {}
+    ) => {
+      return permissionsManager.sanitizeOutput(data, { subject: toSubject(subject), action });
     };
 
     const getRulesForAction = (action: string) => {

@@ -380,7 +380,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
+      invalidatesTags: (_result, error, { collectionType, model, documentId }) => {
+        if (error) {
+          return [];
+        }
+
         return [
           {
             type: 'Document',
@@ -424,21 +428,28 @@ const documentApi = contentManagerApi.injectEndpoints({
       Pick<Update.Params, 'model'> &
         Partial<Pick<Update.Params, 'documentId'>> & {
           collectionType: string;
-          data: Update.Request['body'];
+          data: Omit<Update.Request['body'], 'baseVersion'>;
+          baseVersion?: string;
           params?: Update.Request['query'];
         }
     >({
-      query: ({ collectionType, model, documentId, data, params }) => ({
+      query: ({ collectionType, model, documentId, data, baseVersion, params }) => ({
         url: `/content-manager/${collectionType}/${model}${
           documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
         }`,
         method: 'PUT',
-        data,
+        data: { ...data, baseVersion },
         config: {
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
+      invalidatesTags: (_result, error, { collectionType, model, documentId }) => {
+        // Failed writes (including 409 stale-version) must not refetch the document.
+        // Refetch remounts Edit View, drops the conflict dialog, and replaces local edits.
+        if (error) {
+          return [];
+        }
+
         return [
           {
             type: 'Document',
