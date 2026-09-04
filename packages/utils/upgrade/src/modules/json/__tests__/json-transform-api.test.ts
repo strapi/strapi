@@ -1,7 +1,6 @@
-import { cloneDeep } from 'lodash/fp';
-
 import type { Utils } from '@strapi/types';
 
+import { structuredCloneSafe } from '@strapi/utils';
 import { createJSONTransformAPI } from '../transform-api';
 
 import type { JSONTransformAPI } from '../types';
@@ -13,7 +12,7 @@ describe('JSON Transform API', () => {
   let obj: Utils.JSONObject;
 
   beforeEach(() => {
-    obj = cloneDeep(model);
+    obj = structuredCloneSafe(model);
     api = createJSONTransformAPI(obj);
   });
 

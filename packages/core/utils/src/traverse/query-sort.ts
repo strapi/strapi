@@ -10,11 +10,11 @@ import {
   pipe,
   isNil,
   first,
-  cloneDeep,
 } from 'lodash/fp';
 
 import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
+import { structuredCloneSafe } from '../structured-clone-safe';
 
 const ORDERS = { asc: 'asc', desc: 'desc' };
 const ORDER_VALUES = Object.values(ORDERS);
@@ -119,7 +119,7 @@ const sort = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: structuredCloneSafe<Record<string, unknown>>,
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars

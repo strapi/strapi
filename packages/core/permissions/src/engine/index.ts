@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
-import { providerFactory } from '@strapi/utils';
+import { providerFactory, structuredCloneSafe } from '@strapi/utils';
 
 import {
   createEngineHooks,
@@ -129,7 +129,7 @@ const newEngine = (params: EngineParams): Engine => {
         conditions.map(async (condition) => ({
           condition,
           result: await condition.handler(
-            _.merge(options, { permission: _.cloneDeep(permission) })
+            _.merge(options, { permission: structuredCloneSafe(permission) })
           ),
         }))
       );

@@ -9,7 +9,6 @@ import {
   pick,
   getOr,
   isObject,
-  cloneDeep,
 } from 'lodash/fp';
 
 import type { UID } from '@strapi/types';
@@ -21,6 +20,7 @@ import {
   async,
   traverse,
   createModelCache,
+  structuredCloneSafe,
 } from '@strapi/utils';
 import { createPermissionFieldsCache } from './permission-fields';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
@@ -142,7 +142,7 @@ export default ({ action, ability, model }: any) => {
     );
 
     return async (query: any) => {
-      const sanitizedQuery = cloneDeep(query);
+      const sanitizedQuery = structuredCloneSafe(query);
 
       const [sanitizedFilters, sanitizedSort, sanitizedPopulate, sanitizedFields] =
         await Promise.all([

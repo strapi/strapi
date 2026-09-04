@@ -1,5 +1,5 @@
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
-import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
+import { pick, pipe, has, prop, isNil, isArray } from 'lodash/fp';
+import { errors, contentTypes as contentTypeUtils, structuredCloneSafe } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
 
@@ -71,7 +71,7 @@ const removeId = (value: any) => {
 };
 
 const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
-  removeIdsMut(model, cloneDeep(entry));
+  removeIdsMut(model, structuredCloneSafe(entry));
 
 const removeIdsMut = (
   model: Struct.ComponentSchema | Struct.ContentTypeSchema,

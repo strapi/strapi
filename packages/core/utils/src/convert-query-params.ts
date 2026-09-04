@@ -6,17 +6,7 @@
  */
 
 import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import { get, isArray, isEmpty, isInteger, isNil, isObject, isString, toNumber } from 'lodash/fp';
 import {
   constants,
   hasDraftAndPublish,
@@ -35,6 +25,7 @@ import {
   type SortParamsObject,
 } from './sort-query';
 import { Model } from './types';
+import { structuredCloneSafe } from './structured-clone-safe';
 
 export type { SortParams, SortParamsObject } from './sort-query';
 
@@ -670,7 +661,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     // Don't mutate the original object
-    const filtersCopy = cloneDeep(filters);
+    const filtersCopy = structuredCloneSafe(filters);
 
     return convertAndSanitizeFilters(filtersCopy, schema);
   };
