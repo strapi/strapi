@@ -12,6 +12,10 @@ export declare namespace Me {
       enabledAt: AdminUser['mfaEnabledAt'];
       recoveryCodesRemaining: number;
       codesAcknowledged: boolean;
+      /** Cycle 2: policy requires this account to be enrolled. */
+      required: boolean;
+      /** ISO deadline of the running grace period, or null. */
+      graceUntil: string | null;
     };
   }
 }

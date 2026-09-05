@@ -10,7 +10,9 @@ import {
   getSessionManager,
   buildSessionMetadataFromContext,
 } from '../../../shared/utils/session-auth';
+import { MfaRequiredError } from '../services/mfa-errors';
 
+import type { AdminUser } from '../../../shared/contracts/shared';
 import type {
   Me,
   Enrol,
@@ -39,7 +41,8 @@ export default {
     const mfa = requireEnabled(ctx);
     if (!mfa) return;
 
-    const userId = String(ctx.state.user.id);
+    const user = ctx.state.user as AdminUser;
+    const userId = String(user.id);
     const enrolled = await mfa.isEnrolled(userId);
 
     // The secret and otpauth URI are deliberately absent: they are returned only by /mfa/enrol,
@@ -47,9 +50,13 @@ export default {
     ctx.body = {
       data: {
         enabled: enrolled,
-        enabledAt: enrolled ? ctx.state.user.mfaEnabledAt : null,
+        enabledAt: enrolled ? user.mfaEnabledAt : null,
         recoveryCodesRemaining: enrolled ? await mfa.countUnusedRecoveryCodes(userId) : 0,
         codesAcknowledged: enrolled ? await mfa.areCodesAcknowledged(userId) : false,
+        // Cycle 2: whether policy requires this account to be enrolled, and the deadline stamped
+        // by `enforce` at the first session it applied to. The grace banner reads these.
+        required: await mfa.isMfaRequiredFor(user),
+        graceUntil: user.mfaGraceUntil ? new Date(user.mfaGraceUntil).toISOString() : null,
       },
     } satisfies Me.Response;
   },
@@ -119,6 +126,13 @@ export default {
     const sessionManager = getSessionManager();
     if (!sessionManager) {
       return ctx.internalServerError();
+    }
+
+    // A required account cannot turn its second factor off (spec "Guard"): the profile section
+    // hides the button, and this refusal is what makes that more than cosmetic. Checked before
+    // validation so no password/code attempt is spent on a request that can never succeed.
+    if (await mfa.isMfaRequiredFor(ctx.state.user as AdminUser)) {
+      throw new MfaRequiredError();
     }
 
     await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});

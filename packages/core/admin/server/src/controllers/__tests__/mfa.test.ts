@@ -5,6 +5,7 @@ import { errors } from '@strapi/utils';
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
 import mfaController from '../mfa';
+import { MfaRequiredError } from '../../services/mfa-errors';
 
 const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
@@ -112,6 +113,7 @@ describe('mfa controller', () => {
     const isEnrolled = jest.fn(() => Promise.resolve(true));
     const countUnusedRecoveryCodes = jest.fn(() => Promise.resolve(3));
     const areCodesAcknowledged = jest.fn(() => Promise.resolve(true));
+    const isMfaRequiredFor = jest.fn(() => Promise.resolve(false));
 
     setStrapi({
       admin: {
@@ -121,6 +123,7 @@ describe('mfa controller', () => {
             isEnrolled,
             countUnusedRecoveryCodes,
             areCodesAcknowledged,
+            isMfaRequiredFor,
           },
         },
       },
@@ -143,9 +146,63 @@ describe('mfa controller', () => {
         enabledAt,
         recoveryCodesRemaining: 3,
         codesAcknowledged: true,
+        required: false,
+        graceUntil: null,
       },
     });
     expect(JSON.stringify(ctx.body)).not.toContain('top-secret-ciphertext');
+  });
+
+  describe('me (enforcement fields)', () => {
+    test('reports required and the grace deadline for a required, unenrolled user', async () => {
+      const isMfaRequiredFor = jest.fn(() => Promise.resolve(true));
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor,
+            },
+          },
+        },
+      });
+      const graceUntil = new Date('2026-09-11T10:00:00.000Z');
+      const { ctx } = buildCtx({}, { mfaGraceUntil: graceUntil });
+
+      await mfaController.me(ctx);
+
+      expect(isMfaRequiredFor).toHaveBeenCalledWith(expect.objectContaining({ id: 7 }));
+      expect(ctx.body).toEqual({
+        data: {
+          enabled: false,
+          enabledAt: null,
+          recoveryCodesRemaining: 0,
+          codesAcknowledged: false,
+          required: true,
+          graceUntil: '2026-09-11T10:00:00.000Z',
+        },
+      });
+    });
+
+    test('reports required: false and graceUntil: null when nothing applies', async () => {
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+            },
+          },
+        },
+      });
+      const { ctx } = buildCtx();
+
+      await mfaController.me(ctx);
+
+      expect(ctx.body.data).toEqual(expect.objectContaining({ required: false, graceUntil: null }));
+    });
   });
 
   test('enrol requires the current password', async () => {
@@ -262,6 +319,7 @@ describe('mfa controller', () => {
     const recordEvent = jest.fn();
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
       isEnabled: jest.fn(() => true),
+      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -307,6 +365,7 @@ describe('mfa controller', () => {
         services: {
           mfa: {
             isEnabled: jest.fn(() => true),
+            isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
             assertPasswordAndFactor,
             disable: disableFn,
             recordEvent,
@@ -343,6 +402,7 @@ describe('mfa controller', () => {
     const { invalidateRefreshToken, listSessions, sessionManagerFn, notify } =
       buildStrapiWithSessionManager({
         isEnabled: jest.fn(() => true),
+        isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
         assertPasswordAndFactor,
         disable: disableFn,
         recordEvent,
@@ -389,6 +449,7 @@ describe('mfa controller', () => {
     const recordEvent = jest.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
       isEnabled: jest.fn(() => true),
+      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -424,6 +485,7 @@ describe('mfa controller', () => {
     const recordEvent = jest.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
       isEnabled: jest.fn(() => true),
+      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -445,6 +507,7 @@ describe('mfa controller', () => {
     const recordEvent = jest.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
       isEnabled: jest.fn(() => true),
+      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -466,6 +529,20 @@ describe('mfa controller', () => {
     expect(listSessions).toHaveBeenCalledWith('7');
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7');
     expect(ctx.status).toBe(204);
+  });
+
+  test('disable is refused with MfaRequiredError while the caller is required, before any attempt is spent', async () => {
+    const assertPasswordAndFactor = jest.fn();
+    // `buildStrapiWithSessionManager` calls `setStrapi` itself -- see its definition above.
+    buildStrapiWithSessionManager({
+      isEnabled: () => true,
+      isMfaRequiredFor: jest.fn(() => Promise.resolve(true)),
+      assertPasswordAndFactor,
+    });
+    const { ctx } = buildCtx({ password: 'pw', code: '123456' });
+
+    await expect(mfaController.disable(ctx)).rejects.toBeInstanceOf(MfaRequiredError);
+    expect(assertPasswordAndFactor).not.toHaveBeenCalled();
   });
 
   test('regenerating codes requires both the password and a valid code', async () => {
