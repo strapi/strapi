@@ -220,6 +220,30 @@ describe('Admin MFA enforcement', () => {
       expect(withAuth.body.data.mfa.requiredRoles).toEqual([]);
     });
 
+    test('increasing graceDays needs password and code', async () => {
+      const noAuth = await rq({
+        url: '/admin/security-settings',
+        method: 'PUT',
+        body: { mfa: { mode: 'optional', graceDays: 5, requiredRoles: [] } },
+      });
+      expect(noAuth.statusCode).toBe(400);
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, (31 - (Math.floor(Date.now() / 1000) % 30)) * 1000)
+      );
+      const withAuth = await rq({
+        url: '/admin/security-settings',
+        method: 'PUT',
+        body: {
+          mfa: { mode: 'optional', graceDays: 5, requiredRoles: [] },
+          password: superAdmin.loginInfo.password,
+          code: totpFor(superAdminSecret),
+        },
+      });
+      expect(withAuth.statusCode).toBe(200);
+      expect(withAuth.body.data.mfa.graceDays).toBe(5);
+    });
+
     test('the super admin can replace their authenticator with a recovery code', async () => {
       // A fresh code set: regenerate needs password + a code; wait for a new step first.
       await new Promise((resolve) =>

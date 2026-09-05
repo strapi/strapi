@@ -254,14 +254,14 @@ describe('security-settings: service', () => {
     const { service, roles, storeSet, transaction, emit } = setup({ enrolled: true });
 
     const result = await service.updateSettings(
-      { mfa: { mode: 'required', graceDays: 10, requiredRoles: ['1'] } },
+      { mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] } },
       actor
     );
 
-    expect(result).toEqual({ mfa: { mode: 'required', graceDays: 10, requiredRoles: ['1'] } });
+    expect(result).toEqual({ mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] } });
     expect(storeSet).toHaveBeenCalledWith({
       key: 'security-settings',
-      value: { mfa: { mode: 'required', graceDays: 10 } },
+      value: { mfa: { mode: 'required', graceDays: 5 } },
     });
     expect(roles.map((r) => [r.id, r.mfaRequired])).toEqual([
       [1, true],
@@ -321,6 +321,38 @@ describe('security-settings: service', () => {
       service.updateSettings({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } }, actor)
     ).rejects.toThrow(/password is required/i);
     expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test('increasing graceDays is a downgrade: needs the password (and a code when enrolled)', async () => {
+    const enrolled = setup({ stored: { mfa: { mode: 'optional', graceDays: 7 } }, enrolled: true });
+    const body = { mfa: { mode: 'optional' as const, graceDays: 14, requiredRoles: ['2'] } };
+    await expect(enrolled.service.updateSettings(body, actor)).rejects.toThrow(
+      /password is required/i
+    );
+    expect(enrolled.storeSet).not.toHaveBeenCalled();
+    await expect(
+      enrolled.service.updateSettings({ ...body, password: 'pw', code: '123456' }, actor)
+    ).resolves.toMatchObject({ mfa: { graceDays: 14 } });
+    expect(enrolled.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
+  });
+
+  test('decreasing or keeping graceDays is not a downgrade', async () => {
+    const { service } = setup({
+      stored: { mfa: { mode: 'optional', graceDays: 7 } },
+      enrolled: true,
+    });
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 3, requiredRoles: ['2'] } },
+        actor
+      )
+    ).resolves.toMatchObject({ mfa: { graceDays: 3 } });
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 3, requiredRoles: ['2'] } },
+        actor
+      )
+    ).resolves.toMatchObject({ mfa: { graceDays: 3 } });
   });
 
   test('leaving off clears pending grace stamps but not locks', async () => {

@@ -163,14 +163,17 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     }
 
     // Security downgrades need re-authentication, exactly like `/mfa/disable`: session authority
-    // alone is not enough when the session may be the thing an attacker holds. A role dropped
-    // from `requiredRoles` only relaxes anything while the *resulting* mode is not `required`:
-    // once every local-password user is covered by mode alone, the per-role list is inert, so
-    // removing a role on the same move that raises to `required` is not a downgrade.
+    // alone is not enough when the session may be the thing an attacker holds. Any change that
+    // relaxes enforcement -- a lower mode, a dropped required role, or a longer grace period --
+    // counts. A role dropped from `requiredRoles` only relaxes anything while the *resulting* mode
+    // is not `required`: once every local-password user is covered by mode alone, the per-role
+    // list is inert, so removing a role on the same move that raises to `required` is not a
+    // downgrade.
     const removedRoles = previous.mfa.requiredRoles.filter((id) => !requiredRoles.includes(id));
     const isDowngrade =
       MODE_RANK[input.mfa.mode] < MODE_RANK[previous.mfa.mode] ||
-      (input.mfa.mode !== 'required' && removedRoles.length > 0);
+      (input.mfa.mode !== 'required' && removedRoles.length > 0) ||
+      input.mfa.graceDays > previous.mfa.graceDays;
     if (isDowngrade) {
       // A downgrade requires re-authentication, and an account with no local password (SSO-only,
       // the same condition `isExemptFromMfa` treats as exempt) has no local credential to
