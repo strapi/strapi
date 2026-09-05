@@ -26,9 +26,15 @@ export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
  * every default-off instance.
  *
  * The options passed to the hook can only depend on the *previous* render's result (the hook's
- * own return value isn't available yet while building its own argument), so "seen a 404" is
- * tracked in state and flipped off-by-one render behind via an effect rather than read from the
- * `error` this same call returns.
+ * own return value isn't available yet while building its own argument), so "is a 404 the
+ * current state" is tracked in state and mirrored off-by-one render behind via an effect rather
+ * than read from the `error` this same call returns. This mirroring goes **both ways**: the
+ * banner is mounted for the whole authenticated session, and `/admin/mfa/me` is a shared query
+ * cache entry that `TwoFactorSection`, `SecurityPage` and `MfaNotices` also read, so any of them
+ * (or this component, once the feature is turned back on) can land a successful response and
+ * bring polling/refetch-on-focus back for everyone subscribed -- a one-way latch would mean a
+ * single observed 404 permanently disables this banner's ability to notice a grace period for
+ * the rest of the tab's life, even after an admin enables the requirement.
  */
 const MfaGraceBanner = () => {
   const { formatMessage, formatDate } = useIntl();
@@ -39,8 +45,9 @@ const MfaGraceBanner = () => {
   });
 
   React.useEffect(() => {
-    if (isNotFoundError(error) && !isFeatureOff) {
-      setIsFeatureOff(true);
+    const notFound = isNotFoundError(error);
+    if (notFound !== isFeatureOff) {
+      setIsFeatureOff(notFound);
     }
   }, [error, isFeatureOff]);
 
