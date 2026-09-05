@@ -25,6 +25,16 @@ interface LoginProps {
   children?: React.ReactNode;
 }
 
+/**
+ * The server refuses a password login for an account whose enrolment grace period expired with
+ * `MfaLockedError` (403). Keyed on the runtime `name`, not the message, so copy changes on the
+ * server never break the screen. Typed loosely on purpose: `ApiError['name']` is a closed union
+ * of the `@strapi/utils` error class names, and this class sets its `name` at runtime, so a
+ * direct comparison against the union would not typecheck.
+ */
+export const isMfaLockedError = (error: { name?: string }): boolean =>
+  error.name === 'MfaLockedError';
+
 const LOGIN_SCHEMA = yup.object().shape({
   email: yup
     .string()
@@ -52,6 +62,17 @@ const Login = ({ children }: LoginProps) => {
     const res = await login(body);
 
     if ('error' in res) {
+      if (isMfaLockedError(res.error)) {
+        setApiError(
+          formatMessage({
+            id: 'Auth.form.mfa.locked.message',
+            defaultMessage:
+              'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+          })
+        );
+        return;
+      }
+
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {

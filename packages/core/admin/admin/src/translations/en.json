@@ -39,6 +39,7 @@
   "Auth.form.mfa.button.verify": "Verify",
   "Auth.form.mfa.code.label": "Authentication code",
   "Auth.form.mfa.link.back": "Back to login",
+  "Auth.form.mfa.locked.message": "This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.",
   "Auth.form.mfa.subtitle": "Enter the code from your authenticator app, or one of your recovery codes.",
   "Auth.form.mfa.title": "Two-factor authentication",
   "Auth.form.password.hide-password": "Hide password",

@@ -91,5 +91,67 @@ describe('ResetPassword', () => {
       // the token is in state, not anywhere persistent
       expect(window.localStorage.getItem('jwtToken')).toBeNull();
     });
+
+    it('shows the locked-account message when login answers 403 MfaLockedError', async () => {
+      server.use(
+        http.post('/admin/login', () =>
+          HttpResponse.json(
+            {
+              error: {
+                status: 403,
+                name: 'MfaLockedError',
+                message:
+                  'Two-factor authentication was not set up in time; this account is locked.',
+                details: {},
+              },
+            },
+            { status: 403 }
+          )
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText } = render(<Login />);
+
+      await user.type(getByLabelText('Email*'), 'test@testing.com');
+      await user.type(getByLabelText('Password*'), 'Testing123!');
+      fireEvent.click(getByRole('button', { name: 'Login' }));
+
+      // The design system keeps a permanent, empty `role="alert"` live region mounted for toast
+      // announcements, so `findByRole('alert')` resolves against that instead of waiting for this
+      // banner (see MfaChallenge.test.tsx for the same workaround). Wait on the actual text, then
+      // confirm it is the alert-role element.
+      const errorMessage = await findByText(
+        'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.'
+      );
+      expect(errorMessage).toHaveAttribute('role', 'alert');
+      expect(window.localStorage.getItem('jwtToken')).toBeNull();
+    });
+
+    it('still shows the server message for other login errors', async () => {
+      server.use(
+        http.post('/admin/login', () =>
+          HttpResponse.json(
+            {
+              error: {
+                status: 400,
+                name: 'ApplicationError',
+                message: 'Invalid credentials',
+                details: {},
+              },
+            },
+            { status: 400 }
+          )
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText } = render(<Login />);
+
+      await user.type(getByLabelText('Email*'), 'test@testing.com');
+      await user.type(getByLabelText('Password*'), 'wrong');
+      fireEvent.click(getByRole('button', { name: 'Login' }));
+
+      const errorMessage = await findByText('Invalid credentials');
+      expect(errorMessage).toHaveAttribute('role', 'alert');
+    });
   });
 });
