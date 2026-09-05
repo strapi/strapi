@@ -101,4 +101,22 @@ describe('Header', () => {
 
     expect(getByText('Back')).toBeInTheDocument();
   });
+
+  test.each([
+    ['a percent sign', '100%', '100%25'],
+    ['an ampersand', 'a&b', 'a%26b'],
+    ['a hash', 'a#b', 'a%23b'],
+  ])('re-encodes %s in a carried-over filter on the back link', (_label, raw, encoded) => {
+    (useQueryParams as jest.Mock).mockReturnValueOnce([
+      { rawQuery: '', query: { folder: 2, filters: { $and: [{ name: { $eq: raw } }] } } },
+      jest.fn(),
+    ]);
+
+    const { getByRole } = setup({ folder: FIXTURE_FOLDER });
+
+    expect(getByRole('link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      expect.stringContaining(`filters[$and][0][name][$eq]=${encoded}`)
+    );
+  });
 });

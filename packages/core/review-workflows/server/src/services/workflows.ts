@@ -117,7 +117,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           await strapi
             .plugin('content-releases')
             .service('release-action')
-            .validateActionsByContentTypes(opts.data.contentTypes);
+            ?.validateActionsByContentTypes(opts.data.contentTypes);
         }
 
         return createdWorkflow;
@@ -197,7 +197,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await strapi
           .plugin('content-releases')
           .service('release-action')
-          .validateActionsByContentTypes([
+          ?.validateActionsByContentTypes([
             ...workflow.contentTypes,
             ...(opts.data.contentTypes || []),
           ]);
@@ -243,7 +243,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await strapi
           .plugin('content-releases')
           .service('release-action')
-          .validateActionsByContentTypes(workflow.contentTypes);
+          ?.validateActionsByContentTypes(workflow.contentTypes);
 
         return deletedWorkflow;
       });

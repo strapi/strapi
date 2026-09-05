@@ -159,4 +159,30 @@ describe('useListFilters URL writes', () => {
     expect(result.current.location.search).not.toContain('filters=');
     expect(result.current.navigationType).toBe('REPLACE');
   });
+
+  it.each([
+    ['a percent sign', '100%'],
+    ['an ampersand', 'a&b'],
+    ['a hash', 'a#b'],
+  ])('keeps a search term containing %s intact across filter writes', (_label, term) => {
+    const encoded = encodeURIComponent(term);
+    const { result } = renderHook(
+      () => ({ listFilters: useListFilters(), location: useLocation() }),
+      { initialEntries: [`/?_q=${encoded}`] }
+    );
+
+    act(() => {
+      result.current.listFilters.addFilter({ kind: 'type', condition: 'is', values: ['picture'] });
+    });
+
+    expect(result.current.location.search).toContain(`_q=${encoded}`);
+
+    act(() => {
+      result.current.listFilters.clearFilters();
+    });
+
+    // Clearing must not drop the search along with the filters.
+    expect(result.current.location.search).toContain(`_q=${encoded}`);
+    expect(result.current.location.search).not.toContain('filters=');
+  });
 });

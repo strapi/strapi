@@ -1,5 +1,6 @@
 import { FileWithRawFile } from '../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
 
+import { resolveFileMime } from './resolveFileMime';
 import { typeFromMime } from './typeFromMime';
 
 function getFilenameFromURL(url: string) {
@@ -26,15 +27,21 @@ export const urlsToAssets = async (urls: string[]): Promise<FileWithRawFile[]> =
   // Retrieve the assets metadata
   const assetsResults = await Promise.all(assetPromises);
 
-  const assets = assetsResults.map<FileWithRawFile>((fullFilledAsset) => ({
-    source: 'url' as const,
-    name: fullFilledAsset.name,
-    type: typeFromMime(fullFilledAsset.mime!),
-    url: fullFilledAsset.url,
-    ext: fullFilledAsset.url.split('.').pop(),
-    mime: fullFilledAsset.mime ? fullFilledAsset.mime : undefined,
-    rawFile: fullFilledAsset.rawFile,
-  }));
+  const assets = await Promise.all(
+    assetsResults.map(async (fullFilledAsset) => {
+      const mime = await resolveFileMime(fullFilledAsset.mime, fullFilledAsset.rawFile);
+
+      return {
+        source: 'url' as const,
+        name: fullFilledAsset.name,
+        type: typeFromMime(mime),
+        url: fullFilledAsset.url,
+        ext: fullFilledAsset.url.split('.').pop(),
+        mime: mime || undefined,
+        rawFile: fullFilledAsset.rawFile,
+      };
+    })
+  );
 
   return assets;
 };

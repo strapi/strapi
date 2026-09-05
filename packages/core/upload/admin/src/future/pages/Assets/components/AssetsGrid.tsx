@@ -10,9 +10,11 @@ import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -58,6 +60,7 @@ const StyledCard = styled(Card)<{
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
+  isolation: isolate;
   cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
   /* No opacity change while busy — the overlay does the dimming, and stacking
@@ -230,6 +233,9 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       }}
       role="listitem"
       tabIndex={0}
+      // Right-clicking an item is not the background gesture: the folder keeps
+      // the browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
     >
       {canUpdate && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
@@ -467,12 +473,16 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      {...ASSET_DETAILS_TRIGGER_PROPS}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="listitem"
+      // Right-clicking an item is not the background gesture: the card keeps
+      // the browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e) => e.preventDefault()}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
@@ -484,7 +494,10 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
     >
       <StyledCardHeader>
         {canUpdate && (
-          <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <CheckboxOverlay
+            {...ASSET_ITEM_CONTROL_PROPS}
+            onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+          >
             <Checkbox
               checked={selected}
               onClick={handleCheckboxClick}
@@ -513,7 +526,12 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
           <NameButton type="button" onClick={handleNameClick}>
             <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
-          <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+          <Flex
+            {...ASSET_ITEM_CONTROL_PROPS}
+            onClick={stopCardEvent}
+            onKeyDown={stopCardEvent}
+            onPointerDown={stopCardEvent}
+          >
             <AssetActionsMenu asset={asset} dragData={dragData} />
           </Flex>
         </CardFooter>
@@ -529,18 +547,22 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  /** Keys of the rendered items, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
+export const AssetsGrid = ({
+  assets,
+  folders = [],
+  renderedKeys,
+  onAssetItemClick,
+}: AssetsGridProps) => {
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
   // range selection follows it.
-  const orderedItemKeys: ItemKey[] = [
-    ...folders.map((folder) => folderKey(folder.id)),
-    ...assets.map((asset) => assetKey(asset.id)),
-  ];
+  const orderedItemKeys: ItemKey[] = renderedKeys ?? buildRenderedKeys({ folders, assets });
 
   // The empty state is owned by the page (`AssetsView` renders `EmptyState`) — an
   // empty grid renders nothing at all.

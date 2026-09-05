@@ -4,10 +4,19 @@ import { useDispatch, useStore } from 'react-redux';
 
 import { uploadApi } from '../../../services/api';
 import { useGetAssetsQuery } from '../../../services/assets';
+import { useTypedSelector } from '../../../store/hooks';
+import { selectCompletedUploads } from '../../../store/uploadProgress';
+import { getRelationId } from '../../../utils/getRelationId';
+import { mergeUploadedAssets } from '../utils/mergeUploadedAssets';
 
 import type { File, Pagination } from '../../../../../../shared/contracts/files';
 
 const PAGE_SIZE = 20;
+
+/**
+ * How many list views keep their loaded pages in memory.
+ */
+const MAX_REMEMBERED_LISTS = 10;
 
 interface UseInfiniteAssetsOptions {
   folder?: number | null;
@@ -68,6 +77,13 @@ const flattenPages = (pages: Record<number, File[]>): File[] => {
 };
 
 /**
+ * The highest page an accumulator holds — where the list was last read to, and
+ * so where to resume from on the way back.
+ */
+const deepestPage = (pages: Record<number, File[]>): number =>
+  Object.keys(pages).reduce((deepest, key) => Math.max(deepest, Number(key)), 1);
+
+/**
  * Keeps one earlier page's `getAssets` query subscribed and reports its results
  * back up whenever they change.
  *
@@ -108,6 +124,10 @@ const PageSubscriber = ({
  * The caller MUST render the returned `subscribers` node — that is what keeps
  * every loaded page subscribed, so `{Asset, LIST}` invalidations keep the whole
  * list consistent rather than only the current page.
+ *
+ * Loaded pages survive navigating away and back: each list's accumulator is
+ * remembered (LRU, `MAX_REMEMBERED_LISTS`) and restored when its key returns, so
+ * stepping into a subfolder and back out keeps the rows the user scrolled for.
  */
 const useInfiniteAssets = ({
   folder = null,
@@ -131,30 +151,55 @@ const useInfiniteAssets = ({
   const [pageState, setPageState] = useState<PageState>({ queryKey, page: 1 });
   const [accumulated, setAccumulated] = useState<Accumulated>({ queryKey, listKey, pages: {} });
 
-  // Derived rather than read straight from state: the render that discovers
-  // the key change still reaches the query below, and a list with no page 1
-  // must never be requested at page 2.
-  const page = pageState.queryKey === queryKey ? pageState.page : 1;
+  // Each list's loaded pages, kept across navigation away from it.
+  const memoryRef = useRef(new Map<string, Accumulated>());
 
-  if (pageState.queryKey !== queryKey) {
-    setPageState({ queryKey, page: 1 });
+  const isNewList = pageState.queryKey !== queryKey;
+
+  const remembered = isNewList ? memoryRef.current.get(queryKey) : undefined;
+
+  // Derived rather than read from state: the render that discovers the key
+  // change still reaches the query below, and a list with no page 1 must never
+  // be requested at page 2. A remembered list always holds page 1, so resuming
+  // at its deepest page can't skip one.
+  let page: number;
+  if (!isNewList) {
+    page = pageState.page;
+  } else if (remembered) {
+    page = deepestPage(remembered.pages);
+  } else {
+    page = 1;
   }
 
-  const { currentData, isLoading, isFetching, error } = useGetAssetsQuery(
-    {
-      ...queryArgs,
-      page,
-      pageSize: PAGE_SIZE,
-    },
-    { skip: !enabled }
-  );
+  if (isNewList) {
+    setPageState({ queryKey, page });
+
+    if (remembered) {
+      setAccumulated(remembered);
+    }
+  }
+
+  const { currentData, isLoading, isFetching, error, startedTimeStamp, fulfilledTimeStamp } =
+    useGetAssetsQuery(
+      {
+        ...queryArgs,
+        page,
+        pageSize: PAGE_SIZE,
+      },
+      { skip: !enabled }
+    );
 
   const isSameQuery = accumulated.queryKey === queryKey;
 
   // `currentData` is only ever the payload for the args just passed, so it
   // belongs to this key at this page — nothing to infer. Its reference is
   // stable per cache entry, so this settles after one extra render.
-  if (currentData && (!isSameQuery || accumulated.pages[page] !== currentData.results)) {
+  if (
+    // A restore already set the accumulator from memory; don't overwrite it.
+    !remembered &&
+    currentData &&
+    (!isSameQuery || accumulated.pages[page] !== currentData.results)
+  ) {
     setAccumulated(
       isSameQuery
         ? {
@@ -204,6 +249,32 @@ const useInfiniteAssets = ({
     )
   );
 
+  // Remember what this list has read, so leaving it isn't forgetting it. Filed
+  // under `accumulated.queryKey`, not the live `queryKey`: the accumulator names
+  // the list it belongs to, so an entry still describing the list being left
+  // can't be misfiled under the one being entered.
+  useEffect(() => {
+    if (Object.keys(accumulated.pages).length === 0) {
+      return;
+    }
+
+    const memory = memoryRef.current;
+    // Delete before set so the entry moves to the end. Map iterates in
+    // insertion order, so the first key is the least recently used.
+    memory.delete(accumulated.queryKey);
+    memory.set(accumulated.queryKey, accumulated);
+
+    while (memory.size > MAX_REMEMBERED_LISTS) {
+      const oldest = memory.keys().next();
+
+      if (oldest.done) {
+        break;
+      }
+
+      memory.delete(oldest.value);
+    }
+  }, [accumulated]);
+
   // Drop the left folder's cached `getAssets` pages when the folder changes.
   //
   // RTK Query 1.9.7 leaves a query's store subscription in place when its last
@@ -213,8 +284,9 @@ const useInfiniteAssets = ({
   // next `{Asset, LIST}` invalidation (an upload in the new folder) refetch the
   // *previous* folder's pages: one bogus `/upload/files` request per loaded
   // page. There is no public per-entry unsubscribe, so evict the left folder's
-  // entries outright — returning reloads from page 1, which the accumulator
-  // already does on a list change.
+  // entries outright. Returning then re-reads every page it had loaded, but the
+  // rows come straight back from the accumulator memory above — so those
+  // requests refresh a list already on screen rather than being waited on.
   const dispatch = useDispatch();
   const store = useStore();
   const prevFolderRef = useRef(folder);
@@ -257,7 +329,7 @@ const useInfiniteAssets = ({
   // of the outgoing folder's assets under the incoming folder's header.
   const isChangingList = accumulated.listKey !== listKey;
 
-  const assets = useMemo(
+  const loadedAssets = useMemo(
     () => (isChangingList ? [] : flattenPages(accumulated.pages)),
     [isChangingList, accumulated.pages]
   );
@@ -265,7 +337,61 @@ const useInfiniteAssets = ({
   // Deliberately the live value, not the stale-tolerant one below: paging must
   // never be driven by a total that belongs to the previous query.
   const hasNextPage = currentData ? page < currentData.pagination.pageCount : false;
+
+  const completedUploads = useTypedSelector(selectCompletedUploads);
+
+  // Only an unfiltered, unsearched list can place an upload locally: deciding
+  // whether an asset satisfies a filter means reimplementing the server's
+  // filter semantics client-side. Filtered views still refresh on the
+  // end-of-batch invalidation, as they did before.
+  const canPlaceUploads = !search && (filters?.length ?? 0) === 0;
+
+  // When the loaded data came back from a request that started after a given
+  // upload — i.e. the server had already stored it when asked. Past that point
+  // the list is the authority on whether the asset is there at all, so bridging
+  // must stop: otherwise a later delete or move, which refetches without it,
+  // would have it re-inserted.
+  const listAnsweredAfter =
+    fulfilledTimeStamp !== undefined &&
+    startedTimeStamp !== undefined &&
+    // A refetch in flight leaves `fulfilledTimeStamp` on the previous response,
+    // which predates this request — so only settled data counts.
+    fulfilledTimeStamp > startedTimeStamp
+      ? startedTimeStamp
+      : undefined;
+
+  const assets = useMemo(() => {
+    if (!canPlaceUploads || completedUploads.length === 0) {
+      return loadedAssets;
+    }
+
+    const bridging = completedUploads.filter(
+      ({ asset, completedAt }) =>
+        getRelationId(asset.folder) === folder &&
+        (listAnsweredAfter === undefined || completedAt > listAnsweredAfter)
+    );
+
+    return mergeUploadedAssets({
+      assets: loadedAssets,
+      uploaded: bridging.map(({ asset }) => asset),
+      sort,
+      hasNextPage,
+    });
+  }, [
+    canPlaceUploads,
+    completedUploads,
+    loadedAssets,
+    folder,
+    sort,
+    hasNextPage,
+    listAnsweredAfter,
+  ]);
   const isFetchingMore = isFetching && page > 1;
+
+  // A restored list already has rows on screen, so re-reading its current page
+  // is a background refresh — reporting it as loading would swap those rows for
+  // a spinner. Only an empty list has nothing better to show.
+  const isLoadingList = isChangingList || (isLoading && assets.length === 0);
 
   const fetchNextPage = useCallback(() => {
     setPageState((prev) => ({
@@ -294,7 +420,7 @@ const useInfiniteAssets = ({
     // Falls back to the accumulated total so a consumer showing the count
     // doesn't flash zero mid-transition, matching the possibly stale `assets`.
     pagination: currentData?.pagination ?? accumulated.pagination,
-    isLoading: isLoading || isChangingList,
+    isLoading: isLoadingList,
     isFetchingMore,
     hasNextPage,
     fetchNextPage,

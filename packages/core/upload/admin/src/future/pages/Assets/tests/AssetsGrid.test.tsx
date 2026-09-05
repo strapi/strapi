@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { AssetsGrid } from '../components/AssetsGrid';
 import { BulkActionsBar } from '../components/BulkActionsBar';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../constants';
 import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 const mockNavigateToFolder = jest.fn();
@@ -151,6 +152,26 @@ describe('AssetsGrid', () => {
     jest.clearAllMocks();
   });
 
+  describe('Card stacking', () => {
+    it('keeps the card overlays from painting over the page header', () => {
+      setup();
+
+      // The checkbox and busy overlays carry their own z-index. Without a
+      // stacking context on the card they compete with the page's sticky header
+      // and, being later in document order, win — so a busy card's spinner
+      // draws over the header as the card scrolls under it.
+      // Reading the compiled CSS: `toHaveStyleRule` is not typed in this suite,
+      // and the rule under test is on the styled component rather than an
+      // attribute of the rendered node.
+      // eslint-disable-next-line testing-library/no-node-access
+      const css = Array.from(document.querySelectorAll('style'))
+        .map((style) => style.textContent ?? '')
+        .join('\n');
+
+      expect(css).toContain('isolation:isolate');
+    });
+  });
+
   describe('Grid rendering', () => {
     it('renders asset cards in a grid', () => {
       setup();
@@ -162,6 +183,49 @@ describe('AssetsGrid', () => {
     it('renders nothing when no assets and no folders (empty state is owned by the page)', () => {
       setup({ assets: [], folders: [] });
       expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
+    });
+
+    // The page's background context menu reads this attribute to tell an item
+    // apart from empty space — see MainAreaContextMenu.
+    it('opts every card out of the background context menu', () => {
+      setup({ assets: [mockAssets[0]], folders: [createMockFolder(1, 'Photos')] });
+
+      const cards = screen.getAllByRole('listitem');
+
+      expect(cards).toHaveLength(2);
+      cards.forEach((card) => expect(card).toHaveAttribute('data-native-context-menu'));
+    });
+
+    // Folder cards are deliberately unmarked: opening a folder should close
+    // the drawer, not switch it.
+    // The drawer keeps itself open for a press that switches it, so the card's
+    // own controls have to be distinguishable from the rest of the card.
+    it("marks the asset card's own controls as item-scoped", async () => {
+      setup({ assets: [createMockAsset(7, 'photo.png')] });
+
+      const checkbox = await screen.findByRole('checkbox', { name: 'Select photo.png' });
+      const actions = await screen.findAllByRole('button', { name: 'More actions' });
+
+      /* eslint-disable testing-library/no-node-access */
+      expect(checkbox.closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+      expect(actions[0].closest(ASSET_ITEM_CONTROL_SELECTOR)).not.toBeNull();
+
+      const card = checkbox.closest(ASSET_DETAILS_TRIGGER_SELECTOR);
+      expect(card).not.toBeNull();
+      expect(card?.matches(ASSET_ITEM_CONTROL_SELECTOR)).toBe(false);
+      /* eslint-enable testing-library/no-node-access */
+    });
+
+    it('marks asset cards — and only asset cards — as asset details triggers', () => {
+      setup({
+        assets: [createMockAsset(7, 'photo.png')],
+        folders: [createMockFolder(5, 'Photos')],
+      });
+
+      const [folderCard, assetCard] = screen.getAllByRole('listitem');
+
+      expect(assetCard).toHaveAttribute('data-asset-details-trigger');
+      expect(folderCard).not.toHaveAttribute('data-asset-details-trigger');
     });
   });
 
