@@ -52,6 +52,8 @@ const status = (overrides = {}) =>
         enabledAt: '2026-09-01T10:14:00.000Z',
         recoveryCodesRemaining: 7,
         codesAcknowledged: true,
+        required: false,
+        graceUntil: null,
         ...overrides,
       },
     })

@@ -1,4 +1,4 @@
-import { renderHook, server, waitFor } from '@tests/utils';
+import { renderHook, server, waitFor, act } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -7,6 +7,7 @@ import {
   useGetMfaNoticesQuery,
   useVerifyMfaEnrolmentMutation,
   useDisableMfaMutation,
+  useUnlockUserMfaMutation,
 } from '../mfa';
 
 describe('mfa service', () => {
@@ -19,6 +20,8 @@ describe('mfa service', () => {
             enabledAt: '2026-09-01T10:00:00.000Z',
             recoveryCodesRemaining: 7,
             codesAcknowledged: false,
+            required: false,
+            graceUntil: null,
           },
         })
       )
@@ -32,6 +35,8 @@ describe('mfa service', () => {
       enabledAt: '2026-09-01T10:00:00.000Z',
       recoveryCodesRemaining: 7,
       codesAcknowledged: false,
+      required: false,
+      graceUntil: null,
     });
   });
 
@@ -129,5 +134,27 @@ describe('mfa service', () => {
     await result.current.disable({ password: 'Testing123!', code: '123456' });
     await waitFor(() => expect(result.current.notices.data).toHaveLength(1));
     expect(calls).toBe(2);
+  });
+
+  it('POSTs /admin/mfa/users/:id/unlock with no body', async () => {
+    let hit = false;
+    let body: string | undefined;
+    server.use(
+      http.post('/admin/mfa/users/42/unlock', async ({ request }) => {
+        hit = true;
+        body = await request.text();
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+
+    const { result } = renderHook(() => useUnlockUserMfaMutation());
+
+    await act(async () => {
+      const res = await result.current[0]({ id: 42 });
+      expect('error' in res).toBe(false);
+    });
+
+    expect(hit).toBe(true);
+    expect(body).toBe('');
   });
 });

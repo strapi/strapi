@@ -7,7 +7,7 @@ import {
   useGetMfaStatusQuery,
   useMarkMfaNoticesSeenMutation,
 } from '../services/mfa';
-import { isBaseQueryError } from '../utils/baseQuery';
+import { isNotFoundError } from '../utils/baseQuery';
 
 import { useNotification } from './Notifications';
 
@@ -105,13 +105,7 @@ const MfaNotices = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification, dismissNotification } = useNotification();
   const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
-  const statusIsNotFound = Boolean(
-    (statusError &&
-      isBaseQueryError(statusError) &&
-      'status' in statusError &&
-      statusError.status === 404) ||
-      statusLoading
-  );
+  const statusIsNotFound = isNotFoundError(statusError) || statusLoading;
   const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: statusIsNotFound });
   const [markSeen] = useMarkMfaNoticesSeenMutation();
   const announced = React.useRef(false);

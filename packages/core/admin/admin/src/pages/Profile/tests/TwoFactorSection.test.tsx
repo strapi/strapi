@@ -25,6 +25,8 @@ const status = (overrides = {}) =>
         enabledAt: null,
         recoveryCodesRemaining: 0,
         codesAcknowledged: false,
+        required: false,
+        graceUntil: null,
         ...overrides,
       },
     })

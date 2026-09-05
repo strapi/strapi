@@ -7,6 +7,7 @@ import type {
   Me,
   Notices,
   RegenerateRecoveryCodes,
+  UnlockUser,
   VerifyEnrolment,
 } from '../../../shared/contracts/mfa';
 
@@ -18,7 +19,7 @@ import type {
  */
 const mfaService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['Mfa', 'MfaNotices'],
+    addTagTypes: ['Mfa', 'MfaNotices', 'User'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -79,6 +80,14 @@ const mfaService = adminApi
         query: (body) => ({ method: 'POST', url: '/admin/mfa/notices/seen', data: body }),
         invalidatesTags: ['MfaNotices'],
       }),
+      /**
+       * Cycle 2: clear another admin's lock. Invalidating that user's `User` tag makes the edit
+       * page (`useAdminUsers({ id })`) re-read `mfaLockedAt` / `mfaGraceUntil` without a reload.
+       */
+      unlockUserMfa: builder.mutation<void, UnlockUser.Params>({
+        query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/unlock` }),
+        invalidatesTags: (_res, _err, { id }) => [{ type: 'User', id }],
+      }),
     }),
     overrideExisting: false,
   });
@@ -92,6 +101,7 @@ const {
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
   useMarkMfaNoticesSeenMutation,
+  useUnlockUserMfaMutation,
 } = mfaService;
 
 export {
@@ -103,4 +113,5 @@ export {
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
   useMarkMfaNoticesSeenMutation,
+  useUnlockUserMfaMutation,
 };

@@ -6,6 +6,14 @@ import { adminApi } from './api';
 
 import type { Data } from '@strapi/types';
 
+/**
+ * `GET /admin/users/:id` appends the cycle 2 enforcement state (`mfaEnabledAt`, `mfaGraceUntil`,
+ * `mfaLockedAt`) for callers holding `admin::users.update` while the feature is on; the list
+ * endpoint never does. One item type covers both, with those three fields optional.
+ */
+type AdminUserListItem = Users.FindAll.Response['data']['results'][number] &
+  Users.AdminUserMfaState;
+
 const usersService = adminApi
   .enhanceEndpoints({
     addTagTypes: ['LicenseLimits', 'User', 'Role', 'RolePermissions'],
@@ -40,7 +48,7 @@ const usersService = adminApi
       }),
       getUsers: builder.query<
         {
-          users: Users.FindAll.Response['data']['results'];
+          users: AdminUserListItem[];
           pagination: Users.FindAll.Response['data']['pagination'] | null;
         },
         GetUsersParams
@@ -53,7 +61,7 @@ const usersService = adminApi
           },
         }),
         transformResponse: (res: Users.FindAll.Response | Users.FindOne.Response) => {
-          let users: Users.FindAll.Response['data']['results'] = [];
+          let users: AdminUserListItem[] = [];
 
           if (res.data) {
             if ('results' in res.data) {
@@ -233,4 +241,4 @@ export {
   useUpdateRolePermissionsMutation,
   useUpdateRoleMutation,
 };
-export type { GetRolesParams, GetUsersParams, GetRolePermissionsParams };
+export type { GetRolesParams, GetUsersParams, GetRolePermissionsParams, AdminUserListItem };

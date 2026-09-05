@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import {
@@ -121,6 +122,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
       ...defaultTestStoreConfig(),
       ...storeConfig,
     });
+    setupListeners(storeRef.current.dispatch);
   }
 
   let allPermissions: Permission[];

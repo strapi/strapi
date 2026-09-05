@@ -112,6 +112,17 @@ export declare namespace Disable {
 }
 
 /**
+ * POST /mfa/users/:id/unlock - Clear a lock (and its grace stamp) on another admin's account.
+ * Requires `admin::users.update`. 204 on success; 404 for an unknown user; 400 when the account
+ * is not locked. No grace is stamped here: the user's next session starts a fresh window.
+ */
+export declare namespace UnlockUser {
+  export interface Params {
+    id: Data.ID;
+  }
+}
+
+/**
  * A single security notice: `admin::mfa-event` rows the caller has not yet seen. Never carries a
  * code, a secret or an otpauth URI -- `metadata` is limited to neutral context (see `MfaEventType`
  * in `admin::mfa`).

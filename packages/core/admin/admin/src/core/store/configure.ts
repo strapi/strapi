@@ -7,6 +7,7 @@ import {
   MiddlewareAPI,
   isRejected,
 } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
@@ -87,6 +88,12 @@ const configureStoreImpl = (
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],
   });
+
+  // Lets RTK Query hooks opt in to `refetchOnFocus` / `refetchOnReconnect` (window `focus` and
+  // `online` events). Without this call those options are silently inert. Opt-in per hook: no
+  // existing query passes them, so nothing else changes behaviour. First consumer: the MFA grace
+  // banner, which must notice a grace period stamped by a background token refresh.
+  setupListeners(store.dispatch);
 
   return store;
 };

@@ -85,6 +85,8 @@ describe('Profile page', () => {
             enabledAt: null,
             recoveryCodesRemaining: 0,
             codesAcknowledged: false,
+            required: false,
+            graceUntil: null,
           },
         })
       )

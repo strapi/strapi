@@ -9,7 +9,7 @@ import {
   useGetMfaStatusQuery,
   useMarkMfaNoticesSeenMutation,
 } from '../../services/mfa';
-import { isBaseQueryError } from '../../utils/baseQuery';
+import { isNotFoundError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
 import { Panel } from './Panel';
@@ -121,9 +121,7 @@ const TwoFactorSection = () => {
 
   // 404 means the future flag is off: the feature does not exist on this instance. The UI never
   // reads the flag itself -- a 404 from /admin/mfa/me is the only signal it is off.
-  const isNotFound = Boolean(
-    error && isBaseQueryError(error) && 'status' in error && error.status === 404
-  );
+  const isNotFound = isNotFoundError(error);
 
   if (isLoading || isNotFound || !status) {
     return null;
