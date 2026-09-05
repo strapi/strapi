@@ -99,6 +99,23 @@ describe('EnrolDialog', () => {
     expect(hasLeakedMfaSecrets()).toBe(false);
   });
 
+  it('posts only the password on a fresh enrolment, never a code key', async () => {
+    let enrolBody: unknown;
+    server.use(
+      http.post('/admin/mfa/enrol', async ({ request }) => {
+        enrolBody = await request.json();
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    await screen.findByText(SECRET);
+    expect(enrolBody).toEqual({ password: 'Testing123!' });
+  });
+
   it('renders the QR code with a scannable quiet zone and a larger size', async () => {
     const { user } = renderDialog({ open: true, onClose: jest.fn() });
 
@@ -364,5 +381,55 @@ describe('EnrolDialog', () => {
     unmount();
 
     expect(hasLeakedMfaSecrets()).toBe(false);
+  });
+
+  describe('replace mode', () => {
+    it('titles itself Replace authenticator and asks for password and a code on the first step', () => {
+      renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      expect(screen.getByRole('dialog', { name: 'Replace authenticator' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+      expect(screen.getByLabelText('Authentication code*')).toHaveAttribute(
+        'autocomplete',
+        'one-time-code'
+      );
+      expect(screen.getByText(/keeps working until you verify the new one/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    });
+
+    it('posts password and trimmed code to /mfa/enrol, then verifies and shows the new codes', async () => {
+      let enrolBody: unknown;
+      server.use(
+        http.post('/admin/mfa/enrol', async ({ request }) => {
+          enrolBody = await request.json();
+          return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+        }),
+        http.post('/admin/mfa/enrol/verify', () =>
+          HttpResponse.json({ data: { recoveryCodes: ['AAAAA-BBBBB'], replaced: true } })
+        )
+      );
+      const { user } = renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      await user.type(screen.getByLabelText('Authentication code*'), ' 654321 ');
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      await screen.findByTestId('mfa-manual-key');
+      expect(enrolBody).toEqual({ password: 'Testing123!', code: '654321' });
+
+      await user.type(screen.getByLabelText('Authentication code*'), '123456');
+      fireEvent.click(screen.getByRole('button', { name: 'Verify' }));
+
+      expect(await screen.findByTestId('mfa-recovery-code')).toHaveTextContent('AAAAA-BBBBB');
+    });
+
+    it('keeps the Continue button disabled until both password and a 6+ character code are present', async () => {
+      const { user } = renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+      await user.type(screen.getByLabelText('Authentication code*'), '123456');
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+    });
   });
 });

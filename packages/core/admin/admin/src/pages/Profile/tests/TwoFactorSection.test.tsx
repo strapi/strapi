@@ -271,4 +271,86 @@ describe('TwoFactorSection', () => {
     await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
     await waitFor(() => expect(seenBody).toEqual({}));
   });
+
+  it('offers Replace authenticator to an enrolled user who is not required, alongside Disable', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        required: false,
+      })
+    );
+    renderSection();
+
+    expect(
+      await screen.findByRole('button', { name: 'Replace authenticator' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Disable two-factor authentication' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Generate new recovery codes' })).toBeInTheDocument();
+  });
+
+  it('hides Disable and says why while the account is required', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        required: true,
+      })
+    );
+    renderSection();
+
+    expect(
+      await screen.findByRole('button', { name: 'Replace authenticator' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Disable two-factor authentication' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Two-factor authentication is required for your account and cannot be turned off.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('states the requirement and the deadline for a required user who has not enrolled', async () => {
+    server.use(status({ required: true, graceUntil: '2026-09-11T14:30:00.000Z' }));
+    renderSection();
+
+    expect(
+      await screen.findByText(/Required for your account\. Set it up before .*2026/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Enable two-factor authentication' })
+    ).toBeInTheDocument();
+  });
+
+  it('states the requirement without a deadline when no grace period is stamped yet', async () => {
+    server.use(status({ required: true, graceUntil: null }));
+    renderSection();
+
+    expect(await screen.findByText('Required for your account.')).toBeInTheDocument();
+  });
+
+  it('opens the enrol dialog in replace mode from the Replace authenticator button', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+      })
+    );
+    const { user } = renderSection();
+
+    await user.click(await screen.findByRole('button', { name: 'Replace authenticator' }));
+
+    expect(screen.getByRole('dialog', { name: 'Replace authenticator' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
 });

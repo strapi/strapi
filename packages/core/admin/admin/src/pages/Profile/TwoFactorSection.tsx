@@ -27,12 +27,35 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
 
   if (!status.enabled) {
     return (
-      <Typography textColor="neutral600">
-        {formatMessage({
-          id: 'Settings.profile.form.section.mfa.status.disabled',
-          defaultMessage: 'Not enabled',
-        })}
-      </Typography>
+      <Flex direction="column" alignItems="flex-start" gap={1}>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.status.disabled',
+            defaultMessage: 'Not enabled',
+          })}
+        </Typography>
+        {status.required ? (
+          <Typography textColor="warning700">
+            {status.graceUntil
+              ? formatMessage(
+                  {
+                    id: 'Settings.profile.form.section.mfa.status.required.deadline',
+                    defaultMessage: 'Required for your account. Set it up before {datetime}.',
+                  },
+                  {
+                    datetime: formatDate(status.graceUntil, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    }),
+                  }
+                )
+              : formatMessage({
+                  id: 'Settings.profile.form.section.mfa.status.required',
+                  defaultMessage: 'Required for your account.',
+                })}
+          </Typography>
+        ) : null}
+      </Flex>
     );
   }
 
@@ -116,6 +139,7 @@ const TwoFactorSection = () => {
   const [dismissedAck, setDismissedAck] = React.useState(false);
   const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);
   const [enrolOpen, setEnrolOpen] = React.useState(false);
+  const [replaceOpen, setReplaceOpen] = React.useState(false);
   const [regenerateOpen, setRegenerateOpen] = React.useState(false);
   const [disableOpen, setDisableOpen] = React.useState(false);
 
@@ -198,19 +222,38 @@ const TwoFactorSection = () => {
             </Button>
           </Flex>
         ) : (
-          <Flex gap={2}>
-            <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
-              {formatMessage({
-                id: 'Settings.profile.form.section.mfa.regenerate.title',
-                defaultMessage: 'Generate new recovery codes',
-              })}
-            </Button>
-            <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
-              {formatMessage({
-                id: 'Settings.profile.form.section.mfa.disable.title',
-                defaultMessage: 'Disable two-factor authentication',
-              })}
-            </Button>
+          <Flex direction="column" alignItems="flex-end" gap={2}>
+            <Flex gap={2} wrap="wrap" justifyContent="flex-end">
+              <Button variant="secondary" onClick={() => setRegenerateOpen(true)}>
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.regenerate.title',
+                  defaultMessage: 'Generate new recovery codes',
+                })}
+              </Button>
+              <Button variant="secondary" onClick={() => setReplaceOpen(true)}>
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.replace.title',
+                  defaultMessage: 'Replace authenticator',
+                })}
+              </Button>
+              {!status.required ? (
+                <Button variant="danger-light" onClick={() => setDisableOpen(true)}>
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.disable.title',
+                    defaultMessage: 'Disable two-factor authentication',
+                  })}
+                </Button>
+              ) : null}
+            </Flex>
+            {status.required ? (
+              <Typography variant="pi" textColor="neutral600">
+                {formatMessage({
+                  id: 'Settings.profile.form.section.mfa.disable.required',
+                  defaultMessage:
+                    'Two-factor authentication is required for your account and cannot be turned off.',
+                })}
+              </Typography>
+            ) : null}
           </Flex>
         )}
       </Flex>
@@ -218,13 +261,28 @@ const TwoFactorSection = () => {
         <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
       ) : null}
       {/*
-       * All three dialogs are mounted unconditionally (only `open` toggles), same as
-       * `EnrolDialog` above: the `Mfa` tag invalidation that follows a successful regenerate or
-       * disable (see services/mfa.ts) refetches this section's status query, and mounting a
-       * dialog only while `status.enabled` is true would unmount it out from under itself the
-       * moment that refetch flips `enabled` to `false` mid-flow.
+       * All dialogs are mounted unconditionally (only `open` toggles), same as `EnrolDialog`
+       * below: the `Mfa` tag invalidation that follows a successful regenerate or disable (see
+       * services/mfa.ts) refetches this section's status query, and mounting a dialog only while
+       * `status.enabled` is true would unmount it out from under itself the moment that refetch
+       * flips `enabled` to `false` mid-flow. The `ReAuthDialog intent="disable"` stays mounted
+       * even while `status.required` hides its trigger button above: the server refuses a
+       * disable for a required user regardless, so there's nothing to gain by unmounting it, and
+       * mounting it conditionally would risk the same unmount-mid-flow hazard.
+       *
+       * `EnrolDialog` renders as a single instance for both `enrol` and `replace` modes -- not
+       * two -- because both share the same `MFA_ENROL_CACHE_KEYS` `fixedCacheKey`s (see
+       * EnrolDialog.tsx); two mounted instances would share one cached mutation result and could
+       * clobber each other's in-flight state.
        */}
-      <EnrolDialog open={enrolOpen} onClose={() => setEnrolOpen(false)} />
+      <EnrolDialog
+        open={enrolOpen || replaceOpen}
+        mode={replaceOpen ? 'replace' : 'enrol'}
+        onClose={() => {
+          setEnrolOpen(false);
+          setReplaceOpen(false);
+        }}
+      />
       <ReAuthDialog
         open={regenerateOpen}
         onClose={() => setRegenerateOpen(false)}

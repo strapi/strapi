@@ -17,6 +17,13 @@ import { RecoveryCodes } from './RecoveryCodes';
 interface EnrolDialogProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * `enrol` (default): first enrolment, password only on step 1. `replace`: the account is
+   * already enrolled and is swapping authenticator apps; step 1 also needs a current code (TOTP
+   * or an unused recovery code) because `POST /mfa/enrol` demands it while enrolled. The active
+   * secret keeps working until step 2 verifies the new one; the recovery codes are reissued.
+   */
+  mode?: 'enrol' | 'replace';
 }
 
 const ManualKey = styled(Typography)`
@@ -82,14 +89,33 @@ type Step =
  * this suite. `onClick` calling the same handler sidesteps that; the design system's `Button`
  * already defaults its own `type` to `"button"` (confirmed by reading its source), so there's
  * nothing to opt out of and no risk of it also firing a native submit.
+ *
+ * That "one blocking field per step" premise holds for a fresh enrolment (password alone, then a
+ * code alone) but not for `replace` mode's password step: `POST /mfa/enrol` demands a current
+ * code too while already enrolled (re-proving the factor being replaced), so that step has *two*
+ * blocking fields in the same `<form>`. Per the HTML spec's implicit-submission algorithm
+ * (4.10.22.2), a form with more than one field that blocks implicit submission needs an actual
+ * submit button for Enter to do anything at all -- so the Continue button carries
+ * `type="submit"` in replace mode only (see the JSX below), and `onClick` still calls the same
+ * handler directly for the jsdom reason above. That `type="submit"` reintroduces the re-entrancy
+ * hazard `ReAuthDialog.tsx`'s doc comment covers in full: a *real* click on a submit button both
+ * fires the React `onClick` handler and triggers the browser's native default action of
+ * submitting the form, both synchronously, before either handler's `await` resolves or React
+ * re-renders with `isEnrolling` reflecting the first call -- so `handlePassword` guards with a
+ * synchronous `inFlightRef` (`React.useRef`, flipped in the same tick the first call starts)
+ * rather than relying on `isEnrolling` alone, exactly like `ReAuthDialog`'s `handleSubmit`.
  */
-const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
+const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
+  const isReplace = mode === 'replace';
   const { formatMessage } = useIntl();
   const toMessage = useToMessage();
   const [step, setStep] = React.useState<Step>({ name: 'password' });
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
+  // Synchronous re-entrancy guard for `handlePassword` in replace mode -- see the class doc
+  // comment above for why this can't be the mutation hook's `isLoading` state.
+  const inFlightRef = React.useRef(false);
 
   const [enrol, { isLoading: isEnrolling, reset: resetEnrol }] = useEnrolMfaMutation({
     fixedCacheKey: MFA_ENROL_CACHE_KEYS.password,
@@ -131,19 +157,29 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
     onClose();
   };
 
+  const canContinue = password.length > 0 && (!isReplace || code.trim().length >= 6);
+
   const handlePassword = async (event?: React.FormEvent) => {
     event?.preventDefault();
-    if (isEnrolling || password.length === 0) {
+    if (inFlightRef.current || isEnrolling || !canContinue) {
       return;
     }
+    inFlightRef.current = true;
     setError(undefined);
-    const res = await enrol({ password });
-    if ('error' in res) {
-      setError(toMessage(res.error));
-      return;
+    try {
+      // A fresh enrolment sends the password alone; the server discards `code` on that path
+      // anyway, but the contract documents `code` as replacement-only, so don't send it.
+      const res = await enrol(isReplace ? { password, code: code.trim() } : { password });
+      if ('error' in res) {
+        setError(toMessage(res.error));
+        return;
+      }
+      setPassword('');
+      setCode('');
+      setStep({ name: 'scan', secret: res.data.secret, otpauthUri: res.data.otpauthUri });
+    } finally {
+      inFlightRef.current = false;
     }
-    setPassword('');
-    setStep({ name: 'scan', secret: res.data.secret, otpauthUri: res.data.otpauthUri });
   };
 
   const handleVerify = async (event?: React.FormEvent) => {
@@ -183,10 +219,17 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.enrol.title',
-              defaultMessage: 'Enable two-factor authentication',
-            })}
+            {formatMessage(
+              isReplace
+                ? {
+                    id: 'Settings.profile.form.section.mfa.replace.title',
+                    defaultMessage: 'Replace authenticator',
+                  }
+                : {
+                    id: 'Settings.profile.form.section.mfa.enrol.title',
+                    defaultMessage: 'Enable two-factor authentication',
+                  }
+            )}
           </Modal.Title>
         </Modal.Header>
 
@@ -196,10 +239,18 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <ErrorMessage error={error} />
                 <Typography>
-                  {formatMessage({
-                    id: 'Settings.profile.form.section.mfa.enrol.password.intro',
-                    defaultMessage: 'Confirm your current password to start.',
-                  })}
+                  {formatMessage(
+                    isReplace
+                      ? {
+                          id: 'Settings.profile.form.section.mfa.replace.intro',
+                          defaultMessage:
+                            'Confirm your password and a code from your current authenticator app, or an unused recovery code. Your current app keeps working until you verify the new one; your recovery codes will be replaced.',
+                        }
+                      : {
+                          id: 'Settings.profile.form.section.mfa.enrol.password.intro',
+                          defaultMessage: 'Confirm your current password to start.',
+                        }
+                  )}
                 </Typography>
                 <Field.Root name="password" required>
                   <Field.Label>
@@ -217,6 +268,22 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                     }
                   />
                 </Field.Root>
+                {isReplace ? (
+                  <Field.Root name="code" required>
+                    <Field.Label>
+                      {formatMessage({
+                        id: 'Auth.form.mfa.code.label',
+                        defaultMessage: 'Authentication code',
+                      })}
+                    </Field.Label>
+                    <TextInput
+                      autoComplete="one-time-code"
+                      maxLength={32}
+                      value={code}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
+                    />
+                  </Field.Root>
+                ) : null}
               </Flex>
             </Modal.Body>
             <Modal.Footer>
@@ -224,9 +291,10 @@ const EnrolDialog = ({ open, onClose }: EnrolDialogProps) => {
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
               <Button
+                type={isReplace ? 'submit' : 'button'}
                 onClick={() => handlePassword()}
                 loading={isEnrolling}
-                disabled={password.length === 0}
+                disabled={!canContinue}
               >
                 {formatMessage({
                   id: 'Settings.profile.form.section.mfa.enrol.continue',
