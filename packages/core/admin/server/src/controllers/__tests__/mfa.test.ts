@@ -92,6 +92,7 @@ describe('mfa controller', () => {
       ['disable', { password: 'Password123', code: '123456' }],
       ['notices', {}],
       ['markNoticesSeen', {}],
+      ['unlockUser', {}],
     ];
 
     for (const [handlerName, body] of routes) {
@@ -635,6 +636,7 @@ describe('mfa controller', () => {
       const { ctx, badRequest } = build(false);
       await mfaController.unlockUser(ctx);
       expect(badRequest).toHaveBeenCalledWith('This account is not locked');
+      expect(ctx.status).not.toBe(204);
     });
 
     test('404 when the user does not exist', async () => {
@@ -642,6 +644,7 @@ describe('mfa controller', () => {
       await mfaController.unlockUser(ctx);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
       expect(unlock).not.toHaveBeenCalled();
+      expect(ctx.status).not.toBe(204);
     });
   });
 });

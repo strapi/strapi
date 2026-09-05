@@ -26,6 +26,7 @@ export default [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::users.update'] } },
       ],
+      middlewares: ['admin::rateLimit'],
     },
   },
 ];

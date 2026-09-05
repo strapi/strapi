@@ -174,6 +174,7 @@ describe('User Controller', () => {
 
       await userController.findOne(ctx);
 
+      expect(findOne).toHaveBeenCalledWith(1);
       expect(ctx.state.userAbility.can).toHaveBeenCalledWith('admin::users.update');
       expect(ctx.body).toEqual({
         data: {
@@ -198,6 +199,7 @@ describe('User Controller', () => {
 
       await userController.findOne(ctx);
 
+      expect(findOne).toHaveBeenCalledWith(1);
       expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
     });
   });
