@@ -23,8 +23,8 @@ const settingsController = {
     const settingsBody = ctx.request.body;
     const settings = (await validateSettings(settingsBody)) as Settings;
 
-    // Update
     const settingsService = getService('settings', { strapi });
+
     const updatedSettings = await settingsService.update({ settings });
 
     // Response
