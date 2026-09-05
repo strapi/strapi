@@ -7545,6 +7545,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@remix-run/router@npm:1.23.4":
+  version: 1.23.4
+  resolution: "@remix-run/router@npm:1.23.4"
+  checksum: 10c0/ef17eb2a606c125f09c55683585099725421af1c11f1c1d1c3841fe4eea3f99eb56b26ecbb17429a173c704ecae336c37e0d74855faa9330667433ef4f419436
+  languageName: node
+  linkType: hard
+
 "@rolldown/binding-android-arm64@npm:1.0.0-rc.17":
   version: 1.0.0-rc.17
   resolution: "@rolldown/binding-android-arm64@npm:1.0.0-rc.17"
@@ -8925,7 +8932,7 @@ __metadata:
     react-is: "npm:^18.2.0"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     react-select: "npm:5.8.0"
     react-window: "npm:1.8.10"
     rimraf: "npm:6.1.3"
@@ -9051,7 +9058,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     react-window: "npm:1.8.10"
     slate: "npm:0.94.1"
     slate-history: "npm:0.93.0"
@@ -9101,7 +9108,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
@@ -9161,7 +9168,7 @@ __metadata:
     react-markdown: "npm:9.1.0"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     vitest: "catalog:"
     vitest-config: "npm:5.52.3"
@@ -9399,7 +9406,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
@@ -9499,7 +9506,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
@@ -9580,7 +9587,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.52.3"
     typescript: "npm:5.9.3"
@@ -9612,7 +9619,7 @@ __metadata:
     react-colorful: "npm:5.6.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -9665,7 +9672,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     swagger-ui-dist: "npm:4.19.0"
     yaml: "npm:1.10.3"
@@ -9714,7 +9721,7 @@ __metadata:
     pluralize: "npm:8.0.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.52.3"
     typescript: "npm:5.9.3"
@@ -9740,7 +9747,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     vitest: "catalog:"
     vitest-config: "npm:5.52.3"
@@ -9783,7 +9790,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
@@ -9943,7 +9950,7 @@ __metadata:
     react-helmet: "npm:^6.1.0"
     react-intl: "npm:6.6.2"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     semver: "npm:7.7.4"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
@@ -10215,7 +10222,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     react-select: "npm:5.8.0"
     sharp: "npm:0.35.3"
     styled-components: "npm:6.4.1"
@@ -14933,7 +14940,7 @@ __metadata:
     mysql2: "npm:3.20.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     typescript: "npm:^5"
   languageName: unknown
@@ -16287,7 +16294,7 @@ __metadata:
     better-sqlite3: "npm:12.8.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
     typescript: "npm:^5"
   languageName: unknown
@@ -18734,7 +18741,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     strapi-plugin-workspace-plugin: "workspace:*"
     styled-components: "npm:6.4.1"
   languageName: unknown
@@ -21467,7 +21474,7 @@ __metadata:
     better-sqlite3: "npm:12.8.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
   languageName: unknown
   linkType: soft
@@ -21488,7 +21495,7 @@ __metadata:
     pg: "npm:8.20.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.30.4"
+    react-router-dom: "npm:6.30.5"
     styled-components: "npm:6.4.1"
   languageName: unknown
   linkType: soft
@@ -26126,27 +26133,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:6.30.4, react-router-dom@npm:^6.30.4":
-  version: 6.30.4
-  resolution: "react-router-dom@npm:6.30.4"
+"react-router-dom@npm:6.30.5":
+  version: 6.30.5
+  resolution: "react-router-dom@npm:6.30.5"
   dependencies:
     "@remix-run/router": "npm:1.23.3"
-    react-router: "npm:6.30.4"
+    react-router: "npm:6.30.5"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 10c0/1b25ab26a288da852f7b58eec5c14b3f37919e6773a557cd846d3a05d7a7d890c8d49bda93c0a7f497f240df1df8b0ad50635f990aafb55f2fc545ad8269a822
+  checksum: 10c0/519b92f83edc3be9cff5f8cea9ab8125ff5050147c18b84cc556929e3c39534ceae0c93893cf369511751ed4bfde22b33d296b14a70b6cdcf18433c8722579d0
   languageName: node
   linkType: hard
 
-"react-router@npm:6.30.4":
-  version: 6.30.4
-  resolution: "react-router@npm:6.30.4"
+"react-router-dom@npm:^6.30.5":
+  version: 6.30.6
+  resolution: "react-router-dom@npm:6.30.6"
+  dependencies:
+    "@remix-run/router": "npm:1.23.4"
+    react-router: "npm:6.30.6"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/57dbb2ae4ac787f78c4d10b764c1c5223635378033e33dda4e0a4417144ae847fb43dc98008075951826258287c27c67729ca713c90957cf2ecf9055561bdc2e
+  languageName: node
+  linkType: hard
+
+"react-router@npm:6.30.5":
+  version: 6.30.5
+  resolution: "react-router@npm:6.30.5"
   dependencies:
     "@remix-run/router": "npm:1.23.3"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/fb6de7d1002bcab9ea12c4072d93792eca494f1e4f30cfec334ccb6523756d23ce3e093c7c1241399296cebed94789a3fb89f96ee76004e0e746458a8f6bab33
+  checksum: 10c0/90e469a691d0863f1c30cb2651d7100562993495bbd99422abc5ca2a8271d17dc067251831b1588d7fbf186ca9b37a62a16b02a782999e0b168af618dfdc48f8
+  languageName: node
+  linkType: hard
+
+"react-router@npm:6.30.6":
+  version: 6.30.6
+  resolution: "react-router@npm:6.30.6"
+  dependencies:
+    "@remix-run/router": "npm:1.23.4"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 10c0/d101388d92a44e159ef30dd2402a7f7b6aace8f837bb42aed1f8a6b3a4eff769d1822bf69382f0acb85a790628dac081c22bedb2bca12707e0e5e91427010fc3
   languageName: node
   linkType: hard
 
@@ -28052,7 +28083,7 @@ __metadata:
     eslint: "npm:8.57.1"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
-    react-router-dom: "npm:^6.30.4"
+    react-router-dom: "npm:^6.30.5"
     styled-components: "npm:6.4.1"
   peerDependencies:
     "@strapi/strapi": "workspace:*"

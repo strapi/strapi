@@ -69,7 +69,7 @@
     "@types/node": "20.19.41",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.30.4",
+    "react-router-dom": "6.30.5",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
     "vitest-config": "5.52.3"
