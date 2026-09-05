@@ -98,6 +98,11 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
             : never
           : never,
       ],
+      // Media
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+        Schema.Attribute.GetMediaValue<TAttribute>,
+      ],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, Literals.BooleanValue],
       // Number
