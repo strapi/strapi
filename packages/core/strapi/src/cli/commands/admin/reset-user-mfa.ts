@@ -104,7 +104,9 @@ const action = async (cmdOptions: CmdOptions = {}) => {
 const command: StrapiCommand = () => {
   return createCommand('admin:reset-user-mfa')
     .alias('admin:reset-mfa')
-    .description("Reset an admin user's two-factor authentication")
+    .description(
+      "Reset an admin user's two-factor authentication (does not unlock an enforcement lock; see admin:unlock-user-mfa)"
+    )
     .option('-e, --email <email>', 'The user email')
     .action(runAction('admin:reset-user-mfa', action));
 };

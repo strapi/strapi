@@ -22,17 +22,25 @@ interface MfaService {
   isEnrolled(userId: string): Promise<boolean>;
   countUnusedRecoveryCodes(userId: string): Promise<number>;
   config(): { recoveryCodeCount: number; step: number };
+  isMfaRequiredFor(user: {
+    id: unknown;
+    password?: string | null;
+    roles?: unknown;
+  }): Promise<boolean>;
 }
 
 async function printMfaState({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  // Only what this command needs to display -- never `mfaSecret`, the field the encrypted TOTP
-  // secret lives in.
-  const user = await app.db
-    .query('admin::user')
-    .findOne({ where: { email }, select: ['id', 'email', 'mfaEnabledAt'] });
+  // `password` is selected only so `isMfaRequiredFor`'s no-local-password check can run -- it is
+  // never printed. Never `mfaSecret`/`mfaPendingSecret`, the fields the encrypted TOTP secrets
+  // live in.
+  const user = await app.db.query('admin::user').findOne({
+    where: { email },
+    select: ['id', 'email', 'mfaEnabledAt', 'mfaGraceUntil', 'mfaLockedAt', 'password'],
+    populate: ['roles'],
+  });
 
   if (!user) {
     console.error(`No admin user found for ${email}`);
@@ -53,6 +61,15 @@ async function printMfaState({ email }: CmdOptions) {
   console.log(`recovery codes:    ${unusedRecoveryCodes} of ${recoveryCodeCount} unused`);
   console.log(`server time:       ${new Date().toISOString()}`);
   console.log(`current totp step: ${currentTotpStep({ step })}`);
+
+  const required = await mfa.isMfaRequiredFor(user);
+  console.log(`required:          ${required ? 'yes' : 'no'}`);
+  console.log(
+    `grace until:       ${user.mfaGraceUntil ? new Date(user.mfaGraceUntil).toISOString() : '-'}`
+  );
+  console.log(
+    `locked at:         ${user.mfaLockedAt ? new Date(user.mfaLockedAt).toISOString() : '-'}`
+  );
 
   process.exit(0);
 }

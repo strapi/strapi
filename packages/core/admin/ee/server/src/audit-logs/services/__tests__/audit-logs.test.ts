@@ -120,10 +120,38 @@ describe('Audit logs service', () => {
     await handleEvent('admin.mfa.reset', { userId: '1' });
     await handleEvent('admin.mfa.challenge.failed', { userId: '1' });
     await handleEvent('admin.auth.mfa_required', { userId: '1' });
+    await handleEvent('admin.mfa.locked', { userId: '1' });
+    await handleEvent('admin.mfa.unlocked', { userId: '1', byUserId: '9' });
+    await handleEvent('admin.mfa.authenticator.replaced', { userId: '1' });
 
-    // All five are on the allow-list, so all five produce a saved audit event -- an event name
+    // All eight are on the allow-list, so all eight produce a saved audit event -- an event name
     // eventMap doesn't recognise resolves to `undefined` and is silently dropped instead.
-    expect(saveEvent).toHaveBeenCalledTimes(5);
+    expect(saveEvent).toHaveBeenCalledTimes(8);
+  });
+
+  it('audits an account lock using the payload userId, even though ctx.state.user is not set yet', async () => {
+    // The refresh path locks an account outside any request context that has ctx.state.user set,
+    // just like the failed-challenge case above -- `admin.mfa.locked` must fall back to the
+    // payload's userId the same way.
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
+    const saveEvent = jest.fn();
+    strapi.get.mockReturnValueOnce({ deleteExpiredEvents: jest.fn(), saveEvent });
+    const originalGet = strapi.requestContext.get;
+    strapi.requestContext.get = () => ({ state: { route: { info: { type: 'admin' } } } });
+
+    try {
+      const lifecycle = createAuditLogsLifecycleService(strapi);
+      await lifecycle.register();
+      const [handleEvent] = mockSubscribe.mock.calls[mockSubscribe.mock.calls.length - 1];
+
+      await handleEvent('admin.mfa.locked', { userId: '42' });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'admin.mfa.locked', userId: '42' })
+      );
+    } finally {
+      strapi.requestContext.get = originalGet;
+    }
   });
 
   it('audits a failed second-factor login using the payload userId, even though ctx.state.user is not set yet', async () => {

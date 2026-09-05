@@ -7,6 +7,7 @@ import { command as blockAdminUser } from './admin/block-user';
 import { command as listAdminUsers } from './admin/list-users';
 import { command as resetAdminUserPassword } from './admin/reset-user-password';
 import { command as resetAdminUserMfa } from './admin/reset-user-mfa';
+import { command as unlockAdminUserMfa } from './admin/unlock-user-mfa';
 import { command as adminMfaState } from './admin/mfa-state';
 import { command as listComponents } from './components/list';
 import { command as configurationDump } from './configuration/dump';
@@ -44,6 +45,7 @@ export const commands: StrapiCommand[] = [
   listAdminUsers,
   resetAdminUserPassword,
   resetAdminUserMfa,
+  unlockAdminUserMfa,
   adminMfaState,
   listComponents,
   configurationDump,
