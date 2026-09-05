@@ -1,5 +1,6 @@
 import admin from './admin';
 import ai from './ai';
+import caching from './caching';
 import coreStore from './coreStore';
 import cron from './cron';
 import mcp from './mcp';
@@ -15,6 +16,7 @@ export const providers: Provider[] = [
   admin,
   ai,
   coreStore,
+  caching,
   sessionManager,
   webhooks,
   telemetry,

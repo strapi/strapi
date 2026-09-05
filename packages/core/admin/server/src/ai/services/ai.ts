@@ -2,21 +2,14 @@ import type { Core } from '@strapi/types';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { INTERNAL_CACHE_NS } from '@strapi/utils';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
-   * In-memory cache for AI tokens
-   * Key format: `${projectId}:${userId}`
+   * AI tokens are cached on the process-local memory provider only (`provider: 'memory'`),
+   * key format: `${projectId}:${userId}` — see {@link INTERNAL_CACHE_NS.EE_AI_TOKEN}.
    */
-  const aiTokenCache = new Map<
-    string,
-    {
-      token: string;
-      expiresAt?: string;
-      expiresAtMs?: number;
-    }
-  >();
 
   const isEnabled = (): boolean => {
     const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
@@ -100,26 +93,19 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     // Create a secure user identifier using only user ID
     const userIdentifier = user.id.toString();
 
-    // Check cache for existing valid token
     const cacheKey = `${projectId}:${userIdentifier}`;
-    const cachedToken = aiTokenCache.get(cacheKey);
+    const cachedEntry = await strapi.cacheManager.get(INTERNAL_CACHE_NS.EE_AI_TOKEN, cacheKey, {
+      provider: 'memory',
+    });
 
-    if (cachedToken) {
-      const now = Date.now();
-      // Check if token is still valid (with buffer so it has time to be used)
-      const bufferMs = 2 * 60 * 1000; // 2 minutes
+    if (cachedEntry?.value && typeof cachedEntry.value === 'object' && cachedEntry.value !== null) {
+      const cachedToken = cachedEntry.value as { token: string; expiresAt?: string };
+      strapi.log.info('Using cached AI token');
 
-      if (cachedToken.expiresAtMs && cachedToken.expiresAtMs - bufferMs > now) {
-        strapi.log.info('Using cached AI token');
-
-        return {
-          token: cachedToken.token,
-          expiresAt: cachedToken.expiresAt,
-        };
-      }
-
-      // Token expired or will expire soon, remove from cache
-      aiTokenCache.delete(cacheKey);
+      return {
+        token: cachedToken.token,
+        expiresAt: cachedToken.expiresAt,
+      };
     }
 
     strapi.log.http('Contacting AI Server for token generation');
@@ -180,14 +166,18 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
         expiresAt: data.expiresAt,
       });
 
-      // Cache the token if it has an expiration time
       if (data.expiresAt) {
         const expiresAtMs = new Date(data.expiresAt).getTime();
-        aiTokenCache.set(cacheKey, {
-          token: data.jwt,
-          expiresAt: data.expiresAt,
-          expiresAtMs,
-        });
+        const bufferMs = 2 * 60 * 1000; // 2 minutes — drop cache before JWT becomes too short-lived to use
+        await strapi.cacheManager.set(
+          INTERNAL_CACHE_NS.EE_AI_TOKEN,
+          cacheKey,
+          { token: data.jwt, expiresAt: data.expiresAt },
+          {
+            provider: 'memory',
+            expiresAt: new Date(expiresAtMs - bufferMs),
+          }
+        );
       }
 
       // Note: Token expires in 1 hour, client should handle refresh

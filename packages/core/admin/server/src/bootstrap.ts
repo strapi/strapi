@@ -2,6 +2,7 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
+import { clearAdminAuthAbilityCache } from './strategies/admin';
 import {
   getTokenOptions,
   expiresInToSeconds,
@@ -71,6 +72,22 @@ const registerModelHooks = () => {
       }
     },
   });
+};
+
+const registerAdminAuthCacheInvalidation = () => {
+  const invalidate = async () => {
+    await clearAdminAuthAbilityCache();
+  };
+
+  strapi.eventHub.on('permission.create', invalidate);
+  strapi.eventHub.on('permission.update', invalidate);
+  strapi.eventHub.on('permission.delete', invalidate);
+  strapi.eventHub.on('role.create', invalidate);
+  strapi.eventHub.on('role.update', invalidate);
+  strapi.eventHub.on('role.delete', invalidate);
+  strapi.eventHub.on('user.create', invalidate);
+  strapi.eventHub.on('user.update', invalidate);
+  strapi.eventHub.on('user.delete', invalidate);
 };
 
 const syncAuthSettings = async () => {
@@ -188,6 +205,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();
+  registerAdminAuthCacheInvalidation();
 
   const permissionService = getService('permission');
   const userService = getService('user');

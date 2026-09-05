@@ -45,6 +45,10 @@ describe('AI Container', () => {
           return defaultValue;
         }),
       },
+      cacheManager: {
+        get: jest.fn().mockResolvedValue(null),
+        set: jest.fn().mockResolvedValue(undefined),
+      },
       log: {
         info: jest.fn(),
         error: jest.fn(),
