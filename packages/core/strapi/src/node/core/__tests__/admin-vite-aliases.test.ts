@@ -24,6 +24,16 @@ const PNPM_OPTIMIZE_ALIAS_MODULES = ['invariant', 'prismjs', 'lodash'] as const;
 const DND_SINGLETON_MODULES = ['react-dnd', 'react-dnd-html5-backend'] as const;
 
 /**
+ * react-query keeps its QueryClient on a module-scope context. @strapi/admin mounts the only
+ * QueryClientProvider, while @strapi/content-manager, @strapi/content-releases,
+ * @strapi/content-type-builder, @strapi/email, @strapi/upload, @strapi/plugin-i18n and
+ * @strapi/plugin-users-permissions each declare react-query themselves — so it must be deduped
+ * rather than left to npm hoisting, or the Media Library mounts against an empty context
+ * (#23758, #24865).
+ */
+const QUERY_SINGLETON_MODULES = ['react-query'] as const;
+
+/**
  * resolve.dedupe forces resolution from the app root, so only packages the app itself declares
  * may be deduped. These two are @strapi/admin dependencies: under pnpm's strict isolation they
  * have no top-level node_modules entry, so deduping them would turn a working (if duplicated)
@@ -48,6 +58,16 @@ describe('ADMIN_VITE_ALIAS_MODULES contract', () => {
     for (const mod of DND_SINGLETON_MODULES) {
       expect(ADMIN_VITE_DEDUPE_MODULES).toContain(mod);
     }
+  });
+
+  it('dedupes react-query so the admin QueryClientProvider and upload share one context (#23758)', () => {
+    for (const mod of QUERY_SINGLETON_MODULES) {
+      expect(ADMIN_VITE_DEDUPE_MODULES).toContain(mod);
+    }
+  });
+
+  it('pins react-query alongside other @strapi/admin dependency versions', () => {
+    expect(ADMIN_PINNED_ALIAS_MODULES).toContain('react-query');
   });
 });
 
