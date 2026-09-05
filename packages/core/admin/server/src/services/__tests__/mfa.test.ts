@@ -2940,4 +2940,39 @@ describe('mfa service: enforce', () => {
     await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
     expect(userMocks.updateMany).toHaveBeenCalledTimes(2);
   });
+
+  describe('unlock', () => {
+    test('clears both stamps in one conditional update, records unlocked, emits with byUserId', async () => {
+      const { service, users, events, strapi } = setup({
+        user: { mfaGraceUntil: new Date(0), mfaLockedAt: new Date() },
+      });
+
+      await expect(service.unlock('1', { byUserId: '9' })).resolves.toBe(true);
+
+      expect(users.get('1')!.mfaLockedAt).toBeNull();
+      expect(users.get('1')!.mfaGraceUntil).toBeNull();
+      expect(events).toEqual([
+        expect.objectContaining({ type: 'unlocked', metadata: { byUserId: '9' } }),
+      ]);
+      expect((strapi as any).eventHub.emit).toHaveBeenCalledWith('admin.mfa.unlocked', {
+        userId: '1',
+        byUserId: '9',
+      });
+    });
+
+    test('a user who is not locked is left alone and reported as such', async () => {
+      const { service, events } = setup({ user: { mfaGraceUntil: new Date() } });
+
+      await expect(service.unlock('1', { byUserId: '9' })).resolves.toBe(false);
+      expect(events).toHaveLength(0);
+    });
+
+    test('the CLI marks its unlock with via: cli and no byUserId', async () => {
+      const { service, events } = setup({ user: { mfaLockedAt: new Date() } });
+
+      await service.unlock('1', { via: 'cli' });
+
+      expect(events[0].metadata).toEqual({ via: 'cli' });
+    });
+  });
 });

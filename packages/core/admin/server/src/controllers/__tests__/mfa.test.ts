@@ -601,4 +601,47 @@ describe('mfa controller', () => {
     });
     expect(markEventsSeen).not.toHaveBeenCalled();
   });
+
+  describe('unlockUser', () => {
+    const build = (unlockResult: boolean, userExists = true) => {
+      const unlock = jest.fn(() => Promise.resolve(unlockResult));
+      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      setStrapi({
+        admin: { services: { mfa: { isEnabled: () => true, unlock }, user: { findOne } } },
+      });
+      const notFound = jest.fn();
+      const badRequest = jest.fn();
+      const ctx = createContext(
+        {},
+        {
+          state: { user: { id: 7 } },
+          params: { id: '3' },
+          notFound,
+          badRequest,
+          request: { query: {}, body: {} },
+        }
+      ) as any;
+      return { ctx, unlock, notFound, badRequest };
+    };
+
+    test('unlocks and answers 204 with the acting admin recorded', async () => {
+      const { ctx, unlock } = build(true);
+      await mfaController.unlockUser(ctx);
+      expect(unlock).toHaveBeenCalledWith('3', { byUserId: '7' });
+      expect(ctx.status).toBe(204);
+    });
+
+    test('400 when the user is not locked', async () => {
+      const { ctx, badRequest } = build(false);
+      await mfaController.unlockUser(ctx);
+      expect(badRequest).toHaveBeenCalledWith('This account is not locked');
+    });
+
+    test('404 when the user does not exist', async () => {
+      const { ctx, unlock, notFound } = build(false, false);
+      await mfaController.unlockUser(ctx);
+      expect(notFound).toHaveBeenCalledWith('User does not exist');
+      expect(unlock).not.toHaveBeenCalled();
+    });
+  });
 });

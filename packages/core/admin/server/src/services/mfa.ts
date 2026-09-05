@@ -432,6 +432,32 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * Administrator unlock. One conditional UPDATE (`mfaLockedAt IS NOT NULL` is the precondition);
+   * zero rows means "not locked", which the endpoint reports as 400. No grace is stamped here: the
+   * user's next session starts a fresh window, so an unlock while they are on leave cannot re-lock
+   * them unseen.
+   */
+  const unlock = async (
+    userId: string,
+    actor: { byUserId?: string; via?: 'cli' }
+  ): Promise<boolean> => {
+    const { count } = await userQuery().updateMany({
+      where: { id: userId, mfaLockedAt: { $notNull: true } },
+      data: { mfaLockedAt: null, mfaGraceUntil: null },
+    });
+    if (count !== 1) {
+      return false;
+    }
+
+    await recordEvent(userId, 'unlocked', {
+      ...(actor.byUserId ? { byUserId: actor.byUserId } : {}),
+      ...(actor.via ? { via: actor.via } : {}),
+    });
+    notify(userId, 'unlocked', actor.byUserId ? { byUserId: actor.byUserId } : {});
+    return true;
+  };
+
+  /**
    * Decrypts the stored secret, turning any way it can go wrong — a missing/rotated key, a
    * corrupted or hand-edited value, an unsupported version tag — into the same actionable
    * per-user error. `encryption.decrypt` throws raw `Error`s for malformed input instead of
@@ -1386,6 +1412,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isExemptFromMfa,
     isMfaRequiredFor,
     enforce,
+    unlock,
     beginEnrolment,
     completeEnrolment,
     verifyTotpForUser,

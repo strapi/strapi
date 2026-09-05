@@ -202,4 +202,26 @@ export default {
     await mfa.markEventsSeen(String(ctx.state.user.id), ids);
     ctx.status = 204;
   },
+
+  /**
+   * Administrator unlock of an account locked by enforcement. Route-level permission
+   * `admin::users.update` (the people who can deactivate a user). 404 unknown user, 400 not locked.
+   */
+  async unlockUser(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    const { id } = ctx.params as { id: string };
+    const target = await getService('user').findOne(id);
+    if (!target) {
+      return ctx.notFound('User does not exist');
+    }
+
+    const unlocked = await mfa.unlock(String(target.id), { byUserId: String(ctx.state.user.id) });
+    if (!unlocked) {
+      return ctx.badRequest('This account is not locked');
+    }
+
+    ctx.status = 204;
+  },
 };

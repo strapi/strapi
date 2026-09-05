@@ -87,9 +87,20 @@ export default {
       return ctx.notFound('User does not exist');
     }
 
-    ctx.body = {
-      data: getService('user').sanitizeUser(user as AdminUser),
-    } as FindOne.Response;
+    const data: FindOne.Response['data'] = getService('user').sanitizeUser(user as AdminUser);
+
+    // Enforcement state for the people who can act on it (unlock). Appended after sanitising,
+    // like `registrationToken` in `create`, so the shared sanitizer keeps these out of every other
+    // user-bearing response. Never the secrets: `mfaSecret` / `mfaPendingSecret` stay out.
+    if (ctx.state.userAbility?.can('admin::users.update')) {
+      Object.assign(data, {
+        mfaEnabledAt: user.mfaEnabledAt ?? null,
+        mfaGraceUntil: user.mfaGraceUntil ?? null,
+        mfaLockedAt: user.mfaLockedAt ?? null,
+      });
+    }
+
+    ctx.body = { data } satisfies FindOne.Response;
   },
 
   async update(ctx: Context) {
