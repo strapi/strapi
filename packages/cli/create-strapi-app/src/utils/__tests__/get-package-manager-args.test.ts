@@ -1,6 +1,6 @@
 import execa from 'execa';
 
-import { getInstallArgs } from '../get-package-manager-args';
+import { getInstallArgs, getPackageManagerFromUserAgent } from '../get-package-manager-args';
 
 jest.mock('execa');
 
@@ -43,5 +43,29 @@ describe('getInstallArgs', () => {
     const { cmdArgs } = await getInstallArgs('pnpm');
 
     expect(cmdArgs).toEqual(['install']);
+  });
+
+  it('does not add extra args or env for nub', async () => {
+    mockedExeca.mockResolvedValue({ stdout: '0.6.0' });
+
+    const { cmdArgs, envArgs } = await getInstallArgs('nub');
+
+    expect(cmdArgs).toEqual(['install']);
+    expect(envArgs).toEqual({});
+  });
+});
+
+describe('getPackageManagerFromUserAgent', () => {
+  it('detects nub before the npm compatibility segment', () => {
+    expect(getPackageManagerFromUserAgent('nub/0.6.0 npm/? node/v22.15.0 darwin arm64')).toBe('nub');
+  });
+
+  it('detects pnpm', () => {
+    expect(getPackageManagerFromUserAgent('pnpm/10.25.0 npm/? node/v22.15.0')).toBe('pnpm');
+  });
+
+  it('returns null for an unknown or empty user agent', () => {
+    expect(getPackageManagerFromUserAgent('npm/10.9.2 node/v22.15.0')).toBeNull();
+    expect(getPackageManagerFromUserAgent('')).toBeNull();
   });
 });
