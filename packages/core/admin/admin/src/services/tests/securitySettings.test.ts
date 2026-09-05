@@ -1,11 +1,10 @@
-/* eslint-disable check-file/filename-naming-convention */
 import { renderHook, server, waitFor, act } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
   useGetSecuritySettingsQuery,
   useUpdateSecuritySettingsMutation,
-} from '../security-settings';
+} from '../securitySettings';
 
 const SETTINGS = { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } } as const;
 
