@@ -22,11 +22,12 @@ const defaultSize: FieldSize = {
 
 const fieldSizes: Record<string, FieldSize> = {
   // Full row and not resizable
-  dynamiczone: needsFullSize,
-  component: needsFullSize,
   json: needsFullSize,
+  component: needsFullSize,
   richtext: needsFullSize,
   blocks: needsFullSize,
+  // Full row but resizable
+  dynamiczone: { default: 12, isResizable: true },
   // Small and resizable
   checkbox: smallSize,
   boolean: smallSize,
