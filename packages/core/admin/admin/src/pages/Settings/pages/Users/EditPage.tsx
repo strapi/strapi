@@ -26,6 +26,7 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
+import { TwoFactorPanel } from './components/TwoFactorPanel';
 import { COMMON_USER_SCHEMA } from './utils/validation';
 
 const EDIT_VALIDATION_SCHEMA = yup.object().shape({
@@ -287,6 +288,9 @@ const EditPage = () => {
                       </Grid.Root>
                     </Flex>
                   </Box>
+                  {user.mfaEnabledAt !== undefined ? (
+                    <TwoFactorPanel user={user} canUpdate={canUpdate} />
+                  ) : null}
                 </Flex>
               </Layouts.Content>
             </>

@@ -1,0 +1,171 @@
+import * as React from 'react';
+
+import { Box, Button, Dialog, Flex, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
+import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
+import { useNotification } from '../../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useUnlockUserMfaMutation } from '../../../../../services/mfa';
+import { isBaseQueryError } from '../../../../../utils/baseQuery';
+
+import type { AdminUserListItem } from '../../../../../services/users';
+
+interface TwoFactorPanelProps {
+  user: Pick<AdminUserListItem, 'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt'>;
+  canUpdate: boolean;
+}
+
+/**
+ * "Two-factor authentication" on the user edit page, for the people who unlock (the server
+ * appends `mfaEnabledAt` / `mfaGraceUntil` / `mfaLockedAt` to `GET /admin/users/:id` only for
+ * callers with `admin::users.update`, and only while the feature is on; `EditPage` renders this
+ * panel only when those fields are present). One of four states, in priority order: locked,
+ * enrolled, in grace, not enrolled. A lock is for *password* login: an SSO session on the same
+ * account stays valid until its next token refresh, and the copy says so.
+ *
+ * Unlock (`POST /admin/mfa/users/:id/unlock`) clears both stamps and does not start a new grace
+ * period: the user's next login does, so an unlock while they are away cannot re-lock them
+ * unseen. The mutation invalidates this user's `User` tag, so the panel refreshes itself.
+ */
+const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
+  const { formatMessage, formatDate } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const [unlock, { isLoading }] = useUnlockUserMfaMutation();
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+
+  const dateTime = (value: string | Date) =>
+    formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
+
+  const handleUnlock = async () => {
+    const res = await unlock({ id: user.id });
+    setConfirmOpen(false);
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: isBaseQueryError(res.error)
+          ? formatAPIError(res.error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+      return;
+    }
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: 'Settings.permissions.users.mfa.unlock.success',
+        defaultMessage: 'Account unlocked',
+      }),
+    });
+  };
+
+  let state: React.ReactNode;
+  if (user.mfaLockedAt) {
+    state = (
+      <Flex direction="column" alignItems="flex-start" gap={1}>
+        <Typography textColor="danger600">
+          {formatMessage(
+            {
+              id: 'Settings.permissions.users.mfa.state.locked',
+              defaultMessage: 'Locked for password login since {datetime}',
+            },
+            { datetime: dateTime(user.mfaLockedAt) }
+          )}
+        </Typography>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.permissions.users.mfa.state.locked.hint',
+            defaultMessage:
+              'Two-factor authentication was not set up before the deadline. If this account also signs in through single sign-on, that session stays valid until its next refresh.',
+          })}
+        </Typography>
+      </Flex>
+    );
+  } else if (user.mfaEnabledAt) {
+    state = (
+      <Typography>
+        {formatMessage(
+          {
+            id: 'Settings.permissions.users.mfa.state.enrolled',
+            defaultMessage: 'Enrolled since {date}',
+          },
+          { date: formatDate(user.mfaEnabledAt, { dateStyle: 'medium' }) }
+        )}
+      </Typography>
+    );
+  } else if (user.mfaGraceUntil) {
+    state = (
+      <Typography>
+        {formatMessage(
+          {
+            id: 'Settings.permissions.users.mfa.state.grace',
+            defaultMessage: 'Not enrolled. Must set up two-factor authentication before {datetime}',
+          },
+          { datetime: dateTime(user.mfaGraceUntil) }
+        )}
+      </Typography>
+    );
+  } else {
+    state = (
+      <Typography textColor="neutral600">
+        {formatMessage({
+          id: 'Settings.permissions.users.mfa.state.none',
+          defaultMessage: 'Not enrolled',
+        })}
+      </Typography>
+    );
+  }
+
+  return (
+    <Box
+      background="neutral0"
+      hasRadius
+      shadow="filterShadow"
+      paddingTop={6}
+      paddingBottom={6}
+      paddingLeft={7}
+      paddingRight={7}
+    >
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        <Typography variant="delta" tag="h2">
+          {formatMessage({
+            id: 'Settings.permissions.users.mfa.title',
+            defaultMessage: 'Two-factor authentication',
+          })}
+        </Typography>
+        <Flex justifyContent="space-between" alignItems="flex-start" gap={4} wrap="wrap">
+          {state}
+          {user.mfaLockedAt ? (
+            <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <Dialog.Trigger>
+                <Button variant="secondary" disabled={!canUpdate} loading={isLoading}>
+                  {formatMessage({
+                    id: 'Settings.permissions.users.mfa.unlock',
+                    defaultMessage: 'Unlock',
+                  })}
+                </Button>
+              </Dialog.Trigger>
+              <ConfirmDialog
+                variant="default"
+                title={formatMessage({
+                  id: 'Settings.permissions.users.mfa.unlock.title',
+                  defaultMessage: 'Unlock this account?',
+                })}
+                onConfirm={handleUnlock}
+              >
+                {formatMessage({
+                  id: 'Settings.permissions.users.mfa.unlock.body',
+                  defaultMessage:
+                    'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
+                })}
+              </ConfirmDialog>
+            </Dialog.Root>
+          ) : null}
+        </Flex>
+      </Flex>
+    </Box>
+  );
+};
+
+export { TwoFactorPanel };
+export type { TwoFactorPanelProps };
