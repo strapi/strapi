@@ -10,6 +10,7 @@ import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
+import { MfaGraceBanner } from '../components/MfaGraceBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
@@ -135,6 +136,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
+                <MfaGraceBanner />
                 <UpsellBanner />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use

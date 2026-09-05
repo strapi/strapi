@@ -122,8 +122,21 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
       ...defaultTestStoreConfig(),
       ...storeConfig,
     });
-    setupListeners(storeRef.current.dispatch);
   }
+
+  React.useEffect(() => {
+    /**
+     * `setupListeners` guards its `window` event registration behind a module-level
+     * `initialized` flag (not store-scoped), so calling it eagerly during render would only
+     * ever wire up the *first* test in a file: every later test's call becomes a no-op, and its
+     * store never sees a `focus`/`online` dispatch even though `refetchOnFocus` hooks expect
+     * one. Doing it in an effect -- and unsubscribing on cleanup, which RTL's automatic
+     * `afterEach(cleanup)` triggers on unmount -- clears that flag so the next test's render
+     * re-attaches its own listeners bound to its own store.
+     */
+    const unsubscribe = setupListeners(storeRef.current!.dispatch);
+    return unsubscribe;
+  }, []);
 
   let allPermissions: Permission[];
 
