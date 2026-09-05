@@ -16,6 +16,8 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockHistoryVersionCreate = jest.fn();
+const mockHistoryVersionFindMany = jest.fn().mockResolvedValue([]);
+const mockHistoryVersionDeleteMany = jest.fn();
 
 const mockStrapi = {
   admin: {
@@ -56,6 +58,8 @@ const mockStrapi = {
       if (uid === HISTORY_VERSION_UID) {
         return {
           create: mockHistoryVersionCreate,
+          findMany: mockHistoryVersionFindMany,
+          deleteMany: mockHistoryVersionDeleteMany,
         };
       }
       return { findMany: jest.fn().mockResolvedValue([]) };
@@ -125,6 +129,32 @@ describe('history lifecycles service', () => {
         }),
       })
     );
+  });
+
+  describe('deleteHistoryDaily', () => {
+    /**
+     * Regression: `getRetentionDays()` returned 0 when the license did not grant
+     * `cms-content-history`, which is the state `ee.disable()` leaves behind when a license
+     * lapses at runtime. The cut-off date then landed on `now` and the job deleted every row
+     * in `strapi_history_versions`. This mock strapi has no license and no user config, so it
+     * reproduces exactly that state.
+     */
+    it('prunes with the default retention window when the license is missing', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-21T00:00:00.000Z'));
+      mockHistoryVersionFindMany.mockClear();
+
+      await lifecyclesService.bootstrap();
+      const { deleteHistoryDaily } = mockStrapi.cron.add.mock.calls[0][0];
+
+      await deleteHistoryDaily.task();
+
+      // 90 days back, not `now` — anything created in the last 90 days survives
+      expect(mockHistoryVersionFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { created_at: { $lt: new Date('2026-05-23T00:00:00.000Z') } },
+        })
+      );
+    });
   });
 
   describe('publish dedup guard', () => {
