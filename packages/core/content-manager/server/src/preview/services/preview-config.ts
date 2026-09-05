@@ -80,6 +80,31 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
           'Preview configuration is invalid. Handler must be a function'
         );
       }
+
+      const viewports = this.getViewports();
+
+      const isPositiveNumber = (value: unknown) => typeof value === 'number' && value > 0;
+
+      Object.entries(viewports).forEach(([device, viewport]) => {
+        if (!isPositiveNumber(viewport?.width) || !isPositiveNumber(viewport?.height)) {
+          throw new errors.ValidationError(
+            `Preview configuration is invalid. Viewport for "${device}" must have a positive width and height`
+          );
+        }
+      });
+    },
+
+    /**
+     * Utility to get the configured viewport overrides, keyed by device name
+     */
+    getViewports(): NonNullable<NonNullable<Core.Config.Admin['preview']>['config']['viewports']> {
+      if (!this.isEnabled()) {
+        return {};
+      }
+
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
+
+      return config?.config?.viewports ?? {};
     },
 
     /**
