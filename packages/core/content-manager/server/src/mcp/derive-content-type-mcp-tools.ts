@@ -1,5 +1,5 @@
 import { z } from '@strapi/utils';
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, Modules, Struct, UID } from '@strapi/types';
 
 import { ACTIONS } from '../services/permission-checker';
 
@@ -14,6 +14,8 @@ import {
   buildDataSchema,
   buildSortSchema,
   buildFiltersSchema,
+  buildFieldsSchema,
+  buildPopulateSchema,
   buildDocumentOutputSchema,
   buildListOutputSchema,
   buildDeleteOutputSchema,
@@ -42,6 +44,17 @@ export type { ContentManagerModelForMcp };
 export { slugifyUidForMcpToolName } from './utils';
 export { buildSortSchema, buildFiltersSchema, buildDataSchema } from './schemas';
 export { getComponentLeafPaths } from './permissions';
+
+/**
+ * Returns a bound `getModel` for nested-filter target resolution, or `undefined` when the
+ * strapi instance does not expose one (keeps filters top-level-only, e.g. in unit tests).
+ */
+const resolveGetModel = (
+  strapi: Core.Strapi
+): ((uid: string) => { attributes?: Struct.SchemaAttributes } | undefined) | undefined =>
+  typeof strapi.getModel === 'function'
+    ? (strapi.getModel.bind(strapi) as (uid: string) => { attributes?: Struct.SchemaAttributes })
+    : undefined;
 
 // ---------------------------------------------------------------------------
 // Collection-type tool-definition builder
@@ -87,11 +100,14 @@ const buildCollectionTools = (
       page: pageSchema,
       pageSize: pageSizeSchema,
       sort: buildSortSchema(attributes, readFields),
-      filters: buildFiltersSchema(attributes, readFields),
+      filters: buildFiltersSchema(attributes, readFields, resolveGetModel(strapi)),
+      fields: buildFieldsSchema(attributes, readFields),
+      populate: buildPopulateSchema(attributes, readFields),
     });
   };
 
   const resolveGetInputSchema = (context: Modules.MCP.McpHandlerContext) => {
+    const readFields = resolveReadFields(context);
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -105,6 +121,8 @@ const buildCollectionTools = (
       documentId: documentIdSchema,
       locale: localeSchema,
       status: statusSchema,
+      fields: buildFieldsSchema(attributes, readFields),
+      populate: buildPopulateSchema(attributes, readFields),
     });
   };
 
@@ -332,6 +350,7 @@ const buildSingleTypeTools = (
     buildDocumentOutputSchema(attributes, resolveReadFields(context));
 
   const resolveGetInputSchema = (context: Modules.MCP.McpHandlerContext) => {
+    const readFields = resolveReadFields(context);
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -344,6 +363,8 @@ const buildSingleTypeTools = (
     return z.object({
       locale: localeSchema,
       status: statusSchema,
+      fields: buildFieldsSchema(attributes, readFields),
+      populate: buildPopulateSchema(attributes, readFields),
     });
   };
 

@@ -171,6 +171,7 @@ const makeMinimalGlobalStrapi = (dbOverrides?: Record<string, unknown>): Core.St
     apis: {},
     admin: { services: {} },
     getModel: jest.fn(() => ({})),
+    config: { get: jest.fn((_path: string, defaultValue?: unknown) => defaultValue) },
     contentTypes: {},
     db: dbOverrides?.db ?? {
       transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
@@ -644,7 +645,7 @@ describe('collection-type handler: list', () => {
   const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [baseModel({})]);
   const listTool = tools.find((t) => t.name === 'list_article')!;
 
-  const strapi = { getModel: jest.fn(() => ({})) } as unknown as Core.Strapi;
+  const strapi = makeMinimalGlobalStrapi();
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
   beforeEach(() => jest.clearAllMocks());
@@ -673,7 +674,7 @@ describe('collection-type handler: get', () => {
   const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [baseModel({})]);
   const getTool = tools.find((t) => t.name === 'get_article')!;
 
-  const strapi = {} as unknown as Core.Strapi;
+  const strapi = makeMinimalGlobalStrapi();
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
   beforeEach(() => jest.clearAllMocks());
@@ -1692,6 +1693,59 @@ describe('buildFiltersSchema', () => {
     // Private field must not appear in the schema description surfaced to the AI
     expect(schema.description).not.toContain('secret');
     expect(schema.description).toContain('title');
+  });
+
+  // ── nested (relation/component) filters — require a getModel resolver ──────
+  describe('nested filters (getModel provided)', () => {
+    const nestedAttrs = {
+      title: { type: 'string' },
+      author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+      seo: { type: 'component', component: 'shared.seo' },
+    } as TestAttrs;
+
+    const models: Record<string, { attributes: TestAttrs }> = {
+      'api::author.author': {
+        attributes: { name: { type: 'string' }, age: { type: 'integer' } } as TestAttrs,
+      },
+      'shared.seo': {
+        attributes: { metaTitle: { type: 'string' } } as TestAttrs,
+      },
+    };
+    const getModel = (uid: string) => models[uid];
+
+    it('does NOT allow nested relation filters without a getModel resolver', () => {
+      const schema = buildFiltersSchema(nestedAttrs);
+      expect(schema.safeParse({ author: { name: { $eq: 'Ada' } } }).success).toBe(false);
+    });
+
+    // Relation targets are intentionally NOT expanded into nested filters — see
+    // filters-schema.ts: filtering on a related entry's fields would let a caller probe
+    // fields/entries of the target type without that entry's own read permission being
+    // checked (the permission checker only sanitizes against the source type).
+    it('does NOT expand relation targets into nested filters, even with a getModel resolver', () => {
+      const schema = buildFiltersSchema(nestedAttrs, null, getModel);
+      expect(schema.safeParse({ author: { name: { $contains: 'Ad' } } }).success).toBe(false);
+      expect(schema.safeParse({ author: { age: { $gt: 18 } } }).success).toBe(false);
+    });
+
+    it('accepts a nested component field filter', () => {
+      const schema = buildFiltersSchema(nestedAttrs, null, getModel);
+      expect(schema.safeParse({ seo: { metaTitle: { $eq: 'Home' } } }).success).toBe(true);
+    });
+
+    it('rejects unknown nested fields on a component', () => {
+      const schema = buildFiltersSchema(nestedAttrs, null, getModel);
+      expect(schema.safeParse({ seo: { unknownField: { $eq: 'x' } } }).success).toBe(false);
+    });
+
+    it('combines nested (component) filters with logical operators', () => {
+      const schema = buildFiltersSchema(nestedAttrs, null, getModel);
+      expect(
+        schema.safeParse({
+          $and: [{ title: { $contains: 'foo' } }, { seo: { metaTitle: { $eq: 'Home' } } }],
+        }).success
+      ).toBe(true);
+    });
   });
 });
 
@@ -2911,5 +2965,121 @@ describe('relation identity: shapeRelationsForMcp called on every op', () => {
   it('discard_article_draft routes output through shapeRelationsForMcp', async () => {
     const spy = await runHandler('discard_article_draft', { documentId: 'doc-1' });
     expect(spy).toHaveBeenCalled();
+  });
+});
+
+describe('read tools: fields / populate wiring', () => {
+  const uid = 'api::article.article';
+  const relationAttributes = {
+    title: { type: 'string' },
+    author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+  } as TestAttrs;
+  const model = baseModel({ uid, attributes: relationAttributes });
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  const strapiForTest = makeMinimalGlobalStrapi();
+
+  const { getService } = jest.requireMock('../../utils') as { getService: jest.Mock };
+  const { shapeRelationsForMcp: mockShapeRelations } = jest.requireMock(
+    '../sanitizers/shape-relations'
+  ) as { shapeRelationsForMcp: jest.Mock };
+  const getBuilder = () => getService('populate-builder')();
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('list_ forwards fields and populate into the sanitized read query', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const listTool = tools.find((t) => t.name === 'list_article')!;
+    const handler = listTool.createHandler(strapiForTest, context);
+    await handler({ args: { fields: ['title'], populate: ['author'] }, extra: mockExtra });
+
+    expect(mockPermissionChecker.sanitizedQuery.read).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['title'], populate: ['author'] })
+    );
+  });
+
+  it('list_ honors explicit populate exactly — does NOT auto-populate via populateDeep', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const listTool = tools.find((t) => t.name === 'list_article')!;
+    const handler = listTool.createHandler(strapiForTest, context);
+    await handler({ args: { populate: ['author'] }, extra: mockExtra });
+
+    expect(getBuilder().populateDeep).not.toHaveBeenCalled();
+  });
+
+  it('list_ forwards the sanitized explicit populate shape unchanged to the Document Service', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const listTool = tools.find((t) => t.name === 'list_article')!;
+    const handler = listTool.createHandler(strapiForTest, context);
+    await handler({ args: { populate: ['author'] }, extra: mockExtra });
+
+    // Previously getQueryPopulate (via populateFromQuery) ignored `populate` and produced {}.
+    expect(mockDocumentManager.findPage).toHaveBeenCalledWith(
+      expect.objectContaining({ populate: ['author'] }),
+      uid
+    );
+  });
+
+  it('list_ auto-populates to depth 1 when populate is omitted', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const listTool = tools.find((t) => t.name === 'list_article')!;
+    const handler = listTool.createHandler(strapiForTest, context);
+    await handler({ args: {}, extra: mockExtra });
+
+    expect(getBuilder().populateDeep).toHaveBeenCalledWith(1);
+  });
+
+  it('get_ forwards the sanitized fields shape into findOne', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1', fields: ['title'] }, extra: mockExtra });
+
+    // Previously `fields` was sanitized but never reached the findOne options.
+    expect(mockDocumentManager.findOne).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ fields: ['title'] })
+    );
+  });
+
+  it('get_ forwards the sanitized explicit populate shape unchanged to findOne', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1', populate: ['author'] }, extra: mockExtra });
+
+    expect(mockDocumentManager.findOne).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: ['author'] })
+    );
+  });
+
+  it('get_ passes inline options for a relation named in populate', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1', populate: ['author'] }, extra: mockExtra });
+
+    // sanitizeFormatShape → shapeRelationsForMcp(uid, data, inlineOptions)
+    const inlineOptions = mockShapeRelations.mock.calls.at(-1)?.[2];
+    expect(inlineOptions).toBeDefined();
+    expect(inlineOptions.shouldInline('author')).toBe(true);
+    expect(inlineOptions.shouldInline('editor')).toBe(false);
+  });
+
+  it('get_ passes NO inline options when populate is omitted (default stub behavior)', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1' }, extra: mockExtra });
+
+    const inlineOptions = mockShapeRelations.mock.calls.at(-1)?.[2];
+    expect(inlineOptions).toBeUndefined();
   });
 });
