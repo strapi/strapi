@@ -120,6 +120,7 @@ describe('User Controller', () => {
         admin: {
           services: {
             user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => false },
           },
         },
       } as any;
@@ -144,6 +145,7 @@ describe('User Controller', () => {
         admin: {
           services: {
             user: { findOne },
+            mfa: { isEnabled: () => false },
           },
         },
       } as any;
@@ -166,7 +168,14 @@ describe('User Controller', () => {
       };
       const findOne = jest.fn(() => Promise.resolve(user));
       const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
-      global.strapi = { admin: { services: { user: { findOne, sanitizeUser } } } } as any;
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => true },
+          },
+        },
+      } as any;
       const ctx = createContext(
         {},
         { params: { id: 1 }, state: { userAbility: { can: jest.fn(() => true) } } }
@@ -191,7 +200,14 @@ describe('User Controller', () => {
       const user = { id: 1, email: 'a@b.c', mfaGraceUntil: '2026-09-11T10:00:00.000Z' };
       const findOne = jest.fn(() => Promise.resolve(user));
       const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
-      global.strapi = { admin: { services: { user: { findOne, sanitizeUser } } } } as any;
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => true },
+          },
+        },
+      } as any;
       const ctx = createContext(
         {},
         { params: { id: 1 }, state: { userAbility: { can: jest.fn(() => false) } } }
@@ -200,6 +216,34 @@ describe('User Controller', () => {
       await userController.findOne(ctx);
 
       expect(findOne).toHaveBeenCalledWith(1);
+      expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
+    });
+
+    test('flag off: appends nothing even for a caller who may update users', async () => {
+      const user = {
+        id: 1,
+        email: 'a@b.c',
+        mfaEnabledAt: null,
+        mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+        mfaLockedAt: null,
+      };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => false },
+          },
+        },
+      } as any;
+      const ctx = createContext(
+        {},
+        { params: { id: 1 }, state: { userAbility: { can: () => true } } }
+      ) as any;
+
+      await userController.findOne(ctx);
+
       expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
     });
   });

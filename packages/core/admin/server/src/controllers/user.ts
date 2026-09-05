@@ -92,15 +92,18 @@ export default {
     // Enforcement state for the people who can act on it (unlock). Appended after sanitising,
     // as a fresh object rather than a mutation of the sanitizer's return, like `registrationToken`
     // in `create`, so the shared sanitizer keeps these out of every other user-bearing response.
-    // Never the secrets: `mfaSecret` / `mfaPendingSecret` stay out.
-    const data: FindOne.Response['data'] = ctx.state.userAbility?.can('admin::users.update')
-      ? {
-          ...sanitized,
-          mfaEnabledAt: user.mfaEnabledAt ?? null,
-          mfaGraceUntil: user.mfaGraceUntil ?? null,
-          mfaLockedAt: user.mfaLockedAt ?? null,
-        }
-      : sanitized;
+    // Never the secrets: `mfaSecret` / `mfaPendingSecret` stay out. Gated on the feature being
+    // enabled too, not just the ability check: with the flag off this endpoint must read exactly
+    // as it did on develop, for every caller.
+    const data: FindOne.Response['data'] =
+      getService('mfa').isEnabled() && ctx.state.userAbility?.can('admin::users.update')
+        ? {
+            ...sanitized,
+            mfaEnabledAt: user.mfaEnabledAt ?? null,
+            mfaGraceUntil: user.mfaGraceUntil ?? null,
+            mfaLockedAt: user.mfaLockedAt ?? null,
+          }
+        : sanitized;
 
     ctx.body = { data } satisfies FindOne.Response;
   },

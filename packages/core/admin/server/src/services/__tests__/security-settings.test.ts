@@ -3,6 +3,7 @@ import {
   DEFAULT_MFA_ENFORCEMENT,
   SECURITY_SETTINGS_KEY,
   readMfaEnforcement,
+  resetSecuritySettingsWarnings,
   createSecuritySettingsService,
 } from '../security-settings';
 
@@ -15,6 +16,10 @@ const buildStrapi = (stored: unknown) => {
 };
 
 describe('security-settings: readMfaEnforcement', () => {
+  beforeEach(() => {
+    resetSecuritySettingsWarnings();
+  });
+
   test('defaults to optional / 7 days when nothing is stored', async () => {
     const { strapi, store } = buildStrapi(null);
 
@@ -41,6 +46,17 @@ describe('security-settings: readMfaEnforcement', () => {
 
     await expect(readMfaEnforcement(strapi)).resolves.toEqual(DEFAULT_MFA_ENFORCEMENT);
     expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringMatching(/security-settings/));
+  });
+
+  test('a persistently corrupt row warns once per key per process, not on every read', async () => {
+    const { strapi } = buildStrapi({ mfa: { mode: 'sometimes', graceDays: 'soon' } });
+
+    await readMfaEnforcement(strapi);
+    await readMfaEnforcement(strapi);
+
+    expect(strapi.log.warn).toHaveBeenCalledTimes(2);
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('mfa.mode'));
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('mfa.graceDays'));
   });
 });
 
@@ -122,7 +138,7 @@ describe('security-settings: service', () => {
     const userQuery = {
       findOne: jest.fn(async ({ where }: any) => {
         const row = users.find((u) => String(u.id) === String(where.id));
-        return row ? { ...row, ...(options.actor ?? {}) } : null;
+        return row ? { ...row, ...options.actor } : null;
       }),
       updateMany: jest.fn(async ({ where, data }: any) => {
         let count = 0;

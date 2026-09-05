@@ -34,11 +34,27 @@ const isGraceDays = (value: unknown): value is number =>
 
 const adminStore = (strapi: Core.Strapi) => strapi.store({ type: 'core', name: 'admin' });
 
+type WarnableKey = 'mode' | 'graceDays';
+
+/**
+ * Which of `mode`/`graceDays` has already logged its corrupt-value warning this process.
+ * `readMfaEnforcement` runs on every session issue (login, registration, reset, refresh), so a
+ * persistently corrupt row would otherwise warn on every single one of them -- this makes it warn
+ * once per key per process instead.
+ */
+const warnedKeys = new Set<WarnableKey>();
+
+/** Test-only: clears the per-process warning dedupe so each test starts from a clean slate. */
+export const resetSecuritySettingsWarnings = (): void => {
+  warnedKeys.clear();
+};
+
 /**
  * The one place enforcement policy is read from storage. Read on every session issue (login,
  * registration, reset, refresh), so it must never throw on a hand-edited or corrupt row: a bad
- * value is logged and replaced by the default for that key, which is `optional` (nothing extra
- * required) rather than anything that could lock a user out.
+ * value is logged -- once per key per process, see `warnedKeys` -- and replaced by the default for
+ * that key, which is `optional` (nothing extra required) rather than anything that could lock a
+ * user out.
  */
 export const readMfaEnforcement = async (strapi: Core.Strapi): Promise<MfaEnforcement> => {
   const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
@@ -50,14 +66,16 @@ export const readMfaEnforcement = async (strapi: Core.Strapi): Promise<MfaEnforc
   const mode = isMode(mfa.mode) ? mfa.mode : DEFAULT_MFA_ENFORCEMENT.mode;
   const graceDays = isGraceDays(mfa.graceDays) ? mfa.graceDays : DEFAULT_MFA_ENFORCEMENT.graceDays;
 
-  if (mfa.mode !== undefined && !isMode(mfa.mode)) {
+  if (mfa.mode !== undefined && !isMode(mfa.mode) && !warnedKeys.has('mode')) {
+    warnedKeys.add('mode');
     strapi.log.warn(
-      `[security-settings] stored mfa.mode is not one of ${MFA_ENFORCEMENT_MODES.join(', ')}; using "${mode}".`
+      `[security-settings] stored mfa.mode is not one of ${MFA_ENFORCEMENT_MODES.join(', ')}; using "${mode}" (this warning is logged once per process).`
     );
   }
-  if (mfa.graceDays !== undefined && !isGraceDays(mfa.graceDays)) {
+  if (mfa.graceDays !== undefined && !isGraceDays(mfa.graceDays) && !warnedKeys.has('graceDays')) {
+    warnedKeys.add('graceDays');
     strapi.log.warn(
-      `[security-settings] stored mfa.graceDays is not an integer in ${MIN_GRACE_DAYS}..${MAX_GRACE_DAYS}; using ${graceDays}.`
+      `[security-settings] stored mfa.graceDays is not an integer in ${MIN_GRACE_DAYS}..${MAX_GRACE_DAYS}; using ${graceDays} (this warning is logged once per process).`
     );
   }
 

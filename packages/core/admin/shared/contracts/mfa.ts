@@ -28,7 +28,10 @@ export declare namespace Enrol {
   export interface Request {
     body: {
       password: string;
-      /** Required when the account is already enrolled: replaces the authenticator. */
+      /**
+       * Required when the account is already enrolled: replaces the authenticator. Ignored on a
+       * fresh enrolment -- there is no current factor yet to prove.
+       */
       code?: string;
     };
   }

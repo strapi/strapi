@@ -80,7 +80,7 @@ export type MfaEventType =
  * to `recordEvent` -- every field below is optional, so a `Record<string, unknown>` value (exactly
  * what `buildSessionMetadataFromContext` returns) is still assignable here with no
  * excess-property check. The guarantee is "nothing declared here can be a secret", not "nothing
- * but these three keys can ever reach the database".
+ * beyond the keys declared here can ever reach the database".
  */
 export type MfaEventMetadata = {
   loginAt?: string;
@@ -151,7 +151,7 @@ export interface MfaServiceDeps {
 /**
  * Native TOTP two-factor authentication for admin users.
  *
- * Organised in four groups, extended by later tasks:
+ * Organised in several groups, extended by later tasks:
  *  - Config & status: `isEnabled`, `config`, `isEnrolled`.
  *  - Enrolment: `beginEnrolment`, `completeEnrolment`.
  *  - Verification primitives: `verifyTotpForUser`, `consumeTotpStep`, the atomic replay guard
@@ -162,13 +162,21 @@ export interface MfaServiceDeps {
  *  - Challenge lifecycle (Task 7): `createChallenge`, `verifyChallenge`, `recordEvent`,
  *    `isAccountThrottled`, `sweepExpiredChallenges` — the only code that decides whether a second
  *    factor was satisfied, and the two-tier attempt limiting that stops brute force.
+ *  - Re-authentication gate: `assertFactor`, the second-factor check -- a still-working TOTP code
+ *    or an unused recovery code, dispatched by the submitted code's own shape -- shared by
+ *    `verifyChallenge`'s dispatch, a replacement enrolment (`beginEnrolment` with a code), and
+ *    `assertPasswordAndFactor`, which layers the password check in front of it for `disable` and
+ *    a security-settings downgrade.
  *  - Self-service management (Task 10): `unseenEvents`, `markEventsSeen`, `areCodesAcknowledged`,
  *    `acknowledgeCodes` — the in-app notice feed and recovery-code acknowledgement — plus
- *    `assertPasswordAndFactor` and `disable`, the shared re-authentication gate and its one
- *    consumer that turns two-factor authentication off.
+ *    `disable`, the one consumer of `assertPasswordAndFactor` that turns two-factor authentication
+ *    off.
  *  - Outbound notices (Task 11): `notify` — the eventHub event and best-effort change email
  *    layered on top of `recordEvent` — and `pruneEvents`, the per-user retention cap on
  *    `admin::mfa-event` that `recordEvent` runs after every insert.
+ *  - Enforcement (cycle 2): `isExemptFromMfa`, `isMfaRequiredFor`, `enforce`, `unlock` — the
+ *    session-issue policy check, the grace/lock lifecycle it drives, and the administrator
+ *    override that lifts a lock.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -305,23 +313,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * `precondition` is the caller's own read of `mfaGraceUntil`, expressed as a `where` fragment:
-   * `{ mfaGraceUntil: { $lte: now } }` for the ordinary case, or an exact match on the raw stored
-   * value (`{ mfaGraceUntil: row.mfaGraceUntil }`) when that value didn't parse as a date at all.
-   * A malformed column (hand-edited, or a weakly-typed engine like SQLite letting a non-date
-   * string into a datetime column) has no portable ordering against `now` -- what a `$lte`
-   * comparison even does with it is engine-specific -- but it can always be compared for exact
-   * equality, which still gives the precondition its race protection: if anything rewrote the
-   * column between the read and this statement (a fresh grace, a clear, another lock), the value
-   * has changed and the match -- and the lock -- fails.
+   * The precondition orders the stored deadline against `now`. A row read through
+   * `strapi.db.query` always yields a `Date` or `null` for `mfaGraceUntil` --
+   * `@strapi/database`'s `DatetimeField.fromDB` never returns anything else for this column --
+   * so `$lte` always has a portable comparison to make: if anything rewrote the column between
+   * the read and this statement (a fresh grace, a clear, another lock), the value has changed and
+   * the match -- and the lock -- fails.
    */
-  const lockAccount = async (
-    userId: string,
-    now: Date,
-    precondition: Record<string, unknown>
-  ): Promise<boolean> => {
+  const lockAccount = async (userId: string, now: Date): Promise<boolean> => {
     const { count } = await userQuery().updateMany({
-      where: { id: userId, mfaLockedAt: null, ...precondition },
+      where: { id: userId, mfaLockedAt: null, mfaGraceUntil: { $lte: now } },
       data: { mfaLockedAt: now },
     });
     return count === 1;
@@ -353,7 +354,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * the cycle 2 spec ("Enforcement evaluation"); `retried` bounds the single re-read taken when a
    * conditional update finds its precondition gone.
    */
-  const enforce = async (user: { id: Data.ID }, retried = false): Promise<EnforceOutcome> => {
+  const evaluateEnforcement = async (
+    user: { id: Data.ID },
+    retried: boolean
+  ): Promise<EnforceOutcome> => {
     if (!isEnabled()) {
       return { outcome: 'none' };
     }
@@ -396,40 +400,46 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         return { outcome: 'grace', graceUntil };
       }
       // Lost a race with another first session (or an unlock). The row now says what to do.
-      return retried ? { outcome: 'refused' } : enforce(user, true);
+      if (retried) {
+        strapi.log.warn(
+          `Two-factor enforcement could not stamp or lock admin user ${userId} after a retry; refusing the session.`
+        );
+        return { outcome: 'refused' };
+      }
+      return evaluateEnforcement(user, true);
     }
 
     const graceUntil = new Date(row.mfaGraceUntil);
-    const malformed = Number.isNaN(graceUntil.getTime());
-    if (malformed) {
-      // A malformed stamp must fail closed on the lock side, never become a grace that never ends.
-      strapi.log.warn(
-        `Malformed mfaGraceUntil on admin user ${userId}; treating the grace as expired.`
-      );
-    } else if (graceUntil > now) {
+    if (graceUntil > now) {
       return { outcome: 'grace', graceUntil };
     }
 
-    // The ordinary precondition orders the stored deadline against `now`; a malformed value has no
-    // portable ordering (see `lockAccount`'s doc comment), so its own precondition is an exact
-    // match on the raw value just read instead.
-    const lockPrecondition = malformed
-      ? { mfaGraceUntil: row.mfaGraceUntil }
-      : { mfaGraceUntil: { $lte: now } };
-
-    if (await lockAccount(userId, now, lockPrecondition)) {
+    if (await lockAccount(userId, now)) {
       // Sessions first: a failing event write must never leave a live session past the lock.
       await invalidateAllSessions(userId);
-      await recordEvent(userId, 'locked', {
-        graceUntil: malformed ? undefined : graceUntil.toISOString(),
-      });
+      await recordEvent(userId, 'locked', { graceUntil: graceUntil.toISOString() });
       notify(userId, 'locked');
       return { outcome: 'refused' };
     }
 
     // Precondition gone: an unlock landed between the read and the lock. Re-read once.
-    return retried ? { outcome: 'refused' } : enforce(user, true);
+    if (retried) {
+      strapi.log.warn(
+        `Two-factor enforcement could not stamp or lock admin user ${userId} after a retry; refusing the session.`
+      );
+      return { outcome: 'refused' };
+    }
+    return evaluateEnforcement(user, true);
   };
+
+  /**
+   * Public one-argument entry point every caller outside this module uses. Always starts a fresh
+   * evaluation -- `retried` is `evaluateEnforcement`'s own internal bookkeeping for the single
+   * re-read it takes when a conditional update finds its precondition gone, never something a
+   * caller supplies.
+   */
+  const enforce = (user: { id: Data.ID }): Promise<EnforceOutcome> =>
+    evaluateEnforcement(user, false);
 
   /**
    * Administrator unlock. One conditional UPDATE (`mfaLockedAt IS NOT NULL` is the precondition);
@@ -1368,9 +1378,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * Wrapped in a transaction, same reasoning as `issueRecoveryCodes`: these three statements must
    * all land or none does. Without it, a failure on the user `update` (the last of the three)
    * would leave `mfaEnabledAt`/`mfaSecret` still set -- so a code is still demanded on every
-   * future request -- with the recovery codes already deleted, and `beginEnrolment` refuses to
-   * re-enrol while `mfaEnabledAt` is set. That is a permanent lockout with no way back in short of
-   * the CLI reset.
+   * future request -- with the recovery codes already deleted, and a replacement enrolment demands
+   * a current factor. That is a permanent lockout with no way back in short of the CLI reset.
    */
   const disable = async (userId: string): Promise<void> => {
     await strapi.db.transaction(async () => {

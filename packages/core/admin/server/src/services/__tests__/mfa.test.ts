@@ -159,23 +159,16 @@ interface EventRow {
 /**
  * Coerces a value to something orderable for the `$gt`/`$lt` family. Deliberately narrow and
  * loud for anything that isn't a plausible datetime: every comparison the service actually issues
- * through `strapi.db.query` is on a datetime (`expiresAt`, `createdAt`, `mfaGraceUntil`), so a
- * type this can't even attempt to coerce (an object, a boolean, ...) means the mock has drifted
- * from the service and should fail the test rather than silently compare as NaN and turn a whole
- * class of filter into a no-op.
- *
- * A string is the one exception: `enforce`'s malformed-stamp guard (`Number.isNaN(new
- * Date(row.mfaGraceUntil).getTime())`) exists specifically for a hand-edited or corrupted
- * `mfaGraceUntil` column, and `lockAccount`'s own `$lte` check runs unconditionally regardless of
- * whether that value parses. Coercing via `new Date(...)` and letting an unparseable string come
- * back `NaN` -- rather than throwing -- lets every ordering operator below fail closed on it
- * (`NaN` compares false against anything), exactly mirroring a real `$lte` against a value the
- * database itself could not read as a date.
+ * through `strapi.db.query` is on a datetime (`expiresAt`, `createdAt`, `mfaGraceUntil`), and a row
+ * read through the query layer always yields a `Date` or `null` for one of those columns --
+ * `@strapi/database`'s `DatetimeField.fromDB` guarantees it. A type this can't even attempt to
+ * coerce (a string, an object, a boolean, ...) means the mock has drifted from the service and
+ * should fail the test rather than silently compare as NaN and turn a whole class of filter into a
+ * no-op.
  */
 const asComparable = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
   if (typeof value === 'number') return value;
-  if (typeof value === 'string') return new Date(value).getTime();
   throw new Error(`Unsupported comparison value in mock: ${String(value)}`);
 };
 
@@ -2914,31 +2907,15 @@ describe('mfa service: enforce', () => {
     expect(result.outcome).toBe('grace');
   });
 
-  test('a malformed grace stamp fails closed: locks (once), warns, no grace that never ends', async () => {
-    const { service, users, events, strapi } = setup({
-      user: { mfaGraceUntil: 'not-a-date' },
-    });
-
-    const result = await service.enforce({ id: 1 });
-
-    expect(result).toEqual({ outcome: 'refused' });
-    expect(users.get('1')!.mfaLockedAt).toBeInstanceOf(Date);
-    expect(events).toEqual([
-      expect.objectContaining({ type: 'locked', metadata: { graceUntil: undefined } }),
-    ]);
-    // A single attempt, not the two a retry would cost: the equality-based lock precondition
-    // (see `lockAccount`) matches the malformed value on the first try, so there is nothing to
-    // retry and nothing left to warn about a second time.
-    expect((strapi as any).log.warn).toHaveBeenCalledTimes(1);
-    expect((strapi as any).log.warn).toHaveBeenCalledWith(expect.stringContaining('admin user 1'));
-  });
-
   test('two lost races in a row on a required user with no grace fail closed rather than loop', async () => {
-    const { service, userMocks } = setup();
+    const { service, userMocks, strapi } = setup();
     userMocks.updateMany = jest.fn(async () => ({ count: 0 }));
 
     await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
     expect(userMocks.updateMany).toHaveBeenCalledTimes(2);
+    // The retry itself is silent; only giving up after it warns, and only once.
+    expect((strapi as any).log.warn).toHaveBeenCalledTimes(1);
+    expect((strapi as any).log.warn).toHaveBeenCalledWith(expect.stringContaining('admin user 1'));
   });
 
   describe('unlock', () => {

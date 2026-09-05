@@ -36,7 +36,7 @@ async function unlockMfa({ email }: CmdOptions) {
 
   const user = await app.db
     .query('admin::user')
-    .findOne({ where: { email }, select: ['id', 'email', 'mfaLockedAt'] });
+    .findOne({ where: { email }, select: ['id', 'email'] });
 
   if (!user) {
     console.error(`No admin user found for ${email}`);
