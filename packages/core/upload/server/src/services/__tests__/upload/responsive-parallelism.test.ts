@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 jest.mock('sharp', () => {
   const toFileState = { inFlight: 0, maxInFlight: 0 };
+  const resizeCalls: unknown[] = [];
   // `__setNextMetadata` — per-test image dimensions
   const nextMetadata: {
     value: { width: number | null; height: number | null; format: string };
@@ -19,12 +20,20 @@ jest.mock('sharp', () => {
     return { width: 100, height: 100, size: 1000 };
   });
 
-  const makeChain = () => ({
-    metadata: jest.fn().mockImplementation(() => Promise.resolve({ ...nextMetadata.value })),
-    resize: jest.fn().mockReturnThis(),
-    toFile,
-    on: jest.fn().mockReturnThis(),
-  });
+  const makeChain = () => {
+    const chain: Record<string, any> = {
+      metadata: jest.fn().mockImplementation(() => Promise.resolve({ ...nextMetadata.value })),
+      toFile,
+    };
+
+    chain.resize = jest.fn().mockImplementation((options: unknown) => {
+      resizeCalls.push(options);
+      return chain;
+    });
+    chain.on = jest.fn().mockReturnValue(chain);
+
+    return chain;
+  };
 
   return {
     __esModule: true,
@@ -35,6 +44,10 @@ jest.mock('sharp', () => {
         concurrency: jest.fn(),
         __getToFile: () => toFile,
         __getToFileState: () => toFileState,
+        __getResizeCalls: () => resizeCalls,
+        __clearResizeCalls() {
+          resizeCalls.length = 0;
+        },
         __setNextMetadata(m: { width: number | null; height: number | null; format: string }) {
           nextMetadata.value = m;
         },
@@ -90,16 +103,21 @@ const testFile: Parameters<typeof imageManipulation.generateResponsiveFormats>[0
 
 beforeEach(() => {
   uploadSettings.responsiveDimensions = true;
+  defaultConfig['plugin::upload'] = {
+    breakpoints: { large: 1000, medium: 750, small: 500 },
+  };
   const s = sharp as any;
   s.__setNextMetadata({ width: 2000, height: 2000, format: 'jpeg' });
   resetStrapi();
   s.__getToFile().mockClear();
   s.__getToFileState().inFlight = 0;
   s.__getToFileState().maxInFlight = 0;
+  s.__clearResizeCalls();
 });
 
 const getToFile = () => (sharp as any).__getToFile() as jest.Mock;
 const getToFileState = () => (sharp as any).__getToFileState() as { maxInFlight: number };
+const getResizeCalls = () => (sharp as any).__getResizeCalls() as unknown[];
 
 describe('generateResponsiveFormats (sequential resizes)', () => {
   test('never runs more than one toFile at a time for all breakpoints', async () => {
@@ -134,5 +152,70 @@ describe('generateResponsiveFormats (no toFile when nothing to resize)', () => {
     await imageManipulation.generateResponsiveFormats(testFile);
 
     expect(getToFile()).not.toHaveBeenCalled();
+  });
+});
+
+describe('generateResponsiveFormats (breakpoint shapes — #24221)', () => {
+  test('numeric breakpoints keep square inside fit (backward compatible)', async () => {
+    (defaultConfig['plugin::upload'] as { breakpoints: Record<string, unknown> }).breakpoints = {
+      large: 1000,
+    };
+    resetStrapi();
+
+    await imageManipulation.generateResponsiveFormats(testFile);
+
+    expect(getResizeCalls()).toEqual([{ width: 1000, height: 1000, fit: 'inside' }]);
+  });
+
+  test('object breakpoints can constrain width only for portrait-friendly scaling', async () => {
+    (defaultConfig['plugin::upload'] as { breakpoints: Record<string, unknown> }).breakpoints = {
+      large: { width: 1000 },
+    };
+    // Portrait source: height exceeds 1000, width does not — width-only config must still resize
+    // when width is larger, and skip when only height is larger.
+    (sharp as any).__setNextMetadata({ width: 1200, height: 500, format: 'jpeg' });
+    resetStrapi();
+
+    await imageManipulation.generateResponsiveFormats(testFile);
+
+    expect(getToFile()).toHaveBeenCalledTimes(1);
+    expect(getResizeCalls()).toEqual([{ fit: 'inside', width: 1000 }]);
+  });
+
+  test('width-only object breakpoint skips portrait images whose width already fits', async () => {
+    (defaultConfig['plugin::upload'] as { breakpoints: Record<string, unknown> }).breakpoints = {
+      large: { width: 1000 },
+    };
+    (sharp as any).__setNextMetadata({ width: 500, height: 1200, format: 'jpeg' });
+    resetStrapi();
+
+    await imageManipulation.generateResponsiveFormats(testFile);
+
+    expect(getToFile()).not.toHaveBeenCalled();
+    expect(getResizeCalls()).toEqual([]);
+  });
+
+  test('object breakpoints can constrain height only', async () => {
+    (defaultConfig['plugin::upload'] as { breakpoints: Record<string, unknown> }).breakpoints = {
+      large: { height: 1000, fit: 'inside' },
+    };
+    (sharp as any).__setNextMetadata({ width: 500, height: 1200, format: 'jpeg' });
+    resetStrapi();
+
+    await imageManipulation.generateResponsiveFormats(testFile);
+
+    expect(getToFile()).toHaveBeenCalledTimes(1);
+    expect(getResizeCalls()).toEqual([{ fit: 'inside', height: 1000 }]);
+  });
+
+  test('object breakpoints pass through custom fit', async () => {
+    (defaultConfig['plugin::upload'] as { breakpoints: Record<string, unknown> }).breakpoints = {
+      cover: { width: 800, height: 800, fit: 'cover' },
+    };
+    resetStrapi();
+
+    await imageManipulation.generateResponsiveFormats(testFile);
+
+    expect(getResizeCalls()).toEqual([{ fit: 'cover', width: 800, height: 800 }]);
   });
 });
