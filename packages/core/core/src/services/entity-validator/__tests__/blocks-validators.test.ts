@@ -1,5 +1,7 @@
-import strapiUtils, { errors } from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import { Validators } from '../validators';
+
+const { errors } = strapiUtils;
 
 const validParagraph = [
   {

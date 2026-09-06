@@ -21,6 +21,37 @@ export function createTransferAssetStreamChunk(
 }
 
 /**
+ * Legacy asset-chunk shape for remotes that pre-date #23479 and do `Buffer.from(item.data.data)`
+ * in their push handler. Used only when init negotiation indicates the remote does not understand
+ * {@link createTransferAssetStreamChunk}'s `encoding: 'base64'` field (the base64 string on `data`
+ * would leave `item.data.data` undefined and crash those remotes with `Buffer.from(undefined)`).
+ *
+ * `buffer.toJSON()` returns `{ type: 'Buffer', data: number[] }` — a plain object the WebSocket
+ * replacer passes through untouched, so the receiver sees the same shape the old default
+ * `JSON.stringify(Buffer)` used to produce.
+ *
+ * Note: this shape is ~6× larger on the wire than base64 and allocates the full byte array during
+ * `JSON.parse`, which is what #23479 was fixing for large files. Only use this when negotiation
+ * proves the remote cannot decode base64.
+ */
+export function createTransferAssetStreamChunkLegacy(
+  assetID: string,
+  chunk: Buffer | Uint8Array
+): { action: 'stream'; assetID: string; data: { type: 'Buffer'; data: number[] } } {
+  if (chunk == null) {
+    throw new TypeError(
+      'Asset stream yielded a null/undefined chunk; refusing to encode (would trigger Buffer.from(undefined))'
+    );
+  }
+  const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+  return {
+    action: 'stream',
+    assetID,
+    data: buffer.toJSON(),
+  };
+}
+
+/**
  * Decode a stream item from `TransferAssetFlow` after `JSON.parse` (shared by push + pull handlers
  * and the remote source provider).
  */

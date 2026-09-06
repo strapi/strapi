@@ -85,7 +85,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
     return result;
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - Property 'strapi_stage' does not exist on type ...
   const updatedStage = result?.[ENTITY_STAGE_ATTRIBUTE];
 
   // Stage might be null if field is not populated
@@ -97,10 +97,10 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
       uid: model.uid,
       // TODO v6: Rename to "entry", which is what is used for regular CRUD updates
       entity: {
-        // @ts-expect-error
+        // @ts-expect-error - Property 'id' does not exist on type 'number'
         id: result?.id,
         documentId,
-        // @ts-expect-error
+        // @ts-expect-error - Property 'locale' does not exist on type 'number'
         locale: result?.locale,
         status: 'draft',
       },

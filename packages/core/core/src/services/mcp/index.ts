@@ -7,6 +7,7 @@ import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
 import { createOAuthDiscoveryFallbackMiddleware } from './middleware/oauthDiscoveryFallback';
 import { createMcpRoutes } from './routes';
+import { sendDidStartMcpServer } from './metrics/metrics';
 import { logToolDefinition } from './tools/log';
 
 /**
@@ -64,9 +65,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
     registerTool(tool: Modules.MCP.McpToolDefinition) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Tools must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register tools after the MCP server has started.');
       }
 
       toolDefinitions.define(tool);
@@ -74,18 +73,14 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
     registerPrompt(prompt) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Prompts must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register prompts after the MCP server has started.');
       }
       promptDefinitions.define(prompt);
     },
 
     registerResource(resource) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Resources must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register resources after the MCP server has started.');
       }
       resourceDefinitions.define(resource);
     },
@@ -109,6 +104,13 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       strapi.server.routes(routes);
 
       serverStatus = 'running';
+
+      sendDidStartMcpServer(strapi, {
+        path: config.path,
+        numberOfTools: toolDefinitions.size,
+        numberOfPrompts: promptDefinitions.size,
+        numberOfResources: resourceDefinitions.size,
+      });
 
       const baseUrl = strapi.config.get('server.url', 'http://localhost:1337');
       strapi.log.info(`[MCP] Server available at ${baseUrl}${config.path}`);

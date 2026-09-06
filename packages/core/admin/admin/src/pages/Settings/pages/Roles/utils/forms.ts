@@ -84,6 +84,34 @@ interface PropertyForm {
   properties: PropertyChildForm;
 }
 
+const resolvePermissionPropertyValues = (
+  property: SubjectProperty,
+  matchingPermission?: Permission
+): string[] => {
+  const rawValue = matchingPermission?.properties[property.value];
+
+  // null means "all locales" — expand to every available locale rather than
+  // folding into [] which would then narrow to [defaultLocale] on save.
+  if (rawValue === null && property.value === 'locales') {
+    return (property.children ?? []).map((child) => child.value);
+  }
+
+  const storedValues: string[] = Array.isArray(rawValue) ? rawValue : [];
+
+  const shouldDefaultToLocale =
+    property.value === 'locales' && matchingPermission !== undefined && storedValues.length === 0;
+
+  if (!shouldDefaultToLocale) {
+    return storedValues;
+  }
+
+  const defaultLocaleCode = property.children?.find((child) => child.isDefault)?.value;
+
+  return defaultLocaleCode
+    ? [defaultLocaleCode]
+    : (property.children ?? []).map((child) => child.value);
+};
+
 /**
  * Creates the default form for all the properties found in a content type's layout
  */
@@ -122,8 +150,10 @@ const createDefaultPropertiesForm = (
       const foundProperty = subject.properties.find(({ value }) => value === currentPropertyName);
 
       if (foundProperty) {
-        const matchingPermissionPropertyValues =
-          matchingPermission?.properties[foundProperty.value] ?? [];
+        const matchingPermissionPropertyValues = resolvePermissionPropertyValues(
+          foundProperty,
+          matchingPermission
+        );
 
         const propertyForm = recursivelyCreatePropertyForm(
           foundProperty,

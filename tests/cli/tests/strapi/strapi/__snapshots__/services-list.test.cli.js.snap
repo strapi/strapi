@@ -71,6 +71,8 @@ exports[`services:list should output list of services 1`] = `
 │ api::country.country                                 │
 │ api::homepage.homepage                               │
 │ api::product.product                                 │
+│ api::relation-lab.relation-lab                       │
+│ api::relation-target.relation-target                 │
 │ api::shop.shop                                       │
 │ api::single-type-localized.single-type-localized     │
 │ api::single-type-non-local.single-type-non-local     │

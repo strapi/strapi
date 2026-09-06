@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { lazy } from 'react';
 
-import { Navigate, PathRouteProps, useParams } from 'react-router-dom';
+import { Navigate, RouteObject, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
 import { routes as historyRoutes } from './history/routes';
@@ -57,7 +57,7 @@ const CLONE_PATH = `/content-manager/${CLONE_RELATIVE_PATH}`;
 const LIST_RELATIVE_PATH = ':collectionType/:slug';
 const LIST_PATH = `/content-manager/collection-types/:slug`;
 
-const routes: PathRouteProps[] = [
+const routes: RouteObject[] = [
   {
     path: LIST_RELATIVE_PATH,
     element: <CollectionTypePages />,

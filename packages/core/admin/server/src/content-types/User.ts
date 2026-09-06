@@ -58,6 +58,12 @@ export default {
       private: true,
       searchable: false,
     },
+    resetPasswordTokenExpiresAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     registrationToken: {
       type: 'string',
       configurable: false,

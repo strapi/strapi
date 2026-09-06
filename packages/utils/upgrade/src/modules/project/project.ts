@@ -156,7 +156,16 @@ export class AppProject extends Project {
     return this;
   }
 
-  private refreshStrapiVersion(): void {
+  applyPackageJSON(packageJSON: MinimalPackageJSON): void {
+    this.packageJSON = packageJSON;
+    this.refreshStrapiVersion();
+  }
+
+  getInstalledStrapiVersion(): Version.SemVer {
+    return this.findLocallyInstalledStrapiVersion();
+  }
+
+  refreshStrapiVersion(): void {
     this.strapiVersion =
       // First try to get the strapi version from the package.json dependencies
       this.findStrapiVersionFromProjectPackageJSON() ??
@@ -184,18 +193,29 @@ export class AppProject extends Project {
     const packageSearchText = `${constants.STRAPI_DEPENDENCY_NAME}/package.json`;
 
     let strapiPackageJSONPath: string;
-    let strapiPackageJSON: MinimalPackageJSON;
 
     try {
       strapiPackageJSONPath = require.resolve(packageSearchText, { paths: [this.cwd] });
-      strapiPackageJSON = require(strapiPackageJSONPath);
-
-      assert(typeof strapiPackageJSON === 'object');
     } catch {
+      strapiPackageJSONPath = path.join(
+        this.cwd,
+        'node_modules',
+        constants.STRAPI_DEPENDENCY_NAME,
+        'package.json'
+      );
+    }
+
+    if (!fse.pathExistsSync(strapiPackageJSONPath)) {
       throw new Error(
         `Cannot resolve module "${constants.STRAPI_DEPENDENCY_NAME}" from paths [${this.cwd}]`
       );
     }
+
+    const strapiPackageJSON = JSON.parse(
+      fse.readFileSync(strapiPackageJSONPath, 'utf-8')
+    ) as MinimalPackageJSON;
+
+    assert(typeof strapiPackageJSON === 'object');
 
     const strapiVersion = strapiPackageJSON.version;
 

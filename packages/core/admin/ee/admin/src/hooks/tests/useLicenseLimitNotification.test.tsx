@@ -109,7 +109,7 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (6/5)',
       link: {
-        url: 'https://strapi.io/billing/manage-seats',
+        url: 'https://billing.strapi.io',
         label: 'Manage seats',
       },
       blockTransition: true,
@@ -135,7 +135,7 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (5/5)',
       link: {
-        url: 'https://strapi.io/billing/request-seats',
+        url: 'mailto:sales@strapi.io',
         label: 'Contact sales',
       },
       blockTransition: true,

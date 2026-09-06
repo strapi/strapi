@@ -15,7 +15,7 @@ interface BlocksInputProps extends Omit<InputProps, 'type'> {
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   ({ label, name, required = false, hint, labelAction, ...editorProps }, forwardedRef) => {
     const id = React.useId();
-    const field = useField(name);
+    const field = useField<Schema.Attribute.BlocksValue>(name);
 
     return (
       <Field.Root id={id} name={name} hint={hint} error={field.error} required={required}>
@@ -25,7 +25,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             name={name}
             error={field.error}
             ref={forwardedRef}
-            value={field.value}
+            value={field.value ?? []}
             onChange={field.onChange}
             ariaLabelId={id}
             {...editorProps}

@@ -14,8 +14,8 @@ import {
   ILocalStrapiSourceProvider,
 } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
-import type { IAsset, StageTotalsEstimate, TransferStage, Protocol } from '../../../../types';
-import { Client } from '../../../../types/remote/protocol';
+import type { IAsset, StageTotalsEstimate, TransferStage, Protocol } from '../../../types';
+import { Client } from '../../../types/remote/protocol';
 
 const TRANSFER_KIND = 'pull';
 const VALID_TRANSFER_ACTIONS = ['bootstrap', 'close', 'getMetadata', 'getSchemas'] as const;

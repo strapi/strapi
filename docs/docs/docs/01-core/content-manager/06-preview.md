@@ -19,13 +19,23 @@ Instead, the preview script is defined inside Strapi and sent to the frontend vi
 
 ### Self-contained constraint
 
-The preview script (`packages/core/content-manager/admin/src/preview/utils/previewScript.ts`) is stringified before being sent to the iframe:
+The preview script (`packages/core/content-manager/server/src/preview/controllers/previewScript.js`) is served verbatim from a server endpoint (`GET /content-manager/preview/script`). The admin fetches it, wraps it with its runtime config, and posts the result to the iframe:
 
 ```ts
-const script = `(${previewScript.toString()})(${JSON.stringify(config)})`;
+const previewScriptSource = await fetch(
+  `${window.strapi.backendURL}/content-manager/preview/script`
+).then((res) => res.text());
+const config = {
+  colors: previewHighlightColors,
+  events: INTERNAL_EVENTS,
+  parentOrigin: window.location.origin,
+};
+const script = `(${previewScriptSource})(${JSON.stringify(config)})`;
 ```
 
 Because of this, it **cannot import dependencies or reference external variables**. All logic must be self-contained. The only external code (`@vercel/stega` for decoding) is loaded dynamically from a CDN at runtime.
+
+It lives in a standalone `.js` file served as-is rather than being bundled with the admin: a bundler wraps the module in helper code that breaks once the function is stringified and injected into the iframe. The file is still type-checked via `@ts-check` and JSDoc.
 
 This is why the file has an unusual structure with many functions defined inline.
 

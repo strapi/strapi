@@ -100,6 +100,12 @@ const buildHarness = (
 
   const db: any = {
     dialect: { client: 'postgres' },
+    logger: {
+      info: jest.fn(),
+      debug: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     metadata: {
       values: () => [
         {

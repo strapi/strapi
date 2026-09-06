@@ -4,7 +4,7 @@ export type Env = typeof envFn & typeof utils;
 
 function envFn(key: string): string | undefined;
 function envFn(key: string, defaultValue: string): string;
-function envFn<T>(key: string, defaultValue: T): string | T;
+function envFn<T>(key: string, defaultValue: T): (string & Record<never, never>) | T;
 function envFn(key: string, defaultValue?: any): any {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }

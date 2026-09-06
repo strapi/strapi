@@ -10,19 +10,19 @@ interface JobSpec {
 
 type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
 
-type Task =
+export type CronTask =
   | TaskFn
   | {
       task: TaskFn;
       options: Spec;
     };
 
-interface Tasks {
-  [key: string]: Task;
+export interface CronTasks {
+  [key: string]: CronTask;
 }
 
 export interface CronService {
-  add(tasks: Tasks): CronService;
+  add(tasks: CronTasks): CronService;
   remove(name: string): CronService;
   start(): CronService;
   stop(): CronService;

@@ -58,7 +58,8 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
         if (
           error instanceof Error &&
           error.message &&
-          error.message.includes('maxFileSize exceeded')
+          error.message.includes('maxFileSize') &&
+          error.message.includes('exceeded')
         ) {
           return ctx.payloadTooLarge('FileTooBig');
         }

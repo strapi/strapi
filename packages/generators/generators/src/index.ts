@@ -1,4 +1,4 @@
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import handlebars from 'handlebars';
 import fs from 'fs-extra';
 
@@ -40,6 +40,8 @@ export const generate = async <T extends Record<string, any>>(
   options: T,
   { dir = process.cwd(), plopFile = 'plopfile.js' }: GenerateOptions = {}
 ) => {
+  const resolvedDir = resolve(dir);
+
   // Resolve the absolute path to the plopfile (generator definitions)
   const plopfilePath = join(__dirname, plopFile);
   // Dynamically require the plopfile module.
@@ -62,7 +64,7 @@ export const generate = async <T extends Record<string, any>>(
       helpers[name] = fn;
     },
     getDestBasePath() {
-      return join(dir, 'src');
+      return join(resolvedDir, 'src');
     },
     setWelcomeMessage() {}, // no-op
   };
@@ -85,7 +87,7 @@ export const generate = async <T extends Record<string, any>>(
   const actions: GeneratorAction[] =
     typeof generator.actions === 'function' ? generator.actions(options) : generator.actions || [];
 
-  await executeActions(actions, options, dir);
+  await executeActions(actions, options, resolvedDir);
 
   return { success: true };
 };

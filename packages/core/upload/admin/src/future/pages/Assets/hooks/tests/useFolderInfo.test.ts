@@ -74,6 +74,15 @@ describe('useFolderInfo', () => {
       mockUseGetAssetsQuery.mockReturnValue({ data: undefined, isLoading: false });
     });
 
+    it('returns empty title and itemCount 0 while the subfolder is loading', () => {
+      mockUseGetFolderQuery.mockReturnValue({ data: undefined, isLoading: true });
+
+      const { result } = renderHook(() => useFolderInfo(5));
+
+      expect(result.current.title).toBe('');
+      expect(result.current.itemCount).toBe(0);
+    });
+
     it('returns folder name and itemCount 3 for a loaded subfolder with 3 files', () => {
       mockUseGetFolderQuery.mockReturnValue({
         data: { id: 5, name: 'Docs', files: { count: 3 } },
@@ -98,12 +107,12 @@ describe('useFolderInfo', () => {
       expect(result.current.itemCount).toBe(1);
     });
 
-    it('falls back to "Home" with itemCount 0 when folder data is not found', () => {
+    it('returns empty title and itemCount 0 when folder data is not found', () => {
       mockUseGetFolderQuery.mockReturnValue({ data: undefined, isLoading: false });
 
       const { result } = renderHook(() => useFolderInfo(5));
 
-      expect(result.current.title).toBe('Home');
+      expect(result.current.title).toBe('');
       expect(result.current.itemCount).toBe(0);
     });
   });

@@ -33,7 +33,6 @@ export const tableHeaders = [
       },
       sortable: false,
     },
-    cellFormatter: (user: any) =>
-      user ? (user as SanitizedAdminUserForAuditLogs).displayName : '',
+    cellFormatter: (user?: SanitizedAdminUserForAuditLogs) => user?.displayName ?? '',
   },
 ] as const;

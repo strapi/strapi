@@ -2,54 +2,72 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
-export interface FormAPI {
+type YupObjectShape = Parameters<ReturnType<typeof yup.object>['shape']>[0];
+type YupObjectSchema = ReturnType<typeof yup.object>;
+type FormSection = unknown;
+type FormExtensionHandler = (props?: unknown) => FormSection[];
+type FormValidator = (args: unknown[]) => YupObjectShape;
+type ContentTypeSchemaMutation = (
+  data: Record<string, unknown>,
+  initialData: Record<string, unknown>
+) => Record<string, unknown>;
+
+type ExtensionForm = {
+  advanced: FormExtensionHandler[];
+  base: FormExtensionHandler[];
+};
+
+type ExtensionDefinition = {
+  validators: FormValidator[];
+  form: ExtensionForm;
+};
+
+type ExtensionInput = {
+  validator?: FormValidator;
+  form: {
+    advanced: FormExtensionHandler;
+    base: FormExtensionHandler;
+  };
+};
+
+export type FormAPI = {
   components: {
-    inputs: Record<string, any>;
-    add: ({ id, component }: { id: string; component: any }) => void;
+    inputs: Record<string, unknown>;
+    add: ({ id, component }: { id: string; component: unknown }) => void;
   };
   types: {
     attribute: {
-      [key: string]: {
-        validators: any[];
-        form: {
-          advanced: any[];
-          base: any[];
-        };
-      };
+      [key: string]: ExtensionDefinition;
     };
-    contentType: {
-      validators: any[];
-      form: {
-        advanced: any[];
-        base: any[];
-      };
-    };
-    component: {
-      validators: any[];
-      form: {
-        advanced: any[];
-        base: any[];
-      };
-    };
+    contentType: ExtensionDefinition;
+    component: ExtensionDefinition;
   };
-  contentTypeSchemaMutations: any[];
-  addContentTypeSchemaMutation: (cb: any) => void;
-  extendContentType: (data: any) => void;
-  extendFields: (fields: any[], data: any) => void;
-  getAdvancedForm: (target: any, props?: any) => any[];
-  makeCustomFieldValidator: (attributeShape: any, validator: any, ...validatorArgs: any) => any;
-  makeValidator: (target: any, initShape: any, ...args: any) => any;
+  contentTypeSchemaMutations: ContentTypeSchemaMutation[];
+  addContentTypeSchemaMutation: (cb: ContentTypeSchemaMutation) => void;
+  extendContentType: (data: ExtensionInput) => void;
+  extendFields: (fields: string[], data: ExtensionInput) => void;
+  getAdvancedForm: (target: string[], props?: unknown) => FormSection[];
+  makeCustomFieldValidator: (
+    attributeShape: YupObjectSchema,
+    validator: FormValidator | undefined,
+    ...validatorArgs: unknown[]
+  ) => YupObjectSchema;
+  makeValidator: (
+    target: string[],
+    initShape: YupObjectSchema,
+    ...args: unknown[]
+  ) => YupObjectSchema;
   mutateContentTypeSchema: (
     data: Record<string, unknown>,
     initialData: Record<string, unknown>
-  ) => any;
-}
+  ) => Record<string, unknown>;
+};
 
 export const formsAPI: FormAPI = {
   components: {
     inputs: {},
     add({ id, component }) {
-      if (!this.inputs[id]) {
+      if (this.inputs[id] === undefined) {
         this.inputs[id] = component;
       }
     },
@@ -90,7 +108,7 @@ export const formsAPI: FormAPI = {
   extendContentType({ validator, form: { advanced, base } }) {
     const { contentType } = this.types;
 
-    if (validator) {
+    if (validator !== undefined) {
       contentType.validators.push(validator);
     }
     contentType.form.advanced.push(advanced);
@@ -114,7 +132,7 @@ export const formsAPI: FormAPI = {
         };
       }
 
-      if (validator) {
+      if (validator !== undefined) {
         formType[field].validators.push(validator);
       }
       formType[field].form.advanced.push(advanced);
@@ -123,30 +141,34 @@ export const formsAPI: FormAPI = {
   },
 
   getAdvancedForm(target, props = null) {
-    const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
-      (acc: any, current: any) => {
-        const sections = current(props);
-
-        return [...acc, ...sections];
-      },
+    const advancedForms = get(
+      this.types,
+      [...target, 'form', 'advanced'],
       []
-    );
+    ) as FormExtensionHandler[];
+    const sectionsToAdd = advancedForms.reduce<FormSection[]>((acc, current) => {
+      const sections = current(props);
+
+      return [...acc, ...sections];
+    }, []);
 
     return sectionsToAdd;
   },
 
   makeCustomFieldValidator(attributeShape, validator, ...validatorArgs) {
     // When no validator, return the attribute shape
-    if (!validator) return attributeShape;
+    if (validator === undefined) {
+      return attributeShape;
+    }
 
     // Otherwise extend the shape with the provided validator
     return attributeShape.shape({ options: yup.object().shape(validator(validatorArgs)) });
   },
 
   makeValidator(target, initShape, ...args) {
-    const validators = get(this.types, [...target, 'validators'], []);
+    const validators = get(this.types, [...target, 'validators'], []) as FormValidator[];
 
-    const pluginOptionsShape = validators.reduce((acc: any, current: any) => {
+    const pluginOptionsShape = validators.reduce<YupObjectShape>((acc, current) => {
       const pluginOptionShape = current(args);
 
       return { ...acc, ...pluginOptionShape };
@@ -159,7 +181,7 @@ export const formsAPI: FormAPI = {
 
     const refData = cloneDeep(initialData);
 
-    this.contentTypeSchemaMutations.forEach((cb: any) => {
+    this.contentTypeSchemaMutations.forEach((cb) => {
       enhancedData = cb(enhancedData, refData);
     });
 

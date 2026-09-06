@@ -2,7 +2,9 @@
   "extends": "tsconfig/client.json",
   "include": ["./shared", "./server", "./admin"],
   "compilerOptions": {
-    "declarationDir": "./dist",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": ["@testing-library/jest-dom", "jest"],
+    "noEmit": false
   }
 }

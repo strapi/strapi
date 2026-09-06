@@ -1,4 +1,4 @@
-import type { Struct, Modules } from '@strapi/types';
+import type { Struct, Modules, Core } from '@strapi/types';
 import type { z } from '@strapi/utils';
 
 export type ContentManagerModelForMcp = Pick<
@@ -23,13 +23,14 @@ export type McpToolsBuildContext = {
 
 export type DerivedTool = {
   name: string;
+  telemetry: { source: 'content-manager'; name: string };
   title: string;
   description: string;
   auth: Modules.MCP.McpCapabilityAuth;
   resolveInputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   resolveOutputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   createHandler: (
-    strapi: import('@strapi/types').Core.Strapi,
+    strapi: Core.Strapi,
     context: Modules.MCP.McpHandlerContext
   ) => Modules.MCP.McpToolHandler<z.ZodObject<z.ZodRawShape>, z.ZodObject<z.ZodRawShape>>;
 };

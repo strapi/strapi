@@ -14,7 +14,7 @@ import type {
   IMetadata,
   ProviderType,
   Stream,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';

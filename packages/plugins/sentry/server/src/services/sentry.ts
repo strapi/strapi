@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/strapi';
-import type { Config } from 'src/config';
 import * as Sentry from '@sentry/node';
+import type { Config } from '../config';
 
 const createSentryService = (strapi: Core.Strapi) => {
   let isReady = false;
@@ -35,7 +35,7 @@ const createSentryService = (strapi: Core.Strapi) => {
         // Store the successfully initialized Sentry instance
         instance = Sentry;
         isReady = true;
-      } catch (error) {
+      } catch {
         strapi.log.warn('Could not set up Sentry, make sure you entered a valid DSN');
       }
 

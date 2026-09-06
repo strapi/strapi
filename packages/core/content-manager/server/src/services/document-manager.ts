@@ -1,16 +1,16 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, errors, pagination } from '@strapi/utils';
+import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
-const { ApplicationError } = errors;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -72,7 +72,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         maxLimit: 1000,
       });
 
-      const { populate, sort, ...countParams } = params;
+      const { populate: _populate, sort: _sort, ...countParams } = params;
       const [documents, total = 0] = await Promise.all([
         strapi.documents(uid).findMany(params),
         strapi.documents(uid).count(countParams),
@@ -244,17 +244,15 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return 0;
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
-        throw new ApplicationError(
-          `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
-        );
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
-      return sumDraftCounts(document, uid);
+      return sumDraftCounts(strapi, document, uid);
     },
 
     async countManyEntriesDraftRelations(
@@ -268,25 +266,22 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      let localeFilter = {};
-      if (locale) {
-        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
-      }
-
-      const entities = await strapi.db.query(uid).findMany({
+      const entities = await strapi.documents(uid).findMany({
         populate,
-        where: {
-          documentId: { $in: documentIds },
-          ...localeFilter,
-        },
+        filters: { documentId: { $in: documentIds } } as any,
+        locale,
+        status: 'draft',
       });
 
-      const totalNumberDraftRelations: number = entities!.reduce(
-        (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
-        0
+      const counts = await Promise.all(
+        entities.map((entity: Document) => sumDraftCounts(strapi, entity, uid))
       );
 
-      return totalNumberDraftRelations;
+      return counts.reduce(
+        (total, entityCounts) =>
+          total + entityCounts.unpublishedRelations + entityCounts.draftM2mLinks,
+        0
+      );
     },
   };
 };

@@ -27,8 +27,8 @@ function hasStrapiLicense() {
  *
  * This file lives next to Playwright `.ts` helpers but is loaded via `require('../utils/e2e-edition.ts')`
  * from `tests/scripts/run-tests.js` (plain Node, not Playwright). Node resolves `.ts` when the extension
- * is explicit; **body stays JS-parseable** so Node 20 (supported by `package.json` engines) does not
- * need type stripping or SWC. Node 22+ would accept TypeScript syntax here too.
+ * is explicit; **body stays JS-parseable** (no type annotations) so plain `require()` works without
+ * type stripping or SWC on supported Node versions.
  *
  * @returns {E2eEdition}
  */

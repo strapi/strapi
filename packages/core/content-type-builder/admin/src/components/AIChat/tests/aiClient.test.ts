@@ -29,6 +29,27 @@ describe('aiClient', () => {
     expect(getFetchClient().get).toHaveBeenCalledTimes(1);
   });
 
+  test('getAIJwt falls back to nested token data when top-level fields are empty', async () => {
+    const expiresAt = new Date(Date.now() + 3600_000).toISOString();
+
+    (getFetchClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: {
+          token: '',
+          expiresAt: '',
+          data: {
+            token: 'nested-token',
+            expiresAt,
+          },
+        },
+      }),
+    });
+
+    const token = await getAIJwt();
+
+    expect(token).toEqual({ token: 'nested-token', expiresAt });
+  });
+
   test('fetchAI retries once on 401 and succeeds with refreshed token', async () => {
     (getFetchClient as jest.Mock).mockReturnValue({
       get: jest
@@ -47,7 +68,7 @@ describe('aiClient', () => {
         }),
     });
 
-    const responses: any[] = [
+    const responses: Response[] = [
       new Response(JSON.stringify({ error: 'expired token' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -58,8 +79,8 @@ describe('aiClient', () => {
       }),
     ];
 
-    const fetchSpy = jest.spyOn(global, 'fetch' as any).mockImplementation(() => {
-      return Promise.resolve(responses.shift());
+    const fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => {
+      return Promise.resolve(responses.shift()!);
     });
 
     const res = await fetchAI('https://strapi.io', { method: 'POST' });

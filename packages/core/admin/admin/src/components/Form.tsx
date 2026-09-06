@@ -10,7 +10,7 @@ import {
 } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
-import { produce } from 'immer';
+import { produce, type Draft } from 'immer';
 import isEqual from 'lodash/isEqual';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
@@ -36,9 +36,33 @@ interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
 
-interface FormValues {
-  [field: string]: any;
-}
+type FormFieldValue = unknown;
+type FormValues = object;
+type FormFieldTarget = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+type FormFieldEvent = React.ChangeEvent<FormFieldTarget>;
+type FormFieldEventWithFallbackTarget = Omit<FormFieldEvent, 'target' | 'currentTarget'> & {
+  target?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
+  currentTarget?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
+};
+type MultipleSelectTarget = FormFieldTarget & {
+  multiple: true;
+  options: ArrayLike<HTMLOptionElement>;
+};
+type FormFieldRowValue = Record<string, unknown>;
+type FormFieldRowValueWithKey = FormFieldRowValue & { __temp_key__?: string };
+
+const isArrayLikeOptions = (options: unknown): options is ArrayLike<HTMLOptionElement> => {
+  return typeof options === 'object' && options !== null && 'length' in options;
+};
+
+const isMultipleSelectTarget = (target: FormFieldTarget): target is MultipleSelectTarget => {
+  return (
+    'multiple' in target &&
+    target.multiple === true &&
+    'options' in target &&
+    isArrayLikeOptions(target.options)
+  );
+};
 
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
@@ -50,9 +74,9 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * The default behaviour is to add the row to the end of the array, if you want to add it to a
    * specific index you can pass the index.
    */
-  addFieldRow: (field: string, value: any, addAtIndex?: number) => void;
+  addFieldRow: (field: string, value: FormFieldRowValue, addAtIndex?: number) => void;
   moveFieldRow: (field: string, fromIndex: number, toIndex: number) => void;
-  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void;
+  onChange: (eventOrPath: FormFieldEvent | string, value?: FormFieldValue) => void;
   /*
    * The default behaviour is to remove the last row, if you want to remove a specific index you can
    * pass the index.
@@ -148,8 +172,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
   initialErrors?: FormErrors<TFormValues>;
-  // NOTE: we don't know what return type it can be here
-  validate?: (values: TFormValues, options: Record<string, string>) => Promise<any>;
+  validate?: (values: TFormValues, options: Record<string, string>) => Promise<TFormValues>;
 }
 
 /**
@@ -344,16 +367,29 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         return;
       }
 
-      const target = eventOrPath.target || eventOrPath.currentTarget;
+      const { target: eventTarget, currentTarget } =
+        eventOrPath as FormFieldEventWithFallbackTarget;
+      const target = eventTarget ?? currentTarget;
 
-      const { type, name, id, value, options, multiple } = target;
+      if (target === undefined) {
+        return;
+      }
 
-      const field = name || id;
+      const { type, name, id, value } = target;
+      let field = name;
 
-      if (!field && process.env.NODE_ENV !== 'production') {
+      if (field === undefined || field === '') {
+        field = id;
+      }
+
+      if ((field === undefined || field === '') && process.env.NODE_ENV !== 'production') {
         console.warn(
           `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
         );
+      }
+
+      if (field === undefined || field === '') {
+        return;
       }
 
       /**
@@ -369,9 +405,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       } else if (/checkbox/.test(type)) {
         // Get & invert the current value of the checkbox.
         val = !getIn(state.values, field);
-      } else if (options && multiple) {
+      } else if (isMultipleSelectTarget(target)) {
         // This will handle native select elements incl. ones with mulitple options.
-        val = Array.from<HTMLOptionElement>(options)
+        val = Array.from<HTMLOptionElement>(target.options)
           .filter((el) => el.selected)
           .map((el) => el.value);
       } else {
@@ -384,15 +420,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         }
       }
 
-      if (field) {
-        dispatch({
-          type: 'SET_FIELD_VALUE',
-          payload: {
-            field,
-            value: val,
-          },
-        });
-      }
+      dispatch({
+        type: 'SET_FIELD_VALUE',
+        payload: {
+          field,
+          value: val,
+        },
+      });
     });
 
     const addFieldRow: FormContextValue['addFieldRow'] = React.useCallback(
@@ -504,7 +538,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
  * @internal
  * @description Checks if the error is a Yup validation error.
  */
-const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
+const isErrorYupValidationError = (err: unknown): err is Yup.ValidationError =>
   typeof err === 'object' &&
   err !== null &&
   'name' in err &&
@@ -542,7 +576,7 @@ const getYupValidationErrors = (err: Yup.ValidationError): FormErrors => {
 
 type FormErrors<TFormValues extends FormValues = FormValues> = {
   // is it a repeatable component or dynamic zone?
-  [Key in keyof TFormValues]?: TFormValues[Key] extends any[]
+  [Key in keyof TFormValues]?: TFormValues[Key] extends unknown[]
     ? TFormValues[Key][number] extends object
       ? FormErrors<TFormValues[Key][number]>[] | string | string[]
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
@@ -561,12 +595,22 @@ interface FormState<TFormValues extends FormValues = FormValues> {
   values: TFormValues;
 }
 
+const setDraftValues = <TFormValues extends FormValues>(
+  draft: Draft<FormState<TFormValues>>,
+  values: TFormValues
+) => {
+  draft.values = values as Draft<TFormValues>;
+};
+
 type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
   | { type: 'SUBMIT_SUCCESS' }
-  | { type: 'SET_FIELD_VALUE'; payload: { field: string; value: any } }
-  | { type: 'ADD_FIELD_ROW'; payload: { field: string; value: any; addAtIndex?: number } }
+  | { type: 'SET_FIELD_VALUE'; payload: { field: string; value: FormFieldValue } }
+  | {
+      type: 'ADD_FIELD_ROW';
+      payload: { field: string; value: FormFieldRowValue; addAtIndex?: number };
+    }
   | { type: 'REMOVE_FIELD_ROW'; payload: { field: string; removeAtIndex?: number } }
   | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } }
   | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
@@ -582,12 +626,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
   produce(state, (draft) => {
     switch (action.type) {
       case 'SET_INITIAL_VALUES':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload;
+        setDraftValues(draft, action.payload);
         break;
       case 'SET_VALUES':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload;
+        setDraftValues(draft, action.payload);
         break;
       case 'SUBMIT_ATTEMPT':
         draft.isSubmitting = true;
@@ -599,13 +641,17 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.isSubmitting = false;
         break;
       case 'SET_FIELD_VALUE':
-        draft.values = setIn(state.values, action.payload.field, action.payload.value);
+        setDraftValues(draft, setIn(state.values, action.payload.field, action.payload.value));
         break;
       case 'ADD_FIELD_ROW': {
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = getIn(state.values, action.payload.field, []) as Array<any>;
+        const currentField = getIn(
+          state.values,
+          action.payload.field,
+          []
+        ) as FormFieldRowValueWithKey[];
 
         let position = action.payload.addAtIndex;
 
@@ -618,7 +664,11 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         // Collect all existing keys to ensure uniqueness.
         // Keys may be out of order after drag-and-drop moves, so we can't rely
         // on fractional indexing alone to avoid collisions.
-        const existingKeys = new Set(currentField.map((item) => item.__temp_key__).filter(Boolean));
+        const existingKeys = new Set(
+          currentField
+            .map((item) => item.__temp_key__)
+            .filter((key): key is string => key !== undefined && key !== '')
+        );
 
         // Generate a unique key, retrying if there's a collision
         let key: string;
@@ -632,13 +682,16 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           }
         } while (existingKeys.has(key));
 
-        draft.values = setIn(
-          state.values,
-          action.payload.field,
-          currentField.toSpliced(position, 0, {
-            ...action.payload.value,
-            __temp_key__: key,
-          })
+        setDraftValues(
+          draft,
+          setIn(
+            state.values,
+            action.payload.field,
+            currentField.toSpliced(position, 0, {
+              ...action.payload.value,
+              __temp_key__: key,
+            })
+          )
         );
 
         break;
@@ -648,7 +701,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = [...(getIn(state.values, field, []) as Array<any>)];
+        const currentField = [...(getIn(state.values, field, []) as FormFieldRowValueWithKey[])];
         const currentRow = currentField[fromIndex];
 
         // Preserve the original __temp_key__ to maintain stable identity during drag-and-drop.
@@ -656,7 +709,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         currentField.splice(fromIndex, 1);
         currentField.splice(toIndex, 0, currentRow);
 
-        draft.values = setIn(state.values, field, currentField);
+        setDraftValues(draft, setIn(state.values, field, currentField));
 
         break;
       }
@@ -664,7 +717,11 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = getIn(state.values, action.payload.field, []) as Array<any>;
+        const currentField = getIn(
+          state.values,
+          action.payload.field,
+          []
+        ) as FormFieldRowValueWithKey[];
 
         let position = action.payload.removeAtIndex;
 
@@ -682,10 +739,9 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           (val: unknown) => val
         );
 
-        draft.values = setIn(
-          state.values,
-          action.payload.field,
-          newValue.length > 0 ? newValue : []
+        setDraftValues(
+          draft,
+          setIn(state.values, action.payload.field, newValue.length > 0 ? newValue : [])
         );
 
         break;
@@ -700,8 +756,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.isSubmitting = action.payload;
         break;
       case 'RESET_FORM':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload.values;
+        setDraftValues(draft, action.payload.values);
         // @ts-expect-error – TODO: figure out why this fails ts.
         draft.errors = action.payload.errors;
         draft.isSubmitting = action.payload.isSubmitting;
@@ -714,15 +769,15 @@ const reducer = <TFormValues extends FormValues = FormValues>(
 /* -------------------------------------------------------------------------------------------------
  * useField
  * -----------------------------------------------------------------------------------------------*/
-interface FieldValue<TValue = any> {
+interface FieldValue<TValue = unknown> {
   error?: string;
   initialValue: TValue;
-  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: TValue) => void;
+  onChange: (eventOrPath: FormFieldEvent | string, value?: TValue) => void;
   value: TValue;
-  rawError?: any;
+  rawError?: unknown;
 }
 
-function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
+function useField<TValue = unknown>(path: string): FieldValue<TValue | undefined> {
   const { formatMessage } = useIntl();
 
   const initialValue = useForm(
@@ -773,7 +828,7 @@ function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
   };
 }
 
-const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object: unknown): object is TranslationMessage => {
   return (
     typeof object === 'object' &&
     object !== null &&

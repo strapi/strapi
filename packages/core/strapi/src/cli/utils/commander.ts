@@ -14,7 +14,7 @@ import { getInquirer } from './get-inquirer';
 const parseList = (value: string) => {
   try {
     return value.split(',').map((item) => item.trim()); // trim shouldn't be necessary but might help catch unexpected whitespace characters
-  } catch (e) {
+  } catch {
     exitWith(1, `Unrecognized input: ${value}`);
   }
 
@@ -62,7 +62,7 @@ const parseURL = (value: string) => {
     }
 
     return url;
-  } catch (e) {
+  } catch {
     throw new InvalidOptionArgumentError(`Could not parse url ${value}`);
   }
 };
@@ -94,7 +94,7 @@ const promptEncryptionKey = async (thisCommand: Command) => {
         },
       ]);
       opts.key = answers.key;
-    } catch (e) {
+    } catch {
       return exitWith(1, 'Failed to get encryption key');
     }
     if (!opts.key) {

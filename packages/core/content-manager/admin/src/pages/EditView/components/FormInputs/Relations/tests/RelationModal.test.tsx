@@ -116,6 +116,24 @@ describe('Document Modal Reducer', () => {
         hasUnsavedChanges: true,
       });
     });
+
+    it('should retain the parent form accessor while creating a relation', () => {
+      const getParentFormValues = () => ({ title: 'Unsaved parent title' });
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc1,
+          shouldBypassConfirmation: false,
+          fieldToConnect: 'products',
+          getParentFormValues,
+        },
+      };
+
+      const result = reducer(initialState, action);
+
+      expect(result.getParentFormValues).toBe(getParentFormValues);
+      expect(result.fieldToConnect).toBe('products');
+    });
   });
 
   describe('GO_BACK action', () => {

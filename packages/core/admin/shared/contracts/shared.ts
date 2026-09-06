@@ -12,7 +12,7 @@ export interface Permission extends Entity {
   subject?: string | null;
   properties: {
     fields?: string[];
-    locales?: string[];
+    locales?: string[] | null;
     [key: string]: any;
   };
   conditions: string[];
@@ -25,6 +25,7 @@ export interface AdminUser extends Entity {
   email?: string;
   password?: string;
   resetPasswordToken?: string | null;
+  resetPasswordTokenExpiresAt?: string | Date | null;
   registrationToken?: string | null;
   isActive: boolean;
   roles: AdminRole[];
@@ -43,7 +44,10 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
   roles: Data.ID[];
 };
 
-export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
+export type SanitizedAdminUser = Omit<
+  AdminUser,
+  'password' | 'resetPasswordToken' | 'resetPasswordTokenExpiresAt' | 'roles'
+> & {
   roles: SanitizedAdminRole[];
 };
 

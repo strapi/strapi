@@ -22,7 +22,7 @@ const StageFilter = (props: Filters.ValueInputProps) => {
   const { formatMessage } = useIntl();
   const { workflows, isLoading } = useReviewWorkflows({ filters: { contentTypes: model } });
 
-  const field = useField(props.name);
+  const field = useField<string | number | null>(props.name);
 
   const [workflow] = workflows ?? [];
 

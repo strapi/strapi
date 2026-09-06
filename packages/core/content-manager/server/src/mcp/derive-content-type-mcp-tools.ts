@@ -222,6 +222,7 @@ const buildCollectionTools = (
   const tools: DerivedTool[] = [
     {
       name: `list_${slug}`,
+      telemetry: { source: 'content-manager', name: 'list' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'list' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveListInputSchema,
@@ -231,6 +232,7 @@ const buildCollectionTools = (
     },
     {
       name: `get_${slug}`,
+      telemetry: { source: 'content-manager', name: 'get' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveGetInputSchema,
@@ -239,6 +241,7 @@ const buildCollectionTools = (
     },
     {
       name: `create_${slug}`,
+      telemetry: { source: 'content-manager', name: 'create' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'create' }),
       auth: { policies: [{ action: ACTIONS.create, subject: uid }] },
       resolveInputSchema: resolveCreateInputSchema,
@@ -247,6 +250,7 @@ const buildCollectionTools = (
     },
     {
       name: `update_${slug}`,
+      telemetry: { source: 'content-manager', name: 'update' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
       auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
       resolveInputSchema: resolveUpdateInputSchema,
@@ -255,6 +259,7 @@ const buildCollectionTools = (
     },
     {
       name: `delete_${slug}`,
+      telemetry: { source: 'content-manager', name: 'delete' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
       auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
       resolveInputSchema: resolveDeleteInputSchema,
@@ -268,6 +273,7 @@ const buildCollectionTools = (
     tools.push(
       {
         name: `publish_${slug}`,
+        telemetry: { source: 'content-manager', name: 'publish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
         auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
         resolveInputSchema: resolvePublishInputSchema,
@@ -276,6 +282,7 @@ const buildCollectionTools = (
       },
       {
         name: `unpublish_${slug}`,
+        telemetry: { source: 'content-manager', name: 'unpublish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
         auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
         resolveInputSchema: resolveUnpublishInputSchema,
@@ -284,6 +291,7 @@ const buildCollectionTools = (
       },
       {
         name: `discard_${slug}_draft`,
+        telemetry: { source: 'content-manager', name: 'discard_draft' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
         auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
         resolveInputSchema: resolveDiscardDraftInputSchema,
@@ -436,6 +444,7 @@ const buildSingleTypeTools = (
   const tools: DerivedTool[] = [
     {
       name: `get_${slug}`,
+      telemetry: { source: 'content-manager', name: 'get' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveGetInputSchema,
@@ -444,6 +453,7 @@ const buildSingleTypeTools = (
     },
     {
       name: `write_${slug}`,
+      telemetry: { source: 'content-manager', name: 'write' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'write' }),
       auth: {
         policies: [
@@ -457,6 +467,7 @@ const buildSingleTypeTools = (
     },
     {
       name: `delete_${slug}`,
+      telemetry: { source: 'content-manager', name: 'delete' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
       auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
       resolveInputSchema: resolveDeleteInputSchema,
@@ -470,6 +481,7 @@ const buildSingleTypeTools = (
     tools.push(
       {
         name: `publish_${slug}`,
+        telemetry: { source: 'content-manager', name: 'publish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
         auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
         resolveInputSchema: resolvePublishInputSchema,
@@ -478,6 +490,7 @@ const buildSingleTypeTools = (
       },
       {
         name: `unpublish_${slug}`,
+        telemetry: { source: 'content-manager', name: 'unpublish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
         auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
         resolveInputSchema: resolveUnpublishInputSchema,
@@ -486,6 +499,7 @@ const buildSingleTypeTools = (
       },
       {
         name: `discard_${slug}_draft`,
+        telemetry: { source: 'content-manager', name: 'discard_draft' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
         auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
         resolveInputSchema: resolveDiscardDraftInputSchema,

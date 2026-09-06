@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const request = require('supertest');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -37,6 +38,13 @@ const uploadFile = async (request, filePath = path.join(__dirname, '../utils/rec
 const getFiles = async (request) => {
   const res = await request({ method: 'GET', url: '/upload/files' });
   return res;
+};
+
+const parseBinaryResponse = (res, callback) => {
+  const chunks = [];
+
+  res.on('data', (chunk) => chunks.push(chunk));
+  res.on('end', () => callback(null, Buffer.concat(chunks)));
 };
 
 describe('Upload', () => {
@@ -290,6 +298,53 @@ describe('Upload', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.mime).toBe('image/jpeg');
+      });
+
+      test('Accepts replacement file submitted as a single-element files array', async () => {
+        const replacementPath = path.join(__dirname, '../utils/rec.pdf');
+
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${fileToReplace.id}`,
+          formData: {
+            files: [
+              {
+                path: replacementPath,
+                filename: 'rec.pdf',
+                contentType: 'application/pdf',
+              },
+            ],
+            fileInfo: JSON.stringify({ name: 'rec.pdf' }),
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          id: fileToReplace.id,
+          name: 'rec.pdf',
+          mime: 'application/pdf',
+        });
+
+        const { body: file } = await rq({
+          method: 'GET',
+          url: `/upload/files/${fileToReplace.id}`,
+        });
+
+        expect(file).toMatchObject({
+          id: fileToReplace.id,
+          name: 'rec.pdf',
+          mime: 'application/pdf',
+          provider: 'local',
+          url: expect.any(String),
+        });
+
+        const downloadRes = await request(strapi.server.httpServer)
+          .get(file.url)
+          .buffer(true)
+          .parse(parseBinaryResponse);
+
+        expect(downloadRes.statusCode).toBe(200);
+        expect(downloadRes.body).toEqual(fs.readFileSync(replacementPath));
       });
     });
   });

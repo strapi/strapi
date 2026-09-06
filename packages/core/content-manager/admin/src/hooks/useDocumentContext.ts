@@ -26,7 +26,7 @@ interface DocumentMeta {
    * Query params object
    * i.e. { locale: 'fr' }
    */
-  params?: Record<string, string | string[] | null>;
+  params?: Record<string, unknown>;
 }
 
 interface DocumentContextValue {

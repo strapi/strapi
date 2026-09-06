@@ -1,7 +1,28 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+
+const waitForAssigneeUpdate = (page) =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/assignee') && response.ok()
+  );
+
+const waitForStageUpdate = (page) =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/stage') && response.ok()
+  );
+
+const goBackToArticleList = async (page) => {
+  await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+};
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -11,7 +32,9 @@ const checkAssignee = async (page) => {
    */
   await expect(page.getByRole('combobox', { name: 'Assignee' })).toBeVisible();
   await page.getByRole('combobox', { name: 'Assignee' }).click();
+  const assigneeUpdated = waitForAssigneeUpdate(page);
   await page.getByRole('option', { name: 'editor testing' }).click();
+  await assigneeUpdated;
 
   await findAndClose(page, 'Assignee updated');
 
@@ -29,7 +52,9 @@ const checkStage = async (page) => {
    */
   await expect(page.getByRole('combobox', { name: 'Review stage' })).toBeVisible();
   await page.getByRole('combobox', { name: 'Review stage' }).click();
+  const stageUpdated = waitForStageUpdate(page);
   await page.getByRole('option', { name: 'In progress' }).click();
+  await stageUpdated;
 
   await findAndClose(page, 'Review stage updated');
 
@@ -62,7 +87,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('link', { name: 'Back' }).click();
+    await goBackToArticleList(page);
     await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
 
     /**
@@ -87,7 +112,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('link', { name: 'Back' }).click();
+    await goBackToArticleList(page);
     await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
 
     /**
@@ -97,6 +122,36 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     await expect(page.getByRole('combobox', { name: 'Review stage' })).toBeVisible();
     await expect(page.getByRole('combobox', { name: 'Review stage' })).toHaveText('In progress');
   });
+
+  // Critical path #22 (workflows.review-stages): a full review lifecycle — assign a reviewer and
+  // move the document forward through every stage of the Default workflow, confirming each update
+  // persists and the list view reflects the final stage + assignee.
+  test(
+    'a reviewer can be assigned and the document moved through every review stage',
+    { tag: ['@release'] },
+    async ({ page }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
+
+      // Assign a reviewer.
+      await checkAssignee(page);
+
+      // Move through each subsequent stage of the Default workflow in order.
+      for (const stage of ['Ready to review', 'In progress', 'Reviewed']) {
+        await page.getByRole('combobox', { name: 'Review stage' }).click();
+        const stageUpdated = waitForStageUpdate(page);
+        await page.getByRole('option', { name: stage }).click();
+        await stageUpdated;
+        await findAndClose(page, 'Review stage updated');
+        await expect(page.getByRole('combobox', { name: 'Review stage' })).toHaveText(stage);
+      }
+
+      // The list view reflects the final stage and the assignee.
+      await goBackToArticleList(page);
+      await expect(page.getByRole('gridcell', { name: 'Reviewed' })).toBeVisible();
+      await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
+    }
+  );
 
   describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR === 'true')(
     'Unstable Preview',
@@ -122,7 +177,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
         );
 
         // Confirm the list view updated
-        await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+        await goBackToArticleList(page);
         await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
       });
 
@@ -147,7 +202,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
         );
 
         // Confirm the list view updated
-        await page.getByRole('link', { name: 'Back' }).click();
+        await goBackToArticleList(page);
         await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
       });
     }

@@ -74,7 +74,7 @@ export const TableList = ({
     const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
     const nextSort = `${name}:${nextSortOrder}`;
 
-    onChangeSort && onChangeSort(nextSort);
+    onChangeSort?.(nextSort);
   };
 
   return (

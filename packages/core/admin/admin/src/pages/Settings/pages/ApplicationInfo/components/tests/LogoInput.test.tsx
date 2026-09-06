@@ -2,6 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import { render, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { SIZE } from '../../utils/constants';
 import { LogoInput } from '../LogoInput';
 
 const CUSTOM_IMAGE_FIXTURES = {
@@ -252,7 +253,14 @@ describe('ApplicationsInfosPage || LogoInput', () => {
           // so the downstream size check sees 13 instead of the true byte count.
           // Return a typed-array body so axios surfaces it as something the File
           // constructor can read directly.
-          const body = new Uint8Array(1024 * 1024 + 1).fill(0x31);
+          //
+          // Keep the body only just over the size limit. `parseFileMetadatas`
+          // reads it via `FileReader.readAsDataURL` (and feeds the result to
+          // `Image.src`); the cost of that scales with the byte count, so an
+          // oversized payload (previously 1MB) could push the async pipeline past
+          // `findByText`'s default 1s timeout on a loaded CI runner and flake.
+          // `asset.size` is `file.size / 1000` (KB) and must exceed `SIZE`.
+          const body = new Uint8Array(SIZE * 1000 + 1).fill(0x31);
           return new HttpResponse(body, {
             headers: { 'content-type': 'image/png' },
           });

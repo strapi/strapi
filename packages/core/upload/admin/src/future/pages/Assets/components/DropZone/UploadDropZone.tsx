@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { getTranslationKey } from '../../../../utils/translations';
+import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 
 import { useUploadDropZone } from './UploadDropZoneContext';
 
@@ -32,10 +33,14 @@ const DropZoneOverlay = styled(Box)`
 `;
 
 const DropZoneWithOverlay = ({ children }: { children: React.ReactNode }) => {
-  const { isDragging } = useUploadDropZone();
+  const { isDragging: isUploadDragActive } = useUploadDropZone();
+  const assetsDnd = useAssetsDndOptional();
+  const isInternalDragActive = assetsDnd?.isInternalDragActive ?? false;
+  const showOverlay = isUploadDragActive && !isInternalDragActive;
+
   return (
     <Box position="relative">
-      {isDragging && <DropZoneOverlay />}
+      {showOverlay && <DropZoneOverlay />}
       {children}
     </Box>
   );
@@ -68,7 +73,10 @@ interface DropFilesMessageProps {
 
 const DropFilesMessage = ({ uploadDropZoneRef, folderName }: DropFilesMessageProps) => {
   const { formatMessage } = useIntl();
-  const { isDragging } = useUploadDropZone();
+  const { isDragging: isUploadDragActive } = useUploadDropZone();
+  const assetsDnd = useAssetsDndOptional();
+  const isInternalDragActive = assetsDnd?.isInternalDragActive ?? false;
+  const showMessage = isUploadDragActive && !isInternalDragActive;
 
   // Dropzone message position (relative to main content)
   const [leftContentWidth, setLeftContentWidth] = React.useState(0);
@@ -90,7 +98,9 @@ const DropFilesMessage = ({ uploadDropZoneRef, folderName }: DropFilesMessagePro
     return () => resizeObserver.disconnect();
   }, [uploadDropZoneRef]);
 
-  if (!isDragging) return null;
+  if (!showMessage) {
+    return null;
+  }
 
   return (
     <DropFilesMessageImpl $leftContentWidth={leftContentWidth}>

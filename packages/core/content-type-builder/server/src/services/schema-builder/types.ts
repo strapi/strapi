@@ -11,6 +11,7 @@ export type InternalRelationAttribute = Schema.Attribute.Relation & {
   relation: Schema.Attribute.RelationKind.Any;
   inversedBy?: string;
   mappedBy?: string;
+  required?: boolean;
   private?: boolean;
   pluginOptions?: object;
   conditions?: {

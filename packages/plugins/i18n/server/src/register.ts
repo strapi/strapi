@@ -11,6 +11,15 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
+
+  strapi
+    .hook('strapi::content-types.afterSync')
+    .register(({ oldContentTypes, contentTypes }: any) =>
+      getService('permissions').actions.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes,
+        contentTypes,
+      })
+    );
 };
 
 // TODO: v5 if implemented in the CM => delete this middleware

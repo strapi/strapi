@@ -99,7 +99,7 @@ const localeToData: Transform = (contentType, params) => {
 const normalizeMediaIds = (
   schema: Schema.ContentType | Schema.Component,
   data: Record<string, any>
-) => {
+): Record<string, any> => {
   if (!schema?.attributes || !data || typeof data !== 'object') {
     return data;
   }

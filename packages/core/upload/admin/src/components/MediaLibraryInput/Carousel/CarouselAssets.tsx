@@ -129,6 +129,7 @@ export const CarouselAssets = React.forwardRef(
                   { n: index + 1, m: assets.length }
                 )}
                 onDoubleClick={(event) => {
+                  if (disabled) return;
                   setIsEditingAsset(true);
                   onDoubleClickAsset(asset, event);
                 }}
@@ -153,7 +154,7 @@ export const CarouselAssets = React.forwardRef(
             }
           }}
           asset={currentAsset as Asset}
-          canUpdate
+          canUpdate={!disabled}
           canCopyLink
           canDownload
           trackedLocation={trackedLocation}

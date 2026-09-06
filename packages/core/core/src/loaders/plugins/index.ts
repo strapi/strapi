@@ -114,13 +114,13 @@ export default async function loadPlugins(strapi: Core.Strapi) {
           require: true,
         }) ?? './strapi-server.js'
       ).toString();
-    } catch (e) {
+    } catch {
       // no export map or missing strapi-server export => fallback to default
     }
 
     try {
       serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
-    } catch (e) {
+    } catch {
       throw new Error(
         `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove its configuration.`
       );

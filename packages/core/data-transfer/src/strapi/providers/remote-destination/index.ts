@@ -13,14 +13,15 @@ import type {
   IAsset,
   TransferStage,
   Protocol,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
-import type { Client, Server, Auth } from '../../../../types/remote/protocol';
+import type { Client, Server, Auth } from '../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import {
   createTransferAssetStreamChunk,
+  createTransferAssetStreamChunkLegacy,
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
 
@@ -77,6 +78,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   #checksumsEnabled = false;
 
+  /**
+   * Wire format for asset chunks. `'base64'` is the compact default introduced in #23479; remotes
+   * that predate that PR do `Buffer.from(item.data.data)` directly and need the legacy
+   * `{ type: 'Buffer', data: number[] }` shape instead. Set by init negotiation.
+   */
+  #assetEncoding: 'base64' | 'legacy-buffer-json' = 'base64';
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
@@ -106,11 +114,15 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         options: { strategy, restore },
         transfer: 'push',
         ...(wantsChecksums ? { checksums: true } : {}),
+        assetEncoding: 'base64',
       },
     });
 
     const res = (await query) as
-      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | (Server.Payload<Server.InitMessage> & {
+          checksums?: boolean;
+          assetEncoding?: 'base64';
+        })
       | null;
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
@@ -119,6 +131,21 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     if (wantsChecksums && res.checksums !== true) {
       this.#reportWarning(
         '[Data transfer][push] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
+      );
+    }
+
+    // A remote that predates #23479 silently drops the `assetEncoding` field instead of echoing
+    // it. Falling back to the legacy Buffer JSON shape keeps small pushes working against those
+    // remotes; large pushes may still OOM the remote during `JSON.parse` because that shape
+    // allocates the full byte array — emit a warning so the user understands the trade-off.
+    if (res.assetEncoding === 'base64') {
+      this.#assetEncoding = 'base64';
+    } else {
+      this.#assetEncoding = 'legacy-buffer-json';
+      this.#reportWarning(
+        '[Data transfer][push] Remote does not support the compact base64 asset-chunk format; ' +
+          'falling back to legacy Buffer JSON. Large files may cause out-of-memory errors on the remote — ' +
+          'upgrade the remote Strapi to pick up PR #23479 to use the memory-bounded wire format.'
       );
     }
 
@@ -438,6 +465,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     let batch: Client.TransferAssetFlow[] = [];
     let hasStarted = false;
     const verifyChecksums = this.#checksumsEnabled;
+    const encodeAssetChunk =
+      this.#assetEncoding === 'base64'
+        ? createTransferAssetStreamChunk
+        : createTransferAssetStreamChunkLegacy;
 
     const batchSize = 1024 * 1024; // 1MB;
     const batchLength = () => {
@@ -501,7 +532,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
           for await (const chunk of stream) {
             checksumHash?.update(chunk);
-            await safePush(createTransferAssetStreamChunk(assetID, chunk));
+            await safePush(encodeAssetChunk(assetID, chunk));
           }
 
           await safePush({

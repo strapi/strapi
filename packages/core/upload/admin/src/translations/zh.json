@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "上傳的檔案超出允許的最大素材大小。",
+  "apiError.FileTooBig": "檔案太大，無法上傳。已超出伺服器允許的最大請求大小。",
   "upload.generic-error": "上傳檔案時發生錯誤。",
   "bulk.select.label": "選取所有素材",
   "button.next": "繼續",

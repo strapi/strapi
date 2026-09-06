@@ -134,7 +134,7 @@
   "Settings.application.description": "Globale Informationen über die Administrationsoberfläche",
   "Settings.application.edition-title": "Aktuelle Version",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Sitze hinzufügen} other {Vertrieb kontaktieren}}",
+  "Settings.application.ee.admin-seats.add-seats": "Abonnement verwalten",
   "Settings.application.ee.admin-seats.support": "Vertrieb kontaktieren",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Am Limit: Sitze hinzufügen, um mehr Benutzer einzuladen",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",

@@ -817,27 +817,25 @@ export interface ApiMixedContentMixedContent extends Struct.CollectionTypeSchema
 }
 
 declare module '@strapi/types' {
-  export module Public {
-    export module Registries {
-      export interface ContentTypesSchemas {
-        'admin::permission': AdminPermission;
-        'admin::user': AdminUser;
-        'admin::role': AdminRole;
-        'admin::api-token': AdminApiToken;
-        'admin::api-token-permission': AdminApiTokenPermission;
-        'admin::transfer-token': AdminTransferToken;
-        'admin::transfer-token-permission': AdminTransferTokenPermission;
-        'plugin::upload.file': PluginUploadFile;
-        'plugin::upload.folder': PluginUploadFolder;
-        'plugin::i18n.locale': PluginI18NLocale;
-        'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
-        'plugin::users-permissions.role': PluginUsersPermissionsRole;
-        'plugin::users-permissions.user': PluginUsersPermissionsUser;
-        'api::article.article': ApiArticleArticle;
-        'api::author.author': ApiAuthorAuthor;
-        'api::category.category': ApiCategoryCategory;
-        'api::mixed-content.mixed-content': ApiMixedContentMixedContent;
-      }
+  export namespace Public {
+    export interface ContentTypeSchemas {
+      'admin::permission': AdminPermission;
+      'admin::user': AdminUser;
+      'admin::role': AdminRole;
+      'admin::api-token': AdminApiToken;
+      'admin::api-token-permission': AdminApiTokenPermission;
+      'admin::transfer-token': AdminTransferToken;
+      'admin::transfer-token-permission': AdminTransferTokenPermission;
+      'plugin::upload.file': PluginUploadFile;
+      'plugin::upload.folder': PluginUploadFolder;
+      'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
+      'plugin::users-permissions.role': PluginUsersPermissionsRole;
+      'plugin::users-permissions.user': PluginUsersPermissionsUser;
+      'api::article.article': ApiArticleArticle;
+      'api::author.author': ApiAuthorAuthor;
+      'api::category.category': ApiCategoryCategory;
+      'api::mixed-content.mixed-content': ApiMixedContentMixedContent;
     }
   }
 }

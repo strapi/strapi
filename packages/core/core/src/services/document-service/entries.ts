@@ -8,7 +8,29 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
-import { transformData } from './transform/data';
+import { clearTransformDataRequestCache, transformData } from './transform/data';
+
+/**
+ * Reads and validates the `api.documents.strictRelations` flag.
+ * false/undefined => legacy behaviour (relational required constraints not enforced),
+ * true => enforce required media and relations on non-draft writes.
+ * Mirrors the validation of `api.documents.strictParams` (see repository.ts).
+ */
+const isStrictRelationsEnabled = (): boolean => {
+  const rawStrictRelations: unknown = strapi.config.get('api.documents.strictRelations', undefined);
+
+  if (
+    rawStrictRelations !== undefined &&
+    rawStrictRelations !== false &&
+    rawStrictRelations !== true
+  ) {
+    throw new errors.ValidationError(
+      `Invalid config.api.documents.strictRelations value: "${rawStrictRelations}". Expected boolean (true or false).`
+    );
+  }
+
+  return rawStrictRelations === true;
+};
 
 const createEntriesService = (
   uid: UID.ContentType,
@@ -70,6 +92,7 @@ const createEntriesService = (
       // Note: publishedAt value will always be set when DP is disabled
       isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
+      strictRelations: isStrictRelationsEnabled(),
     });
 
     // Component handling
@@ -107,6 +130,7 @@ const createEntriesService = (
       {
         isDraft: !params?.data?.publishedAt, // Always update the draft version
         locale: params?.locale,
+        strictRelations: isStrictRelationsEnabled(),
       },
       entryToUpdate
     );
@@ -126,11 +150,19 @@ const createEntriesService = (
   }
 
   async function publishEntry(entry: any, params = {} as any) {
+    clearTransformDataRequestCache();
+
     return async.pipe(
       omit('id'),
       assoc('publishedAt', new Date()),
       (draft) => {
-        const opts = { uid, locale: draft.locale, status: 'published', allowMissingId: true };
+        const opts = {
+          uid,
+          locale: draft.locale,
+          status: 'published',
+          allowMissingId: true,
+          useRequestCache: false,
+        };
         return transformData(draft, opts);
       },
       // Create the published entry
@@ -139,11 +171,19 @@ const createEntriesService = (
   }
 
   async function discardDraftEntry(entry: any, params = {} as any) {
+    clearTransformDataRequestCache();
+
     return async.pipe(
       omit('id'),
       assoc('publishedAt', null),
       (entry) => {
-        const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
+        const opts = {
+          uid,
+          locale: entry.locale,
+          status: 'draft',
+          allowMissingId: true,
+          useRequestCache: false,
+        };
         return transformData(entry, opts);
       },
       // Create the draft entry

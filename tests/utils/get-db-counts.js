@@ -15,6 +15,8 @@ try {
   const db = new Database(dbPath, { readonly: true });
   const articles = db.prepare('SELECT COUNT(*) as c FROM articles').get();
   const categories = db.prepare('SELECT COUNT(*) as c FROM categories').get();
+  const uploadFiles = db.prepare('SELECT COUNT(*) as c FROM files').get();
+  const uploadFolders = db.prepare('SELECT COUNT(*) as c FROM upload_folders').get();
   const articleIds = db
     .prepare('SELECT id FROM articles ORDER BY id')
     .all()
@@ -27,6 +29,8 @@ try {
   output = {
     articles: articles.c,
     categories: categories.c,
+    uploadFiles: uploadFiles.c,
+    uploadFolders: uploadFolders.c,
     articleIds,
     categoryIds,
   };

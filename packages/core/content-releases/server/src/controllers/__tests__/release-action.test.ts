@@ -87,6 +87,9 @@ describe('Release Action controller', () => {
         db: {
           transaction: jest.fn((cb) => cb()),
         },
+        eventHub: {
+          emit: jest.fn(),
+        },
       };
 
       jest.clearAllMocks();
@@ -193,6 +196,60 @@ describe('Release Action controller', () => {
       await releaseActionController.createMany(ctx);
 
       expect(mockUpdateReleaseStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves audit events to the service', async () => {
+      mockCreateAction
+        .mockResolvedValueOnce({ id: 1, type: 'publish' })
+        .mockResolvedValueOnce({ id: 2, type: 'publish' });
+
+      const ctx: any = {
+        params: { releaseId: 1 },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd1',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+            {
+              entryDocumentId: 'abcd2',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      // The service emits release.entry.add per created action, on commit — the
+      // controller emits nothing itself
+      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
+      expect(ctx.created).toHaveBeenCalled();
+    });
+
+    it('emits nothing when every entry was already in the release', async () => {
+      mockCreateAction.mockRejectedValue(new AlreadyOnReleaseError('already in release'));
+
+      const ctx: any = {
+        params: { releaseId: 1 },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
     });
   });
 

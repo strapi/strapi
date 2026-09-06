@@ -7,8 +7,16 @@ on:
 permissions: read-all
 
 jobs:
+  change-freeze-disabled:
+    name: 'Change freeze not active'
+    if: vars.CHANGE_FREEZE_ENABLED != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Change freeze is not enabled"
+
   check-ownership:
     name: 'Check if PR was created by a Strapi Team Member'
+    if: vars.CHANGE_FREEZE_ENABLED == 'true'
     runs-on: ubuntu-latest
     outputs:
       isTeamMember: ${{ steps.get-user-teams-membership.outputs.isTeamMember }}
@@ -25,7 +33,7 @@ jobs:
     permissions:
       pull-requests: write
     needs: [check-ownership]
-    if: ${{ needs.check-ownership.outputs.isTeamMember == 'false' && vars.CHANGE_FREEZE_ENABLED == 'true' }}
+    if: ${{ needs.check-ownership.outputs.isTeamMember == 'false' }}
     steps:
       - uses: thollander/actions-comment-pull-request@v2
         with:

@@ -1,8 +1,8 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { resetFiles } from '../../../../utils/file-reset';
 import { createCollectionType, type AddAttribute } from '../../../../utils/content-types';
 import { sharedSetup } from '../../../../utils/setup';
-import { clickAndWait } from '../../../../utils/shared';
+import { clickAndWait, navToHeader } from '../../../../utils/shared';
 
 test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -25,209 +25,226 @@ test.describe('Create collection type with all field types', () => {
   const advancedRequired = { required: true };
   const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
 
-  test('Can create a collection type with all field types', async ({ page }) => {
-    const attributes: AddAttribute[] = [
-      { type: 'text', name: 'testtext', advanced: advancedRegex },
-      { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
-      { type: 'blocks', name: 'testblocks', advanced: advancedRequired },
-      { type: 'json', name: 'testjson', advanced: advancedRequired },
-      {
-        type: 'number',
-        name: 'testinteger',
-        number: { format: 'integer' },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'number',
-        name: 'testbiginteger',
-        number: { format: 'big integer' },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'number',
-        name: 'testdecimal',
-        number: { format: 'decimal' },
-        advanced: advancedRequired,
-      },
-      { type: 'email', name: 'testemail', advanced: advancedRequired },
-      {
-        type: 'date',
-        name: 'testdateonlydate',
-        date: { format: 'date' },
-        advanced: advancedRequired,
-      },
-      { type: 'date', name: 'testdatetime', date: { format: 'time' }, advanced: advancedRequired },
-      {
-        type: 'date',
-        name: 'testdatedatetime',
-        date: { format: 'datetime' },
-        advanced: advancedRequired,
-      },
-      { type: 'password', name: 'testpassword', advanced: advancedRequired },
-      {
-        type: 'media',
-        name: 'testmediasingle',
-        media: { multiple: false },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'media',
-        name: 'testmediamultiple',
-        media: { multiple: true },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testonewayrelation',
-        relation: {
-          type: 'oneWay',
-          target: { select: 'Article', name: 'testonewayrelationtarget' },
+  test(
+    'Can create a collection type with all field types',
+    { tag: ['@critical'] },
+    async ({ page }) => {
+      const attributes: AddAttribute[] = [
+        { type: 'text', name: 'testtext', advanced: advancedRegex },
+        { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
+        { type: 'blocks', name: 'testblocks', advanced: advancedRequired },
+        { type: 'json', name: 'testjson', advanced: advancedRequired },
+        {
+          type: 'number',
+          name: 'testinteger',
+          number: { format: 'integer' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testonetoonerelation',
-        relation: {
-          type: 'oneToOne',
-          target: { select: 'Article', name: 'testonetoonerelationtarget' },
+        {
+          type: 'number',
+          name: 'testbiginteger',
+          number: { format: 'big integer' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testonetomanyrelation',
-        relation: {
-          type: 'oneToMany',
-          target: { select: 'Article', name: 'testonetomanyrelationtarget' },
+        {
+          type: 'number',
+          name: 'testdecimal',
+          number: { format: 'decimal' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanytoonerelation',
-        relation: {
-          type: 'manyToOne',
-          target: { select: 'Article', name: 'testmanytoonerelationtarget' },
+        { type: 'email', name: 'testemail', advanced: advancedRequired },
+        {
+          type: 'date',
+          name: 'testdateonlydate',
+          date: { format: 'date' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanytomanyrelation',
-        relation: {
-          type: 'manyToMany',
-          target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
+        {
+          type: 'date',
+          name: 'testdatetime',
+          date: { format: 'time' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanywayrelation',
-        relation: {
-          type: 'manyWay',
-          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        {
+          type: 'date',
+          name: 'testdatedatetime',
+          date: { format: 'datetime' },
+          advanced: advancedRequired,
         },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'enumeration',
-        name: 'testenumeration',
-        enumeration: { values: ['first', 'second', 'third'] },
-        advanced: advancedRequired,
-      },
-      { type: 'markdown', name: 'testmarkdown', advanced: advancedRequired },
-      // New single component with a new category
-      {
-        type: 'component',
-        name: 'testnewcomponentnewcategory',
-        component: {
-          options: {
-            repeatable: false,
-            name: 'testnewcomponentnewcategory',
-            icon: 'alien',
-            categoryCreate: 'testcategory',
-            attributes: [
+        { type: 'password', name: 'testpassword', advanced: advancedRequired },
+        {
+          type: 'media',
+          name: 'testmediasingle',
+          media: { multiple: false },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'media',
+          name: 'testmediamultiple',
+          media: { multiple: true },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testonewayrelation',
+          relation: {
+            type: 'oneWay',
+            target: { select: 'Article', name: 'testonewayrelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testonetoonerelation',
+          relation: {
+            type: 'oneToOne',
+            target: { select: 'Article', name: 'testonetoonerelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testonetomanyrelation',
+          relation: {
+            type: 'oneToMany',
+            target: { select: 'Article', name: 'testonetomanyrelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testmanytoonerelation',
+          relation: {
+            type: 'manyToOne',
+            target: { select: 'Article', name: 'testmanytoonerelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testmanytomanyrelation',
+          relation: {
+            type: 'manyToMany',
+            target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'relation',
+          name: 'testmanywayrelation',
+          relation: {
+            type: 'manyWay',
+            target: { select: 'Article', name: 'testmanywayrelationtarget' },
+          },
+          advanced: advancedRequired,
+        },
+        {
+          type: 'enumeration',
+          name: 'testenumeration',
+          enumeration: { values: ['first', 'second', 'third'] },
+          advanced: advancedRequired,
+        },
+        { type: 'markdown', name: 'testmarkdown', advanced: advancedRequired },
+        // New single component with a new category
+        {
+          type: 'component',
+          name: 'testnewcomponentnewcategory',
+          component: {
+            options: {
+              repeatable: false,
+              name: 'testnewcomponentnewcategory',
+              icon: 'alien',
+              categoryCreate: 'testcategory',
+              attributes: [
+                {
+                  type: 'text',
+                  name: 'testnewcompotext',
+                  advanced: advancedRegex,
+                },
+              ],
+            },
+          },
+        },
+        // New repeatable component with existing category
+        {
+          type: 'component',
+          name: 'testnewcomponentexistingcategory',
+          component: {
+            options: {
+              repeatable: true,
+              name: 'testnewcomponentrepeatable',
+              icon: 'moon',
+              categorySelect: 'testcategory',
+              attributes: [
+                {
+                  type: 'text',
+                  name: 'testexistingcompotext',
+                  advanced: advancedRegex,
+                },
+              ],
+            },
+          },
+        },
+        // Existing component with existing category
+        {
+          type: 'component',
+          name: 'testexistingcomponentexistingcategory',
+          component: {
+            useExisting: 'testnewcomponentnewcategory',
+            options: {
+              repeatable: false,
+              name: 'testexistingcomponent',
+              icon: 'globe',
+              categorySelect: 'testcategory',
+            },
+          },
+        },
+        // Dynamic zone
+        {
+          type: 'dz',
+          name: 'testdynamiczone',
+          dz: {
+            components: [
               {
-                type: 'text',
-                name: 'testnewcompotext',
-                advanced: advancedRegex,
-              },
-            ],
-          },
-        },
-      },
-      // New repeatable component with existing category
-      {
-        type: 'component',
-        name: 'testnewcomponentexistingcategory',
-        component: {
-          options: {
-            repeatable: true,
-            name: 'testnewcomponentrepeatable',
-            icon: 'moon',
-            categorySelect: 'testcategory',
-            attributes: [
-              {
-                type: 'text',
-                name: 'testexistingcompotext',
-                advanced: advancedRegex,
-              },
-            ],
-          },
-        },
-      },
-      // Existing component with existing category
-      {
-        type: 'component',
-        name: 'testexistingcomponentexistingcategory',
-        component: {
-          useExisting: 'testnewcomponentnewcategory',
-          options: {
-            repeatable: false,
-            name: 'testexistingcomponent',
-            icon: 'globe',
-            categorySelect: 'testcategory',
-          },
-        },
-      },
-      // Dynamic zone
-      {
-        type: 'dz',
-        name: 'testdynamiczone',
-        dz: {
-          components: [
-            {
-              type: 'component',
-              name: 'testdznewcomponentnewcategory',
-              component: {
-                options: {
-                  repeatable: false,
-                  name: 'testnewcomponentnewcategory',
-                  icon: 'paint',
-                  categoryCreate: 'testcategory',
-                  attributes: [
-                    {
-                      type: 'text',
-                      name: 'testdzcompotext',
-                      advanced: advancedRegex,
-                    },
-                  ],
+                type: 'component',
+                name: 'testdznewcomponentnewcategory',
+                component: {
+                  options: {
+                    repeatable: false,
+                    name: 'testnewcomponentnewcategory',
+                    icon: 'paint',
+                    categoryCreate: 'testcategory',
+                    attributes: [
+                      {
+                        type: 'text',
+                        name: 'testdzcompotext',
+                        advanced: advancedRegex,
+                      },
+                    ],
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    ];
+      ];
 
-    const options = {
-      name: 'Secret Document',
-      singularId: 'secret-document',
-      pluralId: 'secret-documents',
-      attributes,
-    };
+      const options = {
+        name: 'Secret Document',
+        singularId: 'secret-document',
+        pluralId: 'secret-documents',
+        attributes,
+      };
 
-    await createCollectionType(page, options);
-  });
+      await createCollectionType(page, options);
+
+      // Verify the collection type is usable in the Content Manager: it appears in the list view and
+      // its create form renders the scalar fields. This closes the #2 critical path (CT visible in CM).
+      await navToHeader(page, ['Content Manager', options.name], options.name);
+      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+      await expect(page.getByRole('textbox', { name: 'testtext' })).toBeVisible();
+      await expect(page.getByLabel('testboolean')).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'testemail' })).toBeVisible();
+    }
+  );
 });

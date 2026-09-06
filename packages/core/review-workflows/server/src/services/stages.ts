@@ -1,9 +1,8 @@
 import type { Core, UID } from '@strapi/types';
-import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
+import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
-import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
 
 interface PopulatedPermission {

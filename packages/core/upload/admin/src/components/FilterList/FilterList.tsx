@@ -65,7 +65,7 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
 
     const nextFilters = appliedFilters.filter((prevFilter) => {
       if (typeof filterValue === 'string') {
-        return prevFilter[name]?.[filterType] !== decodeURIComponent(filterValue);
+        return prevFilter[name]?.[filterType] !== filterValue;
       }
       if (typeof filterValue === 'object' && filterValue !== null) {
         return JSON.stringify(prevFilter[name]?.[filterType]) !== JSON.stringify(filterValue);
@@ -94,7 +94,7 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
       const arr = toMimeArray(inner ?? rawValue);
       value = arr ? arr.join(', ') : Object.values(rawValue).join(', ');
     } else {
-      value = decodeURIComponent(rawValue!);
+      value = rawValue!;
     }
 
     let displayedOperator = operator;

@@ -4,7 +4,7 @@ import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../../enums';
+import { ASSET_TYPES } from '../../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -45,6 +45,17 @@ const StyledImage = styled.img`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+`;
+
+/**
+ * Top-right overlay slot for image actions (crop). Sits above the
+ * image (z-index 3 > AssetContainer 2) so the buttons stay clickable.
+ */
+const ActionsOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[3]};
+  right: ${({ theme }) => theme.spaces[3]};
+  z-index: 3;
 `;
 
 const StyledVideo = styled.video`
@@ -99,29 +110,64 @@ const AssetLoader = () => {
 
 interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
+  actions?: React.ReactNode;
+  isLoading?: boolean;
 }
 
-export const AssetPreview = ({ asset }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
-  const { alternativeText, ext, mime, url } = asset;
-  const mediaUrl = prefixFileUrlWithBackendUrl(url);
+  const { alternativeText, ext, mime, url, updatedAt, isUrlSigned, isLocal } = asset;
+  // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
+  // file (often served at the same URL) shows the new content instead of the
+  // browser-cached old version. Signed URLs are excluded: their query string
+  // is part of the SigV4 signature, so appending a param invalidates the
+  // signature and the request fails with 403. See #26581.
+  const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
+  const appendCacheBuster = (raw: string | undefined) => {
+    if (!raw || cacheKey === undefined) return raw;
+    return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
+  };
+  const mediaUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
   const [isMediaLoaded, setIsMediaLoaded] = React.useState(false);
   React.useEffect(() => {
     setIsMediaLoaded(false);
   }, [mediaUrl]);
 
-  if (mime?.includes(AssetType.Image)) {
-    const imageUrl = prefixFileUrlWithBackendUrl(url);
+  const imageRef = React.useRef<HTMLImageElement>(null);
+  React.useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    const recompute = () => {
+      const parent = image.parentElement;
+      if (!parent) return;
+      const c = parent.getBoundingClientRect();
+      // offsetWidth/Height = pre-transform layout box (transforms ignored).
+      const w = image.offsetWidth;
+      const h = image.offsetHeight;
+      if (!w || !h || !c.width || !c.height) return;
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(image);
+    if (image.parentElement) ro.observe(image.parentElement);
+    return () => ro.disconnect();
+  }, [isMediaLoaded]);
+
+  if (mime?.includes(ASSET_TYPES.Image)) {
+    const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
     if (imageUrl) {
       return (
         <PreviewContainer>
-          {!isMediaLoaded && <AssetLoader />}
+          {(!isMediaLoaded || isLoading) && <AssetLoader />}
+          {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
+              ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
+              crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />
@@ -131,7 +177,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
     }
   }
 
-  if (mime?.includes(AssetType.Video) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Video) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}
@@ -153,7 +199,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
     );
   }
 
-  if (mime?.includes(AssetType.Audio) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Audio) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}

@@ -7,6 +7,7 @@ import * as types from '../../utils/types';
 import { createField } from '../../fields';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
+import { escapeQuery } from './search';
 import { isKnexQuery } from '../../utils/knex';
 
 import type { Ctx } from '../types';
@@ -224,7 +225,12 @@ type Operator =
   | '$jsonSupersetOf';
 
 // TODO: add type casting per operator at some point
-const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, value: any) => {
+const applyOperator = (
+  qb: Knex.QueryBuilder,
+  column: any,
+  operator: Operator,
+  value: any
+): Knex.QueryBuilder | undefined => {
   if (Array.isArray(value) && !isOperatorOfType('array', operator)) {
     return qb.where((subQB) => {
       value.forEach((subValue) =>
@@ -270,7 +276,7 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
         qb.whereNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} = LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {
@@ -287,7 +293,7 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
         qb.whereNotNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} <> LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$gt': {
@@ -327,38 +333,50 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
       break;
     }
     case '$startsWith': {
-      qb.where(column, 'like', `${value}%`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `${escapeLike(value)}%`]);
       break;
     }
     case '$startsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `${escapeLike(value)}%`,
+      ]);
       break;
     }
     case '$endsWith': {
-      qb.where(column, 'like', `%${value}`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}`]);
       break;
     }
     case '$endsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}`,
+      ]);
       break;
     }
     case '$contains': {
-      qb.where(column, 'like', `%${value}%`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}%`]);
       break;
     }
 
     case '$notContains': {
-      qb.whereNot(column, 'like', `%${value}%`);
+      qb.whereRaw(`?? NOT LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}%`]);
       break;
     }
 
     case '$containsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}%`,
+      ]);
       break;
     }
 
     case '$notContainsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}%`,
+      ]);
       break;
     }
 
@@ -411,7 +429,7 @@ type Where =
     }
   | Array<Where>;
 
-const applyWhere = (qb: Knex.QueryBuilder, where: Where) => {
+const applyWhere = (qb: Knex.QueryBuilder, where: Where): Knex.QueryBuilder | undefined => {
   if (!isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
@@ -457,5 +475,16 @@ const fieldLowerFn = (qb: Knex.QueryBuilder) => {
 
   return 'LOWER(??)';
 };
+
+// SQL LIKE wildcards (and the backslash escape character itself) that must be
+// escaped so a user-supplied value is matched literally instead of as a pattern.
+const LIKE_SPECIAL_CHARS = '%_\\';
+
+const escapeLike = (value: unknown) => escapeQuery(`${value}`, LIKE_SPECIAL_CHARS);
+
+// SQLite has no default LIKE escape character and requires an explicit clause.
+// PostgreSQL and MySQL both default to backslash, matching helpers/search.ts.
+const likeEscapeClause = (qb: Knex.QueryBuilder) =>
+  qb.client.dialect === 'sqlite3' ? " ESCAPE '\\'" : '';
 
 export { applyWhere, processWhere };

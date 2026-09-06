@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import { validateFindMany } from '../validation/audit-logs';
+import { validateFindMany, validateFindManyUsers } from '../validation/audit-logs';
 
 export default {
   async findMany(ctx: Context) {
@@ -9,6 +9,16 @@ export default {
 
     const auditLogs = strapi.get('audit-logs');
     const body = await auditLogs.findMany(query);
+
+    ctx.body = body;
+  },
+
+  async findManyUsers(ctx: Context) {
+    const { query } = ctx.request;
+    const { page, pageSize } = await validateFindManyUsers(query);
+
+    const auditLogs = strapi.get('audit-logs');
+    const body = await auditLogs.findManyUsers({ page, pageSize });
 
     ctx.body = body;
   },

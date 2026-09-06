@@ -7,7 +7,7 @@ import { useFetchClient } from '../useFetchClient';
 
 const Component = () => {
   const { get } = useFetchClient();
-  const [data, setData] = React.useState(null);
+  const [data, setData] = React.useState<unknown>(null);
   const [dataCalls, setDataCalls] = React.useState(0);
 
   React.useEffect(() => {

@@ -81,7 +81,10 @@ const populateBuilder = (uid: UID.Schema) => {
         return initialPopulate;
       }
 
-      return getDeepPopulate(uid, { ...deepPopulateOptions, initialPopulate });
+      return getDeepPopulate(uid, {
+        ...deepPopulateOptions,
+        initialPopulate,
+      });
     },
   };
 

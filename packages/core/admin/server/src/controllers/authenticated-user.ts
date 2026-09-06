@@ -2,6 +2,7 @@ import type { Context } from 'koa';
 import type { AdminUser } from '../../../shared/contracts/shared';
 
 import { getService } from '../utils';
+import { normalizeEmail } from '../utils/normalize-email';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
 import { getSessionManager } from '../../../shared/utils/session-auth';
@@ -16,14 +17,16 @@ export default {
   },
 
   async updateMe(ctx: Context) {
-    const input = ctx.request.body as UpdateMe.Request['body'];
+    const data = normalizeEmail(ctx.request.body as UpdateMe.Request['body']);
 
-    await validateProfileUpdateInput(input);
+    await validateProfileUpdateInput(data);
 
     const userService = getService('user');
     const authServer = getService('auth');
 
-    const { currentPassword, ...userInfo } = input;
+    const { currentPassword, ...userInfo } = data;
+
+    const isChangingPassword = Boolean(currentPassword && userInfo.password);
 
     if (currentPassword && userInfo.password) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
@@ -33,8 +36,25 @@ export default {
           currentPassword: ['Invalid credentials'],
         });
       }
+    }
 
-      // Invalidate all sessions when password changes for security
+    if (userInfo.email !== undefined) {
+      const emailAlreadyTaken = await userService.exists({
+        id: { $ne: ctx.state.user.id },
+        email: userInfo.email,
+      });
+
+      if (emailAlreadyTaken === true) {
+        return ctx.badRequest('ValidationError', {
+          email: ['Email already taken'],
+        });
+      }
+    }
+
+    // Invalidate all sessions when password changes for security. This must run only once the
+    // update is going to be persisted, so a rejected request (e.g. duplicate email) does not log
+    // the user out without applying any change.
+    if (isChangingPassword) {
       const sessionManager = getSessionManager();
       if (sessionManager && sessionManager.hasOrigin('admin')) {
         await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));

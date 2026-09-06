@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { update, map, property } from 'lodash/fp';
+import { update, map } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -87,7 +87,6 @@ function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: stri
 export default {
   /**
    * Create a new workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async create(ctx: Context) {
     const { body, query } = ctx.request;
@@ -114,7 +113,6 @@ export default {
 
   /**
    * Update a workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async update(ctx: Context) {
     const { id } = ctx.params;
@@ -153,7 +151,6 @@ export default {
 
   /**
    * Delete a workflow
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async delete(ctx: Context) {
     const { id } = ctx.params;
@@ -181,7 +178,6 @@ export default {
 
   /**
    * List all workflows
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx: Context) {
     const { query } = ctx.request;

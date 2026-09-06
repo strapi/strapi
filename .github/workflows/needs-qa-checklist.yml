@@ -13,7 +13,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -22,10 +21,11 @@ jobs:
           fetch-depth: 0
 
       - name: Generate QA checklist
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.132
         env:
           GH_TOKEN: ${{ github.token }}
         with:
+          github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.PR_QA_ANTHROPIC_API_KEY }}
           prompt: |
             REPO: ${{ github.repository }}
@@ -42,6 +42,9 @@ jobs:
             comment exists, update that comment instead of creating a duplicate. Identify the
             managed comment with this exact hidden marker:
             <!-- ai-generated-qa-checklist -->
+            Use `gh pr view --json comments` to find the managed comment. If it exists, update
+            that specific comment with:
+            `gh api repos/${{ github.repository }}/issues/comments/<comment_id> --method PATCH`.
 
             The comment must use this structure:
 
@@ -84,4 +87,4 @@ jobs:
             tied to files, behavior, or risks in the diff.
 
           claude_args: |
-            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh api:*)"
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh api repos/${{ github.repository }}/issues/comments/*:*)"

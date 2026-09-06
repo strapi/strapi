@@ -4,12 +4,15 @@ import { errors } from '@strapi/utils';
 import { Release } from '../../../shared/contracts/releases';
 import { getService } from '../utils';
 import { RELEASE_MODEL_UID } from '../constants';
+import { runAsSystem } from '../audit-logs';
 
 const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   const scheduledJobs = new Map<Release['id'], string>();
 
   return {
     async set(releaseId: Release['id'], scheduleDate: Date) {
+      const id = String(releaseId); // callers pass both numeric (db row) and string (ctx.params) ids
+
       const release = await strapi.db
         .query(RELEASE_MODEL_UID)
         .findOne({ where: { id: releaseId, releasedAt: null } });
@@ -18,30 +21,35 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const taskName = `publishRelease_${releaseId}`;
+      const taskName = `publishRelease_${id}`;
 
       strapi.cron.add({
         [taskName]: {
           async task() {
-            await getService('release', { strapi }).publish(releaseId);
+            const releaseService = getService('release', { strapi });
+
+            // The system context attributes this run and its entry.publish/unpublish events to the scheduler.
+            await runAsSystem({ strapi }, 'scheduler', () => releaseService.publish(releaseId));
           },
           options: scheduleDate,
         },
       });
 
-      if (scheduledJobs.has(releaseId)) {
-        this.cancel(releaseId);
+      if (scheduledJobs.has(id)) {
+        this.cancel(id);
       }
 
-      scheduledJobs.set(releaseId, taskName);
+      scheduledJobs.set(id, taskName);
 
       return scheduledJobs;
     },
 
     cancel(releaseId: Release['id']) {
-      if (scheduledJobs.has(releaseId)) {
-        strapi.cron.remove(scheduledJobs.get(releaseId)!);
-        scheduledJobs.delete(releaseId);
+      const id = String(releaseId); // normalise to match key from set()
+
+      if (scheduledJobs.has(id)) {
+        strapi.cron.remove(scheduledJobs.get(id)!);
+        scheduledJobs.delete(id);
       }
 
       return scheduledJobs;

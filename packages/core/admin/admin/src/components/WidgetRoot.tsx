@@ -6,7 +6,7 @@ import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
 import { WIDGET_DATA_ATTRIBUTES } from '../utils/widgetLayout';

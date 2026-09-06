@@ -4,6 +4,7 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  publishAndConfirmDraftRelations,
 } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
@@ -30,7 +31,7 @@ describeOnCondition(edition === 'EE')('Releases - Document status', () => {
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
     await findAndClose(page, 'Published document');
     await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 

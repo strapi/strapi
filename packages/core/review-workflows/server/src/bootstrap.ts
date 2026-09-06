@@ -1,3 +1,4 @@
+import { Core } from '@strapi/types';
 import { getAdminService, getService } from './utils';
 import actions from './config/actions';
 
@@ -38,7 +39,7 @@ const registerWebhookEvents = async () =>
     strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
-export default async (args: any) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Permissions
   const { actionProvider } = getAdminService('permission');
   await actionProvider.registerMany(actions.reviewWorkflows);

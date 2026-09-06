@@ -241,6 +241,17 @@ export async function updateTicket(
   await linearClient.updateIssue(issueId, { title, description, labelIds });
 }
 
+export async function updateTicketMetadata(
+  issueId: string,
+  pr: CommunityPR,
+  analysis: PRAnalysis
+): Promise<void> {
+  const title = `PR #${pr.number}: ${pr.title}`;
+  const description = buildDescription(pr, analysis);
+
+  await linearClient.updateIssue(issueId, { title, description });
+}
+
 export async function updateTicketLabels(
   issueId: string,
   analysis: PRAnalysis,

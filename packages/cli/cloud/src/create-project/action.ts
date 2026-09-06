@@ -92,7 +92,7 @@ async function createProject(
     try {
       await waitForEnvironmentCreation(projectData.environmentInternalName);
       environmentSpinner.succeed('Environment created successfully!\n');
-    } catch (e: Error | unknown) {
+    } catch {
       environmentSpinner.fail(
         `An error occurred while creating the environment on Strapi Cloud.\n`
       );

@@ -46,7 +46,16 @@ describe('createMcpServerWithRegistries', () => {
   >;
 
   beforeEach(() => {
-    mockStrapi = {} as Core.Strapi;
+    mockStrapi = {
+      log: {
+        error: jest.fn(),
+        info: jest.fn(),
+        debug: jest.fn(),
+      },
+      telemetry: {
+        send: jest.fn().mockResolvedValue(true),
+      },
+    } as Core.Strapi;
     mockAbility = { can: jest.fn(() => false) };
     mockUser = { id: 1 };
     toolDefinitions = new McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>(

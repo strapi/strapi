@@ -5,7 +5,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 import path from 'path';
 import { describeOnCondition } from '../../../../utils/shared';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')('File Upload', () => {
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('File Upload', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');

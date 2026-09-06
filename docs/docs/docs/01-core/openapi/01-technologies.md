@@ -9,7 +9,7 @@ tags:
 
 # OpenAPI
 
-This section provides an overview of the technologies used in the OpenAPI package
+This section provides an overview of the technologies used in the OpenAPI package.
 
 ---
 
@@ -30,29 +30,17 @@ The package focuses on using a limited set of external dependencies to keep a li
 
 ---
 
-### [Zod to OpenAPI](https://github.com/asteasolutions/zod-to-openapi)
+### [Zod](https://github.com/colinhacks/zod)
 
-> A library that uses [zod schemas](https://github.com/colinhacks/zod) to generate OpenAPI Swagger documentation.
-
-This library is used to transform `zod` schema obtained from Strapi routes objects into valid OpenAPI Schema.
+Route objects carry Zod schemas on `route.request` and `route.response`. Assemblers convert those schemas into OpenAPI parameters, request bodies, and response objects via `z.toJSONSchema` (see `src/utils/zod.ts` and the `ComponentsWriter` post-processor).
 
 :::info
-It is particularly useful to avoid leaking the OpenAPI domain logic into the Strapi core logic.
+Keeping schemas on routes avoids leaking OpenAPI domain logic into Strapi core.
 :::
 
 :::warning
-The main pain point of using this library is **not being able to infer, represent, and transform cyclic dependencies between models** (_relations, components, dynamic zones, media_) **in the final schema** without leaking the OpenAPI domain to the Strapi core.
-
-Luckily, `zod` v4 will [soon go stable](https://v4.zod.dev/v4#wrapping-up) and offer the possibility to transform `zod` schema into JSON object natively **and** with cycles’ support.
-
-It would represent a huge opportunity to migrate away from this dependency and use `zod` only.
-
-For more information, see
-
-- https://v4.zod.dev/
-- https://v4.zod.dev/json-schema
-- https://v4.zod.dev/metadata
-  :::
+Cyclic dependencies between models (_relations, components, dynamic zones, media_) remain difficult to represent accurately in the final component schemas.
+:::
 
 ### [Debug](https://github.com/debug-js/debug)
 
@@ -64,6 +52,8 @@ The root namespace for the package is `strapi:core:openapi` and each component a
 
 :::tip
 A small wrapper that automatically binds the correct default namespace can be found in the package utils: `src/utils/debug.ts`
+
+Enable debug output with `DEBUG=strapi:core:openapi:*`.
 :::
 
 ### Types

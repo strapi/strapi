@@ -1,5 +1,8 @@
+import { join } from 'path';
+
 import type { Core, UID } from '@strapi/types';
 
+import { readFile } from 'fs/promises';
 import { Preview } from '../../../../shared/contracts';
 
 import { getService } from '../utils';
@@ -32,6 +35,15 @@ const createPreviewController = () => {
       return {
         data: { url: url || undefined },
       } satisfies Preview.GetPreviewUrl.Response;
+    },
+
+    /**
+     * Serves the standalone preview script verbatim as JavaScript. The admin fetches
+     * this, injects the config, and posts it to the preview iframe
+     */
+    async getPreviewScript(ctx) {
+      ctx.type = 'application/javascript';
+      ctx.body = await readFile(join(__dirname, 'previewScript.js'), 'utf8');
     },
   } satisfies Core.Controller;
 };

@@ -22,21 +22,23 @@ import type { Global, Teardown } from './types';
  *
  * Scope
  * -----
- * Only string bodies are stashed. `FormData` / `Blob` / `ArrayBuffer` bodies
- * are not — no current handler in the repo reads those shapes, and extending
- * the stash to cover them needs realm-aware handling (see node-globals.ts).
- * A handler that calls `request.formData()` or `request.arrayBuffer()` under
- * this env will hit the undici "Body is unusable" error directly; widen this
- * patch if that case arises.
+ * String and jsdom-realm `FormData` bodies are stashed. `Blob` / `ArrayBuffer`
+ * bodies are not — extend with realm-aware handling (see node-globals.ts) if a
+ * handler starts reading those shapes.
  * -----------------------------------------------------------------------------------------------*/
 
 const BODY_STASH = Symbol('strapi.mswBodyStash');
+const FORM_DATA_STASH = Symbol('strapi.mswFormDataStash');
 const PATCH_MARKER = '__strapiStashedBody';
 
-type Stashed = Request & { [BODY_STASH]?: string };
+type Stashed = Request & {
+  [BODY_STASH]?: string;
+  [FORM_DATA_STASH]?: FormData;
+};
 
 type PatchedText = typeof Request.prototype.text & { [PATCH_MARKER]?: true };
 type PatchedJson = typeof Request.prototype.json & { [PATCH_MARKER]?: true };
+type PatchedFormData = typeof Request.prototype.formData & { [PATCH_MARKER]?: true };
 
 /**
  * Extract the stashable representation of a Request body:
@@ -44,7 +46,7 @@ type PatchedJson = typeof Request.prototype.json & { [PATCH_MARKER]?: true };
  *   - Otherwise the propagated stash from an existing Request passed as input.
  *   - `undefined` for anything else (non-string body, URL-only input, etc.).
  */
-function stashFor(
+function stashStringFor(
   input: RequestInfo | URL | undefined,
   init: RequestInit | undefined,
   RequestCtor: typeof Request
@@ -57,9 +59,24 @@ function stashFor(
   return undefined;
 }
 
+function stashFormDataFor(
+  input: RequestInfo | URL | undefined,
+  init: RequestInit | undefined,
+  RequestCtor: typeof Request,
+  FormDataCtor: typeof FormData
+): FormData | undefined {
+  if (init?.body instanceof FormDataCtor) return init.body as FormData;
+  if (input instanceof RequestCtor) {
+    const inherited = (input as Stashed)[FORM_DATA_STASH];
+    if (inherited) return inherited;
+  }
+  return undefined;
+}
+
 export function patchRequestBodyStash(global: Global): Teardown {
   const NativeRequest = global.Request as typeof Request;
   const jsdomJSON = global.JSON as typeof JSON;
+  const FormDataCtor = global.FormData as typeof FormData;
 
   // Wrap the Request constructor via Proxy. Preserves `instanceof`, the
   // prototype chain, and static members automatically — no need to manually
@@ -68,9 +85,13 @@ export function patchRequestBodyStash(global: Global): Teardown {
     construct(target, args) {
       const [input, init] = args as [RequestInfo | URL | undefined, RequestInit | undefined];
       const request = Reflect.construct(target, args) as Stashed;
-      const body = stashFor(input, init, NativeRequest);
+      const body = stashStringFor(input, init, NativeRequest);
+      const formData = stashFormDataFor(input, init, NativeRequest, FormDataCtor);
       if (body !== undefined) {
         Object.defineProperty(request, BODY_STASH, { value: body });
+      }
+      if (formData !== undefined) {
+        Object.defineProperty(request, FORM_DATA_STASH, { value: formData });
       }
       return request;
     },
@@ -79,8 +100,13 @@ export function patchRequestBodyStash(global: Global): Teardown {
 
   const originalText = Request.prototype.text;
   const originalJson = Request.prototype.json;
+  const originalFormData = Request.prototype.formData;
 
-  if ((originalText as PatchedText)[PATCH_MARKER] || (originalJson as PatchedJson)[PATCH_MARKER]) {
+  if (
+    (originalText as PatchedText)[PATCH_MARKER] ||
+    (originalJson as PatchedJson)[PATCH_MARKER] ||
+    (originalFormData as PatchedFormData)[PATCH_MARKER]
+  ) {
     throw new Error(
       '@strapi/admin-test-utils: patchRequestBodyStash was applied without a ' +
         'matching teardown. setup() was likely called twice in the same worker.'
@@ -101,9 +127,18 @@ export function patchRequestBodyStash(global: Global): Teardown {
   patchedJson[PATCH_MARKER] = true;
   Request.prototype.json = patchedJson;
 
+  const patchedFormData: PatchedFormData = async function stashedFormData(this: Stashed) {
+    const stashed = this[FORM_DATA_STASH];
+    if (stashed) return stashed;
+    return originalFormData.call(this);
+  };
+  patchedFormData[PATCH_MARKER] = true;
+  Request.prototype.formData = patchedFormData;
+
   return function teardownRequestBodyStash() {
     global.Request = NativeRequest;
     Request.prototype.text = originalText;
     Request.prototype.json = originalJson;
+    Request.prototype.formData = originalFormData;
   };
 }

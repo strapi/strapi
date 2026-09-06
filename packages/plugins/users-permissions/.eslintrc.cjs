@@ -8,6 +8,7 @@ const config = {
     '.eslintrc.cjs',
     'rollup.config.mjs',
     'coverage/',
+    'lint-staged.config.mjs',
   ],
   overrides: [
     {

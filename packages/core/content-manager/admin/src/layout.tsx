@@ -1,9 +1,19 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Page, Layouts, SubNav, useIsMobile } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  Layouts,
+  SubNav,
+  useIsMobile,
+  LazyOutlet,
+  useQueryParams,
+  useNotification,
+  useAuth,
+} from '@strapi/admin/strapi-admin';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from './components/DragLayer';
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
@@ -13,6 +23,11 @@ import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
 import { getTranslation } from './utils/translations';
+
+import type { CardDragPreviewProps } from './components/DragPreviews/CardDragPreview';
+import type { ComponentDragPreviewProps } from './components/DragPreviews/ComponentDragPreview';
+import type { RelationDragPreviewProps } from './components/DragPreviews/RelationDragPreview';
+import type { To } from 'react-router-dom';
 
 /* -------------------------------------------------------------------------------------------------
  * Layout
@@ -29,6 +44,8 @@ const Layout = () => {
 
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const permissions = useAuth('Layout', (state) => state.permissions);
 
   if (isLoading) {
     return (
@@ -53,16 +70,53 @@ const Layout = () => {
     supportedModelsToDisplay.length > 0 &&
     pathname !== '/content-manager/403'
   ) {
-    return <Navigate to="/403" />;
+    const requestedLocale = query.plugins?.i18n?.locale;
+    const localeScopedPermissions = permissions.filter(
+      (permission) =>
+        permission.action === 'plugin::content-manager.explorer.read' &&
+        Array.isArray(permission.properties?.locales)
+    );
+    const contentTypePermissions = localeScopedPermissions.filter(
+      (permission) => permission.subject === contentTypeMatch?.params.uid
+    );
+    const accessibleLocales = Array.from(
+      new Set(
+        (contentTypePermissions.length > 0
+          ? contentTypePermissions
+          : localeScopedPermissions
+        ).flatMap((permission) => permission.properties?.locales as string[])
+      )
+    );
+
+    if (typeof requestedLocale === 'string' && accessibleLocales.length > 0) {
+      if (!accessibleLocales.includes(requestedLocale)) {
+        const search = stringify({
+          ...query,
+          plugins: {
+            ...query.plugins,
+            i18n: { ...query.plugins?.i18n, locale: accessibleLocales[0] },
+          },
+        });
+
+        return <NavigateWithLocaleWarning to={{ pathname, search }} />;
+      }
+    } else {
+      return <Navigate to="/content-manager/403" replace />;
+    }
   }
 
   // Redirect the user to the create content type page
-  if (supportedModelsToDisplay.length === 0 && pathname !== '/no-content-types') {
-    return <Navigate to="/no-content-types" />;
+  if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
+    return <Navigate to="/content-manager/no-content-types" replace />;
   }
 
   // On /content-manager base route
-  if (!contentTypeMatch && authorisedModels.length > 0) {
+  if (
+    !contentTypeMatch &&
+    authorisedModels.length > 0 &&
+    pathname !== '/content-manager/403' &&
+    pathname !== '/content-manager/no-content-types'
+  ) {
     // On desktop: redirect to first collection type
     if (!isMobile) {
       return (
@@ -102,10 +156,28 @@ const Layout = () => {
       </Page.Title>
       <Layouts.Root sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
-        <Outlet />
+        <LazyOutlet nested />
       </Layouts.Root>
     </>
   );
+};
+
+const NavigateWithLocaleWarning = ({ to }: { to: To }) => {
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
+
+  React.useEffect(() => {
+    toggleNotification({
+      type: 'warning',
+      message: formatMessage({
+        id: getTranslation('permissions.not-allowed.locale'),
+        defaultMessage:
+          "You don't have the permissions to access this content for the requested locale",
+      }),
+    });
+  }, [toggleNotification, formatMessage]);
+
+  return <Navigate to={to} replace />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -127,17 +199,42 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
   switch (actualType) {
     case ItemTypes.EDIT_FIELD:
     case ItemTypes.FIELD:
-      return <CardDragPreview label={item.label} />;
+      return isCardDragItem(item) ? <CardDragPreview label={item.label} /> : null;
     case ItemTypes.COMPONENT:
     case ItemTypes.DYNAMIC_ZONE:
-      return <ComponentDragPreview displayedValue={item.displayedValue} />;
+      return isComponentDragItem(item) ? (
+        <ComponentDragPreview displayedValue={item.displayedValue} />
+      ) : null;
 
     case ItemTypes.RELATION:
-      return <RelationDragPreview {...item} />;
+      return isRelationDragItem(item) ? <RelationDragPreview {...item} /> : null;
 
     default:
       return null;
   }
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === 'object';
+};
+
+const isCardDragItem = (item: unknown): item is CardDragPreviewProps => {
+  return isRecord(item) && typeof item.label === 'string';
+};
+
+const isComponentDragItem = (item: unknown): item is ComponentDragPreviewProps => {
+  return isRecord(item) && typeof item.displayedValue === 'string';
+};
+
+const isRelationDragItem = (item: unknown): item is RelationDragPreviewProps => {
+  return (
+    isRecord(item) &&
+    typeof item.displayedValue === 'string' &&
+    (typeof item.id === 'string' || typeof item.id === 'number') &&
+    typeof item.index === 'number' &&
+    typeof item.width === 'number' &&
+    (item.status === undefined || typeof item.status === 'string')
+  );
+};
 
 export { Layout };

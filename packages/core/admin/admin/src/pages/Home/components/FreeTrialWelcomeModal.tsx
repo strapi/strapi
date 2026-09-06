@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import lightIllustration from '../../../assets/images/free-trial.png';

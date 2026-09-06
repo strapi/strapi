@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi';
-import type Sentry from '@sentry/node';
+import type * as Sentry from '@sentry/node';
 import type createSentryService from '../services/sentry';
 
 /**

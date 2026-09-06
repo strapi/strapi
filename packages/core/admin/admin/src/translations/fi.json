@@ -134,7 +134,7 @@
   "Settings.application.description": "Hallintapaneelin yleiset tiedot",
   "Settings.application.edition-title": "nykyinen versio",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "Hallinnoi paikkoja",
+  "Settings.application.ee.admin-seats.add-seats": "Hallinnoi tilausta",
   "Settings.application.ee.admin-seats.support": "Ota yhteyttä myyntiin",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Raja saavutettu: lisää paikkoja kutsuaksesi lisää käyttäjiä",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",

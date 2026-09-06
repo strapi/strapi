@@ -1,4 +1,4 @@
-import type { Core, UID, Modules } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';

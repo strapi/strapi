@@ -92,7 +92,7 @@ const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) =
     // NOTE: the router type is used to tag controller actions and for authentication / authorization so we need to pass this info down to the route level
     const routeWithInfo = Object.assign(route, {
       info: {
-        ...(route.info ?? {}),
+        ...route.info,
         type: type ?? 'api',
       },
     });

@@ -10,16 +10,22 @@ import { imageBlocks } from '../Image';
 
 import { Wrapper } from './Wrapper';
 
+type MediaLibraryProps = {
+  onSelectAssets: (images: (typeof mockImage)[]) => void;
+};
+
+type MockStrapiAppState = {
+  components: {
+    'media-library': React.ComponentType<MediaLibraryProps>;
+  };
+};
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useStrapiApp: jest.fn((_name: string, getter: (state: any) => any) =>
+  useStrapiApp: jest.fn((_name: string, getter: (state: MockStrapiAppState) => unknown) =>
     getter({
       components: {
-        'media-library': ({
-          onSelectAssets,
-        }: {
-          onSelectAssets: (images: (typeof mockImage)[]) => void;
-        }) => (
+        'media-library': ({ onSelectAssets }: MediaLibraryProps) => (
           <div>
             <p>{mockMediaLibraryTitle}</p>
             <button type="button" onClick={() => onSelectAssets([mockImage])}>

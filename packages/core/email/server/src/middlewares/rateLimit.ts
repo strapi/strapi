@@ -1,16 +1,16 @@
 import type { Context, Next } from 'koa';
-import utils from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import { isString, get } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
-const { RateLimitError } = utils.errors;
+const { RateLimitError } = errors;
 
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     const pluginConfig = strapi.config.get('plugin::email') as any;
     const rateLimitConfig = {
       enabled: true,
-      ...(pluginConfig.ratelimit || {}),
+      ...pluginConfig.ratelimit,
     };
 
     if (rateLimitConfig.enabled === true) {

@@ -61,7 +61,7 @@ const AdvancedSettingsPage = () => {
           type: 'danger',
           message: formatMessage({
             id: getTrad('notification.error'),
-            defaultMessage: 'An error occured',
+            defaultMessage: 'An error occurred',
           }),
         });
       },

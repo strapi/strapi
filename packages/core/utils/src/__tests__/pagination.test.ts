@@ -35,6 +35,41 @@ describe('Pagination util', () => {
         });
       });
 
+      test('Uses default pageSize when only page is provided', () => {
+        const pagination = { page: 2 };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: defaultLimit, // (page - 1) * defaultLimit
+          limit: defaultLimit,
+        });
+      });
+
+      test('Uses default pageSize when pageSize is null', () => {
+        const pagination = { page: 2, pageSize: null };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: defaultLimit,
+          limit: defaultLimit,
+        });
+      });
+
+      test('Uses the capped default pageSize to calculate the page offset', () => {
+        const pagination = { page: 2 };
+        const defaultPagination = withDefaultPagination(pagination, {
+          defaults: {
+            page: { pageSize: 3 },
+          },
+          maxLimit: 2,
+        });
+
+        expect(defaultPagination).toEqual({
+          start: 2,
+          limit: 2,
+        });
+      });
+
       test('Uses maxLimit as pageSize', () => {
         const pagination = { pageSize: 999 };
         const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });

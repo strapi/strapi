@@ -28,7 +28,7 @@ export default class MysqlDatabaseInspector {
       const databaseName = versionSplit[1];
       versionNumber = versionSplit[0];
       database = databaseName && databaseName.toLowerCase() === 'mariadb' ? MARIADB : MYSQL;
-    } catch (e) {
+    } catch {
       return {
         database: null,
         version: null,

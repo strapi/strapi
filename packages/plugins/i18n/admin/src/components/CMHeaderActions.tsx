@@ -6,7 +6,6 @@ import {
   useQueryParams,
   Table,
   useAPIErrorHandler,
-  FormErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
@@ -47,7 +46,7 @@ import { useGetSettingsQuery } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
-import { BulkLocaleActionModal } from './BulkLocaleActionModal';
+import { BulkLocaleActionModal, type LocaleValidationErrors } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
@@ -190,14 +189,17 @@ const LocalePickerAction = ({
     }
     /**
      * Handle the case where the current locale query param doesn't exist
-     * in the list of available locales, so we redirect to the default locale.
+     * in the list of available locales, so we redirect to the default locale
+     * when the user has access to it, or the first locale they can access.
      */
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
-    const defaultLocale = locales.find((locale) => locale.isDefault);
-    if (!doesLocaleExist && defaultLocale?.code) {
-      handleSelect(defaultLocale.code);
+    const accessibleLocales = locales.filter((locale) => canRead.includes(locale.code));
+    const targetLocale =
+      accessibleLocales.find((locale) => locale.isDefault) ?? accessibleLocales[0];
+    if (!doesLocaleExist && targetLocale?.code) {
+      handleSelect(targetLocale.code);
     }
-  }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
+  }, [handleSelect, hasI18n, locales, currentDesiredLocale, canRead]);
 
   const currentLocale = Array.isArray(locales)
     ? locales.find((locale) => locale.code === currentDesiredLocale)
@@ -748,7 +750,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
+  const [selectedRows, setSelectedRows] = React.useState<Array<LocaleStatus & { id: string }>>([]);
   const [isDraftRelationConfirmationOpen, setIsDraftRelationConfirmationOpen] =
     React.useState<boolean>(false);
 
@@ -798,7 +800,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
 
   // Extract the rows for the bulk locale publish modal and any validation
   // errors per locale
-  const [rows, validationErrors] = React.useMemo(() => {
+  const [rows, validationErrors] = React.useMemo<[LocaleStatus[], LocaleValidationErrors]>(() => {
     if (!document) {
       return [[], {}];
     }
@@ -859,7 +861,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     // Validate the current document locale only. Other locales have minimal
     // data populated for performance reasons and will be validated server-side
     // during the actual bulk publish operation.
-    const errors: FormErrors = {};
+    const errors: LocaleValidationErrors = {};
     if (document.locale) {
       const validation = validate(document as Modules.Documents.AnyDocument);
       if (validation !== null) {

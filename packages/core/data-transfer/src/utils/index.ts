@@ -7,3 +7,4 @@ export * as schema from './schema';
 export * as transaction from './transaction';
 export * as middleware from './middleware';
 export * as diagnostics from './diagnostic';
+export { createCappedWarningReporter, DEFAULT_DETAILED_WARNING_LIMIT } from './capped-warnings';

@@ -176,7 +176,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         Partial<Pick<Discard.Params, 'documentId'>> & {
           collectionType: string;
           params?: Find.Request['query'] & {
-            [key: string]: any;
+            [key: string]: unknown;
           };
         }
     >({
@@ -213,7 +213,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       Find.Response,
       Find.Params & {
         params?: Find.Request['query'] & {
-          [key: string]: any;
+          [key: string]: unknown;
         };
       }
     >({

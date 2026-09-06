@@ -67,29 +67,25 @@ export const AUDIT_LOGS_DEFAULT_PAGE_SIZE = 50;
 // therefore `window.strapi` might not exist at import-time. We should probably define
 // which constant is available at which stage of the application lifecycle.
 export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
-  global: [
-    ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
-      ? [
-          {
-            intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
-            to: '/settings/single-sign-on',
-            id: 'sso',
-            licenseOnly: true,
-          },
-        ]
-      : []),
-  ],
+  global: window.strapi.features.isEnabled(window.strapi.features.SSO)
+    ? [
+        {
+          intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+          to: '/settings/single-sign-on',
+          id: 'sso',
+          licenseOnly: true,
+        },
+      ]
+    : [],
 
-  admin: [
-    ...(window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)
-      ? [
-          {
-            intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
-            to: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
-            id: 'auditLogs',
-            licenseOnly: true,
-          },
-        ]
-      : []),
-  ],
+  admin: window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)
+    ? [
+        {
+          intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
+          to: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
+          id: 'auditLogs',
+          licenseOnly: true,
+        },
+      ]
+    : [],
 });

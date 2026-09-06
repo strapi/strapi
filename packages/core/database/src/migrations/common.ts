@@ -1,4 +1,3 @@
-import type { Resolver } from 'umzug';
 import type { Knex } from 'knex';
 
 import type { Database } from '..';
@@ -24,7 +23,20 @@ export interface MigrationProvider {
 
 export type Context = { db: Database };
 
-export type MigrationResolver = Resolver<Context>;
+export type MigrationResolverParams = {
+  name: string;
+  path?: string;
+  context: Context;
+};
+
+export type MigrationRunnerFn = () => Promise<void> | Promise<Promise<void>>;
+
+export type MigrationResolver = (params: MigrationResolverParams) => {
+  name: string;
+  path?: string;
+  up: MigrationRunnerFn;
+  down: MigrationRunnerFn;
+};
 
 export type MigrationFn = (knex: Knex.Transaction, db: Database) => Promise<void>;
 

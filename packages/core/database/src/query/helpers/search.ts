@@ -75,7 +75,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
   }
 };
 
-const escapeQuery = (query: string, charsToEscape: string, escapeChar = '\\') => {
+export const escapeQuery = (query: string, charsToEscape: string, escapeChar = '\\') => {
   return query
     .split('')
     .reduce(

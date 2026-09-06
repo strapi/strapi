@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { IntlLabel } from '../types';
-
 import { CustomRadioGroup } from './CustomRadioGroup';
+
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface BooleanRadioGroupProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
+  onChange: FormChangeHandler<boolean, 'boolean-radio-group'>;
 }
 
 export const BooleanRadioGroup = ({

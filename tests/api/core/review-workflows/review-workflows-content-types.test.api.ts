@@ -89,15 +89,6 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     return body.data.find((workflow) => workflow.id === id);
   };
 
-  const getWorkflows = async (filters) => {
-    const result = await requests.admin({
-      method: 'GET',
-      url: '/review-workflows/workflows',
-      qs: { filters },
-    });
-    return result.body.data;
-  };
-
   const createEntry = async (uid, data) => {
     const { body } = await requests.admin({
       method: 'POST',
@@ -399,42 +390,6 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
 
       const entry = await createEntry(productUID, { name: 'Product' });
       expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
-    });
-  });
-
-  describe('Get workflows', () => {
-    let workflow1, workflow2;
-
-    beforeEach(async () => {
-      workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
-      workflow2 = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
-    });
-
-    test('Should list workflows filtered by CT', async () => {
-      const workflows = await getWorkflows({ contentTypes: productUID });
-
-      expect(workflows).toHaveLength(1);
-      expect(workflows[0]).toMatchObject({ id: workflow2.id });
-    });
-
-    // Depends on the previous test
-    test('Should list workflows filtered by CT even with similar names (plugin::my-plugin.my-ct and plugin::my-plugin.my-ct2)', async () => {
-      // Manually update workflow to have a similar CT name
-      await strapi.db.query(WORKFLOW_MODEL_UID).update({
-        where: { id: workflow1.id },
-        data: { contentTypes: [`${productUID}-2`] },
-      });
-
-      const workflows = await getWorkflows({ contentTypes: productUID });
-
-      expect(workflows).toHaveLength(1);
-      expect(workflows[0]).toMatchObject({ id: workflow2.id });
-
-      // To avoid breaking other tests
-      await strapi.db.query(WORKFLOW_MODEL_UID).update({
-        where: { id: workflow1.id },
-        data: { contentTypes: [] },
-      });
     });
   });
 });

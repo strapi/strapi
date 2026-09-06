@@ -1,6 +1,5 @@
-import { Umzug } from 'umzug';
-
 import { wrapTransaction } from './common';
+import { createMigrationRunner } from './runner';
 import { internalMigrations } from './internal-migrations';
 import { createStorage } from './storage';
 import { transformLogMessage } from './logger';
@@ -12,32 +11,19 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
   const context = { db };
   const migrations: Migration[] = [...internalMigrations];
 
-  const umzugProvider = new Umzug({
+  const runner = createMigrationRunner({
     storage: createStorage({ db, tableName: 'strapi_migrations_internal' }),
     logger: {
       info(message) {
-        // NOTE: only log internal migration in debug mode
-        db.logger.debug(transformLogMessage('info', message));
-      },
-      warn(message) {
-        db.logger.warn(transformLogMessage('warn', message));
-      },
-      error(message) {
-        db.logger.error(transformLogMessage('error', message));
-      },
-      debug(message) {
-        db.logger.debug(transformLogMessage('debug', message));
+        db.logger.info(transformLogMessage('info', message));
       },
     },
-    context,
-    migrations: () =>
-      migrations.map((migration) => {
-        return {
-          name: migration.name,
-          up: wrapTransaction(context.db)(migration.up),
-          down: wrapTransaction(context.db)(migration.down),
-        };
-      }),
+    getMigrations: async () =>
+      migrations.map((migration) => ({
+        name: migration.name,
+        up: wrapTransaction(context.db)(migration.up),
+        down: wrapTransaction(context.db)(migration.down),
+      })),
   });
 
   return {
@@ -45,14 +31,14 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
       migrations.push(migration);
     },
     async shouldRun() {
-      const pendingMigrations = await umzugProvider.pending();
+      const pendingMigrations = await runner.pending();
       return pendingMigrations.length > 0;
     },
     async up() {
-      await umzugProvider.up();
+      await runner.up();
     },
     async down() {
-      await umzugProvider.down();
+      await runner.down();
     },
   };
 };

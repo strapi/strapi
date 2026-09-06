@@ -11,6 +11,25 @@ const data = {
   leadFormSubmissions,
 };
 
+type FileData = {
+  filepath: string;
+  originalFileName: string;
+  size: number;
+  mimetype: string;
+};
+
+type ContentSection = {
+  __component: string;
+  features?: Array<Record<string, unknown>>;
+  logos?: Array<Record<string, unknown>>;
+  testimonials?: Array<Record<string, unknown>>;
+};
+
+type Page = {
+  slug: string;
+  contentSections: ContentSection[];
+};
+
 /**
  * This function will be called when the app is boostrapped.
  */
@@ -39,7 +58,7 @@ async function isFirstRun() {
   return !initHasRun;
 }
 
-async function setPublicPermissions(newPermissions) {
+async function setPublicPermissions(newPermissions: Record<string, string[]>) {
   // Find the ID of the public role
   const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
     where: {
@@ -48,7 +67,7 @@ async function setPublicPermissions(newPermissions) {
   });
 
   // Create the new permissions and link them to the public role
-  const allPermissionsToCreate = [];
+  const allPermissionsToCreate: Array<Promise<unknown>> = [];
   Object.keys(newPermissions).map((controller) => {
     const actions = newPermissions[controller];
     const permissionsToCreate = actions.map((action) => {
@@ -64,13 +83,13 @@ async function setPublicPermissions(newPermissions) {
   await Promise.all(allPermissionsToCreate);
 }
 
-function getFileSizeInBytes(filePath) {
+function getFileSizeInBytes(filePath: string) {
   const stats = fs.statSync(filePath);
   const fileSizeInBytes = stats['size'];
   return fileSizeInBytes;
 }
 
-function getFileData(fileName) {
+function getFileData(fileName: string): FileData {
   const filePath = `./data/uploads/${fileName}`;
 
   // Parse the file metadata
@@ -134,8 +153,8 @@ async function createEntry(
   }
 }
 
-async function importPages(pages) {
-  const getPageCover = (slug) => {
+async function importPages(pages: Page[]) {
+  const getPageCover = (slug: string): FileData | null => {
     switch (slug) {
       case '':
         return getFileData('undraw-content-team.png');
@@ -145,7 +164,7 @@ async function importPages(pages) {
   };
 
   return pages.map(async (page) => {
-    const files = {};
+    const files: Record<string, FileData | null> = {};
     const shareImage = getPageCover(page.slug);
     if (shareImage) {
       files['metadata.shareImage'] = shareImage;
@@ -155,7 +174,7 @@ async function importPages(pages) {
       if (section.__component === 'sections.hero') {
         files[`contentSections.${index}.picture`] = getFileData('undraw-content-team.svg');
       } else if (section.__component === 'sections.feature-rows-group') {
-        const getFeatureMedia = (featureIndex) => {
+        const getFeatureMedia = (featureIndex: number): FileData | null => {
           switch (featureIndex) {
             case 0:
               return getFileData('undraw-design-page.svg');
@@ -165,12 +184,12 @@ async function importPages(pages) {
               return null;
           }
         };
-        section.features.forEach((feature, featureIndex) => {
+        section.features?.forEach((_feature, featureIndex) => {
           files[`contentSections.${index}.features.${featureIndex}.media`] =
             getFeatureMedia(featureIndex);
         });
       } else if (section.__component === 'sections.feature-columns-group') {
-        const getFeatureMedia = (featureIndex) => {
+        const getFeatureMedia = (featureIndex: number): FileData | null => {
           switch (featureIndex) {
             case 0:
               return getFileData('preview.svg');
@@ -182,15 +201,15 @@ async function importPages(pages) {
               return null;
           }
         };
-        section.features.forEach((feature, featureIndex) => {
+        section.features?.forEach((_feature, featureIndex) => {
           files[`contentSections.${index}.features.${featureIndex}.icon`] =
             getFeatureMedia(featureIndex);
         });
       } else if (section.__component === 'sections.testimonials-group') {
-        section.logos.forEach((logo, logoIndex) => {
+        section.logos?.forEach((_logo, logoIndex) => {
           files[`contentSections.${index}.logos.${logoIndex}.logo`] = getFileData('logo.png');
         });
-        section.testimonials.forEach((testimonial, testimonialIndex) => {
+        section.testimonials?.forEach((_testimonial, testimonialIndex) => {
           files[`contentSections.${index}.testimonials.${testimonialIndex}.logo`] =
             getFileData('logo.png');
           files[`contentSections.${index}.testimonials.${testimonialIndex}.picture`] =
@@ -199,7 +218,13 @@ async function importPages(pages) {
       }
     });
 
-    await createEntry('page', page, files);
+    await createEntry(
+      'page',
+      page,
+      Object.fromEntries(
+        Object.entries(files).filter((entry): entry is [string, FileData] => entry[1] !== null)
+      )
+    );
   });
 }
 
@@ -241,6 +266,6 @@ async function importSeedData() {
 
   // Create all entries
   await importGlobal();
-  await importPages(data.pages);
+  await importPages(data.pages as Page[]);
   await importLeadFormSubmissionData();
 }

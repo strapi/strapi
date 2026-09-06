@@ -6,9 +6,21 @@ import { createPostHandler } from '../handlePost';
 import type { McpHandlerDependencies } from '../types';
 
 import { withTimeout } from '../../utils/withTimeout';
+import {
+  sendDidNotAuthenticateMcpRequest,
+  sendDidNotHandleMcpRequest,
+  sendDidUseMcpServer,
+} from '../../metrics/metrics';
 
 jest.mock('../../utils/withTimeout', () => ({
   withTimeout: jest.fn((promise) => promise),
+}));
+
+jest.mock('../../metrics/metrics', () => ({
+  sendDidUseMcpServer: jest.fn(),
+  sendDidNotAuthenticateMcpRequest: jest.fn(),
+  sendDidNotHandleMcpRequest: jest.fn(),
+  classifyMcpRequestFailure: jest.requireActual('../../metrics/metrics').classifyMcpRequestFailure,
 }));
 
 jest.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
@@ -25,6 +37,9 @@ describe('handlePost', () => {
   beforeEach(() => {
     logErrorSpy = jest.fn();
     logInfoSpy = jest.fn();
+    jest.mocked(sendDidUseMcpServer).mockClear();
+    jest.mocked(sendDidNotAuthenticateMcpRequest).mockClear();
+    jest.mocked(sendDidNotHandleMcpRequest).mockClear();
     mockStrapi = {
       log: {
         error: logErrorSpy,
@@ -37,16 +52,18 @@ describe('handlePost', () => {
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
       authenticate: jest.fn().mockResolvedValue({
+        // Distinct ids so assertions can tell the token owner (user) apart
+        // from the token itself (credentials).
         authenticated: true,
-        credentials: { id: 1 },
-        user: { id: 1 },
+        credentials: { id: 7 },
+        user: { id: 42 },
         ability: { can: jest.fn(() => true) },
       }),
     };
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body }, respond: true }) as any;
+    ({ req, res, request: { body }, respond: true, state: {} }) as any;
 
   const makeRes = () => {
     const writeHeadSpy = jest.fn();
@@ -94,9 +111,7 @@ describe('handlePost', () => {
   test('should return AUTHENTICATION_REQUIRED when authentication fails', async () => {
     mockAuthenticationStrategy.authenticate = jest.fn().mockResolvedValue({
       authenticated: false,
-      credentials: null,
-      ability: null,
-      error: null,
+      reason: 'invalid_token',
     });
 
     const deps: McpHandlerDependencies = {
@@ -125,6 +140,59 @@ describe('handlePost', () => {
         id: null,
       })
     );
+    expect(sendDidUseMcpServer).not.toHaveBeenCalled();
+    expect(sendDidNotAuthenticateMcpRequest).toHaveBeenCalledWith(mockStrapi, 'invalid_token');
+    expect(sendDidNotHandleMcpRequest).not.toHaveBeenCalled();
+  });
+
+  test('should record missing_token auth failure telemetry', async () => {
+    mockAuthenticationStrategy.authenticate = jest.fn().mockResolvedValue({
+      authenticated: false,
+      reason: 'missing_token',
+    });
+
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn(),
+      capabilityDefinitions: {} as any,
+    };
+
+    const handler = createPostHandler(deps);
+    const { res } = makeRes();
+    const ctx = makeCtx(makeReq(), res);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(sendDidNotAuthenticateMcpRequest).toHaveBeenCalledWith(mockStrapi, 'missing_token');
+    expect(sendDidUseMcpServer).not.toHaveBeenCalled();
+    expect(sendDidNotHandleMcpRequest).not.toHaveBeenCalled();
+  });
+
+  test('should not send handle failure telemetry when authentication throws', async () => {
+    mockAuthenticationStrategy.authenticate = jest
+      .fn()
+      .mockRejectedValue(new Error('Auth service unavailable'));
+
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn(),
+      capabilityDefinitions: {} as any,
+    };
+
+    const handler = createPostHandler(deps);
+    const { res, writeHeadSpy } = makeRes();
+    const ctx = makeCtx(makeReq(), res);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(writeHeadSpy).toHaveBeenCalledWith(500, { 'Content-Type': 'application/json' });
+    expect(sendDidUseMcpServer).not.toHaveBeenCalled();
+    expect(sendDidNotAuthenticateMcpRequest).not.toHaveBeenCalled();
+    expect(sendDidNotHandleMcpRequest).not.toHaveBeenCalled();
   });
 
   test('should create ephemeral server + stateless transport, connect and handle request', async () => {
@@ -172,12 +240,45 @@ describe('handlePost', () => {
       definitions: capabilityDefinitions,
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
-      user: { id: 1 },
+      user: { id: 42 },
     });
     expect(StreamableHTTPServerTransport).toHaveBeenCalledWith({ sessionIdGenerator: undefined });
     expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);
     expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
+    expect(sendDidUseMcpServer).toHaveBeenCalledWith(mockStrapi);
     expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+  });
+
+  test('should expose the authenticated user and mcp audit source on ctx.state', async () => {
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn().mockReturnValue({
+        mcpServer: {
+          connect: jest.fn().mockResolvedValue(undefined),
+          close: jest.fn().mockResolvedValue(undefined),
+        },
+        registries: {},
+      }),
+      capabilityDefinitions: {} as any,
+    };
+
+    const { StreamableHTTPServerTransport } = jest.requireMock(
+      '@modelcontextprotocol/sdk/server/streamableHttp.js'
+    );
+    StreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler(deps);
+    const ctx = makeCtx(makeReq(), { headersSent: false } as unknown as ServerResponse);
+
+    await handler(ctx, () => Promise.resolve());
+
+    // user (id 42), not credentials (id 7) — the actor is the token owner.
+    expect(ctx.state.user).toEqual({ id: 42 });
+    expect(ctx.state.auditSource).toBe('mcp');
   });
 
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {
@@ -300,6 +401,7 @@ describe('handlePost', () => {
       );
       expect(writeHeadSpy).toHaveBeenCalledWith(500, { 'Content-Type': 'application/json' });
       expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+      expect(sendDidNotHandleMcpRequest).toHaveBeenCalledWith(mockStrapi, 'error');
     });
 
     test('should return INTERNAL_ERROR when mcpServer.connect throws', async () => {
@@ -338,6 +440,7 @@ describe('handlePost', () => {
       );
       expect(writeHeadSpy).toHaveBeenCalledWith(500, { 'Content-Type': 'application/json' });
       expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+      expect(sendDidNotHandleMcpRequest).toHaveBeenCalledWith(mockStrapi, 'error');
     });
 
     test('should handle non-Error exceptions', async () => {
@@ -375,6 +478,78 @@ describe('handlePost', () => {
         expect.objectContaining({ error: 'Unknown error' })
       );
       expect(writeHeadSpy).toHaveBeenCalledWith(500, { 'Content-Type': 'application/json' });
+      expect(sendDidNotHandleMcpRequest).toHaveBeenCalledWith(mockStrapi, 'error');
+    });
+
+    test('should record usage and handle failure telemetry when an authenticated request fails', async () => {
+      const mockMcpServer = {
+        connect: jest.fn().mockRejectedValue(new Error('Connect failed')),
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const createServerWithRegistries = jest.fn().mockReturnValue({
+        mcpServer: mockMcpServer,
+        registries: {},
+      });
+
+      const { StreamableHTTPServerTransport } = jest.requireMock(
+        '@modelcontextprotocol/sdk/server/streamableHttp.js'
+      );
+      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+
+      const deps: McpHandlerDependencies = {
+        strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
+        config: mockConfig,
+        createServerWithRegistries,
+        capabilityDefinitions: {} as any,
+      };
+
+      const handler = createPostHandler(deps);
+      const { res } = makeRes();
+      const ctx = makeCtx(makeReq(), res);
+
+      await handler(ctx, () => Promise.resolve());
+
+      expect(sendDidUseMcpServer).toHaveBeenCalledWith(mockStrapi);
+      expect(sendDidNotHandleMcpRequest).toHaveBeenCalledWith(mockStrapi, 'error');
+      expect(sendDidNotAuthenticateMcpRequest).not.toHaveBeenCalled();
+    });
+
+    test('should classify timeout failures', async () => {
+      const mockMcpServer = {
+        connect: jest
+          .fn()
+          .mockRejectedValue(new Error("Operation 'mcpServer.connect' timed out after 30000ms")),
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const createServerWithRegistries = jest.fn().mockReturnValue({
+        mcpServer: mockMcpServer,
+        registries: {},
+      });
+
+      const { StreamableHTTPServerTransport } = jest.requireMock(
+        '@modelcontextprotocol/sdk/server/streamableHttp.js'
+      );
+      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+
+      const deps: McpHandlerDependencies = {
+        strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
+        config: mockConfig,
+        createServerWithRegistries,
+        capabilityDefinitions: {} as any,
+      };
+
+      const handler = createPostHandler(deps);
+      const { res, writeHeadSpy } = makeRes();
+      const ctx = makeCtx(makeReq(), res);
+
+      await handler(ctx, () => Promise.resolve());
+
+      expect(writeHeadSpy).toHaveBeenCalledWith(500, { 'Content-Type': 'application/json' });
+      expect(sendDidNotHandleMcpRequest).toHaveBeenCalledWith(mockStrapi, 'timeout');
     });
   });
 });

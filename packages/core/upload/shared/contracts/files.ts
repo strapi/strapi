@@ -234,7 +234,25 @@ export declare namespace CreateFile {
 }
 
 /**
- * POST /upload/unstable/stream - Stream upload files with partial success support
+ * POST /upload/files - Upload a single file
+ *
+ * Accepts one file per request (multipart `files` + `fileInfo`) and returns the
+ * single created `File`. Does not run inline AI metadata generation.
+ */
+export declare namespace UploadFile {
+  export interface Request {
+    body: FormData;
+  }
+  export interface Response {
+    data: File;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * POST /upload/actions/upload-from-urls - Stream upload files with partial success support
+ *
+ * Still used by the URL upload flow (`uploadFromUrls`).
  */
 export declare namespace CreateFilesStream {
   export interface FileUploadError {
@@ -251,7 +269,7 @@ export declare namespace CreateFilesStream {
 }
 
 /**
- * POST /upload/unstable/stream - SSE streaming event types
+ * POST /upload/actions/upload-from-urls - SSE streaming event types
  *
  * The endpoint streams Server-Sent Events as each file is processed.
  * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
@@ -329,9 +347,9 @@ export declare namespace BulkUpdateFiles {
 }
 
 /**
- * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ * GET /upload/ai-metadata-jobs/pending-count - Get count of images without metadata
  */
-export declare namespace GetAIMetadataCount {
+export declare namespace GetAIMetadataPendingCount {
   export interface Request {
     query: {};
   }
@@ -346,9 +364,9 @@ export declare namespace GetAIMetadataCount {
 }
 
 /**
- * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ * POST /upload/ai-metadata-jobs - Create a backfill job over every image missing metadata
  */
-export declare namespace GenerateAIMetadata {
+export declare namespace CreateAIMetadataJob {
   export interface Request {
     body: {};
   }
@@ -364,6 +382,35 @@ export declare namespace GenerateAIMetadata {
           message: string;
         };
     error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /upload/actions/generate-ai-metadata - Generate AI metadata for selected files
+ *
+ * Synchronous (no job): generates and persists alt text / caption for the given
+ * files and reports the outcome per file. Non-images are `skipped`; ids that no
+ * longer exist and files whose generation failed are reported as `error` rather
+ * than failing the whole request.
+ */
+export declare namespace GenerateAIMetadata {
+  export type FileStatus = 'success' | 'skipped' | 'error';
+
+  export interface FileResult {
+    id: number;
+    status: FileStatus;
+    error?: string;
+  }
+
+  export interface Request {
+    body: {
+      fileIds: number[];
+    };
+  }
+
+  export interface Response {
+    data: FileResult[];
+    error?: errors.ApplicationError | errors.ValidationError;
   }
 }
 

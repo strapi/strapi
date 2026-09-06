@@ -27,6 +27,14 @@ export const actionTypes = {
   'permission.create': 'Create permission',
   'permission.update': 'Update permission',
   'permission.delete': 'Delete permission',
+  'release.create': 'Create release',
+  'release.update': 'Update release',
+  'release.delete': 'Delete release',
+  'release.trigger': 'Trigger release',
+  'release.entry.add': 'Add entry to release',
+  'release.entry.update': 'Change entry on release',
+  'release.entry.remove': 'Remove entry from release',
+  'release.settings.update': 'Update release settings',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {

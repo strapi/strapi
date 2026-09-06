@@ -8,8 +8,8 @@
  */
 
 export const sanitizeRouteForSerialization = ({
-  request,
-  response,
+  request: _request,
+  response: _response,
   ...rest
 }: Record<string, unknown>) => rest as Record<string, unknown>;
 

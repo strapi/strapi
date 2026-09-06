@@ -15,7 +15,7 @@ type TransformWithContentType = (
  * DP disabled -> Used mostly for parsing relations, so there is not a need for a default.
  */
 const setStatusToDraft: TransformWithContentType = (contentType, params) => {
-  if (!contentTypes.hasDraftAndPublish(contentType) && params.status) {
+  if (!contentTypes.hasDraftAndPublish(contentType)) {
     return params;
   }
 

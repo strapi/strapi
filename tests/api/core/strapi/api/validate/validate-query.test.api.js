@@ -650,6 +650,9 @@ describe('Core API - Validate', () => {
             ],
             ['isActive $eq', { updatedBy: { isActive: true } }],
             ['blocked $eq', { updatedBy: { blocked: false } }],
+            // GHSA-9xg4-3qfm-9w8f: a column-qualified key must not slip past the private
+            // field check the way the plain attribute name does.
+            ['t1.password $startsWith', { updatedBy: { 't1.password': { $startsWith: '$2' } } }],
           ])('Returns 400 on updatedBy.%s filter (authenticated)', async (_label, filters) => {
             const res = await rq.get('/api/documents', { qs: { filters } });
             expect(res.status).toEqual(400);
@@ -665,6 +668,9 @@ describe('Core API - Validate', () => {
             ],
             ['isActive $eq', { updatedBy: { isActive: true } }],
             ['blocked $eq', { updatedBy: { blocked: false } }],
+            // GHSA-9xg4-3qfm-9w8f: a column-qualified key must not slip past the private
+            // field check the way the plain attribute name does.
+            ['t1.password $startsWith', { updatedBy: { 't1.password': { $startsWith: '$2' } } }],
           ])('Returns 400 on updatedBy.%s filter (unauthenticated)', async (_label, filters) => {
             const res = await publicRq.get('/documents', { qs: { filters } });
             expect(res.status).toEqual(400);
@@ -716,6 +722,13 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
+            // GHSA-rjg2-95x7-8qmx: `where` is the database layer's own filter key and must
+            // not be accepted from a request. It is silently ignored rather than rejected,
+            // so the defence is that the response is identical to the baseline.
+            [
+              'where on a private relation field',
+              { where: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
           ])(
             'do not affect the response (authenticated) - %s',
             async (_label, unrecognizedParams) => {
@@ -736,6 +749,13 @@ describe('Core API - Validate', () => {
               { customFilter: { relation: { field: { $startsWith: 'x' } } } },
             ],
             ['plain param', { unknownKey: 'value' }],
+            // GHSA-rjg2-95x7-8qmx: `where` is the database layer's own filter key and must
+            // not be accepted from a request. It is silently ignored rather than rejected,
+            // so the defence is that the response is identical to the baseline.
+            [
+              'where on a private relation field',
+              { where: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
           ])(
             'do not affect the response (unauthenticated) - %s',
             async (_label, unrecognizedParams) => {
@@ -749,6 +769,35 @@ describe('Core API - Validate', () => {
               );
             }
           );
+        });
+
+        describe('Internal-only query params', () => {
+          // GHSA-495j-h493-42q2: `lookup` is used internally by the document service for
+          // draft/publish and i18n scoping. Accepting it from a request would let a caller
+          // reach fields the sanitizers never see, so the document service rejects any
+          // request carrying it outright, whatever the value. Asserted as a 400 rather than
+          // with the shape-equality pattern above, because rejection is the defence here.
+          it.each([
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            ['lookup on a public field', { lookup: { name: 'test' } }],
+          ])('Returns 400 on %s (authenticated)', async (_label, qs) => {
+            const res = await rq.get('/api/documents', { qs });
+            expect(res.status).toEqual(400);
+          });
+
+          it.each([
+            [
+              'lookup on a private relation field',
+              { lookup: { updatedBy: { password: { $startsWith: '$2' } } } },
+            ],
+            ['lookup on a public field', { lookup: { name: 'test' } }],
+          ])('Returns 400 on %s (unauthenticated)', async (_label, qs) => {
+            const res = await publicRq.get('/documents', { qs });
+            expect(res.status).toEqual(400);
+          });
         });
       });
     });

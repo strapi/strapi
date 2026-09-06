@@ -11,7 +11,7 @@ import type {
   IDestinationProviderTransferResults,
   IMetadata,
   ProviderType,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';

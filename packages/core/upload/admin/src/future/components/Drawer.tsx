@@ -65,25 +65,39 @@ const slideLeftFromRightOut = keyframes`
 
 interface DrawerContainerProps {
   $animationDirection?: DrawerBodyProps['animationDirection'];
+  $width?: string;
+  $maxHeight?: string;
 }
 
 const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   flex-direction: column;
   position: fixed;
   bottom: 0;
+  /* Mobile: full-bleed sheet. Anchoring to the right at a fixed width left a
+     dead gutter on every phone wider than the panel, and the panel only filled
+     the screen once the viewport happened to be narrower than it. Below the
+     medium breakpoint the panel is the screen; medium+ restores the
+     right-anchored rail. */
+  left: 0;
   right: 0;
+  width: 100%;
   padding: ${({ theme }) => theme.spaces[2]};
   max-width: 100%;
-  /* Sit at the overlay layer (300): above the page/navigation, but below
-     popovers (500) and tooltips (1000) rendered from descendant components
-     (e.g. the asset details SingleSelect) so they surface above the panel, and
-     below dialog content (modal, 310) so confirmation dialogs — e.g. the
-     unsaved-changes <Blocker> — render on top of the drawer rather than behind
-     it. */
-  z-index: ${({ theme }) => theme.zIndices.overlay};
+  /* Sit just below the overlay token (300) so that:
+     - popovers (500) and tooltips (1000) rendered from descendant components
+       surface above the drawer panel,
+     - AlertDialog overlays (300) and contents (310) opened from inside the
+       drawer (e.g. the asset details "delete" confirm) cover the drawer. */
+  z-index: 200;
   overflow: hidden;
-  width: ${({ width }) => width ?? '400px'};
-  max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};
+  /* dvh, not vh: anchored to the bottom, a 100vh cap on mobile (visual
+     viewport < 100vh under the URL bar) would push the drawer top off-screen. */
+  max-height: ${({ $maxHeight }) => $maxHeight ?? '100dvh'};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: auto;
+    width: ${({ $width }) => $width ?? '400px'};
+  }
 
   &:focus {
     outline: none;
@@ -130,8 +144,19 @@ const CollapsibleContent = styled(Box)<CollapsibleContentProps>`
   transition: grid-template-rows 0.3s ease-in-out;
 
   > div {
-    overflow: ${({ $isVisible }) => ($isVisible ? 'auto' : 'hidden')};
+    overflow: hidden;
     min-height: 0;
+  }
+
+  /* The scroll area wraps its children in a div styled inline as
+     display: table, min-width: 100%. A table box grows to its content, so a
+     single unbreakable string (a long file name) widens it past the scrollport
+     and the panel gains a horizontal scrollbar — with nothing left to clamp the
+     row, the name never truncates. Overriding to a block box makes the
+     scrollport the width again, which is what the vertical-only list wants.
+     Inline styles, hence the important. */
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
   }
 `;
 
@@ -145,22 +170,52 @@ const CloseIconButton = styled(IconButton)`
  * Drawer.Body
  * -----------------------------------------------------------------------------------------------*/
 
-interface DrawerBodyProps extends FlexProps {
+type PointerDownOutsideHandler = NonNullable<Dialog.DialogContentProps['onPointerDownOutside']>;
+
+/** Vetoes an outside interaction that would otherwise dismiss the drawer. */
+const keepOpen = (event: { preventDefault: () => void }) => event.preventDefault();
+
+interface DrawerBodyProps extends Omit<FlexProps, 'width' | 'maxHeight'> {
   animationDirection?: 'up' | 'left';
+  /** Width of the panel from the medium breakpoint up. Mobile is always full-bleed. */
+  width?: string;
+  /** Cap on the panel height. Defaults to the dynamic viewport height. */
+  maxHeight?: string;
+  /**
+   * Opt in to dismiss-on-outside-click. Omitted, an outside pointer press never
+   * closes the drawer — it must be closed explicitly, as long-running panels
+   * like the upload progress dialog need. Passed, the handler can still veto
+   * individual presses via `event.preventDefault()`. Content rendered from
+   * inside the panel but portaled elsewhere (DS dialogs, popovers, tooltips)
+   * never counts as outside — Radix reads the React tree, not the DOM.
+   */
+  onPointerDownOutside?: PointerDownOutsideHandler;
   children: React.ReactNode;
 }
 
 const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
-  ({ animationDirection, children, ...props }, ref) => (
+  (
+    { animationDirection, width, maxHeight, onPointerDownOutside = keepOpen, children, ...props },
+    ref
+  ) => (
     <Dialog.Content
       ref={ref}
       forceMount
       asChild
-      onPointerDownOutside={(e) => e.preventDefault()}
-      onInteractOutside={(e) => e.preventDefault()}
+      onPointerDownOutside={onPointerDownOutside}
+      // Non-modal, so focus legitimately moves outside (tabbing past the last
+      // field); only a pointer press should ever dismiss.
+      onFocusOutside={keepOpen}
       data-animation-direction={animationDirection}
     >
-      <DrawerContainer $animationDirection={animationDirection} {...props}>
+      {/* width/maxHeight go through transient props so the DS Flex never emits a
+          competing `width` rule that would outrank the mobile full-bleed one. */}
+      <DrawerContainer
+        $animationDirection={animationDirection}
+        $width={width}
+        $maxHeight={maxHeight}
+        {...props}
+      >
         <DrawerContent>{children}</DrawerContent>
       </DrawerContainer>
     </Dialog.Content>

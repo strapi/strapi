@@ -84,6 +84,11 @@
     },
     "favoriteTreat": {
       "type": "string"
+    },
+    "related": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::dog.dog"
     }
   }
 }

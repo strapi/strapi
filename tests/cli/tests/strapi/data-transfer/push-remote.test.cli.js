@@ -13,7 +13,6 @@
  * Helpers: tests/utils/cli-transfer-remote-e2e/
  */
 
-const { spawn } = require('child_process');
 const coffee = require('coffee');
 const execa = require('execa');
 
@@ -25,6 +24,8 @@ const {
   getSeedUploadSignature,
   jestSuiteTimeoutMs,
   seedTransferTestMedia,
+  startRemoteStrapiProcess,
+  stopRemoteStrapiProcess,
   waitForHttpOk,
 } = require('../../../../utils/cli-transfer-remote-e2e');
 // eslint-disable-next-line import/extensions
@@ -68,15 +69,7 @@ describe('strapi transfer push — local to remote (generated media)', () => {
     const localFilesAfterSeed = countUploadFiles(localPath);
     expect(localFilesAfterSeed).toBeGreaterThan(0);
 
-    remoteChild = spawn('npm', ['run', '-s', 'start'], {
-      cwd: remotePath,
-      env: {
-        ...process.env,
-        PORT: REMOTE_PORT,
-        HOST: '127.0.0.1',
-      },
-      stdio: 'ignore',
-    });
+    remoteChild = startRemoteStrapiProcess(remotePath, { port: REMOTE_PORT });
 
     const base = `http://127.0.0.1:${REMOTE_PORT}`;
     await waitForHttpOk(`${base}/admin`);
@@ -88,13 +81,7 @@ describe('strapi transfer push — local to remote (generated media)', () => {
   });
 
   afterAll(async () => {
-    if (remoteChild && !remoteChild.killed) {
-      remoteChild.kill('SIGTERM');
-      await new Promise((r) => setTimeout(r, 2000));
-      if (!remoteChild.killed) {
-        remoteChild.kill('SIGKILL');
-      }
-    }
+    await stopRemoteStrapiProcess(remoteChild);
   });
 
   it('pushes upload files to remote (counts + Strapi content hashes match)', async () => {

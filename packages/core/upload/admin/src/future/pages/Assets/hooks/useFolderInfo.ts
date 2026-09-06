@@ -33,12 +33,12 @@ export const useFolderInfo = (currentFolderId: number | null): FolderInfo => {
     return { title: homeLabel, itemCount: rootAssetsData?.pagination?.total ?? 0 };
   }
 
-  if (isLoading) {
-    return { title: homeLabel, itemCount: 0 };
+  if (isLoading || !currentFolder) {
+    return { title: '', itemCount: 0 };
   }
 
   return {
-    title: currentFolder?.name ?? homeLabel,
-    itemCount: currentFolder?.files?.count ?? 0,
+    title: currentFolder.name,
+    itemCount: currentFolder.files?.count ?? 0,
   };
 };

@@ -1,7 +1,7 @@
 import jsonLogic from 'json-logic-js';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
-export const ConditionSchema = z.object({
+const ConditionSchema = z.object({
   dependsOn: z.string().min(1),
   operator: z.enum(['is', 'isNot']),
   value: z.union([z.string(), z.number(), z.boolean()]),
@@ -60,8 +60,10 @@ export function createRulesEngine(): RulesEngine {
   ): boolean => {
     try {
       return jsonLogic.apply(condition, data);
-    } catch (err: any) {
-      throw new Error(`Invalid condition: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+
+      throw new Error(`Invalid condition: ${message}`);
     }
   };
 

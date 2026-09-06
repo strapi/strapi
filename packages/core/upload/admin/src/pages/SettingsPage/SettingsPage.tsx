@@ -29,7 +29,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
 import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
-import { GetAIMetadataCount, GenerateAIMetadata } from '../../../../shared/contracts/files';
+import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
 import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
@@ -165,12 +165,14 @@ export const SettingsPage = () => {
   const isAIAvailable = useAIAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataCount.Response['data'],
-    GetAIMetadataCount.Response['error']
+    GetAIMetadataPendingCount.Response['data'],
+    GetAIMetadataPendingCount.Response['error']
   >(
     ['ai-metadata-count'],
     async () => {
-      const { data } = await get('/upload/actions/generate-ai-metadata/count');
+      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+        '/upload/ai-metadata-jobs/pending-count'
+      );
       return data;
     },
     {
@@ -198,7 +200,10 @@ export const SettingsPage = () => {
     UpdateSettings.Request['body']
   >(
     async (body) => {
-      const { data } = await put('/upload/settings', body);
+      const { data } = await put<UpdateSettings.Response['data'], UpdateSettings.Request['body']>(
+        '/upload/settings',
+        body
+      );
 
       return data;
     },
@@ -211,10 +216,10 @@ export const SettingsPage = () => {
           message: formatMessage({ id: 'notification.form.success.fields' }),
         });
       },
-      onError(err: any) {
+      onError(err) {
         toggleNotification({
           type: 'danger',
-          message: err.message || formatMessage({ id: 'notification.error' }),
+          message: err?.message ?? formatMessage({ id: 'notification.error' }),
         });
       },
     }
@@ -226,12 +231,15 @@ export const SettingsPage = () => {
   });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
-    GenerateAIMetadata.Response['data'],
-    GenerateAIMetadata.Response['error'],
+    CreateAIMetadataJob.Response['data'],
+    CreateAIMetadataJob.Response['error'],
     void
   >(
     async () => {
-      const { data } = await post('/upload/actions/generate-ai-metadata', {});
+      const { data } = await post<
+        CreateAIMetadataJob.Response['data'],
+        CreateAIMetadataJob.Request['body']
+      >('/upload/ai-metadata-jobs', {});
       return data;
     },
     {

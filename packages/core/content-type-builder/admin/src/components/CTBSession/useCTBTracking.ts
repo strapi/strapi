@@ -4,6 +4,11 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useCTBSession } from './useCTBSession';
 
+type TrackUsageWithDynamicEvent = (
+  event: string,
+  properties: Record<string, unknown>
+) => ReturnType<ReturnType<typeof useTracking>['trackUsage']>;
+
 /**
  * Hook that provides tracking functionality with automatic CTB session ID inclusion.
  * This version accepts arbitrary event names (string) to allow feature-specific
@@ -21,13 +26,14 @@ export const useCTBTracking = () => {
   const trackUsage = useCallback(
     (event: string, properties?: Record<string, unknown>) => {
       const enhancedProperties = {
-        ...(properties ?? {}),
+        ...properties,
         ctbSessionId: sessionId,
       };
 
-      // Forward to original implementation. Casts are necessary because
-      // originalTrackUsage has strict overloads for known event names.
-      return (originalTrackUsage as any)(event, enhancedProperties as any);
+      // The admin tracking API is typed for declared events, but CTB emits extension events too.
+      const trackDynamicEvent = originalTrackUsage as unknown as TrackUsageWithDynamicEvent;
+
+      return trackDynamicEvent(event, enhancedProperties);
     },
     [originalTrackUsage, sessionId]
   );

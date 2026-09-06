@@ -215,9 +215,15 @@ export const titleHandler = (
   }, 0);
 };
 
+type FileToInsert = {
+  alt: string;
+  url: string;
+  mime: string;
+};
+
 export const insertFile = (
   editor: MutableRefObject<CodeMirror.EditorFromTextArea>,
-  files: any[]
+  files: FileToInsert[]
 ) => {
   let { line } = editor.current.getCursor();
   const { ch } = editor.current.getCursor();

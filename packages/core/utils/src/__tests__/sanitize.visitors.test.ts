@@ -420,6 +420,139 @@ describe('Sanitize visitors util', () => {
     });
   });
 
+  /**
+   * The scope decision memo is keyed on the request's `auth` object, so the first entity
+   * of a response populates it and every entity after that reads the cached answer. These
+   * tests pin that the cached answer is still applied, because the failure mode this memo
+   * could introduce is a restricted relation being stripped from the first entity of a
+   * list and surviving on the rest.
+   *
+   * Driven through `traverseEntity` rather than by calling the visitor directly, so the
+   * memo is exercised the way a real sanitized response exercises it.
+   */
+  describe('removeRestrictedRelations - scope decisions across a list of entities', () => {
+    const restrictedSchema = {
+      kind: 'collectionType',
+      info: { singularName: 'article', pluralName: 'articles' },
+      options: {},
+      attributes: {
+        title: { type: 'string' },
+        secretRelation: { type: 'relation', relation: 'oneToOne', target: 'api::secret.secret' },
+      },
+    } as any;
+
+    const secretModel = {
+      kind: 'collectionType',
+      info: { singularName: 'secret', pluralName: 'secrets' },
+      attributes: { name: { type: 'string' } },
+    } as any;
+
+    const getModelWithSecret = (uid: string) =>
+      uid === 'api::secret.secret' ? secretModel : getModel(uid);
+
+    const makePage = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        title: `entity-${i}`,
+        secretRelation: { name: `secret-${i}` },
+      }));
+
+    // `global.strapi` is assigned without being restored, matching the other suites here.
+    // The test setup installs a setter that mutates whatever it is given, so assigning the
+    // previous value back (commonly `undefined`) throws.
+
+    test('strips the restricted relation from every entity in the page, not just the first', async () => {
+      const verify = jest.fn().mockRejectedValue(new Error('Forbidden'));
+      global.strapi = { auth: { verify } } as any;
+
+      // One visitor instance for the whole response, matching how sanitizeOutput builds it
+      // once per request. A per-entity instance would not share the memo at all.
+      const auth = { strategy: 'api-token', credentials: null };
+      const visitor = visitors.removeRestrictedRelations(auth);
+
+      const [first, ...rest] = makePage(3);
+
+      // The first entity is sanitized on its own so its decision is definitely written to
+      // the memo before the others read it. Sanitizing the whole page concurrently does
+      // not exercise the cache at all: every branch calls `verify` before any of them has
+      // written a decision, so the read path this memo introduces is never taken.
+      const sanitizedFirst = await traverseEntity(
+        visitor,
+        { schema: restrictedSchema, getModel: getModelWithSecret },
+        first
+      );
+
+      const sanitizedRest = await Promise.all(
+        rest.map((entity) =>
+          traverseEntity(
+            visitor,
+            { schema: restrictedSchema, getModel: getModelWithSecret },
+            entity
+          )
+        )
+      );
+
+      const sanitized = [sanitizedFirst, ...sanitizedRest];
+
+      expect(sanitized).toHaveLength(3);
+      sanitized.forEach((entity, i) => {
+        expect(entity).not.toHaveProperty('secretRelation');
+        expect(entity).toHaveProperty('title', `entity-${i}`);
+      });
+    });
+
+    test('keeps the relation on every entity when the scope is allowed', async () => {
+      const verify = jest.fn().mockResolvedValue(undefined);
+      global.strapi = { auth: { verify } } as any;
+
+      const auth = { strategy: 'api-token', credentials: null };
+      const visitor = visitors.removeRestrictedRelations(auth);
+
+      const sanitized = await Promise.all(
+        makePage(3).map((entity) =>
+          traverseEntity(
+            visitor,
+            { schema: restrictedSchema, getModel: getModelWithSecret },
+            entity
+          )
+        )
+      );
+
+      sanitized.forEach((entity, i) => {
+        expect(entity).toHaveProperty('secretRelation');
+        expect(entity).toHaveProperty('title', `entity-${i}`);
+      });
+    });
+
+    test('a denial cached from one entity does not leak access to later entities', async () => {
+      // Sequential rather than concurrent, so the first traversal has definitely written
+      // its decision to the memo before the others read it. This is the exact ordering the
+      // memo makes possible and the one a per-call check could never hit.
+      const verify = jest.fn().mockRejectedValue(new Error('Forbidden'));
+      global.strapi = { auth: { verify } } as any;
+
+      const auth = { strategy: 'api-token', credentials: null };
+      const visitor = visitors.removeRestrictedRelations(auth);
+
+      const results = [];
+      for (const entity of makePage(4)) {
+        results.push(
+          // eslint-disable-next-line no-await-in-loop
+          await traverseEntity(
+            visitor,
+            { schema: restrictedSchema, getModel: getModelWithSecret },
+            entity
+          )
+        );
+      }
+
+      results.forEach((entity) => expect(entity).not.toHaveProperty('secretRelation'));
+
+      // The point of the memo: the scope was resolved once and reused, rather than
+      // re-verified (and re-thrown) for all four entities.
+      expect(verify).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('strictParams visitor - removes fields not in schema', () => {
     const ctx = { schema: articleModel, getModel };
 

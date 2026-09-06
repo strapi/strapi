@@ -4,8 +4,10 @@ import type { Context } from 'koa';
 
 export type McpAdminTokenAbility = Ability;
 
+export type McpAuthFailureReason = 'missing_token' | 'invalid_token';
+
 export type McpAdminTokenAuthResult =
-  | { authenticated: false; error?: Error }
+  | { authenticated: false; reason: McpAuthFailureReason; error?: Error }
   | {
       authenticated: true;
       credentials: { id: Data.ID };
@@ -34,7 +36,7 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
     const token = extractBearerToken(ctx);
 
     if (token === null) {
-      return { authenticated: false };
+      return { authenticated: false, reason: 'missing_token' };
     }
 
     const authResult = (await strapi.admin.services['api-token-admin'].authenticateAdminToken(
@@ -42,7 +44,11 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
     )) as McpAdminTokenAuthResult;
 
     if (authResult.authenticated === false) {
-      return authResult;
+      return {
+        authenticated: false,
+        reason: 'invalid_token',
+        error: authResult.error,
+      };
     }
 
     return {

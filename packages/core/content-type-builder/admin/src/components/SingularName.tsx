@@ -5,15 +5,15 @@ import { useIntl } from 'react-intl';
 
 import { nameToSlug } from '../utils/nameToSlug';
 
-import type { IntlLabel } from '../types';
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface SingularNameProps {
   description?: IntlLabel | null;
   error?: string | null;
   intlLabel: IntlLabel;
-  modifiedData: Record<string, any>;
+  modifiedData: { displayName?: string };
   name: string;
-  onChange: (value: { target: { name: string; value: string } }) => void;
+  onChange: FormChangeHandler<string>;
   value?: string | null;
 }
 

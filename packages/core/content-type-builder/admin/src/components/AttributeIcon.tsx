@@ -73,12 +73,12 @@ type AttributeIconProps = {
 export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIconProps) => {
   const getCustomField = useStrapiApp('AttributeIcon', (state) => state.customFields.get);
 
-  let Compo: any = iconByTypes[type];
+  let Compo = iconByTypes[type];
 
   if (customField) {
     const customFieldObject = getCustomField(customField);
-    const icon = customFieldObject?.icon;
-    if (icon) {
+    const icon = customFieldObject?.icon as ComponentType<SVGProps<SVGSVGElement>> | undefined;
+    if (icon !== undefined) {
       Compo = icon;
     }
   }

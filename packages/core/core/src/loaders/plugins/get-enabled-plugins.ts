@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
-import { getUserPluginsConfig } from './get-user-plugins-config';
+import { getUserPluginsConfig, PluginDeclaration } from './get-user-plugins-config';
 
 interface PluginMeta {
   enabled: boolean;
@@ -19,12 +18,6 @@ type PluginMetas = Record<string, PluginMeta>;
 interface PluginInfo {
   name: string;
   kind: string;
-}
-
-interface PluginDeclaration {
-  enabled: boolean;
-  resolve: string;
-  isModule: boolean;
 }
 
 /**
@@ -71,7 +64,7 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
     } else {
       try {
         pathToPlugin = dirname(require.resolve(declaration.resolve));
-      } catch (e) {
+      } catch {
         pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
         if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
@@ -135,7 +128,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
   const declaredPlugins: PluginMetas = {};
   const userPluginsConfig = await getUserPluginsConfig();
 
-  _.forEach(userPluginsConfig, (declaration, pluginName) => {
+  for (const [pluginName, declaration] of Object.entries(userPluginsConfig)) {
     validatePluginName(pluginName);
 
     declaredPlugins[pluginName] = {
@@ -155,7 +148,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
         declaredPlugins[pluginName].packageInfo = packageInfo;
       }
     }
-  });
+  }
 
   const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);
   const installedPluginsNotAlreadyUsed = pickBy(

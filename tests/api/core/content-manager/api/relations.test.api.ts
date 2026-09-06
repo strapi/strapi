@@ -14,10 +14,14 @@ const data = {
 let id1;
 let id2;
 let id3;
+let id4;
+let id5;
 
 let docid1;
 let docid2;
 let docid3;
+let docid4;
+let docid5;
 
 const testCases = [
   ['documentId object format ([{ documentId: "123f" }, { documentId: "54ed" }])', 'docIdObject'],
@@ -203,18 +207,26 @@ describe('Relations', () => {
     const createdProduct1 = await createEntry('product', { name: 'Skate' });
     const createdProduct2 = await createEntry('product', { name: 'Candle' });
     const createdProduct3 = await createEntry('product', { name: 'Mug' });
+    const createdProduct4 = await createEntry('product', { name: 'Book' });
+    const createdProduct5 = await createEntry('product', { name: 'Lamp' });
 
     data.products.push(createdProduct1.data);
     data.products.push(createdProduct2.data);
     data.products.push(createdProduct3.data);
+    data.products.push(createdProduct4.data);
+    data.products.push(createdProduct5.data);
 
     docid1 = data.products[0].documentId;
     docid2 = data.products[1].documentId;
     docid3 = data.products[2].documentId;
+    docid4 = data.products[3].documentId;
+    docid5 = data.products[4].documentId;
 
     id1 = data.products[0].id;
     id2 = data.products[1].id;
     id3 = data.products[2].id;
+    id4 = data.products[3].id;
+    id5 = data.products[4].id;
   });
 
   afterAll(async () => {
@@ -881,6 +893,154 @@ describe('Relations', () => {
         expect(updatedShop.products_mm).toMatchObject(expectedRelations);
         expect(updatedShop.products_mw).toMatchObject(expectedRelations);
         expect(updatedShop.products_om).toMatchObject(expectedRelations);
+      });
+
+      test('Reorder a relation before one that is disconnected in the same call', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            myCompo: {
+              compo_products_mw: { connect: manyRelations },
+            },
+          },
+          ['myCompo']
+        );
+
+        // Move id2 before id1, and remove id1 in the same request.
+        // id1 is both the disconnect target and the position reference for the
+        // connect item, so it must not crash and id2 should end up where id1 was.
+        const relationToChange =
+          mode === 'idObject'
+            ? [{ id: id2, position: { before: id1 } }]
+            : [{ documentId: docid2, position: { before: docid1 } }];
+        const relationToRemove = mode === 'idObject' ? [{ id: id1 }] : [{ documentId: docid1 }];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_om: { connect: relationToChange, disconnect: relationToRemove },
+          products_mm: { connect: relationToChange, disconnect: relationToRemove },
+          products_mw: { connect: relationToChange, disconnect: relationToRemove },
+          myCompo: {
+            id: createdShop.data.myCompo.id,
+            compo_products_mw: { connect: relationToChange, disconnect: relationToRemove },
+          },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id2 }, { id: id3 }]
+            : [{ documentId: docid2 }, { documentId: docid3 }];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_om).toMatchObject(expectedRelations);
+      });
+
+      test('Rejects strict reorder before a non-related id even if it is also disconnected', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
+        const createdShop = await createEntry('shop', {
+          name: 'Cazotte Shop',
+          products_mw: { connect: manyRelations },
+        });
+
+        const relationToChange =
+          mode === 'idObject'
+            ? [{ id: id1, position: { before: id3 } }]
+            : [{ documentId: docid1, position: { before: docid3 } }];
+        const relationToRemove = mode === 'idObject' ? [{ id: id3 }] : [{ documentId: docid3 }];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_mw: { connect: relationToChange, disconnect: relationToRemove },
+        });
+
+        expect(updatedEntry.error).toBeDefined();
+        expect(updatedEntry.error.status).toBe(400);
+      });
+
+      test('Preserves order for multiple connects around a disconnected relation', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
+        const createdShop = await createEntry('shop', {
+          name: 'Cazotte Shop',
+          products_mw: { connect: manyRelations },
+        });
+
+        const relationToChange =
+          mode === 'idObject'
+            ? [
+                { id: id4, position: { before: id2 } },
+                { id: id5, position: { after: id2 } },
+              ]
+            : [
+                { documentId: docid4, position: { before: docid2 } },
+                { documentId: docid5, position: { after: docid2 } },
+              ];
+        const relationToRemove = mode === 'idObject' ? [{ id: id2 }] : [{ documentId: docid2 }];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_mw: { connect: relationToChange, disconnect: relationToRemove },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id1 }, { id: id4 }, { id: id5 }, { id: id3 }]
+            : [
+                { documentId: docid1 },
+                { documentId: docid4 },
+                { documentId: docid5 },
+                { documentId: docid3 },
+              ];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      });
+
+      test('Does not delete a relation that is reconnected with position metadata', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
+        const createdShop = await createEntry('shop', {
+          name: 'Cazotte Shop',
+          products_mw: { connect: manyRelations },
+        });
+
+        const relationToChange =
+          mode === 'idObject'
+            ? [{ id: id2, position: { end: true } }]
+            : [{ documentId: docid2, position: { end: true } }];
+        const relationToRemove = mode === 'idObject' ? [{ id: id2 }] : [{ documentId: docid2 }];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_mw: { connect: relationToChange, disconnect: relationToRemove },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id1 }, { id: id3 }, { id: id2 }]
+            : [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
       });
 
       test('Invalid reorder with non-strict mode should not give an error', async () => {

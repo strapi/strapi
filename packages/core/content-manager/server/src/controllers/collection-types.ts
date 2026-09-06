@@ -17,6 +17,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -75,7 +76,7 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', publicationFilter: 'never-published-document' },
+  draft: { status: 'draft', publicationFilter: 'never-published' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
@@ -190,7 +191,9 @@ const removeStatusFromSort = (sort: unknown): unknown => {
   }
 
   if (typeof sort === 'object' && sort !== null) {
-    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    const rest = { ...(sort as Record<string, unknown>) };
+    delete rest.status;
+
     return Object.keys(rest).length ? rest : undefined;
   }
 
@@ -981,8 +984,11 @@ export default {
       }
     }
 
-    // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    // We filter out documentsIds that maybe doesn't exist in a specific locale.
+    // With draft & publish, findLocales returns a row per publication state, so the
+    // same documentId can appear twice (draft + published). Deduplicate to avoid
+    // deleting (and running document service middleware for) the same document twice.
+    const localeDocumentsIds = [...new Set(documentLocales.map((document) => document.documentId))];
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 
@@ -1017,7 +1023,23 @@ export default {
       });
 
       if (!entity) {
-        return ctx.notFound();
+        // The document may simply not have a version in the requested locale yet.
+        // Check every existing locale/status version before deciding it truly doesn't exist —
+        // findLocales returns one row per locale AND per publication state.
+        const versions = await documentManager.findLocales(id, model, { populate });
+
+        if (versions.length === 0) {
+          return ctx.notFound();
+        }
+
+        if (
+          permissionChecker.requiresEntity.read() &&
+          versions.every((version) => permissionChecker.cannot.read(version))
+        ) {
+          return ctx.forbidden();
+        }
+
+        return { data: EMPTY_DRAFT_RELATION_COUNTS };
       }
 
       if (permissionChecker.cannot.read(entity)) {
@@ -1025,10 +1047,10 @@ export default {
       }
     }
 
-    const number = await documentManager.countDraftRelations(id, model, locale);
+    const counts = await documentManager.countDraftRelations(id, model, locale);
 
     return {
-      data: number,
+      data: counts,
     };
   },
 

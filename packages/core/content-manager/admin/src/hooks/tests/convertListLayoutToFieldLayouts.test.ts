@@ -71,10 +71,11 @@ describe('convertListLayoutToFieldLayouts', () => {
 
   const columns = ['user'];
 
-  it('throws when configurations and schemas are omitted but list metadata defines mainField', () => {
-    expect(() =>
-      convertListLayoutToFieldLayouts(columns, contentTypeAttributes, listMetadatas)
-    ).toThrow(TypeError);
+  it('falls back to id when configurations and schemas are omitted but list metadata defines mainField', () => {
+    const result = convertListLayoutToFieldLayouts(columns, contentTypeAttributes, listMetadatas);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].mainField).toEqual({ name: 'id', type: 'custom' });
   });
 
   it('resolves component mainField when configurations, component schemas, and content-type schemas are provided', () => {

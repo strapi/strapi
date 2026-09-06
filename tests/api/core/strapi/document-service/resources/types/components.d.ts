@@ -82,8 +82,8 @@ export interface MixedContentNestedMediaWrapper extends Schema.Component {
 }
 
 declare module '@strapi/types' {
-  export module Shared {
-    export interface Components {
+  export namespace Public {
+    export interface ComponentSchemas {
       'article.comp': ArticleComp;
       'article.dz-comp': ArticleDzComp;
       'article.dz-other-comp': ArticleDzOtherComp;

@@ -10,7 +10,7 @@ tags:
 The RBAC permission system relies under the hood on the [CASL](https://casl.js.org) library.
 
 A `permission` is the combination of an `action`, a `subject`, some `properties` and some `conditions`.
-The logic is that: a user can perform an `action` on a `subject` and some of its `properties` only if it its role has the `permission` and if the `conditions` associated to the permission pass.
+The logic is that: a user can perform an `action` on a `subject` and some of its `properties` only if its role has the `permission` and if the `conditions` associated to the permission pass.
 The creation and edition of permissions is done through the [edit page](http://localhost:1337/admin/settings/roles/2) of a role by checking or unchecking checkboxes.
 
 Example 1: the action `update` can be applied on the subject `article` and property `title`, this result is the permission to update the title of an article.
@@ -19,11 +19,11 @@ Example 2: the condition `isCreator` added to the previous permission will ensur
 
 Example 3: the action `access the Marketplace page` has no subject to apply on. The permission only contains the action `admin::marketplace.read`.
 
-The permissions are attached to a role. Each role can have different permissions independentely. There is no inheritance system.
+The permissions are attached to a role. Each role can have different permissions independently. There is no inheritance system.
 To check if an action can be performed by a user, frontend and backend simply retrieve the list of the permissions associated with the user's roles and check if it contains the permission associated with the action about to be performed. The backend also runs the associated conditions.
 
 :::tip
-If a user has several role, the user will be allowed to perform an action if at least one of its roles is allowed to perform it.
+If a user has several roles, the user will be allowed to perform an action if at least one of its roles is allowed to perform it.
 :::
 
 ## Actions

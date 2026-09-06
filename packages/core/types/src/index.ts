@@ -1,4 +1,4 @@
-import { Strapi } from './core';
+import type { Strapi } from './core';
 
 export type * as Core from './core';
 export type * as Data from './data';

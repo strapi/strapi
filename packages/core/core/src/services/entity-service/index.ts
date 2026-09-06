@@ -226,7 +226,10 @@ export default (ctx: {
     const newService = _.mapValues(
       oldService,
       (method, methodName: keyof Modules.EntityService.EntityService) =>
-        async function (this: Modules.EntityService.EntityService, ...args: []) {
+        async function transformDatabaseErrors(
+          this: Modules.EntityService.EntityService,
+          ...args: []
+        ) {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {

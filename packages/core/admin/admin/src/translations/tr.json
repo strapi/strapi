@@ -548,7 +548,7 @@
   "Settings.application.customization.menu-logo.carousel-hint": "Ana navigasyondaki logoyu değiştirin",
   "Settings.application.customization.size-details": "Maks boyut: {dimension}×{dimension}, Maks dosya boyutu: {size}KB",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Topluluk Sürümü} other {Kurumsal Sürüm}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Koltuk ekle} other {Satış ekibiyle iletişime geç}}",
+  "Settings.application.ee.admin-seats.add-seats": "Aboneliği yönet",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limitte: daha fazla kullanıcı davet etmek için koltuk ekleyin",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.content-history.description": "İçeriğinizin yaşam döngüsünün her adımında daha fazla kontrol elde edin.",

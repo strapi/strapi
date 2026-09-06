@@ -37,8 +37,8 @@ const InlineCode = styled.code`
   background-color: ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
   padding: ${({ theme }) => `0 ${theme.spaces[2]}`};
-  font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
-    monospace;
+  font-family:
+    'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
   color: inherit;
 `;
 

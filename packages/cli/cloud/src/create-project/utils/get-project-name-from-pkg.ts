@@ -5,7 +5,7 @@ export async function getProjectNameFromPackageJson(ctx: CLIContext): Promise<st
   try {
     const packageJson = (await loadPkg(ctx)) as PackageJson;
     return packageJson.name || 'my-strapi-project';
-  } catch (e) {
+  } catch {
     return 'my-strapi-project';
   }
 }

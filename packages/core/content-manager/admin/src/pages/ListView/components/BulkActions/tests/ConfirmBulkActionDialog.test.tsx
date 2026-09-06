@@ -92,9 +92,8 @@ describe('ConfirmDialogPublishAll', () => {
     expect(await findByText('Are you sure you want to publish these entries?')).toBeInTheDocument();
   });
 
-  // TODO skipping these tests for now as there is a bug with the draft relation count that will be worked on separately
   // see RFC "Count draft relations" in Notion
-  it.skip('should show the warning message with just 1 draft relation and 2 entries', async () => {
+  it('should show the warning message with just 1 draft relation and 2 entries', async () => {
     server.use(
       http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
@@ -117,7 +116,7 @@ describe('ConfirmDialogPublishAll', () => {
     within(getByRole('alertdialog')).getByText(/1 relation out of 2 entries is/i);
   });
 
-  it.skip('should show the warning message with 2 draft relations and 2 entries', async () => {
+  it('should show the warning message with 2 draft relations and 2 entries', async () => {
     server.use(
       http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',

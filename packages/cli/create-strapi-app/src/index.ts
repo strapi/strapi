@@ -167,12 +167,14 @@ async function run(args: string[]): Promise<void> {
     devDependencies: {},
     dependencies: {
       '@strapi/strapi': version,
+      '@strapi/database': version,
       '@strapi/plugin-users-permissions': version,
       '@strapi/plugin-cloud': version,
       // third party
       react: '^18.0.0',
       'react-dom': '^18.0.0',
-      'react-router-dom': '^6.0.0',
+      // Match @strapi/* peer ranges (^6.30.3) so npm peer resolution stays clean
+      'react-router-dom': '^6.30.3',
       'styled-components': '^6.0.0',
     },
     shouldCreateGrowthSsoTrial,

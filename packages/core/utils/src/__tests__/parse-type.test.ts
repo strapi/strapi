@@ -1,5 +1,5 @@
 import format from 'date-fns/format';
-import parseType from '../parse-type';
+import parseType, { isBooleanLike } from '../parse-type';
 
 describe('parseType', () => {
   describe('boolean', () => {
@@ -21,6 +21,49 @@ describe('parseType', () => {
       expect(parseType({ type: 'boolean', value: 0 })).toBe(false);
 
       expect(() => parseType({ type: 'boolean', value: 12 })).toThrow();
+    });
+  });
+
+  describe('isBooleanLike', () => {
+    // The predicate exists so callers can ask this question without catching an error.
+    // Its whole contract is that it agrees with parseType, so assert that directly
+    // rather than restating the accepted values: a change to one and not the other
+    // cannot then pass silently.
+    const cases: unknown[] = [
+      true,
+      false,
+      'true',
+      't',
+      '1',
+      1,
+      'false',
+      'f',
+      '0',
+      0,
+      'test',
+      '',
+      12,
+      -1,
+      1.5,
+      NaN,
+      null,
+      undefined,
+      {},
+      [],
+      'TRUE',
+      'yes',
+    ];
+
+    it.each(cases.map((value) => [value]))('agrees with parseType for %p', (value) => {
+      let parseAccepts: boolean;
+      try {
+        parseType({ type: 'boolean', value });
+        parseAccepts = true;
+      } catch {
+        parseAccepts = false;
+      }
+
+      expect(isBooleanLike(value)).toBe(parseAccepts);
     });
   });
 

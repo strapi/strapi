@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { rm } from 'node:fs/promises';
+
 import chalk from 'chalk';
 import semver from 'semver';
 import { packageManager } from '@strapi/utils';
@@ -324,6 +327,50 @@ export class Upgrader implements UpgraderInterface {
       stdout: this.logger?.stdout,
       stderr: this.logger?.stderr,
     });
+
+    await this.clearStrapiAdminViteCacheAfterUpgrade();
+  }
+
+  /**
+   * Removes only `node_modules/.strapi/vite` (Vite `cacheDir` for the admin panel). Generated
+   * cache — not user source. Optionally gated by `confirm` when the CLI passes a callback so
+   * users know the next `strapi develop` may spend longer once re-optimizing dependencies.
+   */
+  private async clearStrapiAdminViteCacheAfterUpgrade(): Promise<void> {
+    if (this.isDry) {
+      return;
+    }
+
+    const shouldClear =
+      typeof this.confirmationCallback === 'function' &&
+      (await this.confirm(
+        [
+          'Remove the Strapi admin dev cache',
+          chalk.dim('(node_modules/.strapi/vite)'),
+          '?',
+          'Recommended after dependency changes to avoid stale bundles;',
+          'the next',
+          chalk.bold('strapi develop'),
+          'may take longer once while Vite re-optimizes.',
+        ].join(' ')
+      ));
+
+    if (!shouldClear) {
+      this.logger?.info?.(
+        'Skipped clearing admin dev cache. If the admin panel misbehaves after upgrading, delete node_modules/.strapi/vite and run develop again.'
+      );
+      return;
+    }
+
+    const cachePath = path.join(this.project.cwd, 'node_modules', '.strapi', 'vite');
+
+    try {
+      await rm(cachePath, { recursive: true, force: true });
+      this.logger?.debug?.(`Removed Strapi admin Vite cache at ${cachePath}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger?.warn?.(`Could not remove Strapi admin Vite cache at ${cachePath}: ${message}`);
+    }
   }
 
   private async runCodemods(range: Version.Range): Promise<void> {
@@ -388,6 +435,12 @@ export const upgraderFactory = (
 
   if (semver.eq(semverTarget, project.strapiVersion)) {
     throw new Error(`The project is already using v${semverTarget}`);
+  }
+
+  if (semver.lt(semverTarget, project.strapiVersion)) {
+    throw new Error(
+      `The target version v${semverTarget} must be greater than the current version v${project.strapiVersion}`
+    );
   }
 
   return new Upgrader(project, semverTarget, npmPackage);

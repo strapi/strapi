@@ -5,7 +5,7 @@ import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+import { ASSET_SOURCES } from '../../../constants';
 import { getTrad, rawFileToAsset } from '../../../utils';
 
 import type { File } from '../../../../../shared/contracts/files';
@@ -45,21 +45,14 @@ export const EmptyStateAsset = ({
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
-      const files = e.dataTransfer.files;
-      const assets: FileWithoutIdHash[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
-
-          assets.push(asset);
-        }
-      }
+      const files = Array.from(e.dataTransfer.files);
+      const assets = await Promise.all(
+        files.map((file) => rawFileToAsset(file, ASSET_SOURCES.Computer))
+      );
 
       onDropAsset(assets);
     }

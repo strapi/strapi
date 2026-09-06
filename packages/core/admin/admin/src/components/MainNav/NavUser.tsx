@@ -72,6 +72,10 @@ export const NavUser = ({
     navigate(redirection);
   };
 
+  const handleSessions = () => {
+    navigate('/me/sessions');
+  };
+
   const handleLogout = () => {
     const redirection = '/auth/login';
     logout();
@@ -103,7 +107,9 @@ export const NavUser = ({
               {user?.email}
             </StyledTypography>
             <BadgeWrapper>
-              {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+              {user?.roles?.map((role) => (
+                <Badge key={role.id}>{role.name}</Badge>
+              ))}
             </BadgeWrapper>
           </UserInfo>
 
@@ -113,6 +119,13 @@ export const NavUser = ({
             {formatMessage({
               id: 'global.profile.settings',
               defaultMessage: 'Profile settings',
+            })}
+          </Menu.Item>
+
+          <Menu.Item onSelect={handleSessions}>
+            {formatMessage({
+              id: 'global.sessions.active-devices',
+              defaultMessage: 'Active devices',
             })}
           </Menu.Item>
 

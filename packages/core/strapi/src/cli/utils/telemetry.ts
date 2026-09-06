@@ -15,7 +15,7 @@ export const sendEvent = async (event: string, uuid: string, installId?: any) =>
         'X-Strapi-Event': event,
       },
     });
-  } catch (e) {
+  } catch {
     // ...
   }
 };

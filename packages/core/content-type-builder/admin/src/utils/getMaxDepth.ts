@@ -22,7 +22,7 @@ export const getChildrenMaxDepth = (
   componentUid: Internal.UID.Component,
   components: Array<ComponentWithChildren>,
   currentDepth = 0
-) => {
+): number => {
   const component = findComponent(componentUid, components);
 
   // If the component doesn't exist or has no child components, return the current depth.

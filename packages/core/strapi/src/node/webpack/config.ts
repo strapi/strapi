@@ -1,5 +1,4 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -15,8 +14,10 @@ import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
+import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   return {
@@ -34,6 +35,10 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
+        // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable
+        // optional/transitive CodeMirror packages are skipped
+        ...Object.fromEntries(buildSingletonAliasEntries()),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
@@ -176,6 +181,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
 };
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   const baseConfig = await resolveBaseConfig(ctx);

@@ -9,5 +9,5 @@ declare global {
       };
     };
   }
-  declare module '*?raw';
+  module '*?raw';
 }

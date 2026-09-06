@@ -8,7 +8,7 @@ export type Entity = {
   [key: string]: unknown;
 } | null;
 
-type Options = { isDraft?: boolean; locale?: string };
+type Options = { isDraft?: boolean; locale?: string; strictRelations?: boolean };
 
 /**
  * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.

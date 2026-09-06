@@ -31,13 +31,22 @@ import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponents
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
 
-import type { ContentTypes, ContentType, Components } from '../../types';
+import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { Internal } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
 }
+
+type SchemaResponse = {
+  data: {
+    components: Components;
+    contentTypes: ContentTypes;
+  };
+};
+
+type ReservedNamesResponse = DataManagerContextValue['reservedNames'];
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
@@ -104,8 +113,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   getDataRef.current = async () => {
     try {
       const [schemaResponse, reservedNamesResponse] = await Promise.all([
-        fetchClient.get(`/content-type-builder/schema`),
-        fetchClient.get(`/content-type-builder/reserved-names`),
+        fetchClient.get<SchemaResponse>(`/content-type-builder/schema`),
+        fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
       const { components, contentTypes } = schemaResponse.data.data;
@@ -306,16 +315,36 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     sortedContentTypesList,
     isLoading,
     addAttribute(payload) {
-      dispatch(actions.addAttribute(payload));
+      dispatch(
+        actions.addAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editAttribute(payload) {
-      dispatch(actions.editAttribute(payload));
+      dispatch(
+        actions.editAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     addCustomFieldAttribute(payload) {
-      dispatch(actions.addCustomFieldAttribute(payload));
+      dispatch(
+        actions.addCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editCustomFieldAttribute(payload) {
-      dispatch(actions.editCustomFieldAttribute(payload));
+      dispatch(
+        actions.editCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));

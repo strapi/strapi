@@ -62,6 +62,35 @@ describe('Scheduling service', () => {
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(2);
     });
 
+    it('should cancel the previous job when the release is created with a numeric id and updated with a string id', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findOne: jest.fn().mockReturnValue({ id: 1 }),
+          })),
+        },
+      };
+
+      const oldJobDate = new Date();
+      const newJobDate = new Date(oldJobDate.getTime() + 1000);
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+
+      // create() and syncFromDatabase() pass the numeric database row id
+      const scheduledJobs = await schedulingService.set(1, oldJobDate);
+      expect(scheduledJobs.size).toBe(1);
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
+
+      // the update controller passes ctx.params.id, which is always a string
+      await schedulingService.set('1', newJobDate);
+
+      expect(strapiMock.cron.remove).toHaveBeenCalledWith('publishRelease_1');
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(2);
+      expect(scheduledJobs.size).toBe(1);
+    });
+
     it('should create a new job', async () => {
       const strapiMock = {
         ...baseStrapiMock,

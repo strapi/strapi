@@ -13,6 +13,7 @@ import {
   cloneDeep,
 } from 'lodash/fp';
 
+import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
 
 const ORDERS = { asc: 'asc', desc: 'desc' };
@@ -28,7 +29,12 @@ const isNestedSorts = (value: unknown): value is string =>
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
+/** Meaningless sort arrays (e.g. qs `sort[]` → `[null]`) must not be walked as `{ '0': null }`. */
+const isMeaninglessSortArray = (value: unknown): value is unknown[] =>
+  Array.isArray(value) && !hasSort(value);
+
 const sort = traverseFactory()
+  .intercept(isMeaninglessSortArray, async (_visitor, _options, sort) => sort)
   .intercept(
     // String with chained sorts (foo,bar,foobar) => split, map(recurse), then recompose
     isNestedSorts,

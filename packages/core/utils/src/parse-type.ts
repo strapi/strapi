@@ -42,7 +42,7 @@ const parseDate = (value: unknown) => {
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 
     throw new Error(`Invalid format, expected an ISO compatible date`);
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid format, expected an ISO compatible date`);
   }
 };
@@ -64,7 +64,7 @@ const parseDateTimeOrTimestamp = (value: unknown) => {
     if (dates.isValid(milliUnixDate)) return milliUnixDate;
 
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
   }
 };
@@ -87,6 +87,38 @@ export interface ParseTypeOptions<T extends keyof TypeMap> {
   forceCast?: boolean;
 }
 
+/**
+ * Hoisted out of `parseBoolean`, which allocated both of these arrays on every call.
+ * Query validation calls it once per node of the populate tree of every request, which
+ * made those two throwaway allocations one of the largest single sources of GC pressure
+ * in a read: 4.3% of on-CPU time in a profiled LaunchPad run.
+ */
+const TRUTHY_INPUTS: ReadonlyArray<string | number> = ['true', 't', '1', 1];
+const FALSY_INPUTS: ReadonlyArray<string | number> = ['false', 'f', '0', 0];
+
+/**
+ * Whether `parseBoolean` would accept this value without `forceCast`.
+ *
+ * Exists so callers can ask the question without using an exception as control flow.
+ * Query validation asked it once per populate key by calling `parseType` inside a
+ * `try`/`catch`, so every key that is not a boolean keyword — which is nearly all of
+ * them — built an Error and captured a stack trace only to discard it. Stack capture is
+ * the expensive part, and it made this the second hottest function in a read.
+ *
+ * Kept in lockstep with `parseBoolean`'s accept conditions below.
+ */
+const isBooleanLike = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return true;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return TRUTHY_INPUTS.includes(value) || FALSY_INPUTS.includes(value);
+  }
+
+  return false;
+};
+
 const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean => {
   const { forceCast = false } = options;
 
@@ -95,11 +127,11 @@ const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
-    if (['true', 't', '1', 1].includes(value)) {
+    if (TRUTHY_INPUTS.includes(value)) {
       return true;
     }
 
-    if (['false', 'f', '0', 0].includes(value)) {
+    if (FALSY_INPUTS.includes(value)) {
       return false;
     }
   }
@@ -141,4 +173,5 @@ const parseType = <Type extends keyof TypeMap>(options: ParseTypeOptions<Type>):
   }
 };
 
+export { isBooleanLike };
 export default parseType;

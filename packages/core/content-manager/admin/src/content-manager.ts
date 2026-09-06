@@ -163,9 +163,12 @@ class ContentManagerPlugin {
   addEditViewSidePanel(panels: PanelComponent[]): void;
   addEditViewSidePanel(panels: DescriptionReducer<PanelComponent> | PanelComponent[]) {
     if (Array.isArray(panels)) {
+      validateDescriptionItems(panels, 'addEditViewSidePanel', 'panels');
       this.editViewSidePanels = [...this.editViewSidePanels, ...panels];
     } else if (typeof panels === 'function') {
-      this.editViewSidePanels = panels(this.editViewSidePanels);
+      const result = panels(this.editViewSidePanels);
+      validateDescriptionItems(result, 'addEditViewSidePanel', 'panels');
+      this.editViewSidePanels = result;
     } else {
       throw new Error(
         `Expected the \`panels\` passed to \`addEditViewSidePanel\` to be an array or a function, but received ${getPrintableType(
@@ -181,9 +184,12 @@ class ContentManagerPlugin {
     actions: DescriptionReducer<DocumentActionComponent> | DocumentActionComponent[]
   ) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addDocumentAction', 'actions');
       this.documentActions = [...this.documentActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.documentActions = actions(this.documentActions);
+      const result = actions(this.documentActions);
+      validateDescriptionItems(result, 'addDocumentAction', 'actions');
+      this.documentActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addDocumentAction\` to be an array or a function, but received ${getPrintableType(
@@ -199,9 +205,12 @@ class ContentManagerPlugin {
     actions: DescriptionReducer<HeaderActionComponent> | HeaderActionComponent[]
   ) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addDocumentHeaderAction', 'actions');
       this.headerActions = [...this.headerActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.headerActions = actions(this.headerActions);
+      const result = actions(this.headerActions);
+      validateDescriptionItems(result, 'addDocumentHeaderAction', 'actions');
+      this.headerActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received ${getPrintableType(
@@ -215,9 +224,12 @@ class ContentManagerPlugin {
   addBulkAction(actions: BulkActionComponent[]): void;
   addBulkAction(actions: DescriptionReducer<BulkActionComponent> | BulkActionComponent[]) {
     if (Array.isArray(actions)) {
+      validateDescriptionItems(actions, 'addBulkAction', 'actions');
       this.bulkActions = [...this.bulkActions, ...actions];
     } else if (typeof actions === 'function') {
-      this.bulkActions = actions(this.bulkActions);
+      const result = actions(this.bulkActions);
+      validateDescriptionItems(result, 'addBulkAction', 'actions');
+      this.bulkActions = result;
     } else {
       throw new Error(
         `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
@@ -284,6 +296,29 @@ const getPrintableType = (value: unknown): string => {
   }
 
   return nativeType;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * validateDescriptionItems
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description Descriptions must be functions (they're rendered as components so hooks can be used
+ * inside them), not plain objects. Passing a plain object crashes deep inside
+ * `DescriptionComponentRenderer` with an unhelpful `description is not a function` error, so we
+ * validate eagerly here to fail fast with a clear message pointing at the offending API call.
+ */
+const validateDescriptionItems = (items: unknown[], apiName: string, argName: string): void => {
+  items.forEach((item, index) => {
+    if (typeof item !== 'function') {
+      throw new Error(
+        `Expected every item in the \`${argName}\` array passed to \`${apiName}\` to be a function that returns a description object, but received ${getPrintableType(
+          item
+        )} at index ${index}. Did you forget to wrap it in a function, e.g. \`() => ({ ...yourAction })\`?`
+      );
+    }
+  });
 };
 
 export { ContentManagerPlugin };

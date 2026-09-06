@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
 import type { Core } from '@strapi/types';
 
-import { Transaction, TransactionCallback } from '../../types/utils';
+import { Transaction, TransactionCallback } from '../types/utils';
 
 export const createTransaction = (strapi: Core.Strapi): Transaction => {
   const fns: { fn: TransactionCallback; uuid: string }[] = [];

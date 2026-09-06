@@ -164,7 +164,7 @@ interface PanelProps extends Pick<PanelDescription, 'title'> {
   children: React.ReactNode;
 }
 
-const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
+const Panel = React.forwardRef<HTMLElement, PanelProps>(({ children, title }, ref) => {
   const isDesktop = useIsDesktop();
 
   return (

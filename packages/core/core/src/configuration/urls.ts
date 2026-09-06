@@ -22,7 +22,7 @@ export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = f
   if (serverUrl.startsWith('http')) {
     try {
       serverUrl = _.trim(new URL(serverConfig.url).toString(), '/');
-    } catch (e) {
+    } catch {
       throw new Error(
         'Invalid server url config. Make sure the url defined in server.js is valid.'
       );
@@ -40,7 +40,7 @@ export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = f
   if (adminUrl.startsWith('http')) {
     try {
       adminUrl = _.trim(new URL(adminUrl).toString(), '/');
-    } catch (e) {
+    } catch {
       throw new Error('Invalid admin url config. Make sure the url defined in server.js is valid.');
     }
   } else {

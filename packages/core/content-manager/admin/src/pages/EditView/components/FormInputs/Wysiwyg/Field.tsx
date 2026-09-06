@@ -19,9 +19,16 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
   type: Schema.Attribute.RichText['type'];
 }
 
+type SelectedAsset = {
+  alternativeText?: string | null;
+  name: string;
+  url: string;
+  mime: string;
+};
+
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   ({ hint, disabled, label, name, placeholder, required, labelAction }, forwardedRef) => {
-    const field = useField(name);
+    const field = useField<string>(name);
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const editorRef = React.useRef<EditorFromTextArea>(
       null
@@ -41,10 +48,10 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
       setIsExpandMode((prev) => !prev);
     };
 
-    const handleSelectAssets = (files: any[]) => {
+    const handleSelectAssets = (files: SelectedAsset[]) => {
       const formattedFiles = files.map((f) => ({
         alt: f.alternativeText || f.name,
-        url: prefixFileUrlWithBackendUrl(f.url),
+        url: prefixFileUrlWithBackendUrl(f.url) ?? f.url,
         mime: f.mime,
       }));
 
@@ -80,7 +87,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               onChange={field.onChange}
               placeholder={placeholder}
               textareaRef={textareaRef}
-              value={field.value}
+              value={field.value ?? ''}
               ref={forwardedRef}
             />
             {!isExpandMode && !isMobile && <WysiwygFooter onToggleExpand={handleToggleExpand} />}

@@ -14,14 +14,8 @@ import { getTrad } from '../utils';
 
 import type { IntlLabel } from '../types';
 
-interface Description {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
-
 interface DraftAndPublishToggleProps {
-  description?: Description;
+  description?: IntlLabel;
   disabled?: boolean;
   intlLabel: IntlLabel;
   isCreating: boolean;

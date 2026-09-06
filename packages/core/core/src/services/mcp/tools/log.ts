@@ -23,6 +23,7 @@ export const logToolDefinition = makeMcpToolDefinition({
   description: 'Logs a message to the Strapi logger with specified level',
   resolveInputSchema: () => inputSchema,
   resolveOutputSchema: () => outputSchema,
+  telemetry: { source: 'core', name: 'log' },
   devModeOnly: true,
   createHandler:
     (strapi) =>

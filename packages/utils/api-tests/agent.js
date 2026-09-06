@@ -22,10 +22,45 @@ const applyHeadersToRequest = (rq, headers) => {
     }
   }
 
-  const { Authorization, authorization, ...rest } = headers;
+  const { Authorization: _Authorization, authorization: _authorization, ...rest } = headers;
   if (Object.keys(rest).length > 0) {
     rq.set(rest);
   }
+};
+
+const isFileDescriptor = (value) =>
+  value && typeof value === 'object' && 'filename' in value && !Array.isArray(value);
+
+const isReadableFile = (value) =>
+  value && typeof value === 'object' && typeof value.pipe === 'function';
+
+const applyFormDataValue = (rq, field, value) => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => applyFormDataValue(rq, field, item));
+    return;
+  }
+
+  // File attachment: { path, filename } or { value, filename }; optional contentType for multipart part
+  if (isFileDescriptor(value)) {
+    const opts = { filename: value.filename };
+    if (value.contentType !== undefined) {
+      opts.contentType = value.contentType;
+    }
+    if ('path' in value) {
+      rq.attach(field, value.path, opts);
+    } else if ('value' in value) {
+      rq.attach(field, value.value, opts);
+    }
+    return;
+  }
+
+  if (isReadableFile(value)) {
+    rq.attach(field, value);
+    return;
+  }
+
+  // Regular form field (string, number, etc.)
+  rq.field(field, value);
 };
 
 const createAgent = (strapi, initialState = {}) => {
@@ -60,22 +95,7 @@ const createAgent = (strapi, initialState = {}) => {
 
     if (formData) {
       Object.keys(formData).forEach((field) => {
-        const value = formData[field];
-        // File attachment: { path, filename } or { value, filename }; optional contentType for multipart part
-        if (value && typeof value === 'object' && 'filename' in value && !Array.isArray(value)) {
-          const opts = { filename: value.filename };
-          if (value.contentType !== undefined) {
-            opts.contentType = value.contentType;
-          }
-          if ('path' in value) {
-            rq.attach(field, value.path, opts);
-          } else if ('value' in value) {
-            rq.attach(field, value.value, opts);
-          }
-        } else {
-          // Regular form field (string, number, etc.)
-          rq.field(field, value);
-        }
+        applyFormDataValue(rq, field, formData[field]);
       });
     }
 

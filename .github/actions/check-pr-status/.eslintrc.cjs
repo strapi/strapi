@@ -4,11 +4,7 @@
 const config = {
   root: true,
   extends: ['eslint-config-custom/back'],
-  ignorePatterns: [
-    'node_modules/',
-    '.eslintrc.cjs',
-    'dist/',
-  ],
+  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'dist/', 'lint-staged.config.mjs'],
 };
 
 module.exports = config;

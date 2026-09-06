@@ -344,9 +344,9 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   type IdsToDelete = Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 
-  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
-      acc.push({ id, __component });
+  const idsToDelete = allIds.reduce((acc, { id, __component: componentUID }) => {
+    if (!idsToKeep.find((el) => el.id === id && el.__component === componentUID)) {
+      acc.push({ id, __component: componentUID });
     }
 
     return acc;
@@ -354,8 +354,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {
-      const { id, __component } = idToDelete;
-      await deleteComponent(__component, { id });
+      const { id, __component: componentUID } = idToDelete;
+      await deleteComponent(componentUID, { id });
     }
   }
 };
@@ -477,6 +477,115 @@ const deleteComponent = async <TUID extends UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
+interface IComponentIdMapping {
+  uid: UID.Component;
+  oldID: number;
+  newID: number;
+}
+
+/**
+ * Walk the source data and the newly created entity in parallel and collect
+ * the [old ID, new ID] couple of every component instance found in both trees
+ * (components & dynamic zones, including nested ones).
+ *
+ * Unlike a JSON diff, couples are also collected when the ID did not change,
+ * so the result is an exhaustive map of every component instance that was
+ * re-created with the entity.
+ */
+const collectComponentIdMappings = ({
+  data,
+  created,
+  schema,
+  strapi,
+}: {
+  data: any;
+  created: any;
+  schema: Schema.Schema;
+  strapi: Core.Strapi;
+}): IComponentIdMapping[] => {
+  const mappings: IComponentIdMapping[] = [];
+
+  const visitComponent = (uid: UID.Component, oldValue: any, newValue: any) => {
+    if (!_.isObjectLike(oldValue) || !_.isObjectLike(newValue)) {
+      return;
+    }
+
+    if (typeof oldValue.id === 'number' && typeof newValue.id === 'number') {
+      mappings.push({ uid, oldID: oldValue.id, newID: newValue.id });
+    }
+
+    const componentSchema = strapi.getModel(uid);
+
+    // Collect nested components & dynamic zones
+    if (componentSchema) {
+      visitSchema(componentSchema, oldValue, newValue);
+    }
+  };
+
+  const visitSchema = (currentSchema: Schema.Schema, oldData: any, newData: any) => {
+    if (!_.isObjectLike(oldData) || !_.isObjectLike(newData)) {
+      return;
+    }
+
+    const { attributes = {} } = currentSchema;
+
+    for (const [attributeName, attribute] of Object.entries(attributes)) {
+      const oldValue = oldData[attributeName];
+      const newValue = newData[attributeName];
+
+      if (_.isNil(oldValue) || _.isNil(newValue)) {
+        continue;
+      }
+
+      if (attribute.type === 'component') {
+        const { component: componentUID, repeatable = false } = attribute;
+
+        if (repeatable === true) {
+          if (!Array.isArray(oldValue) || !Array.isArray(newValue)) {
+            continue;
+          }
+
+          // Components are created (and thus populated back) in the same
+          // order as the source data, pair them by index
+          const length = Math.min(oldValue.length, newValue.length);
+
+          for (let i = 0; i < length; i += 1) {
+            visitComponent(componentUID, oldValue[i], newValue[i]);
+          }
+        } else {
+          visitComponent(componentUID, oldValue, newValue);
+        }
+      }
+
+      if (attribute.type === 'dynamiczone') {
+        if (!Array.isArray(oldValue) || !Array.isArray(newValue)) {
+          continue;
+        }
+
+        const length = Math.min(oldValue.length, newValue.length);
+
+        for (let i = 0; i < length; i += 1) {
+          const oldItem = oldValue[i];
+          const newItem = newValue[i];
+          const componentUID = oldItem?.__component;
+
+          // Both items must reference the same dynamic zone component for the
+          // ID couple to be meaningful
+          if (!componentUID || (newItem?.__component && newItem.__component !== componentUID)) {
+            continue;
+          }
+
+          visitComponent(componentUID, oldItem, newItem);
+        }
+      }
+    }
+  };
+
+  visitSchema(schema, data, created);
+
+  return mappings;
+};
+
 /**
  * Resolve the component UID of an entity's attribute based
  * on a given path (components & dynamic zones only)
@@ -533,5 +642,6 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
+  collectComponentIdMappings,
   resolveComponentUID,
 };

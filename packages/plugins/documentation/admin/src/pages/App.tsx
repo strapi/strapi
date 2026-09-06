@@ -71,10 +71,6 @@ const App = () => {
       });
   };
 
-  const handleShowConfirmDelete = () => {
-    setShowConfirmDelete(!showConfirmDelete);
-  };
-
   const handleConfirmDelete = async () => {
     if (!versionToDelete) {
       // nothing to delete

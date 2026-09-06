@@ -3,8 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "sourceMap": true
+    "noEmit": false
   },
   "include": ["src"],
-  "exclude": ["**/__tests__/**", "**/cli/**", "./src/types.ts", "dist"]
+  "exclude": ["**/__tests__/**", "./src/types.ts"]
 }

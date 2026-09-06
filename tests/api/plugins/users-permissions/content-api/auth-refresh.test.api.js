@@ -81,13 +81,19 @@ const recreateStrapiInstance = async (config = {}) => {
       if (config.disableRateLimit) {
         s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
       }
-      if (config.enableRoutes) {
-        for (const { route, role } of config.enableRoutes) {
-          await enableAuthRoute(s, route, role);
-        }
-      }
     },
   });
+
+  if (config.enableRoutes) {
+    for (const { route, role } of config.enableRoutes) {
+      await enableAuthRoute(strapi, route, role);
+    }
+  }
+
+  // The previous instance already seeded `internals.user`; remove it before
+  // re-seeding so we don't attempt to create a duplicate (the user service now
+  // goes through the Document Service, which validates uniqueness).
+  await strapi.db.query('plugin::users-permissions.user').deleteMany();
   await createAuthenticatedUser({ strapi, userInfo: internals.user });
 };
 
@@ -105,8 +111,10 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
   });
 
   afterAll(async () => {
-    await strapi.db.query('plugin::users-permissions.user').deleteMany();
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query('plugin::users-permissions.user').deleteMany();
+      await strapi.destroy();
+    }
   });
 
   test('Default (httpOnly=false): returns jwt and refreshToken in JSON, no cookie set', async () => {

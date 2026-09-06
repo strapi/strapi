@@ -146,7 +146,7 @@ const wrapResolvers = ({
         if ((isValidType || hasConfig) && !isAuthDisabled) {
           try {
             await strapi.auth.verify(authContext, authConfig);
-          } catch (error) {
+          } catch {
             throw new ForbiddenError();
           }
         }

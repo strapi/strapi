@@ -12,6 +12,7 @@ import { HOOKS } from '../constants/hooks';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { BaseQueryError } from '../utils/api';
 import { getMainField } from '../utils/attributes';
+import { normalizeContentManagerLayout } from '../utils/layouts/normalizeContentManagerLayout';
 
 import { useContentTypeSchema } from './useContentTypeSchema';
 import {
@@ -117,6 +118,51 @@ type UseDocumentLayout = (model: string) => {
   listViewConversionContext: ListViewConversionContext | null;
 };
 
+type ResolvedLayouts = {
+  edit: EditLayout;
+  list: ListLayout;
+  listViewConversionContext: ListViewConversionContext;
+};
+
+type ResolvedLayoutCacheEntry = {
+  components: ComponentsDictionary;
+  data: LayoutData;
+  model: string;
+  schema?: Schema;
+  schemas: Schema[];
+  value: ResolvedLayouts;
+};
+
+const RESOLVED_LAYOUT_CACHE_LIMIT = 25;
+// Module-level cache keeps resolved layout object identities stable across hook instances
+// when RTK Query returns the same schema/configuration references.
+const resolvedLayoutCache: ResolvedLayoutCacheEntry[] = [];
+
+const getCachedResolvedLayouts = ({
+  components,
+  data,
+  model,
+  schema,
+  schemas,
+}: Omit<ResolvedLayoutCacheEntry, 'value'>) => {
+  return resolvedLayoutCache.find(
+    (entry) =>
+      entry.components === components &&
+      entry.data === data &&
+      entry.model === model &&
+      entry.schema === schema &&
+      entry.schemas === schemas
+  )?.value;
+};
+
+const setCachedResolvedLayouts = (entry: ResolvedLayoutCacheEntry) => {
+  resolvedLayoutCache.unshift(entry);
+
+  if (resolvedLayoutCache.length > RESOLVED_LAYOUT_CACHE_LIMIT) {
+    resolvedLayoutCache.pop();
+  }
+};
+
 /* -------------------------------------------------------------------------------------------------
  * useDocumentLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -192,16 +238,27 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
       return null;
     }
 
-    const edit = formatEditLayout(data, { schemas, schema, components });
-    const list = formatListLayout(data, { schemas, schema, components });
+    const cachedLayouts = getCachedResolvedLayouts({ components, data, model, schema, schemas });
+
+    if (cachedLayouts) {
+      return cachedLayouts;
+    }
+
+    const normalizedData = normalizeContentManagerLayout(data, { schemas, schema, components });
+    const edit = formatEditLayout(normalizedData, { schemas, schema, components });
+    const list = formatListLayout(normalizedData, { schemas, schema, components });
     const listViewConversionContext: ListViewConversionContext = {
-      componentConfigurations: data.components,
+      componentConfigurations: normalizedData.components,
       componentSchemas: components,
       contentTypeSchemas: schemas,
     };
 
-    return { edit, list, listViewConversionContext };
-  }, [data, isLoading, schemas, schema, components]);
+    const layouts = { edit, list, listViewConversionContext };
+
+    setCachedResolvedLayouts({ components, data, model, schema, schemas, value: layouts });
+
+    return layouts;
+  }, [data, isLoading, model, schemas, schema, components]);
 
   React.useEffect(() => {
     if (resolvedLayouts) {

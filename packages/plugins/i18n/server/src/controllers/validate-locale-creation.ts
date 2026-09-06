@@ -34,7 +34,7 @@ const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   let entityLocale;
   try {
     entityLocale = await getValidLocale(locale);
-  } catch (e) {
+  } catch {
     throw new ApplicationError("This locale doesn't exist");
   }
 

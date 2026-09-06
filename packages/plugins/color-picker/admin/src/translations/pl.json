@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "Wybierz dowolny kolor",
+  "color-picker.input.aria-label": "Pole wyboru koloru",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "Kolor",
+  "color-picker.options.advanced.regex": "Wzorzec RegExp",
+  "color-picker.options.advanced.regex.description": "Podaj wyrażenie regularne, aby zwalidować wartość HEX",
+  "color-picker.options.advanced.requiredField": "Pole wymagane",
+  "color-picker.options.advanced.requiredField.description": "Nie będziesz mógł utworzyć wpisu, jeśli to pole jest puste",
+  "color-picker.settings": "Ustawienia",
+  "color-picker.toggle.aria-label": "Przełącznik wyboru koloru",
+  "plugin.description.long": "Pole niestandardowe wyboru koloru utrzymywane przez Strapi. Użyj suwaków nasycenia i odcienia, aby wybrać kolor i zapisać wartość jako ciąg HEX.",
+  "plugin.description.short": "Pole niestandardowe wyboru koloru utrzymywane przez Strapi.",
+  "plugin.name": "Wybór koloru"
+}

@@ -1,7 +1,5 @@
 import { isAllowedContentTypesForRelations } from '../isAllowedContentTypesForRelations';
 
-import type { ContentType } from '../../types';
-
 describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   it('should be falsy if the model is a single type', () => {
     expect(

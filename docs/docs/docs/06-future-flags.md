@@ -8,6 +8,8 @@ To achieve this, we utilize future flags, which provide a way to enable unstable
 
 Future flags can be used for unstable features that have not yet been shipped. So, if you decide to enable an unstable feature (prefixed with `unstable`), please be aware that this feature is likely to be modified or even removed. It's also highly probable that this unstable feature is not fully ready for use; some parts may still be under development or using mock data at the moment.
 
+Once such a feature is complete enough to be tested against real use, its flag is prefixed with `beta` instead. A beta feature is expected to work end to end and its opt-in surface (config key, route, menu entry) is already the one it will ship with, so enabling it does not commit you to a rename later. It may still change before general availability.
+
 Additionally, future flags can be utilized for enabling coming breaking changes in upcoming versions (when prefixed by `vX`, with 'X' being the target version). In this scenario, if you decide to enable a future flag for a breaking change, please consider that you will need to migrate your application to adapt to this breaking change.
 
 ## How to enable a future flag.

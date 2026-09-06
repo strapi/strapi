@@ -1,4 +1,4 @@
-import { Images, WarningCircle } from '@strapi/icons';
+import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
@@ -19,6 +19,13 @@ const name = pluginPkg.strapi.name;
 
 const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
+    /**
+     * The beta Media Library owns `plugins/upload` outright when the flag is on:
+     * the legacy app is not registered at all, so there is exactly one Media
+     * Library entry in the menu and no route to rename at GA.
+     */
+    const isBetaMediaLibrary = window.strapi.future.isEnabled('betaMediaLibrary');
+
     app.addMenuLink({
       to: `plugins/${pluginId}`,
       icon: Images,
@@ -27,13 +34,19 @@ const admin: Plugin.Config.AdminInput = {
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
-      Component: () => {
-        return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
-      },
+      Component: isBetaMediaLibrary
+        ? () => {
+            return import('./future/App').then((mod) => ({
+              default: mod.BetaMediaLibrary,
+            }));
+          }
+        : () => {
+            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+          },
       position: 4,
     });
 
-    if (window.strapi.future.isEnabled('unstableMediaLibrary')) {
+    if (isBetaMediaLibrary) {
       app.addReducers({ uploadProgress: uploadProgressReducer });
 
       app.addComponents([
@@ -42,22 +55,6 @@ const admin: Plugin.Config.AdminInput = {
           Component: UploadProgressDialog,
         },
       ]);
-
-      app.addMenuLink({
-        to: `plugins/unstable-${pluginId}`,
-        icon: WarningCircle,
-        intlLabel: {
-          id: `${pluginId}.plugin.name`,
-          defaultMessage: 'Media Library',
-        },
-        permissions: PERMISSIONS.main,
-        Component: () => {
-          return import('./future/App').then((mod) => ({
-            default: mod.UnstableMediaLibrary,
-          }));
-        },
-        position: 5,
-      });
     }
 
     app.addSettingsLink('global', {

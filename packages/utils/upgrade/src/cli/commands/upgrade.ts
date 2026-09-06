@@ -74,32 +74,41 @@ export const register = (program: Command) => {
 
   // upgrade latest
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Latest,
+    Version.RELEASE_TYPES.Latest,
     'Upgrade to the latest available version of Strapi'
   );
 
   // upgrade major
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Major,
+    Version.RELEASE_TYPES.Major,
     'Upgrade to the next available major version of Strapi'
   );
 
   // upgrade minor
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Minor,
+    Version.RELEASE_TYPES.Minor,
     'Upgrade to the latest minor and patch version of Strapi for the current major'
   );
 
   // upgrade patch
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Patch,
+    Version.RELEASE_TYPES.Patch,
     'Upgrade to latest patch version of Strapi for the current major and minor'
   );
 
   // upgrade to <target>
   program
-    .command('to <target>', { hidden: true })
-    .description('Upgrade to the specified version of Strapi')
+    .command('to')
+    .description('Upgrade to a specific version of Strapi')
+    .argument('<target>', 'Target version', (target) => {
+      if (!isValidSemVer(target)) {
+        throw new InvalidArgumentError(
+          `Invalid target supplied, expected a valid semver but got "${target}"`
+        );
+      }
+
+      return semVerFactory(target);
+    })
     .addOption(projectPathOption)
     .addOption(dryOption)
     .addOption(debugOption)
@@ -119,12 +128,7 @@ export const register = (program: Command) => {
         return semVerFactory(codemodsTarget);
       })
     )
-    .action(async (target: string, options: CLIUpgradeToOptions) => {
-      if (!isValidSemVer(target)) {
-        console.error(`Invalid target supplied, expected a valid semver but got "${target}"`);
-        process.exit(1);
-      }
-
-      return upgrade({ ...options, target: semVerFactory(target) });
+    .action(async (target: Version.SemVer, options: CLIUpgradeToOptions) => {
+      return upgrade({ ...options, target });
     });
 };
