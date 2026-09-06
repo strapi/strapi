@@ -20,6 +20,7 @@ const TRAILING_REFERENCE = /\(#(\d+)\)\s*$/u;
 const MERGE_REFERENCE = /^Merge pull request #(\d+)\b/u;
 
 const SECOND_PARENT_MISMATCH = 'second-parent-mismatch';
+const NOREPLY_ADDRESS = /^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/iu;
 
 /**
  * Reads an anchored pull request number out of a commit subject.
@@ -89,12 +90,62 @@ export function checkSecondParent(
   return integration.parents[1] === headSha ? null : SECOND_PARENT_MISMATCH;
 }
 
-/** Projects the fields the report needs out of a raw pull request payload. */
-export function summarisePull(pull: PullPayload): PullSummary {
+/**
+ * Reads the login out of a GitHub noreply address.
+ *
+ * Both forms are in the history: `login@users.noreply.github.com` and the numbered
+ * `1234567+login@users.noreply.github.com` GitHub hands out today.
+ *
+ * @returns `null` for any address that is not a noreply one, which says nothing either way.
+ */
+export function parseNoreplyLogin(email: string): string | null {
+  const match = NOREPLY_ADDRESS.exec(email ?? '');
+
+  return match?.[1] ?? null;
+}
+
+/**
+ * The display name for a pull request, when the history can vouch for it.
+ *
+ * A squash commit is authored by the contributor, so its `%an` is the name GitHub itself renders.
+ * Two other cases are refused rather than guessed, because a plausible wrong name is worse than a
+ * missing one:
+ *
+ * - a merge commit is authored by whoever pressed merge, and says nothing about who wrote the work;
+ * - a noreply email naming a different login means the squash took someone else's authorship,
+ *   which happens on a pull request written by several people.
+ *
+ * An address that carries no login, a work address for instance, is not evidence against the name.
+ *
+ * @returns `null` when nothing vouches for a name.
+ */
+export function deriveAuthorName(integration: Integration, login: string): string | null {
+  if (integration.parents.length !== 1 || integration.author === '') {
+    return null;
+  }
+
+  const committed = parseNoreplyLogin(integration.email);
+
+  if (committed !== null && login !== '' && committed.toLowerCase() !== login.toLowerCase()) {
+    return null;
+  }
+
+  return integration.author;
+}
+
+/**
+ * Projects the fields the report needs out of a raw pull request payload.
+ *
+ * The integration is passed in because the payload alone cannot answer who wrote the pull request
+ * by name. See {@link deriveAuthorName}.
+ */
+export function summarisePull(pull: PullPayload, integration: Integration): PullSummary {
+  const login = pull.user?.login ?? '';
+
   return {
     number: pull.number,
     title: pull.title ?? '',
-    author: pull.user?.login ?? '',
+    author: { login, name: deriveAuthorName(integration, login) },
     url: pull.html_url ?? '',
     baseRef: pull.base?.ref ?? '',
     headRef: pull.head?.ref ?? '',
@@ -132,7 +183,7 @@ async function resolveBySubject(
     return {
       status: 'resolved',
       basis: 'verified-subject',
-      pull: summarisePull(pull),
+      pull: summarisePull(pull, integration),
       reason: `The subject references #${referenced}, whose merge SHA is this integration.`,
     };
   }
@@ -141,7 +192,7 @@ async function resolveBySubject(
     return {
       status: 'resolved',
       basis: 'second-parent-head',
-      pull: summarisePull(pull),
+      pull: summarisePull(pull, integration),
       reason: `The subject references #${referenced}, whose head is the second parent of this merge.`,
     };
   }
@@ -194,7 +245,7 @@ export async function resolveIntegration(
       ...base,
       status: 'resolved',
       basis: 'exact-merge-sha',
-      pull: summarisePull(first),
+      pull: summarisePull(first, integration),
       warnings: warning === null ? [] : [warning],
       reason: 'Merged into the target base with a merge SHA equal to this integration.',
     };
@@ -285,6 +336,9 @@ export function dedupePullRequests(records: readonly AttributionRecord[]): Attri
 
     return accumulator.set(record.pull.number, {
       ...existing,
+      // The first integration that could vouch for a name keeps it. A later one that could not is
+      // silent about the author, not a retraction of what an earlier one established.
+      author: existing.author.name === null ? record.pull.author : existing.author,
       integrationShas: [...existing.integrationShas, record.sha],
     });
   }, new Map());

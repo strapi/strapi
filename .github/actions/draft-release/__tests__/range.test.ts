@@ -18,8 +18,24 @@ function log(records: readonly (readonly string[])[]): string {
 describe('parseFirstParentLog', () => {
   it('reads one record per integration', () => {
     const stdout = log([
-      ['abc', 'def', 'Alice', '2026-09-05T10:00:00Z', 'fix(upload): a thing (#1)', ''],
-      ['fed', 'cba 999', 'Bob', '2026-09-05T11:00:00Z', 'Merge pull request #2 from strapi/x', ''],
+      [
+        'abc',
+        'def',
+        'Alice',
+        'alice@example.com',
+        '2026-09-05T10:00:00Z',
+        'fix(upload): a thing (#1)',
+        '',
+      ],
+      [
+        'fed',
+        'cba 999',
+        'Bob',
+        'bob@example.com',
+        '2026-09-05T11:00:00Z',
+        'Merge pull request #2 from strapi/x',
+        '',
+      ],
     ]);
 
     assert.deepEqual(parseFirstParentLog(stdout), [
@@ -27,6 +43,7 @@ describe('parseFirstParentLog', () => {
         sha: 'abc',
         parents: ['def'],
         author: 'Alice',
+        email: 'alice@example.com',
         authoredAt: '2026-09-05T10:00:00Z',
         subject: 'fix(upload): a thing (#1)',
         body: '',
@@ -35,6 +52,7 @@ describe('parseFirstParentLog', () => {
         sha: 'fed',
         parents: ['cba', '999'],
         author: 'Bob',
+        email: 'bob@example.com',
         authoredAt: '2026-09-05T11:00:00Z',
         subject: 'Merge pull request #2 from strapi/x',
         body: '',
@@ -48,6 +66,7 @@ describe('parseFirstParentLog', () => {
         'abc',
         'def',
         'Alice',
+        'alice@example.com',
         '2026-09-05T10:00:00Z',
         'feat!: drop node 20',
         'BREAKING CHANGE: gone\n\nmore',

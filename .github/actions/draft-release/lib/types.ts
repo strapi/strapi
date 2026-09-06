@@ -75,10 +75,32 @@ export type StableVersion = {
 export type Integration = {
   sha: string;
   parents: string[];
+  /** The git author name, `%an`. On a squash commit this is the contributor's display name. */
   author: string;
+  /** The git author email, `%ae`. Never leaves this action: it is evidence, not payload. */
+  email: string;
   authoredAt: string;
   subject: string;
   body: string;
+};
+
+/**
+ * Who wrote a pull request.
+ *
+ * A GitHub pull request payload only ever carries a login. Its `user` is the short user object,
+ * which has no display name in it, and asking for one costs a request per distinct contributor.
+ * Git already has the name: a squash commit is authored by the contributor, so `%an` on the
+ * integration commit is the same string GitHub renders next to it.
+ *
+ * The email that comes with it is deliberately not part of this type. It is read to decide whether
+ * the name can be trusted, and then dropped, because the payload is published in a public pull
+ * request body and a work address does not belong there.
+ */
+export type Author = {
+  /** The GitHub username. Empty only when the pull request payload carries no user. */
+  login: string;
+  /** The display name, `null` when no commit in the range can vouch for one. */
+  name: string | null;
 };
 
 /** The fields of a GitHub pull request payload this action reads. */
@@ -98,7 +120,7 @@ export type PullPayload = {
 export type PullSummary = {
   number: number;
   title: string;
-  author: string;
+  author: Author;
   url: string;
   baseRef: string;
   headRef: string;
@@ -109,6 +131,7 @@ export type PullSummary = {
 export type AttributionRecord = {
   sha: string;
   subject: string;
+  /** The commit's own git author name, not the pull request's. `pull.author` is that one. */
   author: string;
   authoredAt: string;
   parents: string[];

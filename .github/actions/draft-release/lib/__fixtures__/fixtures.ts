@@ -20,7 +20,8 @@ export function integration(overrides: Partial<Integration> = {}): Integration {
   return {
     sha: SHA.SQUASH,
     parents: ['1111111111111111111111111111111111111111'],
-    author: 'someone',
+    author: 'Someone Real',
+    email: '4242+someone@users.noreply.github.com',
     authoredAt: '2026-09-05T10:00:00Z',
     subject: 'fix(content-type-builder): default new private fields to not searchable (#27482)',
     body: '',

@@ -41,7 +41,8 @@ function scenario(overrides: Overrides = {}): {
     {
       sha: BACK_MERGE_SHA,
       parents: ['0'.repeat(40), '9'.repeat(40)],
-      author: 'strapi-bot',
+      author: 'Strapi Bot',
+      email: 'strapi-bot@users.noreply.github.com',
       authoredAt: '2026-09-01T10:00:00Z',
       subject: 'chore: release v5.52.3 update develop',
       body: '',
@@ -49,7 +50,8 @@ function scenario(overrides: Overrides = {}): {
     {
       sha: FIX_SHA,
       parents: [BACK_MERGE_SHA],
-      author: 'dev-a',
+      author: 'Dev A',
+      email: '11+dev-a@users.noreply.github.com',
       authoredAt: '2026-09-02T10:00:00Z',
       subject: 'fix(upload): reserve list space for the bulk actions bar (#27509)',
       body: '',
@@ -57,7 +59,8 @@ function scenario(overrides: Overrides = {}): {
     {
       sha: FEAT_SHA,
       parents: [FIX_SHA],
-      author: 'dev-b',
+      author: 'Dev B',
+      email: 'dev-b@strapi.io',
       authoredAt: '2026-09-03T10:00:00Z',
       subject: 'feat(content-releases): record release actions in audit logs (#27436)',
       body: '',
@@ -288,6 +291,18 @@ describe('runDraftRelease', () => {
     });
   });
 
+  it('names every shipping author by display name and login', async () => {
+    const { result } = await run({ dryRun: false });
+
+    assert.deepEqual(
+      result.payload.pullRequests.map((pull) => pull.author),
+      [
+        { login: 'dev-a', name: 'Dev A' },
+        { login: 'dev-b', name: 'Dev B' },
+      ]
+    );
+  });
+
   it('identifies the candidate it just created', async () => {
     const { result } = await run({ dryRun: false });
 
@@ -301,7 +316,7 @@ describe('runDraftRelease', () => {
 
     assert.equal(result.payload.candidate.headSha, result.payload.range.toSha);
     assert.equal(result.payload.candidate.branch, result.branch);
-    assert.equal(result.payload.schemaVersion, 2);
+    assert.equal(result.payload.schemaVersion, 3);
   });
 
   it('reports no pull request for a candidate a dry run only planned', async () => {

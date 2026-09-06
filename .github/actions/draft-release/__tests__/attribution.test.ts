@@ -5,6 +5,8 @@ import {
   assertSupportedMergeMethods,
   checkSecondParent,
   dedupePullRequests,
+  deriveAuthorName,
+  parseNoreplyLogin,
   parseSubjectReference,
   resolveIntegration,
   resolveIntegrations,
@@ -117,12 +119,99 @@ describe('checkSecondParent', () => {
   });
 });
 
+describe('parseNoreplyLogin', () => {
+  it('reads the login out of both noreply forms', () => {
+    assert.equal(parseNoreplyLogin('3693028+Adzouz@users.noreply.github.com'), 'Adzouz');
+    assert.equal(parseNoreplyLogin('Adzouz@users.noreply.github.com'), 'Adzouz');
+  });
+
+  it('says nothing about an address that is not a noreply one', () => {
+    assert.equal(parseNoreplyLogin('ben.irvin@strapi.io'), null);
+    assert.equal(parseNoreplyLogin(''), null);
+  });
+});
+
+describe('deriveAuthorName', () => {
+  it('takes the name off a squash commit, which the contributor authored', () => {
+    assert.equal(
+      deriveAuthorName(
+        integration({ author: 'Nico André', email: '123+nclsndr@users.noreply.github.com' }),
+        'nclsndr'
+      ),
+      'Nico André'
+    );
+  });
+
+  it('matches a login case-insensitively, the way GitHub does', () => {
+    assert.equal(
+      deriveAuthorName(
+        integration({ author: 'Adrien L', email: '3693028+Adzouz@users.noreply.github.com' }),
+        'adzouz'
+      ),
+      'Adrien L'
+    );
+  });
+
+  it('keeps the name when the address carries no login to check it against', () => {
+    assert.equal(
+      deriveAuthorName(
+        integration({ author: 'Ben Irvin', email: 'ben.irvin@strapi.io' }),
+        'innerdvations'
+      ),
+      'Ben Irvin'
+    );
+  });
+
+  it('refuses a merge commit, whose author is whoever pressed merge', () => {
+    assert.equal(
+      deriveAuthorName(
+        integration({
+          author: 'The Merger',
+          email: '1+merger@users.noreply.github.com',
+          parents: ['a'.repeat(40), 'b'.repeat(40)],
+        }),
+        'someone'
+      ),
+      null
+    );
+  });
+
+  it('refuses a squash that took another contributor authorship', () => {
+    assert.equal(
+      deriveAuthorName(
+        integration({ author: 'Co Author', email: '9+co-author@users.noreply.github.com' }),
+        'someone'
+      ),
+      null
+    );
+  });
+
+  it('refuses an empty name rather than reporting one', () => {
+    assert.equal(deriveAuthorName(integration({ author: '', email: '' }), 'someone'), null);
+  });
+});
+
 describe('summarisePull', () => {
+  it('carries the login from the payload and the name from the commit', () => {
+    assert.deepEqual(summarisePull(pull(), integration()).author, {
+      login: 'someone',
+      name: 'Someone Real',
+    });
+  });
+
+  it('keeps the author email out of what gets published', () => {
+    // The payload is embedded in a public pull request body. The email is evidence for the name,
+    // read and dropped, and no summary is allowed to carry it there.
+    const summary = summarisePull(pull(), integration({ email: 'private.address@strapi.io' }));
+
+    assert.equal(JSON.stringify(summary).includes('private.address@strapi.io'), false);
+  });
+
   it('fills every absent field rather than leaking undefined', () => {
-    assert.deepEqual(summarisePull({ number: 1 }), {
+    assert.deepEqual(summarisePull({ number: 1 }, integration({ author: '', email: '' })), {
       number: 1,
       title: '',
-      author: '',
+      author: { login: '', name: null },
       url: '',
       baseRef: '',
       headRef: '',
@@ -282,8 +371,25 @@ describe('resolveIntegrations', () => {
 });
 
 describe('dedupePullRequests', () => {
+  it('keeps the name the first integration that could vouch for one established', () => {
+    const merge = summarisePull(
+      pull({ number: 1 }),
+      integration({ parents: ['a'.repeat(40), 'b'.repeat(40)] })
+    );
+    const squash = summarisePull(pull({ number: 1 }), integration());
+
+    assert.equal(merge.author.name, null);
+
+    const [deduped] = dedupePullRequests([
+      record({ sha: 'a', pull: merge }),
+      record({ sha: 'b', pull: squash }),
+    ]);
+
+    assert.deepEqual(deduped?.author, { login: 'someone', name: 'Someone Real' });
+  });
+
   it('collapses duplicates while keeping every integration SHA', () => {
-    const summary = summarisePull(pull({ number: 1 }));
+    const summary = summarisePull(pull({ number: 1 }), integration());
     const records = [
       record({ sha: 'a', pull: summary }),
       record({ sha: 'b', pull: summary }),

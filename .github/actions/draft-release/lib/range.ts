@@ -6,9 +6,9 @@ export const RECORD_SEPARATOR = '\x1e';
 export const FIELD_SEPARATOR = '\x1f';
 
 /** `%x1f` and `%x1e` make git emit the separators, so no control byte is embedded in this source. */
-export const LOG_FORMAT = ['%H', '%P', '%an', '%aI', '%s', '%b'].join('%x1f') + '%x1e';
+export const LOG_FORMAT = ['%H', '%P', '%an', '%ae', '%aI', '%s', '%b'].join('%x1f') + '%x1e';
 
-const BODY_FIELD_INDEX = 5;
+const BODY_FIELD_INDEX = 6;
 
 /**
  * Parses the first-parent log into integration records.
@@ -28,8 +28,9 @@ export function parseFirstParentLog(stdout: string): Integration[] {
         sha: fields[0] ?? '',
         parents: (fields[1] ?? '').split(' ').filter((parent) => parent !== ''),
         author: fields[2] ?? '',
-        authoredAt: fields[3] ?? '',
-        subject: fields[4] ?? '',
+        email: fields[3] ?? '',
+        authoredAt: fields[4] ?? '',
+        subject: fields[5] ?? '',
         body: fields.slice(BODY_FIELD_INDEX).join(FIELD_SEPARATOR).trim(),
       };
     });

@@ -1,6 +1,7 @@
 import type {
   AttentionRecord,
   AttributedPull,
+  Author,
   BumpClassification,
   BumpKind,
   JournalEntry,
@@ -11,7 +12,7 @@ import type {
   VersionSource,
 } from './types.ts';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 export const BLOCK_START = '<!-- STRAPI_RELEASE_CANDIDATE_START -->';
 export const BLOCK_END = '<!-- STRAPI_RELEASE_CANDIDATE_END -->';
 
@@ -56,6 +57,18 @@ function table(header: readonly string[], rows: readonly string[]): string {
   );
 }
 
+/**
+ * An author, as one table cell.
+ *
+ * The login is the identity and is always rendered; the display name is only ever added in front of
+ * it, so a row stays readable and linkable when git could not vouch for a name.
+ */
+export function renderAuthor(author: Author): string {
+  const login = author.login === '' ? '_unknown_' : `@${cell(author.login)}`;
+
+  return author.name === null ? login : `${cell(author.name)} (${login})`;
+}
+
 /** The shipping table, one row per attributed pull request. */
 export function renderPullRequestTable(pullRequests: readonly AttributedPull[]): string {
   if (pullRequests.length === 0) {
@@ -66,7 +79,7 @@ export function renderPullRequestTable(pullRequests: readonly AttributedPull[]):
     ['PR', 'Title', 'Author', 'Milestone', 'Basis'],
     pullRequests.map(
       (pull) =>
-        `| [#${pull.number}](${pull.url}) | ${cell(pull.title)} | @${cell(pull.author)} | ` +
+        `| [#${pull.number}](${pull.url}) | ${cell(pull.title)} | ${renderAuthor(pull.author)} | ` +
         `${cell(pull.milestone ?? '—')} | ${cell(pull.basis)} |`
     )
   );

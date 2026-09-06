@@ -8,6 +8,7 @@ import {
   experimentalVersion,
   extractJsonBlock,
   renderAttentionTable,
+  renderAuthor,
   renderBody,
   renderJournalTable,
   renderMilestoneComment,
@@ -55,7 +56,7 @@ function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
       {
         number: 27436,
         title: 'feat(content-releases): audit logs',
-        author: 'someone',
+        author: { login: 'someone', name: 'Someone Real' },
         url: 'https://github.com/strapi/strapi/pull/27436',
         baseRef: 'develop',
         headRef: 'feat/audit-logs',
@@ -111,12 +112,36 @@ describe('withoutTrailingReference', () => {
   });
 });
 
+describe('renderAuthor', () => {
+  it('puts the display name in front of the login that identifies it', () => {
+    assert.equal(renderAuthor({ login: 'nclsndr', name: 'Nico André' }), 'Nico André (@nclsndr)');
+  });
+
+  it('falls back to the login alone when no commit vouched for a name', () => {
+    assert.equal(renderAuthor({ login: 'nclsndr', name: null }), '@nclsndr');
+  });
+
+  it('says so rather than rendering an empty mention', () => {
+    assert.equal(renderAuthor({ login: '', name: null }), '_unknown_');
+  });
+
+  it('escapes a pipe so a name cannot break the table', () => {
+    assert.equal(renderAuthor({ login: 'x', name: 'A | B' }), 'A \\| B (@x)');
+  });
+});
+
 describe('renderPullRequestTable', () => {
+  it('names the author with their display name and their login', () => {
+    const table = renderPullRequestTable(payloadInput().pullRequests);
+
+    assert.match(table, /Someone Real \(@someone\)/u);
+  });
+
   it('escapes a pipe so a title cannot break the table', () => {
     const pull = {
       number: 1,
       title: 'fix: a | b',
-      author: 'x',
+      author: { login: 'x', name: null },
       url: 'u',
       baseRef: 'develop',
       headRef: 'fix/x',
@@ -155,7 +180,7 @@ describe('renderJournalTable', () => {
 
 describe('buildPayload', () => {
   it('carries the schema version later automation reads', () => {
-    assert.equal(buildPayload(payloadInput()).schemaVersion, 2);
+    assert.equal(buildPayload(payloadInput()).schemaVersion, 3);
   });
 
   it('identifies the candidate by its branch, its pinned head and its pull request', () => {

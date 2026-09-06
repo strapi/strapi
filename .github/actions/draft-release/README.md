@@ -90,6 +90,25 @@ The pull request body carries a JSON block between `STRAPI_RELEASE_CANDIDATE_STA
 | `expectedExperimentalVersion`         | `0.0.0-experimental.<headSha>`, the artifact published from that commit.  |
 | `pullRequestNumber`, `pullRequestUrl` | The release pull request, both `null` on a dry run.                       |
 
+`pullRequests[].author` carries both halves of an identity:
+
+| Field   | Meaning                                                                        |
+| ------- | ------------------------------------------------------------------------------ |
+| `login` | The GitHub username, from the pull request payload. Empty only if it has none. |
+| `name`  | The display name, or `null` when no commit in the range can vouch for one.     |
+
+A GitHub pull request payload has no display name in it: its `user` is the short user object, and
+asking for the long one costs a request per distinct contributor. Git already has the name, because
+a squash commit is authored by the contributor, so `%an` on the integration commit is the same
+string GitHub renders next to it.
+
+`name` is `null` rather than guessed in the two cases where that string would be someone else's: a
+merge commit, authored by whoever pressed merge, and a squash whose author email is a GitHub noreply
+address naming a different login, which is what a pull request written by several people leaves
+behind. An address that carries no login, a work address for instance, is not evidence against the
+name. The email itself never reaches the payload: it is read as evidence and dropped, because the
+payload is published in a public pull request body.
+
 The experimental version mirrors
 [`publish-pr-experimental.yml`](../../workflows/publish-pr-experimental.yml), which versions on
 `github.event.pull_request.head.sha` with the full 40-character SHA. Changing the scheme there means

@@ -25,7 +25,15 @@ function records(pairs: readonly [Integration, StubbedRecord['pull']][]): Stubbe
 }
 
 function summary(number: number, headRef: string): StubbedRecord['pull'] {
-  return { number, title: '', author: '', url: '', baseRef: 'develop', headRef, milestone: null };
+  return {
+    number,
+    title: '',
+    author: { login: '', name: null },
+    url: '',
+    baseRef: 'develop',
+    headRef,
+    milestone: null,
+  };
 }
 
 const noCommits = async (): Promise<PullCommit[]> => [];
