@@ -1,29 +1,24 @@
 import type { Core } from '@strapi/types';
 
+import { getDisplayName } from '../utils';
+
 interface Event {
   action: string;
   date: Date;
-  userId: string | number;
+  // Null for actions no person performed, such as a scheduled job
+  userId: string | number | null;
   payload: Record<string, unknown>;
 }
 
 interface Log extends Omit<Event, 'userId'> {
-  user: string | number;
+  user: string | number | null;
 }
 
 const getSanitizedUser = (user: any) => {
-  let displayName = user.email;
-
-  if (user.username) {
-    displayName = user.username;
-  } else if (user.firstname && user.lastname) {
-    displayName = `${user.firstname} ${user.lastname}`;
-  }
-
   return {
     id: user.id,
     email: user.email,
-    displayName,
+    displayName: getDisplayName(user),
   };
 };
 
