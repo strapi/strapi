@@ -288,6 +288,34 @@ describe('runDraftRelease', () => {
     });
   });
 
+  it('identifies the candidate it just created', async () => {
+    const { result } = await run({ dryRun: false });
+
+    assert.deepEqual(result.payload.candidate, {
+      branch: 'releases/5.53.0',
+      headSha: FEAT_SHA,
+      expectedExperimentalVersion: `0.0.0-experimental.${FEAT_SHA}`,
+      pullRequestNumber: 27700,
+      pullRequestUrl: 'https://github.com/strapi/strapi/pull/27700',
+    });
+
+    assert.equal(result.payload.candidate.headSha, result.payload.range.toSha);
+    assert.equal(result.payload.candidate.branch, result.branch);
+    assert.equal(result.payload.schemaVersion, 2);
+  });
+
+  it('reports no pull request for a candidate a dry run only planned', async () => {
+    const { result } = await run({ dryRun: true });
+
+    assert.deepEqual(result.payload.candidate, {
+      branch: 'releases/5.53.0',
+      headSha: FEAT_SHA,
+      expectedExperimentalVersion: `0.0.0-experimental.${FEAT_SHA}`,
+      pullRequestNumber: null,
+      pullRequestUrl: null,
+    });
+  });
+
   it('embeds a machine-readable payload in the pull request body', async () => {
     const { result } = await run({ dryRun: true });
     const body = renderBody({

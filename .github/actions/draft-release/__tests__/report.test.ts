@@ -5,6 +5,7 @@ import {
   BLOCK_END,
   BLOCK_START,
   buildPayload,
+  experimentalVersion,
   extractJsonBlock,
   renderAttentionTable,
   renderBody,
@@ -34,6 +35,9 @@ function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
       toSha: 'b'.repeat(40),
     },
     integrationCount: 12,
+    branch: 'releases/5.53.0',
+    pullNumber: 27700,
+    pullUrl: 'https://github.com/strapi/strapi/pull/27700',
     classification: {
       features: [
         {
@@ -149,6 +153,49 @@ describe('renderJournalTable', () => {
   });
 });
 
+describe('buildPayload', () => {
+  it('carries the schema version later automation reads', () => {
+    assert.equal(buildPayload(payloadInput()).schemaVersion, 2);
+  });
+
+  it('identifies the candidate by its branch, its pinned head and its pull request', () => {
+    const payload = buildPayload(payloadInput());
+
+    assert.deepEqual(payload.candidate, {
+      branch: 'releases/5.53.0',
+      headSha: 'b'.repeat(40),
+      expectedExperimentalVersion: `0.0.0-experimental.${'b'.repeat(40)}`,
+      pullRequestNumber: 27700,
+      pullRequestUrl: 'https://github.com/strapi/strapi/pull/27700',
+    });
+  });
+
+  it('pins the head to the SHA the range ended at', () => {
+    const payload = buildPayload(payloadInput());
+
+    assert.equal(payload.candidate.headSha, payload.range.toSha);
+  });
+
+  it('reports no pull request on a dry run, and still identifies the candidate', () => {
+    const payload = buildPayload(payloadInput({ dryRun: true, pullNumber: null, pullUrl: null }));
+
+    assert.equal(payload.candidate.pullRequestNumber, null);
+    assert.equal(payload.candidate.pullRequestUrl, null);
+    assert.equal(payload.candidate.branch, 'releases/5.53.0');
+    assert.equal(payload.candidate.headSha, 'b'.repeat(40));
+    assert.equal(
+      payload.candidate.expectedExperimentalVersion,
+      `0.0.0-experimental.${'b'.repeat(40)}`
+    );
+  });
+});
+
+describe('experimentalVersion', () => {
+  it('mirrors the workflow, which versions on the full head SHA', () => {
+    assert.equal(experimentalVersion('b'.repeat(40)), `0.0.0-experimental.${'b'.repeat(40)}`);
+  });
+});
+
 describe('renderBody', () => {
   const payload = buildPayload(payloadInput());
 
@@ -217,6 +264,14 @@ describe('renderBody', () => {
 });
 
 describe('extractJsonBlock', () => {
+  it('round-trips a body carrying the candidate block', () => {
+    const payload = buildPayload(payloadInput());
+    const body = renderBody({ payload, pullRequests: payload.pullRequests, attention: [] });
+
+    assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(payload)));
+    assert.match(body, /"expectedExperimentalVersion": "0\.0\.0-experimental\.b{40}"/u);
+  });
+
   it('returns null when the markers are missing', () => {
     assert.equal(extractJsonBlock('just prose'), null);
   });

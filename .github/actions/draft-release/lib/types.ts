@@ -250,6 +250,18 @@ export type ReleasePayload = {
     source: VersionSource;
   };
   range: PinnedRange & { integrationCount: number };
+  /** What later automation needs to find this candidate again, without re-deriving any of it. */
+  candidate: {
+    /** The release branch this candidate lives on, e.g. `releases/5.53.0`. */
+    branch: string;
+    /** The pinned commit the branch was cut at. Same value as `range.toSha`. */
+    headSha: string;
+    /** The artifact `publish-pr-experimental.yml` publishes from `headSha`. */
+    expectedExperimentalVersion: string;
+    /** The release pull request, `null` on a dry run where no pull request is created. */
+    pullRequestNumber: number | null;
+    pullRequestUrl: string | null;
+  };
   bumpEvidence: {
     featureIntegrations: BumpVote[];
     breakingIntegrations: BumpVote[];

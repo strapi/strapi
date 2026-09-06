@@ -11,11 +11,21 @@ import type {
   VersionSource,
 } from './types.ts';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 export const BLOCK_START = '<!-- STRAPI_RELEASE_CANDIDATE_START -->';
 export const BLOCK_END = '<!-- STRAPI_RELEASE_CANDIDATE_END -->';
 
 const SHORT_SHA_LENGTH = 8;
+
+/**
+ * The version published from a pull request head by
+ * [`publish-pr-experimental.yml`](../../workflows/publish-pr-experimental.yml), which versions on
+ * `github.event.pull_request.head.sha`. Mirrored here so a consumer of the payload never has to
+ * rebuild the scheme, and only ever from the full SHA the workflow itself uses.
+ */
+export function experimentalVersion(headSha: string): string {
+  return `0.0.0-experimental.${headSha}`;
+}
 
 /** Escapes the characters that would break out of a Markdown table cell. */
 function cell(value: unknown): string {
@@ -108,6 +118,9 @@ export type PayloadInput = {
   versionSource: VersionSource;
   range: PinnedRange;
   integrationCount: number;
+  branch: string;
+  pullNumber: number | null;
+  pullUrl: string | null;
   classification: BumpClassification;
   pullRequests: AttributedPull[];
   attention: AttentionRecord[];
@@ -129,6 +142,13 @@ export function buildPayload(input: PayloadInput): ReleasePayload {
       source: input.versionSource,
     },
     range: { ...input.range, integrationCount: input.integrationCount },
+    candidate: {
+      branch: input.branch,
+      headSha: input.range.toSha,
+      expectedExperimentalVersion: experimentalVersion(input.range.toSha),
+      pullRequestNumber: input.pullNumber,
+      pullRequestUrl: input.pullUrl,
+    },
     bumpEvidence: {
       featureIntegrations: input.classification.features,
       breakingIntegrations: input.classification.breaking,

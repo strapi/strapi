@@ -76,6 +76,25 @@ would never run.
 
 `version`, `bump`, `branch`, `pr_number`, `pr_url`, `journal_path`.
 
+## The release candidate block
+
+The pull request body carries a JSON block between `STRAPI_RELEASE_CANDIDATE_START` and
+`STRAPI_RELEASE_CANDIDATE_END`, so later automation reads the release rather than the prose.
+
+`candidate` is the part that identifies the release without re-deriving any of it:
+
+| Field                                 | Meaning                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------- |
+| `branch`                              | The release branch, `releases/x.y.z`.                                     |
+| `headSha`                             | The commit the branch was cut at. Always the same value as `range.toSha`. |
+| `expectedExperimentalVersion`         | `0.0.0-experimental.<headSha>`, the artifact published from that commit.  |
+| `pullRequestNumber`, `pullRequestUrl` | The release pull request, both `null` on a dry run.                       |
+
+The experimental version mirrors
+[`publish-pr-experimental.yml`](../../workflows/publish-pr-experimental.yml), which versions on
+`github.event.pull_request.head.sha` with the full 40-character SHA. Changing the scheme there means
+changing `experimentalVersion` in [`lib/report.ts`](lib/report.ts).
+
 ## The write journal
 
 This action does not roll back. A run that dies halfway leaves the repository half-changed and a

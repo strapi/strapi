@@ -189,6 +189,7 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
   );
 
   const pullNumber = createdPull?.number ?? null;
+  const pullUrl = createdPull?.html_url ?? null;
 
   await journal.write(
     { op: 'pr.label', target: pullTarget(pullNumber), after: EXPERIMENTAL_LABEL },
@@ -212,6 +213,9 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
     versionSource,
     range: pinned,
     integrationCount: integrations.length,
+    branch,
+    pullNumber,
+    pullUrl,
     classification,
     pullRequests,
     attention,
@@ -269,7 +273,7 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
     journal: journal.toJSON(),
     payload,
     pullNumber,
-    pullUrl: createdPull?.html_url ?? null,
+    pullUrl,
     summary: renderStepSummary({ payload, entries: journal.entries() }),
     version,
     warnings,
