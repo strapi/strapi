@@ -16178,6 +16178,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"draft-release@workspace:.github/actions/draft-release":
+  version: 0.0.0-use.local
+  resolution: "draft-release@workspace:.github/actions/draft-release"
+  dependencies:
+    "@types/node": "npm:20.19.41"
+    typescript: "npm:5.9.3"
+  languageName: unknown
+  linkType: soft
+
 "dset@npm:^3.1.2":
   version: 3.1.4
   resolution: "dset@npm:3.1.4"
