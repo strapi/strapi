@@ -144,7 +144,7 @@ describe('createGithubAdapter', () => {
     await createGithubAdapter('t', coords, request).createPull({
       head: 'releases/5.53.0',
       base: 'main',
-      title: '[draft] release 5.53.0',
+      title: 'Release 5.53.0',
       body: 'x',
     });
 

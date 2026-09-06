@@ -15,7 +15,7 @@ Triggered by hand from the Actions tab through [`draft-release.yml`](../../workf
 | Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                                      |
 | Milestones   | Renames the open milestone to the shipping version, opens the next patch milestone, closes the shipping one. |
 | Branch       | Pushes `releases/x.y.z` at the pinned SHA.                                                                   |
-| Pull request | Opens the draft PR `[draft] release x.y.z` against `main` and labels it `publish-experimental`.              |
+| Pull request | Opens the draft PR `Release x.y.z` against `main` and labels it `publish-experimental`.                      |
 | Report       | Writes the shipping table and a machine-readable JSON block into the PR body.                                |
 | Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue, then comments.             |
 

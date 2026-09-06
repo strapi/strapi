@@ -33,6 +33,7 @@ import type {
 
 export const TARGET_BASE = 'develop';
 export const RELEASE_BASE = 'main';
+export const RELEASE_BRANCH_NAME = 'releases';
 export const EXPERIMENTAL_LABEL = 'publish-experimental';
 
 /** Statuses that do not stop the run but do need a human to look. */
@@ -159,7 +160,7 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
   );
 
   // 4. Branch, pull request, experimental label.
-  const branch = `releases/${version}`;
+  const branch = `${RELEASE_BRANCH_NAME}/${version}`;
 
   if (git.remoteBranchExists(branch) === true) {
     throw new Error(`The branch ${branch} already exists. Delete it or pick another version.`);
@@ -175,7 +176,7 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
     async () => git.pushBranch(pinned.toSha, branch)
   );
 
-  const title = `[draft] release ${version}`;
+  const title = `Release ${version}`;
   const createdPull = await journal.write(
     { op: 'pr.create', target: `${branch} → ${RELEASE_BASE}`, after: title },
     async () =>

@@ -257,7 +257,7 @@ describe('runDraftRelease', () => {
     const { calls } = await run({ dryRun: false });
 
     assert.equal(calls.includes(`pushBranch:releases/5.53.0:${FEAT_SHA}`), true);
-    assert.equal(calls.includes('createPull:[draft] release 5.53.0'), true);
+    assert.equal(calls.includes('createPull:Release 5.53.0'), true);
     assert.equal(calls.includes(`addLabels:27700:${EXPERIMENTAL_LABEL}`), true);
     assert.equal(calls.includes('updatePullBody:27700'), true);
     assert.equal(calls.includes('createComment:27700'), true);
