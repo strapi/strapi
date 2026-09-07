@@ -43,6 +43,15 @@ describe('field parsers', () => {
       expect(() => parseTime('12:60:00')).toThrow(InvalidTimeError);
       expect(() => parseTime(123)).toThrow(InvalidTimeError);
     });
+
+    // The fraction separator must be a literal dot; an unescaped `.` in the
+    // regex previously let any character (and trailing junk) through.
+    it.each(['12:31:11x2', '12:31:11,2', '12:31:11 2'])(
+      'throws InvalidTimeError when the fraction separator is not a dot (%s)',
+      (input) => {
+        expect(() => parseTime(input)).toThrow(InvalidTimeError);
+      }
+    );
   });
 
   describe('parseDateTimeOrTimestamp', () => {
