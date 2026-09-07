@@ -307,6 +307,78 @@ describe('classifyIntegrations', () => {
   });
 });
 
+describe('classifyIntegrations — a breaking footer on the landing commit', () => {
+  const BODY = 'Rework the upload flow.\n\nBREAKING CHANGE: the provider config shape moved.';
+
+  it('stops an unparsed squash subject whose body breaks, even with inner feats', async () => {
+    // The path this action exists to correct: commitlint never sees the squash subject, so
+    // `Feat/...` lands unparsed while the footer sits in the body GitHub pre-filled.
+    const entry = integration({ subject: 'Feat/new upload flow (#123)', body: BODY });
+
+    const classification = await classifyIntegrations(
+      [entry],
+      records([[entry, summary(123, 'feat/new-upload-flow')]]),
+      async () => pullCommits(['feat(upload): rework the flow'])
+    );
+
+    assert.deepEqual(classification.breaking, [
+      { sha: entry.sha, pr: 123, subject: entry.subject, via: 'landing-body' },
+    ]);
+    assert.deepEqual(classification.unparsed, []);
+    assert.throws(() => decideBump(classification), /carries a breaking change/u);
+  });
+
+  it('stops an unparsed direct commit whose body breaks', async () => {
+    const entry = integration({ subject: 'Rework the upload flow', body: BODY });
+
+    const classification = await classifyIntegrations([entry], records([[entry, null]]), noCommits);
+
+    assert.deepEqual(classification.breaking, [
+      { sha: entry.sha, pr: null, subject: entry.subject, via: 'landing-body' },
+    ]);
+    assert.deepEqual(classification.unparsed, []);
+    assert.throws(() => decideBump(classification), /carries a breaking change/u);
+  });
+
+  it('keeps a breaking marker found in pull request commits that all failed to parse', async () => {
+    // `readPullCommitHeaders` reads the footer off every commit body, parsed header or not. Only
+    // the type classification depends on a header, so an empty header list must not discard it.
+    const entry = integration({ subject: 'Rework the upload flow (#124)', body: '' });
+
+    const classification = await classifyIntegrations(
+      [entry],
+      records([[entry, summary(124, 'rework/upload')]]),
+      async () => pullCommits(['wip\n\nBREAKING CHANGE: the provider config shape moved.'])
+    );
+
+    assert.deepEqual(classification.breaking, [
+      { sha: entry.sha, pr: 124, subject: entry.subject, via: 'pr-commits' },
+    ]);
+    assert.deepEqual(classification.unparsed, []);
+    assert.throws(() => decideBump(classification), /carries a breaking change/u);
+  });
+
+  it('names the subject as the source when the header carries the bang', async () => {
+    const entry = integration({ subject: 'feat(upload)!: rework the flow', body: BODY });
+
+    const classification = await classifyIntegrations([entry], records([[entry, null]]), noCommits);
+
+    assert.equal(classification.breaking[0]?.via, 'subject');
+  });
+
+  it('still reports an unparsed integration whose body does not break', async () => {
+    const entry = integration({ subject: 'Rework the upload flow', body: 'No footer here.' });
+
+    const classification = await classifyIntegrations([entry], records([[entry, null]]), noCommits);
+
+    assert.deepEqual(classification.breaking, []);
+    assert.deepEqual(classification.unparsed, [
+      { sha: entry.sha, pr: null, subject: entry.subject },
+    ]);
+    assert.equal(decideBump(classification), 'patch');
+  });
+});
+
 describe('decideBump', () => {
   const empty: BumpClassification = { features: [], breaking: [], ignored: [], unparsed: [] };
 

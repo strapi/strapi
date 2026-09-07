@@ -316,7 +316,7 @@ describe('runDraftRelease', () => {
 
     assert.equal(result.payload.candidate.headSha, result.payload.range.toSha);
     assert.equal(result.payload.candidate.branch, result.branch);
-    assert.equal(result.payload.schemaVersion, 3);
+    assert.equal(result.payload.schemaVersion, 4);
   });
 
   it('reports no pull request for a candidate a dry run only planned', async () => {
@@ -362,6 +362,33 @@ describe('runDraftRelease', () => {
 
   it('rejects a malformed version input', async () => {
     await assert.rejects(() => run({ dryRun: true, version: '5.53' }), /not a stable x\.y\.z/u);
+  });
+
+  it('stops the whole run when only the landing commit body says the range breaks', async () => {
+    // End to end, not just the classifier: an unparsed squash subject with a breaking footer in
+    // the body has to fail the run before any branch is cut or milestone touched.
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: true },
+          {
+            git: {
+              listIntegrations: () => [
+                {
+                  sha: FEAT_SHA,
+                  parents: [FIX_SHA],
+                  author: 'Dev B',
+                  email: 'dev-b@strapi.io',
+                  authoredAt: '2026-09-03T10:00:00Z',
+                  subject: 'Feat/record release actions (#27436)',
+                  body: 'Adds audit logs.\n\nBREAKING CHANGE: the audit log payload shape moved.',
+                },
+              ],
+            },
+          }
+        ),
+      /carries a breaking change/u
+    );
   });
 
   it('stops instead of reporting a failed lookup as a direct commit', async () => {

@@ -32,7 +32,7 @@ otherwise                                -> patch
 `enhancement`, `future`, `security`, `fix`, `chore`, `ci`, `docs`, `test` and `revert` never force a
 minor. `feat(i18n)` counts like any other feature.
 
-Two corrections keep the rule honest:
+Three corrections keep the rule honest:
 
 - **Unparsed subjects fall back to the pull request's own commits.** commitlint runs
   `--from base.sha --to head.sha`, so it validates the commits inside a pull request, never the
@@ -42,6 +42,21 @@ Two corrections keep the rule honest:
 - **Release back-merges are ignored.** `chore: release v5.52.3 update develop` is a pull request
   whose head is `main`, carrying the previous release's commits. Counting them would let an already
   shipped `feat` vote for a second minor.
+- **A breaking marker is never dropped for want of a parsable subject.** The body of the landing
+  commit is read on every path, not only when its subject parses. That is where a breaking footer
+  most often ends up: GitHub pre-fills the squash merge box from the pull request's commits, so the
+  subject can read `Feat/new upload flow (#123)` while the body carries `BREAKING CHANGE:` and the
+  inner commits stay `feat:`. An unparsed subject leaves the _type_ unknown; it says nothing about
+  whether the change breaks.
+
+`bumpEvidence` names where each vote was read, so a stop is always traceable to a place a human can
+look:
+
+| `via`          | Read from                                                     |
+| -------------- | ------------------------------------------------------------- |
+| `subject`      | The landing commit's conventional header, including its `!`.  |
+| `pr-commits`   | The commits inside the pull request, headers and bodies both. |
+| `landing-body` | The body of the landing commit itself.                        |
 
 ## Attribution rule
 

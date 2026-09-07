@@ -163,12 +163,22 @@ export type ConventionalHeader = {
   breaking: boolean;
 };
 
+/**
+ * Where the evidence behind a bump vote was read.
+ *
+ * `landing-body` is the body of the first-parent commit itself, which is the only place a breaking
+ * footer can be found when the subject does not parse as a conventional header.
+ */
+export const BUMP_VOTE_SOURCES = ['subject', 'pr-commits', 'landing-body'] as const;
+
+export type BumpVoteSource = (typeof BUMP_VOTE_SOURCES)[number];
+
 /** One integration voting for a bump, with the evidence that made it vote. */
 export type BumpVote = {
   sha: string;
   pr: number | null;
   subject: string;
-  via: 'subject' | 'pr-commits';
+  via: BumpVoteSource;
 };
 
 export type BumpClassification = {

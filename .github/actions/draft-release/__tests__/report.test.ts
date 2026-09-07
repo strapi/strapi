@@ -203,7 +203,7 @@ describe('renderJournalTable', () => {
 
 describe('buildPayload', () => {
   it('carries the schema version later automation reads', () => {
-    assert.equal(buildPayload(payloadInput()).schemaVersion, 3);
+    assert.equal(buildPayload(payloadInput()).schemaVersion, 4);
   });
 
   it('identifies the candidate by its branch, its pinned head and its pull request', () => {

@@ -144,30 +144,46 @@ async function classifyOne(
   const prNumber = record.pull?.number ?? null;
   const header = parseConventionalSubject(integration.subject);
 
-  if (header !== null) {
-    const breaking = header.breaking === true || hasBreakingFooter(integration.body);
+  // The landing commit's own body is breaking evidence whatever its subject parses to, so it is
+  // read on every path below rather than only the one where the subject happened to parse.
+  //
+  // A squash body is where a breaking footer most often ends up. commitlint validates the commits
+  // inside a pull request, never the squash subject, and GitHub pre-fills the merge box from those
+  // commits, so a subject can read `Feat/new upload flow (#123)` while the body carries the footer
+  // and the inner commits stay `feat:`.
+  const landingBreak = hasBreakingFooter(integration.body)
+    ? vote(integration, prNumber, 'landing-body')
+    : null;
 
+  if (header !== null) {
     return {
       kind: 'classified',
       feature: header.type === FEATURE_TYPE ? vote(integration, prNumber, 'subject') : null,
-      breaking: breaking === true ? vote(integration, prNumber, 'subject') : null,
+      breaking: header.breaking === true ? vote(integration, prNumber, 'subject') : landingBreak,
     };
   }
 
+  // An unparsed subject leaves the type unknown. It is not a reason to drop a breaking marker:
+  // reporting one as `unparsed` would let the range cut a release with a break in it.
   if (prNumber === null) {
-    return {
-      kind: 'unparsed',
-      entry: { sha: integration.sha, pr: null, subject: integration.subject },
-    };
+    return landingBreak === null
+      ? {
+          kind: 'unparsed',
+          entry: { sha: integration.sha, pr: null, subject: integration.subject },
+        }
+      : { kind: 'classified', feature: null, breaking: landingBreak };
   }
 
   const { headers, breaking } = readPullCommitHeaders(await listPullCommits(prNumber));
+  const anyBreak = breaking === true ? vote(integration, prNumber, 'pr-commits') : landingBreak;
 
   if (headers.length === 0) {
-    return {
-      kind: 'unparsed',
-      entry: { sha: integration.sha, pr: prNumber, subject: integration.subject },
-    };
+    return anyBreak === null
+      ? {
+          kind: 'unparsed',
+          entry: { sha: integration.sha, pr: prNumber, subject: integration.subject },
+        }
+      : { kind: 'classified', feature: null, breaking: anyBreak };
   }
 
   return {
@@ -175,7 +191,7 @@ async function classifyOne(
     feature: headers.some((entry) => entry.type === FEATURE_TYPE)
       ? vote(integration, prNumber, 'pr-commits')
       : null,
-    breaking: breaking === true ? vote(integration, prNumber, 'pr-commits') : null,
+    breaking: anyBreak,
   };
 }
 

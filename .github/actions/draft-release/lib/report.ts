@@ -12,7 +12,7 @@ import type {
   VersionSource,
 } from './types.ts';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 export const BLOCK_START = '<!-- STRAPI_RELEASE_CANDIDATE_START -->';
 export const BLOCK_END = '<!-- STRAPI_RELEASE_CANDIDATE_END -->';
 
