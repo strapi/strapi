@@ -35,6 +35,7 @@ export const actionTypes = {
   'release.entry.update': 'Change entry on release',
   'release.entry.remove': 'Remove entry from release',
   'release.settings.update': 'Update release settings',
+  'audit-log.export': 'Export audit logs',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {
