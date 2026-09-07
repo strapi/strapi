@@ -271,6 +271,114 @@ describe('previewScript — findBlockIndex for nested lists', () => {
   });
 });
 
+// pickElementAtPoint only knows about marked (stega-tagged) nodes. Code blocks
+// and images with no alt text are never marked, so a click on one finds no
+// exact hit and falls back to the nearest marked sibling — useful to figure out
+// which *field* was clicked, but that sibling is not the block the user
+// actually clicked. Feeding it into findBlockIndex would jump the Slate cursor
+// to the wrong block, so the double-click handler must only derive a block
+// index from an exact hit.
+describe('previewScript — unmarked click inside a blocks field does not jump the cursor', () => {
+  const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
+
+  const rect = (left: number, top: number, width: number, height: number) =>
+    ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON() {},
+    }) as DOMRect;
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
+      true;
+
+    // Two marked paragraphs (stega-tagged) around an unmarked image (empty alt)
+    // and an unmarked code block — mirrors what content-source-maps.ts produces:
+    // code text and images with no alt are intentionally never encoded.
+    document.body.innerHTML = `
+      <dd id="field">
+        <p id="para0" data-strapi-source="${BLOCKS_SOURCE}">First paragraph</p>
+        <img id="the-image" alt="" />
+        <pre id="code-block"><code>const x = 1;</code></pre>
+        <p id="para1" data-strapi-source="${BLOCKS_SOURCE}">Second paragraph</p>
+      </dd>
+    `;
+
+    const sizes: Record<string, DOMRect> = {
+      para0: rect(0, 0, 300, 20),
+      'the-image': rect(0, 20, 300, 40),
+      'code-block': rect(0, 60, 300, 40),
+      para1: rect(0, 100, 300, 40),
+    };
+    Object.entries(sizes).forEach(([id, r]) => {
+      const el = document.getElementById(id);
+      if (el) el.getBoundingClientRect = () => r;
+    });
+
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  afterEach(() => {
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+    delete (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean })
+      .STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  const dblClickAt = (x: number, y: number) => {
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+    const postMessageSpy = jest.spyOn(window, 'postMessage');
+
+    highlight.dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: x, clientY: y })
+    );
+
+    const focusIntentCalls = postMessageSpy.mock.calls.filter(
+      ([data]) => (data as { type?: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+    );
+    expect(focusIntentCalls).toHaveLength(1);
+    postMessageSpy.mockRestore();
+
+    return (focusIntentCalls[0][0] as { payload: { blockIndex: number | null } }).payload;
+  };
+
+  test('double-clicking the empty-alt image does not jump to a neighboring paragraph', () => {
+    // (10, 30) falls inside the image's rect (20-60), not any marked paragraph's.
+    const payload = dblClickAt(10, 30);
+    expect(payload.blockIndex).toBeNull();
+  });
+
+  test('double-clicking the code block does not jump to a neighboring paragraph', () => {
+    // (10, 80) falls inside the code block's rect (60-100), not any marked paragraph's.
+    const payload = dblClickAt(10, 80);
+    expect(payload.blockIndex).toBeNull();
+  });
+
+  test('double-clicking a marked paragraph still resolves its own block index', () => {
+    // (10, 110) falls inside para1's rect (100-140) — an exact hit.
+    const payload = dblClickAt(10, 110);
+    // Children of #field: para0=0, the-image=1, code-block=2, para1=3.
+    expect(payload.blockIndex).toBe(3);
+  });
+});
+
 // An image-only blocks field renders no block-level tag (<img> is not in
 // BLOCK_LEVEL_TAGS), so the container walk-up finds no match inside the field
 // and escapes into page layout. Without an area guard it matched a page-level

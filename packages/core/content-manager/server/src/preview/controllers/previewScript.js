@@ -933,18 +933,24 @@ function previewScript(config) {
      * redispatch hits the specific item the user clicked, even when the group
      * highlight covers several elements (multi-media gallery).
      * When no element rect contains the point (e.g. click in empty space within
-     * a blocks field), falls back to the nearest element by distance to rect.
+     * a blocks field, or on an unmarked node like a code block or an image with
+     * no alt text), falls back to the nearest element by distance to rect.
+     *
+     * `exact` tells callers whether the returned element actually contains the
+     * point or is just the nearest fallback — the blocks double-click handler
+     * needs this to avoid deriving a Slate block index from an element the user
+     * didn't actually click on.
      *
      * @param {HighlightGroup} group
      * @param {number} x
      * @param {number} y
-     * @returns {HTMLElement | null}
+     * @returns {{ element: HTMLElement | null, exact: boolean }}
      */
     const pickElementAtPoint = (group, x, y) => {
       for (const el of group.elements) {
         const r = el.getBoundingClientRect();
         if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
-          return el;
+          return { element: el, exact: true };
         }
       }
       // No exact hit — find the nearest element by squared distance to its rect.
@@ -961,7 +967,7 @@ function previewScript(config) {
           nearest = el;
         }
       }
-      return nearest ?? group.elements.values().next().value ?? null;
+      return { element: nearest ?? group.elements.values().next().value ?? null, exact: false };
     };
 
     /**
@@ -1002,7 +1008,7 @@ function previewScript(config) {
 
           // Pick the specific underlying element under the pointer so the
           // redispatched click targets the right item in a multi-element group
-          const underlying = pickElementAtPoint(group, event.clientX, event.clientY);
+          const { element: underlying } = pickElementAtPoint(group, event.clientX, event.clientY);
           if (!underlying) return;
 
           /** @type {HTMLElement} */
@@ -1058,7 +1064,7 @@ function previewScript(config) {
           pendingClicks.delete(group);
         }
 
-        const anchor = pickElementAtPoint(group, event.clientX, event.clientY);
+        const { element: anchor, exact } = pickElementAtPoint(group, event.clientX, event.clientY);
         if (!anchor) return;
         const sourceAttribute = anchor.getAttribute(SOURCE_ATTRIBUTE);
         if (!sourceAttribute) return;
@@ -1088,7 +1094,11 @@ function previewScript(config) {
           rect = computeGroupRect(group);
         }
         if (!rect) return;
-        const blockIndex = isBlocksField ? findBlockIndex(anchor) : -1;
+        // Only derive a Slate block index from an exact hit on a marked element.
+        // A fallback anchor (nearest marked sibling to an unmarked click — e.g. a
+        // code block or an image with no alt text) tells us which field to open,
+        // not which block was clicked, so don't jump the cursor to it.
+        const blockIndex = isBlocksField && exact ? findBlockIndex(anchor) : -1;
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
           path,
           position: {
