@@ -125,17 +125,25 @@ describe('Provider rejections during concurrent uploads', () => {
     providerInstance.delete.mockResolvedValue(undefined);
   });
 
-  test('still surfaces an immediate upload rejection to the caller', async () => {
+  test('handles an immediate upload rejection in the same turn, without swallowing it', async () => {
     const providerError = new Error('InvalidAccessKeyId: synthetic provider rejection');
-    // Containing the rejection must not swallow it.
-    providerService.upload.mockRejectedValueOnce(providerError).mockResolvedValue(undefined);
+    const rejection = Promise.reject(providerError);
+    const catchSpy = jest.spyOn(rejection, 'catch');
+    providerService.upload.mockReturnValueOnce(rejection).mockResolvedValue(undefined);
 
     await expect(settle(uploadService._uploadImage(getFileData()))).resolves.toBe(providerError);
+
+    // The property the fix adds: a handler on the pushed promise before the
+    // caller awaits the image work. Asserting only that the error arrives passes
+    // without the fix, because `Promise.all` always surfaced it.
+    expect(catchSpy).toHaveBeenCalled();
   });
 
-  test('still surfaces an immediate replace rejection to the caller', async () => {
+  test('handles an immediate replace rejection in the same turn, without swallowing it', async () => {
     const providerError = new Error('InvalidAccessKeyId: synthetic provider rejection');
-    providerService.replace.mockRejectedValueOnce(providerError).mockResolvedValue(undefined);
+    const rejection = Promise.reject(providerError);
+    const catchSpy = jest.spyOn(rejection, 'catch');
+    providerService.replace.mockReturnValueOnce(rejection).mockResolvedValue(undefined);
     providerService.upload.mockResolvedValue(undefined);
 
     const oldFile = {
@@ -148,5 +156,7 @@ describe('Provider rejections during concurrent uploads', () => {
     await expect(
       settle(uploadService._replaceImage(getFileData() as any, oldFile as any))
     ).resolves.toBe(providerError);
+
+    expect(catchSpy).toHaveBeenCalled();
   });
 });
