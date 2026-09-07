@@ -1,5 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+import { AUDIT_LOGS_EXPORT_PART_MAX_ROWS } from '../../../../../shared/utils/audit-log-export';
+
 const ALLOWED_SORT_STRINGS = ['action:ASC', 'action:DESC', 'date:ASC', 'date:DESC'];
 
 const validateFindManySchema = yup
@@ -19,12 +21,24 @@ const validateFindManyUsersSchema = yup
   })
   .required();
 
+const validateExportSchema = yup
+  .object()
+  .shape({
+    cursor: yup.number().integer().min(1),
+    pageSize: yup.number().integer().min(1).max(AUDIT_LOGS_EXPORT_PART_MAX_ROWS),
+    until: yup.number().integer().min(0),
+    token: yup.string(),
+  })
+  .required();
+
 export const validateFindMany = validateYupSchema(validateFindManySchema, { strict: false });
 export const validateFindManyUsers = validateYupSchema(validateFindManyUsersSchema, {
   strict: false,
 });
+export const validateExport = validateYupSchema(validateExportSchema, { strict: false });
 
 export default {
   validateFindMany,
   validateFindManyUsers,
+  validateExport,
 };
