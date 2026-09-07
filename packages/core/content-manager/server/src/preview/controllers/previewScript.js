@@ -1363,6 +1363,9 @@ function previewScript(config) {
         pendingClicks.forEach((timeout) => clearTimeout(timeout));
         pendingClicks.clear();
       },
+      disconnectContainerObserver: () => {
+        containerResizeObserver.disconnect();
+      },
     };
   };
 
@@ -1911,6 +1914,9 @@ function previewScript(config) {
 
       // Clear all pending click timeouts
       highlightManager.clearAllPendingClicks();
+
+      // Stop watching blocks-field containers for live resize
+      highlightManager.disconnectContainerObserver();
 
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {

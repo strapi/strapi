@@ -572,25 +572,43 @@ describe('previewScript — trailing buffer stays inside the blocks field', () =
 describe('previewScript — blocks container resize is observed live', () => {
   const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
 
-  const observedCallbacks = new Map<Element, ResizeObserverCallback>();
-
+  // Per-instance mock: the real script creates two independent ResizeObservers
+  // (the per-element `resizeObserver` from setupObservers, and the blocks-only
+  // `containerResizeObserver` from createHighlightManager). A single
+  // module-level `observedCallbacks` map shared across instances made one
+  // observer's unobserve/disconnect silently delete or mask the other's
+  // entries, which is exactly what hid the containerResizeObserver cleanup
+  // leak this describe block's last test guards against.
   class MockResizeObserver {
+    static instances: MockResizeObserver[] = [];
+
     callback: ResizeObserverCallback;
+
+    observed = new Map<Element, ResizeObserverCallback>();
+
+    disconnected = false;
 
     constructor(callback: ResizeObserverCallback) {
       this.callback = callback;
+      MockResizeObserver.instances.push(this);
     }
 
     observe(target: Element) {
-      observedCallbacks.set(target, this.callback);
+      this.observed.set(target, this.callback);
     }
 
     unobserve(target: Element) {
-      observedCallbacks.delete(target);
+      this.observed.delete(target);
     }
 
-    disconnect() {}
+    disconnect() {
+      this.disconnected = true;
+      this.observed.clear();
+    }
   }
+
+  const findObserverFor = (target: Element) =>
+    MockResizeObserver.instances.find((instance) => instance.observed.has(target));
 
   const rect = (left: number, top: number, width: number, height: number) =>
     ({
@@ -606,7 +624,7 @@ describe('previewScript — blocks container resize is observed live', () => {
     }) as DOMRect;
 
   beforeEach(async () => {
-    observedCallbacks.clear();
+    MockResizeObserver.instances = [];
     global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 
     (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
@@ -639,7 +657,7 @@ describe('previewScript — blocks container resize is observed live', () => {
 
   test('the field container is registered for resize observation', () => {
     const field = document.getElementById('field') as HTMLElement;
-    expect(observedCallbacks.has(field)).toBe(true);
+    expect(findObserverFor(field)).toBeDefined();
   });
 
   test('growing the container live-resizes the highlight without a rescan', () => {
@@ -654,7 +672,7 @@ describe('previewScript — blocks container resize is observed live', () => {
     // (it was never saved), so nothing but the container's own resize can
     // signal that the highlight is stale.
     field.getBoundingClientRect = () => rect(100, 100, 320, 140);
-    const callback = observedCallbacks.get(field);
+    const callback = findObserverFor(field)?.callback;
     expect(callback).toBeDefined();
     const noEntries: ResizeObserverEntry[] = [];
     callback?.(noEntries, null as unknown as ResizeObserver);
@@ -668,11 +686,29 @@ describe('previewScript — blocks container resize is observed live', () => {
     const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
 
     field.getBoundingClientRect = () => rect(100, 100, 320, 30);
-    const callback = observedCallbacks.get(field);
+    const callback = findObserverFor(field)?.callback;
     const noEntries: ResizeObserverEntry[] = [];
     callback?.(noEntries, null as unknown as ResizeObserver);
 
     // 30px content + 2*HIGHLIGHT_PADDING (2px)
     expect(parseFloat(highlight.style.height)).toBeCloseTo(34, 0);
+  });
+
+  test('the container resize observer disconnects on cleanup, without touching the per-element observer', () => {
+    const field = document.getElementById('field') as HTMLElement;
+    const containerObserver = findObserverFor(field);
+    expect(containerObserver?.disconnected).toBe(false);
+
+    // The per-element resizeObserver (from setupObservers) always observes
+    // document.documentElement — grab it as a control to prove cleanup
+    // reaches both observers independently, not just the blocks one.
+    const elementObserver = findObserverFor(document.documentElement);
+    expect(elementObserver?.disconnected).toBe(false);
+    expect(elementObserver).not.toBe(containerObserver);
+
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+
+    expect(containerObserver?.disconnected).toBe(true);
+    expect(elementObserver?.disconnected).toBe(true);
   });
 });
