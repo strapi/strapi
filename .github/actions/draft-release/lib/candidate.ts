@@ -1,14 +1,23 @@
-import { extractJsonBlock } from './report.ts';
-import { compareStable, parseStable } from './semver.ts';
+import { compareStable, formatStable, parseStable } from './semver.ts';
 
-import type { Candidate, PullPayload, ReleaseMode } from './types.ts';
+import type {
+  Candidate,
+  GitAdapter,
+  PinnedRange,
+  PullPayload,
+  ReleaseMode,
+  RepositoryCoords,
+  StableVersion,
+} from './types.ts';
 
 /**
  * Finding the release candidate that is already in flight.
  *
  * The action runs more than once per release: `develop` keeps moving while a candidate is open, and
  * a later run has to fold what landed since into the same release rather than start a new one. The
- * open pull request is what identifies it.
+ * open pull request is what identifies it, and only one whose head lives in this repository counts.
+ * Anyone can open a pull request from a fork with a branch named `releases/x.y.z`, and a candidate
+ * is something only this repository's own automation can have cut.
  *
  * Nothing else is a usable key. A release branch outlives its candidate, because the ruleset over
  * `releases/*` forbids deletion without a bypass, so a leftover branch says nothing about what is
@@ -24,31 +33,43 @@ const RELEASE_BRANCH_PATTERN = /^releases\/(\d+\.\d+\.\d+)$/u;
  * @returns `null` for any branch that is not exactly `releases/x.y.z`, so a branch such as
  * `releases/5.53.0-hotfix` is not mistaken for a candidate.
  */
-export function parseReleaseBranch(headRef: string): string | null {
-  return RELEASE_BRANCH_PATTERN.exec(headRef ?? '')?.[1] ?? null;
+export function parseReleaseBranch(headRef: string): StableVersion | null {
+  return parseStable(RELEASE_BRANCH_PATTERN.exec(headRef)?.[1]);
 }
 
 /**
  * Finds the candidate among the pull requests open against the release base.
  *
+ * A pull request whose head is not in this repository is skipped, not refused: a fork can name its
+ * branch anything, and stopping on it would let anyone block a release by opening one.
+ *
  * @returns `null` when none is open, which is a fresh draft.
  * @throws When more than one is open. Two candidates mean a human is mid-intervention, and picking
  * one of them would finish the intervention on their behalf.
  */
-export function findCandidate(pulls: readonly PullPayload[]): Candidate | null {
-  const candidates = pulls.flatMap((pull) => {
-    const version = parseReleaseBranch(pull.head?.ref ?? '');
+export function findCandidate(
+  pulls: readonly PullPayload[],
+  coords: RepositoryCoords
+): Candidate | null {
+  const ownRepository = `${coords.owner}/${coords.repo}`;
 
-    return version === null
+  const candidates = pulls.flatMap((pull) => {
+    if (pull.head?.repo?.full_name !== ownRepository) {
+      return [];
+    }
+
+    const branch = pull.head.ref ?? '';
+    const parsedVersion = parseReleaseBranch(branch);
+
+    return parsedVersion === null
       ? []
       : [
           {
-            version,
-            branch: pull.head?.ref ?? '',
+            version: formatStable(parsedVersion),
+            parsedVersion,
+            branch,
             pullNumber: pull.number,
             pullUrl: pull.html_url ?? '',
-            pullHeadSha: pull.head?.sha ?? '',
-            payload: extractJsonBlock(pull.body ?? ''),
           },
         ];
   });
@@ -73,49 +94,22 @@ export function findCandidate(pulls: readonly PullPayload[]): Candidate | null {
  * a branch that `publish.sh` has already tagged.
  */
 export function assertCandidateUnpublished(candidate: Candidate, baselineVersion: string): void {
-  const version = parseStable(candidate.version);
   const baseline = parseStable(baselineVersion);
 
-  if (version === null || baseline === null) {
+  if (baseline === null) {
     throw new Error(
       `Cannot compare the candidate ${candidate.version} with the published baseline ` +
-        `${baselineVersion}. Both have to be plain x.y.z versions.`
+        `${baselineVersion}, which is not a plain x.y.z version.`
     );
   }
 
-  if (compareStable(version, baseline) !== 1) {
+  if (compareStable(candidate.parsedVersion, baseline) !== 1) {
     throw new Error(
       `The candidate ${candidate.version} on #${candidate.pullNumber} is not above the published ` +
         `baseline ${baselineVersion}, so that release already shipped. Close the pull request ` +
         'before drafting the next one.'
     );
   }
-}
-
-/**
- * Refuses a release branch that carries work of its own.
- *
- * A candidate branch is only ever a pointer into `develop`. When its head is not contained in
- * `develop`, somebody pushed to it: a cherry-pick, or the version-bump commit `publish.sh` makes
- * at publish time. Advancing it to `develop`'s head would throw that commit away, and the ruleset
- * would refuse the non-fast-forward push in any case.
- */
-export function assertBranchContained(input: {
-  branch: string;
-  branchHeadSha: string;
-  sourceRef: string;
-  sourceSha: string;
-  contained: boolean;
-}): void {
-  if (input.contained === true) {
-    return;
-  }
-
-  throw new Error(
-    `${input.branch} (${input.branchHeadSha}) is not contained in ${input.sourceRef} ` +
-      `(${input.sourceSha}). Something was pushed to the release branch directly, so this run ` +
-      'would discard it. Resolve the branch by hand.'
-  );
 }
 
 /**
@@ -132,16 +126,15 @@ export function decideMode(candidate: Candidate | null, version: string): Releas
   }
 
   const recomputed = parseStable(version);
-  const current = parseStable(candidate.version);
 
-  if (recomputed === null || current === null) {
+  if (recomputed === null) {
     throw new Error(
       `Cannot compare ${version} with the candidate ${candidate.version}. ` +
-        'Both have to be plain x.y.z versions.'
+        'The recomputed version has to be a plain x.y.z version.'
     );
   }
 
-  const order = compareStable(recomputed, current);
+  const order = compareStable(recomputed, candidate.parsedVersion);
 
   if (order === -1) {
     throw new Error(
@@ -154,46 +147,57 @@ export function decideMode(candidate: Candidate | null, version: string): Releas
   return order === 0 ? 'refresh' : 'redraft';
 }
 
-function readString(source: unknown, path: readonly string[]): string | null {
-  const value = path.reduce<unknown>(
-    (node, key) =>
-      typeof node === 'object' && node !== null
-        ? (node as Record<string, unknown>)[key]
-        : undefined,
-    source
-  );
-
-  return typeof value === 'string' ? value : null;
-}
-
 /**
- * Compares the candidate's own payload with the branch it lives on.
+ * Decides what has to happen to the release branch, and refuses what must not.
  *
- * The branch name is the authority, because it is what the release is published from. A payload
- * that disagrees means the body was hand-edited, which is worth saying out loud and not worth
- * stopping for.
- *
- * @returns One warning per disagreement, empty when the payload is absent or consistent.
+ * @returns `advances: false` when the branch already points at the pinned head, which is the case
+ * where nothing landed since the last run. Pushing anyway would fire `synchronize` on the pull
+ * request and publish another identical experimental artifact for nothing. `candidateHeadSha` is
+ * the head git resolved for the candidate's branch, `null` without a candidate; a redraft deletes
+ * that branch under a lease on exactly this value.
+ * @throws When the candidate's branch carries work of its own. A candidate branch is only ever a
+ * pointer into `develop`, so a head not contained in it means somebody pushed to it: a cherry-pick,
+ * or the version-bump commit `publish.sh` makes at publish time. Advancing or deleting it would
+ * throw that commit away, and the ruleset would refuse the non-fast-forward push in any case.
  */
-export function crossCheckCandidate(candidate: Candidate): string[] {
-  if (candidate.payload === null) {
-    return [
-      `#${candidate.pullNumber} carries no readable release candidate block, so its branch name ` +
-        'is the only evidence of the version it was cut under.',
-    ];
+export function planBranch(input: {
+  git: GitAdapter;
+  mode: ReleaseMode;
+  branch: string;
+  candidate: Candidate | null;
+  range: PinnedRange;
+}): { advances: boolean; candidateHeadSha: string | null } {
+  const { git, mode, branch, candidate, range } = input;
+
+  if (mode !== 'refresh' && git.remoteBranchExists(branch) === true) {
+    throw new Error(
+      `The branch ${branch} already exists but no open pull request is drafting it. ` +
+        'An earlier run left it behind. Delete it, or reopen its pull request, before drafting.'
+    );
   }
 
-  const recordedBranch = readString(candidate.payload, ['candidate', 'branch']);
-  const recordedVersion = readString(candidate.payload, ['release', 'version']);
+  if (candidate === null) {
+    return { advances: true, candidateHeadSha: null };
+  }
 
-  return [
-    recordedBranch === null || recordedBranch === candidate.branch
-      ? null
-      : `#${candidate.pullNumber} lives on \`${candidate.branch}\` but its payload records ` +
-        `\`${recordedBranch}\`.`,
-    recordedVersion === null || recordedVersion === candidate.version
-      ? null
-      : `#${candidate.pullNumber} was cut as \`${candidate.version}\` but its payload records ` +
-        `\`${recordedVersion}\`.`,
-  ].filter((warning): warning is string => warning !== null);
+  if (git.remoteBranchExists(candidate.branch) === false) {
+    throw new Error(
+      `#${candidate.pullNumber} is open against ${candidate.branch}, but that branch is gone from ` +
+        'the remote. Close the pull request, or restore the branch, before drafting.'
+    );
+  }
+
+  git.fetchBranch(candidate.branch);
+
+  const candidateHeadSha = git.resolveSha(`origin/${candidate.branch}`);
+
+  if (git.isAncestor(candidateHeadSha, range.toSha) === false) {
+    throw new Error(
+      `${candidate.branch} (${candidateHeadSha}) is not contained in ${range.toRef} ` +
+        `(${range.toSha}). Something was pushed to the release branch directly, so this run ` +
+        'would discard it. Resolve the branch by hand.'
+    );
+  }
+
+  return { advances: mode === 'redraft' || candidateHeadSha !== range.toSha, candidateHeadSha };
 }

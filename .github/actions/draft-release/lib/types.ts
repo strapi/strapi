@@ -141,7 +141,12 @@ export type PullPayload = {
   merged_at?: string | null;
   merge_commit_sha?: string | null;
   base?: { ref?: string | null } | null;
-  head?: { ref?: string | null; sha?: string | null } | null;
+  head?: {
+    ref?: string | null;
+    sha?: string | null;
+    /** `null` when the head repository was deleted, which only a fork can be. */
+    repo?: { full_name?: string | null } | null;
+  } | null;
   user?: { login?: string | null } | null;
   milestone?: { title?: string | null } | null;
 };
@@ -333,20 +338,19 @@ export type PinnedRange = {
 /**
  * A release candidate already in flight, discovered from its open pull request.
  *
- * The pull request is the only artifact whose lifecycle matches the candidate's. A release branch
+ * The pull request is the only artifact whose lifecycle matches the candidate's, and only one whose
+ * head lives in this repository qualifies. A release branch
  * outlives it, because the ruleset that protects release branches forbids deleting them without a
  * bypass, and a milestone is renamed by this very action.
  */
 export type Candidate = {
-  /** The version the candidate was cut under, parsed out of its branch name. */
+  /** The version the candidate was cut under, as its branch name spells it. */
   version: string;
+  /** The same version parsed once, because the branch pattern already proved it is `x.y.z`. */
+  parsedVersion: StableVersion;
   branch: string;
   pullNumber: number;
   pullUrl: string;
-  /** The head the pull request payload reports, used only to cross-check the git ref. */
-  pullHeadSha: string;
-  /** The payload the last run embedded in the body, `null` when it is absent or unreadable. */
-  payload: unknown;
 };
 
 /** The machine-readable payload embedded in the release pull request body. */
@@ -438,7 +442,8 @@ export type GitAdapter = {
   isAncestor: (ancestor: string, descendant: string) => boolean;
   listIntegrations: (fromSha: string, toSha: string) => Integration[];
   pushBranch: (sha: string, branch: string) => void;
-  deleteBranch: (branch: string) => void;
+  /** Deletes under a lease: the push fails unless the remote head is still `expectedSha`. */
+  deleteBranch: (branch: string, expectedSha: string) => void;
   remoteBranchExists: (branch: string) => boolean;
   /** Brings a remote branch into `refs/remotes/origin`, so a guard never rests on how the
    * workflow's checkout was configured. */

@@ -84,12 +84,18 @@ export function pullRequestItem(
   return milestoneItem({ number, state, pull_request: { merged_at: mergedAt } });
 }
 
-/**
- * The open pull request that identifies a release candidate in flight.
- *
- * Its body carries the release candidate block a previous run wrote, because that is what the
- * cross-check reads back.
- */
+/** The repository the pipeline fixtures run against, as `head.repo.full_name` spells it. */
+export const OWN_REPOSITORY = 'strapi/strapi';
+
+/** The head of a release pull request cut by this repository's own automation. */
+export function candidateHead(
+  version: string,
+  sha: string = SHA.CANDIDATE_HEAD
+): NonNullable<PullPayload['head']> {
+  return { ref: `releases/${version}`, sha, repo: { full_name: OWN_REPOSITORY } };
+}
+
+/** The open pull request that identifies a release candidate in flight. */
 export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload {
   const version = '5.53.0';
 
@@ -97,19 +103,10 @@ export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload
     number: 27600,
     title: `Release ${version}`,
     html_url: 'https://github.com/strapi/strapi/pull/27600',
-    body: [
-      '<!-- STRAPI_RELEASE_CANDIDATE_START -->',
-      '```json',
-      JSON.stringify({
-        release: { version },
-        candidate: { branch: `releases/${version}` },
-      }),
-      '```',
-      '<!-- STRAPI_RELEASE_CANDIDATE_END -->',
-    ].join('\n'),
+    body: `Release \`${version}\`.`,
     merged_at: null,
     base: { ref: 'main' },
-    head: { ref: `releases/${version}`, sha: SHA.CANDIDATE_HEAD },
+    head: candidateHead(version),
     user: { login: 'strapi-release-bot' },
     milestone: null,
     ...overrides,

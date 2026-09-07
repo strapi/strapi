@@ -127,8 +127,18 @@ export function createGitAdapter(exec: GitExec): GitAdapter {
       run(['push', 'origin', `${sha}:refs/heads/${branch}`]);
     },
 
-    deleteBranch(branch) {
-      run(['push', 'origin', '--delete', `refs/heads/${branch}`]);
+    /**
+     * Compare-and-swap, not a plain delete. The lease names the head the preflight resolved, so a
+     * commit pushed to the branch between preflight and this write makes git refuse rather than
+     * drop it.
+     */
+    deleteBranch(branch, expectedSha) {
+      run([
+        'push',
+        `--force-with-lease=refs/heads/${branch}:${expectedSha}`,
+        'origin',
+        `:refs/heads/${branch}`,
+      ]);
     },
 
     /**

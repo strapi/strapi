@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { createJournal } from '../lib/journal.ts';
 import { EXPERIMENTAL_LABEL, preflightRelease, runDraftRelease } from '../lib/pipeline.ts';
 import { renderBody } from '../lib/report.ts';
-import { SHA, candidatePull } from '../lib/__fixtures__/fixtures.ts';
+import { SHA, candidateHead, candidatePull } from '../lib/__fixtures__/fixtures.ts';
 
 import type { RegistryRequest } from '../lib/npm.ts';
 import type { DraftReleaseResult } from '../lib/pipeline.ts';
@@ -178,8 +178,8 @@ function scenario(overrides: Overrides = {}): {
     pushBranch(sha, branch) {
       calls.push(`pushBranch:${branch}:${sha}`);
     },
-    deleteBranch(branch) {
-      calls.push(`deleteBranch:${branch}`);
+    deleteBranch(branch, expectedSha) {
+      calls.push(`deleteBranch:${branch}:${expectedSha}`);
     },
     fetchBranch(branch) {
       calls.push(`fetchBranch:${branch}`);
@@ -428,6 +428,24 @@ describe('runDraftRelease', () => {
     );
   });
 
+  it('drafts as if nothing were open when the only release pull request comes from a fork', async () => {
+    const { calls, result } = await run(
+      { dryRun: false },
+      {
+        openPulls: [
+          candidatePull({
+            head: { ...candidateHead('5.53.0'), repo: { full_name: 'someone/strapi' } },
+          }),
+        ],
+      }
+    );
+
+    assert.equal(result.mode, 'draft');
+    assert.equal(result.pullNumber, 27700);
+    assert.equal(calls.includes('createPull:Release 5.53.0'), true);
+    assert.equal(calls.includes('updatePullBody:27600'), false);
+  });
+
   it('stops when a release branch was left behind with no pull request drafting it', async () => {
     await assert.rejects(
       () => run({ dryRun: true }, { git: { remoteBranchExists: () => true } }),
@@ -600,16 +618,6 @@ describe('runDraftRelease, candidate in flight', () => {
     assert.equal(calls.includes('updatePullBody:27600'), true);
   });
 
-  it('warns when the candidate body was hand-edited away from its branch', async () => {
-    const { result } = await run(
-      { dryRun: false },
-      inFlight(SHA.CANDIDATE_HEAD, { openPulls: [candidatePull({ body: 'someone rewrote this' })] })
-    );
-
-    assert.equal(result.warnings.length, 1);
-    assert.match(result.warnings[0] ?? '', /carries no readable release candidate block/u);
-  });
-
   // Only the containment check fails. The range pin asks the same question of the baseline tag,
   // and answering `false` there would stop the run for the wrong reason.
   const diverged: Partial<GitAdapter> = {
@@ -659,9 +667,7 @@ describe('runDraftRelease, candidate in flight', () => {
         run(
           { dryRun: false },
           inFlight(SHA.CANDIDATE_HEAD, {
-            openPulls: [
-              candidatePull({ head: { ref: 'releases/5.52.3', sha: SHA.CANDIDATE_HEAD } }),
-            ],
+            openPulls: [candidatePull({ head: candidateHead('5.52.3') })],
           })
         ),
       /is not above the published baseline 5\.52\.3, so that release already shipped/u
@@ -674,9 +680,7 @@ describe('runDraftRelease, candidate in flight', () => {
         run(
           { dryRun: false },
           inFlight(SHA.CANDIDATE_HEAD, {
-            openPulls: [
-              candidatePull({ head: { ref: 'releases/5.54.0', sha: SHA.CANDIDATE_HEAD } }),
-            ],
+            openPulls: [candidatePull({ head: candidateHead('5.54.0') })],
           })
         ),
       /below the candidate 5\.54\.0/u
@@ -691,10 +695,7 @@ describe('runDraftRelease, candidate in flight', () => {
           inFlight(SHA.CANDIDATE_HEAD, {
             openPulls: [
               candidatePull(),
-              candidatePull({
-                number: 27601,
-                head: { ref: 'releases/5.52.4', sha: SHA.CANDIDATE_HEAD },
-              }),
+              candidatePull({ number: 27601, head: candidateHead('5.52.4') }),
             ],
           })
         ),
@@ -725,12 +726,7 @@ describe('runDraftRelease, redraft', () => {
   /** The version drifted: the candidate was cut as 5.52.4, and a feat has landed since. */
   function drifted(overrides: Overrides = {}): Overrides {
     return {
-      openPulls: [
-        candidatePull({
-          number: 27600,
-          head: { ref: 'releases/5.52.4', sha: SHA.CANDIDATE_HEAD },
-        }),
-      ],
+      openPulls: [candidatePull({ number: 27600, head: candidateHead('5.52.4') })],
       gh: {
         listMilestones: async () => [
           { number: 430, title: '5.52.4', state: 'closed' },
@@ -768,11 +764,19 @@ describe('runDraftRelease, redraft', () => {
 
     const created = calls.indexOf('createPull:Release 5.53.0');
     const closed = calls.indexOf('closePull:27600');
-    const deleted = calls.indexOf('deleteBranch:releases/5.52.4');
+    const deleted = calls.indexOf(`deleteBranch:releases/5.52.4:${SHA.CANDIDATE_HEAD}`);
 
     assert.equal(created > -1, true);
     assert.equal(created < closed, true);
     assert.equal(closed < deleted, true);
+  });
+
+  it('deletes the old branch under a lease on the head the preflight saw', async () => {
+    const { result } = await run({ dryRun: true }, drifted());
+    const entry = result.journal.entries.find((candidate) => candidate.op === 'branch.delete');
+
+    assert.equal(entry?.target, 'refs/heads/releases/5.52.4');
+    assert.equal(entry?.before, SHA.CANDIDATE_HEAD);
   });
 
   it('records the whole sequence in the journal, in order', async () => {

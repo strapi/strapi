@@ -154,8 +154,8 @@ export function createGithubAdapter(
     },
 
     /**
-     * Pull requests against one base branch. Paged, because the list endpoint returns the body of
-     * every pull request and the release candidate is found by reading it back.
+     * Pull requests against one base branch. Paged, because the candidate is found by head ref and
+     * a run that stops at the first page could miss it behind unrelated pull requests.
      */
     async listPulls({ state, base: baseRef }) {
       return rest.paginate(`${base}/pulls?${query({ state, base: baseRef })}`);

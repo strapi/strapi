@@ -30,9 +30,11 @@ makes finishing that by hand mechanical.
 
 ## Running more than once
 
-The open pull request against `main` whose head is `releases/x.y.z` is what identifies the candidate
-in flight. Nothing else works as a key: a release branch outlives its candidate, because the ruleset
-over `releases/*` forbids deleting one, and a milestone is renamed by this very action.
+The open pull request against `main` whose head is `releases/x.y.z` and lives in this repository is
+what identifies the candidate in flight. A pull request from a fork is never a candidate, whatever
+its branch is named, because anyone can open one. Nothing else works as a key: a release branch
+outlives its candidate, because the ruleset over `releases/*` forbids deleting one, and a milestone
+is renamed by this very action.
 
 | Mode      | When                                                     | What it does                                                                                                                                         |
 | --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -207,6 +209,10 @@ vouch for whether it landed.
 | `pr.close`              | `gh pr reopen <n>`                                                            |
 | `pr.label`              | `gh pr edit <n> --remove-label publish-experimental`                          |
 | `pr.body`, `pr.comment` | Edit or delete by hand.                                                       |
+
+`branch.delete` is a compare-and-swap on the head the preflight saw: the push carries
+`--force-with-lease` against that SHA, so a commit pushed to the old branch mid-run makes the delete
+fail instead of losing the commit. The same SHA is what `before` records, and what the undo restores.
 
 ## Repository settings this action depends on
 

@@ -106,17 +106,24 @@ describe('createGitAdapter', () => {
     );
   });
 
-  it('deletes a remote branch through an explicit ref', () => {
-    const seen: string[] = [];
+  it('deletes a remote branch under a lease on the head it expects', () => {
+    const seen: string[][] = [];
     const exec: GitExec = (args) => {
-      seen.push(args.join(' '));
+      seen.push(args);
 
       return { status: 0, stdout: '', stderr: '' };
     };
 
-    createGitAdapter(exec).deleteBranch('releases/5.52.4');
+    createGitAdapter(exec).deleteBranch('releases/5.52.4', 'face0000');
 
-    assert.equal(seen[0], 'push origin --delete refs/heads/releases/5.52.4');
+    assert.deepEqual(seen, [
+      [
+        'push',
+        '--force-with-lease=refs/heads/releases/5.52.4:face0000',
+        'origin',
+        ':refs/heads/releases/5.52.4',
+      ],
+    ]);
   });
 
   it('forces the remote-tracking ref when fetching a branch, since it is only a read cache', () => {

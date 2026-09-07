@@ -4,13 +4,7 @@ import {
   resolveIntegrations,
 } from './attribution.ts';
 import { classifyIntegrations, decideBump } from './bump.ts';
-import {
-  assertBranchContained,
-  assertCandidateUnpublished,
-  crossCheckCandidate,
-  decideMode,
-  findCandidate,
-} from './candidate.ts';
+import { assertCandidateUnpublished, decideMode, findCandidate, planBranch } from './candidate.ts';
 import { planCleanup, planMilestones, planRealignment, reconcile } from './milestones.ts';
 import { fetchPackument, resolveLatestVersion } from './npm.ts';
 import { pinRange } from './range.ts';
@@ -94,6 +88,13 @@ export type ReleasePlan = {
   branch: string;
   /** `false` when the branch already points at the pinned head, so nothing has to be pushed. */
   branchAdvances: boolean;
+  /**
+   * The head git resolved for the candidate's branch during preflight, `null` without a candidate.
+   *
+   * A redraft deletes that branch under a lease on this value, so a commit pushed to it after the
+   * preflight fails the delete instead of being lost.
+   */
+  candidateHeadSha: string | null;
   realignment: RealignItem[];
 };
 
@@ -162,7 +163,10 @@ export async function preflightRelease(deps: DraftReleaseDeps): Promise<ReleaseP
     records.filter((record) => ignoredShas.has(record.sha) === false)
   );
 
-  const candidate = findCandidate(await gh.listPulls({ state: 'open', base: RELEASE_BASE }));
+  const candidate = findCandidate(
+    await gh.listPulls({ state: 'open', base: RELEASE_BASE }),
+    gh.coords
+  );
 
   if (candidate !== null) {
     assertCandidateUnpublished(candidate, previousVersion);
@@ -177,7 +181,7 @@ export async function preflightRelease(deps: DraftReleaseDeps): Promise<ReleaseP
       : `Candidate ${candidate.version} on #${candidate.pullNumber}: ${mode}`
   );
 
-  const branchAdvances = planBranch({ git, mode, branch, candidate, range });
+  const branchPlan = planBranch({ git, mode, branch, candidate, range });
   const milestones = planMilestones({
     allMilestones: await gh.listMilestones('all'),
     version,
@@ -196,67 +200,13 @@ export async function preflightRelease(deps: DraftReleaseDeps): Promise<ReleaseP
     integrationCount: integrations.length,
     pullRequests,
     attention: toAttentionRecords(records),
-    warnings: [
-      ...toWarnings(records),
-      ...(candidate === null ? [] : crossCheckCandidate(candidate)),
-    ],
+    warnings: toWarnings(records),
     milestones,
     branch,
-    branchAdvances,
+    branchAdvances: branchPlan.advances,
+    candidateHeadSha: branchPlan.candidateHeadSha,
     realignment: planRealignment(pullRequests, milestones.shipping),
   };
-}
-
-/**
- * Decides what has to happen to the release branch, and refuses what must not.
- *
- * @returns `false` when the branch already points at the pinned head, which is the case where
- * nothing landed since the last run. Pushing anyway would fire `synchronize` on the pull request
- * and publish another identical experimental artifact for nothing.
- */
-function planBranch(input: {
-  git: GitAdapter;
-  mode: ReleaseMode;
-  branch: string;
-  candidate: Candidate | null;
-  range: PinnedRange;
-}): boolean {
-  const { git, mode, branch, candidate, range } = input;
-
-  if (mode !== 'refresh' && git.remoteBranchExists(branch) === true) {
-    throw new Error(
-      `The branch ${branch} already exists but no open pull request is drafting it. ` +
-        'An earlier run left it behind. Delete it, or reopen its pull request, before drafting.'
-    );
-  }
-
-  if (candidate === null) {
-    return true;
-  }
-
-  if (git.remoteBranchExists(candidate.branch) === false) {
-    throw new Error(
-      `#${candidate.pullNumber} is open against ${candidate.branch}, but that branch is gone from ` +
-        'the remote. Close the pull request, or restore the branch, before drafting.'
-    );
-  }
-
-  // The branch a candidate lives on is only ever a pointer into `develop`. Whether this run
-  // advances it or replaces it, a commit pushed to it directly would be discarded, so both paths
-  // refuse before writing anything.
-  git.fetchBranch(candidate.branch);
-
-  const branchHeadSha = git.resolveSha(`origin/${candidate.branch}`);
-
-  assertBranchContained({
-    branch: candidate.branch,
-    branchHeadSha,
-    sourceRef: range.toRef,
-    sourceSha: range.toSha,
-    contained: git.isAncestor(branchHeadSha, range.toSha),
-  });
-
-  return mode === 'redraft' || branchHeadSha !== range.toSha;
 }
 
 /**
@@ -397,8 +347,8 @@ export async function applyRelease(
   );
 
   // 5. Retire the candidate this run replaced, once its replacement exists.
-  if (plan.mode === 'redraft' && plan.candidate !== null) {
-    await applySupersede(journal, gh, git, plan.candidate, { pullNumber, branch: plan.branch });
+  if (plan.mode === 'redraft') {
+    await applySupersede(journal, gh, git, plan, pullNumber);
   }
 
   // 6. The per-run record of what this run pulled in.
@@ -717,14 +667,27 @@ async function applyPullRequest(
  *
  * Only reached once the replacement exists, so the release is never without a candidate. The branch
  * goes too: two release branches side by side is an invitation to publish the wrong one.
+ *
+ * @throws When the plan carries no candidate or no head for it. A redraft is only ever decided
+ * against a candidate, so this is a broken plan, not a state of the repository.
  */
 async function applySupersede(
   journal: Journal,
   gh: GithubAdapter,
   git: GitAdapter,
-  candidate: Candidate,
-  replacement: { pullNumber: number | null; branch: string }
+  plan: ReleasePlan,
+  replacementPullNumber: number | null
 ): Promise<void> {
+  const { candidate, candidateHeadSha } = plan;
+
+  if (candidate === null || candidateHeadSha === null) {
+    throw new Error(
+      `A ${plan.mode} needs the candidate it replaces and the head its branch was resolved at, ` +
+        'but the plan carries neither. Nothing was retired.'
+    );
+  }
+
+  const replacement = { pullNumber: replacementPullNumber, branch: plan.branch };
   const reference =
     replacement.pullNumber === null ? `\`${replacement.branch}\`` : `#${replacement.pullNumber}`;
 
@@ -758,9 +721,9 @@ async function applySupersede(
     {
       op: 'branch.delete',
       target: `refs/heads/${candidate.branch}`,
-      before: candidate.pullHeadSha,
+      before: candidateHeadSha,
       detail: `superseded by ${replacement.branch}`,
     },
-    async () => git.deleteBranch(candidate.branch)
+    async () => git.deleteBranch(candidate.branch, candidateHeadSha)
   );
 }
