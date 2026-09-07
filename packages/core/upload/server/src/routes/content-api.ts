@@ -52,7 +52,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       path: '/files/:id',
       handler: 'content-api.findOne',
       request: {
-        params: { id: validator.fileId },
+        params: { id: validator.fileIdentifier },
         query: {
           fields: validator.queryFields.optional(),
           populate: validator.queryPopulate.optional(),
@@ -65,7 +65,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       path: '/files/:id',
       handler: 'content-api.destroy',
       request: {
-        params: { id: validator.fileId },
+        params: { id: validator.fileIdentifier },
       },
       response: validator.file,
     },
