@@ -752,6 +752,94 @@ describe('useInfiniteAssets', () => {
     expect(ids[PAGE_SIZE - 1]).toBe(PAGE_SIZE);
   });
 
+  describe('returning to a folder', () => {
+    const rootPage1 = createMockPage(1, 3, 50);
+    const rootPage2 = createMockPage(2, 3, 50);
+    const subfolderPage1 = createMockPage(1, 1, 2, 2);
+
+    /**
+     * The root has three pages, the subfolder one. `whenBack` lets a test return
+     * something other than settled data after the user comes back — modelling a
+     * re-read that is still in flight rather than instant.
+     */
+    const mockFolders = (whenBack?: () => object | undefined) => {
+      mockUseGetAssetsQuery.mockImplementation(
+        ({ folder, page: p }: { folder: number | null; page: number }) => {
+          if (folder !== null) {
+            return subfolderPage1;
+          }
+
+          return whenBack?.() ?? (p === 2 ? rootPage2 : rootPage1);
+        }
+      );
+    };
+
+    it('restores the pages a folder had loaded when the user comes back to it', () => {
+      mockFolders();
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      act(() => {
+        getResult().fetchNextPage();
+      });
+
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+
+      changeFolder(26);
+
+      expect(getResult().assets).toHaveLength(2);
+
+      changeFolder(null);
+
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+      // Page 1 is back too, in front — the whole list returned, not just the
+      // page current when the user left.
+      expect(getResult().assets[0].id).toBe(1);
+      expect(getResult().assets[PAGE_SIZE].id).toBe(PAGE_SIZE + 1);
+      // And it resumes at the page it was read to, so the next scroll asks for
+      // page 3 rather than replaying pages the user already has.
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ folder: null, page: 2 }),
+        expect.anything()
+      );
+    });
+
+    it('shows the restored rows rather than a spinner while the pages re-read', () => {
+      // Leaving evicts the folder's cache entries, so returning always re-reads.
+      // But rows stay on screen throughout, so it's a refresh, not a load.
+      let hasReturned = false;
+      mockFolders(() => (hasReturned ? PENDING_QUERY : undefined));
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      act(() => {
+        getResult().fetchNextPage();
+      });
+
+      changeFolder(26);
+      hasReturned = true;
+      changeFolder(null);
+
+      expect(getResult().isLoading).toBe(false);
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+      expect(getResult().pagination?.total).toBe(50);
+    });
+
+    it('still reports loading when the list it returns to has nothing to show', () => {
+      // Nothing was ever loaded for folder 26, so there is nothing to restore.
+      mockUseGetAssetsQuery.mockImplementation(({ folder }: { folder: number | null }) =>
+        folder === null ? rootPage1 : PENDING_QUERY
+      );
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      changeFolder(26);
+
+      expect(getResult().isLoading).toBe(true);
+      expect(getResult().assets).toHaveLength(0);
+    });
+  });
+
   it('returns error from query', () => {
     const mockError = { status: 500, data: 'Server error' };
     mockUseGetAssetsQuery.mockReturnValue({

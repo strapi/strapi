@@ -373,7 +373,10 @@ module.exports = ({ strapi }) => ({
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
       const isProduction = process.env.NODE_ENV === 'production';
 
-      const { maxAge, ...cookieOptions } = buildRefreshCookieOptions(upSessions, isProduction);
+      const { maxAge: _maxAge, ...cookieOptions } = buildRefreshCookieOptions(
+        upSessions,
+        isProduction
+      );
 
       ctx.cookies.set(cookieName, '', { ...cookieOptions, expires: new Date(0) });
     }

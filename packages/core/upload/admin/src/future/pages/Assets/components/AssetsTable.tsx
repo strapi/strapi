@@ -24,11 +24,12 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
-import { TABLE_HEADERS } from '../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS, TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -319,12 +320,16 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      {...ASSET_DETAILS_TRIGGER_PROPS}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
@@ -337,7 +342,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {/* No checkbox without the update permission (nothing selectable can be
           acted on). Shown at every viewport width otherwise. */}
       {canUpdate && (
-        <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
+        <CheckboxTd {...ASSET_ITEM_CONTROL_PROPS} onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
               checked={selected}
@@ -407,7 +412,12 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would open the details drawer). */}
-      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
+      <StyledTd
+        {...ASSET_ITEM_CONTROL_PROPS}
+        onClick={stopRowEvent}
+        onKeyDown={stopRowEvent}
+        onPointerDown={stopRowEvent}
+      >
         <Flex justifyContent="flex-end">
           <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
@@ -503,6 +513,9 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e: React.DragEvent) => {
         if (isEventFromWithin(e)) {
           e.preventDefault();
@@ -591,6 +604,8 @@ interface AssetsTableProps {
    * order instead of folders-first. Range selection follows the same order.
    */
   mixedItems?: MixedItem[] | null;
+  /** Keys of the rendered rows, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
@@ -598,6 +613,7 @@ export const AssetsTable = ({
   assets,
   folders = [],
   mixedItems = null,
+  renderedKeys,
   onAssetItemClick,
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
@@ -622,14 +638,8 @@ export const AssetsTable = ({
 
   // Render order — folders first by default, or the interleaved mixed order.
   // Range selection follows it.
-  const orderedItemKeys: ItemKey[] = mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
-    : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
-      ];
+  const orderedItemKeys: ItemKey[] =
+    renderedKeys ?? buildRenderedKeys({ folders, assets, mixedItems });
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {

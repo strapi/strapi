@@ -214,6 +214,20 @@ const NavList = styled.ul`
 
 const INDENT_PER_LEVEL_REM = 1.6;
 
+/**
+ * A leaf's chevron is present only to keep the folder names aligned, so it
+ * should read as absent. The design system's disabled state is built for real
+ * controls — a filled, bordered pill — which draws more attention than the
+ * enabled chevron next to it. Doubled selector to outrank that rule.
+ */
+const ChevronButton = styled(IconButton)`
+  &&[aria-disabled='true'] {
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.3;
+  }
+`;
+
 const RotatingChevron = styled(ChevronDown)<{ $expanded: boolean }>`
   transform: rotate(${({ $expanded }) => ($expanded ? '0deg' : '-90deg')});
   transition: transform 0.2s ease;
@@ -283,26 +297,37 @@ const FolderTreeItemInner = ({
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
       >
-        <IconButton
-          label={formatMessage(
-            {
-              id: getTranslationKey(
-                isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
-              ),
-              defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
-            },
-            { name }
-          )}
+        <ChevronButton
+          label={
+            hasChildren
+              ? formatMessage(
+                  {
+                    id: getTranslationKey(
+                      isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
+                    ),
+                    defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
+                  },
+                  { name }
+                )
+              : formatMessage(
+                  {
+                    id: getTranslationKey('sidebar.tree.no-subfolders'),
+                    defaultMessage: 'The folder {name} has no subfolders',
+                  },
+                  { name }
+                )
+          }
+          disabled={!hasChildren}
           onClick={(event: React.MouseEvent) => {
             event.stopPropagation();
             onToggle(id);
           }}
           variant="ghost"
           withTooltip={false}
-          aria-expanded={isFolderExpanded}
+          aria-expanded={hasChildren ? isFolderExpanded : undefined}
         >
           <RotatingChevron $expanded={isFolderExpanded} fill="neutral500" />
-        </IconButton>
+        </ChevronButton>
 
         <Box flex="1" minWidth={0}>
           <RowButton
