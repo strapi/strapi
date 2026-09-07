@@ -255,6 +255,7 @@ const releaseController = {
     await validateRelease(releaseArgs);
 
     const releaseService = getService('release', { strapi });
+
     const release = await releaseService.update(id, releaseArgs, { user });
 
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
@@ -282,30 +283,21 @@ const releaseController = {
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-    const releaseActionService = getService('release-action', { strapi });
-    const release = await releaseService.publish(id);
 
-    const [countPublishActions, countUnpublishActions] = await Promise.all([
-      releaseActionService.countActions({
-        filters: {
-          release: id,
-          type: 'publish',
-        },
-      }),
-      releaseActionService.countActions({
-        filters: {
-          release: id,
-          type: 'unpublish',
-        },
-      }),
-    ]);
+    // The service audits the run itself, whoever the caller is
+    const { release, counts, countsError } = await releaseService.publish(id);
+
+    // The publish is committed and audited; the response still needs the counts
+    if (!counts) {
+      throw countsError ?? new Error('Failed to count the release entries');
+    }
 
     ctx.body = {
       data: release,
       meta: {
-        totalEntries: countPublishActions + countUnpublishActions,
-        totalPublishedEntries: countPublishActions,
-        totalUnpublishedEntries: countUnpublishActions,
+        totalEntries: counts.published + counts.unpublished,
+        totalPublishedEntries: counts.published,
+        totalUnpublishedEntries: counts.unpublished,
       },
     };
   },

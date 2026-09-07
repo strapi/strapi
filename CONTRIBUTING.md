@@ -93,6 +93,14 @@ yarn setup
 yarn ai:sync  # link AI skills into your local tool directories (.agents/, .claude/, .cursor/)
 ```
 
+To set up a checkout created with Git worktrees:
+
+```bash
+git worktree add <path> <commit-ish>
+cd <path>
+yarn setup:worktree
+```
+
 ### 4. Start the example application
 
 ```bash

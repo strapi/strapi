@@ -183,6 +183,33 @@ In that step the provider may back up the local `uploads` folder, delete existin
 
 This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
 
+**Supported workflow — content replace, keep destination config:** `--only content` (or `--exclude config`) replaces in-scope content on the destination while leaving core store and webhooks untouched. That is intentional restore scoping, not incremental sync. Incremental / merge sync remains a possible future product direction; designs should prefer opt-in strategies over changing restore defaults.
+
+### `--only` / `--exclude` deletion vs transfer matrix
+
+Stage presets:
+
+| Preset    | Stages          | Typical payload                                                  |
+| --------- | --------------- | ---------------------------------------------------------------- |
+| `content` | entities, links | Content-type rows (incl. media library DB records) and relations |
+| `files`   | assets          | Upload binaries under `public/uploads`                           |
+| `config`  | configuration   | Core store and webhooks                                          |
+
+Schemas always transfer with the CLI (independent of these presets).
+
+| Flags                     | Transferred                             | Pre-transfer wipe                                   | Destination preserved                                              |
+| ------------------------- | --------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| (none)                    | content + files + config                | All transferable entities, assets, config           | Admin / ignored types only                                         |
+| `--only content`          | content                                 | User content types only (not core store / webhooks) | Config + upload binaries                                           |
+| `--only content,config`   | content + config                        | All transferable entities + config                  | Upload binaries                                                    |
+| `--exclude config`        | content + files                         | User content types only                             | Config (core store / webhooks)                                     |
+| `--exclude files`         | content + config                        | Entities + config (assets skipped)                  | Upload binaries; media library DB rows still transfer with content |
+| `--exclude media-library` | content (without upload types) + config | Entities except upload types + config               | Upload binaries + `plugin::upload.file` / `folder`                 |
+
+Content-type filters (`--only-content-types` / `--exclude-content-types`) further narrow the entities/links stream and restore wipe. When upload types are out of scope, the files stage is skipped automatically.
+
+When `--only` omits one or more of `content` / `files` / `config`, the CLI prints a dim clarity line listing stages that are not transferred so destination data for those stages is obviously preserved.
+
 A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.

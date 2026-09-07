@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  deepEncodeQueryValues,
+  useQueryParams,
+  withEncodedUserParams,
+} from '@strapi/admin/strapi-admin';
 import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -22,7 +26,12 @@ export const Filters = () => {
   const filters = query?.filters?.$and || [];
 
   const handleRemoveFilter: FilterListProps['onRemoveFilter'] = (nextFilters) => {
-    setQuery({ filters: { $and: nextFilters }, page: 1 } as Query);
+    setQuery(
+      withEncodedUserParams(query, {
+        filters: deepEncodeQueryValues({ $and: nextFilters }),
+        page: 1,
+      }) as Query
+    );
   };
 
   const handleSubmit: FilterPopoverProps['onSubmit'] = (filters) => {
@@ -30,7 +39,12 @@ export const Filters = () => {
       location: 'content-manager',
       filter: Object.keys(filters[filters.length - 1])[0],
     });
-    setQuery({ filters: { $and: filters }, page: 1 } as Query);
+    setQuery(
+      withEncodedUserParams(query, {
+        filters: deepEncodeQueryValues({ $and: filters }),
+        page: 1,
+      }) as Query
+    );
   };
 
   return (

@@ -50,7 +50,7 @@ describe('useFolderNavigation', () => {
     renderHook(() => useFolderNavigation());
 
     await waitFor(() => {
-      expect(mockSetQuery).toHaveBeenCalledWith({ folder: '' }, 'remove');
+      expect(mockSetQuery).toHaveBeenCalledWith({ folder: undefined });
     });
   });
 
@@ -181,7 +181,17 @@ describe('useFolderNavigation', () => {
       renderHook(() => useFolderNavigation());
 
       await waitFor(() => {
-        expect(mockSetQuery).toHaveBeenCalledWith({ folder: '' }, 'remove');
+        expect(mockSetQuery).toHaveBeenCalledWith({ _q: 'kitten', folder: undefined });
+      });
+    });
+
+    it('re-encodes a search term holding a percent sign when stripping the folder', async () => {
+      mockUseQueryParams.mockReturnValue([{ query: { folder: 'abc', _q: '100%' } }, mockSetQuery]);
+
+      renderHook(() => useFolderNavigation());
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalledWith({ _q: '100%25', folder: undefined });
       });
     });
   });

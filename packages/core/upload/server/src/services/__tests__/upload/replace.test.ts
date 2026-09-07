@@ -15,6 +15,7 @@ const providerMethods = {
   upload: jest.fn(),
   replace: jest.fn(),
   delete: jest.fn(),
+  checkFileSize: jest.fn(),
 };
 
 const imageManipulationMock = {
@@ -132,5 +133,32 @@ describe('Upload service - replace()', () => {
 
     expect(providerMethods.replace).toHaveBeenCalledTimes(1);
     expect(providerMethods.delete).not.toHaveBeenCalled();
+  });
+
+  test('checks the file size before writing anything to the provider', async () => {
+    currentDbFile = {
+      id: 3,
+      hash: 'document_ghi789',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    // A rejected size check must abort the replace, leaving the stored file untouched.
+    providerMethods.checkFileSize.mockImplementationOnce(() => {
+      throw new Error('document.txt exceeds size limit of 1 KB.');
+    });
+
+    await expect(
+      uploadService.replace(3, {
+        data: { fileInfo: {} as any },
+        file: inputFile() as any,
+      })
+    ).rejects.toThrow('exceeds size limit');
+
+    expect(providerMethods.checkFileSize).toHaveBeenCalledTimes(1);
+    expect(providerMethods.replace).not.toHaveBeenCalled();
+    expect(providerMethods.upload).not.toHaveBeenCalled();
+    expect(dbUpdate).not.toHaveBeenCalled();
   });
 });

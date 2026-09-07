@@ -102,7 +102,7 @@
   "form.attribute.item.number.type.float": "float (ex: 3.33333333)",
   "form.attribute.item.number.type.integer": "integer (ex: 10)",
   "form.attribute.item.privateField": "Private field",
-  "form.attribute.item.privateField.description": "This field will not show up in the API response",
+  "form.attribute.item.privateField.description": "This field will not show up in the API response. New private fields are also excluded from search.",
   "form.attribute.item.requiredField": "Required field",
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
   "form.attribute.item.text.regex": "RegExp pattern",

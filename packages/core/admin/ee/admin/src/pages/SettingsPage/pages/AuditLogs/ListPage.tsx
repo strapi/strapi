@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Flex, IconButton, Typography } from '@strapi/design-system';
-import { Eye } from '@strapi/icons';
+import { Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Download, Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
@@ -10,12 +10,17 @@ import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
-import { useQueryParams } from '../../../../../../../admin/src/hooks/useQueryParams';
+import {
+  useQueryParams,
+  withEncodedUserParams,
+} from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
+import { ExportCard } from './components/ExportCard';
 import { Modal } from './components/Modal';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
+import { useExportAuditLogs } from './hooks/useExportAuditLogs';
 import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
@@ -26,12 +31,30 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
+  const readPermissions = permissions?.auditLogs?.read;
+  const exportPermissions = permissions?.auditLogs?.export;
   const {
-    allowedActions: { canRead: canReadAuditLogs },
+    allowedActions: { canRead: canReadAuditLogs, canExport: canExportAuditLogs },
     isLoading: isLoadingRBAC,
-  } = useRBAC(permissions?.auditLogs?.read || []);
+  } = useRBAC(
+    React.useMemo(
+      () => [...(readPermissions ?? []), ...(exportPermissions ?? [])],
+      [readPermissions, exportPermissions]
+    )
+  );
 
-  const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    id?: AuditLog['id'];
+    filters?: unknown;
+    _q?: unknown;
+  }>();
+
+  const openLog = (id: AuditLog['id']) =>
+    setQuery(withEncodedUserParams(query, { id }), 'push', true);
+  const closeLog = () => setQuery(withEncodedUserParams(query, { id: undefined }), 'push', true);
+  const { exportAuditLogs, downloadExport, dismissExport, isExporting, progress, exportResult } =
+    useExportAuditLogs();
+
   const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
     auditLogs,
@@ -90,8 +113,8 @@ const ListPage = () => {
         defaultMessage: 'User',
       }),
       sortable: false,
-      // In this case, the passed parameter cannot and shouldn't be something else than User
-      cellFormatter: ({ user }) => (user ? user.displayName : ''),
+      // System actions, such as a scheduled release publish, have no user
+      cellFormatter: ({ user }) => (user ? user.displayName : '-'),
     },
   ];
 
@@ -102,6 +125,7 @@ const ListPage = () => {
   const isLoading = isLoadingData || isLoadingRBAC;
 
   const { results = [] } = auditLogs ?? {};
+  const totalEntries = auditLogs?.pagination?.total;
 
   return (
     <Page.Main aria-busy={isLoading}>
@@ -125,6 +149,21 @@ const ListPage = () => {
           id: 'Settings.permissions.auditLogs.listview.header.subtitle',
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
+        primaryAction={
+          canExportAuditLogs && (
+            <Button
+              startIcon={<Download />}
+              loading={isExporting}
+              disabled={isLoading || totalEntries === 0}
+              onClick={() => exportAuditLogs(query?.filters, totalEntries ?? 0)}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.auditLogs.listview.export',
+                defaultMessage: 'Export as CSV',
+              })}
+            </Button>
+          )
+        }
       />
       <Layouts.Action
         startActions={
@@ -147,7 +186,7 @@ const ListPage = () => {
             <Table.Loading />
             <Table.Body>
               {results.map((log) => (
-                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id }, 'push', true)}>
+                <Table.Row key={log.id} onClick={() => openLog(log.id)}>
                   {headers.map((header) => {
                     const { name, cellFormatter } = header;
 
@@ -196,7 +235,7 @@ const ListPage = () => {
                   <Table.Cell onClick={(e) => e.stopPropagation()}>
                     <Flex justifyContent="end">
                       <IconButton
-                        onClick={() => setQuery({ id: log.id }, 'push', true)}
+                        onClick={() => openLog(log.id)}
                         withTooltip={false}
                         label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
@@ -219,12 +258,13 @@ const ListPage = () => {
           <Pagination.Links />
         </Pagination.Root>
       </Layouts.Content>
-      {query?.id && (
-        <Modal
-          handleClose={() => setQuery({ id: '' }, 'remove', true)}
-          logId={query.id.toString()}
-        />
-      )}
+      {query?.id && <Modal handleClose={closeLog} logId={query.id.toString()} />}
+      <ExportCard
+        progress={progress}
+        exportResult={exportResult}
+        onDownload={downloadExport}
+        onDismiss={dismissExport}
+      />
     </Page.Main>
   );
 };

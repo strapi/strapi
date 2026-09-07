@@ -93,7 +93,7 @@ describe('useListSort', () => {
 
     act(() => result.current.setSortBy('mostRecentUpdates'));
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ sort: '' }, 'remove');
+    expect(mockSetQuery).toHaveBeenCalledWith({ sort: undefined });
   });
 
   it('never leaves the list without a sort rule: clearing the last facet restores the default', () => {
@@ -102,7 +102,7 @@ describe('useListSort', () => {
 
     act(() => result.current.setDirection(null));
 
-    expect(mockSetQuery).toHaveBeenCalledWith({ sort: '' }, 'remove');
+    expect(mockSetQuery).toHaveBeenCalledWith({ sort: undefined });
   });
 
   it('toggles folders position through the dedicated param', () => {
@@ -116,6 +116,37 @@ describe('useListSort', () => {
     expect(mixed.current.foldersPosition).toBe('mixed');
 
     act(() => mixed.current.setFoldersPosition('top'));
-    expect(mockSetQuery).toHaveBeenCalledWith({ folders: '' }, 'remove');
+    expect(mockSetQuery).toHaveBeenCalledWith({ folders: undefined });
+  });
+
+  it.each([
+    ['a percent sign', '100%', '100%25'],
+    ['an ampersand', 'a&b', 'a%26b'],
+    ['a hash', 'a#b', 'a%23b'],
+  ])('re-encodes %s in the search term when the sort changes', (_label, raw, encoded) => {
+    mockQuery = { _q: raw };
+    const { result } = renderHook(() => useListSort());
+
+    act(() => result.current.setSortBy('oldestUploads'));
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: encoded, sort: 'createdAt:ASC' });
+  });
+
+  it('re-encodes the search term when the sort is reset to the default', () => {
+    mockQuery = { sort: 'createdAt:ASC', _q: '100%' };
+    const { result } = renderHook(() => useListSort());
+
+    act(() => result.current.setSortBy('mostRecentUpdates'));
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '100%25', sort: undefined });
+  });
+
+  it('re-encodes the search term when the folders position toggles', () => {
+    mockQuery = { _q: '100%' };
+    const { result } = renderHook(() => useListSort());
+
+    act(() => result.current.setFoldersPosition('mixed'));
+
+    expect(mockSetQuery).toHaveBeenCalledWith({ _q: '100%25', folders: 'mixed' });
   });
 });

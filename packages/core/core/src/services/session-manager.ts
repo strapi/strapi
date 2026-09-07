@@ -582,10 +582,21 @@ class SessionManager {
     try {
       const config = this.getConfigForOrigin(origin);
       const algorithm = config.algorithm || DEFAULT_ALGORITHM;
-      const jwtKey = this.getJwtKey(config, algorithm, 'verify');
-      const payload = jwt.verify(refreshToken, jwtKey, {
+      const verifyKey = this.getJwtKey(config, algorithm, 'verify');
+      const signKey = this.getJwtKey(config, algorithm, 'sign');
+
+      // Filter out conflicting options that are already handled by the payload or key selection
+      const jwtOptions = config.jwtOptions || {};
+      const {
+        expiresIn: _expiresIn,
+        privateKey: _privateKey,
+        publicKey: _publicKey,
+        ...jwtSignOptions
+      } = jwtOptions;
+
+      const payload = jwt.verify(refreshToken, verifyKey, {
         algorithms: [algorithm],
-        ...config.jwtOptions,
+        ...jwtSignOptions,
       }) as RefreshTokenPayload;
 
       if (!payload || payload.type !== 'refresh') {
@@ -613,10 +624,7 @@ class SessionManager {
             exp: childExp,
           };
 
-          // Filter out conflicting options that are already handled by the payload
-          const { expiresIn: _expiresIn, ...jwtSignOptions } = config.jwtOptions || {};
-
-          const childToken = jwt.sign(childPayload, jwtKey, {
+          const childToken = jwt.sign(childPayload, signKey, {
             algorithm,
             noTimestamp: true,
             ...jwtSignOptions,
@@ -687,10 +695,8 @@ class SessionManager {
         iat: childIat,
         exp: childExp,
       };
-      // Filter out conflicting options that are already handled by the payload
-      const { expiresIn: _expiresIn, ...jwtSignOptions } = config.jwtOptions || {};
 
-      const childToken = jwt.sign(payloadOut, jwtKey, {
+      const childToken = jwt.sign(payloadOut, signKey, {
         algorithm,
         noTimestamp: true,
         ...jwtSignOptions,

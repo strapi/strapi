@@ -716,6 +716,8 @@ const normalizeTransferFilterOptionsHook = (command: Command) => {
   normalizeTransferFilterOptions(command.opts() as TransferCliFilterOptions);
 };
 
+const TRANSFER_STAGE_PRESETS = ['content', 'files', 'config'] as const;
+
 const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
   const { exclude, only, excludeContentTypes, onlyContentTypes } = opts;
   if (
@@ -737,6 +739,18 @@ const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
 
   if (parts.length) {
     console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+  }
+
+  // When `--only` omits stages, say so — destination data for those stages is preserved.
+  if (only?.length) {
+    const omittedStages = TRANSFER_STAGE_PRESETS.filter((stage) => !only.includes(stage));
+    if (omittedStages.length) {
+      console.log(
+        chalk.dim(
+          `Stages not transferred (destination data preserved): ${omittedStages.join(', ')}.`
+        )
+      );
+    }
   }
 
   const contentTypeParts: string[] = [];
