@@ -81,7 +81,7 @@ export function renderAuthor(author: Author): string {
  * The time of day is kept in the payload for anything that needs to order two merges.
  */
 export function renderMergeDate(mergedAt: string): string {
-  return /^(\d{4}-\d{2}-\d{2})/u.exec(mergedAt ?? '')?.[1] ?? '—';
+  return /^(\d{4}-\d{2}-\d{2})/u.exec(mergedAt)?.[1] ?? '—';
 }
 
 /**

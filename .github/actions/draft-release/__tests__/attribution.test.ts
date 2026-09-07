@@ -94,7 +94,7 @@ describe('selectExactCandidates', () => {
   });
 
   it('rejects an unmerged pull request', () => {
-    const open = pull({ merged_at: null });
+    const open: PullPayload = { ...pull(), merged_at: null };
 
     assert.deepEqual(selectExactCandidates(integration(), [open], 'develop'), []);
   });
@@ -208,7 +208,9 @@ describe('summarisePull', () => {
   });
 
   it('fills every absent field rather than leaking undefined', () => {
-    assert.deepEqual(summarisePull({ number: 1 }, integration({ author: '', email: '' })), {
+    const bare = { number: 1, merged_at: '2026-09-05T09:59:00Z' };
+
+    assert.deepEqual(summarisePull(bare, integration({ author: '', email: '' })), {
       number: 1,
       title: '',
       author: { login: '', name: null },
@@ -216,7 +218,7 @@ describe('summarisePull', () => {
       baseRef: '',
       headRef: '',
       milestone: null,
-      mergedAt: '',
+      mergedAt: '2026-09-05T09:59:00Z',
     });
   });
 });

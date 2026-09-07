@@ -151,6 +151,9 @@ export type PullPayload = {
   milestone?: { title?: string | null } | null;
 };
 
+/** A pull request the API reports as merged, produced only by the `isMerged` guard. */
+export type MergedPull = PullPayload & { merged_at: string };
+
 /** The projection of a pull request that reaches the report. */
 export type PullSummary = {
   number: number;
@@ -163,8 +166,8 @@ export type PullSummary = {
   /**
    * When the pull request landed, ISO 8601, from `merged_at`.
    *
-   * Never empty on a summary that reaches the report: attribution refuses any pull request without
-   * a `merged_at`, so a summary can only exist for one that merged.
+   * Always a real timestamp: a summary is only ever projected from a {@link MergedPull}, which is
+   * the type the `isMerged` guard produces, so the payload cannot have arrived without one.
    */
   mergedAt: string;
 };

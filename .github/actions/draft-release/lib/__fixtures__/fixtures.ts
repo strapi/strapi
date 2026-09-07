@@ -1,4 +1,11 @@
-import type { Integration, MilestoneItem, PullCommit, PullPayload, ReleasePlan } from '../types.ts';
+import type {
+  Integration,
+  MergedPull,
+  MilestoneItem,
+  PullCommit,
+  PullPayload,
+  ReleasePlan,
+} from '../types.ts';
 
 /**
  * Fixtures modelled on the real `v5.52.3..develop` range, including the cases that proved the
@@ -31,7 +38,8 @@ export function integration(overrides: Partial<Integration> = {}): Integration {
   };
 }
 
-export function pull(overrides: Partial<PullPayload> = {}): PullPayload {
+/** A merged pull request, because everything attribution accepts has already merged. */
+export function pull(overrides: Partial<MergedPull> = {}): MergedPull {
   return {
     number: 27482,
     title: 'fix(content-type-builder): default new private fields to not searchable',
@@ -47,7 +55,7 @@ export function pull(overrides: Partial<PullPayload> = {}): PullPayload {
 }
 
 /** A pull request merged into `main`, only indirectly associated with a develop integration. */
-export function indirectPull(): PullPayload {
+export function indirectPull(): MergedPull {
   return pull({
     number: 27470,
     title: 'Releases/5.52.2',
@@ -58,7 +66,7 @@ export function indirectPull(): PullPayload {
 }
 
 /** The release back-merge: head is `main`, so its commits already shipped. */
-export function backMergePull(): PullPayload {
+export function backMergePull(): MergedPull {
   return pull({
     number: 27527,
     title: 'chore: release v5.52.3 update develop',
