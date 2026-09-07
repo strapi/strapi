@@ -16,9 +16,18 @@ const config = {
   },
   rules: {
     ...require('./index').rules,
+
     // TODO: The following rules from @strapi/eslint-config/back/typescript are disabled because they're causing problems we need to solve or fix
     // to be solved in configuration
-    'node/no-unsupported-features/es-syntax': 'off',
+
+    // NOTE: This rule takes into consideration package.json#engines
+    'node/no-unsupported-features/es-syntax': [
+      'error',
+      {
+        // NOTE: We are using a bundler that takes care of these
+        ignores: ['modules', 'dynamicImport'],
+      },
+    ],
     'import/prefer-default-export': 'off',
     'import/namespace': 'off',
     'node/no-missing-import': 'off',

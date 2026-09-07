@@ -88,6 +88,7 @@
     "@types/jest": "29.5.2",
     "@types/jscodeshift": "17.3.0",
     "@types/node": "20.19.41",
+    "@types/prompts": "2.4.9",
     "eslint-config-custom": "5.52.3",
     "jest": "29.6.0",
     "rimraf": "6.1.3"
