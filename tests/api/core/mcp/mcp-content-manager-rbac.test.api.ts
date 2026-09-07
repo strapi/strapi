@@ -7,6 +7,8 @@ import type { Core, UID } from '@strapi/types';
 const MCP_PROTOCOL_VERSION = '2025-06-18';
 const MODEL_UID = 'api::mcp-rbac-doc.mcp-rbac-doc';
 const SLUG = 'mcp-rbac-doc';
+const SINGLE_MODEL_UID = 'api::mcp-rbac-single.mcp-rbac-single';
+const SINGLE_SLUG = 'mcp-rbac-single';
 
 const CM_ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -20,6 +22,24 @@ const ct = {
   displayName: 'mcp-rbac-doc',
   singularName: 'mcp-rbac-doc',
   pluralName: 'mcp-rbac-docs',
+  draftAndPublish: false,
+  attributes: {
+    title: { type: 'string' },
+    secret: { type: 'string' },
+    // json/blocks are valid `fields` projections but excluded from sort/filter eligibility —
+    // see buildFieldsSchema regression tests below.
+    payload: { type: 'json' },
+    body: { type: 'blocks' },
+  },
+};
+
+// Single-type coverage — the single-type get/write handlers share the same RBAC
+// sanitization path as the collection-type handlers but were previously untested here.
+const singleCt = {
+  kind: 'singleType',
+  displayName: 'mcp-rbac-single',
+  singularName: 'mcp-rbac-single',
+  pluralName: 'mcp-rbac-singles',
   draftAndPublish: false,
   attributes: {
     title: { type: 'string' },
@@ -68,10 +88,11 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
 
   const deleteAllDocuments = async () => {
     await strapi.db.query(MODEL_UID).deleteMany({});
+    await strapi.db.query(SINGLE_MODEL_UID).deleteMany({});
   };
 
   beforeAll(async () => {
-    await builder.addContentType(ct).build();
+    await builder.addContentTypes([ct, singleCt]).build();
 
     strapi = await createStrapiInstance({
       register({ strapi: instance }) {
@@ -193,9 +214,13 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
     return parseMcpResponse(res);
   };
 
-  const fieldPermission = (action: string, fields: string[]): AdminPermission => ({
+  const fieldPermission = (
+    action: string,
+    fields: string[],
+    subject: string = MODEL_UID
+  ): AdminPermission => ({
     action,
-    subject: MODEL_UID,
+    subject,
     conditions: [],
     properties: { fields },
   });
@@ -282,5 +307,160 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
 
     const surviving = await strapi.documents(MODEL_UID as UID.CollectionType).findMany({});
     expect(surviving).toHaveLength(1);
+  });
+
+  // Regression: `fields` was sanitized through permissionChecker.sanitizedQuery.read but
+  // never forwarded into the documentManager.findOne options, so the get tool always
+  // returned every readable scalar field regardless of the requested projection.
+  test('get tool applies the requested "fields" projection instead of returning every readable field', async () => {
+    const seeded = await strapi.documents(MODEL_UID as UID.CollectionType).create({
+      data: { title: 'visible', secret: 'hidden' },
+    });
+
+    // Read is permitted on BOTH fields — this isolates the projection bug from RBAC.
+    const token = await createAdminToken([fieldPermission(CM_ACTIONS.read, ['title', 'secret'])]);
+    await initializeMcpSession(token.accessKey);
+
+    const response = await callTool(token.accessKey, `get_${SLUG}`, {
+      documentId: seeded.documentId,
+      fields: ['title'],
+    });
+
+    expect(response.error).toBeUndefined();
+    expect(response.result?.isError).not.toBe(true);
+
+    const data = response.result?.structuredContent?.data as Record<string, unknown> | undefined;
+    expect(data).toBeDefined();
+    expect(data?.title).toBe('visible');
+    // secret is readable (permission-wise) but was not requested — must not appear.
+    expect(data).not.toHaveProperty('secret');
+  });
+
+  // Regression: buildFieldsSchema reused the sort/filter scalar allowlist, which excludes
+  // json/blocks, so `fields: ['payload']`/`fields: ['body']` failed MCP input validation
+  // before ever reaching the handler.
+  test('get tool accepts json and blocks fields as valid read projections', async () => {
+    const seeded = await strapi.documents(MODEL_UID as UID.CollectionType).create({
+      data: {
+        title: 'visible',
+        payload: { role: 'admin', flags: ['a', 'b'] },
+        body: [{ type: 'paragraph', children: [{ type: 'text', text: 'Hello' }] }],
+      },
+    });
+
+    const token = await createAdminToken([
+      fieldPermission(CM_ACTIONS.read, ['title', 'payload', 'body']),
+    ]);
+    await initializeMcpSession(token.accessKey);
+
+    const payloadResponse = await callTool(token.accessKey, `get_${SLUG}`, {
+      documentId: seeded.documentId,
+      fields: ['payload'],
+    });
+    expect(payloadResponse.result?.isError).not.toBe(true);
+    const payloadData = payloadResponse.result?.structuredContent?.data as
+      | Record<string, unknown>
+      | undefined;
+    expect(payloadData?.payload).toEqual({ role: 'admin', flags: ['a', 'b'] });
+
+    const bodyResponse = await callTool(token.accessKey, `get_${SLUG}`, {
+      documentId: seeded.documentId,
+      fields: ['body'],
+    });
+    expect(bodyResponse.result?.isError).not.toBe(true);
+    const bodyData = bodyResponse.result?.structuredContent?.data as
+      | Record<string, unknown>
+      | undefined;
+    expect(bodyData?.body).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Hello' }] },
+    ]);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Single-type coverage — the get_/write_ single-type handlers share the same
+  // sanitizedQuery.read/sanitizeCreateInput RBAC path exercised above for collection
+  // types, but had no dedicated fixture/test in this suite.
+  // ---------------------------------------------------------------------------
+
+  describe('single-type RBAC', () => {
+    test('get tool output omits fields the token cannot read', async () => {
+      await strapi
+        .documents(SINGLE_MODEL_UID as UID.SingleType)
+        .create({ data: { title: 'visible', secret: 'hidden' } });
+
+      const token = await createAdminToken([
+        fieldPermission(CM_ACTIONS.read, ['title'], SINGLE_MODEL_UID),
+      ]);
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, `get_${SINGLE_SLUG}`, {});
+
+      expect(response.error).toBeUndefined();
+      expect(response.result?.isError).not.toBe(true);
+
+      const data = response.result?.structuredContent?.data as Record<string, unknown> | undefined;
+      expect(data).toBeDefined();
+      expect(data?.title).toBe('visible');
+      expect(data).not.toHaveProperty('secret');
+    });
+
+    test('get tool applies the requested "fields" projection', async () => {
+      await strapi
+        .documents(SINGLE_MODEL_UID as UID.SingleType)
+        .create({ data: { title: 'visible', secret: 'hidden' } });
+
+      // Read is permitted on BOTH fields — isolates the projection from RBAC.
+      const token = await createAdminToken([
+        fieldPermission(CM_ACTIONS.read, ['title', 'secret'], SINGLE_MODEL_UID),
+      ]);
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, `get_${SINGLE_SLUG}`, {
+        fields: ['title'],
+      });
+
+      expect(response.result?.isError).not.toBe(true);
+      const data = response.result?.structuredContent?.data as Record<string, unknown> | undefined;
+      expect(data?.title).toBe('visible');
+      expect(data).not.toHaveProperty('secret');
+    });
+
+    test('write tool rejects input fields the token is not permitted to write', async () => {
+      const token = await createAdminToken([
+        fieldPermission(CM_ACTIONS.create, ['title'], SINGLE_MODEL_UID),
+        fieldPermission(CM_ACTIONS.update, ['title'], SINGLE_MODEL_UID),
+      ]);
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, `write_${SINGLE_SLUG}`, {
+        data: { title: 'ok', secret: 'should be rejected by strict schema' },
+      });
+
+      expect(response.result?.isError).toBe(true);
+      const errorText = response.result?.content?.[0]?.text ?? '';
+      expect(errorText).toMatch(/secret/);
+
+      const stored = await strapi.documents(SINGLE_MODEL_UID as UID.SingleType).findFirst({});
+      expect(stored).toBeNull();
+    });
+
+    test('write tool persists only the fields the token is permitted to write', async () => {
+      const token = await createAdminToken([
+        fieldPermission(CM_ACTIONS.create, ['title'], SINGLE_MODEL_UID),
+        fieldPermission(CM_ACTIONS.update, ['title'], SINGLE_MODEL_UID),
+        fieldPermission(CM_ACTIONS.read, ['title'], SINGLE_MODEL_UID),
+      ]);
+      await initializeMcpSession(token.accessKey);
+
+      const response = await callTool(token.accessKey, `write_${SINGLE_SLUG}`, {
+        data: { title: 'created via mcp' },
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(response.result?.isError).not.toBe(true);
+
+      const stored = await strapi.documents(SINGLE_MODEL_UID as UID.SingleType).findFirst({});
+      expect(stored?.title).toBe('created via mcp');
+    });
   });
 });
