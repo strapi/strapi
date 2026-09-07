@@ -1506,6 +1506,14 @@ const admin = [
     conditions: [],
   },
   {
+    id: 378,
+    action: 'admin::audit-logs.export',
+    actionParameters: {},
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
+  {
     id: 362,
     action: 'admin::review-workflows.create',
     actionParameters: {},
@@ -1845,6 +1853,12 @@ const app = {
       update: [
         {
           action: 'admin::audit-logs.update',
+          subject: null,
+        },
+      ],
+      export: [
+        {
+          action: 'admin::audit-logs.export',
           subject: null,
         },
       ],
