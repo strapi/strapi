@@ -13,10 +13,10 @@ export interface ConfigOptions {
 /**
  * Default TS -> JS Compilation for Strapi
  */
-export function run(tsConfigPath: string, configOptions: ConfigOptions = {}) {
+export function run(tsconfigPath: string, configOptions: ConfigOptions = {}) {
   const { ignoreDiagnostics = false } = configOptions;
   // Parse the tsconfig.json file & resolve the configuration options
-  const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);
+  const { fileNames, options, projectReferences } = resolveConfigOptions(tsconfigPath);
 
   const compilerOptions = merge(options, configOptions.options);
 

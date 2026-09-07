@@ -4,6 +4,7 @@ import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
+import { loadTsConfig } from '../cli/utils/tsconfig';
 
 interface BuildOptions extends CLIContext {
   /**
@@ -32,6 +33,11 @@ interface BuildOptions extends CLIContext {
    * @default false
    */
   installDeps?: boolean;
+
+  /**
+   * Custom tsconfig path
+   */
+  tsconfigPath: string;
 }
 
 /**
@@ -39,7 +45,7 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, cwd, tsconfig, installDeps = false, ...options }: BuildOptions) => {
+const build = async ({ logger, cwd, installDeps = false, ...options }: BuildOptions) => {
   const timer = getTimer();
 
   const shouldContinue = await handleAdminDependencies({
@@ -52,12 +58,17 @@ const build = async ({ logger, cwd, tsconfig, installDeps = false, ...options }:
     return;
   }
 
+  const tsconfig = loadTsConfig({ cwd, logger, path: options.tsconfigPath });
+
   if (tsconfig?.config) {
     timer.start('compilingTS');
     const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
     try {
-      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+      await tsUtils.compile(cwd, {
+        tsconfigPath: tsconfig.path,
+        configOptions: { ignoreDiagnostics: false },
+      });
     } catch {
       // Match previous compiler behavior (process.exit inside basic.run).
       process.exit(1);

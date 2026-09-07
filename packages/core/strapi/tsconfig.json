@@ -2,6 +2,7 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "types": ["node", "jest"]
+    // "exactOptionalPropertyTypes": true
   },
   "include": ["src"],
   "exclude": ["**/__tests__/**"]

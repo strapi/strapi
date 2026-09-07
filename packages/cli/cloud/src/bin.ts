@@ -30,9 +30,9 @@ function loadStrapiCloudCommand(argv = process.argv, command = new Command()) {
   buildStrapiCloudCommands({ command, ctx, argv });
 }
 
-function runStrapiCloudCommand(argv = process.argv, command = new Command()) {
+async function runStrapiCloudCommand(argv = process.argv, command = new Command()) {
   loadStrapiCloudCommand(argv, command);
-  command.parse(argv);
+  await command.parseAsync(argv);
 }
 
 export { runStrapiCloudCommand };

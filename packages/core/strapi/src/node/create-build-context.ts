@@ -11,6 +11,7 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 import type { BaseContext } from './types';
+import { TsConfig } from '../cli/utils/tsconfig';
 
 interface BaseOptions {
   stats?: boolean;
@@ -38,11 +39,14 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
+
+  tsconfig: TsConfig | undefined;
 }
 
 interface CreateBuildContextArgs<TOptions = unknown> extends CLIContext {
   strapi?: Core.Strapi;
   options?: TOptions;
+  tsconfig: TsConfig | undefined;
 }
 
 const DEFAULT_BROWSERSLIST = [
