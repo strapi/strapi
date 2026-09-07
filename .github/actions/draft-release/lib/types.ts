@@ -237,12 +237,21 @@ export type Milestone = {
   state?: string;
 };
 
+/**
+ * One milestone the run has to end up with, and how it gets there.
+ *
+ * `number` and `currentTitle` are `null` only with `create`, where the milestone does not exist
+ * until the run applies.
+ */
+export type MilestoneTarget = {
+  action: 'create' | 'keep' | 'rename';
+  number: number | null;
+  currentTitle: string | null;
+  title: string;
+};
+
 export type MilestonePlan = {
-  shipping: {
-    action: 'create' | 'rename' | 'keep';
-    number: number | null;
-    currentTitle: string | null;
-    title: string;
+  shipping: MilestoneTarget & {
     /**
      * Whether the run still has to close it.
      *
@@ -252,12 +261,7 @@ export type MilestonePlan = {
      */
     close: boolean;
   };
-  next: {
-    action: 'create' | 'reuse' | 'rename';
-    number: number | null;
-    currentTitle: string | null;
-    title: string;
-  };
+  next: MilestoneTarget;
 };
 
 /**
@@ -351,6 +355,53 @@ export type Candidate = {
   branch: string;
   pullNumber: number;
   pullUrl: string;
+};
+
+/**
+ * Everything the run decided, before it wrote anything.
+ *
+ * Producing this is the only phase allowed to refuse. Once a plan exists, every remaining step is a
+ * write, so a refusal can never leave the repository half-changed.
+ */
+export type ReleasePlan = {
+  mode: ReleaseMode;
+  candidate: Candidate | null;
+  previousVersion: string;
+  version: string;
+  bumpKind: BumpKind;
+  classification: BumpClassification;
+  versionSource: VersionSource;
+  range: PinnedRange;
+  integrationCount: number;
+  pullRequests: AttributedPull[];
+  attention: AttentionRecord[];
+  warnings: string[];
+  milestones: MilestonePlan;
+  branch: string;
+  /** `false` when the branch already points at the pinned head, so nothing has to be pushed. */
+  branchAdvances: boolean;
+  /**
+   * The head git resolved for the candidate's branch during preflight, `null` without a candidate.
+   *
+   * A redraft deletes that branch under a lease on this value, so a commit pushed to it after the
+   * preflight fails the delete instead of being lost.
+   */
+  candidateHeadSha: string | null;
+  realignment: RealignItem[];
+};
+
+/**
+ * What the writes produced that the plan could not know.
+ *
+ * The numbers GitHub assigned to whatever this run created, and the milestone drift read once the
+ * realignment had run. Every field is `null` on a dry run that would have created the thing.
+ */
+export type ReleaseOutcome = {
+  shippingNumber: number | null;
+  nextNumber: number | null;
+  pullNumber: number | null;
+  pullUrl: string | null;
+  reconciliation: Reconciliation;
 };
 
 /** The machine-readable payload embedded in the release pull request body. */

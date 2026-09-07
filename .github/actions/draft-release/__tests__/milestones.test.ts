@@ -98,7 +98,7 @@ describe('planMilestones, candidate in flight', () => {
       close: false,
     });
     assert.deepEqual(plan.next, {
-      action: 'reuse',
+      action: 'keep',
       number: 431,
       currentTitle: '5.53.1',
       title: '5.53.1',

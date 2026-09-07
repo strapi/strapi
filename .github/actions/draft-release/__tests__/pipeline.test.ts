@@ -243,6 +243,9 @@ describe('runDraftRelease', () => {
     assert.deepEqual(
       result.journal.entries.map((entry) => entry.op),
       [
+        'branch.push',
+        'pr.create',
+        'pr.label',
         'milestone.rename',
         'milestone.create',
         'issue.milestone.set',
@@ -251,20 +254,35 @@ describe('runDraftRelease', () => {
         'issue.milestone.clear',
         'issue.milestone.clear',
         'milestone.close',
-        'branch.push',
-        'pr.create',
-        'pr.label',
         'pr.body',
         'pr.comment',
       ]
     );
   });
 
+  it('pushes the branch and opens the pull request before touching a milestone', async () => {
+    // The two writes most likely to fail on permissions go first, so a failure there leaves at
+    // most one write behind instead of dozens of milestone moves.
+    const { calls } = await run({ dryRun: false });
+
+    const firstMilestoneWrite = calls.findIndex(
+      (call) => call.startsWith('updateMilestone:') === true || call.startsWith('createMilestone:')
+    );
+
+    assert.equal(calls.indexOf(`pushBranch:releases/5.53.0:${FEAT_SHA}`), 0);
+    assert.equal(calls.indexOf('createPull:Release 5.53.0'), 1);
+    assert.equal(calls.indexOf(`addLabels:27700:${EXPERIMENTAL_LABEL}`), 2);
+    assert.equal(firstMilestoneWrite, 3);
+  });
+
   it('renames, opens the next milestone, then closes the shipping one', async () => {
     const { calls } = await run({ dryRun: false });
 
     assert.deepEqual(
-      [calls[0], calls[1], calls.find((call) => call.includes('"state":"closed"'))],
+      calls.filter(
+        (call) =>
+          call.startsWith('updateMilestone:') === true || call.startsWith('createMilestone:')
+      ),
       [
         'updateMilestone:430:{"title":"5.53.0"}',
         'createMilestone:5.53.1',
@@ -785,16 +803,16 @@ describe('runDraftRelease, redraft', () => {
     assert.deepEqual(
       result.journal.entries.map((entry) => entry.op),
       [
-        'milestone.rename',
-        'milestone.rename',
-        'issue.milestone.set',
-        'issue.milestone.set',
-        'issue.milestone.set',
-        'issue.milestone.clear',
-        'issue.milestone.clear',
         'branch.push',
         'pr.create',
         'pr.label',
+        'milestone.rename',
+        'milestone.rename',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.clear',
+        'issue.milestone.clear',
         'pr.body',
         'pr.comment',
         'pr.close',

@@ -17,16 +17,21 @@ Triggered by hand from the Actions tab through [`draft-release.yml`](../../workf
 | Attribute    | Resolves each first-parent integration to the pull request that produced it.                        |
 | Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                             |
 | Discover     | Finds the candidate already in flight, and decides whether to draft, refresh or redraft.            |
-| Milestones   | Makes the shipping milestone name the version that ships, keeps the next one open, closes shipping. |
-| Realign      | Pulls every pull request that shipped onto the shipping milestone, whatever its author picked.      |
 | Branch       | Pushes `releases/x.y.z` at the pinned SHA, or advances it.                                          |
 | Pull request | Opens the draft PR `Release x.y.z` against `main`, or reuses the one in flight.                     |
-| Report       | Writes the shipping table and a machine-readable JSON block into the PR body.                       |
-| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue, then comments.    |
+| Milestones   | Makes the shipping milestone name the version that ships, keeps the next one open, closes shipping. |
+| Realign      | Pulls every pull request that shipped onto the shipping milestone, whatever its author picked.      |
+| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue.                   |
+| Report       | Writes the shipping table and a machine-readable JSON block into the PR body, then comments.        |
 
 Every refusal happens in the preflight, before the first write. A run that stops leaves the
 repository untouched; only a run that dies mid-write leaves it half-changed, and the journal is what
 makes finishing that by hand mechanical.
+
+The branch push and the pull request are the first writes because they are the two most likely to
+fail on permissions: the push needs a bypass on the ruleset over `releases/*`, and the pull request
+needs the app's scopes. A run that fails there leaves at most one write to undo, where the milestone
+phase alone is dozens.
 
 ## Running more than once
 
@@ -40,7 +45,7 @@ is renamed by this very action.
 | --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `draft`   | No candidate is open.                                    | Cuts the branch, opens the pull request, closes the shipping milestone.                                                                              |
 | `refresh` | A candidate is open and the version still agrees.        | Fast-forwards the branch, refills the shipping milestone, rewrites the body, comments. The pull request keeps its number, its reviews and its label. |
-| `redraft` | A candidate is open and the commits changed the version. | Renames both milestones, opens a replacement pull request, then comments on, closes and deletes the one it replaced.                                 |
+| `redraft` | A candidate is open and the commits changed the version. | Opens a replacement pull request, renames both milestones, then comments on, closes and deletes the one it replaced.                                 |
 
 A `refresh` that finds the branch already at `develop`'s head pushes nothing. Pushing would fire
 `synchronize` on the pull request and publish another identical experimental artifact for nothing.

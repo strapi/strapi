@@ -164,16 +164,19 @@ function planNext(
   }
 
   if (open.title === title) {
-    return { action: 'reuse', number: open.number, currentTitle: open.title, title };
+    return { action: 'keep', number: open.number, currentTitle: open.title, title };
   }
 
-  // On a fresh draft the open milestone becomes the shipping one, so the next milestone is always
-  // created or reused, never renamed. A rename here only ever means the version drifted.
-  const expected = candidateVersion === null ? null : nextPatchOf(candidateVersion);
+  // On a fresh draft the open milestone became the shipping one, and `soleOpenMilestone` refused a
+  // second, so an open milestone here always belongs to a candidate in flight. The next milestone
+  // is therefore created or kept on a fresh draft, never renamed, and a rename here only ever means
+  // the version drifted: the open milestone still names the next patch of the version the candidate
+  // was cut under. The fresh-draft arm of the ternary is never taken; it narrows the type.
+  const expected = candidateVersion === null ? title : nextPatchOf(candidateVersion);
 
-  if (expected === null || open.title !== expected) {
+  if (open.title !== expected) {
     throw new Error(
-      `The open milestone is ${open.title}, but this release expects ${expected ?? title}. ` +
+      `The open milestone is ${open.title}, but this release expects ${expected}. ` +
         'Resolve the milestones by hand before drafting.'
     );
   }

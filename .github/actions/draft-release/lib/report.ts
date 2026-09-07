@@ -2,15 +2,12 @@ import type {
   AttentionRecord,
   AttributedPull,
   Author,
-  BumpClassification,
-  BumpKind,
   JournalEntry,
-  PinnedRange,
-  ReleasePayload,
-  Reconciliation,
   ReleaseMode,
+  ReleaseOutcome,
+  ReleasePayload,
+  ReleasePlan,
   RepositoryCoords,
-  VersionSource,
 } from './types.ts';
 
 export const SCHEMA_VERSION = 5;
@@ -151,61 +148,65 @@ export function renderJournalTable(entries: readonly JournalEntry[]): string {
   );
 }
 
-export type PayloadInput = {
+/**
+ * Builds the machine-readable payload embedded in the pull request body.
+ *
+ * Everything the plan decided is read from the plan; the outcome only adds what the writes
+ * produced. Deriving the milestone section here keeps the payload shape the concern of one module.
+ */
+export function buildPayload(input: {
+  plan: ReleasePlan;
+  outcome: ReleaseOutcome;
   generatedAt: string;
   coords: RepositoryCoords;
   dryRun: boolean;
-  version: string;
-  bump: BumpKind;
-  previousVersion: string;
-  versionSource: VersionSource;
-  mode: ReleaseMode;
-  range: PinnedRange;
-  integrationCount: number;
-  branch: string;
-  branchAdvanced: boolean;
-  pullNumber: number | null;
-  pullUrl: string | null;
-  classification: BumpClassification;
-  pullRequests: AttributedPull[];
-  attention: AttentionRecord[];
-  milestones: ReleasePayload['milestones'];
-  reconciliation: Reconciliation;
-};
+}): ReleasePayload {
+  const { plan, outcome } = input;
+  const { shipping, next } = plan.milestones;
 
-/** Builds the machine-readable payload embedded in the pull request body. */
-export function buildPayload(input: PayloadInput): ReleasePayload {
   return {
     schemaVersion: SCHEMA_VERSION,
     generatedAt: input.generatedAt,
     repository: `${input.coords.owner}/${input.coords.repo}`,
     dryRun: input.dryRun,
     release: {
-      version: input.version,
-      bump: input.bump,
-      previousVersion: input.previousVersion,
-      source: input.versionSource,
-      mode: input.mode,
+      version: plan.version,
+      bump: plan.bumpKind,
+      previousVersion: plan.previousVersion,
+      source: plan.versionSource,
+      mode: plan.mode,
     },
-    range: { ...input.range, integrationCount: input.integrationCount },
+    range: { ...plan.range, integrationCount: plan.integrationCount },
     candidate: {
-      branch: input.branch,
-      headSha: input.range.toSha,
-      expectedExperimentalVersion: experimentalVersion(input.range.toSha),
-      branchAdvanced: input.branchAdvanced,
-      pullRequestNumber: input.pullNumber,
-      pullRequestUrl: input.pullUrl,
+      branch: plan.branch,
+      headSha: plan.range.toSha,
+      expectedExperimentalVersion: experimentalVersion(plan.range.toSha),
+      branchAdvanced: plan.branchAdvances,
+      pullRequestNumber: outcome.pullNumber,
+      pullRequestUrl: outcome.pullUrl,
     },
     bumpEvidence: {
-      featureIntegrations: input.classification.features,
-      breakingIntegrations: input.classification.breaking,
-      ignored: input.classification.ignored,
-      unparsed: input.classification.unparsed,
+      featureIntegrations: plan.classification.features,
+      breakingIntegrations: plan.classification.breaking,
+      ignored: plan.classification.ignored,
+      unparsed: plan.classification.unparsed,
     },
-    pullRequests: input.pullRequests,
-    attention: input.attention,
-    milestones: input.milestones,
-    reconciliation: input.reconciliation,
+    pullRequests: plan.pullRequests,
+    attention: plan.attention,
+    milestones: {
+      shipping: {
+        number: outcome.shippingNumber,
+        title: shipping.title,
+        renamedFrom: shipping.action === 'rename' ? shipping.currentTitle : null,
+        state: 'closed',
+      },
+      next: {
+        number: outcome.nextNumber,
+        title: next.title,
+        created: next.action === 'create',
+      },
+    },
+    reconciliation: outcome.reconciliation,
   };
 }
 

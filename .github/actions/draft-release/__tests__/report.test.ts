@@ -17,66 +17,42 @@ import {
   withoutTrailingReference,
 } from '../lib/report.ts';
 
-import type { AttributedPull, JournalEntry } from '../lib/types.ts';
-import type { PayloadInput } from '../lib/report.ts';
+import { releasePlan } from '../lib/__fixtures__/fixtures.ts';
 
-function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
+import type {
+  AttributedPull,
+  JournalEntry,
+  ReleaseOutcome,
+  ReleasePayload,
+  ReleasePlan,
+} from '../lib/types.ts';
+
+function releaseOutcome(overrides: Partial<ReleaseOutcome> = {}): ReleaseOutcome {
   return {
-    generatedAt: '2026-09-06T17:57:00Z',
-    coords: { owner: 'strapi', repo: 'strapi' },
-    dryRun: false,
-    version: '5.53.0',
-    bump: 'minor',
-    previousVersion: '5.52.3',
-    versionSource: 'computed',
-    mode: 'draft',
-    range: {
-      fromRef: 'v5.52.3',
-      fromSha: 'a'.repeat(40),
-      toRef: 'origin/develop',
-      toSha: 'b'.repeat(40),
-    },
-    integrationCount: 12,
-    branch: 'releases/5.53.0',
-    branchAdvanced: true,
+    shippingNumber: 430,
+    nextNumber: 431,
     pullNumber: 27700,
     pullUrl: 'https://github.com/strapi/strapi/pull/27700',
-    classification: {
-      features: [
-        {
-          sha: 'c'.repeat(40),
-          pr: 27436,
-          subject: 'feat(content-releases): audit logs',
-          via: 'subject',
-        },
-      ],
-      breaking: [],
-      ignored: [],
-      unparsed: [],
-    },
-    pullRequests: [
-      {
-        number: 27436,
-        title: 'feat(content-releases): audit logs',
-        author: { login: 'someone', name: 'Someone Real' },
-        url: 'https://github.com/strapi/strapi/pull/27436',
-        baseRef: 'develop',
-        headRef: 'feat/audit-logs',
-        milestone: '5.52.4',
-        mergedAt: '2026-09-05T09:59:00Z',
-        status: 'resolved',
-        basis: 'exact-merge-sha',
-        integrationShas: ['c'.repeat(40)],
-      },
-    ],
-    attention: [],
-    milestones: {
-      shipping: { number: 430, title: '5.53.0', renamedFrom: '5.52.4', state: 'closed' },
-      next: { number: 431, title: '5.53.1', created: true },
-    },
     reconciliation: { inHistoryNotInMilestone: [], inMilestoneNotInHistory: [] },
     ...overrides,
   };
+}
+
+/** The payload of a fresh draft, built the way the pipeline builds it. */
+function payload(
+  overrides: {
+    plan?: Partial<ReleasePlan>;
+    outcome?: Partial<ReleaseOutcome>;
+    dryRun?: boolean;
+  } = {}
+): ReleasePayload {
+  return buildPayload({
+    plan: releasePlan(overrides.plan),
+    outcome: releaseOutcome(overrides.outcome),
+    generatedAt: '2026-09-06T17:57:00Z',
+    coords: { owner: 'strapi', repo: 'strapi' },
+    dryRun: overrides.dryRun ?? false,
+  });
 }
 
 function journalEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
@@ -136,7 +112,7 @@ describe('renderAuthor', () => {
 
 describe('renderPullRequestTable', () => {
   it('names the author with their display name and their login', () => {
-    const table = renderPullRequestTable(payloadInput().pullRequests);
+    const table = renderPullRequestTable(releasePlan().pullRequests);
 
     assert.match(table, /Someone Real \(@someone\)/u);
   });
@@ -209,13 +185,11 @@ describe('renderJournalTable', () => {
 
 describe('buildPayload', () => {
   it('carries the schema version later automation reads', () => {
-    assert.equal(buildPayload(payloadInput()).schemaVersion, 5);
+    assert.equal(payload().schemaVersion, 5);
   });
 
   it('identifies the candidate by its branch, its pinned head and its pull request', () => {
-    const payload = buildPayload(payloadInput());
-
-    assert.deepEqual(payload.candidate, {
+    assert.deepEqual(payload().candidate, {
       branch: 'releases/5.53.0',
       headSha: 'b'.repeat(40),
       expectedExperimentalVersion: `0.0.0-experimental.${'b'.repeat(40)}`,
@@ -226,22 +200,49 @@ describe('buildPayload', () => {
   });
 
   it('pins the head to the SHA the range ended at', () => {
-    const payload = buildPayload(payloadInput());
+    const built = payload();
 
-    assert.equal(payload.candidate.headSha, payload.range.toSha);
+    assert.equal(built.candidate.headSha, built.range.toSha);
   });
 
   it('reports no pull request on a dry run, and still identifies the candidate', () => {
-    const payload = buildPayload(payloadInput({ dryRun: true, pullNumber: null, pullUrl: null }));
+    const built = payload({ dryRun: true, outcome: { pullNumber: null, pullUrl: null } });
 
-    assert.equal(payload.candidate.pullRequestNumber, null);
-    assert.equal(payload.candidate.pullRequestUrl, null);
-    assert.equal(payload.candidate.branch, 'releases/5.53.0');
-    assert.equal(payload.candidate.headSha, 'b'.repeat(40));
+    assert.equal(built.candidate.pullRequestNumber, null);
+    assert.equal(built.candidate.pullRequestUrl, null);
+    assert.equal(built.candidate.branch, 'releases/5.53.0');
+    assert.equal(built.candidate.headSha, 'b'.repeat(40));
     assert.equal(
-      payload.candidate.expectedExperimentalVersion,
+      built.candidate.expectedExperimentalVersion,
       `0.0.0-experimental.${'b'.repeat(40)}`
     );
+  });
+
+  it('derives the milestone section from the plan and the numbers the writes produced', () => {
+    assert.deepEqual(payload().milestones, {
+      shipping: { number: 430, title: '5.53.0', renamedFrom: '5.52.4', state: 'closed' },
+      next: { number: 431, title: '5.53.1', created: true },
+    });
+  });
+
+  it('reports no rename when both milestones were kept', () => {
+    const built = payload({
+      plan: {
+        milestones: {
+          shipping: {
+            action: 'keep',
+            number: 430,
+            currentTitle: '5.53.0',
+            title: '5.53.0',
+            close: false,
+          },
+          next: { action: 'keep', number: 431, currentTitle: '5.53.1', title: '5.53.1' },
+        },
+      },
+    });
+
+    assert.equal(built.milestones.shipping.renamedFrom, null);
+    assert.equal(built.milestones.next.created, false);
   });
 });
 
@@ -252,40 +253,40 @@ describe('experimentalVersion', () => {
 });
 
 describe('renderBody', () => {
-  const payload = buildPayload(payloadInput());
+  const built = payload();
 
   it('carries a JSON block that round-trips through the markers', () => {
-    const body = renderBody({ payload, pullRequests: payload.pullRequests, attention: [] });
+    const body = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
     assert.equal(body.includes(BLOCK_START), true);
     assert.equal(body.includes(BLOCK_END), true);
-    assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(payload)));
+    assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(built)));
   });
 
   it('explains a minor with the commits that caused it', () => {
-    const body = renderBody({ payload, pullRequests: payload.pullRequests, attention: [] });
+    const body = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
     assert.match(body, /## Why this is a minor/u);
     assert.match(body, /feat\(content-releases\): audit logs \(#27436\)/u);
   });
 
   it('names the version input when a human decided', () => {
-    const overridden = buildPayload(payloadInput({ versionSource: 'version-input' }));
+    const overridden = payload({ plan: { versionSource: 'version-input' } });
     const body = renderBody({ payload: overridden, pullRequests: [], attention: [] });
 
     assert.match(body, /decided from the `version` input/u);
   });
 
   it('surfaces reconciliation differences only when there are any', () => {
-    const clean = renderBody({ payload, pullRequests: payload.pullRequests, attention: [] });
+    const clean = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
     assert.equal(clean.includes('## Milestone reconciliation'), false);
 
-    const drifted = buildPayload(
-      payloadInput({
+    const drifted = payload({
+      outcome: {
         reconciliation: { inHistoryNotInMilestone: [27509], inMilestoneNotInHistory: [27123] },
-      })
-    );
+      },
+    });
 
     const body = renderBody({
       payload: drifted,
@@ -299,8 +300,8 @@ describe('renderBody', () => {
 
   it('lists the records a human still has to settle', () => {
     const body = renderBody({
-      payload,
-      pullRequests: payload.pullRequests,
+      payload: built,
+      pullRequests: built.pullRequests,
       attention: [
         {
           sha: 'd'.repeat(40),
@@ -320,10 +321,10 @@ describe('renderBody', () => {
 
 describe('extractJsonBlock', () => {
   it('round-trips a body carrying the candidate block', () => {
-    const payload = buildPayload(payloadInput());
-    const body = renderBody({ payload, pullRequests: payload.pullRequests, attention: [] });
+    const built = payload();
+    const body = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
-    assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(payload)));
+    assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(built)));
     assert.match(body, /"expectedExperimentalVersion": "0\.0\.0-experimental\.b{40}"/u);
   });
 
@@ -381,16 +382,14 @@ describe('renderMilestoneComment', () => {
 
 describe('renderStepSummary', () => {
   it('labels a dry run as planned', () => {
-    const payload = buildPayload(payloadInput({ dryRun: true }));
-    const summary = renderStepSummary({ payload, entries: [] });
+    const summary = renderStepSummary({ payload: payload({ dryRun: true }), entries: [] });
 
     assert.match(summary, /Dry run\./u);
     assert.match(summary, /## Planned writes/u);
   });
 
   it('labels a real run as applied', () => {
-    const payload = buildPayload(payloadInput());
-    const summary = renderStepSummary({ payload, entries: [journalEntry()] });
+    const summary = renderStepSummary({ payload: payload(), entries: [journalEntry()] });
 
     assert.match(summary, /## Applied writes/u);
   });

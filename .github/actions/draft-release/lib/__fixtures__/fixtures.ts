@@ -1,4 +1,4 @@
-import type { Integration, MilestoneItem, PullCommit, PullPayload } from '../types.ts';
+import type { Integration, MilestoneItem, PullCommit, PullPayload, ReleasePlan } from '../types.ts';
 
 /**
  * Fixtures modelled on the real `v5.52.3..develop` range, including the cases that proved the
@@ -109,6 +109,70 @@ export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload
     head: candidateHead(version),
     user: { login: 'strapi-release-bot' },
     milestone: null,
+    ...overrides,
+  };
+}
+
+/** A fresh draft, decided: `5.52.3` → `5.53.0` off one `feat`, the open `5.52.4` milestone renamed. */
+export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
+  return {
+    mode: 'draft',
+    candidate: null,
+    previousVersion: '5.52.3',
+    version: '5.53.0',
+    bumpKind: 'minor',
+    classification: {
+      features: [
+        {
+          sha: 'c'.repeat(40),
+          pr: 27436,
+          subject: 'feat(content-releases): audit logs',
+          via: 'subject',
+        },
+      ],
+      breaking: [],
+      ignored: [],
+      unparsed: [],
+    },
+    versionSource: 'computed',
+    range: {
+      fromRef: 'v5.52.3',
+      fromSha: 'a'.repeat(40),
+      toRef: 'origin/develop',
+      toSha: 'b'.repeat(40),
+    },
+    integrationCount: 12,
+    pullRequests: [
+      {
+        number: 27436,
+        title: 'feat(content-releases): audit logs',
+        author: { login: 'someone', name: 'Someone Real' },
+        url: 'https://github.com/strapi/strapi/pull/27436',
+        baseRef: 'develop',
+        headRef: 'feat/audit-logs',
+        milestone: '5.52.4',
+        mergedAt: '2026-09-05T09:59:00Z',
+        status: 'resolved',
+        basis: 'exact-merge-sha',
+        integrationShas: ['c'.repeat(40)],
+      },
+    ],
+    attention: [],
+    warnings: [],
+    milestones: {
+      shipping: {
+        action: 'rename',
+        number: 430,
+        currentTitle: '5.52.4',
+        title: '5.53.0',
+        close: true,
+      },
+      next: { action: 'create', number: null, currentTitle: null, title: '5.53.1' },
+    },
+    branch: 'releases/5.53.0',
+    branchAdvances: true,
+    candidateHeadSha: null,
+    realignment: [],
     ...overrides,
   };
 }
