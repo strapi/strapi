@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
+const STRAPI_MANAGED_AI_LICENSE_FEATURE = 'cms-ai';
+
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * In-memory cache for AI tokens
@@ -18,27 +20,39 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   >();
 
-  const isEnabled = (): boolean => {
-    const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
-    const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    return configEnabled && licenseEnabled;
+  const isConfigEnabled = (): boolean => strapi.config.get('admin.ai.enabled', true) === true;
+
+  const isAvailable = (): boolean => isConfigEnabled() && strapi.ee?.isEE === true;
+
+  const isStrapiManagedAiEnabled = (): boolean =>
+    isConfigEnabled() && strapi.ee?.features?.isEnabled(STRAPI_MANAGED_AI_LICENSE_FEATURE) === true;
+
+  const isPluginAiFeatureConfigured = async (plugin: string, service: string): Promise<boolean> => {
+    const aiService = strapi.plugin(plugin)?.service(service) as
+      | { isEnabled?: () => Promise<boolean> | boolean }
+      | undefined;
+
+    if (typeof aiService?.isEnabled !== 'function') {
+      return false;
+    }
+
+    return (await aiService.isEnabled()) === true;
   };
 
   const getAiFeatureConfig = async () => {
-    if (!isEnabled()) {
+    if (!isAvailable()) {
       return {
         isAiI18nConfigured: false,
         isAiMediaLibraryConfigured: false,
       };
     }
 
-    const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
-    const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
+    const [isAiI18nConfigured, isAiMediaLibraryConfigured] = await Promise.all([
+      isPluginAiFeatureConfigured('i18n', 'ai-localizations'),
+      isPluginAiFeatureConfigured('upload', 'aiMetadata'),
+    ]);
 
-    return {
-      isAiI18nConfigured: Boolean(i18nSettings?.aiLocalizations),
-      isAiMediaLibraryConfigured: Boolean(uploadSettings?.aiMetadata),
-    };
+    return { isAiI18nConfigured, isAiMediaLibraryConfigured };
   };
 
   /**
@@ -46,7 +60,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
    * EE license, project ID, and AI server URL.
    */
   const resolveAiContext = (errorPrefix: string) => {
-    if (!isEnabled()) {
+    if (!isStrapiManagedAiEnabled()) {
       strapi.log.error(`${errorPrefix} AI is not enabled`);
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
     }
@@ -282,7 +296,8 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
-    isEnabled,
+    isAvailable,
+    isStrapiManagedAiEnabled,
     getAiFeatureConfig,
     getAiToken,
     getAiUsage,

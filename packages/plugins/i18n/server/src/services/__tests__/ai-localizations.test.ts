@@ -565,6 +565,8 @@ describe('ai-localizations service', () => {
         update: jest.fn().mockResolvedValue({}),
       };
 
+      const generateTranslations = jest.fn();
+
       const mockStrapi = {
         getModel: jest.fn(() => schema),
         documents: jest.fn(() => documentsApi),
@@ -572,6 +574,10 @@ describe('ai-localizations service', () => {
           i18n: {
             services: {
               'ai-localization-jobs': jobsService,
+              'ai-translations': {
+                isEnabled: () => true,
+                generateTranslations,
+              },
               settings: settingsService,
               'content-types': contentTypesService,
               locales: localesService,
@@ -587,14 +593,14 @@ describe('ai-localizations service', () => {
         },
         ai: {
           admin: {
-            isEnabled: jest.fn(() => true),
+            isStrapiManagedAiEnabled: jest.fn(() => true),
             getAiToken: jest.fn().mockResolvedValue({ token: 'test-token' }),
           },
         },
         log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
       };
 
-      return { mockStrapi, jobsService, documentsApi };
+      return { mockStrapi, jobsService, documentsApi, generateTranslations };
     };
 
     afterEach(() => {
@@ -606,22 +612,16 @@ describe('ai-localizations service', () => {
 
     it('forwards maxLength/minLength to the AI so translations can respect the limit', async () => {
       const schema = buildSchema();
-      const { mockStrapi } = buildMockStrapi(schema);
+      const { mockStrapi, generateTranslations } = buildMockStrapi(schema);
 
       (global as any).strapi = mockStrapi;
 
-      const fetchMock = jest.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({
-          localizations: [
-            { locale: 'pt-BR', content: { title: 'Título', description: 'Descrição' } },
-            { locale: 'fr', content: { title: 'Titre', description: 'Description' } },
-          ],
-        }),
+      generateTranslations.mockResolvedValue({
+        localizations: [
+          { locale: 'pt-BR', content: { title: 'Título', description: 'Descrição' } },
+          { locale: 'fr', content: { title: 'Titre', description: 'Description' } },
+        ],
       });
-      (global as any).fetch = fetchMock;
 
       const service = createAILocalizationsService({ strapi: mockStrapi as any });
 
@@ -636,10 +636,10 @@ describe('ai-localizations service', () => {
         } as any,
       });
 
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-      const requestBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(generateTranslations).toHaveBeenCalledTimes(1);
+      const [input] = generateTranslations.mock.calls[0];
 
-      expect(requestBody.contentTypeSchema.description).toMatchObject({
+      expect(input.contentTypeSchema.description).toMatchObject({
         type: 'text',
         maxLength: 80,
         minLength: 10,
@@ -648,7 +648,8 @@ describe('ai-localizations service', () => {
 
     it('persists valid locales even if another locale fails validation, and reports which locale failed', async () => {
       const schema = buildSchema();
-      const { mockStrapi, jobsService, documentsApi } = buildMockStrapi(schema);
+      const { mockStrapi, jobsService, documentsApi, generateTranslations } =
+        buildMockStrapi(schema);
       (global as any).strapi = mockStrapi;
 
       documentsApi.update.mockImplementation(async ({ locale }: { locale: string }) => {
@@ -658,22 +659,17 @@ describe('ai-localizations service', () => {
         return {};
       });
 
-      (global as any).fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({
-          localizations: [
-            { locale: 'pt-BR', content: { title: 'Título', description: 'curto' } },
-            {
-              locale: 'fr',
-              content: {
-                title: 'Titre',
-                description: 'a'.repeat(103), // exceeds maxLength 80
-              },
+      generateTranslations.mockResolvedValue({
+        localizations: [
+          { locale: 'pt-BR', content: { title: 'Título', description: 'curto' } },
+          {
+            locale: 'fr',
+            content: {
+              title: 'Titre',
+              description: 'a'.repeat(103), // exceeds maxLength 80
             },
-          ],
-        }),
+          },
+        ],
       });
 
       const errorSpy = mockStrapi.log.error;

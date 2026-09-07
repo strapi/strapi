@@ -17,8 +17,13 @@ export default {
   },
 
   async getSettings(ctx: Context) {
-    const data = await getService('settings').getSettings();
+    const settings = await getService('settings').getSettings();
 
-    ctx.body = { data };
+    ctx.body = {
+      data: {
+        ...settings,
+        aiLocalizationsAvailable: getService('ai-translations').isEnabled(),
+      },
+    };
   },
 };
