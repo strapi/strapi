@@ -76,7 +76,11 @@ export async function fetchPackument(
   request: RegistryRequest,
   name: string = PACKAGE_NAME
 ): Promise<unknown> {
-  const url = `${REGISTRY_URL}/${name.replace('/', '%2f')}`;
+  // `encodeURIComponent`, not a substitution of the one separator a scoped name happens to have.
+  // A hand-written substitution encodes the first occurrence only, so any further reserved
+  // character in the name would reach the registry raw and address a different path than this
+  // function was asked for.
+  const url = `${REGISTRY_URL}/${encodeURIComponent(name)}`;
   const response = await request(url);
 
   if (response.ok === false) {

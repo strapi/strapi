@@ -60,16 +60,34 @@ describe('resolveLatestVersion', () => {
 });
 
 describe('fetchPackument', () => {
-  it('escapes the scope separator and returns the parsed body', async () => {
+  function recording(): { seen: string[]; request: RegistryRequest } {
     const seen: string[] = [];
-    const request: RegistryRequest = async (url) => {
-      seen.push(url);
 
-      return { ok: true, status: 200, json: async () => ({ ok: true }) };
+    return {
+      seen,
+      async request(url) {
+        seen.push(url);
+
+        return { ok: true, status: 200, json: async () => ({ ok: true }) };
+      },
     };
+  }
+
+  it('encodes the package name and returns the parsed body', async () => {
+    const { seen, request } = recording();
 
     assert.deepEqual(await fetchPackument(request), { ok: true });
-    assert.deepEqual(seen, ['https://registry.npmjs.org/@strapi%2fstrapi']);
+    assert.deepEqual(seen, ['https://registry.npmjs.org/%40strapi%2Fstrapi']);
+  });
+
+  it('encodes every reserved character, not just the first separator', async () => {
+    // A substitution of the one separator a scoped name happens to have leaves anything after it
+    // raw, and the request then addresses a path the caller never asked for.
+    const { seen, request } = recording();
+
+    await fetchPackument(request, '@scope/name/extra?x=1');
+
+    assert.deepEqual(seen, ['https://registry.npmjs.org/%40scope%2Fname%2Fextra%3Fx%3D1']);
   });
 
   it('surfaces a registry error', async () => {

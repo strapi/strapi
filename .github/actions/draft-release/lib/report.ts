@@ -28,9 +28,16 @@ export function experimentalVersion(headSha: string): string {
   return `0.0.0-experimental.${headSha}`;
 }
 
-/** Escapes the characters that would break out of a Markdown table cell. */
+/**
+ * Escapes the characters that would break out of a Markdown table cell.
+ *
+ * Backslashes go first, because the backslash is the escape character. Escaping the pipe of `a\|b`
+ * without them yields `a\\|b`, which renders as a literal backslash followed by an unescaped pipe,
+ * and the cell the value was meant to sit inside ends early.
+ */
 function cell(value: unknown): string {
   return String(value ?? '')
+    .replace(/\\/gu, '\\\\')
     .replace(/\|/gu, '\\|')
     .replace(/[\r\n]+/gu, ' ')
     .trim();

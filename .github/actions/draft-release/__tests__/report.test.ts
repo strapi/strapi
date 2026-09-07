@@ -137,6 +137,29 @@ describe('renderPullRequestTable', () => {
     assert.match(table, /Someone Real \(@someone\)/u);
   });
 
+  it('escapes the backslash before the pipe, so a subject cannot break the table', () => {
+    // Escaping the pipe first would leave `a\\|b`: a literal backslash, then a bare pipe, and the
+    // row ends one cell early.
+    const pull = {
+      number: 1,
+      title: 'fix(admin): handle a \\| b',
+      author: { login: 'x', name: null },
+      url: 'u',
+      baseRef: 'develop',
+      headRef: 'fix/x',
+      milestone: null,
+      status: 'resolved',
+      basis: 'none',
+      integrationShas: ['a'],
+    } satisfies AttributedPull;
+
+    const table = renderPullRequestTable([pull]);
+
+    assert.match(table, /handle a \\\\\\\| b/u);
+    assert.equal(table.split('\n').length, 3);
+    assert.equal(table.split('\n')[2]?.split(/(?<!\\)\|/u).length, 7);
+  });
+
   it('escapes a pipe so a title cannot break the table', () => {
     const pull = {
       number: 1,
