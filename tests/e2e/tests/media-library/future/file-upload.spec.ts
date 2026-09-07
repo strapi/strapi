@@ -100,13 +100,9 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('File Upload', ()
     const assetsPage = new AssetsPage(page);
     await assetsPage.goto();
 
-    // Still a live third-party URL, and it should not be. The fetch happens
-    // server-side (`POST /upload/actions/upload-from-urls`), so `page.route` cannot
-    // stand in for the host, and a URL served by the test app is refused too: the
-    // upload service blocks loopback and RFC-1918 addresses to prevent SSRF, with a
-    // hard-coded block list and no opt-out. Removing this dependency needs a config
-    // option on the upload plugin, not a change here.
-    await assetsPage.uploadFilesFromUrl('https://picsum.photos/200');
+    // Reserved for documentation (RFC 5737) so the server-side fetch's SSRF guard
+    // allows it; `server.proxy.fetch` routes the request to the local fixture proxy.
+    await assetsPage.uploadFilesFromUrl('http://192.0.2.1/url-import.png');
 
     // Verify the upload progress dialog appears and shows success
     await expect(assetsPage.uploadProgressDialog).toBeVisible();

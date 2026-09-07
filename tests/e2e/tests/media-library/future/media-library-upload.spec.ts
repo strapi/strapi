@@ -23,8 +23,21 @@ const IMAGE_1 = path.join(UPLOADS_DIR, 'test-image-1.jpg');
 const IMAGE_2 = path.join(UPLOADS_DIR, 'test-image-2.jpg');
 const BLOCKED_FILE = path.join(UPLOADS_DIR, 'blocked-file.exe');
 
+// The fixture the URL-import proxy serves is a 1x1 PNG.
+const FIXTURE_WIDTH = 1;
+const FIXTURE_HEIGHT = 1;
+
 // Every upload path funnels through the plugin's upload endpoints.
 const UPLOAD_ROUTE = '**/upload/**';
+
+/**
+ * The app fetches import URLs server-side, and that fetch refuses loopback and
+ * private addresses to prevent SSRF — so the suite cannot host the file itself.
+ * This address is reserved for documentation (RFC 5737), which the guard allows;
+ * `server.proxy.fetch` then routes the request to the local fixture proxy, so
+ * nothing is ever sent to it. The filename comes from this path.
+ */
+const URL_IMPORT_URL = 'http://192.0.2.1/url-import.png';
 
 // How long each upload request is held open when a step needs files to still be in
 // flight. Deliberate knob, not a sleep: the fixtures are tiny, so at full speed a
@@ -37,6 +50,23 @@ const UPLOAD_HOLD_MS = 4_000;
  * The table is paginated, so counting rows only ever sees the first page — it
  * cannot tell you whether a 25-file batch actually landed.
  */
+const adminToken = async (request: APIRequestContext) => {
+  const auth = await request.post('/admin/login', {
+    data: { email: ADMIN_EMAIL_ADDRESS, password: ADMIN_PASSWORD },
+  });
+  const token = (await auth.json())?.data?.token;
+  expect(token, 'admin API login failed').toBeTruthy();
+  return token;
+};
+
+const findAsset = async (request: APIRequestContext, name: string) => {
+  const token = await adminToken(request);
+  const listed = await request.get(`/upload/files?filters[name][$eq]=${encodeURIComponent(name)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return (await listed.json())?.results?.[0];
+};
+
 const countAssets = async (request: APIRequestContext) => {
   const auth = await request.post('/admin/login', {
     data: { email: ADMIN_EMAIL_ADDRESS, password: ADMIN_PASSWORD },
@@ -157,21 +187,21 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       });
 
       await test.step('I upload from a URL', async () => {
-        // Live third-party URL, deliberately left for now — see the note in
-        // `file-upload.spec.ts`. The server-side fetch blocks loopback and private
-        // addresses for SSRF, so neither `page.route` nor a locally served file can
-        // replace it without a config option on the upload plugin.
-        const before = await countAssets(page.request);
-
-        await assetsPage.uploadFilesFromUrl('https://picsum.photos/200');
+        await assetsPage.uploadFilesFromUrl(URL_IMPORT_URL);
         await expect(assetsPage.uploadProgressDialog).toBeVisible();
         await assetsPage.waitForUploadProgressSuccess();
         await assetsPage.closeUploadProgressDialog();
 
-        // The fetched asset lands in the library. Counted rather than matched by
-        // name: the remote host decides the filename, so there is nothing stable
-        // to assert on.
-        expect(await countAssets(page.request)).toBe(before + 1);
+        await expect(assetsPage.getAssetRow('url-import.png')).toBeVisible();
+
+        // Prove the proxy served it. A network that answers for the unroutable
+        // address returns an HTML error page, which would otherwise land under the
+        // expected filename and pass.
+        const imported = await findAsset(page.request, 'url-import.png');
+        expect(imported?.mime).toBe('image/png');
+        // Dimensions, not bytes: the upload pipeline re-encodes images, and an HTML
+        // error page from a network that answers for the address has none at all.
+        expect([imported?.width, imported?.height]).toEqual([FIXTURE_WIDTH, FIXTURE_HEIGHT]);
       });
 
       await test.step('I cancel and retry an upload', async () => {
