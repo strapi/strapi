@@ -108,6 +108,44 @@ describe('uploadProgress slice', () => {
       );
       expect(clamped.files[0].uploadedBytes).toBe(100);
     });
+
+    // The URL flow learns the size from the same event as the first byte count, so a row
+    // still at `size: 0` would clamp every byte it is given down to zero.
+    it('takes the size along with the bytes when the row has none yet', () => {
+      const state = makeState([makeFile(0, 'uploading', 0)]);
+
+      const updated = uploadProgressReducer(
+        state,
+        setFileProgress({ uploadId: 1, index: 0, bytes: 40, size: 100 })
+      );
+
+      expect(updated.files[0].size).toBe(100);
+      expect(updated.files[0].uploadedBytes).toBe(40);
+    });
+
+    it('never lets a reported size overwrite a size the row already has', () => {
+      const state = makeState([makeFile(0, 'uploading', 100)]);
+
+      const updated = uploadProgressReducer(
+        state,
+        setFileProgress({ uploadId: 1, index: 0, bytes: 40, size: 999 })
+      );
+
+      expect(updated.files[0].size).toBe(100);
+      expect(updated.files[0].uploadedBytes).toBe(40);
+    });
+
+    it('leaves a zero-size row clamped to zero when no size is reported', () => {
+      const state = makeState([makeFile(0, 'uploading', 0)]);
+
+      const updated = uploadProgressReducer(
+        state,
+        setFileProgress({ uploadId: 1, index: 0, bytes: 40 })
+      );
+
+      expect(updated.files[0].size).toBe(0);
+      expect(updated.files[0].uploadedBytes).toBe(0);
+    });
   });
 
   describe('setFileComplete', () => {

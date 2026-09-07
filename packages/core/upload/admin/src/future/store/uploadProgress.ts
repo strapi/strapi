@@ -139,16 +139,25 @@ const uploadProgressSlice = createSlice({
         state.files[index].size = size;
       }
     },
+    /**
+     * `size` is optional and only sent by the URL flow, which learns the size from the
+     * same server event that carries the first byte count — the row was created with
+     * `size: 0`, and bytes clamped against a zero size would all read as zero. The
+     * direct-file flow already knows the size up front and omits it.
+     */
     setFileProgress(
       state,
-      action: PayloadAction<{ index: number; bytes: number; uploadId: number }>
+      action: PayloadAction<{ index: number; bytes: number; uploadId: number; size?: number }>
     ) {
-      const { index, bytes, uploadId } = action.payload;
+      const { index, bytes, size, uploadId } = action.payload;
       if (uploadId !== state.uploadId) {
         return;
       }
       const file = state.files[index];
       if (file) {
+        if (size !== undefined && file.size === 0) {
+          file.size = size;
+        }
         // Clamp to the known file size so the aggregate can never exceed 100%.
         file.uploadedBytes = Math.min(bytes, file.size);
       }
