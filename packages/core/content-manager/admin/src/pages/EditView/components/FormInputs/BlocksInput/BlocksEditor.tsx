@@ -379,7 +379,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           } else {
             domEl.scrollIntoView({ block: 'start' });
           }
-        } catch (_) {
+        } catch {
           // scroll errors are non-fatal; the cursor is already positioned
         }
       });
