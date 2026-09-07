@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import {
   maxGreaterThanMin,
   maxLengthGreaterThanMinLength,
+  validateUpdateSchema,
   verifyDraftAndPublishReservedAttributes,
 } from '../schema';
 
@@ -24,6 +25,151 @@ describe('Schema', () => {
       // so it can be ran many time inside the same test
       ctx.addIssue.mockClear();
     };
+  });
+
+  describe('validateUpdateSchema', () => {
+    const schemaWithOptionalDefaults = (includeUndefined: boolean) => ({
+      data: {
+        components: [
+          {
+            action: 'create',
+            uid: 'shared.hero',
+            displayName: 'Hero',
+            category: 'shared',
+            attributes: [],
+            ...(includeUndefined ? { config: undefined } : {}),
+          },
+        ],
+        contentTypes: [
+          {
+            action: 'create',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            draftAndPublish: true,
+            singularName: 'article',
+            pluralName: 'articles',
+            kind: 'singleType',
+            attributes: [],
+            ...(includeUndefined ? { options: undefined, pluginOptions: undefined } : {}),
+          },
+        ],
+      },
+    });
+
+    const schemaWithSearchable = (searchable?: boolean | null) => ({
+      data: {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            draftAndPublish: false,
+            singularName: 'article',
+            pluralName: 'articles',
+            kind: 'collectionType',
+            attributes: [
+              {
+                action: 'create',
+                name: 'secret',
+                properties: {
+                  type: 'text',
+                  private: true,
+                  ...(searchable === undefined ? {} : { searchable }),
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    test('reports a missing schema', () => {
+      expect(() => validateUpdateSchema(undefined)).toThrow('Schema is required');
+    });
+
+    test('reports a schema with the wrong type', () => {
+      expect(() => validateUpdateSchema('invalid')).toThrow(
+        'Invalid schema, expected an object with a data property'
+      );
+    });
+
+    test('applies collection defaults when keys are absent or undefined', () => {
+      expect(validateUpdateSchema({ data: {} })).toEqual({
+        data: { components: [], contentTypes: [] },
+      });
+      expect(
+        validateUpdateSchema({ data: { components: undefined, contentTypes: undefined } })
+      ).toEqual({
+        data: { components: [], contentTypes: [] },
+      });
+    });
+
+    test.each([
+      ['absent', false],
+      ['present with undefined', true],
+    ])('applies nested object defaults when keys are %s', (_label, includeUndefined) => {
+      expect(validateUpdateSchema(schemaWithOptionalDefaults(includeUndefined))).toMatchObject({
+        data: {
+          components: [{ config: {} }],
+          contentTypes: [{ options: {}, pluginOptions: {} }],
+        },
+      });
+    });
+
+    test('retains searchable when a private attribute explicitly disables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(false))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: false },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('retains searchable when a private attribute explicitly enables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(true))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('accepts an absent searchable property', () => {
+      const schema = validateUpdateSchema(schemaWithSearchable());
+
+      expect(schema).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(schema).not.toHaveProperty('data.contentTypes.0.attributes.0.properties.searchable');
+    });
+
+    test('rejects a null searchable property', () => {
+      expect(() => validateUpdateSchema(schemaWithSearchable(null))).toThrow();
+    });
   });
 
   describe('maxLengthGreaterThanMinLength', () => {

@@ -27,8 +27,27 @@ const allowedOperations = [
 
 const operations = pick(allowedOperations, sift);
 
+/**
+ * Match an RBAC condition query against an entity in memory with sift.
+ */
 const conditionsMatcher = (conditions: unknown) => {
-  return sift.createQueryTester(conditions, { operations });
+  try {
+    return sift.createQueryTester(conditions, { operations });
+  } catch (error) {
+    if (error instanceof Error) {
+      const [, operator] = error.message.match(/^Unsupported operation: (.+)$/) ?? [];
+
+      if (operator) {
+        throw new Error(
+          `RBAC condition uses unsupported operator "${operator}". Conditions are matched in memory and support only: ${allowedOperations.join(
+            ', '
+          )}.`
+        );
+      }
+    }
+
+    throw error;
+  }
 };
 
 const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {

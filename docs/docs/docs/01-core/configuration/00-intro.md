@@ -76,6 +76,7 @@ module.exports = () => ({
 
       defaultLimit: 25,
       maxLimit: 100,
+      depthLimit: 10,
 
       apolloServer: {
         tracing: true,

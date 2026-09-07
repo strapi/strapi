@@ -1,8 +1,9 @@
 import { adminApi } from '@strapi/admin/strapi-admin';
 import { renderHook, act, waitFor } from '@tests/utils';
 
-import { uploadProgressReducer } from '../../store/uploadProgress';
-import { abortUpload, useUploadFilesMutation } from '../api';
+import { useTypedDispatch } from '../../store/hooks';
+import { cancelUpload, uploadProgressReducer } from '../../store/uploadProgress';
+import { abortUpload, useRetryCancelledFilesMutation, useUploadFilesMutation } from '../api';
 import { uploadFileViaXHR, UploadAbortedError } from '../uploadFileViaXHR';
 
 jest.mock('../uploadFileViaXHR', () => ({
@@ -71,6 +72,17 @@ const setup = (count: number, concurrency?: number) => {
   });
 
   return { inFlight, result };
+};
+
+const drop = (result: { current: [(arg: unknown) => void, unknown] }, count: number) => {
+  act(() => {
+    result.current[0]({
+      formData: buildFormData(count),
+      totalFiles: count,
+      concurrency: undefined,
+      generateAiMetadata: false,
+    });
+  });
 };
 
 const settle = async (inFlight: Deferred[], upTo: number) => {
@@ -176,5 +188,143 @@ describe('uploadFiles worker pool', () => {
     });
 
     expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+  });
+
+  describe('a second drop while the first is still uploading', () => {
+    it('does not start a second pool alongside the first', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      drop(result as never, 2);
+
+      // Flush first: `waitFor` would pass before a second pool could even start.
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1);
+
+      await settle(inFlight, 5);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(5));
+    });
+
+    it('resolves with the whole batch, not just the merged leg', async () => {
+      const { inFlight, result } = setup(2);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      // The merge call's promise is the one the caller awaits, so it is the one
+      // that has to carry all 3 files — 2 from the first drop plus 1 merged in.
+      let merged: Promise<{ data?: unknown[] }>;
+      act(() => {
+        merged = (result.current[0] as (arg: unknown) => Promise<{ data?: unknown[] }>)({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await settle(inFlight, 3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
+
+      await expect(merged!).resolves.toEqual(expect.objectContaining({ data: expect.any(Array) }));
+      await expect(merged!.then((r) => r.data?.length)).resolves.toBe(3);
+    });
+
+    it('cancelling the batch also cancels the files that were merged in', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      drop(result as never, 2);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      act(() => {
+        abortUpload(1);
+      });
+
+      await act(async () => {
+        inFlight[0].reject(new UploadAbortedError());
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('a drop while a retry is still running', () => {
+    it('queues behind the retry pool instead of running beside it', async () => {
+      const inFlight: Deferred[] = [];
+
+      mockUploadFileViaXHR.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            inFlight.push({
+              resolve: () => resolve({ id: inFlight.length, name: 'uploaded' } as never),
+              reject,
+            });
+          })
+      );
+
+      const { result } = renderHook(
+        () => ({
+          upload: useUploadFilesMutation()[0],
+          retry: useRetryCancelledFilesMutation()[0],
+          dispatch: useTypedDispatch(),
+        }),
+        { providerOptions: { storeConfig } }
+      );
+
+      act(() => {
+        result.current.upload({
+          formData: buildFormData(2),
+          totalFiles: 2,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+
+      // Cancel is all-or-nothing, so this is the only way Retry becomes reachable.
+      await act(async () => {
+        abortUpload(1);
+        result.current.dispatch(cancelUpload());
+        inFlight[0].reject(new UploadAbortedError());
+      });
+
+      act(() => {
+        result.current.retry();
+      });
+
+      // The retry replays both cancelled rows, sequentially: one request in flight.
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      // Retried rows are `pending` again and the batch is still registered, so
+      // this drop merges. It must wait for the retry pool to drain.
+      act(() => {
+        result.current.upload({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+
+      // Draining the retry's two rows lets the merged file start: 1 cancelled +
+      // 2 retried + 1 merged.
+      await settle(inFlight, 3);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(4));
+    });
   });
 });

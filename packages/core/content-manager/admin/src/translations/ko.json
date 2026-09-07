@@ -263,6 +263,7 @@
   "containers.SettingPage.editSettings.relationOpenMode.newTab": "새 탭에서 열기",
   "containers.SettingPage.editSettings.relationOpenMode.page": "페이지로 이동",
   "containers.SettingPage.relations": "관련 필드",
+  "containers.empty-label": "제목 없음",
   "containers.untitled": "제목 없음",
   "dnd.cancel-item": "{item}, 놓았습니다. 순서 변경이 취소되었습니다.",
   "dnd.drop-item": "{item}, 놓았습니다. 목록에서의 최종 위치: {position}.",

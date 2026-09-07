@@ -848,7 +848,7 @@ describe('transformDocument — relation handling', () => {
       expect((result.category as any).connect[0].label).toBe('Technology');
     });
 
-    test('falls back to documentId as label when mainField is not a string', async () => {
+    test('uses an untranslated empty marker when mainField is null', async () => {
       const { service, mockStrapi, dbFindMany } = makeService();
 
       (mockStrapi.getModel as jest.Mock).mockImplementation((uid: string) => {
@@ -860,7 +860,6 @@ describe('transformDocument — relation handling', () => {
         mockStrapi.plugins.i18n.services['content-types'].isLocalizedContentType as jest.Mock
       ).mockReturnValue(false);
 
-      // name is null — should fall back to documentId
       dbFindMany.mockResolvedValue([{ documentId: 'cat-1', id: 10, name: null }]);
 
       const result = await service.transformDocument(
@@ -870,7 +869,8 @@ describe('transformDocument — relation handling', () => {
         makeUserAbility()
       );
 
-      expect((result.category as any).connect[0].label).toBe('cat-1');
+      expect((result.category as any).connect[0].label).toBe('');
+      expect((result.category as any).connect[0].label).not.toBe('cat-1');
     });
   });
 });

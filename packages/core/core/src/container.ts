@@ -14,6 +14,10 @@ export class Container implements Core.Container {
     return this;
   }
 
+  has(name: string) {
+    return this.registerMap.has(name) || this.serviceMap.has(name);
+  }
+
   get(name: string, args?: unknown) {
     // TODO: handle singleton vs instantiation everytime
     if (this.serviceMap.has(name)) {

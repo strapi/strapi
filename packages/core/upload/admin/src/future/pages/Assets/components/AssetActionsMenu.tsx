@@ -14,6 +14,7 @@ import { ArrowRight, ArrowsCounterClockwise, Download, Link, More, Trash } from 
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -55,6 +56,7 @@ interface AssetActionsMenuProps {
  */
 export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
   const { deselect } = useAssetSelection();
@@ -109,23 +111,21 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
 
     let res;
     try {
-      res = await replaceAsset({ id: asset.id, file });
+      res = await replaceAsset({ id: asset.id, file, fileInfo: { name: asset.name } });
     } finally {
       releaseBusy();
     }
 
     if ('error' in res) {
-      // `fetchBaseQuery` already unwraps the API envelope, so a server-sent
-      // reason (file too large, unsupported type) lands directly on `message`.
-      const { message } = res.error as { message?: string };
       toggleNotification({
         type: 'danger',
-        message:
-          message ??
+        message: getErrorMessage(
+          res.error,
           formatMessage({
             id: getTranslationKey('asset-details.replace.error'),
             defaultMessage: 'Failed to replace the file.',
-          }),
+          })
+        ),
       });
       return;
     }
@@ -209,6 +209,11 @@ export const AssetActionsMenu = ({ asset, dragData }: AssetActionsMenuProps) => 
         <input
           ref={fileInputRef}
           type="file"
+          // Replacing swaps the bytes of an existing asset, so the picker offers
+          // only its own type. Without this the picker accepted anything and a
+          // JPG could come back as PNG bytes still served under a `.jpg` url,
+          // since replace preserves hash and ext by design.
+          accept={asset.mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden

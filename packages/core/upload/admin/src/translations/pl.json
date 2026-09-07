@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "Przesłany plik przekracza maksymalny dozwolony rozmiar pliku.",
+  "apiError.FileTooBig": "Plik jest zbyt duży, aby go przesłać. Przekracza maksymalny rozmiar żądania dozwolony przez serwer.",
   "assets.uploaded": "{number, plural, one {# przesłany zasób} other {# przesłanych zasobów}} pomyślnie",
   "asset-details.title": "Szczegóły pliku",
   "asset-details.description": "Wyświetla informacje o pliku i jego metadane",

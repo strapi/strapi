@@ -2,7 +2,7 @@
   "ai.modal.error": "Kon geen AI-metadata genereren voor de geüploade bestanden.",
   "ai.modal.title": "{count, plural, one {# bestand geüpload} other {# bestanden geüpload}}, beoordeel door AI gegenereerde metadata",
   "ai.modal.uploading.title": "Uploaden en verwerken met AI...",
-  "apiError.FileTooBig": "Het geüploade bestand overschrijdt de maximaal toegestane bestandsgrootte.",
+  "apiError.FileTooBig": "Het bestand is te groot om te uploaden. Het overschrijdt de maximale aanvraaggrootte die door de server is toegestaan.",
   "asset-details.alternativeText": "Alternatieve tekst",
   "asset-details.assetId": "Bestands-ID",
   "asset-details.caption": "Onderschrift",

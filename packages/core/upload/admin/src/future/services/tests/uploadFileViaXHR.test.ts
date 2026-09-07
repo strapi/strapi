@@ -108,8 +108,22 @@ describe('uploadFileViaXHR', () => {
       name: 'UploadFileError',
       message: 'File too large',
       status: 400,
+      isServerMessage: true,
     });
     await expect(promise).rejects.toBeInstanceOf(UploadFileError);
+  });
+
+  it('flags a status-based message as not server-sourced when the body carries none', async () => {
+    const controller = new AbortController();
+
+    const promise = uploadFileViaXHR(ENDPOINT, 'token', new FormData(), controller.signal);
+    lastXHR().respond(500, '');
+
+    await expect(promise).rejects.toMatchObject({
+      message: 'Upload failed with status 500',
+      status: 500,
+      isServerMessage: false,
+    });
   });
 
   it('refreshes the access token and retries once on a 401 response', async () => {
@@ -177,6 +191,7 @@ describe('uploadFileViaXHR', () => {
     lastXHR().fail();
 
     await expect(promise).rejects.toBeInstanceOf(UploadFileError);
+    await expect(promise).rejects.toMatchObject({ isServerMessage: false });
   });
 
   it('forwards bytes/total from upload progress events to onProgress', async () => {

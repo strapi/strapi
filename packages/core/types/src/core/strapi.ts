@@ -88,6 +88,13 @@ export interface Strapi extends Container {
   auth: Modules.Auth.AuthenticationService;
   /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;
+  /**
+   * Per-application store of named Zod schemas built for content-API route validation.
+   *
+   * @internal Not a plugin API. Content-API validation writes during schema construction;
+   * OpenAPI generation reads the same instance-owned store.
+   */
+  contentAPISchemaRegistry: Core.ContentAPISchemaRegistry;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
   sessionManager: Modules.SessionManager.SessionManagerService;

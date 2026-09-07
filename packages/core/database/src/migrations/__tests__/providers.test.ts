@@ -216,7 +216,7 @@ describe('migration providers', () => {
 
   describe('createInternalMigrationProvider', () => {
     it('runs registered migrations through the internal storage table', async () => {
-      const { db, sqlite } = createTestDatabase();
+      const { db, sqlite, logger } = createTestDatabase();
       const provider = createInternalMigrationProvider(db);
 
       await provider.register({
@@ -237,12 +237,27 @@ describe('migration providers', () => {
       expect(await sqlite('strapi_migrations_internal').select('name')).toEqual([
         { name: 'test-internal' },
       ]);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: 'info',
+          message: '[internal migration]: migrating test-internal',
+        })
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: 'info',
+          message: expect.stringMatching(
+            /^\[internal migration\]: migrated test-internal \(\d+\.\d{3}s\)$/
+          ),
+        })
+      );
+      expect(logger.debug).not.toHaveBeenCalled();
 
       await sqlite.destroy();
     });
 
     it('skips registered internal migrations already recorded in storage', async () => {
-      const { db, sqlite } = createTestDatabase();
+      const { db, sqlite, logger } = createTestDatabase();
       const up = jest.fn(async (knex: knex.Knex) => {
         await knex.schema.createTable('should_not_exist', (table) => {
           table.increments('id');
@@ -270,6 +285,8 @@ describe('migration providers', () => {
       expect(await sqlite('strapi_migrations_internal').select('name')).toEqual([
         { name: 'already-applied' },
       ]);
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
 
       await sqlite.destroy();
     });

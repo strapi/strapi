@@ -20,10 +20,17 @@ export class UploadAbortedError extends Error {
 export class UploadFileError extends Error {
   status?: number;
 
-  constructor(message: string, status?: number) {
+  /**
+   * Whether `message` came from the response body. The fallbacks this module
+   * invents are hardcoded English; callers with localized text should use theirs.
+   */
+  isServerMessage: boolean;
+
+  constructor(message: string, status?: number, isServerMessage = false) {
     super(message);
     this.name = 'UploadFileError';
     this.status = status;
+    this.isServerMessage = isServerMessage;
   }
 }
 
@@ -92,13 +99,18 @@ const sendUploadViaXHR = <T>(
       }
 
       let message = `Upload failed with status ${xhr.status}`;
+      let isServerMessage = false;
       try {
         const parsed = JSON.parse(xhr.responseText);
-        message = parsed?.error?.message || parsed?.message || message;
+        const serverMessage = parsed?.error?.message || parsed?.message;
+        if (serverMessage) {
+          message = serverMessage;
+          isServerMessage = true;
+        }
       } catch {
         // Keep the default status-based message.
       }
-      reject(new UploadFileError(message, xhr.status));
+      reject(new UploadFileError(message, xhr.status, isServerMessage));
     };
 
     xhr.onerror = () => {

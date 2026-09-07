@@ -65,6 +65,7 @@
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "release": "node scripts/release.js",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache && tsx scripts/ai-tooling/post-setup.ts",
+    "setup:worktree": "yarn install && yarn build && yarn ai:sync",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",

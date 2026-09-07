@@ -27,7 +27,7 @@ Both processor types receive the full `DocumentContext`. Register instances in `
 
 ## Adding a post-processor
 
-`ComponentsWriter` is the current post-processor: it writes `components.schemas` from `z.globalRegistry` after assembly.
+`ComponentsWriter` is the current post-processor: it writes `components.schemas` from `strapi.contentAPISchemaRegistry` after assembly. Nested Zod `.meta({ id })` schemas harvested during route conversion are merged in via `context.registries.extractedComponentSchemas` so `$ref`s resolve.
 
 #### 1. Create a processor class
 

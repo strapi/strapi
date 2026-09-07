@@ -155,7 +155,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * Schema-aware filters validation that restricts to actual model fields
    */
   protected get schemaAwareFilters() {
-    return z.record(this.scalarFieldsEnum, z.any()).describe('Filters to apply to the query');
+    return z
+      .partialRecord(this.scalarFieldsEnum, z.any())
+      .describe('Filters to apply to the query');
   }
 
   get locale() {

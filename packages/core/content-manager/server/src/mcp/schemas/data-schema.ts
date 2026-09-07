@@ -253,7 +253,16 @@ export const attributeToInputSchema = (
                 'Replace all relations. Array replaces existing; null clears all. Mutually exclusive with connect/disconnect.'
               ),
           })
-          .strict();
+          .strict()
+          .refine(
+            (value) =>
+              value.set === undefined ||
+              (value.connect === undefined && value.disconnect === undefined),
+            {
+              message: 'set is mutually exclusive with connect and disconnect',
+              path: ['set'],
+            }
+          );
       } else {
         s = z.union([
           relDocumentId,
