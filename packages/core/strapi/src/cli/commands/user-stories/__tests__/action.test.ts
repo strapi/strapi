@@ -8,6 +8,7 @@ import {
   renderSkeleton,
   extractExistingIds,
   syncUserStories,
+  action,
 } from '../action';
 
 const SAMPLE = `# Admin Login
@@ -121,6 +122,12 @@ describe('syncUserStories', () => {
     await fs.rm(tmp, { recursive: true, force: true });
   });
 
+  it('throws when the input directory does not exist', async () => {
+    await expect(
+      syncUserStories({ input: 'does/not/exist', cwd: tmp, write: false })
+    ).rejects.toThrow('Input directory not found');
+  });
+
   it('reports a spec to create in check mode without writing', async () => {
     const results = await syncUserStories({ input: 'docs/user-stories', cwd: tmp, write: false });
 
@@ -190,5 +197,99 @@ describe('Admin Login', () => {
     const spec = await fs.readFile(specAbs, 'utf8');
     expect(extractExistingIds(spec)).toEqual(new Set(['AC1.1', 'AC1.2', 'AC2.1']));
     expect(spec).toContain('AUTO-GENERATED');
+  });
+});
+
+describe('action (CLI entrypoint)', () => {
+  let tmp: string;
+  let originalCwd: string;
+  let logSpy: jest.SpyInstance;
+  let exitSpy: jest.SpyInstance;
+
+  const loggedText = () => logSpy.mock.calls.map((call) => call.join(' ')).join('\n');
+
+  beforeEach(async () => {
+    originalCwd = process.cwd();
+    tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'us-action-'));
+    const docDir = path.join(tmp, 'docs', 'user-stories', 'admin');
+    await fs.mkdir(docDir, { recursive: true });
+    await fs.writeFile(path.join(docDir, 'login.md'), SAMPLE);
+    process.chdir(tmp);
+
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+  });
+
+  afterEach(async () => {
+    process.chdir(originalCwd);
+    await fs.rm(tmp, { recursive: true, force: true });
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+  });
+
+  it('check mode exits 1 and reports a spec that needs creating', async () => {
+    await action({ input: 'docs/user-stories' });
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(loggedText()).toContain('tests/e2e/tests/admin/login.vitest.spec.ts');
+    expect(loggedText()).toContain('doc(s) checked');
+  });
+
+  it('check mode does not exit once everything is in sync', async () => {
+    await action({ input: 'docs/user-stories', write: true });
+    exitSpy.mockClear();
+    logSpy.mockClear();
+
+    await action({ input: 'docs/user-stories' });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(loggedText()).toContain('ok');
+  });
+
+  it('--write creates the missing spec on disk without exiting', async () => {
+    await action({ input: 'docs/user-stories', write: true });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    const specAbs = path.join(tmp, 'tests/e2e/tests/admin/login.vitest.spec.ts');
+    await expect(fs.access(specAbs)).resolves.toBeUndefined();
+  });
+
+  it('--write without --force leaves a drifted hand-written spec untouched and warns', async () => {
+    const specAbs = path.join(tmp, 'tests/e2e/tests/admin/login.vitest.spec.ts');
+    await fs.mkdir(path.dirname(specAbs), { recursive: true });
+    const handWritten = `import { describe, test } from 'vitest';\ndescribe('x', () => { test('AC1.1 — old', async () => {}); });\n`;
+    await fs.writeFile(specAbs, handWritten);
+
+    await action({ input: 'docs/user-stories', write: true });
+
+    expect(loggedText()).toContain('drift');
+    expect(loggedText()).toContain('left untouched');
+    expect(await fs.readFile(specAbs, 'utf8')).toBe(handWritten);
+  });
+
+  it('--write --force regenerates a drifted spec and reports it as rewrote', async () => {
+    const specAbs = path.join(tmp, 'tests/e2e/tests/admin/login.vitest.spec.ts');
+    await fs.mkdir(path.dirname(specAbs), { recursive: true });
+    await fs.writeFile(
+      specAbs,
+      `import { describe, test } from 'vitest';\ndescribe('x', () => { test('AC1.1 — old', async () => {}); });\n`
+    );
+
+    await action({ input: 'docs/user-stories', write: true, force: true });
+
+    expect(loggedText()).toContain('rewrote');
+    expect(await fs.readFile(specAbs, 'utf8')).toContain('AUTO-GENERATED');
+  });
+
+  it('reports a doc with no `> Source:` line as skipped', async () => {
+    await fs.writeFile(
+      path.join(tmp, 'docs', 'user-stories', 'admin', 'no-source.md'),
+      '# No Source\n\n## User Story: Something\n\n### Acceptance Criteria\n\n- **Given** a **When** b **Then** c\n'
+    );
+
+    await action({ input: 'docs/user-stories' });
+
+    expect(loggedText()).toContain('skip');
+    expect(loggedText()).toContain('no `> Source:` line');
   });
 });
