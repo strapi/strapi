@@ -1,0 +1,68 @@
+name: 'Draft release'
+
+# Prepares a release candidate: pins the range against the published npm baseline, decides the
+# version from the commits that landed, cuts `releases/x.y.z`, opens the draft PR against `main`,
+# attributes every shipping PR, and reconciles milestones.
+#
+# Defaults to a dry run. A dry run performs no write at all and reports the exact list of writes the
+# real run would perform.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Explicit x.y.z version. Leave empty to decide it from the commits.'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Rehearse without writing anything.'
+        type: boolean
+        required: false
+        default: true
+      source_ref:
+        description: 'Branch to cut the release from.'
+        required: false
+        default: 'develop'
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    name: 'Draft'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_SECRET }}
+
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0 # tags and full first-parent history are both required
+
+      # The action runs its TypeScript sources directly through Node's type stripping, which needs
+      # Node >= 22.18. Pinned here rather than left to the runner image default.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Draft the release
+        id: draft
+        uses: ./.github/actions/draft-release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          version: ${{ inputs.version }}
+          dry_run: ${{ inputs.dry_run }}
+          source_ref: ${{ inputs.source_ref }}
+
+      - name: Upload the write journal
+        if: always() && steps.draft.outputs.journal_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: draft-release-journal
+          path: ${{ steps.draft.outputs.journal_path }}
+          if-no-files-found: warn
