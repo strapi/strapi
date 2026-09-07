@@ -355,9 +355,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key];
       if (oldFormat) {
-        await getService('provider').replace(newFormat, oldFormat);
+        await getService('provider').replace(newFormat, oldFormat as File);
       } else {
         await getService('provider').upload(newFormat);
       }
@@ -396,7 +396,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       for (const oldKey of Object.keys(oldFile.formats)) {
         if (!newFormatKeys.has(oldKey)) {
-          const oldFormat = oldFile.formats[oldKey] as File;
+          const oldFormat = oldFile.formats[oldKey];
           promises.push(strapi.plugin('upload').provider.delete(oldFormat));
         }
       }
@@ -507,9 +507,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           // they're orphaned in storage since the DB record no longer tracks them.
           await getService('provider').replace(fileData, dbFile);
           if (dbFile.formats) {
+            const formats = dbFile.formats;
             await Promise.all(
-              Object.keys(dbFile.formats).map((key) =>
-                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
+              Object.keys(formats).map((key) =>
+                strapi.plugin('upload').provider.delete(formats[key])
               )
             );
           }
@@ -703,11 +704,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await strapi.plugin('upload').provider.delete(file);
 
       if (file.formats) {
-        const keys = Object.keys(file.formats);
+        const formats = file.formats;
+        const keys = Object.keys(formats);
 
         await Promise.all(
           keys.map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats![key]);
+            return strapi.plugin('upload').provider.delete(formats[key]);
           })
         );
       }

@@ -61,7 +61,10 @@ export interface FocalPoint {
   y: number;
 }
 
-export interface File {
+/**
+ * Upload Content-Type File (content-types/file.ts)
+ */
+export interface UploadFile {
   id: number;
   name: string;
   alternativeText?: string | null;
@@ -69,14 +72,10 @@ export interface File {
   focalPoint?: FocalPoint | null;
   width?: number | null;
   height?: number | null;
-  formats?:
-    | Record<string, FileFormat>
-    | {
-        thumbnail: {
-          url: string;
-        };
-      }
-    | null;
+  formats?: {
+    thumbnail?: FileFormat | { url: string } | undefined;
+    [size: string]: FileFormat | { url: string } | undefined;
+  } | null;
   hash: string;
   ext?: string;
   mime?: string;
@@ -102,6 +101,11 @@ export interface File {
   updatedBy?: number;
   isLocal?: boolean;
 }
+
+/**
+ * @deprecated use {@linkcode UploadFile} instead. {@linkcode File} often gets shadowed by {@linkcode global.File}
+ */
+export type File = UploadFile;
 
 export type UploadFileInfo = Pick<
   File,
