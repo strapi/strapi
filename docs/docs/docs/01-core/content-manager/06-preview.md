@@ -124,19 +124,30 @@ All markers within one blocks field share both the same `fieldPath` key (e.g., `
 
 The `deriveGroupKey` function in the preview script detects the presence of `fieldPath` in a `data-strapi-source` attribute and strips `path` from the group key, so all encoded spans within one blocks field share a single `HighlightGroup`.
 
-The bounding box of that group is computed in `computeGroupRect` / `findBlocksContainer`:
+The bounding box of that group is computed in `computeGroupRect`, via `getBlocksContainer`. `getBlocksContainer` trusts an already-established, still-attached container for the group without re-checking it — it only runs the guarded discovery below when there's no cached container yet. This matters because live edits can legitimately dwarf a field's currently-marked content (e.g. typing an image into a field whose only marked content is a short paragraph); re-validating on every redraw would otherwise reject the still-correct container and collapse the highlight. The cache is populated by `syncContainerObservation` (see [Live container resize](#live-container-resize)) and shared with `findBlockIndex`.
+
+Fresh discovery (`findBlocksContainer`), run only when there's no cached container:
 
 1. Walk up the DOM from the first span in the group looking for an ancestor whose direct children include a block-level tag (`P`, `H1`–`H6`, `UL`, `OL`, `BLOCKQUOTE`, `PRE`), skipping `LI` elements (a list item can have a nested `<ul>`/`<ol>` as a direct child, which would satisfy the check but is not the container).
-2. Use the container's `getBoundingClientRect()` as the highlight rect. This includes container padding and empty trailing blocks that have no stega spans.
-3. Fallback (if no container is found): union of all span rects plus an 80 px bottom buffer so that empty trailing blocks remain clickable.
+2. Reject the candidate if its area is more than `MAX_CONTAINER_AREA_RATIO` (6x) larger than the union of the group's own marked elements — this stops an image-only field (no block-level tags of its own) from escaping into an unrelated, page-level ancestor and swallowing the whole page.
+3. Use the container's `getBoundingClientRect()` as the highlight rect. This includes container padding and empty trailing blocks that have no stega spans.
+4. Fallback (if no container is found): union of all span rects plus an 80 px bottom buffer so that empty trailing blocks remain clickable.
+
+### Live container resize
+
+Live edits never carry a stega tag until the field is saved, so growing or shrinking content inside an already-open blocks field (typing a new paragraph, adding an image) doesn't touch any marked span — nothing signals the highlight manager that a redraw is needed. `syncContainerObservation` covers this gap: whenever a group's container is (re)established, a shared `containerResizeObserver` (`ResizeObserver`) watches it, and any resize triggers `updateAllHighlights()`.
+
+`containerResizeObserver` is disconnected in `__strapi_previewCleanup` alongside the other observers. Since the preview script re-runs on every iframe navigation and `strapiScript` re-injection, leaving it connected would leak one live observer — still pinning its watched DOM node — per re-run.
 
 ### Double-click flow
 
 Double-clicking a blocks field highlight opens the editor at the clicked block.
 
-1. The preview script calls `findBlockIndex(anchor)` to identify which block was clicked. It applies the same block-level-tag walk-up as `findBlocksContainer` to locate the field container, then walks up from the clicked span until its parent is the container, and returns the DOM child index of that element. The full `children` list (not filtered by tag name) is used so that empty paragraphs (`<br>`) and other non-standard elements don't cause index drift.
+1. The preview script picks the element at the click point via `pickElementAtPoint`, which reports whether it was an **exact** hit (inside a _marked_ element's own rect) or a fallback to the nearest marked element (only good for "which field", not "which block").
+   - **Exact hit**: `findBlockIndex(anchor, groupKey, group)` resolves the block index — it gets the field's container via `getBlocksContainer`, walks up from the clicked span until its parent is the container, and returns the DOM child index of that element. The full `children` list (not filtered by tag name) is used so that empty paragraphs (`<br>`) and other non-standard elements don't cause index drift.
+   - **No exact hit**: unmarked doesn't always mean _permanently_ unmarked — live edits render before they're saved, so a paragraph just typed is unmarked the same way a code block or alt-less image is by design. The script finds the real clicked element with `document.elementsFromPoint` (skipping past the highlight overlay itself, which is what actually received the click) and, unless it's content that's never marked by design (`isKnownUnencodedElement`: inside a `<pre>`, or an `<img>` with no `alt`), resolves its block index the same way as an exact hit. For code blocks and alt-less images, `blockIndex` stays `null` — the editor still opens, but the cursor doesn't jump to a wrong neighboring block.
 2. For the popover trigger position the script uses the clicked element's rect — not the full group rect — so the popover opens adjacent to the clicked line. If the stega span is zero-width (invisible chars only), it walks up to the nearest visible ancestor.
-3. `strapiFieldFocusIntent` is sent with the `path` set to the `fieldPath` value (the blocks field path) and a `blockIndex` number in the payload.
+3. `strapiFieldFocusIntent` is sent with the `path` set to the `fieldPath` value (the blocks field path) and `blockIndex` in the payload — a number, or `null` when it couldn't be resolved (see above).
 4. `InputPopover` receives the message and calls `setPopoverField` with both the field metadata and the `blockIndex`.
 5. `InputPopoverProvider` makes `blockIndex` available via `usePreviewPopoverBlockIndex()` to all inputs rendered inside the popover.
 6. `InputRenderer` picks up `blockIndex` and passes it — along with `livePreviewSync={true}` — to `BlocksInput` → `BlocksEditor`.
