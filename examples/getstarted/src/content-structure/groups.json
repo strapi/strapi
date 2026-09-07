@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "sections": {
+    "collectionTypes": {
+      "groups": [
+        {
+          "parent": null,
+          "name": "Menu sections",
+          "id": "grp_d7f1h3j5l9",
+          "children": [
+            {
+              "uid": "api::menusection.menusection",
+              "type": "contentType"
+            }
+          ]
+        },
+        {
+          "parent": null,
+          "name": "Restaurants",
+          "id": "grp_x8k2m4p7q1",
+          "children": [
+            {
+              "type": "group",
+              "id": "grp_1c33d1dc74d545aaa9d5a6a2"
+            },
+            {
+              "type": "group",
+              "id": "grp_b4r8s2u6y0"
+            },
+            {
+              "type": "group",
+              "id": "grp_c3v9n5t2w6"
+            }
+          ]
+        },
+        {
+          "parent": "grp_x8k2m4p7q1",
+          "name": "Menus",
+          "id": "grp_c3v9n5t2w6",
+          "children": [
+            {
+              "uid": "api::menu.menu",
+              "type": "contentType"
+            }
+          ]
+        },
+        {
+          "parent": "grp_x8k2m4p7q1",
+          "name": "Locations",
+          "id": "grp_b4r8s2u6y0",
+          "children": [
+            {
+              "uid": "api::country.country",
+              "type": "contentType"
+            }
+          ]
+        },
+        {
+          "parent": null,
+          "name": "Blog",
+          "id": "grp_e5g9i3k7m1",
+          "children": []
+        },
+        {
+          "parent": "grp_x8k2m4p7q1",
+          "name": "My New Folder",
+          "id": "grp_1c33d1dc74d545aaa9d5a6a2",
+          "children": []
+        }
+      ]
+    },
+    "singleTypes": {
+      "groups": [
+        {
+          "parent": null,
+          "name": "Site pages",
+          "id": "grp_n2p6r0t4v8",
+          "children": [
+            {
+              "uid": "api::homepage.homepage",
+              "type": "contentType"
+            },
+            {
+              "uid": "api::about.about",
+              "type": "contentType"
+            },
+            {
+              "uid": "api::footer.footer",
+              "type": "contentType"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

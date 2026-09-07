@@ -259,4 +259,77 @@ describe('useContentManagerInitData', () => {
     expect(result.current.collectionTypeLinks).toHaveLength(contentTypes.length);
     expect(permissionCheckCalls).toBe(0);
   });
+
+  it('forwards the contentStructure from the init payload into state', async () => {
+    const contentTypes = createContentTypes();
+    const contentStructure = {
+      collectionTypes: [
+        {
+          type: 'group',
+          id: 'grp-1',
+          name: 'Group 1',
+          children: [{ type: 'contentType', uid: 'api::perf-a.perf-a' }],
+        },
+      ],
+      singleTypes: [],
+    };
+
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: { components: [], contentTypes, fieldSizes: {}, contentStructure },
+        })
+      ),
+      http.get('/content-manager/content-types-settings', () => HttpResponse.json({ data: [] })),
+      http.post('/admin/permissions/check', async () => HttpResponse.json({ data: [] }))
+    );
+
+    const permissions = contentTypes.map((contentType, index) => ({
+      id: index + 1,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: contentType.uid,
+      properties: {},
+      conditions: [],
+    }));
+
+    const { result } = renderHook(() => useContentManagerInitData(), {
+      providerOptions: { storeConfig: createStoreConfig(), permissions },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.contentStructure).toEqual(contentStructure);
+  });
+
+  it('leaves contentStructure undefined when the init payload omits it', async () => {
+    const contentTypes = createContentTypes();
+
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({ data: { components: [], contentTypes, fieldSizes: {} } })
+      ),
+      http.get('/content-manager/content-types-settings', () => HttpResponse.json({ data: [] })),
+      http.post('/admin/permissions/check', async () => HttpResponse.json({ data: [] }))
+    );
+
+    const permissions = contentTypes.map((contentType, index) => ({
+      id: index + 1,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: contentType.uid,
+      properties: {},
+      conditions: [],
+    }));
+
+    const { result } = renderHook(() => useContentManagerInitData(), {
+      providerOptions: { storeConfig: createStoreConfig(), permissions },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Backwards compatibility: An older server omits contentStructure completely, but links still populate.
+    expect(result.current.contentStructure).toBeUndefined();
+    expect(result.current.collectionTypeLinks).toHaveLength(contentTypes.length);
+  });
 });

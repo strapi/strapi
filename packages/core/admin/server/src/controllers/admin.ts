@@ -125,6 +125,18 @@ export default {
       )(strapi.contentTypes as any);
     };
 
+    const getNumberOfFolders = async (): Promise<number> => {
+      try {
+        const contentStructure = strapi.get('content-structure') as
+          | { countGroups?: () => Promise<number> }
+          | undefined;
+
+        return (await contentStructure?.countGroups?.()) ?? 0;
+      } catch {
+        return 0;
+      }
+    };
+
     return {
       data: {
         useTypescriptOnServer,
@@ -133,6 +145,7 @@ export default {
         numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
+        numberOfFolders: await getNumberOfFolders(),
       },
     } satisfies TelemetryProperties.Response;
   },

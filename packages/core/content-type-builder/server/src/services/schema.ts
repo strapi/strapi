@@ -1,4 +1,4 @@
-import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
@@ -7,6 +7,9 @@ import createBuilder from './schema-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
+import type { CoreContentStructureService } from './content-structure';
+
+type ContentTypeKind = 'collectionType' | 'singleType';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
@@ -133,7 +136,11 @@ export const getSchema = async () => {
     };
   }, strapi.components);
 
+  const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
+  const contentStructure = await coreContentStructure.getCleanedFile();
+
   return {
+    contentStructure,
     contentTypes,
     components,
   };
@@ -143,11 +150,33 @@ export const updateSchema = async (schema: CTBSchema) => {
   const builder = createBuilder();
   const apiHandler = getService('api-handler');
 
-  const { components, contentTypes } = schema;
+  const { components, contentTypes, contentStructure } = schema;
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
+
+  const upsertedUids = new Map<string, ContentTypeKind>();
+  const deletedUids = new Set<string>();
+
+  for (const contentType of contentTypes) {
+    if (contentType.action === 'create') {
+      upsertedUids.set(contentType.uid, contentType.kind ?? 'collectionType');
+    } else if (contentType.action === 'update' && contentType.kind) {
+      // A kind switch in the same save must override the registry's stale kind,
+      // otherwise a folder assignment into the new section fails validation.
+      upsertedUids.set(contentType.uid, contentType.kind);
+    } else if (contentType.action === 'delete') {
+      deletedUids.add(contentType.uid);
+    }
+  }
+
+  // Validate folder references before anything is written. This will throw if invalid.
+  getService('content-structure').validateFromUpdate({
+    incomingStructure: contentStructure,
+    upsertedUids,
+    deletedUids,
+  });
 
   // we pre create empty typesk
   for (const contentType of contentTypes) {
@@ -256,7 +285,21 @@ export const updateSchema = async (schema: CTBSchema) => {
     .filter((ct: any) => ct.action === 'delete')
     .map((ct: any) => ct.uid);
 
-  await builder.writeFiles();
+  const schemaFilesWritten = await builder.writeFiles();
+
+  if (!schemaFilesWritten) {
+    throw new errors.ApplicationError('Invalid schema edition');
+  }
+
+  try {
+    await getService('content-structure').commitFromUpdate({
+      incomingStructure: contentStructure,
+      deletedUids,
+    });
+  } catch (error) {
+    await builder.rollback();
+    throw error;
+  }
 
   try {
     for (const uid of APIsToDelete) {
