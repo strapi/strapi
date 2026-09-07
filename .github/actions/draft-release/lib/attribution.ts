@@ -150,6 +150,9 @@ export function summarisePull(pull: PullPayload, integration: Integration): Pull
     baseRef: pull.base?.ref ?? '',
     headRef: pull.head?.ref ?? '',
     milestone: pull.milestone?.title ?? null,
+    // Every path into this projection is gated by `isMerged`, so the fallback is unreachable. It
+    // exists because the payload type cannot express that.
+    mergedAt: pull.merged_at ?? '',
   };
 }
 

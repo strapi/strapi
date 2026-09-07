@@ -8,11 +8,12 @@ import type {
   PinnedRange,
   ReleasePayload,
   Reconciliation,
+  ReleaseMode,
   RepositoryCoords,
   VersionSource,
 } from './types.ts';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 export const BLOCK_START = '<!-- STRAPI_RELEASE_CANDIDATE_START -->';
 export const BLOCK_END = '<!-- STRAPI_RELEASE_CANDIDATE_END -->';
 
@@ -76,18 +77,35 @@ export function renderAuthor(author: Author): string {
   return author.name === null ? login : `${cell(author.name)} (${login})`;
 }
 
-/** The shipping table, one row per attributed pull request. */
+/**
+ * The calendar day a pull request landed, from its ISO `merged_at`.
+ *
+ * The day is the whole point of the column: it answers which release window the work landed in.
+ * The time of day is kept in the payload for anything that needs to order two merges.
+ */
+export function renderMergeDate(mergedAt: string): string {
+  return /^(\d{4}-\d{2}-\d{2})/u.exec(mergedAt ?? '')?.[1] ?? '—';
+}
+
+/**
+ * The shipping table, one row per attributed pull request.
+ *
+ * The milestone column is the one the author picked, read when the range was attributed. The run
+ * then corrects it to the shipping milestone, so a value that disagrees with the release is the
+ * interesting case rather than a mistake in the report.
+ */
 export function renderPullRequestTable(pullRequests: readonly AttributedPull[]): string {
   if (pullRequests.length === 0) {
     return '_No pull request resolved in this range._';
   }
 
   return table(
-    ['PR', 'Title', 'Author', 'Milestone', 'Basis'],
+    ['PR', 'Title', 'Author', 'Merged', 'Milestone at merge', 'Basis'],
     pullRequests.map(
       (pull) =>
         `| [#${pull.number}](${pull.url}) | ${cell(pull.title)} | ${renderAuthor(pull.author)} | ` +
-        `${cell(pull.milestone ?? '—')} | ${cell(pull.basis)} |`
+        `${renderMergeDate(pull.mergedAt)} | ${cell(pull.milestone ?? '—')} | ` +
+        `${cell(pull.basis)} |`
     )
   );
 }
@@ -112,17 +130,22 @@ export function renderAttentionTable(records: readonly AttentionRecord[]): strin
   ].join('\n');
 }
 
-/** Every mutation, planned or applied, as a table. */
+/**
+ * Every mutation, with how far it got.
+ *
+ * The state column is the point of the table. Only an `applied` entry is worth undoing, and an
+ * `indeterminate` one is the entry somebody has to go and look at before touching anything.
+ */
 export function renderJournalTable(entries: readonly JournalEntry[]): string {
   if (entries.length === 0) {
     return '_No write recorded._';
   }
 
   return table(
-    ['Operation', 'Target', 'Before', 'After'],
+    ['State', 'Operation', 'Target', 'Before', 'After'],
     entries.map(
       (entry) =>
-        `| ${entry.op} | ${cell(entry.target)} | ${cell(entry.before ?? '—')} | ` +
+        `| ${entry.state} | ${entry.op} | ${cell(entry.target)} | ${cell(entry.before ?? '—')} | ` +
         `${cell(entry.after ?? '—')} |`
     )
   );
@@ -136,9 +159,11 @@ export type PayloadInput = {
   bump: BumpKind;
   previousVersion: string;
   versionSource: VersionSource;
+  mode: ReleaseMode;
   range: PinnedRange;
   integrationCount: number;
   branch: string;
+  branchAdvanced: boolean;
   pullNumber: number | null;
   pullUrl: string | null;
   classification: BumpClassification;
@@ -160,12 +185,14 @@ export function buildPayload(input: PayloadInput): ReleasePayload {
       bump: input.bump,
       previousVersion: input.previousVersion,
       source: input.versionSource,
+      mode: input.mode,
     },
     range: { ...input.range, integrationCount: input.integrationCount },
     candidate: {
       branch: input.branch,
       headSha: input.range.toSha,
       expectedExperimentalVersion: experimentalVersion(input.range.toSha),
+      branchAdvanced: input.branchAdvanced,
       pullRequestNumber: input.pullNumber,
       pullRequestUrl: input.pullUrl,
     },
@@ -216,6 +243,22 @@ export function extractJsonBlock(body: string): unknown {
   }
 }
 
+/**
+ * What the run did to the candidate, in one sentence.
+ *
+ * A reader who opens the pull request a second time needs to know whether they are looking at a
+ * fresh draft or at the same candidate carrying more work than it did an hour ago.
+ */
+const MODE_LINES: Record<ReleaseMode, string> = {
+  draft: 'Drafted from `develop`.',
+  refresh:
+    'Refreshed. This candidate was already open, and it now covers everything that landed on ' +
+    '`develop` since it was drafted.',
+  redraft:
+    'Redrafted. The commits that landed since changed the version, so this candidate replaces the ' +
+    'one drafted before it.',
+};
+
 function formatNumbers(numbers: readonly number[]): string {
   return numbers.length === 0 ? '_none_' : numbers.map((number) => `#${number}`).join(', ');
 }
@@ -225,6 +268,8 @@ export type BodyInput = {
   pullRequests: readonly AttributedPull[];
   attention: readonly AttentionRecord[];
   warnings?: readonly string[];
+  /** The candidate a redraft replaced, `null` on every other run. */
+  supersedes?: { pullNumber: number; branch: string } | null;
 };
 
 /** The pull request body: a human summary, the shipping table, then the machine-readable block. */
@@ -240,6 +285,15 @@ export function renderBody(input: BodyInput): string {
     `\`${payload.release.previousVersion}\` → \`${payload.release.version}\` ` +
       `(**${payload.release.bump}**, decided from ${decidedBy}).`,
     '',
+    MODE_LINES[payload.release.mode],
+    ...(input.supersedes === null || input.supersedes === undefined
+      ? []
+      : [
+          '',
+          `Supersedes #${input.supersedes.pullNumber}, which was drafted as ` +
+            `\`${input.supersedes.branch}\`.`,
+        ]),
+    '',
     table(
       ['', ''],
       [
@@ -248,6 +302,8 @@ export function renderBody(input: BodyInput): string {
         `| **To** | \`${payload.range.toSha}\` |`,
         `| **Integrations** | ${payload.range.integrationCount} |`,
         `| **Pull requests** | ${pullRequests.length} |`,
+        `| **Branch** | \`${payload.candidate.branch}\`, ` +
+          `${payload.candidate.branchAdvanced === true ? 'advanced to the pinned head' : 'already at the pinned head'} |`,
         `| **Milestone** | ${payload.milestones.shipping.title} (closed) → ` +
           `${payload.milestones.next.title} |`,
       ]
@@ -302,10 +358,16 @@ export function renderBody(input: BodyInput): string {
   ].join('\n');
 }
 
-/** The single comment posted on the release pull request after the milestone work. */
+/**
+ * The comment posted on the release pull request after the milestone work.
+ *
+ * One comment per run, never rewritten. The body of the pull request is the current truth and gets
+ * replaced wholesale; these comments are the only record of which run pulled which work in.
+ */
 export function renderMilestoneComment(input: {
   version: string;
   nextTitle: string;
+  mode: ReleaseMode;
   entries: readonly JournalEntry[];
   dryRun: boolean;
 }): string {
@@ -313,12 +375,22 @@ export function renderMilestoneComment(input: {
     (entry) => entry.op.startsWith('milestone.') === true || entry.op.startsWith('issue.') === true
   );
 
+  const applied = {
+    draft: `\`${input.version}\` is closed. Work now collects in \`${input.nextTitle}\`.`,
+    refresh:
+      `\`${input.version}\` stays closed and now carries everything that landed since the last ` +
+      `run. Work continues to collect in \`${input.nextTitle}\`.`,
+    redraft:
+      `The candidate is now \`${input.version}\`, and its milestone is closed. Work collects in ` +
+      `\`${input.nextTitle}\`.`,
+  }[input.mode];
+
   return [
     `## Milestone reconciliation for ${input.version}`,
     '',
     input.dryRun === true
       ? `Dry run. Nothing below was applied. Work now collects in \`${input.nextTitle}\`.`
-      : `\`${input.version}\` is closed. Work now collects in \`${input.nextTitle}\`.`,
+      : applied,
     '',
     renderJournalTable(milestoneEntries),
   ].join('\n');
@@ -334,7 +406,7 @@ export function renderStepSummary(input: {
   const heading = payload.dryRun === true ? 'Planned' : 'Applied';
 
   return [
-    `# draft-release — ${payload.release.version} (${payload.release.bump})`,
+    `# draft-release — ${payload.release.version} (${payload.release.bump}, ${payload.release.mode})`,
     '',
     `${mode}. Baseline \`${payload.release.previousVersion}\`, range \`${payload.range.fromRef}\` → ` +
       `\`${short(payload.range.toSha)}\`, ${payload.range.integrationCount} integrations, ` +

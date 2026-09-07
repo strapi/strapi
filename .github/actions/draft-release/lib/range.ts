@@ -74,11 +74,18 @@ export function createGitExec(cwd: string = process.cwd()): GitExec {
 
 /** Wraps a process surface into the Git operations this action performs. */
 export function createGitAdapter(exec: GitExec): GitAdapter {
+  /**
+   * The exit code travels on the error, which is what tells the write journal that git reached a
+   * verdict. Git updates a ref atomically, so a push that exits non-zero left the ref untouched.
+   * See `classifyFailure` in [`journal.ts`](journal.ts).
+   */
   function run(args: string[]): string {
     const result = exec(args);
 
     if (result.status !== 0) {
-      throw new Error(`git ${args.join(' ')} failed: ${result.stderr.trim()}`);
+      throw Object.assign(new Error(`git ${args.join(' ')} failed: ${result.stderr.trim()}`), {
+        status: result.status,
+      });
     }
 
     return result.stdout;
@@ -118,6 +125,20 @@ export function createGitAdapter(exec: GitExec): GitAdapter {
 
     pushBranch(sha, branch) {
       run(['push', 'origin', `${sha}:refs/heads/${branch}`]);
+    },
+
+    deleteBranch(branch) {
+      run(['push', 'origin', '--delete', `refs/heads/${branch}`]);
+    },
+
+    /**
+     * Brings one remote branch into `refs/remotes/origin`.
+     *
+     * Forced on purpose: the local remote-tracking ref is a read cache with no history to protect,
+     * and a release branch that was rewritten would otherwise refuse to update.
+     */
+    fetchBranch(branch) {
+      run(['fetch', '--force', 'origin', `refs/heads/${branch}:refs/remotes/origin/${branch}`]);
     },
 
     remoteBranchExists(branch) {

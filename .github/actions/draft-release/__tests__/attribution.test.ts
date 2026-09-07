@@ -216,6 +216,7 @@ describe('summarisePull', () => {
       baseRef: '',
       headRef: '',
       milestone: null,
+      mergedAt: '',
     });
   });
 });

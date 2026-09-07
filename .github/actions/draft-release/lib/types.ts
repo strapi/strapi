@@ -46,6 +46,7 @@ export type IgnoreReason = (typeof IGNORE_REASONS)[number];
 
 /** Every mutation the action can perform, as recorded in the write journal. */
 export const JOURNAL_OPS = [
+  'branch.delete',
   'branch.push',
   'issue.milestone.clear',
   'issue.milestone.set',
@@ -53,12 +54,40 @@ export const JOURNAL_OPS = [
   'milestone.create',
   'milestone.rename',
   'pr.body',
+  'pr.close',
   'pr.comment',
   'pr.create',
   'pr.label',
 ] as const;
 
 export type JournalOp = (typeof JOURNAL_OPS)[number];
+
+/**
+ * How far a recorded mutation got.
+ *
+ * `failed` and `indeterminate` are deliberately separate. A run that dies halfway is finished by
+ * hand, and the person doing it needs to know the difference between a write the server refused and
+ * a write whose outcome nobody can vouch for.
+ */
+export const JOURNAL_ENTRY_STATES = [
+  'planned',
+  'attempted',
+  'applied',
+  'failed',
+  'indeterminate',
+] as const;
+
+export type JournalEntryState = (typeof JOURNAL_ENTRY_STATES)[number];
+
+/**
+ * What a run does with the release candidate.
+ *
+ * `draft` opens one, `refresh` advances the one in flight, and `redraft` replaces it because the
+ * version it was cut under no longer matches what landed.
+ */
+export const RELEASE_MODES = ['draft', 'refresh', 'redraft'] as const;
+
+export type ReleaseMode = (typeof RELEASE_MODES)[number];
 
 export const CLEANUP_ACTIONS = ['keep', 'move', 'clear'] as const;
 
@@ -108,6 +137,7 @@ export type PullPayload = {
   number: number;
   title?: string | null;
   html_url?: string | null;
+  body?: string | null;
   merged_at?: string | null;
   merge_commit_sha?: string | null;
   base?: { ref?: string | null } | null;
@@ -125,6 +155,13 @@ export type PullSummary = {
   baseRef: string;
   headRef: string;
   milestone: string | null;
+  /**
+   * When the pull request landed, ISO 8601, from `merged_at`.
+   *
+   * Never empty on a summary that reaches the report: attribution refuses any pull request without
+   * a `merged_at`, so a summary can only exist for one that merged.
+   */
+  mergedAt: string;
 };
 
 /** One integration, decided. Always carries the rule that decided it. */
@@ -201,12 +238,33 @@ export type MilestonePlan = {
     number: number | null;
     currentTitle: string | null;
     title: string;
+    /**
+     * Whether the run still has to close it.
+     *
+     * `false` on a refresh, where the milestone was already closed by the run that drafted the
+     * candidate. A closed milestone still accepts item assignments through the REST API, which is
+     * what lets a refresh keep filling it without reopening it first.
+     */
+    close: boolean;
   };
   next: {
-    action: 'create' | 'reuse';
+    action: 'create' | 'reuse' | 'rename';
     number: number | null;
+    currentTitle: string | null;
     title: string;
   };
+};
+
+/**
+ * A pull request whose milestone disagrees with what history says.
+ *
+ * History is the authority: a pull request merged inside the range ships in this release whatever
+ * milestone its author picked, so the milestone is corrected rather than obeyed.
+ */
+export type RealignItem = {
+  number: number;
+  from: string | null;
+  toTitle: string;
 };
 
 /** An issue or pull request carrying a milestone, as returned by the issues endpoint. */
@@ -247,7 +305,9 @@ export type JournalEntry = {
   after: string | null;
   detail: string | null;
   at: string;
-  applied: boolean;
+  state: JournalEntryState;
+  /** The failure that stopped this write, `null` while it has not failed. */
+  error: string | null;
 };
 
 export type JournalSnapshot = {
@@ -270,6 +330,25 @@ export type PinnedRange = {
   toSha: string;
 };
 
+/**
+ * A release candidate already in flight, discovered from its open pull request.
+ *
+ * The pull request is the only artifact whose lifecycle matches the candidate's. A release branch
+ * outlives it, because the ruleset that protects release branches forbids deleting them without a
+ * bypass, and a milestone is renamed by this very action.
+ */
+export type Candidate = {
+  /** The version the candidate was cut under, parsed out of its branch name. */
+  version: string;
+  branch: string;
+  pullNumber: number;
+  pullUrl: string;
+  /** The head the pull request payload reports, used only to cross-check the git ref. */
+  pullHeadSha: string;
+  /** The payload the last run embedded in the body, `null` when it is absent or unreadable. */
+  payload: unknown;
+};
+
 /** The machine-readable payload embedded in the release pull request body. */
 export type ReleasePayload = {
   schemaVersion: number;
@@ -281,6 +360,8 @@ export type ReleasePayload = {
     bump: BumpKind;
     previousVersion: string;
     source: VersionSource;
+    /** Whether this run opened the candidate, advanced it, or replaced it. */
+    mode: ReleaseMode;
   };
   range: PinnedRange & { integrationCount: number };
   /** What later automation needs to find this candidate again, without re-deriving any of it. */
@@ -291,6 +372,13 @@ export type ReleasePayload = {
     headSha: string;
     /** The artifact `publish-pr-experimental.yml` publishes from `headSha`. */
     expectedExperimentalVersion: string;
+    /**
+     * Whether this run moved the branch.
+     *
+     * `false` when the branch already pointed at the pinned head, which means the experimental
+     * artifact a reader may already have tested is still the current one.
+     */
+    branchAdvanced: boolean;
     /** The release pull request, `null` on a dry run where no pull request is created. */
     pullRequestNumber: number | null;
     pullRequestUrl: string | null;
@@ -350,7 +438,11 @@ export type GitAdapter = {
   isAncestor: (ancestor: string, descendant: string) => boolean;
   listIntegrations: (fromSha: string, toSha: string) => Integration[];
   pushBranch: (sha: string, branch: string) => void;
+  deleteBranch: (branch: string) => void;
   remoteBranchExists: (branch: string) => boolean;
+  /** Brings a remote branch into `refs/remotes/origin`, so a guard never rests on how the
+   * workflow's checkout was configured. */
+  fetchBranch: (branch: string) => void;
 };
 
 export type GithubAdapter = {
@@ -358,6 +450,7 @@ export type GithubAdapter = {
   getRepository: () => Promise<RepositoryMergeSettings>;
   listPullsForCommit: (sha: string) => Promise<PullPayload[]>;
   getPull: (pullNumber: number) => Promise<PullPayload>;
+  listPulls: (input: { state: 'open' | 'closed' | 'all'; base: string }) => Promise<PullPayload[]>;
   listPullCommits: (pullNumber: number) => Promise<PullCommit[]>;
   listMilestones: (state: 'open' | 'closed' | 'all') => Promise<Milestone[]>;
   createMilestone: (title: string) => Promise<Milestone>;
@@ -374,6 +467,7 @@ export type GithubAdapter = {
     body: string;
   }) => Promise<{ number: number; html_url?: string | null }>;
   updatePullBody: (pullNumber: number, body: string) => Promise<void>;
+  closePull: (pullNumber: number) => Promise<void>;
   addLabels: (issueNumber: number, labels: string[]) => Promise<void>;
   createComment: (issueNumber: number, body: string) => Promise<void>;
 };
@@ -390,5 +484,4 @@ export type Clock = () => string;
 export type DraftReleaseInputs = {
   version: string;
   dryRun: boolean;
-  sourceRef: string;
 };

@@ -47,6 +47,16 @@ export function parseNextLink(header: string | null): string | null {
   return next?.[1] ?? null;
 }
 
+/**
+ * A failure the server answered.
+ *
+ * The status travels on the error so the write journal can tell a refused mutation from one whose
+ * outcome nobody can vouch for. See `classifyFailure` in [`journal.ts`](journal.ts).
+ */
+function answeredFailure(message: string, status: number): Error {
+  return Object.assign(new Error(message), { status });
+}
+
 async function describeFailure(response: HttpResponse): Promise<string> {
   const body = await response.text().catch(() => '');
 
@@ -81,7 +91,10 @@ export function createRestClient(token: string, request: HttpRequest) {
     });
 
     if (response.ok === false) {
-      throw new Error(`GitHub ${method} ${url} failed: ${await describeFailure(response)}`);
+      throw answeredFailure(
+        `GitHub ${method} ${url} failed: ${await describeFailure(response)}`,
+        response.status
+      );
     }
 
     return response;
@@ -140,6 +153,14 @@ export function createGithubAdapter(
       return rest.get(`${base}/pulls/${pullNumber}`);
     },
 
+    /**
+     * Pull requests against one base branch. Paged, because the list endpoint returns the body of
+     * every pull request and the release candidate is found by reading it back.
+     */
+    async listPulls({ state, base: baseRef }) {
+      return rest.paginate(`${base}/pulls?${query({ state, base: baseRef })}`);
+    },
+
     async listPullCommits(pullNumber) {
       return rest.paginate(`${base}/pulls/${pullNumber}/commits?${query({})}`);
     },
@@ -180,6 +201,10 @@ export function createGithubAdapter(
 
     async updatePullBody(pullNumber, body) {
       await rest.send('PATCH', `${base}/pulls/${pullNumber}`, { body });
+    },
+
+    async closePull(pullNumber) {
+      await rest.send('PATCH', `${base}/pulls/${pullNumber}`, { state: 'closed' });
     },
 
     async addLabels(issueNumber, labels) {

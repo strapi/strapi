@@ -7,6 +7,8 @@ import type { Integration, MilestoneItem, PullCommit, PullPayload } from '../typ
  */
 
 export const SHA = {
+  /** Where a release branch already points, one integration behind `develop`. */
+  CANDIDATE_HEAD: 'face0000face0000face0000face0000face0000',
   BACK_MERGE: 'ca560c0d681a696a497cb1a68245b002fd9810bf',
   DIRECT: 'aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000',
   MERGE: 'b912880160c178af6171de530e830b3174a2b1d4',
@@ -80,4 +82,36 @@ export function pullRequestItem(
   mergedAt: string | null
 ): MilestoneItem {
   return milestoneItem({ number, state, pull_request: { merged_at: mergedAt } });
+}
+
+/**
+ * The open pull request that identifies a release candidate in flight.
+ *
+ * Its body carries the release candidate block a previous run wrote, because that is what the
+ * cross-check reads back.
+ */
+export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload {
+  const version = '5.53.0';
+
+  return {
+    number: 27600,
+    title: `Release ${version}`,
+    html_url: 'https://github.com/strapi/strapi/pull/27600',
+    body: [
+      '<!-- STRAPI_RELEASE_CANDIDATE_START -->',
+      '```json',
+      JSON.stringify({
+        release: { version },
+        candidate: { branch: `releases/${version}` },
+      }),
+      '```',
+      '<!-- STRAPI_RELEASE_CANDIDATE_END -->',
+    ].join('\n'),
+    merged_at: null,
+    base: { ref: 'main' },
+    head: { ref: `releases/${version}`, sha: SHA.CANDIDATE_HEAD },
+    user: { login: 'strapi-release-bot' },
+    milestone: null,
+    ...overrides,
+  };
 }

@@ -29,6 +29,7 @@ function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
     bump: 'minor',
     previousVersion: '5.52.3',
     versionSource: 'computed',
+    mode: 'draft',
     range: {
       fromRef: 'v5.52.3',
       fromSha: 'a'.repeat(40),
@@ -37,6 +38,7 @@ function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
     },
     integrationCount: 12,
     branch: 'releases/5.53.0',
+    branchAdvanced: true,
     pullNumber: 27700,
     pullUrl: 'https://github.com/strapi/strapi/pull/27700',
     classification: {
@@ -61,6 +63,7 @@ function payloadInput(overrides: Partial<PayloadInput> = {}): PayloadInput {
         baseRef: 'develop',
         headRef: 'feat/audit-logs',
         milestone: '5.52.4',
+        mergedAt: '2026-09-05T09:59:00Z',
         status: 'resolved',
         basis: 'exact-merge-sha',
         integrationShas: ['c'.repeat(40)],
@@ -84,7 +87,8 @@ function journalEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
     after: '5.53.0',
     detail: null,
     at: '2026-09-06T17:57:00Z',
-    applied: true,
+    state: 'applied',
+    error: null,
     ...overrides,
   };
 }
@@ -148,6 +152,7 @@ describe('renderPullRequestTable', () => {
       baseRef: 'develop',
       headRef: 'fix/x',
       milestone: null,
+      mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
       integrationShas: ['a'],
@@ -157,7 +162,7 @@ describe('renderPullRequestTable', () => {
 
     assert.match(table, /handle a \\\\\\\| b/u);
     assert.equal(table.split('\n').length, 3);
-    assert.equal(table.split('\n')[2]?.split(/(?<!\\)\|/u).length, 7);
+    assert.equal(table.split('\n')[2]?.split(/(?<!\\)\|/u).length, 8);
   });
 
   it('escapes a pipe so a title cannot break the table', () => {
@@ -169,6 +174,7 @@ describe('renderPullRequestTable', () => {
       baseRef: 'develop',
       headRef: 'fix/x',
       milestone: null,
+      mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
       integrationShas: ['a'],
@@ -203,7 +209,7 @@ describe('renderJournalTable', () => {
 
 describe('buildPayload', () => {
   it('carries the schema version later automation reads', () => {
-    assert.equal(buildPayload(payloadInput()).schemaVersion, 4);
+    assert.equal(buildPayload(payloadInput()).schemaVersion, 5);
   });
 
   it('identifies the candidate by its branch, its pinned head and its pull request', () => {
@@ -213,6 +219,7 @@ describe('buildPayload', () => {
       branch: 'releases/5.53.0',
       headSha: 'b'.repeat(40),
       expectedExperimentalVersion: `0.0.0-experimental.${'b'.repeat(40)}`,
+      branchAdvanced: true,
       pullRequestNumber: 27700,
       pullRequestUrl: 'https://github.com/strapi/strapi/pull/27700',
     });
@@ -344,6 +351,7 @@ describe('renderMilestoneComment', () => {
     const comment = renderMilestoneComment({
       version: '5.53.0',
       nextTitle: '5.53.1',
+      mode: 'draft',
       dryRun: true,
       entries: [
         journalEntry(),
@@ -362,6 +370,7 @@ describe('renderMilestoneComment', () => {
     const comment = renderMilestoneComment({
       version: '5.53.0',
       nextTitle: '5.53.1',
+      mode: 'draft',
       dryRun: false,
       entries: [],
     });

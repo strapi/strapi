@@ -2,9 +2,9 @@ import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { createJournal } from '../lib/journal.ts';
-import { EXPERIMENTAL_LABEL, runDraftRelease } from '../lib/pipeline.ts';
+import { EXPERIMENTAL_LABEL, preflightRelease, runDraftRelease } from '../lib/pipeline.ts';
 import { renderBody } from '../lib/report.ts';
-import { SHA } from '../lib/__fixtures__/fixtures.ts';
+import { SHA, candidatePull } from '../lib/__fixtures__/fixtures.ts';
 
 import type { RegistryRequest } from '../lib/npm.ts';
 import type { DraftReleaseResult } from '../lib/pipeline.ts';
@@ -25,6 +25,8 @@ const BACK_MERGE_SHA = SHA.BACK_MERGE;
 type Overrides = {
   gh?: Partial<GithubAdapter>;
   git?: Partial<GitAdapter>;
+  /** The pull requests open against `main`, which is where a candidate in flight is found. */
+  openPulls?: PullPayload[];
 };
 
 /**
@@ -131,6 +133,7 @@ function scenario(overrides: Overrides = {}): {
       throw new Error('404');
     },
     listPullCommits: async () => [],
+    listPulls: async () => overrides.openPulls ?? [],
     listMilestones: async () => [{ number: 430, title: '5.52.4', state: 'open' }],
     async createMilestone(title) {
       calls.push(`createMilestone:${title}`);
@@ -154,6 +157,9 @@ function scenario(overrides: Overrides = {}): {
     async updatePullBody(number) {
       calls.push(`updatePullBody:${number}`);
     },
+    async closePull(number) {
+      calls.push(`closePull:${number}`);
+    },
     async addLabels(number, labels) {
       calls.push(`addLabels:${number}:${labels.join(',')}`);
     },
@@ -171,6 +177,12 @@ function scenario(overrides: Overrides = {}): {
     remoteBranchExists: () => false,
     pushBranch(sha, branch) {
       calls.push(`pushBranch:${branch}:${sha}`);
+    },
+    deleteBranch(branch) {
+      calls.push(`deleteBranch:${branch}`);
+    },
+    fetchBranch(branch) {
+      calls.push(`fetchBranch:${branch}`);
     },
     ...overrides.git,
   };
@@ -195,7 +207,7 @@ async function run(
   const journal = createJournal({ apply: inputs.dryRun === false, clock: CLOCK });
 
   const result = await runDraftRelease({
-    inputs: { version: '', sourceRef: 'develop', ...inputs },
+    inputs: { version: '', ...inputs },
     git: context.git,
     gh: context.gh,
     journal,
@@ -233,14 +245,16 @@ describe('runDraftRelease', () => {
       [
         'milestone.rename',
         'milestone.create',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.clear',
+        'issue.milestone.clear',
         'milestone.close',
         'branch.push',
         'pr.create',
         'pr.label',
         'pr.body',
-        'issue.milestone.set',
-        'issue.milestone.clear',
-        'issue.milestone.clear',
         'pr.comment',
       ]
     );
@@ -249,11 +263,14 @@ describe('runDraftRelease', () => {
   it('renames, opens the next milestone, then closes the shipping one', async () => {
     const { calls } = await run({ dryRun: false });
 
-    assert.deepEqual(calls.slice(0, 3), [
-      'updateMilestone:430:{"title":"5.53.0"}',
-      'createMilestone:5.53.1',
-      'updateMilestone:430:{"state":"closed"}',
-    ]);
+    assert.deepEqual(
+      [calls[0], calls[1], calls.find((call) => call.includes('"state":"closed"'))],
+      [
+        'updateMilestone:430:{"title":"5.53.0"}',
+        'createMilestone:5.53.1',
+        'updateMilestone:430:{"state":"closed"}',
+      ]
+    );
   });
 
   it('cuts the branch at the pinned SHA and labels the PR for the experimental publish', async () => {
@@ -272,10 +289,10 @@ describe('runDraftRelease', () => {
     assert.equal(calls.includes('setIssueMilestone:27600:431'), true);
     assert.equal(calls.includes('setIssueMilestone:27601:null'), true);
     assert.equal(calls.includes('setIssueMilestone:26000:null'), true);
-    assert.equal(
-      calls.some((call) => call.startsWith('setIssueMilestone:27436')),
-      false
-    );
+    // 27436 and 27509 shipped, so they are pulled into the shipping milestone rather than left
+    // on the one their authors picked.
+    assert.equal(calls.includes('setIssueMilestone:27436:430'), true);
+    assert.equal(calls.includes('setIssueMilestone:27509:430'), true);
   });
 
   it('keeps the release back-merge out of the shipping set and out of the drift report', async () => {
@@ -310,13 +327,15 @@ describe('runDraftRelease', () => {
       branch: 'releases/5.53.0',
       headSha: FEAT_SHA,
       expectedExperimentalVersion: `0.0.0-experimental.${FEAT_SHA}`,
+      branchAdvanced: true,
       pullRequestNumber: 27700,
       pullRequestUrl: 'https://github.com/strapi/strapi/pull/27700',
     });
 
     assert.equal(result.payload.candidate.headSha, result.payload.range.toSha);
     assert.equal(result.payload.candidate.branch, result.branch);
-    assert.equal(result.payload.schemaVersion, 4);
+    assert.equal(result.payload.release.mode, 'draft');
+    assert.equal(result.payload.schemaVersion, 5);
   });
 
   it('reports no pull request for a candidate a dry run only planned', async () => {
@@ -326,6 +345,7 @@ describe('runDraftRelease', () => {
       branch: 'releases/5.53.0',
       headSha: FEAT_SHA,
       expectedExperimentalVersion: `0.0.0-experimental.${FEAT_SHA}`,
+      branchAdvanced: true,
       pullRequestNumber: null,
       pullRequestUrl: null,
     });
@@ -408,10 +428,10 @@ describe('runDraftRelease', () => {
     );
   });
 
-  it('stops when the release branch already exists', async () => {
+  it('stops when a release branch was left behind with no pull request drafting it', async () => {
     await assert.rejects(
       () => run({ dryRun: true }, { git: { remoteBranchExists: () => true } }),
-      /already exists/u
+      /already exists but no open pull request is drafting it/u
     );
   });
 
@@ -494,5 +514,302 @@ describe('runDraftRelease', () => {
       true
     );
     assert.equal(result.payload.attention.length, 3);
+  });
+});
+
+/**
+ * The second and third runs of a release window.
+ *
+ * `develop` keeps moving while a candidate is open, so the action has to fold what landed since
+ * into the same release. These scenarios start from the repository state the first run leaves
+ * behind: the shipping milestone closed, the next one open, and the release pull request in flight.
+ */
+describe('runDraftRelease, candidate in flight', () => {
+  const CANDIDATE_MILESTONES = [
+    { number: 430, title: '5.53.0', state: 'closed' },
+    { number: 431, title: '5.53.1', state: 'open' },
+  ];
+
+  /** The release branch sits at `head`, which is behind `develop` unless it is `FEAT_SHA`. */
+  function inFlight(head: string, overrides: Overrides = {}): Overrides {
+    return {
+      ...overrides,
+      openPulls: overrides.openPulls ?? [candidatePull()],
+      gh: { listMilestones: async () => CANDIDATE_MILESTONES, ...overrides.gh },
+      git: {
+        remoteBranchExists: () => true,
+        resolveSha(ref) {
+          if (ref === 'v5.52.3') {
+            return '0'.repeat(40);
+          }
+
+          return ref.startsWith('origin/releases/') === true ? head : FEAT_SHA;
+        },
+        ...overrides.git,
+      },
+    };
+  }
+
+  it('advances the candidate instead of opening a second one', async () => {
+    const { calls, result } = await run({ dryRun: false }, inFlight(SHA.CANDIDATE_HEAD));
+
+    assert.equal(result.mode, 'refresh');
+    assert.equal(result.version, '5.53.0');
+    assert.equal(result.pullNumber, 27600);
+    assert.equal(calls.includes(`pushBranch:releases/5.53.0:${FEAT_SHA}`), true);
+    assert.equal(calls.includes('updatePullBody:27600'), true);
+    assert.equal(calls.includes('createComment:27600'), true);
+    assert.equal(
+      calls.some((call) => call.startsWith('createPull:')),
+      false
+    );
+  });
+
+  it('checks the branch is only a pointer into develop before touching it', async () => {
+    const { calls } = await run({ dryRun: false }, inFlight(SHA.CANDIDATE_HEAD));
+
+    assert.equal(calls.includes('fetchBranch:releases/5.53.0'), true);
+  });
+
+  it('leaves the shipping milestone closed and fills it through the API', async () => {
+    const { calls, result } = await run({ dryRun: false }, inFlight(SHA.CANDIDATE_HEAD));
+
+    assert.equal(result.payload.milestones.shipping.number, 430);
+    assert.equal(result.payload.milestones.next.number, 431);
+    assert.equal(calls.includes('setIssueMilestone:27509:430'), true);
+    assert.equal(calls.includes('setIssueMilestone:27436:430'), true);
+    assert.equal(
+      calls.some((call) => call.includes('"state":"closed"')),
+      false
+    );
+    assert.equal(
+      calls.some((call) => call.startsWith('createMilestone:')),
+      false
+    );
+  });
+
+  it('does not push, and says so, when nothing landed since the last run', async () => {
+    const { calls, result } = await run({ dryRun: false }, inFlight(FEAT_SHA));
+
+    assert.equal(result.mode, 'refresh');
+    assert.equal(result.payload.candidate.branchAdvanced, false);
+    assert.equal(
+      calls.some((call) => call.startsWith('pushBranch:')),
+      false
+    );
+    assert.equal(calls.includes('updatePullBody:27600'), true);
+  });
+
+  it('warns when the candidate body was hand-edited away from its branch', async () => {
+    const { result } = await run(
+      { dryRun: false },
+      inFlight(SHA.CANDIDATE_HEAD, { openPulls: [candidatePull({ body: 'someone rewrote this' })] })
+    );
+
+    assert.equal(result.warnings.length, 1);
+    assert.match(result.warnings[0] ?? '', /carries no readable release candidate block/u);
+  });
+
+  // Only the containment check fails. The range pin asks the same question of the baseline tag,
+  // and answering `false` there would stop the run for the wrong reason.
+  const diverged: Partial<GitAdapter> = {
+    isAncestor: (ancestor) => ancestor !== SHA.CANDIDATE_HEAD,
+  };
+
+  it('stops when something was pushed to the release branch directly', async () => {
+    await assert.rejects(
+      () => run({ dryRun: false }, inFlight(SHA.CANDIDATE_HEAD, { git: diverged })),
+      /releases\/5\.53\.0 \(face0000.*\) is not contained in origin\/develop/u
+    );
+  });
+
+  it('refuses in the preflight, before a single write is attempted', async () => {
+    const context = scenario(inFlight(SHA.CANDIDATE_HEAD, { git: diverged }));
+
+    await assert.rejects(() =>
+      preflightRelease({
+        inputs: { version: '', dryRun: false },
+        git: context.git,
+        gh: context.gh,
+        journal: createJournal({ apply: true, clock: CLOCK }),
+        request: context.request,
+        logger: { info() {} },
+        clock: CLOCK,
+      })
+    );
+
+    // `fetchBranch` is the only call the preflight makes that the stub records, and it is a read.
+    assert.deepEqual(context.calls, ['fetchBranch:releases/5.53.0']);
+  });
+
+  it('stops when the candidate pull request outlived its branch', async () => {
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: false },
+          inFlight(SHA.CANDIDATE_HEAD, { git: { remoteBranchExists: () => false } })
+        ),
+      /#27600 is open against releases\/5\.53\.0, but that branch is gone from the remote/u
+    );
+  });
+
+  it('stops when the candidate release already published', async () => {
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: false },
+          inFlight(SHA.CANDIDATE_HEAD, {
+            openPulls: [
+              candidatePull({ head: { ref: 'releases/5.52.3', sha: SHA.CANDIDATE_HEAD } }),
+            ],
+          })
+        ),
+      /is not above the published baseline 5\.52\.3, so that release already shipped/u
+    );
+  });
+
+  it('stops when the version would move backwards', async () => {
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: false },
+          inFlight(SHA.CANDIDATE_HEAD, {
+            openPulls: [
+              candidatePull({ head: { ref: 'releases/5.54.0', sha: SHA.CANDIDATE_HEAD } }),
+            ],
+          })
+        ),
+      /below the candidate 5\.54\.0/u
+    );
+  });
+
+  it('stops when two release pull requests are open', async () => {
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: false },
+          inFlight(SHA.CANDIDATE_HEAD, {
+            openPulls: [
+              candidatePull(),
+              candidatePull({
+                number: 27601,
+                head: { ref: 'releases/5.52.4', sha: SHA.CANDIDATE_HEAD },
+              }),
+            ],
+          })
+        ),
+      /Found 2 open release pull requests/u
+    );
+  });
+
+  it('stops when the open milestone is not the candidate’s next one', async () => {
+    await assert.rejects(
+      () =>
+        run(
+          { dryRun: false },
+          inFlight(SHA.CANDIDATE_HEAD, {
+            gh: {
+              listMilestones: async () => [
+                { number: 430, title: '5.53.0', state: 'closed' },
+                { number: 432, title: '6.0.0', state: 'open' },
+              ],
+            },
+          })
+        ),
+      /The open milestone is 6\.0\.0, but this release expects 5\.53\.1/u
+    );
+  });
+});
+
+describe('runDraftRelease, redraft', () => {
+  /** The version drifted: the candidate was cut as 5.52.4, and a feat has landed since. */
+  function drifted(overrides: Overrides = {}): Overrides {
+    return {
+      openPulls: [
+        candidatePull({
+          number: 27600,
+          head: { ref: 'releases/5.52.4', sha: SHA.CANDIDATE_HEAD },
+        }),
+      ],
+      gh: {
+        listMilestones: async () => [
+          { number: 430, title: '5.52.4', state: 'closed' },
+          { number: 431, title: '5.52.5', state: 'open' },
+        ],
+        ...overrides.gh,
+      },
+      git: {
+        remoteBranchExists: (branch) => branch === 'releases/5.52.4',
+        resolveSha(ref) {
+          if (ref === 'v5.52.3') {
+            return '0'.repeat(40);
+          }
+
+          return ref.startsWith('origin/releases/') === true ? SHA.CANDIDATE_HEAD : FEAT_SHA;
+        },
+        ...overrides.git,
+      },
+    };
+  }
+
+  it('renames both milestones onto the version the commits decided', async () => {
+    const { calls, result } = await run({ dryRun: false }, drifted());
+
+    assert.equal(result.mode, 'redraft');
+    assert.equal(result.version, '5.53.0');
+    assert.deepEqual(
+      calls.filter((call) => call.startsWith('updateMilestone:')),
+      ['updateMilestone:430:{"title":"5.53.0"}', 'updateMilestone:431:{"title":"5.53.1"}']
+    );
+  });
+
+  it('opens the replacement before retiring what it replaces', async () => {
+    const { calls } = await run({ dryRun: false }, drifted());
+
+    const created = calls.indexOf('createPull:Release 5.53.0');
+    const closed = calls.indexOf('closePull:27600');
+    const deleted = calls.indexOf('deleteBranch:releases/5.52.4');
+
+    assert.equal(created > -1, true);
+    assert.equal(created < closed, true);
+    assert.equal(closed < deleted, true);
+  });
+
+  it('records the whole sequence in the journal, in order', async () => {
+    const { result } = await run({ dryRun: true }, drifted());
+
+    assert.deepEqual(
+      result.journal.entries.map((entry) => entry.op),
+      [
+        'milestone.rename',
+        'milestone.rename',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.set',
+        'issue.milestone.clear',
+        'issue.milestone.clear',
+        'branch.push',
+        'pr.create',
+        'pr.label',
+        'pr.body',
+        'pr.comment',
+        'pr.close',
+        'branch.delete',
+        'pr.comment',
+      ]
+    );
+  });
+
+  it('tells the reader on both pull requests which one replaced which', async () => {
+    const { result } = await run({ dryRun: false }, drifted());
+    const body = renderBody({
+      payload: result.payload,
+      pullRequests: result.payload.pullRequests,
+      attention: result.payload.attention,
+      supersedes: { pullNumber: 27600, branch: 'releases/5.52.4' },
+    });
+
+    assert.match(body, /Supersedes #27600, which was drafted as `releases\/5\.52\.4`/u);
+    assert.match(body, /Redrafted\./u);
   });
 });

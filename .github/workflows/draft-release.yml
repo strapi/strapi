@@ -4,6 +4,11 @@ name: 'Draft release'
 # version from the commits that landed, cuts `releases/x.y.z`, opens the draft PR against `main`,
 # attributes every shipping PR, and reconciles milestones.
 #
+# Runs as many times as a release window needs. A second run folds whatever landed on `develop`
+# since into the same candidate: it advances the release branch, refills the shipping milestone, and
+# rewrites the report on the pull request already open. When the new commits change the version, it
+# redrafts the candidate under the version they decided.
+#
 # Defaults to a dry run. A dry run performs no write at all and reports the exact list of writes the
 # real run would perform.
 
@@ -19,13 +24,15 @@ on:
         description: 'Explicit x.y.z version. Default: auto-computed.'
         required: false
         default: ''
-      source_ref:
-        description: 'Branch to cut the release from.'
-        required: false
-        default: 'develop'
 
 permissions:
   contents: read
+
+# Never two at once. Both runs would compute the same release and race each other's writes, and the
+# journal exists to survive a run that stops, not two that interleave.
+concurrency:
+  group: draft-release
+  cancel-in-progress: false
 
 jobs:
   draft:
@@ -57,7 +64,6 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           version: ${{ inputs.version }}
           dry_run: ${{ inputs.dry_run }}
-          source_ref: ${{ inputs.source_ref }}
 
       - name: Upload the write journal
         if: always() && steps.draft.outputs.journal_path != ''

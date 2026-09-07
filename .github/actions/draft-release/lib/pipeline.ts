@@ -4,7 +4,14 @@ import {
   resolveIntegrations,
 } from './attribution.ts';
 import { classifyIntegrations, decideBump } from './bump.ts';
-import { planCleanup, planMilestones, reconcile } from './milestones.ts';
+import {
+  assertBranchContained,
+  assertCandidateUnpublished,
+  crossCheckCandidate,
+  decideMode,
+  findCandidate,
+} from './candidate.ts';
+import { planCleanup, planMilestones, planRealignment, reconcile } from './milestones.ts';
 import { fetchPackument, resolveLatestVersion } from './npm.ts';
 import { pinRange } from './range.ts';
 import { buildPayload, renderBody, renderMilestoneComment, renderStepSummary } from './report.ts';
@@ -13,10 +20,12 @@ import { compareStable, increment, parseStable } from './semver.ts';
 import type { RegistryRequest } from './npm.ts';
 import type {
   AttentionRecord,
+  AttributedPull,
   AttributionRecord,
   AttributionStatus,
   BumpClassification,
   BumpKind,
+  Candidate,
   CleanupItem,
   Clock,
   DraftReleaseInputs,
@@ -27,10 +36,19 @@ import type {
   JournalSnapshot,
   Logger,
   MilestonePlan,
+  PinnedRange,
+  RealignItem,
+  ReleaseMode,
   ReleasePayload,
   VersionSource,
 } from './types.ts';
 
+/**
+ * The branch every release is cut from.
+ *
+ * Not an input. A release candidate always comes from the protected `develop` head, so nothing
+ * about the release content can be chosen at dispatch time.
+ */
 export const TARGET_BASE = 'develop';
 export const RELEASE_BASE = 'main';
 export const RELEASE_BRANCH_NAME = 'releases';
@@ -53,11 +71,38 @@ export type DraftReleaseDeps = {
   clock?: Clock;
 };
 
+/**
+ * Everything the run decided, before it wrote anything.
+ *
+ * Producing this is the only phase allowed to refuse. Once a plan exists, every remaining step is a
+ * write, so a refusal can never leave the repository half-changed.
+ */
+export type ReleasePlan = {
+  mode: ReleaseMode;
+  candidate: Candidate | null;
+  previousVersion: string;
+  version: string;
+  bumpKind: BumpKind;
+  classification: BumpClassification;
+  versionSource: VersionSource;
+  range: PinnedRange;
+  integrationCount: number;
+  pullRequests: AttributedPull[];
+  attention: AttentionRecord[];
+  warnings: string[];
+  milestones: MilestonePlan;
+  branch: string;
+  /** `false` when the branch already points at the pinned head, so nothing has to be pushed. */
+  branchAdvances: boolean;
+  realignment: RealignItem[];
+};
+
 export type DraftReleaseResult = {
   branch: string;
   bump: BumpKind;
   cleanup: CleanupItem[];
   journal: JournalSnapshot;
+  mode: ReleaseMode;
   payload: ReleasePayload;
   pullNumber: number | null;
   pullUrl: string | null;
@@ -67,41 +112,30 @@ export type DraftReleaseResult = {
 };
 
 /**
- * Orders the whole run.
+ * Reads the world and decides the release.
  *
- * The order matters in two places. The range is pinned before anything else, so a pull request
- * merged while the action runs falls outside the release however long the run takes. And the
- * milestone moves happen before the branch and the pull request, so work in flight has somewhere to
- * go as early as possible: `check-pr-status` fails any pull request targeting `develop` without a
- * milestone.
+ * The range is pinned before anything else, so a pull request merged while the action runs falls
+ * outside the release however long the run takes.
  */
-export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftReleaseResult> {
-  const { inputs, git, gh, journal, request, logger } = deps;
-  const generatedAt = (deps.clock ?? ((): string => new Date().toISOString()))();
+export async function preflightRelease(deps: DraftReleaseDeps): Promise<ReleasePlan> {
+  const { inputs, git, gh, request, logger } = deps;
 
-  // 0. Pin the range.
   assertSupportedMergeMethods(await gh.getRepository());
 
   const previousVersion = resolveLatestVersion(await fetchPackument(request));
   logger.info(`Published baseline: ${previousVersion}`);
 
-  const pinned = pinRange(git, {
-    baselineVersion: previousVersion,
-    sourceRef: inputs.sourceRef,
-  });
-  logger.info(`Range pinned: ${pinned.fromRef} (${pinned.fromSha}) → ${pinned.toSha}`);
+  const range = pinRange(git, { baselineVersion: previousVersion, sourceRef: TARGET_BASE });
+  logger.info(`Range pinned: ${range.fromRef} (${range.fromSha}) → ${range.toSha}`);
 
-  const integrations = git.listIntegrations(pinned.fromSha, pinned.toSha);
+  const integrations = git.listIntegrations(range.fromSha, range.toSha);
 
   if (integrations.length === 0) {
-    throw new Error(
-      `Nothing to release: ${pinned.fromRef} and ${pinned.toRef} are the same commit.`
-    );
+    throw new Error(`Nothing to release: ${range.fromRef} and ${range.toRef} are the same commit.`);
   }
 
   logger.info(`${integrations.length} integrations to attribute`);
 
-  // 1. Attribution.
   const records = await resolveIntegrations(
     integrations,
     { listPullsForCommit: gh.listPullsForCommit, getPull: gh.getPull },
@@ -110,10 +144,6 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
 
   assertNoFailedLookups(records);
 
-  const attention = toAttentionRecords(records);
-  const warnings = toWarnings(records);
-
-  // 2. Version.
   const { version, bumpKind, classification, versionSource } = await resolveVersion({
     inputs,
     previousVersion,
@@ -132,64 +162,167 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
     records.filter((record) => ignoredShas.has(record.sha) === false)
   );
 
-  // 3. Milestones.
-  const allMilestones = await gh.listMilestones('all');
-  const openMilestones = allMilestones.filter((milestone) => milestone.state === 'open');
-  const milestonePlan = planMilestones(openMilestones, version, allMilestones);
+  const candidate = findCandidate(await gh.listPulls({ state: 'open', base: RELEASE_BASE }));
 
-  const shippingNumber = await applyShippingMilestone(journal, gh, milestonePlan.shipping);
-  const nextNumber = await applyNextMilestone(journal, gh, milestonePlan.next);
-
-  const milestoneItems = shippingNumber === null ? [] : await gh.listMilestoneItems(shippingNumber);
-
-  await journal.write(
-    {
-      op: 'milestone.close',
-      target: `milestone/${shippingNumber ?? '<new>'}`,
-      before: 'open',
-      after: 'closed',
-      detail: milestonePlan.shipping.title,
-    },
-    async () => {
-      if (shippingNumber === null) {
-        return null;
-      }
-
-      return gh.updateMilestone(shippingNumber, { state: 'closed' });
-    }
-  );
-
-  // 4. Branch, pull request, experimental label.
-  const branch = `${RELEASE_BRANCH_NAME}/${version}`;
-
-  if (git.remoteBranchExists(branch) === true) {
-    throw new Error(`The branch ${branch} already exists. Delete it or pick another version.`);
+  if (candidate !== null) {
+    assertCandidateUnpublished(candidate, previousVersion);
   }
 
-  await journal.write(
-    {
-      op: 'branch.push',
-      target: `refs/heads/${branch}`,
-      after: pinned.toSha,
-      detail: `cut from ${pinned.toRef}`,
-    },
-    async () => git.pushBranch(pinned.toSha, branch)
+  const mode = decideMode(candidate, version);
+  const branch = `${RELEASE_BRANCH_NAME}/${version}`;
+
+  logger.info(
+    candidate === null
+      ? `No candidate in flight: ${mode}`
+      : `Candidate ${candidate.version} on #${candidate.pullNumber}: ${mode}`
   );
 
-  const title = `Release ${version}`;
-  const createdPull = await journal.write(
-    { op: 'pr.create', target: `${branch} → ${RELEASE_BASE}`, after: title },
-    async () =>
-      gh.createPull({
-        head: branch,
-        base: RELEASE_BASE,
-        title,
-        body: `Release \`${version}\`. The attribution report lands here once the run finishes.`,
-      })
-  );
+  const branchAdvances = planBranch({ git, mode, branch, candidate, range });
+  const milestones = planMilestones({
+    allMilestones: await gh.listMilestones('all'),
+    version,
+    candidateVersion: candidate?.version ?? null,
+  });
 
-  const pullNumber = createdPull?.number ?? null;
-  const pullUrl = createdPull?.html_url ?? null;
+  return {
+    mode,
+    candidate,
+    previousVersion,
+    version,
+    bumpKind,
+    classification,
+    versionSource,
+    range,
+    integrationCount: integrations.length,
+    pullRequests,
+    attention: toAttentionRecords(records),
+    warnings: [
+      ...toWarnings(records),
+      ...(candidate === null ? [] : crossCheckCandidate(candidate)),
+    ],
+    milestones,
+    branch,
+    branchAdvances,
+    realignment: planRealignment(pullRequests, milestones.shipping),
+  };
+}
+
+/**
+ * Decides what has to happen to the release branch, and refuses what must not.
+ *
+ * @returns `false` when the branch already points at the pinned head, which is the case where
+ * nothing landed since the last run. Pushing anyway would fire `synchronize` on the pull request
+ * and publish another identical experimental artifact for nothing.
+ */
+function planBranch(input: {
+  git: GitAdapter;
+  mode: ReleaseMode;
+  branch: string;
+  candidate: Candidate | null;
+  range: PinnedRange;
+}): boolean {
+  const { git, mode, branch, candidate, range } = input;
+
+  if (mode !== 'refresh' && git.remoteBranchExists(branch) === true) {
+    throw new Error(
+      `The branch ${branch} already exists but no open pull request is drafting it. ` +
+        'An earlier run left it behind. Delete it, or reopen its pull request, before drafting.'
+    );
+  }
+
+  if (candidate === null) {
+    return true;
+  }
+
+  if (git.remoteBranchExists(candidate.branch) === false) {
+    throw new Error(
+      `#${candidate.pullNumber} is open against ${candidate.branch}, but that branch is gone from ` +
+        'the remote. Close the pull request, or restore the branch, before drafting.'
+    );
+  }
+
+  // The branch a candidate lives on is only ever a pointer into `develop`. Whether this run
+  // advances it or replaces it, a commit pushed to it directly would be discarded, so both paths
+  // refuse before writing anything.
+  git.fetchBranch(candidate.branch);
+
+  const branchHeadSha = git.resolveSha(`origin/${candidate.branch}`);
+
+  assertBranchContained({
+    branch: candidate.branch,
+    branchHeadSha,
+    sourceRef: range.toRef,
+    sourceSha: range.toSha,
+    contained: git.isAncestor(branchHeadSha, range.toSha),
+  });
+
+  return mode === 'redraft' || branchHeadSha !== range.toSha;
+}
+
+/**
+ * Performs a plan.
+ *
+ * The order matters in one place: the milestone moves happen before the branch and the pull
+ * request, so work in flight has somewhere to go as early as possible. `check-pr-status` fails any
+ * pull request targeting `develop` without a milestone.
+ */
+export async function applyRelease(
+  plan: ReleasePlan,
+  deps: DraftReleaseDeps
+): Promise<DraftReleaseResult> {
+  const { inputs, git, gh, journal, logger } = deps;
+  const generatedAt = (deps.clock ?? ((): string => new Date().toISOString()))();
+
+  // 1. Milestones.
+  const shippingNumber = await applyShippingMilestone(journal, gh, plan.milestones.shipping);
+  const nextNumber = await applyNextMilestone(journal, gh, plan.milestones.next);
+
+  await applyRealignment(journal, gh, plan.realignment, shippingNumber);
+
+  const milestoneItems = shippingNumber === null ? [] : await gh.listMilestoneItems(shippingNumber);
+  const cleanup = planCleanup(milestoneItems, nextNumber);
+
+  await applyCleanup(journal, gh, cleanup, plan.milestones);
+
+  if (plan.milestones.shipping.close === true) {
+    await journal.write(
+      {
+        op: 'milestone.close',
+        target: `milestone/${shippingNumber ?? '<new>'}`,
+        before: 'open',
+        after: 'closed',
+        detail: plan.milestones.shipping.title,
+      },
+      async () => {
+        if (shippingNumber === null) {
+          return null;
+        }
+
+        return gh.updateMilestone(shippingNumber, { state: 'closed' });
+      }
+    );
+  }
+
+  // 2. Branch.
+  if (plan.branchAdvances === true) {
+    await journal.write(
+      {
+        op: 'branch.push',
+        target: `refs/heads/${plan.branch}`,
+        after: plan.range.toSha,
+        detail:
+          plan.mode === 'refresh'
+            ? `advanced to ${plan.range.toRef}`
+            : `cut from ${plan.range.toRef}`,
+      },
+      async () => git.pushBranch(plan.range.toSha, plan.branch)
+    );
+  } else {
+    logger.info(`${plan.branch} already points at ${plan.range.toSha}, nothing to push.`);
+  }
+
+  // 3. Pull request. A refresh keeps the one in flight, with its reviews and its comments.
+  const { pullNumber, pullUrl } = await applyPullRequest(journal, gh, plan);
 
   await journal.write(
     { op: 'pr.label', target: pullTarget(pullNumber), after: EXPERIMENTAL_LABEL },
@@ -202,58 +335,77 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
     }
   );
 
-  // 5. Report.
+  // 4. Report.
   const payload = buildPayload({
     generatedAt,
     coords: gh.coords,
     dryRun: inputs.dryRun,
-    version,
-    bump: bumpKind,
-    previousVersion,
-    versionSource,
-    range: pinned,
-    integrationCount: integrations.length,
-    branch,
+    version: plan.version,
+    bump: plan.bumpKind,
+    previousVersion: plan.previousVersion,
+    versionSource: plan.versionSource,
+    mode: plan.mode,
+    range: plan.range,
+    integrationCount: plan.integrationCount,
+    branch: plan.branch,
+    branchAdvanced: plan.branchAdvances,
     pullNumber,
     pullUrl,
-    classification,
-    pullRequests,
-    attention,
+    classification: plan.classification,
+    pullRequests: plan.pullRequests,
+    attention: plan.attention,
     milestones: {
       shipping: {
         number: shippingNumber,
-        title: milestonePlan.shipping.title,
+        title: plan.milestones.shipping.title,
         renamedFrom:
-          milestonePlan.shipping.action === 'rename' ? milestonePlan.shipping.currentTitle : null,
+          plan.milestones.shipping.action === 'rename'
+            ? plan.milestones.shipping.currentTitle
+            : null,
         state: 'closed',
       },
       next: {
         number: nextNumber,
-        title: milestonePlan.next.title,
-        created: milestonePlan.next.action === 'create',
+        title: plan.milestones.next.title,
+        created: plan.milestones.next.action === 'create',
       },
     },
-    reconciliation: reconcile(pullRequests, milestoneItems),
+    // Read after the realignment, so an applied run reports the corrected state and a dry run
+    // reports the drift it would correct. The `inMilestoneNotInHistory` direction still earns its
+    // place either way: it catches a pull request someone filed under this release that never
+    // landed in the range.
+    reconciliation: reconcile(plan.pullRequests, milestoneItems),
   });
 
-  const body = renderBody({ payload, pullRequests, attention, warnings });
+  const body = renderBody({
+    payload,
+    pullRequests: plan.pullRequests,
+    attention: plan.attention,
+    warnings: plan.warnings,
+    supersedes: plan.mode === 'redraft' ? plan.candidate : null,
+  });
 
-  await journal.write({ op: 'pr.body', target: pullTarget(pullNumber), after: title }, async () => {
-    if (pullNumber === null) {
-      return;
+  await journal.write(
+    { op: 'pr.body', target: pullTarget(pullNumber), after: `Release ${plan.version}` },
+    async () => {
+      if (pullNumber === null) {
+        return;
+      }
+
+      await gh.updatePullBody(pullNumber, body);
     }
+  );
 
-    await gh.updatePullBody(pullNumber, body);
-  });
+  // 5. Retire the candidate this run replaced, once its replacement exists.
+  if (plan.mode === 'redraft' && plan.candidate !== null) {
+    await applySupersede(journal, gh, git, plan.candidate, { pullNumber, branch: plan.branch });
+  }
 
-  // 6. Milestone cleanup and comment.
-  const cleanup = planCleanup(milestoneItems, nextNumber);
-
-  await applyCleanup(journal, gh, cleanup, milestonePlan);
-
+  // 6. The per-run record of what this run pulled in.
   const comment = renderMilestoneComment({
-    version,
-    nextTitle: milestonePlan.next.title,
+    version: plan.version,
+    nextTitle: plan.milestones.next.title,
+    mode: plan.mode,
     entries: journal.entries(),
     dryRun: inputs.dryRun,
   });
@@ -267,17 +419,23 @@ export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftRele
   });
 
   return {
-    branch,
-    bump: bumpKind,
+    branch: plan.branch,
+    bump: plan.bumpKind,
     cleanup,
     journal: journal.toJSON(),
+    mode: plan.mode,
     payload,
     pullNumber,
     pullUrl,
     summary: renderStepSummary({ payload, entries: journal.entries() }),
-    version,
-    warnings,
+    version: plan.version,
+    warnings: plan.warnings,
   };
+}
+
+/** Decides the whole release, then performs it. */
+export async function runDraftRelease(deps: DraftReleaseDeps): Promise<DraftReleaseResult> {
+  return applyRelease(await preflightRelease(deps), deps);
 }
 
 function pullTarget(pullNumber: number | null): string {
@@ -403,6 +561,7 @@ async function applyShippingMilestone(
         target: `milestone/${plan.number ?? '<new>'}`,
         before: plan.currentTitle,
         after: plan.title,
+        detail: 'shipping',
       },
       async () => {
         if (plan.number === null) {
@@ -434,12 +593,65 @@ async function applyNextMilestone(
     return plan.number;
   }
 
+  if (plan.action === 'rename') {
+    await journal.write(
+      {
+        op: 'milestone.rename',
+        target: `milestone/${plan.number ?? '<new>'}`,
+        before: plan.currentTitle,
+        after: plan.title,
+        detail: 'next',
+      },
+      async () => {
+        if (plan.number === null) {
+          return null;
+        }
+
+        return gh.updateMilestone(plan.number, { title: plan.title });
+      }
+    );
+
+    return plan.number;
+  }
+
   const created = await journal.write(
     { op: 'milestone.create', target: 'milestones', after: plan.title, detail: 'next' },
     async () => gh.createMilestone(plan.title)
   );
 
   return created?.number ?? null;
+}
+
+/**
+ * Corrects the milestone of every pull request that shipped.
+ *
+ * Sequential on purpose: a release milestone carries dozens of items and GitHub throttles parallel
+ * issue writes.
+ */
+async function applyRealignment(
+  journal: Journal,
+  gh: GithubAdapter,
+  realignment: readonly RealignItem[],
+  shippingNumber: number | null
+): Promise<void> {
+  for (const item of realignment) {
+    await journal.write(
+      {
+        op: 'issue.milestone.set',
+        target: `issues/${item.number}`,
+        before: item.from,
+        after: item.toTitle,
+        detail: 'Merged inside the release range.',
+      },
+      async () => {
+        if (shippingNumber === null) {
+          return;
+        }
+
+        await gh.setIssueMilestone(item.number, shippingNumber);
+      }
+    );
+  }
 }
 
 async function applyCleanup(
@@ -470,4 +682,85 @@ async function applyCleanup(
       }
     );
   }
+}
+
+/**
+ * @returns The pull request the report lands on. A refresh reuses the candidate's, so its reviews,
+ * its comments and its `publish-experimental` label all survive.
+ */
+async function applyPullRequest(
+  journal: Journal,
+  gh: GithubAdapter,
+  plan: ReleasePlan
+): Promise<{ pullNumber: number | null; pullUrl: string | null }> {
+  if (plan.mode === 'refresh' && plan.candidate !== null) {
+    return { pullNumber: plan.candidate.pullNumber, pullUrl: plan.candidate.pullUrl };
+  }
+
+  const title = `Release ${plan.version}`;
+  const created = await journal.write(
+    { op: 'pr.create', target: `${plan.branch} → ${RELEASE_BASE}`, after: title },
+    async () =>
+      gh.createPull({
+        head: plan.branch,
+        base: RELEASE_BASE,
+        title,
+        body: `Release \`${plan.version}\`. The attribution report lands here once the run finishes.`,
+      })
+  );
+
+  return { pullNumber: created?.number ?? null, pullUrl: created?.html_url ?? null };
+}
+
+/**
+ * Retires the candidate a redraft replaced.
+ *
+ * Only reached once the replacement exists, so the release is never without a candidate. The branch
+ * goes too: two release branches side by side is an invitation to publish the wrong one.
+ */
+async function applySupersede(
+  journal: Journal,
+  gh: GithubAdapter,
+  git: GitAdapter,
+  candidate: Candidate,
+  replacement: { pullNumber: number | null; branch: string }
+): Promise<void> {
+  const reference =
+    replacement.pullNumber === null ? `\`${replacement.branch}\`` : `#${replacement.pullNumber}`;
+
+  await journal.write(
+    {
+      op: 'pr.comment',
+      target: `pulls/${candidate.pullNumber}`,
+      detail: `superseded by ${reference}`,
+    },
+    async () =>
+      gh.createComment(
+        candidate.pullNumber,
+        `Superseded by ${reference}. The commits that landed since this candidate was drafted ` +
+          `changed the release version, so \`${candidate.branch}\` is replaced by ` +
+          `\`${replacement.branch}\`.`
+      )
+  );
+
+  await journal.write(
+    {
+      op: 'pr.close',
+      target: `pulls/${candidate.pullNumber}`,
+      before: 'open',
+      after: 'closed',
+      detail: `superseded by ${reference}`,
+    },
+    async () => gh.closePull(candidate.pullNumber)
+  );
+
+  await journal.write(
+    {
+      op: 'branch.delete',
+      target: `refs/heads/${candidate.branch}`,
+      before: candidate.pullHeadSha,
+      detail: `superseded by ${replacement.branch}`,
+    },
+    async () => git.deleteBranch(candidate.branch)
+  );
 }
