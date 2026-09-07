@@ -329,6 +329,18 @@ describe('previewScript — unmarked click inside a blocks field does not jump t
       if (el) el.getBoundingClientRect = () => r;
     });
 
+    // jsdom doesn't implement elementsFromPoint at all — stub it with the
+    // same coordinate-containment check real hit-testing would do, against
+    // the elements above we gave real (mocked) rects.
+    document.elementsFromPoint = ((x: number, y: number) =>
+      ['para0', 'the-image', 'code-block', 'para1']
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => !!el)
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+        })) as typeof document.elementsFromPoint;
+
     previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
 
     await new Promise<void>((resolve) => {
@@ -376,6 +388,32 @@ describe('previewScript — unmarked click inside a blocks field does not jump t
     const payload = dblClickAt(10, 110);
     // Children of #field: para0=0, the-image=1, code-block=2, para1=3.
     expect(payload.blockIndex).toBe(3);
+  });
+
+  test('double-clicking a live-typed (unsaved) paragraph resolves its own position, unlike code/images', () => {
+    // A paragraph the host just re-rendered from a live, unsaved edit is
+    // unmarked too (nothing gets a stega tag until the field is saved) — but
+    // unlike code blocks/alt-less images, it's only *temporarily* unmarked,
+    // so it should resolve its own position rather than staying null.
+    const field = document.getElementById('field') as HTMLElement;
+    const liveParagraph = document.createElement('p');
+    liveParagraph.id = 'live-para';
+    liveParagraph.textContent = 'Freshly typed, not saved yet';
+    liveParagraph.getBoundingClientRect = () => rect(0, 140, 300, 20);
+    field.appendChild(liveParagraph);
+
+    const previousElementsFromPoint = document.elementsFromPoint;
+    document.elementsFromPoint = ((x: number, y: number) => {
+      const r = liveParagraph.getBoundingClientRect();
+      const hit = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      return [...(hit ? [liveParagraph] : []), ...previousElementsFromPoint(x, y)];
+    }) as typeof document.elementsFromPoint;
+
+    // (10, 150) falls inside the live paragraph's rect (140-160) — no marked
+    // element there, so this only reaches the fallback (non-exact) path.
+    const payload = dblClickAt(10, 150);
+    // Children of #field: para0=0, the-image=1, code-block=2, para1=3, live-para=4.
+    expect(payload.blockIndex).toBe(4);
   });
 });
 
@@ -710,5 +748,130 @@ describe('previewScript — blocks container resize is observed live', () => {
 
     expect(containerObserver?.disconnected).toBe(true);
     expect(elementObserver?.disconnected).toBe(true);
+  });
+
+  test('highlight grows to cover a live-added image that dwarfs the marked paragraph', () => {
+    const field = document.getElementById('field') as HTMLElement;
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+
+    // Sanity check: starts sized to the small, already-established container.
+    expect(parseFloat(highlight.style.height)).toBeCloseTo(64, 0);
+
+    // Simulate a live edit: the host re-renders an unmarked <img> into the
+    // SAME container node (its own wrapper doesn't change identity, only its
+    // children do) and the container's own rect grows far past
+    // MAX_CONTAINER_AREA_RATIO (6x) of the still-small marked paragraph
+    // (300*40 = 12,000px² vs the new container's 320*660 = 211,200px², ~17.6x).
+    // Without the fix, re-running the ratio-guarded discovery on this resize
+    // would reject the still-correct container and collapse the highlight
+    // down to the small union-of-marked-spans-plus-buffer fallback.
+    field.getBoundingClientRect = () => rect(100, 100, 320, 660);
+    const callback = findObserverFor(field)?.callback;
+    expect(callback).toBeDefined();
+    const noEntries: ResizeObserverEntry[] = [];
+    callback?.(noEntries, null as unknown as ResizeObserver);
+
+    // 660px content + 2*HIGHLIGHT_PADDING (2px)
+    expect(parseFloat(highlight.style.height)).toBeCloseTo(664, 0);
+  });
+});
+
+// findBlockIndex used to run its own copy of the walk-up-with-area-guard,
+// gated on the ratio between the found container and the *clicked anchor's*
+// own area (not the group's marked-union area) — so double-clicking a small
+// but legitimately marked paragraph next to a large unmarked sibling (e.g. an
+// image typed in live) could fail the guard and lose the block index, even
+// though the container was already correctly established. It now shares
+// getBlocksContainer with computeGroupRect, so an established container is
+// trusted the same way in both places.
+describe('previewScript — findBlockIndex resolves next to a large unmarked sibling', () => {
+  const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
+
+  const rect = (left: number, top: number, width: number, height: number) =>
+    ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON() {},
+    }) as DOMRect;
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean }).STRAPI_DISABLE_STEGA_DECODING =
+      true;
+
+    // Start with only the small marked paragraph, so the container is
+    // established (cached) while it's still proportionate — mirrors the real
+    // sequence: server-rendered, marked content registers first, live edits
+    // that add unmarked content come later.
+    document.body.innerHTML = `
+      <div id="field">
+        <p id="para" data-strapi-source="${BLOCKS_SOURCE}">Hello world</p>
+      </div>
+    `;
+
+    const field = document.getElementById('field') as HTMLElement;
+    const para = document.getElementById('para') as HTMLElement;
+    field.getBoundingClientRect = () => rect(100, 100, 320, 60);
+    para.getBoundingClientRect = () => rect(100, 100, 300, 40);
+
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    // Now simulate the live edit: an unmarked <img> (never stega-tagged) is
+    // added inside the same container node, which grows far past
+    // MAX_CONTAINER_AREA_RATIO (6x) of the still-small marked paragraph
+    // (300*40 = 12,000px² vs the new container's 320*660 = 211,200px², ~17.6x).
+    // This never re-registers anything (the image has no data-strapi-source),
+    // so the container's cached identity is never re-validated against the
+    // ratio guard before the double-click below.
+    const image = document.createElement('img');
+    image.id = 'the-image';
+    image.getBoundingClientRect = () => rect(100, 160, 300, 600);
+    field.appendChild(image);
+    field.getBoundingClientRect = () => rect(100, 100, 320, 660);
+  });
+
+  afterEach(() => {
+    (window as Window & { __strapi_previewCleanup?: () => void }).__strapi_previewCleanup?.();
+    delete (window as Window & { STRAPI_DISABLE_STEGA_DECODING?: boolean })
+      .STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  test('double-clicking the marked paragraph still resolves its block index', () => {
+    const highlight = document.querySelector('.strapi-highlight') as HTMLElement;
+    const postMessageSpy = jest.spyOn(window, 'postMessage');
+
+    // (110, 110) falls inside the paragraph's rect — an exact hit.
+    highlight.dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 110, clientY: 110 })
+    );
+
+    const focusIntentCalls = postMessageSpy.mock.calls.filter(
+      ([data]) => (data as { type?: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+    );
+    expect(focusIntentCalls).toHaveLength(1);
+    const payload = (focusIntentCalls[0][0] as { payload: { blockIndex: number | null } }).payload;
+
+    // Children of #field: para=0, the-image=1. Without the fix this would be
+    // null — the guard rejecting the container relative to the paragraph's
+    // own small area, even though it's the same, correctly-established one.
+    expect(payload.blockIndex).toBe(0);
+
+    postMessageSpy.mockRestore();
   });
 });

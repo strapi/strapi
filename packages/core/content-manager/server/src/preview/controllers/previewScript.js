@@ -147,6 +147,22 @@ function previewScript(config) {
   };
 
   /**
+   * True for content that content-source-maps.ts never stega-encodes by
+   * design — code block text, and images with no (or empty) alt text — as
+   * opposed to content that's merely *not yet* encoded because it's a live,
+   * unsaved edit. Used to decide whether an unmarked double-click should
+   * still resolve a real block index (live-typed content) or stay a
+   * no-cursor-jump (content that will never carry a marker even once saved).
+   * @param {Element} element
+   * @returns {boolean}
+   */
+  const isKnownUnencodedElement = (element) => {
+    if (element.closest('pre')) return true;
+    if (element.tagName === 'IMG' && !element.getAttribute('alt')) return true;
+    return false;
+  };
+
+  /**
    * When a media field's mime type changes (e.g. image -> video), we can't
    * swap the rendered DOM tag in place — the host framework (e.g. React)
    * owns the original element and throws on removeChild if we replaceChild
@@ -738,6 +754,35 @@ function previewScript(config) {
     };
 
     /**
+     * Resolves the trusted container for a blocks field's group, preferring a
+     * still-attached, already-observed container over re-running the
+     * ratio-guarded discovery walk.
+     *
+     * findBlocksContainer's area guard only needs to protect *first*
+     * discovery (telling a real field container apart from an unrelated
+     * page-level ancestor we escaped into, e.g. an image-only field with no
+     * block-level tags of its own). Once a container has been established for
+     * a groupKey, live edits inside it (e.g. typing a new, unmarked image
+     * block into a field whose only marked content is a short paragraph) can
+     * legitimately dwarf the originally-marked content — re-running the guard
+     * on every redraw would then reject the same, still-correct container and
+     * collapse the highlight down to a too-small fallback box. The container
+     * element itself doesn't change across those edits (the host re-renders
+     * its children, not the field's own wrapper), so trusting it is safe as
+     * long as it's still in the document.
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     * @returns {HTMLElement | null}
+     */
+    const getBlocksContainer = (groupKey, group) => {
+      const cached = observedContainers.get(groupKey);
+      if (cached && document.contains(cached)) {
+        return cached;
+      }
+      return findBlocksContainer(group);
+    };
+
+    /**
      * Keeps a blocks group's container under observation as its membership
      * changes. Safe to call every time an element joins the group — re-finding
      * and re-observing the same container is a no-op; it only does real work
@@ -752,7 +797,7 @@ function previewScript(config) {
       const isBlocksField = !!sourceAttr && new URLSearchParams(sourceAttr).has('fieldPath');
       if (!isBlocksField) return;
 
-      const container = findBlocksContainer(group);
+      const container = getBlocksContainer(groupKey, group);
       const previousContainer = observedContainers.get(groupKey);
       if (container === previousContainer) return;
 
@@ -774,48 +819,18 @@ function previewScript(config) {
      * formatted text (bold, italic…) produces multiple spans per block, so an
      * element-list index is not the same as the Slate block index.
      *
-     * Instead: locate the blocks-field container (the direct parent of all
-     * top-level block elements) and find which of its children contains the
-     * clicked element.
+     * Uses the same trusted-container resolution as computeGroupRect
+     * (getBlocksContainer) rather than its own walk-up-with-area-guard, so
+     * that double-clicking a legitimately marked block next to a large
+     * unmarked one (e.g. an image typed in next to a short paragraph) doesn't
+     * spuriously fail the guard and lose the block index.
      * @param {HTMLElement} anchor - stega span that was clicked
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
      * @returns {number} 0-based block index, or -1 if it cannot be determined
      */
-    const findBlockIndex = (anchor) => {
-      // Walk up from the clicked anchor to find the field container — the
-      // nearest ancestor whose direct children include block-level tags.
-      // NCA across the full group.elements set was previously used here but
-      // caused incorrect results when the NCA landed on a high-level ancestor
-      // (e.g. <main> or <article>) that has many non-blocks children.
-      //
-      // The same area guard as findBlocksContainer applies: when the field
-      // renders no block-level tag (e.g. an image-only field) the walk would
-      // otherwise escape into page layout and return an index within an
-      // unrelated container.
-      const anchorRect = anchor.getBoundingClientRect();
-      const anchorArea = anchorRect.width * anchorRect.height;
-
-      let fieldContainer = null;
-      let el = anchor.parentElement;
-      while (el && el !== document.body && el !== document.documentElement) {
-        // Skip list elements — <li> can have a nested <ul>/<ol> as a direct child, and
-        // @strapi/blocks-react-renderer places nested lists directly inside <ul>/<ol>
-        // (not wrapped in a <li>), so list containers also satisfy the block-level check
-        // while being blocks themselves, not the field container.
-        if (
-          el.tagName !== 'LI' &&
-          el.tagName !== 'UL' &&
-          el.tagName !== 'OL' &&
-          Array.from(el.children).some((c) => BLOCK_LEVEL_TAGS.includes(c.tagName))
-        ) {
-          const r = el.getBoundingClientRect();
-          if (anchorArea > 0 && r.width * r.height > anchorArea * MAX_CONTAINER_AREA_RATIO) {
-            return -1;
-          }
-          fieldContainer = el;
-          break;
-        }
-        el = el.parentElement;
-      }
+    const findBlockIndex = (anchor, groupKey, group) => {
+      const fieldContainer = getBlocksContainer(groupKey, group);
       if (!fieldContainer) return -1;
 
       // Walk up from anchor to its direct-child-of-container ancestor
@@ -835,8 +850,9 @@ function previewScript(config) {
 
     /**
      * @param {HighlightGroup} group
+     * @param {string} groupKey
      */
-    const computeGroupRect = (group) => {
+    const computeGroupRect = (group, groupKey) => {
       if (group.elements.size === 0) return null;
 
       // For blocks fields (identified by fieldPath in the source attribute),
@@ -849,7 +865,7 @@ function previewScript(config) {
         !!firstSourceAttr && new URLSearchParams(firstSourceAttr).has('fieldPath');
 
       if (isBlocksField) {
-        const container = findBlocksContainer(group);
+        const container = getBlocksContainer(groupKey, group);
         if (container) {
           const r = container.getBoundingClientRect();
           if (r.width > 0 || r.height > 0) {
@@ -911,9 +927,10 @@ function previewScript(config) {
 
     /**
      * @param {HighlightGroup} group
+     * @param {string} groupKey
      */
-    const drawGroup = (group) => {
-      const rect = computeGroupRect(group);
+    const drawGroup = (group, groupKey) => {
+      const rect = computeGroupRect(group, groupKey);
       if (!rect) {
         group.highlight.style.display = 'none';
         return;
@@ -925,7 +942,7 @@ function previewScript(config) {
     };
 
     const updateAllHighlights = () => {
-      groups.forEach(drawGroup);
+      groups.forEach((group, groupKey) => drawGroup(group, groupKey));
     };
 
     /**
@@ -1091,14 +1108,34 @@ function previewScript(config) {
           }
           rect = anchorRect;
         } else {
-          rect = computeGroupRect(group);
+          rect = computeGroupRect(group, groupKey);
         }
         if (!rect) return;
-        // Only derive a Slate block index from an exact hit on a marked element.
-        // A fallback anchor (nearest marked sibling to an unmarked click — e.g. a
-        // code block or an image with no alt text) tells us which field to open,
-        // not which block was clicked, so don't jump the cursor to it.
-        const blockIndex = isBlocksField && exact ? findBlockIndex(anchor) : -1;
+        let blockIndex = -1;
+        if (isBlocksField) {
+          if (exact) {
+            blockIndex = findBlockIndex(anchor, groupKey, group);
+          } else {
+            // Unmarked doesn't always mean "never marked" — live edits render
+            // before they're saved, so a just-typed paragraph is unmarked the
+            // same way a code block or alt-less image permanently is. Only
+            // the latter should keep blockIndex null; resolve the real
+            // clicked element's own position for everything else.
+            // elementsFromPoint (not elementFromPoint) skips past the
+            // highlight overlay itself, which is what actually received this
+            // dblclick and would otherwise be the only hit at this point.
+            const clickedElement = document
+              .elementsFromPoint(event.clientX, event.clientY)
+              .find((el) => !overlay.contains(el));
+            if (clickedElement && !isKnownUnencodedElement(clickedElement)) {
+              blockIndex = findBlockIndex(
+                /** @type {HTMLElement} */ (clickedElement),
+                groupKey,
+                group
+              );
+            }
+          }
+        }
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
           path,
           position: {
@@ -1266,7 +1303,7 @@ function previewScript(config) {
       }
       group.elements.add(element);
       elementToGroupKey.set(element, groupKey);
-      drawGroup(group);
+      drawGroup(group, groupKey);
       syncContainerObservation(groupKey, group);
     };
 
@@ -1285,7 +1322,7 @@ function previewScript(config) {
       if (group.elements.size === 0) {
         destroyGroup(groupKey, group);
       } else {
-        drawGroup(group);
+        drawGroup(group, groupKey);
       }
     };
 
