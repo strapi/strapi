@@ -77,6 +77,34 @@ describe('renderSkeleton', () => {
     // Every rendered AC id round-trips through the extractor.
     expect(extractExistingIds(out)).toEqual(new Set(['AC1.1', 'AC1.2', 'AC2.1']));
   });
+
+  it('renders a story with no parseable criteria as describe.todo, not an empty describe', () => {
+    const noCriteriaDoc = `# Plain Prose
+
+> Source: \`tests/e2e/tests/admin/plain.spec.ts\`
+
+## User Story: Narrative only
+
+**As a** user **I want** something **so that** reasons.
+
+### Acceptance Criteria
+
+- This bullet has no bold Given/When/Then markup.
+- Neither does this one.
+`;
+    const doc = parseUserStory(noCriteriaDoc);
+    expect(doc.stories[0].criteria).toHaveLength(0);
+
+    const out = renderSkeleton(doc, {
+      sourceDocRelPath: 'user-stories/admin/plain.md',
+      specPathFromRoot: 'tests/e2e/tests/admin/plain.vitest.spec.ts',
+    });
+
+    expect(out).toContain("describe.todo('Narrative only');");
+    // An empty `describe(..., () => {})` would make Vitest fail the file with
+    // "No test found in suite" — assert that shape isn't produced.
+    expect(out).not.toMatch(/describe\('Narrative only',\s*\(\)\s*=>\s*\{\s*\}\s*\)/);
+  });
 });
 
 describe('syncUserStories', () => {

@@ -128,6 +128,14 @@ export const renderSkeleton = (
 
   const body = doc.stories
     .map((story) => {
+      // No parseable Given/When/Then criteria (e.g. plain prose bullets in the doc) — a `describe`
+      // with an empty callback has no tests, which Vitest treats as a hard failure. `describe.todo`
+      // renders the suite as pending instead, so the file stays runnable until the doc is reworded
+      // into criteria bullets or the story is scaffolded by hand.
+      if (story.criteria.length === 0) {
+        return `  describe.todo('${escapeSingleQuotes(story.name)}');`;
+      }
+
       const tests = story.criteria
         .map((ac) => {
           const gwt = [

@@ -28,5 +28,5 @@ describe('Release Details Page', () => {
     test.todo('AC2.2 — the release is deleted');
   });
 
-  describe('Manage entries within a release', () => {});
+  describe.todo('Manage entries within a release');
 });

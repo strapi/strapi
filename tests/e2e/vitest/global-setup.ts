@@ -85,9 +85,12 @@ const startServer = (): ChildProcess => {
   const { NODE_ENV: _ignored, ...parentEnv } = process.env;
   const child = spawn('npm', ['run', 'develop', '--', '--no-watch-admin'], {
     cwd: TEST_APP_PATH,
-    stdio: 'inherit',
+    stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...parentEnv, NODE_ENV: 'development', PORT: E2E_PORT, HOST: E2E_HOST },
   });
+  // Piped (not 'inherit') so teardown() can unpipe before killing — see there for why.
+  child.stdout?.pipe(process.stdout);
+  child.stderr?.pipe(process.stderr);
   child.on('error', (err) => {
     // eslint-disable-next-line no-console
     console.error('[vitest-e2e] Failed to start Strapi dev server:', err);
@@ -118,6 +121,12 @@ export async function setup({ provide }: GlobalSetupContext) {
 
 export async function teardown() {
   if (!server) return;
+  // Strapi's own SIGTERM handler can throw while tearing down the admin plugin (a pre-existing
+  // shutdown-order bug unrelated to this suite — the process is already exiting by then).
+  // Playwright's `webServer.stdout: 'pipe'` already hides this same crash for the other e2e
+  // runner; unpipe here so it doesn't print after we've already reported results.
+  server.stdout?.unpipe(process.stdout);
+  server.stderr?.unpipe(process.stderr);
   server.kill('SIGTERM');
   // Give Strapi a moment to release the port/db before Vitest exits.
   await sleep(2_000);

@@ -51,15 +51,15 @@ describe('i18n Edit View', () => {
     test.todo('AC3.3 — "Saved" is shown');
   });
 
-  describe('Delete a locale of a single type and collection type', () => {});
+  describe.todo('Delete a locale of a single type and collection type');
 
-  describe('Publish multiple locales of a document', () => {});
+  describe.todo('Publish multiple locales of a document');
 
-  describe('Unpublish multiple locales of a document', () => {});
+  describe.todo('Unpublish multiple locales of a document');
 
-  describe('Non-translatable fields are pre-filled when creating a new locale', () => {});
+  describe.todo('Non-translatable fields are pre-filled when creating a new locale');
 
-  describe('Non-localized fields stay pre-filled when revisiting an unsaved locale draft', () => {});
+  describe.todo('Non-localized fields stay pre-filled when revisiting an unsaved locale draft');
 
-  describe('Enable AI translation (unstable feature)', () => {});
+  describe.todo('Enable AI translation (unstable feature)');
 });
