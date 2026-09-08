@@ -201,5 +201,24 @@ describe('ai-translations service', () => {
       await expect(service.validateProvider()).resolves.toBeUndefined();
       expect(validate).not.toHaveBeenCalled();
     });
+
+    test('disables the feature once a registered provider fails validation', async () => {
+      const service = createAITranslationsService({ strapi: createMockStrapi() });
+
+      service.registerProvider({
+        provider: createProvider({
+          validate() {
+            throw new Error('missing API key');
+          },
+        }),
+      });
+
+      await expect(service.validateProvider()).rejects.toThrow();
+
+      expect(service.isEnabled()).toBe(false);
+      await expect(service.generateTranslations(PARAMS)).rejects.toThrow(
+        'No AI translations provider is registered.'
+      );
+    });
   });
 });

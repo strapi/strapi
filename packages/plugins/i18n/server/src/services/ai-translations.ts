@@ -32,9 +32,10 @@ const createAITranslationsService = ({
   const strapiManagedProvider = createStrapiManagedAiTranslationsProvider({ strapi });
 
   let registeredProvider: AiTranslationsProvider | null = null;
+  let isProviderInvalid = false;
 
   const resolveProvider = (): AiTranslationsProvider | null => {
-    if (!strapi.ai.admin.isAvailable()) {
+    if (!strapi.ai.admin.isAvailable() || isProviderInvalid) {
       return null;
     }
 
@@ -74,12 +75,16 @@ const createAITranslationsService = ({
       const provider = resolveProvider();
 
       if (!provider?.validate) {
+        isProviderInvalid = false;
         return;
       }
 
       try {
         await provider.validate();
+        isProviderInvalid = false;
       } catch (error) {
+        isProviderInvalid = true;
+
         throw new Error(
           `The AI translations provider "${provider.name}" is not correctly configured: ${
             error instanceof Error ? error.message : String(error)

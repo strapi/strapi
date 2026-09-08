@@ -104,7 +104,11 @@ export default async () => {
   // AI Localizations
   const aiTranslations = getService('ai-translations');
 
-  await aiTranslations.validateProvider();
+  try {
+    await aiTranslations.validateProvider();
+  } catch (error) {
+    strapi.log.error(error instanceof Error ? error.message : String(error));
+  }
 
   if (aiTranslations.isEnabled()) {
     getService('ai-localizations').setupMiddleware();
