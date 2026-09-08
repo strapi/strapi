@@ -927,7 +927,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('coalesces a flood of chunk reports into a handful of frames', async () => {
-      const chunks = Array.from({ length: 500 }, (_, i) => ({
+      const chunks = Array.from({ length: 512 }, (_, i) => ({
         bytesWritten: (i + 1) * 1024,
         totalBytes: 512 * 1024,
       }));
@@ -937,10 +937,24 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.uploadFromUrls(ctxUrls as Context);
 
-      // Only the size announcement gets through — the rest are dropped, and `file:complete`
-      // is what closes the bar out.
-      expect(eventsOf('file:progress')).toHaveLength(1);
-      expect(eventsOf('file:progress')[0].data.loadedBytes).toBe(0);
+      // Only the size announcement and the final frame get through.
+      expect(eventsOf('file:progress').map((frame) => frame.data.loadedBytes)).toEqual([
+        0,
+        512 * 1024,
+      ]);
+    });
+
+    // Otherwise the row holds the last emitted fraction through the whole provider upload.
+    it('flushes the frame that reaches the total even inside the throttle window', async () => {
+      mockFetchReporting([
+        { bytesWritten: 0, totalBytes: 300 },
+        { bytesWritten: 200, totalBytes: 300 },
+        { bytesWritten: 300, totalBytes: 300 },
+      ]);
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:progress').map((frame) => frame.data.loadedBytes)).toEqual([0, 300]);
     });
 
     // Without it the client never learns the denominator and the row stays indeterminate.
@@ -952,7 +966,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.uploadFromUrls(ctxUrls as Context);
 
-      expect(eventsOf('file:progress')).toHaveLength(1);
+      expect(eventsOf('file:progress')).toHaveLength(2);
       expect(eventsOf('file:progress')[0].data).toEqual({
         index: 0,
         loadedBytes: 0,

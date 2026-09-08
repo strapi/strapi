@@ -330,24 +330,24 @@ describe('uploadProgress slice', () => {
       expect(reportsBytes(state)).toBe(false);
     });
 
-    it('turns true once any row actually reports bytes, without a flag change', () => {
-      // Forward-compatible: real bytes bring the percentage back, no revert needed.
+    it('stays false for a URL batch even once a row reports bytes', () => {
+      // Byte-weighting over the one size known so far would show 25% of one file as 25% of
+      // the batch. The bytes still drive the row-weighted header instead.
       const opened = uploadProgressReducer(
         undefined,
-        openUploadProgress({ totalFiles: 1, fileNames: ['remote.png'] })
+        openUploadProgress({ totalFiles: 2, fileNames: ['a.png', 'b.png'] })
       );
       const uploading = uploadProgressReducer(
         opened,
-        setFileUploading({ uploadId: opened.uploadId, name: 'remote.png', index: 0, size: 1000 })
+        setFileUploading({ uploadId: opened.uploadId, name: 'a.png', index: 0, size: 1000 })
       );
       const progressed = uploadProgressReducer(
         uploading,
         setFileProgress({ index: 0, bytes: 250, uploadId: opened.uploadId })
       );
 
-      expect(progressed.reportsByteProgress).toBe(false);
-      expect(reportsBytes(progressed)).toBe(true);
-      expect(aggregate(progressed)).toBe(25);
+      expect(reportsBytes(progressed)).toBe(false);
+      expect(countBased(progressed)).toBe(13);
     });
 
     it('stays false when a URL row completes, so the batch stays on the count-based branch', () => {
@@ -444,6 +444,33 @@ describe('uploadProgress slice', () => {
         })
       );
       expect(countBased(state)).toBe(67);
+    });
+
+    it('climbs within each URL and never moves backwards across the batch', () => {
+      // Sizes arrive one row at a time. Weighting the in-flight row by its own fraction keeps
+      // the header monotonic: 13 → 33 → 47 → 67 → 100 instead of 40 → 33 → 70 → 67.
+      let state = uploadProgressReducer(
+        undefined,
+        openUploadProgress({ totalFiles: 3, fileNames: ['a.png', 'b.png', 'c.png'] })
+      );
+      const seen: Array<number | null> = [];
+      const step = (action: Parameters<typeof uploadProgressReducer>[1]) => {
+        state = uploadProgressReducer(state, action);
+        seen.push(countBased(state));
+      };
+      const { uploadId } = state;
+
+      step(setFileUploading({ uploadId, name: 'a.png', index: 0, size: 0 }));
+      step(setFileProgress({ uploadId, index: 0, bytes: 400, size: 1000 }));
+      step(setFileComplete({ uploadId, index: 0, file: { id: 1 } as never, completedAt: 1 }));
+      step(setFileUploading({ uploadId, name: 'b.png', index: 1, size: 0 }));
+      step(setFileProgress({ uploadId, index: 1, bytes: 400, size: 1000 }));
+      step(setFileComplete({ uploadId, index: 1, file: { id: 2 } as never, completedAt: 2 }));
+      step(setFileUploading({ uploadId, name: 'c.png', index: 2, size: 0 }));
+      step(setFileProgress({ uploadId, index: 2, bytes: 9000, size: 10000 }));
+      step(setFileComplete({ uploadId, index: 2, file: { id: 3 } as never, completedAt: 3 }));
+
+      expect(seen).toEqual([null, 13, 33, 33, 47, 67, 67, 97, 100]);
     });
 
     it('counts errored and cancelled rows as settled, so a failed row cannot stall progress', () => {

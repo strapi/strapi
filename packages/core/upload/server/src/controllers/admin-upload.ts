@@ -390,13 +390,22 @@ export default {
           // sane frame rate is the caller's job. State is per URL: the loop is sequential.
           let lastProgressAt = 0;
           let hasAnnouncedSize = false;
+          let hasReachedTotal = false;
 
           const onFetchProgress = ({ bytesWritten, totalBytes }: UrlFetchProgress) => {
-            if (hasAnnouncedSize && Date.now() - lastProgressAt < URL_FETCH_PROGRESS_INTERVAL_MS) {
+            // The frame that reaches the total always goes out, or a throttled last chunk
+            // leaves the row short of 100% until `file:complete`.
+            const isFinal = !hasReachedTotal && totalBytes !== null && bytesWritten >= totalBytes;
+            if (
+              hasAnnouncedSize &&
+              !isFinal &&
+              Date.now() - lastProgressAt < URL_FETCH_PROGRESS_INTERVAL_MS
+            ) {
               return;
             }
 
             hasAnnouncedSize = true;
+            hasReachedTotal = hasReachedTotal || isFinal;
             lastProgressAt = Date.now();
 
             writeSSE('file:progress', {

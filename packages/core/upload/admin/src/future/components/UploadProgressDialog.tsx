@@ -632,7 +632,10 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
     //    there is no denominator, nothing is dispatched, and `uploadedBytes` stays 0.
     // Keying off `size` alone froze such rows at a determinate 0% for the entire upload;
     // keying off reported bytes keeps them animating until there is a fraction to show.
-    const hasReportedProgress = file.size > 0 && file.uploadedBytes > 0;
+    // Back to indeterminate once every byte is in: the server is still working (the URL
+    // flow's provider upload, the direct flow awaiting its response), not stuck at 100%.
+    const hasReportedProgress =
+      file.size > 0 && file.uploadedBytes > 0 && file.uploadedBytes < file.size;
 
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>

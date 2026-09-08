@@ -40,9 +40,8 @@ export interface UploadProgressState {
   errors: FileUploadError[];
   uploadId: number;
   /**
-   * Whether this batch reports transferred bytes at all. The direct-file flow streams
-   * byte counts from XHR; the URL flow leaves the fetch to the server and gets none back
-   * so its byte-weighted aggregate is stuck at 0%.
+   * Whether every row's size was known when the batch opened (the direct-file flow), so
+   * the byte-weighted aggregate is meaningful. The URL flow learns sizes one row at a time.
    */
   reportsByteProgress: boolean;
 }
@@ -340,44 +339,41 @@ export const selectAggregateProgress = createSelector(
 );
 
 /**
- * Whether to show byte-weighted `selectAggregateProgress` rather than count-based progress.
- * A batch that never reports bytes stays pinned at 0%, so the header falls back to
- * `selectCountBasedProgress`.
+ * Whether to show byte-weighted `selectAggregateProgress` rather than `selectCountBasedProgress`.
  *
- * Checks the rows too, not just the flag: an in-flight row reporting bytes proves the batch
- * can, so byte-weighting takes over once the URL flow starts emitting progress. Only
- * `uploading` rows count — completion backfills `uploadedBytes` to the file size, so letting
- * settled rows qualify would switch a multi-URL batch to byte-weighting mid-upload over only
- * the sizes known so far (transiently 100% after the first file).
+ * Only the flag: byte-weighting needs every size up front. A URL batch learns sizes one row
+ * at a time, so weighting over the sizes known so far makes the header jump backwards at
+ * every file boundary.
  */
 export const selectReportsByteProgress = createSelector(
   (state: RootState) => state.uploadProgress.reportsByteProgress,
-  (state: RootState) => state.uploadProgress.files,
-  (reportsByteProgress, files): boolean =>
-    reportsByteProgress || files.some((f) => f.status === 'uploading' && f.uploadedBytes > 0)
+  (reportsByteProgress): boolean => reportsByteProgress
 );
 
 /**
- * Count-based progress (settled / total rows) for a batch that reports no transferred bytes
- * (the URL flow). Used by the header whenever `selectReportsByteProgress` is false.
+ * Row-weighted progress for a batch whose sizes are not known up front (the URL flow).
+ * Each row is worth `1 / total`: settled rows count fully and an in-flight row contributes
+ * `uploadedBytes / size` once it reports bytes, so a multi-URL batch climbs smoothly to
+ * 33 → 67 → 100 and never moves backwards.
  *
- * Never byte-weights, so a multi-URL batch climbs 33 → 67 → 100 as each file lands instead
- * of jumping to a transient 100% after the first.
- *
- * Returns `null` until a row settles — 0% is the frozen signal this flow exists to remove
- * (a lone URL upload would otherwise read "Uploading 1 item (0%)" throughout), so the header
- * stays indeterminate until there's real progress.
+ * Returns `null` until something has moved — 0% is the frozen signal this flow exists to
+ * remove, so the header stays indeterminate until there's real progress.
  */
 export const selectCountBasedProgress = createSelector(
   (state: RootState) => state.uploadProgress.files,
   (files): number | null => {
-    const settled = files.filter(
-      (f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled'
-    ).length;
+    const done = files.reduce((sum, f) => {
+      if (f.status === 'complete' || f.status === 'error' || f.status === 'cancelled') {
+        return sum + 1;
+      }
+      return f.size > 0 ? sum + Math.min(f.uploadedBytes / f.size, 1) : sum;
+    }, 0);
 
-    if (settled === 0) return null;
+    if (done === 0) {
+      return null;
+    }
 
-    return Math.round((settled / files.length) * 100);
+    return Math.round((done / files.length) * 100);
   }
 );
 
