@@ -2403,7 +2403,14 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // the account with `mfaEnabledAt`/`mfaSecret` still set (a code is still demanded) and zero
       // recovery codes -- and `beginEnrolment` refuses to re-enrol while `mfaEnabledAt` is set, so
       // that combination is a permanent lockout with no path back but the CLI reset.
-      const { strapi, recoveryRows, challenges } = buildMfaFixture({
+      //
+      // Also seeds one trusted-device row for this user: `disable` runs the trusted-device clear
+      // (Cycle 3) inside the same transaction as the recovery-code and challenge deletes, and this
+      // is the only test that proves the rollback actually reaches it -- a failure of the user
+      // update here must leave the trust in place, exactly as it leaves the recovery codes and
+      // challenges in place. Seeded directly through `trustedMocks.create`, bypassing
+      // `trustDevice`'s settings/store lookup, since the delete this proves has no such dependency.
+      const { strapi, recoveryRows, challenges, trustedRows, trustedMocks } = buildMfaFixture({
         userOverrides: {
           update: jest.fn(async () => {
             throw new Error('connection dropped');
@@ -2414,20 +2421,33 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
 
       await service.issueRecoveryCodes('1');
       await service.createChallenge('1');
+      await trustedMocks.create({
+        data: {
+          userId: '1',
+          tokenHash: 'hash-1',
+          deviceId: null,
+          deviceName: null,
+          expiresAt: new Date(Date.now() + 86_400_000),
+          lastUsedAt: null,
+        },
+      });
       const codesBefore = recoveryRows.filter((r) => r.userId === '1').length;
       const challengesBefore = challenges.filter((c) => c.userId === '1').length;
       expect(codesBefore).toBeGreaterThan(0);
       expect(challengesBefore).toBeGreaterThan(0);
+      expect(trustedRows.filter((r) => r.userId === '1')).toHaveLength(1);
 
       await expect(service.disable('1')).rejects.toThrow(/connection dropped/);
 
       // Rolled back, not merely "not yet deleted": a real transaction undoes the earlier deletes
-      // too when the final statement fails.
+      // too when the final statement fails -- the trusted-device row included, since it is deleted
+      // inside the very same transaction callback.
       expect(recoveryRows.filter((r) => r.userId === '1')).toHaveLength(codesBefore);
       expect(challenges.filter((c) => c.userId === '1')).toHaveLength(challengesBefore);
+      expect(trustedRows.filter((r) => r.userId === '1')).toHaveLength(1);
     });
 
-    test('deletes the trusted devices too, inside the same transaction', async () => {
+    test('deletes the trusted devices too', async () => {
       const stored = { trustedDevices: { enabled: true, days: 30 } };
       const fixture = buildMfaFixture({
         strapiOverrides: {
@@ -2441,7 +2461,6 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       await service.disable('1');
 
       expect(fixture.trustedRows.map((r) => r.userId)).toEqual(['2']);
-      expect(fixture.strapi.db.transaction).toHaveBeenCalled();
     });
   });
 });
