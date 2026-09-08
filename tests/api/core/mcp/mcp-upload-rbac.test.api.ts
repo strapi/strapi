@@ -1679,7 +1679,7 @@ describe('MCP upload tools RBAC (api)', () => {
       expect(tree.map((node) => node.name).sort()).toEqual(['Assets only', 'Not an asset']);
     });
 
-    test('fails the call when no id resolved at all', async () => {
+    test('still reports per id when no id resolved at all', async () => {
       const destination = await seeder.seedFolder('Nothing moved');
       const token = await createUpdateTokenSession();
 
@@ -1690,8 +1690,15 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
-      expect(JSON.stringify(response)).toMatch(/999999/);
+      // A tool error would carry no structuredContent at all, so a single bad id would get
+      // prose where a mixed request gets a machine-readable entry — the same mistake, two
+      // different contracts.
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { moved, failed } = structured(response);
+      expect(moved).toEqual([]);
+      expect(failed.map(({ id }) => id).sort()).toEqual([999998, 999999]);
+      expect(failed[0].reason).toMatch(/move_folder/);
     });
 
     test('rejects the whole call for a destination folder that does not exist', async () => {

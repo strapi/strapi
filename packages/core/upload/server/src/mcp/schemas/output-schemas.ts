@@ -139,7 +139,8 @@ export const mediaDeleteFolderOutputSchema = z.object({
  * A bad id among good ones does not roll back the valid moves (see the handler), so the response
  * has to say which ids moved and which did not: an agent that only learned "the call failed"
  * would either retry moves that already happened or abandon ones that did. `moved` and `failed`
- * together account for every id in the request.
+ * together account for every id in the request, on every successful response — including one
+ * where `moved` is empty because no id resolved.
  *
  * `moved` carries the full asset in the same shape the read tools return, so the new folder can
  * be confirmed without a follow-up `media_get_asset`.

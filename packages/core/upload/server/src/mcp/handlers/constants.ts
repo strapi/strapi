@@ -37,12 +37,12 @@ export const MCP_MOVE_MEDIA_ID_FORBIDDEN =
   'This token is not allowed to edit this asset. A permission condition on plugin::upload.assets.update excludes it.';
 
 /**
- * Returned when `media_move_assets` moved nothing at all.
+ * Returned when the move of one asset failed for a reason that is not a missing asset or a
+ * permission denial — a DB error, say, or an upload-provider fault.
  *
- * A response of `moved: []` with every id in `failed` is a failed call, not a partial success, so
- * it is reported as a tool error rather than an OK result an agent might read as done. Partial
- * success — at least one move applied — stays a successful response carrying the per-id report,
- * because there is real work the agent must not retry.
+ * Reported per id rather than thrown: a tool error carries no `structuredContent`, so throwing
+ * would discard the report naming the assets that had already moved in the same call.
+ * `cause` is the underlying message, kept verbatim so the real fault stays legible.
  */
-export const MCP_MOVE_MEDIA_NOTHING_MOVED = (ids: number[]) =>
-  `No assets were moved. None of these ids resolved to an asset this token can edit: ${ids.join(', ')}. Asset ids and folder ids are indistinguishable integers — use media_move_folder for folders, and media_list_assets to discover valid asset ids.`;
+export const MCP_MOVE_MEDIA_ID_FAILED = (cause: string) =>
+  `Moving this asset failed: ${cause}. This is not a problem with the id itself — the asset exists and this token may edit it — so retrying may succeed. Any assets listed under \`moved\` were still moved.`;

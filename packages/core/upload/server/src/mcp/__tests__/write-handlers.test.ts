@@ -8,7 +8,7 @@ import {
   MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND,
   MCP_MOVE_MEDIA_ID_NOT_FOUND,
   MCP_MOVE_MEDIA_ID_FORBIDDEN,
-  MCP_MOVE_MEDIA_NOTHING_MOVED,
+  MCP_MOVE_MEDIA_ID_FAILED,
 } from '../handlers/constants';
 import { ACTIONS, FILE_MODEL_UID } from '../../constants';
 
@@ -476,24 +476,65 @@ describe('media_move_assets handler', () => {
       ]);
     });
 
-    test('fails the call when nothing moved at all', async () => {
+    test('still returns the per-id report when nothing moved at all', async () => {
       setupMoveStrapi();
 
-      // Every id failed: there is no partial success to preserve, and an OK result would let an
-      // agent read a wholly rejected request as a completed reorganisation.
-      await expect(move({ ids: [999, 998], folder: 3 })).rejects.toThrow(errors.ValidationError);
-      await expect(move({ ids: [999, 998], folder: 3 })).rejects.toThrow(
-        MCP_MOVE_MEDIA_NOTHING_MOVED([999, 998])
-      );
+      // `moved: []` with every id in `failed` is not ambiguous — it says plainly that nothing
+      // moved and why. Throwing would drop `structuredContent` entirely, so a single bad id
+      // would get prose where `[1, 999]` gets a machine-readable entry, for the same mistake.
+      const { moved, failed } = structured(await move({ ids: [999, 998], folder: 3 }));
+
+      expect(moved).toEqual([]);
+      expect(failed.map(({ id }) => id)).toEqual([999, 998]);
+      expect(failed[0].reason).toBe(MCP_MOVE_MEDIA_ID_NOT_FOUND);
     });
 
-    test('surfaces an unexpected error instead of blaming the id for it', async () => {
+    test('reports a write failure against its own id, keeping the earlier moves in the report', async () => {
       const { updateFileInfo } = setupMoveStrapi();
-      updateFileInfo.mockRejectedValueOnce(new Error('connection lost'));
+      // Asset 1 moves; asset 4's write then fails.
+      updateFileInfo.mockImplementationOnce(
+        async (id: number, fileInfo: Record<string, unknown>) => ({
+          ...ASSETS[id],
+          ...fileInfo,
+        })
+      );
+      updateFileInfo.mockImplementationOnce(async () => {
+        throw new Error('connection lost');
+      });
 
-      // A DB failure is not a per-id verdict: reporting it in `failed` would tell the agent to
-      // retry an id that is perfectly valid, and hide the real fault.
-      await expect(move({ ids: [1], folder: 3 })).rejects.toThrow('connection lost');
+      const { moved, failed } = structured(await move({ ids: [1, 4], folder: 3 }));
+
+      // The regression this guards: throwing here would reach the client as a tool error with
+      // no `structuredContent`, discarding the fact that asset 1 had already moved — the agent
+      // could not tell which ids to retry.
+      expect(moved.map((asset) => asset.id)).toEqual([1]);
+      expect(failed).toEqual([{ id: 4, reason: MCP_MOVE_MEDIA_ID_FAILED('connection lost') }]);
+    });
+
+    test('carries the underlying message through, so the real fault stays legible', async () => {
+      const { updateFileInfo } = setupMoveStrapi();
+      updateFileInfo.mockImplementationOnce(async () => {
+        throw new Error('provider unreachable');
+      });
+
+      const { failed } = structured(await move({ ids: [1], folder: 3 }));
+
+      expect(failed[0].reason).toMatch(/provider unreachable/);
+      // ...and says the id itself is fine, so the agent does not treat it as a bad id.
+      expect(failed[0].reason).toMatch(/not a problem with the id itself/);
+    });
+
+    test('does not strand the rest of a reorganisation after one broken asset', async () => {
+      const { updateFileInfo } = setupMoveStrapi();
+      updateFileInfo.mockImplementationOnce(async () => {
+        throw new Error('transient');
+      });
+
+      const { moved, failed } = structured(await move({ ids: [1, 4], folder: 3 }));
+
+      // Asset 1 failed, but the loop continued and moved asset 4.
+      expect(moved.map((asset) => asset.id)).toEqual([4]);
+      expect(failed.map(({ id }) => id)).toEqual([1]);
     });
   });
 
