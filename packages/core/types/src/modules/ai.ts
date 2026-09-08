@@ -7,7 +7,8 @@ export type AiProvider = {
 };
 
 /**
- * AI service for the admin panel. Only present at runtime when EE + an AI license feature is active
+ * AI service for the admin panel. Always registered (CE and EE), but its methods gate on
+ * EE/license/config internally and report unavailable outside of that context.
  */
 export type AiAdminService = {
   isAvailable(): boolean;
