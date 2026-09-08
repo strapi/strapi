@@ -27,6 +27,8 @@ interface MfaService {
     password?: string | null;
     roles?: unknown;
   }): Promise<boolean>;
+  /** Cycle 3: the user's live trusted browsers; only the count is printed. */
+  listTrustedDevices(userId: string): Promise<unknown[]>;
 }
 
 async function printMfaState({ email }: CmdOptions) {
@@ -70,6 +72,9 @@ async function printMfaState({ email }: CmdOptions) {
   console.log(
     `locked at:         ${user.mfaLockedAt ? new Date(user.mfaLockedAt).toISOString() : '-'}`
   );
+
+  const trustedDevices = await mfa.listTrustedDevices(String(user.id));
+  console.log(`trusted devices:   ${trustedDevices.length}`);
 
   process.exit(0);
 }

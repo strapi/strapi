@@ -8,12 +8,14 @@ const isEnrolled = jest.fn();
 const countUnusedRecoveryCodes = jest.fn();
 const config = jest.fn();
 const isMfaRequiredFor = jest.fn(() => Promise.resolve(true));
+const listTrustedDevices = jest.fn(() => Promise.resolve([] as unknown[]));
 
 const mfaServiceInstance = {
   isEnrolled,
   countUnusedRecoveryCodes,
   config,
   isMfaRequiredFor,
+  listTrustedDevices,
 };
 
 // Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
@@ -59,11 +61,13 @@ describe('admin:mfa-state command', () => {
     countUnusedRecoveryCodes.mockClear();
     config.mockClear();
     isMfaRequiredFor.mockClear();
+    listTrustedDevices.mockClear();
     db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
 
     config.mockReturnValue({ recoveryCodeCount: 10, step: 30 });
+    listTrustedDevices.mockResolvedValue([]);
   });
 
   test('exits non-zero when the email is unknown', async () => {
@@ -197,6 +201,25 @@ describe('admin:mfa-state command', () => {
     expect(consoleLog).toHaveBeenCalledWith(`current totp step: ${expectedStep}`);
 
     dateSpy.mockRestore();
+    mockExit.mockRestore();
+    consoleLog.mockRestore();
+  });
+
+  test('prints the number of live trusted devices', async () => {
+    const email = 'kai@doe.com';
+    findOne.mockResolvedValue({ id: 1, email, mfaEnabledAt: new Date('2026-01-01T00:00:00.000Z') });
+    isEnrolled.mockResolvedValue(true);
+    countUnusedRecoveryCodes.mockResolvedValue(10);
+    listTrustedDevices.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await mfaStateCommand({ email });
+
+    expect(listTrustedDevices).toHaveBeenCalledWith('1');
+    expect(consoleLog).toHaveBeenCalledWith('trusted devices:   2');
+
     mockExit.mockRestore();
     consoleLog.mockRestore();
   });

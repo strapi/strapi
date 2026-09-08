@@ -140,10 +140,13 @@ describe('Audit logs service', () => {
     await handleEvent('admin.mfa.locked', { userId: '1' });
     await handleEvent('admin.mfa.unlocked', { userId: '1', byUserId: '9' });
     await handleEvent('admin.mfa.authenticator.replaced', { userId: '1' });
+    await handleEvent('admin.mfa.device.trusted', { userId: '1' });
+    await handleEvent('admin.mfa.device.trust.revoked', { userId: '1', byUserId: '9', count: 2 });
+    await handleEvent('admin.mfa.trusted.device.used', { userId: '1' });
 
-    // All eight are on the allow-list, so all eight produce a saved audit event -- an event name
-    // eventMap doesn't recognise resolves to `undefined` and is silently dropped instead.
-    expect(saveEvent).toHaveBeenCalledTimes(8);
+    // All eleven are on the allow-list, so all eleven produce a saved audit event -- an event
+    // name eventMap doesn't recognise resolves to `undefined` and is silently dropped instead.
+    expect(saveEvent).toHaveBeenCalledTimes(11);
   });
 
   it('audits an account lock using the payload userId, even though ctx.state.user is not set yet', async () => {
