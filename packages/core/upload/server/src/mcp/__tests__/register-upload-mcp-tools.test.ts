@@ -18,6 +18,10 @@ const makeStrapi = (options: { isEnabled?: boolean; withAi?: boolean } = {}) => 
 
 const READ_TOOLS = ['media_list_assets', 'media_get_asset', 'media_list_folders'];
 
+const FOLDER_WRITE_TOOLS = ['create_folder', 'rename_folder', 'move_folder', 'delete_folder'];
+
+const WRITE_TOOLS = ['media_update_asset', ...FOLDER_WRITE_TOOLS];
+
 describe('upload MCP tool registration', () => {
   describe('registration', () => {
     test('registers every read tool', () => {
@@ -25,12 +29,10 @@ describe('upload MCP tool registration', () => {
 
       registerUploadMcpTools({ strapi });
 
-      expect(registerTool).toHaveBeenCalledTimes(4);
+      expect(registerTool).toHaveBeenCalledTimes(8);
       expect(registerTool.mock.calls.map(([tool]) => tool.name)).toEqual([
-        'media_list_assets',
-        'media_get_asset',
-        'media_list_folders',
-        'media_update_asset',
+        ...READ_TOOLS,
+        ...WRITE_TOOLS,
       ]);
     });
 
@@ -56,7 +58,7 @@ describe('upload MCP tool registration', () => {
 
       registerUploadMcpTools({ strapi });
 
-      expect(registerTool).toHaveBeenCalledTimes(4);
+      expect(registerTool).toHaveBeenCalledTimes(8);
     });
 
     test('does not throw when strapi.ai is unavailable', () => {
@@ -130,6 +132,109 @@ describe('upload MCP tool registration', () => {
       // An agent that wants to move an asset must be steered from the tool description alone.
       expect(byName.media_update_asset.description).toMatch(/media_move_assets/);
       expect(byName.media_update_asset.description).toMatch(/numeric id/i);
+    });
+
+    test('gates every folder write on plugin::upload.assets.update', () => {
+      // Folder writes inherit the existing asset permission rather than a folder-specific
+      // one: MCP-specific folder RBAC is explicitly out of scope.
+      for (const name of FOLDER_WRITE_TOOLS) {
+        expect(byName[name].auth.policies).toEqual([{ action: ACTIONS.update }]);
+      }
+    });
+
+    test('gives every folder write a short-verb telemetry name', () => {
+      const expected = {
+        create_folder: 'create_folder',
+        rename_folder: 'rename_folder',
+        move_folder: 'move_folder',
+        delete_folder: 'delete_folder',
+      };
+
+      for (const [name, telemetryName] of Object.entries(expected)) {
+        expect(byName[name].telemetry.name).toBe(telemetryName);
+      }
+    });
+
+    test('registers rename and move as two separate tools', () => {
+      // Both call `folder.update` underneath, but an agent picks by intent: rename changes an
+      // attribute, move changes a location — the same split as the asset surface.
+      expect(byName.rename_folder).toBeDefined();
+      expect(byName.move_folder).toBeDefined();
+      expect(byName.rename_folder.description).toMatch(/move_folder/);
+      expect(byName.move_folder.description).toMatch(/rename_folder/);
+    });
+
+    test('states that rename_folder does not change a folder location', () => {
+      expect(byName.rename_folder.description).toMatch(/name only/i);
+    });
+
+    test('states that move_folder carries the subtree and rejects its own descendants', () => {
+      expect(byName.move_folder.description).toMatch(/subfolders and files/i);
+      expect(byName.move_folder.description).toMatch(/cannot be moved into itself/i);
+    });
+
+    test('names the destructive, irreversible, cascading behaviour in delete_folder', () => {
+      // An agent reads the description as its only warning before an irreversible call.
+      const { description } = byName.delete_folder;
+
+      expect(description).toMatch(/destructive/i);
+      expect(description).toMatch(/irreversible/i);
+      expect(description).toMatch(/cascade/i);
+      expect(description).toMatch(/permanently/i);
+      expect(description).toMatch(/no undo/i);
+    });
+
+    test('warns in delete_folder that usage information is unavailable', () => {
+      // "Used in" detection is not in the Media Library MVP, so the tool cannot say whether
+      // a contained asset is referenced by a live entry — and must say so.
+      const { description } = byName.delete_folder;
+
+      expect(description).toMatch(/used in/i);
+      expect(description).toMatch(/cannot (tell|be checked)/i);
+    });
+
+    test('steers delete_folder to the dry run first, and to delete_media for assets', () => {
+      const { description } = byName.delete_folder;
+
+      expect(description).toMatch(/dryRun/);
+      expect(description).toMatch(/delete_media/);
+      expect(description).toMatch(/FOLDER ids only/);
+    });
+
+    test('defaults delete_folder to a preview, so deleting needs an explicit opt-in', () => {
+      // `dryRun` is optional and the handler defaults it to true: omitting the flag must be the
+      // safe branch, never the destructive one.
+      const schema = byName.delete_folder.resolveInputSchema?.(
+        {} as Parameters<NonNullable<typeof byName.delete_folder.resolveInputSchema>>[0]
+      );
+
+      const parsed = schema?.safeParse({ ids: [1] });
+      expect(parsed?.success).toBe(true);
+      expect((parsed as { data: Record<string, unknown> })?.data.dryRun).toBeUndefined();
+    });
+
+    test('exposes an input schema for every folder write', () => {
+      for (const name of FOLDER_WRITE_TOOLS) {
+        expect(byName[name].resolveInputSchema).toBeDefined();
+      }
+    });
+
+    test('publishes every folder write as a plain object schema the registry can expose', () => {
+      // A `.refine()` anywhere here would produce a ZodEffects the tool registry cannot turn
+      // into an input JSON Schema.
+      for (const name of FOLDER_WRITE_TOOLS) {
+        const schema = byName[name].resolveInputSchema?.(
+          {} as Parameters<NonNullable<typeof byName.create_folder.resolveInputSchema>>[0]
+        );
+
+        expect(schema?.shape).toBeDefined();
+      }
+    });
+
+    test('documents that folders use numeric ids, not documentIds', () => {
+      for (const name of FOLDER_WRITE_TOOLS) {
+        expect(byName[name].description).toMatch(/numeric id/i);
+      }
     });
 
     test('publishes media_update_asset as a plain object schema the registry can expose', () => {

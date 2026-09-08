@@ -1,4 +1,8 @@
-import { sanitizeMediaAsset, sanitizeMediaFolderTree } from '../sanitizers/sanitize-media';
+import {
+  sanitizeMediaAsset,
+  sanitizeMediaFolderTree,
+  sanitizeMediaFolder,
+} from '../sanitizers/sanitize-media';
 
 describe('sanitizeMediaAsset', () => {
   const rawFile = {
@@ -130,5 +134,56 @@ describe('sanitizeMediaFolderTree', () => {
     expect(sanitizeMediaFolderTree([{ id: 1, name: 'leaf' }])).toEqual([
       { id: 1, name: 'leaf', children: [] },
     ]);
+  });
+});
+
+describe('sanitizeMediaFolder', () => {
+  const rawFolder = {
+    id: 4,
+    name: 'Campaigns',
+    path: '/1/4',
+    pathId: 4,
+    createdAt: new Date('2026-01-02T03:04:05.000Z'),
+    updatedAt: '2026-02-03T04:05:06.000Z',
+  };
+
+  test('exposes only the allowlisted folder fields', () => {
+    expect(sanitizeMediaFolder(rawFolder)).toEqual({
+      id: 4,
+      name: 'Campaigns',
+      parent: null,
+      createdAt: '2026-01-02T03:04:05.000Z',
+      updatedAt: '2026-02-03T04:05:06.000Z',
+    });
+  });
+
+  test('drops the internal materialized-path bookkeeping', () => {
+    const sanitized = sanitizeMediaFolder(rawFolder);
+
+    // `path` and `pathId` drive the cascade internally and must never look addressable.
+    expect(sanitized).not.toHaveProperty('path');
+    expect(sanitized).not.toHaveProperty('pathId');
+  });
+
+  test('exposes a populated parent as id and name', () => {
+    expect(
+      sanitizeMediaFolder({ ...rawFolder, parent: { id: 1, name: 'Root', path: '/1' } })?.parent
+    ).toEqual({ id: 1, name: 'Root' });
+  });
+
+  test('accepts a parent that arrives as a bare id', () => {
+    // Depending on the query, the relation comes back populated or as a plain id.
+    expect(sanitizeMediaFolder({ ...rawFolder, parent: 1 })?.parent).toEqual({ id: 1 });
+  });
+
+  test('reports a root-level folder as parent: null', () => {
+    expect(sanitizeMediaFolder({ ...rawFolder, parent: null })?.parent).toBeNull();
+    expect(sanitizeMediaFolder(rawFolder)?.parent).toBeNull();
+  });
+
+  test('returns null for a missing row rather than throwing', () => {
+    // A write whose read-back finds nothing must not fail on a property access.
+    expect(sanitizeMediaFolder(null)).toBeNull();
+    expect(sanitizeMediaFolder(undefined)).toBeNull();
   });
 });

@@ -10,16 +10,35 @@ import {
   mediaListFoldersOutputSchema,
   mediaUpdateAssetInputSchema,
   mediaUpdateAssetOutputSchema,
+  createFolderInputSchema,
+  createFolderOutputSchema,
+  renameFolderInputSchema,
+  renameFolderOutputSchema,
+  moveFolderInputSchema,
+  moveFolderOutputSchema,
+  deleteFolderInputSchema,
+  deleteFolderOutputSchema,
 } from './schemas';
 import {
   createMediaListAssetsHandler,
   createMediaGetAssetHandler,
   createMediaListFoldersHandler,
   createMediaUpdateAssetHandler,
+  createCreateFolderHandler,
+  createRenameFolderHandler,
+  createMoveFolderHandler,
+  createDeleteFolderHandler,
 } from './handlers';
 
 /**
  * The Media Library MCP tools.
+ *
+ * Folder writes inherit the same `plugin::upload.assets.update` action rather than introducing a
+ * folder-specific one, matching what the admin UI enforces today. MCP-specific folder RBAC is
+ * out of scope.
+ *
+ * Renaming and moving are separate tools for both objects — rename/update changes attributes,
+ * move changes location — so an agent selects by intent instead of assembling a combined patch.
  */
 export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
   {
@@ -64,6 +83,50 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     resolveInputSchema: () => mediaUpdateAssetInputSchema,
     resolveOutputSchema: () => mediaUpdateAssetOutputSchema,
     createHandler: createMediaUpdateAssetHandler,
+  },
+  {
+    name: 'create_folder',
+    title: 'Media: create folder',
+    description:
+      'Create a Media Library folder, optionally inside an existing one. Folders are identified by a numeric id: pass `parent` to nest the new folder, or omit it to create the folder at the media library root. The name must be unique among its siblings and cannot contain slashes.',
+    telemetry: { source: 'upload', name: 'create_folder' },
+    auth: { policies: [{ action: ACTIONS.update }] },
+    resolveInputSchema: () => createFolderInputSchema,
+    resolveOutputSchema: () => createFolderOutputSchema,
+    createHandler: createCreateFolderHandler,
+  },
+  {
+    name: 'rename_folder',
+    title: 'Media: rename folder',
+    description:
+      "Rename a Media Library folder, identified by its numeric id. Changes the folder name only and leaves its location, its contents and their URLs untouched — use move_folder to change which folder it sits in. The new name must be unique among the folder's siblings.",
+    telemetry: { source: 'upload', name: 'rename_folder' },
+    auth: { policies: [{ action: ACTIONS.update }] },
+    resolveInputSchema: () => renameFolderInputSchema,
+    resolveOutputSchema: () => renameFolderOutputSchema,
+    createHandler: createRenameFolderHandler,
+  },
+  {
+    name: 'move_folder',
+    title: 'Media: move folder',
+    description:
+      'Move a Media Library folder into a different parent folder, identified by numeric ids. The folder keeps its name and carries all of its subfolders and files with it; pass `parent: null` to move it to the media library root. A folder cannot be moved into itself or into one of its own descendants. Use rename_folder to change the name instead.',
+    telemetry: { source: 'upload', name: 'move_folder' },
+    auth: { policies: [{ action: ACTIONS.update }] },
+    resolveInputSchema: () => moveFolderInputSchema,
+    resolveOutputSchema: () => moveFolderOutputSchema,
+    createHandler: createMoveFolderHandler,
+  },
+  {
+    name: 'delete_folder',
+    title: 'Media: delete folder (destructive)',
+    description:
+      'DESTRUCTIVE AND IRREVERSIBLE. Deletes Media Library folders by numeric id and CASCADES: every subfolder and every file inside them is permanently deleted from the database and from the storage provider. There is no undo, no trash and no recycle bin, and the deleted files stop being served — any live entry or page still referencing one will break.\n\nWHETHER THE CONTAINED ASSETS ARE USED IN PUBLISHED CONTENT CANNOT BE CHECKED: Strapi does not expose "used in" information over this API, so this tool cannot tell you whether a file is referenced by an entry. Confirm with the user before deleting.\n\nCall it first WITHOUT `dryRun` (or with `dryRun: true`) to preview: nothing is deleted and the response reports how many folders and files WOULD be removed. Only after reporting those counts should you call it again with `dryRun: false` to actually delete. Takes FOLDER ids only — asset ids are a separate namespace of integers; use delete_media for individual assets.',
+    telemetry: { source: 'upload', name: 'delete_folder' },
+    auth: { policies: [{ action: ACTIONS.update }] },
+    resolveInputSchema: () => deleteFolderInputSchema,
+    resolveOutputSchema: () => deleteFolderOutputSchema,
+    createHandler: createDeleteFolderHandler,
   },
 ];
 
