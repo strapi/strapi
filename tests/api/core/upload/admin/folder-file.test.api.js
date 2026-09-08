@@ -191,13 +191,18 @@ describe('Bulk actions for folders & files', () => {
       const folder = await createFolder('folder-with-replaced-file', null);
       const file = await createAFile(folder.id);
 
-      await rq({
+      const resReplace = await rq({
         method: 'POST',
         url: `/upload?id=${file.id}`,
         formData: {
           files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
         },
       });
+
+      // Asserted directly: a failed replace would leave the file at `folder.path`, so the
+      // deletion below would still remove it and this test would pass without the fix.
+      expect(resReplace.statusCode).toBe(200);
+      expect(resReplace.body.folderPath).toBe(folder.path);
 
       await rq({
         method: 'POST',
