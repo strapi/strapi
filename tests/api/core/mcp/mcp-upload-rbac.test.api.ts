@@ -1186,6 +1186,25 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(folders[0]).not.toHaveProperty('pathId');
       });
 
+      test('does not claim a nested folder sits at the root', async () => {
+        // `parent: null` means "at the media library root" in the output contract. The delete
+        // lookup does not load the relation, so it must omit the key rather than assert null —
+        // misdescribing the target's location in a destructive confirmation step.
+        const parent = await seeder.seedFolder('Parent');
+        const nested = await seeder.seedFolder('Nested', parent.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [nested.id],
+        });
+
+        const folders = response.result?.structuredContent?.folders as Record<string, unknown>[];
+        expect(folders[0]).toMatchObject({ id: nested.id, name: 'Nested' });
+
+        // Absent means "not loaded"; null would be a false claim of root placement.
+        expect('parent' in folders[0]).toBe(false);
+      });
+
       test('deletes with dryRun: false, cascading over subfolders and files', async () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
@@ -1262,7 +1281,7 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(await countFolders()).toBe(0);
       });
 
-      test('reports ids that matched no folder instead of failing the call', async () => {
+      test('rejects the whole call when one id does not resolve, deleting nothing', async () => {
         const folder = await seeder.seedFolder('Real');
         const token = await createUpdateTokenSession();
 
@@ -1271,14 +1290,57 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
-        expect(response.result?.structuredContent?.missingIds).toEqual([999999]);
-        expect(await countFolders()).toBe(0);
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(JSON.stringify(response)).toMatch(/999999/);
+
+        // The valid folder in the same request must survive: all or nothing.
+        expect(await countFolders()).toBe(1);
+        expect(await folderRow(folder.id)).toMatchObject({ name: 'Real' });
       });
 
-      test('rejects asset ids, naming delete_media', async () => {
+      test('rejects a request mixing folder ids with asset ids, deleting neither', async () => {
+        // The case the all-or-nothing rule exists for: the two id namespaces are
+        // indistinguishable integers, so a mixed list is an agent mistake that must not
+        // cascade through the folders that happened to match.
+        const folder = await seeder.seedFolder('Keep me');
+        const inside = await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
+        const asset = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [folder.id, asset.id],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(JSON.stringify(response)).toMatch(/delete_media/);
+
+        // Nothing at all was removed — not the folder, not the file it contained.
+        expect(await countFolders()).toBe(1);
+        expect(await countFiles()).toBe(2);
+        expect(
+          await strapi.db.query('plugin::upload.file').findOne({ where: { id: inside.id } })
+        ).toMatchObject({ name: 'inside.jpg' });
+      });
+
+      test('rejects an unresolvable id on the dry run too, before reporting any cascade', async () => {
+        const folder = await seeder.seedFolder('Real');
+        await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [folder.id, 999999],
+        });
+
+        // A preview must not describe a cascade the executing call would refuse.
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(response.result?.structuredContent?.totalFolderNumber).toBeUndefined();
+        expect(await countFolders()).toBe(1);
+      });
+
+      test('rejects an asset id, naming delete_media', async () => {
         // Folder and asset ids are indistinguishable integers, so an asset id here is a likely
-        // agent mistake that must not be reported as an empty cascade.
+        // agent mistake that must be refused rather than reported as an empty cascade.
         const asset = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
         const token = await createUpdateTokenSession();
 

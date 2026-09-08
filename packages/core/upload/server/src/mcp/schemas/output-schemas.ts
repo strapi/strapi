@@ -87,7 +87,9 @@ export const mediaFolderOutputSchema = z.object({
     })
     .nullable()
     .optional()
-    .describe('Containing folder, or null when the folder sits at the media library root.'),
+    .describe(
+      'Containing folder, or null when the folder sits at the media library root. Absent when this response did not load the relation — absent means unknown, not root.'
+    ),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
 });
@@ -110,6 +112,9 @@ export const moveFolderOutputSchema = z.object({
  * `dryRun` echoes which branch ran: on true the counts are what *would* be removed and nothing
  * was touched; on false they are what actually was. Echoing it back means the agent can tell a
  * preview from a completed deletion without tracking what it sent.
+ *
+ * There is no "skipped ids" field: an id that does not resolve to a folder rejects the whole
+ * call, so every id in the request is accounted for by `folders` on any successful response.
  */
 export const deleteFolderOutputSchema = z.object({
   dryRun: z
@@ -126,7 +131,4 @@ export const deleteFolderOutputSchema = z.object({
       'Total folders affected, including the matched folders themselves and every descendant.'
     ),
   totalFileNumber: z.number().describe('Total files affected, across the whole cascade.'),
-  missingIds: z
-    .array(z.number())
-    .describe('Ids from the request that matched no folder — silently skipped, not an error.'),
 });
