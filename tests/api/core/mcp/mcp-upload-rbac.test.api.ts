@@ -21,7 +21,7 @@ const FOLDER_WRITE_TOOLS = [
   'media_delete_folder',
 ] as const;
 
-const WRITE_TOOLS = ['media_update_asset', ...FOLDER_WRITE_TOOLS] as const;
+const WRITE_TOOLS = ['media_update_asset', 'media_move_assets', ...FOLDER_WRITE_TOOLS] as const;
 
 /** Fields that must never reach an MCP client. */
 const FORBIDDEN_ASSET_FIELDS = [
@@ -746,6 +746,19 @@ describe('MCP upload tools RBAC (api)', () => {
       expect(response.error ?? response.result?.isError).toBeTruthy();
     });
   });
+  /**
+   * Folder read-backs, shared by the folder CRUD suite and by `media_move_assets` — which has to prove
+   * a folder id passed among asset ids left the folder tree alone.
+   */
+  const readTree = async (accessKey: string) => {
+    const response = await mcp.callTool(accessKey, 'media_list_folders', {});
+    expect(response.error).toBeUndefined();
+    return response.result?.structuredContent?.data as Array<Record<string, unknown>>;
+  };
+
+  const folderRow = async (id: number) =>
+    strapi.db.query('plugin::upload.folder').findOne({ where: { id } });
+
   // ---------------------------------------------------------------------------
   // Folder CRUD
   // ---------------------------------------------------------------------------
@@ -753,16 +766,6 @@ describe('MCP upload tools RBAC (api)', () => {
   describe('folder CRUD', () => {
     const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
       response.result?.structuredContent?.data as Record<string, unknown>;
-
-    /** The folder tree as `media_list_folders` reports it, for read-back assertions. */
-    const readTree = async (accessKey: string) => {
-      const response = await mcp.callTool(accessKey, 'media_list_folders', {});
-      expect(response.error).toBeUndefined();
-      return response.result?.structuredContent?.data as Array<Record<string, unknown>>;
-    };
-
-    const folderRow = async (id: number) =>
-      strapi.db.query('plugin::upload.folder').findOne({ where: { id } });
 
     const countFolders = async () => strapi.db.query('plugin::upload.folder').count({});
     const countFiles = async () => strapi.db.query('plugin::upload.file').count({});
@@ -1452,6 +1455,364 @@ describe('MCP upload tools RBAC (api)', () => {
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
       });
+    });
+  });
+  // ---------------------------------------------------------------------------
+  // media_move_assets
+  // ---------------------------------------------------------------------------
+
+  describe('media_move_assets', () => {
+    const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
+      response.result?.structuredContent as {
+        destinationFolder: Record<string, unknown> | null;
+        moved: Record<string, unknown>[];
+        failed: { id: number; reason: string }[];
+      };
+
+    /** The stored row, so the private `folderPath` can be asserted alongside the relation. */
+    const fileRow = async (id: number) =>
+      strapi.db.query('plugin::upload.file').findOne({ where: { id }, populate: ['folder'] });
+
+    const readBack = async (accessKey: string, id: number) => {
+      const response = await mcp.callTool(accessKey, 'media_get_asset', { id });
+      expect(response.error).toBeUndefined();
+      return response.result?.structuredContent?.data as Record<string, unknown>;
+    };
+
+    test('moves several assets across folders in one call, confirmed by media_get_asset', async () => {
+      const source = await seeder.seedFolder('Source');
+      const destination = await seeder.seedFolder('Destination');
+      const first = await seeder.seedAsset({ name: 'first.jpg', folderId: source.id });
+      const second = await seeder.seedAsset({ name: 'second.jpg', folderId: source.id });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [first.id, second.id],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { destinationFolder, moved, failed } = structured(response);
+      expect(destinationFolder).toMatchObject({ id: destination.id, name: 'Destination' });
+      expect(moved.map((asset) => asset.id).sort()).toEqual([first.id, second.id].sort());
+      expect(failed).toEqual([]);
+
+      // The write response is authoritative on its own — no follow-up read required.
+      for (const asset of moved) {
+        expect(asset.folder).toMatchObject({ id: destination.id, name: 'Destination' });
+      }
+
+      // ...and the move is actually persisted, relation and private folderPath alike.
+      expect(await readBack(token.accessKey, first.id)).toMatchObject({
+        name: 'first.jpg',
+        folder: { id: destination.id, name: 'Destination' },
+      });
+      expect(await fileRow(second.id)).toMatchObject({
+        folder: { id: destination.id },
+        folderPath: destination.path,
+      });
+    });
+
+    test('moves an asset to the media library root with folder: null', async () => {
+      const folder = await seeder.seedFolder('Somewhere');
+      const seeded = await seeder.seedAsset({ name: 'homeward.jpg', folderId: folder.id });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: null,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { destinationFolder, moved } = structured(response);
+      expect(destinationFolder).toBeNull();
+      expect(moved[0]).toMatchObject({ id: seeded.id, folder: null });
+
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({ folder: null });
+      expect(await fileRow(seeded.id)).toMatchObject({ folder: null, folderPath: '/' });
+
+      // media_list_assets's root filter is the read side of the same claim.
+      const atRoot = await mcp.callTool(token.accessKey, 'media_list_assets', { folderId: null });
+      expect(
+        (atRoot.result?.structuredContent?.results as Record<string, unknown>[]).map(
+          (asset) => asset.name
+        )
+      ).toEqual(['homeward.jpg']);
+    });
+
+    test('moves a single asset through the same bulk contract', async () => {
+      const destination = await seeder.seedFolder('Solo');
+      const seeded = await seeder.seedAsset({ name: 'alone.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      // An array of one is the whole difference — there is no single-asset move tool.
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expect(structured(response).moved.map((asset) => asset.id)).toEqual([seeded.id]);
+    });
+
+    test('moves assets into a nested folder, recording its full path', async () => {
+      const parent = await seeder.seedFolder('Parent');
+      const nested = await seeder.seedFolder('Nested', parent.id);
+      const seeded = await seeder.seedAsset({ name: 'deep.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: nested.id,
+      });
+
+      // `folderPath` is the materialized path of the destination, not just its id: getting this
+      // wrong would leave the asset invisible to the admin folder navigation.
+      expect(await fileRow(seeded.id)).toMatchObject({
+        folder: { id: nested.id },
+        folderPath: nested.path,
+      });
+    });
+
+    test('changes the folder only, leaving metadata and the public URL untouched', async () => {
+      const destination = await seeder.seedFolder('Elsewhere');
+      const seeded = await seeder.seedAsset({
+        name: 'keep.jpg',
+        alternativeText: 'keep alt',
+        caption: 'keep caption',
+      });
+
+      const token = await createUpdateTokenSession();
+
+      const before = await readBack(token.accessKey, seeded.id);
+
+      await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: destination.id,
+      });
+
+      const after = await readBack(token.accessKey, seeded.id);
+
+      // A move that broke live URLs would break every entry and page referencing the asset.
+      expect(after).toMatchObject({
+        name: 'keep.jpg',
+        alternativeText: 'keep alt',
+        caption: 'keep caption',
+        url: before.url,
+        mime: before.mime,
+      });
+    });
+
+    test('returns the sanitized asset shape, with no provider secrets or private metadata', async () => {
+      const destination = await seeder.seedFolder('Sanitized');
+      const seeded = await seeder.seedAsset({ name: 'clean.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: destination.id,
+      });
+
+      const [asset] = structured(response).moved;
+      for (const field of FORBIDDEN_ASSET_FIELDS) {
+        expect(asset).not.toHaveProperty(field);
+      }
+      expect(asset).not.toHaveProperty('documentId');
+    });
+
+    test('reports a partial failure per id and leaves the valid moves applied', async () => {
+      const destination = await seeder.seedFolder('Partial');
+      const good = await seeder.seedAsset({ name: 'good.jpg' });
+      const alsoGood = await seeder.seedAsset({ name: 'also-good.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [good.id, 999999, alsoGood.id],
+        folder: destination.id,
+      });
+
+      // Partial success is reported, not discarded: the call succeeds and the report says
+      // exactly which id to retry.
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { moved, failed } = structured(response);
+      expect(moved.map((asset) => asset.id).sort()).toEqual([good.id, alsoGood.id].sort());
+      expect(failed).toHaveLength(1);
+      expect(failed[0].id).toBe(999999);
+      expect(failed[0].reason).toMatch(/media_move_folder/);
+
+      // The valid moves are committed — not rolled back by the bad id.
+      expect(await fileRow(good.id)).toMatchObject({ folder: { id: destination.id } });
+      expect(await fileRow(alsoGood.id)).toMatchObject({ folder: { id: destination.id } });
+    });
+
+    test('reports a folder id passed among asset ids, without moving the folder', async () => {
+      // The two id namespaces are indistinguishable integers, so this is the likeliest agent
+      // mistake — and it must not silently re-parent a folder.
+      const destination = await seeder.seedFolder('Assets only');
+      const bystander = await seeder.seedFolder('Not an asset');
+      const seeded = await seeder.seedAsset({ name: 'real.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id, bystander.id],
+        folder: destination.id,
+      });
+
+      const { moved, failed } = structured(response);
+      expect(moved.map((asset) => asset.id)).toEqual([seeded.id]);
+      expect(failed.map(({ id }) => id)).toEqual([bystander.id]);
+      expect(failed[0].reason).toMatch(/media_move_folder/);
+
+      // The folder stayed at the root: it was never touched.
+      expect(await folderRow(bystander.id)).toMatchObject({ name: 'Not an asset' });
+      const tree = await readTree(token.accessKey);
+      expect(tree.map((node) => node.name).sort()).toEqual(['Assets only', 'Not an asset']);
+    });
+
+    test('fails the call when no id resolved at all', async () => {
+      const destination = await seeder.seedFolder('Nothing moved');
+      const token = await createUpdateTokenSession();
+
+      // Nothing to preserve: an OK result would let an agent read a wholly rejected request as
+      // a completed reorganisation.
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [999998, 999999],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(JSON.stringify(response)).toMatch(/999999/);
+    });
+
+    test('rejects the whole call for a destination folder that does not exist', async () => {
+      const source = await seeder.seedFolder('Stay put');
+      const seeded = await seeder.seedAsset({ name: 'unmoved.jpg', folderId: source.id });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: 999999,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(JSON.stringify(response)).toMatch(/media_list_folders/);
+
+      // A bad destination is a property of the request, so nothing moves — not even valid ids.
+      expect(await fileRow(seeded.id)).toMatchObject({
+        folder: { id: source.id },
+        folderPath: source.path,
+      });
+    });
+
+    test('rejects an asset id used as the destination folder, moving nothing', async () => {
+      const source = await seeder.seedFolder('Origin');
+      const seeded = await seeder.seedAsset({ name: 'stays.jpg', folderId: source.id });
+      const notAFolder = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: notAFolder.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await fileRow(seeded.id)).toMatchObject({ folder: { id: source.id } });
+    });
+
+    test('requires the destination, so a mistyped move cannot become a silent no-op', async () => {
+      const seeded = await seeder.seedAsset({ name: 'needs-destination.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', { ids: [seeded.id] });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('rejects a scalar id, pointing the caller at the bulk ids array', async () => {
+      const destination = await seeder.seedFolder('Bulk only');
+      const seeded = await seeder.seedAsset({ name: 'scalar.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        id: seeded.id,
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await fileRow(seeded.id)).toMatchObject({ folder: null });
+    });
+
+    test('rejects a documentId in place of the numeric ids', async () => {
+      const destination = await seeder.seedFolder('Numeric ids');
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: ['z7v8zma53x01r6oceimv922b'],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('rejects an empty id list', async () => {
+      const destination = await seeder.seedFolder('Empty');
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('denies the move to a token without plugin::upload.assets.update', async () => {
+      const source = await seeder.seedFolder('Read only');
+      const destination = await seeder.seedFolder('Off limits');
+      const seeded = await seeder.seedAsset({ name: 'protected.jpg', folderId: source.id });
+
+      // A read-granted token: it can see the asset but must not be able to move it.
+      const token = await createReadTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
+        folder: { id: source.id, name: 'Read only' },
+      });
+    });
+
+    test('denies the move to a token holding an unrelated upload permission', async () => {
+      const destination = await seeder.seedFolder('Unrelated');
+      const seeded = await seeder.seedAsset({ name: 'unrelated.jpg' });
+
+      const token = await createAdminToken([permission(UPLOAD_ACTIONS.settingsRead)]);
+      await mcp.initializeSession(token.accessKey);
+
+      expect(await mcp.listToolNames(token.accessKey)).not.toContain('media_move_assets');
+
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+        folder: destination.id,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await fileRow(seeded.id)).toMatchObject({ folder: null });
     });
   });
 });

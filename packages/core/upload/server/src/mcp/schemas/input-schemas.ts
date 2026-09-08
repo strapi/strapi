@@ -243,3 +243,54 @@ export const mediaDeleteFolderInputSchema = z
       ),
   })
   .strict();
+
+/**
+ * `media_move_assets` input.
+ *
+ * Bulk by design: an agent reorganising a library moves many assets at once, and one call with a
+ * per-id report is cheaper and easier to recover from than N sequential calls. There is no
+ * single-asset variant — the array length is the only difference, and a second tool would add a
+ * choice without removing a mistake. The admin REST API agrees: `/actions/bulk-move` is the only
+ * move route.
+ *
+ * `folder` is required, including an explicit null for the root, for the same reason `media_move_folder`
+ * requires `parent`: a move needs a destination, and an omitted key would silently become a no-op.
+ *
+ * ASSET ids only. Asset ids and folder ids are indistinguishable integers from separate
+ * namespaces, and nothing in the schema can tell them apart — the handler rejects an id that
+ * does not resolve to an asset, and `media_move_folder` is the tool for folders.
+ */
+export const moveMediaInputSchema = z
+  .object(
+    {
+      ids: z
+        .array(mediaIdSchema)
+        .min(1)
+        .max(100)
+        .describe(
+          'Numeric ids of the assets to move (1-100). ASSET ids only — folder ids are a separate namespace of integers and are rejected here; use media_move_folder to move a folder.'
+        ),
+      folder: folderIdSchema
+        .nullable()
+        .describe(
+          'Numeric id of the destination folder. Pass null to move the assets to the media library root. Required — including the explicit null — so a move always names a destination. Use media_list_folders to discover folder ids.'
+        ),
+    },
+    {
+      error(issue) {
+        if (
+          issue.code === 'unrecognized_keys' &&
+          issue.keys.some((key) => key === 'id' || key === 'fileIds')
+        ) {
+          return 'media_move_assets moves assets in bulk: pass `ids` as an array of numeric asset ids, even for a single asset.';
+        }
+
+        if (issue.code === 'unrecognized_keys' && issue.keys.includes('folderIds')) {
+          return 'media_move_assets moves assets only. Use media_move_folder to move a folder.';
+        }
+
+        return undefined;
+      },
+    }
+  )
+  .strict();
