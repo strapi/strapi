@@ -1,12 +1,9 @@
 import { z } from '@strapi/utils';
 
 /**
- * The exhaustive set of asset fields the MCP surface may expose.
- *
- * This is deliberately an ALLOWLIST rather than a denylist: the file content-type carries
- * `provider_metadata` (provider-specific, may hold credentials or private keys), `provider`,
- * `hash`, and the private `folderPath`. A denylist would leak any field added later, so new
- * fields stay invisible to MCP until they are added here on purpose.
+ * The exhaustive set of asset fields the MCP surface may expose — an allowlist, for the reasons
+ * in `sanitizeMediaAsset`. A field added to the file content-type stays invisible to MCP until
+ * it is added both here and there.
  */
 export const mediaAssetOutputSchema = z.object({
   id: z.number().describe('Numeric asset id — the canonical identifier for this asset.'),

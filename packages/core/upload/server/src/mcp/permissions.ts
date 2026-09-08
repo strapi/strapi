@@ -8,6 +8,12 @@ import type { Core, Modules } from '@strapi/types';
  * re-check permissions itself, exactly as the admin controllers do via `ctx.state.userAbility`.
  * The declarative `auth.policies` on a tool definition already gates registration and invocation;
  * this second check is what keeps a handler safe if it is ever called from another entry point.
+ *
+ * It is also the only check bound to a model. `plugin::upload.read` is registered in the
+ * `plugins` section with no subject (see the upload plugin bootstrap), so a tool's policies
+ * carry an action only — a subject-less grant registers as CASL `subject: 'all'`. Passing a
+ * model UID as the policy subject is rejected by the admin-token validation, so the file /
+ * folder distinction is enforced here, where the permissions manager is bound to the UID.
  */
 export const createMediaPermissionsManager = (
   strapi: Core.Strapi,

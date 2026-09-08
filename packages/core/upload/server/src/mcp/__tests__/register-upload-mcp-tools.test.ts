@@ -17,9 +17,9 @@ const makeStrapi = (options: { isEnabled?: boolean; withAi?: boolean } = {}) => 
 };
 
 describe('upload MCP tool registration', () => {
-  describe('gating', () => {
-    test('registers every read tool when the MCP server is enabled', () => {
-      const { strapi, registerTool } = makeStrapi({ isEnabled: true });
+  describe('registration', () => {
+    test('registers every read tool', () => {
+      const { strapi, registerTool } = makeStrapi();
 
       registerUploadMcpTools({ strapi });
 
@@ -31,12 +31,15 @@ describe('upload MCP tool registration', () => {
       ]);
     });
 
-    test('registers nothing when the MCP server is disabled', () => {
+    test('registers the tools even when the MCP server is disabled', () => {
+      // registerTool() only stores the definition; the server is what withholds a disabled
+      // tool from clients. Registering unconditionally keeps this function free of a gate
+      // that would have to stay in sync with core's own enablement rules.
       const { strapi, registerTool } = makeStrapi({ isEnabled: false });
 
       registerUploadMcpTools({ strapi });
 
-      expect(registerTool).not.toHaveBeenCalled();
+      expect(registerTool).toHaveBeenCalledTimes(3);
     });
 
     test('does not throw when strapi.ai is unavailable', () => {

@@ -16,19 +16,7 @@ import {
 } from './handlers';
 
 /**
- * The Media Library MCP read tools.
- *
- * Exported separately from registration so unit tests can assert the definitions (names, auth
- * policies, schemas) without booting Strapi or an MCP server.
- *
- * Every tool description states that media uses numeric ids. The content-manager tools key
- * everything on `documentId`, which does not exist on files, so the distinction is spelled out
- * per tool rather than left to be inferred.
- *
- * `plugin::upload.read` is registered in the `plugins` section with no subject (see the upload
- * plugin bootstrap), so the policies carry an action only — a subject-less grant registers as
- * CASL `subject: 'all'`. The per-model check still happens inside the handlers, where the
- * permissions manager is bound to the file or folder UID.
+ * The Media Library MCP tools.
  */
 export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
   {
@@ -70,13 +58,10 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
  * Must be called from the plugin register phase, before the MCP HTTP server starts.
  */
 export const registerUploadMcpTools = ({ strapi }: { strapi: Core.Strapi }): void => {
-  // Performance only: registerTool() is safe when MCP is disabled (definitions are stored but
-  // never exposed). Skip the work below when the MCP server will not start.
-  if (strapi.ai?.mcp?.isEnabled() !== true) {
-    return;
-  }
-
+  // No `isEnabled()` gate: registerTool() only stores the definition, and the MCP server never
+  // exposes it when disabled, so registering unconditionally is a no-op there. The three
+  // definitions are static, so there is no derivation cost worth guarding either.
   for (const tool of buildUploadMcpToolDefinitions()) {
-    strapi.ai.mcp.registerTool(tool);
+    strapi.ai?.mcp?.registerTool(tool);
   }
 };
