@@ -6,7 +6,10 @@ import { SecurityPage } from '../SecurityPage';
 const settings = (overrides = {}) =>
   http.get('/admin/security-settings', () =>
     HttpResponse.json({
-      data: { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['1'], ...overrides } },
+      data: {
+        mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['1'], ...overrides },
+        trustedDevices: { enabled: true, days: 30 },
+      },
     })
   );
 
@@ -20,6 +23,7 @@ const me = (enabled: boolean) =>
         codesAcknowledged: enabled,
         required: false,
         graceUntil: null,
+        trustedDevicesEnabled: true,
       },
     })
   );
@@ -111,6 +115,25 @@ describe('SecurityPage', () => {
 
     await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
     expect(await screen.findByRole('radio', { name: /^Optional/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    // Both cards share `canUpdate`, so every Save button (enforcement card, trusted devices card)
+    // must be disabled.
+    screen.getAllByRole('button', { name: 'Save' }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+  });
+
+  it('renders the trusted devices card under the enforcement card', async () => {
+    server.use(settings(), me(true));
+    render(<SecurityPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(headings.indexOf('Two-factor authentication')).toBeLessThan(
+      headings.indexOf('Trusted devices')
+    );
+    expect(
+      screen.getByRole('checkbox', { name: 'Allow users to trust a device after entering a code' })
+    ).toBeChecked();
+    expect(screen.getByRole('spinbutton', { name: 'Trust period (days)' })).toHaveValue(30);
   });
 });

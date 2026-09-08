@@ -12,14 +12,15 @@ import { useGetMfaStatusQuery } from '../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../services/securitySettings';
 import { isNotFoundError } from '../../../../utils/baseQuery';
 
+import { TrustedDevicesCard } from './components/TrustedDevicesCard';
 import { TwoFactorEnforcementCard } from './components/TwoFactorEnforcementCard';
 
 /**
- * Settings > Administration Panel > Security. A generic home for security settings; today its
- * only card is two-factor enforcement (`TwoFactorEnforcementCard`). The settings link is the one
- * place that reads the future flag; this page keys off the API instead: a 404 from
- * `/admin/security-settings` means the feature is off (kill switch or flag), and it renders a
- * disabled-feature state rather than an empty form.
+ * Settings > Administration Panel > Security. A generic home for security settings; its cards are
+ * two-factor enforcement (`TwoFactorEnforcementCard`) and trusted devices (`TrustedDevicesCard`).
+ * The settings link is the one place that reads the future flag; this page keys off the API
+ * instead: a 404 from `/admin/security-settings` means the feature is off (kill switch or flag),
+ * and it renders a disabled-feature state rather than an empty form.
  *
  * Role names need `admin::roles.read` on top of `admin::security-settings.read`; without it the
  * card renders with an empty role list (the server still enforces role ids on save).
@@ -96,6 +97,12 @@ const SecurityPage = () => {
             <TwoFactorEnforcementCard
               settings={settings.mfa}
               roles={roles}
+              canUpdate={canUpdate}
+              callerEnrolled={Boolean(mfaStatus?.enabled)}
+              isRefreshing={isFetchingSettings}
+            />
+            <TrustedDevicesCard
+              settings={settings.trustedDevices}
               canUpdate={canUpdate}
               callerEnrolled={Boolean(mfaStatus?.enabled)}
               isRefreshing={isFetchingSettings}
