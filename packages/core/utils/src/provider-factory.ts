@@ -1,10 +1,10 @@
-import { cloneDeep } from 'lodash/fp';
 import {
   createAsyncSeriesHook,
   createAsyncParallelHook,
   AsyncSeriesHook,
   AsyncParallelHook,
 } from './hooks';
+import { structuredCloneSafe } from './structured-clone-safe';
 
 export interface ProviderHooksMap {
   willRegister: AsyncSeriesHook;
@@ -68,7 +68,7 @@ const providerFactory = <T = Item>(options: Options = {}): Provider<T> => {
 
       state.registry.set(key, item);
 
-      await state.hooks.didRegister.call({ key, value: cloneDeep(item) });
+      await state.hooks.didRegister.call({ key, value: structuredCloneSafe(item) });
 
       return this;
     },
@@ -77,11 +77,11 @@ const providerFactory = <T = Item>(options: Options = {}): Provider<T> => {
       if (this.has(key)) {
         const item = this.get(key);
 
-        await state.hooks.willDelete.call({ key, value: cloneDeep(item) });
+        await state.hooks.willDelete.call({ key, value: structuredCloneSafe(item) });
 
         state.registry.delete(key);
 
-        await state.hooks.didDelete.call({ key, value: cloneDeep(item) });
+        await state.hooks.didDelete.call({ key, value: structuredCloneSafe(item) });
       }
 
       return this;

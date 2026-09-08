@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
+const { structuredCloneSafe } = require('@strapi/utils');
 
 describe('Role CRUD End to End', () => {
   let rq;
@@ -27,7 +28,7 @@ describe('Role CRUD End to End', () => {
     expect(res.statusCode).toBe(200);
 
     // Data is sorted to avoid error with snapshot when the data is not in the same order
-    const sortedData = _.cloneDeep(res.body.data);
+    const sortedData = structuredCloneSafe(res.body.data);
     Object.keys(sortedData.sections).forEach((sectionName) => {
       sortedData.sections[sectionName] = _.sortBy(sortedData.sections[sectionName], ['action']);
     });

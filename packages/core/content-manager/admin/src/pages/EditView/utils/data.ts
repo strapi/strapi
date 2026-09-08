@@ -1,4 +1,5 @@
 import { createRulesEngine } from '@strapi/admin/strapi-admin';
+import { structuredCloneSafe } from '@strapi/utils';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 
@@ -200,7 +201,7 @@ const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyD
     delete acc[key];
 
     return acc;
-  }, structuredClone(data));
+  }, structuredCloneSafe(data));
 
   return revisedData;
 };

@@ -2,6 +2,7 @@ import { join } from 'path';
 import _ from 'lodash';
 import { pathExists } from 'fs-extra';
 import type { Core, Struct, UID } from '@strapi/types';
+import { structuredCloneSafe } from '@strapi/utils';
 import { loadFiles } from '../utils/load-files';
 
 type LoadedComponent = {
@@ -49,7 +50,7 @@ export default async function loadComponents(strapi: Core.Strapi) {
       const uid: UID.Component = `${category}.${key}`;
 
       acc[uid] = Object.assign(schema, {
-        __schema__: _.cloneDeep(schema),
+        __schema__: structuredCloneSafe(schema),
         uid,
         category,
         modelType: 'component' as const,

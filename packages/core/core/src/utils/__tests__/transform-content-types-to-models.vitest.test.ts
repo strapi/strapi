@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { cloneDeep, merge } from 'lodash';
+import { merge } from 'lodash';
 import { Database } from '@strapi/database';
+import { structuredCloneSafe } from '@strapi/utils';
 import {
   LoadedContentTypeModel,
   transformContentTypesToModels,
@@ -282,7 +283,7 @@ function mergeContentType(
   changes: ContentTypeChange
 ): LoadedContentTypeModel {
   // Deep clone the original object to avoid modifying it
-  const clonedContentType = cloneDeep(contentType);
+  const clonedContentType = structuredCloneSafe(contentType);
   return merge(clonedContentType, changes);
 }
 

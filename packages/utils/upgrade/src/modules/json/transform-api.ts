@@ -1,14 +1,15 @@
-import { cloneDeep, get, has, set, merge, omit } from 'lodash/fp';
+import { get, has, set, merge, omit } from 'lodash/fp';
 
 import type { Utils } from '@strapi/types';
 
+import { structuredCloneSafe } from '@strapi/utils';
 import type { JSONTransformAPI as JSONTransformAPIInterface } from './types';
 
 export class JSONTransformAPI implements JSONTransformAPIInterface {
   private json: Utils.JSONObject;
 
   constructor(json: Utils.JSONObject) {
-    this.json = cloneDeep(json);
+    this.json = structuredCloneSafe(json);
   }
 
   get<T extends Utils.JSONValue>(path: string): T | undefined;
@@ -18,7 +19,7 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
       return this.root() as T;
     }
 
-    return cloneDeep(get(path, this.json) ?? defaultValue) as T;
+    return structuredCloneSafe(get(path, this.json) ?? defaultValue) as T;
   }
 
   has(path: string) {
@@ -32,7 +33,7 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
   }
 
   root(): Utils.JSONObject {
-    return cloneDeep(this.json);
+    return structuredCloneSafe(this.json);
   }
 
   set(path: string, value: Utils.JSONValue) {

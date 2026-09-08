@@ -1,10 +1,11 @@
 import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { cloneDeep, get, set } from 'lodash/fp';
+import { get, set } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
+import { structuredCloneSafe } from '@strapi/utils';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
 import type {
@@ -848,7 +849,7 @@ describe('Transfer engine', () => {
 
         test('differing nested field fails', async () => {
           const destination = createDestination();
-          const fakeSchema = cloneDeep(schemas);
+          const fakeSchema = structuredCloneSafe(schemas);
 
           if (fakeSchema['admin::permission'].attributes.action) {
             fakeSchema['admin::permission'].attributes.action.minLength = 2;
@@ -880,7 +881,7 @@ describe('Transfer engine', () => {
           `Don't throw on ignorable attribute's properties: %s`,
           (attributeName, transformValue) => {
             const destination = createDestination();
-            const fakeSchemas = cloneDeep(schemas);
+            const fakeSchemas = structuredCloneSafe(schemas);
 
             const path = `attributes.createdAt.${attributeName}`;
             const oldValue = get(path, fakeSchemas['api::homepage.homepage']);
@@ -907,7 +908,7 @@ describe('Transfer engine', () => {
           const fakeSchemas = set(
             '["api::homepage.homepage"].attributes.createdAt.type',
             'string',
-            cloneDeep(schemas)
+            structuredCloneSafe(schemas)
           );
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
@@ -935,7 +936,7 @@ describe('Transfer engine', () => {
         };
 
         versionsThatFail.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
+          const modifiedMetadata = structuredCloneSafe(metadata);
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -957,7 +958,7 @@ describe('Transfer engine', () => {
         };
 
         versionsThatFail.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
+          const modifiedMetadata = structuredCloneSafe(metadata);
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -970,7 +971,7 @@ describe('Transfer engine', () => {
         });
 
         versionsThatSucceed.forEach((version) => {
-          const modifiedMetadata = cloneDeep(metadata);
+          const modifiedMetadata = structuredCloneSafe(metadata);
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -993,7 +994,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatFail.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1008,7 +1009,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatSucceed.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1032,7 +1033,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatFail.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1047,7 +1048,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatSucceed.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1071,7 +1072,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatFail.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1086,7 +1087,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatSucceed.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
@@ -1109,7 +1110,7 @@ describe('Transfer engine', () => {
 
         await Promise.all(
           versionsThatSucceed.map(async (version) => {
-            const modifiedMetadata = cloneDeep(metadata);
+            const modifiedMetadata = structuredCloneSafe(metadata);
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);

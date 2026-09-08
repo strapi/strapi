@@ -1,9 +1,10 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
+import { curry, isObject, isEmpty, isArray, isNil, omit } from 'lodash/fp';
 
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
 import type { Model } from '../types';
+import { structuredCloneSafe } from '../structured-clone-safe';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
@@ -39,7 +40,7 @@ const filters = traverseFactory()
   )
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: structuredCloneSafe<Record<string, unknown>>,
 
     remove(key, data) {
       return omit(key, data);

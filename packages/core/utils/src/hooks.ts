@@ -1,4 +1,5 @@
-import { eq, remove, cloneDeep } from 'lodash/fp';
+import { eq, remove } from 'lodash/fp';
+import { structuredCloneSafe } from './structured-clone-safe';
 
 export type Handler = (...args: any[]) => any;
 
@@ -99,7 +100,7 @@ const createAsyncParallelHook = <T extends Handler = Handler>() => ({
   ...createHook<T>(),
 
   async call(context: unknown) {
-    const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
+    const promises = this.getHandlers().map((handler) => handler(structuredCloneSafe(context)));
 
     return Promise.all(promises);
   },

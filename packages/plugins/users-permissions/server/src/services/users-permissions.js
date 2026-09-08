@@ -8,6 +8,7 @@ const {
   errors,
   objects,
   sanitizeRoutesMapForSerialization,
+  structuredCloneSafe,
 } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -105,7 +106,7 @@ module.exports = ({ strapi }) => ({
     }
 
     // Return a deeply cloned version to avoid circular references
-    return _.cloneDeep(actionMap);
+    return structuredCloneSafe(actionMap);
   },
 
   async getRoutes() {

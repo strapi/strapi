@@ -9,7 +9,6 @@ import {
   constant,
   isNil,
   identity,
-  cloneDeep,
   join,
   first,
 } from 'lodash/fp';
@@ -18,6 +17,7 @@ import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
 import { ValidationError } from '../errors';
+import { structuredCloneSafe } from '../structured-clone-safe';
 
 const DEFAULT_QS_ARRAY_LIMIT = 100;
 
@@ -161,7 +161,7 @@ const populate = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: structuredCloneSafe<Record<string, unknown>>,
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars
