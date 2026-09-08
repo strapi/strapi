@@ -67,7 +67,10 @@ export type MfaEventType =
   | 'grace_started'
   | 'locked'
   | 'unlocked'
-  | 'authenticator_replaced';
+  | 'authenticator_replaced'
+  | 'device_trusted'
+  | 'device_trust_revoked'
+  | 'trusted_device_used';
 
 /**
  * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
@@ -88,8 +91,12 @@ export type MfaEventMetadata = {
   via?: 'cli';
   /** ISO deadline carried by `grace_started` and `locked`. Never a secret. */
   graceUntil?: string;
-  /** The administrator who unlocked the account (`unlocked` only). */
+  /** The administrator who unlocked the account (`unlocked`) or revoked trust (`device_trust_revoked`). */
   byUserId?: string;
+  /** The trust period, in days, carried by `device_trusted`. */
+  days?: number;
+  /** How many trusted devices a `device_trust_revoked` event covered. */
+  count?: number;
 };
 
 /**
@@ -857,7 +864,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     | 'challenge_failed'
     | 'authenticator_replaced'
     | 'locked'
-    | 'unlocked';
+    | 'unlocked'
+    | 'device_trusted'
+    | 'device_trust_revoked'
+    | 'trusted_device_used';
 
   /**
    * The subset of `MfaChangeNotice` that also sends a change email -- a change to the user's own
@@ -865,7 +875,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * own decision to keep enforcement hub-only (the in-app notice feed carries them instead). Kept
    * as its own type, rather than an `Exclude<MfaChangeNotice, ...>` of the ever-growing exclusion
    * list, so `CHANGE_NOTICE_TEXT` below stays exhaustive over exactly the emailed members and a
-   * newly added hub-only notice cannot silently start demanding an email phrase.
+   * newly added hub-only notice cannot silently start demanding an email phrase. The cycle 3
+   * device notices are hub-only for the same reason as lock events: the in-app feed carries
+   * `device_trusted` and `device_trust_revoked`, and `trusted_device_used` is audit-only.
    */
   type EmailedNotice = 'enabled' | 'disabled' | 'reset' | 'authenticator_replaced';
 
@@ -923,7 +935,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const notify = (
     userId: string,
     type: MfaChangeNotice,
-    extra: { byUserId?: string } = {}
+    extra: { byUserId?: string; count?: number } = {}
   ): Promise<void> => {
     strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId, ...extra });
 

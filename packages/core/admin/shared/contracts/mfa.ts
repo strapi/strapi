@@ -123,6 +123,67 @@ export declare namespace UnlockUser {
 }
 
 /**
+ * One browser the caller has trusted to skip the second factor (cycle 3). Never carries the
+ * token or its hash: `id` is the row id, and `current` says whether this row is the browser
+ * making the request (its trust cookie hashed to this row).
+ */
+export interface TrustedDevice {
+  id: string;
+  deviceName: string | null;
+  /** ISO, when the trust was granted. */
+  createdAt: string;
+  /** ISO, the *effective* expiry: min(stored expiry, createdAt + the current `days` setting). */
+  expiresAt: string;
+  /** ISO, the last login this trust skipped a challenge for; null until it has. */
+  lastUsedAt: string | null;
+  current: boolean;
+}
+
+/**
+ * GET /mfa/trusted-devices - The caller's trusted browsers, current first, then newest.
+ */
+export declare namespace ListTrustedDevices {
+  export interface Response {
+    data: TrustedDevice[];
+  }
+}
+
+/**
+ * DELETE /mfa/trusted-devices/:id - Revoke one of the caller's trusted browsers. 204, or 404 when
+ * the row is not the caller's. Clears the trust cookie when the row was the current browser.
+ * `DELETE /mfa/trusted-devices` (no `:id`) revokes every one of the caller's trusted browsers,
+ * 204, and clears the cookie.
+ */
+export declare namespace RevokeTrustedDevice {
+  export interface Params {
+    id: string;
+  }
+}
+
+/**
+ * GET /mfa/users/:id/trusted-devices - An administrator's view of another user's trusted
+ * browsers (`admin::users.read`). Same rows without `current`.
+ */
+export declare namespace ListUserTrustedDevices {
+  export interface Params {
+    id: Data.ID;
+  }
+  export interface Response {
+    data: Array<Omit<TrustedDevice, 'current'>>;
+  }
+}
+
+/**
+ * DELETE /mfa/users/:id/trusted-devices - Revoke every trusted browser of another user
+ * (`admin::users.update`). 204, 404 for an unknown user.
+ */
+export declare namespace RevokeUserTrustedDevices {
+  export interface Params {
+    id: Data.ID;
+  }
+}
+
+/**
  * A single security notice: `admin::mfa-event` rows the caller has not yet seen. Never carries a
  * code, a secret or an otpauth URI -- `metadata` is limited to neutral context (see `MfaEventType`
  * in `admin::mfa`).
@@ -138,7 +199,10 @@ export interface MfaEventNotice {
     | 'grace_started'
     | 'locked'
     | 'unlocked'
-    | 'authenticator_replaced';
+    | 'authenticator_replaced'
+    | 'device_trusted'
+    | 'device_trust_revoked'
+    | 'trusted_device_used';
   metadata: Record<string, unknown>;
   createdAt: string;
   seenAt: string | null;

@@ -2,10 +2,11 @@ import contentTypes from '..';
 import challenge from '../mfa-challenge';
 import recoveryCode from '../mfa-recovery-code';
 import event from '../mfa-event';
+import trustedDevice from '../mfa-trusted-device';
 import User from '../User';
 import roleContentType from '../Role';
 
-const schemas = { challenge, recoveryCode, event };
+const schemas = { challenge, recoveryCode, event, trustedDevice };
 
 describe('mfa content types', () => {
   test('are registered under the expected keys', () => {
@@ -97,6 +98,31 @@ describe('mfa content types', () => {
         default: false,
         configurable: false,
       });
+    });
+  });
+
+  describe('cycle 3 trusted devices', () => {
+    test('is registered under mfa-trusted-device', () => {
+      expect(contentTypes['mfa-trusted-device'].schema).toBe(trustedDevice);
+    });
+
+    test('declares the six columns, with a unique token hash and required owner and expiry', () => {
+      const { attributes } = trustedDevice;
+      expect(Object.keys(attributes).sort()).toEqual(
+        ['deviceId', 'deviceName', 'expiresAt', 'lastUsedAt', 'tokenHash', 'userId'].sort()
+      );
+      expect(attributes.tokenHash.unique).toBe(true);
+      expect(attributes.tokenHash.required).toBe(true);
+      expect(attributes.userId.required).toBe(true);
+      expect(attributes.expiresAt.required).toBe(true);
+      expect(attributes.expiresAt.type).toBe('datetime');
+      expect(attributes.lastUsedAt.type).toBe('datetime');
+    });
+
+    test('is hidden from every tooling surface', () => {
+      expect(trustedDevice.collectionName).toBe('strapi_admin_mfa_trusted_devices');
+      expect(trustedDevice.options.draftAndPublish).toBe(false);
+      expect(trustedDevice.pluginOptions.i18n.localized).toBe(false);
     });
   });
 });

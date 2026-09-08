@@ -9,6 +9,7 @@ import session from './session';
 import mfaChallenge from './mfa-challenge';
 import mfaRecoveryCode from './mfa-recovery-code';
 import mfaEvent from './mfa-event';
+import mfaTrustedDevice from './mfa-trusted-device';
 
 export default {
   permission: { schema: Permission },
@@ -22,4 +23,5 @@ export default {
   'mfa-challenge': { schema: mfaChallenge },
   'mfa-recovery-code': { schema: mfaRecoveryCode },
   'mfa-event': { schema: mfaEvent },
+  'mfa-trusted-device': { schema: mfaTrustedDevice },
 };
