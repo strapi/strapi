@@ -56,6 +56,18 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
     id: 'Settings.profile.form.section.mfa.notice.authenticator_replaced',
     defaultMessage: 'Your authenticator app was replaced',
   },
+  device_trusted: {
+    id: 'Settings.profile.form.section.mfa.notice.device_trusted',
+    defaultMessage: 'A device was trusted to skip the two-factor code',
+  },
+  device_trust_revoked: {
+    id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked',
+    defaultMessage: 'Trusted devices were revoked',
+  },
+  trusted_device_used: {
+    id: 'Settings.profile.form.section.mfa.notice.trusted_device_used',
+    defaultMessage: 'A trusted device logged in without a code',
+  },
 };
 
 /**
