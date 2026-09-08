@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Redis-backed cache provider for the Strapi cache manager.",
+  "plugin.description.short": "Redis cache provider.",
+  "plugin.name": "Cache provider (Redis)"
+}

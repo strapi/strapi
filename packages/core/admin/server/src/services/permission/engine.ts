@@ -77,6 +77,13 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     },
 
     /**
+     * Build an ability from an explicit permission list and user (e.g. DB-cached permissions).
+     */
+    async generateAbility(permissions: Permission[], user: AdminUser): Promise<Ability> {
+      return engineInstance.generateAbility(permissions as any, user);
+    },
+
+    /**
      * Generate an ability based on an admin token's stored permissions, scoped to the owner.
      * Token permissions are already validated and ceiling-clamped at write time.
      */

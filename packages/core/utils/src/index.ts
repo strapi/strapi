@@ -4,6 +4,7 @@ export { default as setCreatorFields } from './set-creator-fields';
 export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
 export { default as importDefault } from './import-default';
+export { INTERNAL_CACHE_NS } from './cache-namespaces';
 export { generateInstallId } from './install-id';
 export { createModelCache } from './model-cache';
 
