@@ -643,29 +643,37 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // Without that, a `disable` (or anything else) racing in between the read above and this
     // write would be silently undone -- the account would come back enrolled on the abandoned
     // pending secret the moment this write lands, no matter what ran in between.
-    const { count } = await userQuery().updateMany({
-      where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
-      data: {
-        mfaSecret: user.mfaPendingSecret,
-        mfaPendingSecret: null,
-        mfaEnabledAt: replaced ? user.mfaEnabledAt : new Date(),
-        // Enrolling satisfies any enforcement requirement, so both stamps are cleared. The lock
-        // cannot be set on an account holding a session, this is purely defensive.
-        mfaGraceUntil: null,
-        mfaLockedAt: null,
-      },
+    //
+    // Wrapped in a transaction together with the trust clear below, same reasoning as `disable`:
+    // if the clear throws, the promotion must not have already landed -- otherwise the caller
+    // gets a 500 for an authenticator that was in fact replaced, the recovery codes issued just
+    // above are lost to the response, and the old trusts stay honoured against the retired
+    // authenticator. Nested query calls below join this ambient transaction.
+    await strapi.db.transaction(async () => {
+      const { count } = await userQuery().updateMany({
+        where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
+        data: {
+          mfaSecret: user.mfaPendingSecret,
+          mfaPendingSecret: null,
+          mfaEnabledAt: replaced ? user.mfaEnabledAt : new Date(),
+          // Enrolling satisfies any enforcement requirement, so both stamps are cleared. The lock
+          // cannot be set on an account holding a session, this is purely defensive.
+          mfaGraceUntil: null,
+          mfaLockedAt: null,
+        },
+      });
+
+      if (count !== 1) {
+        throw new ValidationError('No enrolment in progress');
+      }
+
+      // Cycle 3: the trusts on file were granted against the authenticator the user just retired.
+      // Conservative by design -- the cost is one code per browser at its next login -- and only
+      // on a replacement: a first enrolment has nothing to revoke.
+      if (replaced) {
+        await trustedDevices.clearTrustedDevices(userId);
+      }
     });
-
-    if (count !== 1) {
-      throw new ValidationError('No enrolment in progress');
-    }
-
-    // Cycle 3: the trusts on file were granted against the authenticator the user just retired.
-    // Conservative by design -- the cost is one code per browser at its next login -- and only on
-    // a replacement: a first enrolment has nothing to revoke.
-    if (replaced) {
-      await trustedDevices.clearTrustedDevices(userId);
-    }
 
     return { recoveryCodes, replaced };
   };

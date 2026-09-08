@@ -8,9 +8,8 @@ import type { MfaEventMetadata, MfaEventType } from './mfa';
 export const TRUSTED_DEVICE_UID = 'admin::mfa-trusted-device';
 
 /**
- * The most trusted browsers one account may hold. The grant that would make eleven deletes the
- * oldest, so the table is bounded by users times ten regardless of how often someone ticks the
- * box.
+ * The most trusted browsers one account may hold: bounded at ten, transiently eleven under
+ * concurrent grants; the next grant heals it.
  */
 export const MAX_TRUSTED_DEVICES_PER_USER = 10;
 
@@ -135,12 +134,17 @@ export const createTrustedDevices = ({
         select: ['id'],
       })) as Array<Pick<TrustedDeviceRow, 'id'>>;
       await deleteRows(rows.slice(MAX_TRUSTED_DEVICES_PER_USER).map((row) => row.id));
+
+      // Recorded inside the same transaction as the row and the cap eviction: the grant and its
+      // audit trail must land or fail together, not have the row committed while the event that
+      // explains it is lost to an unrelated failure. `notify` stays outside -- it is the event
+      // hub, fire-and-forget.
+      await recordEvent(userId, 'device_trusted', {
+        ...(deviceName ? { deviceName } : {}),
+        days: current.days,
+      });
     });
 
-    await recordEvent(userId, 'device_trusted', {
-      ...(deviceName ? { deviceName } : {}),
-      days: current.days,
-    });
     notify(userId, 'device_trusted');
 
     return { token, expiresAt };

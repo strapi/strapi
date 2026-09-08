@@ -119,12 +119,18 @@ export default {
       const sessionOptions = await enforceMfaOrThrow(user);
 
       if (mfa.isEnabled() && (await mfa.isEnrolled(userId))) {
-        // Cycle 3: a browser trusted after an earlier verified code skips the challenge. Only
-        // here (never on reset-password), only after the password check and `enforce`, only for
-        // an enrolled user, and only through `consumeTrustedDevice`, which compares the row's
-        // owner to this user. A cookie that matches nothing live is cleared so the browser stops
-        // presenting it. Written as a fall-through so `login` keeps a single `issueSession` call
-        // site (see session-issuing-paths.test.ts).
+        // Read once, before anything else in this block: `createChallenge` below already mints a
+        // challenge row, so a store-read failure for the offered trust period must not risk a
+        // 500 on a response whose challenge already exists (a retry would then mint a second,
+        // orphaned one). Cycle 3: a browser trusted after an earlier verified code skips the
+        // challenge. Only here (never on reset-password), only after the password check and
+        // `enforce`, only for an enrolled user, and only through `consumeTrustedDevice`, which
+        // compares the row's owner to this user. A cookie that matches nothing live, belongs to a
+        // foreign owner, or is refused outright because the setting is now disabled is cleared so
+        // the browser stops presenting it. Written as a fall-through so `login` keeps a single
+        // `issueSession` call site (see session-issuing-paths.test.ts).
+        const trustedDeviceDays = await offeredTrustDays();
+
         const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
         const trusted = trustToken ? await mfa.consumeTrustedDevice(userId, trustToken) : false;
 
@@ -153,7 +159,7 @@ export default {
               mfaRequired: true,
               challengeToken,
               expiresIn,
-              trustedDeviceDays: await offeredTrustDays(),
+              trustedDeviceDays,
             },
           } satisfies MfaChallengeResponse;
           return;
@@ -311,6 +317,10 @@ export default {
     const mfa = getService('mfa');
 
     if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
+      // Read before `createChallenge` mints its row, for the same reason as `login`: a store-read
+      // failure here must not risk a 500 on a response whose challenge already exists.
+      const trustedDeviceDays = await offeredTrustDays();
+
       const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
       // Same reasoning as `login`'s gate: forgot-password must not be a way to walk past a
@@ -329,7 +339,7 @@ export default {
           mfaRequired: true,
           challengeToken,
           expiresIn,
-          trustedDeviceDays: await offeredTrustDays(),
+          trustedDeviceDays,
         },
       } satisfies MfaChallengeResponse;
       return;
