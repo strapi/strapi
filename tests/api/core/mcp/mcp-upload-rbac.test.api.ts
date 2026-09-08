@@ -1479,6 +1479,44 @@ describe('MCP upload tools RBAC (api)', () => {
       return response.result?.structuredContent?.data as Record<string, unknown>;
     };
 
+    /** Highest asset id currently in the database, or 0 when there are none. */
+    const maxAssetId = async (): Promise<number> => {
+      const rows = await strapi.db.query('plugin::upload.file').findMany({ select: ['id'] });
+      return rows.reduce((highest: number, row: { id: number }) => Math.max(highest, row.id), 0);
+    };
+
+    /**
+     * Seeds a folder and an asset that share the same numeric id.
+     *
+     * The two tables have independent sequences sitting at arbitrary offsets by the time these
+     * tests run, so the collision is CONSTRUCTED rather than waited for: both rows are seeded
+     * normally and the folder is then renumbered onto the asset's id with a direct update.
+     *
+     * Forcing it is the point. The api test this replaced asserted the opposite behaviour and
+     * passed only because the two sequences happened to be apart — a fixture that produced a
+     * collision by luck proved nothing, and hid a real bug from review.
+     *
+     * The caller must seed the destination folder AFTER this returns: the renumbered folder frees
+     * its original id, and a destination seeded first can be sitting on the asset id this needs.
+     */
+    const seedIdCollision = async (assetName: string) => {
+      const asset = await seeder.seedAsset({ name: assetName });
+      const folder = await seeder.seedFolder(`Collides with ${assetName}`);
+
+      // Renumber the folder onto the asset's id. `id` is not writable through the folder service,
+      // so this goes straight to the row — the collision is the fixture, not the behaviour.
+      await strapi.db
+        .connection(strapi.getModel('plugin::upload.folder').collectionName)
+        .where({ id: folder.id })
+        .update({ id: asset.id });
+
+      const renumbered = await folderRow(asset.id);
+      expect(renumbered).toMatchObject({ id: asset.id, name: `Collides with ${assetName}` });
+      expect(await fileRow(asset.id)).toMatchObject({ id: asset.id, name: assetName });
+
+      return { collidingId: asset.id, folderName: renumbered.name as string, assetName };
+    };
+
     test('moves several assets across folders in one call, confirmed by media_get_asset', async () => {
       const source = await seeder.seedFolder('Source');
       const destination = await seeder.seedFolder('Destination');
@@ -1654,29 +1692,109 @@ describe('MCP upload tools RBAC (api)', () => {
       expect(await fileRow(alsoGood.id)).toMatchObject({ folder: { id: destination.id } });
     });
 
-    test('reports a folder id passed among asset ids, without moving the folder', async () => {
-      // The two id namespaces are indistinguishable integers, so this is the likeliest agent
-      // mistake — and it must not silently re-parent a folder.
+    /**
+     * ACCEPTED RISK, asserted so it cannot change unnoticed.
+     *
+     * Asset ids and folder ids are independent sequences, so the same integer can name both. The
+     * tool resolves ids in the file table only: handed a folder id that collides with an asset
+     * id, it moves THAT ASSET. Nothing in the input can express which namespace was meant, and
+     * refusing every colliding id would make those assets permanently unmovable over MCP.
+     *
+     * The mitigation is the tool description, not a server-side check. The durable fix is
+     * namespaced handles across the whole media surface (`asset:1` / `folder:1`), which is a
+     * breaking change to the read tools and belongs to its own ticket.
+     *
+     * This test pins the real behaviour on a FORCED collision. The version it replaced asserted
+     * the opposite and passed only because the fixture happened to avoid a collision — it proved
+     * nothing, and hid this from review.
+     */
+    test('moves the colliding asset when a folder id doubles as an asset id', async () => {
+      const { collidingId, assetName, folderName } = await seedIdCollision('collides.jpg');
+      // Seeded last: the renumbered folder released its original id, which a destination created
+      // earlier could have been holding.
+      const destination = await seeder.seedFolder('Destination');
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'move_media', {
+        ids: [collidingId],
+        folder: destination.id,
+      });
+
+      const { moved, failed } = structured(response);
+
+      // The asset sharing the number moved; nothing is reported as failed.
+      expect(moved.map((asset) => asset.id)).toEqual([collidingId]);
+      expect(moved[0]).toMatchObject({ name: assetName, folder: { id: destination.id } });
+      expect(failed).toEqual([]);
+      expect(await fileRow(collidingId)).toMatchObject({ folder: { id: destination.id } });
+
+      // ...and the folder the caller meant to move is exactly where it was.
+      expect(await folderRow(collidingId)).toMatchObject({ id: collidingId, name: folderName });
+      const tree = await readTree(token.accessKey);
+      expect(tree.map((node) => node.name).sort()).toEqual([folderName, 'Destination'].sort());
+    });
+
+    test('reports a folder id that matches no asset as failed, moving nothing', async () => {
+      // The guarantee this tool DOES make: a number that resolves to no asset moves nothing, and
+      // the reason points at move_folder because a folder id is the likeliest cause.
+      //
+      // The id is forced past every asset id in the database, so the assertion holds on the id
+      // itself rather than on whichever sequence values this test happened to draw.
       const destination = await seeder.seedFolder('Assets only');
       const bystander = await seeder.seedFolder('Not an asset');
       const seeded = await seeder.seedAsset({ name: 'real.jpg' });
+      const unmatchedId = (await maxAssetId()) + 1000;
 
       const token = await createUpdateTokenSession();
 
       const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
-        ids: [seeded.id, bystander.id],
+        ids: [seeded.id, unmatchedId],
         folder: destination.id,
       });
 
       const { moved, failed } = structured(response);
       expect(moved.map((asset) => asset.id)).toEqual([seeded.id]);
-      expect(failed.map(({ id }) => id)).toEqual([bystander.id]);
+      expect(failed.map(({ id }) => id)).toEqual([unmatchedId]);
       expect(failed[0].reason).toMatch(/media_move_folder/);
 
       // The folder stayed at the root: it was never touched.
       expect(await folderRow(bystander.id)).toMatchObject({ name: 'Not an asset' });
       const tree = await readTree(token.accessKey);
       expect(tree.map((node) => node.name).sort()).toEqual(['Assets only', 'Not an asset']);
+    });
+
+    test('never re-parents the folder itself, whether or not its id collides', async () => {
+      // The one thing that holds in both branches above: move_media writes to the file table
+      // only, so a folder passed in `ids` keeps its parent either way. Asserted on the folder
+      // tree, which is what an agent would see next.
+      const { collidingId, folderName } = await seedIdCollision('shares-a-number.jpg');
+      const destination = await seeder.seedFolder('Destination');
+      const untouched = await seeder.seedFolder('No asset shares this');
+      const unmatchedId = (await maxAssetId()) + 1000;
+
+      // The second folder is the non-colliding case, so its id must genuinely match no asset —
+      // asserted rather than assumed, since that is the whole difference between the two branches.
+      expect(await fileRow(untouched.id)).toBeNull();
+
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'move_media', {
+        ids: [collidingId, untouched.id, unmatchedId],
+        folder: destination.id,
+      });
+
+      const { moved, failed } = structured(response);
+      // Only the colliding asset moved; the two folder ids that match no asset failed.
+      expect(moved.map((asset) => asset.id)).toEqual([collidingId]);
+      expect(failed.map(({ id }) => id).sort()).toEqual([untouched.id, unmatchedId].sort());
+
+      // Neither folder was re-parented: both are still at the root, alongside the destination.
+      expect(await folderRow(collidingId)).toMatchObject({ id: collidingId, name: folderName });
+      expect(await folderRow(untouched.id)).toMatchObject({ name: 'No asset shares this' });
+      const tree = await readTree(token.accessKey);
+      expect(tree.map((node) => node.name).sort()).toEqual(
+        [folderName, 'Destination', 'No asset shares this'].sort()
+      );
     });
 
     test('still reports per id when no id resolved at all', async () => {
