@@ -110,9 +110,7 @@ export default async () => {
     strapi.log.error(error instanceof Error ? error.message : String(error));
   }
 
-  if (aiTranslations.isEnabled()) {
-    getService('ai-localizations').setupMiddleware();
-  }
+  getService('ai-localizations').setupMiddleware();
 
   sendDidInitializeEvent();
 };

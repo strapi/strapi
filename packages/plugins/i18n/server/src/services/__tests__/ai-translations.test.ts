@@ -220,5 +220,15 @@ describe('ai-translations service', () => {
         'No AI translations provider is registered.'
       );
     });
+
+    test('closes provider registration', async () => {
+      const service = createAITranslationsService({ strapi: createMockStrapi() });
+
+      await service.validateProvider();
+
+      expect(() => service.registerProvider({ provider: createProvider() })).toThrow(
+        'Cannot register the AI translations provider "byok": provider registration is closed. Providers must be registered during the "register" lifecycle phase.'
+      );
+    });
   });
 });
