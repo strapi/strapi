@@ -1,6 +1,7 @@
 import type { Core, Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
+import type { GenerateTranslationsResult } from './ai-translations';
 
 const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined): boolean => {
   return (attribute?.pluginOptions as any)?.i18n?.localized === true;
@@ -292,7 +293,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
       );
 
-      let aiResult = null;
+      let aiResult: GenerateTranslationsResult;
       try {
         aiResult = await getService('ai-translations').generateTranslations({
           sourceLocale: document.locale,
