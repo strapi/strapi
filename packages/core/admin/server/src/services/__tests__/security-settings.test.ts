@@ -235,6 +235,7 @@ describe('security-settings: service', () => {
       service,
       roles,
       users,
+      roleQuery,
       storeSet,
       emit,
       assertPasswordAndFactor,
@@ -481,7 +482,7 @@ describe('security-settings: service', () => {
   });
 
   test('a body with only trustedDevices leaves mfa and the role flags untouched', async () => {
-    const { service, roles, storeSet } = setup({
+    const { service, roles, roleQuery, storeSet } = setup({
       stored: { mfa: { mode: 'required', graceDays: 3 } },
       enrolled: true,
     });
@@ -495,6 +496,9 @@ describe('security-settings: service', () => {
 
     expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
     expect(roles.find((r) => r.id === 3)!.mfaRequired).toBe(false);
+    // The role flags being unchanged above is consistent with either "left alone" or "rewritten
+    // to the same values" -- this is the assertion that actually distinguishes them.
+    expect(roleQuery.updateMany).not.toHaveBeenCalled();
     expect(storeSet).toHaveBeenCalledWith({
       key: SECURITY_SETTINGS_KEY,
       value: {

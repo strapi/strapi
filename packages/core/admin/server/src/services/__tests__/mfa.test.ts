@@ -1402,6 +1402,53 @@ describe('mfa service: enrolment', () => {
 
       expect(trustedRows.map((r) => r.userId)).toEqual(['2']);
     });
+
+    test('a failing trust clear rolls back the promotion, leaving the old authenticator in place', async () => {
+      const stored = { trustedDevices: { enabled: true, days: 30 } };
+      const store = jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() }));
+      const fixture = buildStrapi({ store });
+      const { strapi, users, trustedRows } = fixture;
+      const service = createMfaService(defaultDeps(strapi));
+
+      // First enrolment, then a trust granted against it.
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+      await service.trustDevice('1', {});
+      const previousSecret = users.get('1')!.mfaSecret;
+      expect(trustedRows).toHaveLength(1);
+
+      // Replacement: a current code starts it, a code from the pending secret completes it -- but
+      // the trust clear the completion triggers rejects once.
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const replacement = await service.beginEnrolment(
+          '1',
+          'pw',
+          generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+        );
+        jest.setSystemTime(now + 60_000);
+
+        fixture.trustedMocks.deleteMany.mockRejectedValueOnce(new Error('boom'));
+
+        await expect(
+          service.completeEnrolment(
+            '1',
+            generateTotp({ secret: base32Decode(replacement.secret), step: 30, digits: 6 })
+          )
+        ).rejects.toThrow('boom');
+      } finally {
+        jest.useRealTimers();
+      }
+
+      // The promotion rolled back with the failed clear: the account is still enrolled on the OLD
+      // authenticator, and the trust the clear could not remove is still on file.
+      expect(users.get('1')!.mfaSecret).toBe(previousSecret);
+      expect(trustedRows).toHaveLength(1);
+    });
   });
 });
 
@@ -3255,7 +3302,7 @@ describe('mfa service: trusted devices', () => {
     expect(trustedRows).toHaveLength(1);
   });
 
-  test('the eleventh grant evicts the oldest, so a user never holds more than ten', async () => {
+  test('the eleventh grant evicts the oldest', async () => {
     const now = Date.now();
     jest.useFakeTimers({ now });
     const { service, trustedRows } = setup();

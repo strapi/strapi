@@ -343,6 +343,30 @@ describe('Admin MFA trusted devices', () => {
         headers,
       });
       expect(malformed.statusCode).toBe(404);
+
+      // Ownership, not just existence: a row that belongs to someone else is a 404 too, not merely
+      // "not found for a made-up id".
+      const foreignRow = await strapi.db.query('admin::mfa-trusted-device').create({
+        data: {
+          userId: String(superAdminId),
+          tokenHash: 'not-a-real-hash-super-admin',
+          deviceId: null,
+          deviceName: null,
+          expiresAt: new Date(Date.now() + DAY),
+          lastUsedAt: null,
+        },
+      });
+      const foreign = await createRequest({ strapi }).delete(
+        `/admin/mfa/trusted-devices/${foreignRow.id}`,
+        { headers }
+      );
+      expect(foreign.statusCode).toBe(404);
+      expect(
+        await strapi.db.query('admin::mfa-trusted-device').findOne({ where: { id: foreignRow.id } })
+      ).not.toBeNull();
+      await strapi.db
+        .query('admin::mfa-trusted-device')
+        .deleteMany({ where: { id: foreignRow.id } });
     });
   });
 

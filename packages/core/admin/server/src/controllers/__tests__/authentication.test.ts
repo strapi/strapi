@@ -741,10 +741,11 @@ describe('authentication controller', () => {
         await authenticationController.loginMfa(ctx, jest.fn());
 
         expect(trustDevice).toHaveBeenCalled();
-        expect(cookiesSet).not.toHaveBeenCalledWith(
-          MFA_TRUST_COOKIE_NAME,
-          expect.anything(),
-          expect.anything()
+        expect(cookiesSet).toHaveBeenCalledTimes(1);
+        expect(cookiesSet).toHaveBeenCalledWith(
+          REFRESH_COOKIE_NAME,
+          'refresh-token',
+          expect.any(Object)
         );
         expect((ctx.body as any).data.token).toBe('access-token');
       });
