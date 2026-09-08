@@ -7,7 +7,11 @@ import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { Panel } from '../../../../../components/Panel';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
-import { useUnlockUserMfaMutation } from '../../../../../services/mfa';
+import {
+  useGetUserTrustedDevicesQuery,
+  useRevokeUserTrustedDevicesMutation,
+  useUnlockUserMfaMutation,
+} from '../../../../../services/mfa';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import type { AdminUserListItem } from '../../../../../services/users';
@@ -28,6 +32,11 @@ interface TwoFactorPanelProps {
  * Unlock (`POST /admin/mfa/users/:id/unlock`) clears both stamps and does not start a new grace
  * period: the user's next login does, so an unlock while they are away cannot re-lock them
  * unseen. The mutation invalidates this user's `User` tag, so the panel refreshes itself.
+ *
+ * Cycle 3 adds, for an enrolled user, the number of trusted browsers and a "Revoke trusted
+ * devices" action (`DELETE /admin/mfa/users/:id/trusted-devices`, behind `admin::users.update`).
+ * Revoking trust is security-positive, it forces the second factor back on, so unlike a reset it
+ * needs no re-authentication.
  */
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
@@ -35,6 +44,14 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [unlock, { isLoading }] = useUnlockUserMfaMutation();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+
+  // Cycle 3. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
+  // the query is skipped otherwise. A failed read hides the line rather than showing a false zero.
+  const { data: trustedDevices = [], isError: trustedDevicesFailed } =
+    useGetUserTrustedDevicesQuery({ id: user.id }, { skip: !user.mfaEnabledAt });
+  const [revokeTrustedDevices, { isLoading: isRevokingTrust }] =
+    useRevokeUserTrustedDevicesMutation();
+  const [revokeTrustOpen, setRevokeTrustOpen] = React.useState(false);
 
   const dateTime = (value: string | Date) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
@@ -56,6 +73,27 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.unlock.success',
         defaultMessage: 'Account unlocked',
+      }),
+    });
+  };
+
+  const handleRevokeTrustedDevices = async () => {
+    const res = await revokeTrustedDevices({ id: user.id });
+    setRevokeTrustOpen(false);
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: isBaseQueryError(res.error)
+          ? formatAPIError(res.error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+      return;
+    }
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: 'Settings.permissions.users.mfa.trustedDevices.revoke.success',
+        defaultMessage: 'Trusted devices revoked',
       }),
     });
   };
@@ -154,6 +192,45 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
           </Dialog.Root>
         ) : null}
       </Flex>
+      {user.mfaEnabledAt && !trustedDevicesFailed ? (
+        <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
+          <Typography textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'Settings.permissions.users.mfa.trustedDevices.count',
+                defaultMessage:
+                  '{count, plural, =0 {No trusted devices} one {# trusted device} other {# trusted devices}}',
+              },
+              { count: trustedDevices.length }
+            )}
+          </Typography>
+          {trustedDevices.length > 0 && canUpdate ? (
+            <Dialog.Root open={revokeTrustOpen} onOpenChange={setRevokeTrustOpen}>
+              <Dialog.Trigger>
+                <Button variant="danger-light" loading={isRevokingTrust}>
+                  {formatMessage({
+                    id: 'Settings.permissions.users.mfa.trustedDevices.revoke',
+                    defaultMessage: 'Revoke trusted devices',
+                  })}
+                </Button>
+              </Dialog.Trigger>
+              <ConfirmDialog
+                title={formatMessage({
+                  id: 'Settings.permissions.users.mfa.trustedDevices.revoke.title',
+                  defaultMessage: "Revoke this user's trusted devices?",
+                })}
+                onConfirm={handleRevokeTrustedDevices}
+              >
+                {formatMessage({
+                  id: 'Settings.permissions.users.mfa.trustedDevices.revoke.body',
+                  defaultMessage:
+                    'Every browser this user trusted will ask for a code at its next login. They keep their authenticator and recovery codes.',
+                })}
+              </ConfirmDialog>
+            </Dialog.Root>
+          ) : null}
+        </Flex>
+      ) : null}
     </Panel>
   );
 };

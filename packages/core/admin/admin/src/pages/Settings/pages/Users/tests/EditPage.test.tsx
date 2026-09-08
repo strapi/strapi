@@ -177,5 +177,91 @@ describe('Users | EditPage', () => {
 
       expect(await screen.findByRole('button', { name: 'Unlock' })).toBeDisabled();
     });
+
+    const enrolled = () =>
+      userWith({
+        mfaEnabledAt: '2026-09-01T10:14:00.000Z',
+        mfaGraceUntil: null,
+        mfaLockedAt: null,
+      });
+    const DEVICE = {
+      id: '3',
+      deviceName: 'Chrome on macOS',
+      createdAt: '2026-09-01T10:14:00.000Z',
+      expiresAt: '2026-10-01T10:14:00.000Z',
+      lastUsedAt: null,
+    };
+
+    it('shows the trusted device count for an enrolled user and revokes them after confirmation', async () => {
+      let rows: unknown[] = [DEVICE, { ...DEVICE, id: '4' }];
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: rows })),
+        http.delete('/admin/mfa/users/1/trusted-devices', () => {
+          rows = [];
+          return new HttpResponse(null, { status: 204 });
+        })
+      );
+      const { user } = renderEdit();
+
+      expect(await screen.findByText('2 trusted devices')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Revoke trusted devices' }));
+      expect(
+        screen.getByRole('alertdialog', { name: "Revoke this user's trusted devices?" })
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByText('Trusted devices revoked')).toBeInTheDocument();
+      expect(await screen.findByText('No trusted devices')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Revoke trusted devices' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('uses the singular for one trusted device', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [DEVICE] }))
+      );
+      renderEdit();
+
+      expect(await screen.findByText('1 trusted device')).toBeInTheDocument();
+    });
+
+    it('does not ask for trusted devices when the user is not enrolled', async () => {
+      let called = false;
+      server.use(
+        userWith({ mfaEnabledAt: null, mfaGraceUntil: null, mfaLockedAt: null }),
+        http.get('/admin/mfa/users/1/trusted-devices', () => {
+          called = true;
+          return HttpResponse.json({ data: [] });
+        })
+      );
+      renderEdit();
+
+      await screen.findByText('Not enrolled');
+      expect(screen.queryByText(/trusted device/)).not.toBeInTheDocument();
+      expect(called).toBe(false);
+    });
+
+    it('toasts the server message when the revocation is refused', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [DEVICE] })),
+        http.delete('/admin/mfa/users/1/trusted-devices', () =>
+          HttpResponse.json(
+            { error: { status: 404, name: 'NotFoundError', message: 'User does not exist' } },
+            { status: 404 }
+          )
+        )
+      );
+      const { user } = renderEdit();
+
+      await screen.findByText('1 trusted device');
+      await user.click(screen.getByRole('button', { name: 'Revoke trusted devices' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByText('User does not exist')).toBeInTheDocument();
+    });
   });
 });
