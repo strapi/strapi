@@ -794,8 +794,9 @@ describe('media_delete_assets handler', () => {
 
       const { deleted, failed } = structured(await del({ ids: [999], dryRun: false }));
 
-      // A folder id lands here: asset and folder ids are indistinguishable integers, so this is
-      // the only thing stopping media_delete_assets from acting on a folder id.
+      // Only ids matching NO asset land here. A folder id reaches this branch just when no
+      // asset shares its number — when one does, the handler deletes that asset instead (an
+      // accepted risk; see the api tests for the forced-collision case).
       expect(remove).not.toHaveBeenCalled();
       expect(deleted).toEqual([]);
       expect(failed).toEqual([{ id: 999, reason: MCP_DELETE_MEDIA_ID_NOT_FOUND }]);
