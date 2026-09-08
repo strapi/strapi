@@ -6,6 +6,7 @@ import { errors } from '@strapi/utils';
 import createContext from '../../../../../../../tests/helpers/create-context';
 import mfaController from '../mfa';
 import { MfaRequiredError } from '../../services/mfa-errors';
+import { MFA_TRUST_COOKIE_NAME } from '../../../../shared/utils/session-auth';
 
 const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
@@ -22,21 +23,24 @@ const DEFAULT_USER = { id: 7, mfaEnabledAt: null, mfaSecret: null, mfaLastUsedSt
 const buildCtx = (
   body: Record<string, unknown> = {},
   userOverrides: Record<string, unknown> = {},
-  stateOverrides: Record<string, unknown> = {}
+  stateOverrides: Record<string, unknown> = {},
+  extra: { cookies?: Record<string, string>; params?: Record<string, string> } = {}
 ) => {
   const notFound = jest.fn();
   const internalServerError = jest.fn();
+  const cookiesSet = jest.fn();
   const ctx = createContext(
-    { body },
+    { body, params: extra.params ?? {} },
     {
       state: { user: { ...DEFAULT_USER, ...userOverrides }, ...stateOverrides },
       notFound,
       internalServerError,
+      cookies: { get: jest.fn((name: string) => extra.cookies?.[name]), set: cookiesSet },
       request: { query: {}, body, headers: { 'user-agent': 'jest' }, secure: false },
     }
   ) as any;
 
-  return { ctx, notFound, internalServerError };
+  return { ctx, notFound, internalServerError, cookiesSet };
 };
 
 /**
@@ -93,6 +97,11 @@ describe('mfa controller', () => {
       ['notices', {}],
       ['markNoticesSeen', {}],
       ['unlockUser', {}],
+      ['listTrustedDevices', {}],
+      ['revokeTrustedDevice', {}],
+      ['revokeAllTrustedDevices', {}],
+      ['listUserTrustedDevices', {}],
+      ['revokeUserTrustedDevices', {}],
     ];
 
     for (const [handlerName, body] of routes) {
@@ -125,6 +134,7 @@ describe('mfa controller', () => {
             countUnusedRecoveryCodes,
             areCodesAcknowledged,
             isMfaRequiredFor,
+            trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
           },
         },
       },
@@ -149,6 +159,7 @@ describe('mfa controller', () => {
         codesAcknowledged: true,
         required: false,
         graceUntil: null,
+        trustedDevicesEnabled: true,
       },
     });
     expect(JSON.stringify(ctx.body)).not.toContain('top-secret-ciphertext');
@@ -164,6 +175,7 @@ describe('mfa controller', () => {
               isEnabled: () => true,
               isEnrolled: jest.fn(() => Promise.resolve(false)),
               isMfaRequiredFor,
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
             },
           },
         },
@@ -182,6 +194,7 @@ describe('mfa controller', () => {
           codesAcknowledged: false,
           required: true,
           graceUntil: '2026-09-11T10:00:00.000Z',
+          trustedDevicesEnabled: true,
         },
       });
     });
@@ -194,6 +207,7 @@ describe('mfa controller', () => {
               isEnabled: () => true,
               isEnrolled: jest.fn(() => Promise.resolve(false)),
               isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
             },
           },
         },
@@ -203,6 +217,26 @@ describe('mfa controller', () => {
       await mfaController.me(ctx);
 
       expect(ctx.body.data).toEqual(expect.objectContaining({ required: false, graceUntil: null }));
+    });
+
+    test('reports trustedDevicesEnabled: false when the organisation does not offer trust', async () => {
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: false, days: 30 })),
+            },
+          },
+        },
+      });
+      const { ctx } = buildCtx();
+
+      await mfaController.me(ctx);
+
+      expect((ctx.body as any).data.trustedDevicesEnabled).toBe(false);
     });
   });
 
@@ -645,6 +679,168 @@ describe('mfa controller', () => {
       expect(notFound).toHaveBeenCalledWith('User does not exist');
       expect(unlock).not.toHaveBeenCalled();
       expect(ctx.status).not.toBe(204);
+    });
+  });
+
+  describe('trusted devices (cycle 3)', () => {
+    const enabledMfa = (overrides: Record<string, unknown> = {}) => ({
+      isEnabled: jest.fn(() => true),
+      ...overrides,
+    });
+    const device = {
+      id: '3',
+      deviceName: 'Chrome on macOS',
+      createdAt: '2026-09-01T00:00:00.000Z',
+      expiresAt: '2026-10-01T00:00:00.000Z',
+      lastUsedAt: null,
+      current: true,
+    };
+
+    test('listTrustedDevices passes the presented cookie so the current row can be marked', async () => {
+      const listTrustedDevices = jest.fn(() => Promise.resolve([device]));
+      setStrapi({ admin: { services: { mfa: enabledMfa({ listTrustedDevices }) } } });
+      const { ctx } = buildCtx({}, {}, {}, { cookies: { [MFA_TRUST_COOKIE_NAME]: 'trust-token' } });
+
+      await mfaController.listTrustedDevices(ctx);
+
+      expect(listTrustedDevices).toHaveBeenCalledWith('7', 'trust-token');
+      expect(ctx.body).toEqual({ data: [device] });
+    });
+
+    test('revokeTrustedDevice: a non-numeric id is a 404 without touching the service', async () => {
+      const revokeTrustedDevice = jest.fn();
+      setStrapi({ admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } } });
+      const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: '3; drop' } });
+
+      await mfaController.revokeTrustedDevice(ctx);
+
+      expect(notFound).toHaveBeenCalled();
+      expect(revokeTrustedDevice).not.toHaveBeenCalled();
+    });
+
+    test("revokeTrustedDevice: a row that is not the caller's is a 404 and no cookie changes", async () => {
+      const revokeTrustedDevice = jest.fn(() =>
+        Promise.resolve({ revoked: false, current: false })
+      );
+      setStrapi({ admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } } });
+      const { ctx, notFound, cookiesSet } = buildCtx({}, {}, {}, { params: { id: '3' } });
+
+      await mfaController.revokeTrustedDevice(ctx);
+
+      expect(revokeTrustedDevice).toHaveBeenCalledWith('7', '3', undefined);
+      expect(notFound).toHaveBeenCalled();
+      expect(cookiesSet).not.toHaveBeenCalled();
+    });
+
+    test('revokeTrustedDevice: the current row clears the cookie, another row does not', async () => {
+      const revokeTrustedDevice = jest
+        .fn()
+        .mockResolvedValueOnce({ revoked: true, current: true })
+        .mockResolvedValueOnce({ revoked: true, current: false });
+      // `revokeTrustedDevice` clears the trust cookie via `clearTrustCookie`, which reads cookie
+      // scope options off `strapi.config` (see `session-issuing-paths.test.ts` for the same
+      // double) -- unlike the other trusted-device tests, this is the one where the current row
+      // actually triggers that path.
+      setStrapi({
+        config: { get: jest.fn(() => undefined) },
+        admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } },
+      });
+
+      const current = buildCtx(
+        {},
+        {},
+        {},
+        { params: { id: '3' }, cookies: { [MFA_TRUST_COOKIE_NAME]: 'trust-token' } }
+      );
+      await mfaController.revokeTrustedDevice(current.ctx);
+      expect(revokeTrustedDevice).toHaveBeenCalledWith('7', '3', 'trust-token');
+      expect(current.ctx.status).toBe(204);
+      expect(current.cookiesSet).toHaveBeenCalledWith(
+        MFA_TRUST_COOKIE_NAME,
+        '',
+        expect.objectContaining({ expires: new Date(0) })
+      );
+
+      const other = buildCtx(
+        {},
+        {},
+        {},
+        { params: { id: '4' }, cookies: { [MFA_TRUST_COOKIE_NAME]: 'trust-token' } }
+      );
+      await mfaController.revokeTrustedDevice(other.ctx);
+      expect(other.ctx.status).toBe(204);
+      expect(other.cookiesSet).not.toHaveBeenCalled();
+    });
+
+    test('revokeAllTrustedDevices always clears the cookie', async () => {
+      const revokeAllTrustedDevices = jest.fn(() => Promise.resolve(2));
+      // Same `config` double as above: this handler always calls `clearTrustCookie`.
+      setStrapi({
+        config: { get: jest.fn(() => undefined) },
+        admin: { services: { mfa: enabledMfa({ revokeAllTrustedDevices }) } },
+      });
+      const { ctx, cookiesSet } = buildCtx();
+
+      await mfaController.revokeAllTrustedDevices(ctx);
+
+      expect(revokeAllTrustedDevices).toHaveBeenCalledWith('7');
+      expect(ctx.status).toBe(204);
+      expect(cookiesSet).toHaveBeenCalledWith(
+        MFA_TRUST_COOKIE_NAME,
+        '',
+        expect.objectContaining({ expires: new Date(0) })
+      );
+    });
+
+    test('listUserTrustedDevices: 404 for an unknown user; current is stripped for a known one', async () => {
+      const listTrustedDevices = jest.fn(() => Promise.resolve([device]));
+      const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
+      setStrapi({
+        admin: { services: { mfa: enabledMfa({ listTrustedDevices }), user: { findOne } } },
+      });
+
+      const unknown = buildCtx({}, {}, {}, { params: { id: '42' } });
+      await mfaController.listUserTrustedDevices(unknown.ctx);
+      expect(unknown.notFound).toHaveBeenCalled();
+      expect(listTrustedDevices).not.toHaveBeenCalled();
+
+      const known = buildCtx(
+        {},
+        {},
+        {},
+        { params: { id: '42' }, cookies: { [MFA_TRUST_COOKIE_NAME]: 'trust-token' } }
+      );
+      await mfaController.listUserTrustedDevices(known.ctx);
+      expect(listTrustedDevices).toHaveBeenCalledWith('42');
+      expect(known.ctx.body).toEqual({
+        data: [
+          {
+            id: '3',
+            deviceName: 'Chrome on macOS',
+            createdAt: '2026-09-01T00:00:00.000Z',
+            expiresAt: '2026-10-01T00:00:00.000Z',
+            lastUsedAt: null,
+          },
+        ],
+      });
+    });
+
+    test('revokeUserTrustedDevices: 404 for an unknown user; names the acting administrator otherwise', async () => {
+      const revokeAllTrustedDevices = jest.fn(() => Promise.resolve(1));
+      const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
+      setStrapi({
+        admin: { services: { mfa: enabledMfa({ revokeAllTrustedDevices }), user: { findOne } } },
+      });
+
+      const unknown = buildCtx({}, {}, {}, { params: { id: '42' } });
+      await mfaController.revokeUserTrustedDevices(unknown.ctx);
+      expect(unknown.notFound).toHaveBeenCalled();
+      expect(revokeAllTrustedDevices).not.toHaveBeenCalled();
+
+      const known = buildCtx({}, {}, {}, { params: { id: '42' } });
+      await mfaController.revokeUserTrustedDevices(known.ctx);
+      expect(revokeAllTrustedDevices).toHaveBeenCalledWith('42', { byUserId: '7' });
+      expect(known.ctx.status).toBe(204);
     });
   });
 });

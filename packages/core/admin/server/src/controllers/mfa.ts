@@ -9,6 +9,8 @@ import {
 import {
   getSessionManager,
   buildSessionMetadataFromContext,
+  MFA_TRUST_COOKIE_NAME,
+  clearTrustCookie,
 } from '../../../shared/utils/session-auth';
 import { MfaRequiredError } from '../services/mfa-errors';
 
@@ -21,6 +23,9 @@ import type {
   Disable,
   Notices,
   MarkNoticesSeen,
+  ListTrustedDevices,
+  RevokeTrustedDevice,
+  ListUserTrustedDevices,
 } from '../../../shared/contracts/mfa';
 
 /**
@@ -57,6 +62,9 @@ export default {
         // by `enforce` at the first session it applied to. The grace banner reads these.
         required: await mfa.isMfaRequiredFor(user),
         graceUntil: user.mfaGraceUntil ? new Date(user.mfaGraceUntil).toISOString() : null,
+        // Cycle 3: the profile renders its trusted-devices list only when the organisation
+        // offers trust at all.
+        trustedDevicesEnabled: (await mfa.trustedDeviceSettings()).enabled,
       },
     } satisfies Me.Response;
   },
@@ -221,6 +229,108 @@ export default {
     if (!unlocked) {
       return ctx.badRequest('This account is not locked');
     }
+
+    ctx.status = 204;
+  },
+
+  /**
+   * Cycle 3. The caller's trusted browsers; the presented cookie (if any) marks the current one.
+   * The service hashes it, the hash never reaches the response.
+   */
+  async listTrustedDevices(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    ctx.body = {
+      data: await mfa.listTrustedDevices(
+        String(ctx.state.user.id),
+        ctx.cookies.get(MFA_TRUST_COOKIE_NAME)
+      ),
+    } satisfies ListTrustedDevices.Response;
+  },
+
+  async revokeTrustedDevice(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    // Row ids are integers; anything else can only ever be a 404, and asking the database to
+    // compare an integer column against arbitrary text is a 500 on Postgres rather than a miss.
+    const { id } = ctx.params as RevokeTrustedDevice.Params;
+    if (!/^\d+$/.test(id)) {
+      return ctx.notFound('Trusted device not found');
+    }
+
+    const result = await mfa.revokeTrustedDevice(
+      String(ctx.state.user.id),
+      id,
+      ctx.cookies.get(MFA_TRUST_COOKIE_NAME)
+    );
+    if (!result.revoked) {
+      return ctx.notFound('Trusted device not found');
+    }
+    if (result.current) {
+      clearTrustCookie(ctx);
+    }
+
+    ctx.status = 204;
+  },
+
+  async revokeAllTrustedDevices(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    await mfa.revokeAllTrustedDevices(String(ctx.state.user.id));
+    // Unconditionally: whatever cookie this browser holds no longer matches a row.
+    clearTrustCookie(ctx);
+
+    ctx.status = 204;
+  },
+
+  /**
+   * An administrator's view of another user's trusted browsers (route permission
+   * `admin::users.read`). `current` is meaningless to someone looking at another user's
+   * browsers, so it is stripped.
+   */
+  async listUserTrustedDevices(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    const { id } = ctx.params as { id: string };
+    const target = await getService('user').findOne(id);
+    if (!target) {
+      return ctx.notFound('User does not exist');
+    }
+
+    const devices = await mfa.listTrustedDevices(String(target.id));
+    ctx.body = {
+      data: devices.map(({ id: rowId, deviceName, createdAt, expiresAt, lastUsedAt }) => ({
+        id: rowId,
+        deviceName,
+        createdAt,
+        expiresAt,
+        lastUsedAt,
+      })),
+    } satisfies ListUserTrustedDevices.Response;
+  },
+
+  /**
+   * Administrator revocation (route permission `admin::users.update`, the same people who can
+   * deactivate a user). Security-positive, unlike an admin reset: it forces the second factor
+   * back on, so it is not an escalation path. 404 for an unknown user.
+   */
+  async revokeUserTrustedDevices(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    const { id } = ctx.params as { id: string };
+    const target = await getService('user').findOne(id);
+    if (!target) {
+      return ctx.notFound('User does not exist');
+    }
+
+    await mfa.revokeAllTrustedDevices(String(target.id), {
+      byUserId: String(ctx.state.user.id),
+    });
 
     ctx.status = 204;
   },

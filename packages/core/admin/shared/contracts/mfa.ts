@@ -16,6 +16,8 @@ export declare namespace Me {
       required: boolean;
       /** ISO deadline of the running grace period, or null. */
       graceUntil: string | null;
+      /** Cycle 3: whether the organisation lets this user trust a browser after a code. */
+      trustedDevicesEnabled: boolean;
     };
   }
 }
