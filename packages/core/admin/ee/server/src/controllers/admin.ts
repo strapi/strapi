@@ -17,6 +17,8 @@ export default {
           flags,
           type: strapi.ee.type,
           planPriceId: strapi.ee.planPriceId,
+          // Strapi-managed AI only (not any AI configuration, e.g. BYOK providers).
+          // TODO: merge with the per-feature BYOK checks once every feature is migrated off this legacy path.
           ai: {
             enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
