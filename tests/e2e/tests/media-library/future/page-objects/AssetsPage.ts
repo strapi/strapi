@@ -175,10 +175,15 @@ export class AssetsPage {
   }
 
   getMoveSuccessNotification() {
+    // The beta library reports moves through `list.bulk-actions.move.success`,
+    // which names the count, source and destination — "1 element has been moved
+    // from Home to Marketing". The flat "Elements have been moved successfully"
+    // this used to match belongs to the legacy library (`modal.move.success-label`,
+    // used by `hooks/useBulkMove.ts`), so it never appeared here.
     return this.page
       .getByRole('region', { name: 'Notifications' })
       .getByRole('status')
-      .filter({ hasText: 'Elements have been moved successfully' });
+      .filter({ hasText: /been moved/ });
   }
 
   async getSuccessMessage() {
@@ -755,7 +760,9 @@ export class AssetsPage {
   }
 
   getHomeTreeRow() {
-    return this.folderTreeNav.getByRole('button', { name: 'Home' });
+    // The tree's own test id rather than the button name: "Home" is a partial match
+    // and the rail carries more than one control containing it.
+    return this.folderTreeNav.getByTestId('folder-tree-home');
   }
 
   /**
