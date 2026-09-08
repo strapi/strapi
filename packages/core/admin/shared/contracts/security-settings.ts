@@ -21,8 +21,18 @@ export interface MfaEnforcementSettings extends MfaEnforcement {
   requiredRoles: string[];
 }
 
+/**
+ * Cycle 3: whether a user may trust a browser after a verified code, and for how many days.
+ * Stored beside `mfa` in the same `security-settings` document. `days` is an integer 1..90.
+ */
+export interface TrustedDeviceSettings {
+  enabled: boolean;
+  days: number;
+}
+
 export interface SecuritySettings {
   mfa: MfaEnforcementSettings;
+  trustedDevices: TrustedDeviceSettings;
 }
 
 /**
@@ -36,14 +46,17 @@ export declare namespace GetSecuritySettings {
 }
 
 /**
- * PUT /admin/security-settings - whole `mfa` object, no merge. `password` (and `code` when the
- * caller is enrolled) are required only when the change lowers protection: a lower `mode`, or a
- * role removed from `requiredRoles`.
+ * PUT /admin/security-settings - per object, no merge inside an object: each of `mfa` /
+ * `trustedDevices` present in the body replaces its object whole, an absent one is untouched, a
+ * body with neither is rejected. `password` (and `code` when the caller is enrolled) are required
+ * only when the change lowers protection: a lower `mode`, a role removed from `requiredRoles`, a
+ * longer `graceDays`, enabling trusted devices, or a longer trust `days` while enabled.
  */
 export declare namespace UpdateSecuritySettings {
   export interface Request {
     body: {
-      mfa: MfaEnforcementSettings;
+      mfa?: MfaEnforcementSettings;
+      trustedDevices?: TrustedDeviceSettings;
       password?: string;
       code?: string;
     };

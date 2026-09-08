@@ -1,8 +1,10 @@
 import type { Core } from '@strapi/types';
 import {
   DEFAULT_MFA_ENFORCEMENT,
+  DEFAULT_TRUSTED_DEVICES,
   SECURITY_SETTINGS_KEY,
   readMfaEnforcement,
+  readTrustedDeviceSettings,
   resetSecuritySettingsWarnings,
   createSecuritySettingsService,
 } from '../security-settings';
@@ -58,6 +60,55 @@ describe('security-settings: readMfaEnforcement', () => {
     expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('mfa.mode'));
     expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('mfa.graceDays'));
   });
+});
+
+describe('security-settings: readTrustedDeviceSettings', () => {
+  beforeEach(() => {
+    resetSecuritySettingsWarnings();
+  });
+
+  test('defaults to enabled / 30 days when nothing is stored', async () => {
+    const { strapi } = buildStrapi(null);
+
+    await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual(DEFAULT_TRUSTED_DEVICES);
+    expect(DEFAULT_TRUSTED_DEVICES).toEqual({ enabled: true, days: 30 });
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  test('returns the stored object', async () => {
+    const { strapi } = buildStrapi({ trustedDevices: { enabled: false, days: 7 } });
+
+    await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual({ enabled: false, days: 7 });
+  });
+
+  test('a document with only mfa falls back to the trusted-device defaults without a warning', async () => {
+    const { strapi } = buildStrapi({ mfa: { mode: 'off', graceDays: 3 } });
+
+    await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual(DEFAULT_TRUSTED_DEVICES);
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  test('falls back per key: a valid days survives a corrupt enabled', async () => {
+    const { strapi } = buildStrapi({ trustedDevices: { enabled: 'yes', days: 14 } });
+
+    await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual({ enabled: true, days: 14 });
+    expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('trustedDevices.enabled'));
+  });
+
+  test.each([[0], [91], [7.5], ['30'], [null]])(
+    'days %p is corrupt and warns once',
+    async (days) => {
+      const { strapi } = buildStrapi({ trustedDevices: { enabled: true, days } });
+
+      await readTrustedDeviceSettings(strapi);
+      await readTrustedDeviceSettings(strapi);
+
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+      expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('trustedDevices.days'));
+      await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual({ enabled: true, days: 30 });
+    }
+  );
 });
 
 describe('security-settings: service', () => {
@@ -196,6 +247,7 @@ describe('security-settings: service', () => {
     const { service } = setup({ stored: { mfa: { mode: 'required' } } });
     await expect(service.getSettings()).resolves.toEqual({
       mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] },
+      trustedDevices: { enabled: true, days: 30 },
     });
   });
 
@@ -225,7 +277,10 @@ describe('security-settings: service', () => {
         { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '3'] } },
         actor
       )
-    ).resolves.toEqual({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '3'] } });
+    ).resolves.toEqual({
+      mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '3'] },
+      trustedDevices: { enabled: true, days: 30 },
+    });
   });
 
   test('an exempt (SSO-only) caller passes the guard', async () => {
@@ -258,10 +313,16 @@ describe('security-settings: service', () => {
       actor
     );
 
-    expect(result).toEqual({ mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] } });
+    expect(result).toEqual({
+      mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] },
+      trustedDevices: { enabled: true, days: 30 },
+    });
     expect(storeSet).toHaveBeenCalledWith({
       key: 'security-settings',
-      value: { mfa: { mode: 'required', graceDays: 5 } },
+      value: {
+        mfa: { mode: 'required', graceDays: 5 },
+        trustedDevices: { enabled: true, days: 30 },
+      },
     });
     expect(roles.map((r) => [r.id, r.mfaRequired])).toEqual([
       [1, true],
@@ -270,7 +331,10 @@ describe('security-settings: service', () => {
     ]);
     expect(transaction).toHaveBeenCalledTimes(1);
     expect(emit).toHaveBeenCalledWith('admin.security-settings.update', {
-      previous: { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } },
+      previous: {
+        mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] },
+        trustedDevices: { enabled: true, days: 30 },
+      },
       next: result,
     });
   });
@@ -312,7 +376,10 @@ describe('security-settings: service', () => {
     const { service } = setup({ stored: { mfa: { mode: 'required' } }, enrolled: true });
     await expect(
       service.updateSettings({ mfa: { mode: 'required', graceDays: 7, requiredRoles: [] } }, actor)
-    ).resolves.toEqual({ mfa: { mode: 'required', graceDays: 7, requiredRoles: [] } });
+    ).resolves.toEqual({
+      mfa: { mode: 'required', graceDays: 7, requiredRoles: [] },
+      trustedDevices: { enabled: true, days: 30 },
+    });
   });
 
   test('the same role drop is a real downgrade once the mode itself drops to optional', async () => {
@@ -404,6 +471,132 @@ describe('security-settings: service', () => {
         { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '2'] } },
         actor
       )
-    ).resolves.toEqual({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } });
+    ).resolves.toEqual({
+      mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] },
+      trustedDevices: { enabled: true, days: 30 },
+    });
+  });
+
+  test('a body with only trustedDevices leaves mfa and the role flags untouched', async () => {
+    const { service, roles, storeSet } = setup({
+      stored: { mfa: { mode: 'required', graceDays: 3 } },
+      enrolled: true,
+    });
+
+    await expect(
+      service.updateSettings({ trustedDevices: { enabled: true, days: 7 } }, actor)
+    ).resolves.toEqual({
+      mfa: { mode: 'required', graceDays: 3, requiredRoles: ['2'] },
+      trustedDevices: { enabled: true, days: 7 },
+    });
+
+    expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
+    expect(roles.find((r) => r.id === 3)!.mfaRequired).toBe(false);
+    expect(storeSet).toHaveBeenCalledWith({
+      key: SECURITY_SETTINGS_KEY,
+      value: {
+        mfa: { mode: 'required', graceDays: 3 },
+        trustedDevices: { enabled: true, days: 7 },
+      },
+    });
+  });
+
+  test('a body with only mfa keeps the stored trustedDevices', async () => {
+    const { service } = setup({
+      stored: {
+        mfa: { mode: 'optional', graceDays: 7 },
+        trustedDevices: { enabled: false, days: 14 },
+      },
+    });
+
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 5, requiredRoles: ['2'] } },
+        actor
+      )
+    ).resolves.toMatchObject({
+      mfa: { graceDays: 5 },
+      trustedDevices: { enabled: false, days: 14 },
+    });
+  });
+
+  test('a body with neither object is rejected before anything is read or written', async () => {
+    const { service, storeSet } = setup();
+
+    await expect(service.updateSettings({ password: 'pw' }, actor)).rejects.toThrow(
+      /mfa or trustedDevices/
+    );
+    expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test('enabling trusted devices is a downgrade: needs the password (and a code when enrolled)', async () => {
+    const unenrolled = setup({ stored: { trustedDevices: { enabled: false, days: 30 } } });
+    const body = { trustedDevices: { enabled: true, days: 30 } };
+
+    await expect(unenrolled.service.updateSettings(body, actor)).rejects.toThrow(
+      /password is required/i
+    );
+    expect(unenrolled.storeSet).not.toHaveBeenCalled();
+    await expect(
+      unenrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { enabled: true } });
+    expect(unenrolled.validatePassword).toHaveBeenCalledWith('pw', 'hashed');
+
+    const enrolled = setup({
+      stored: { trustedDevices: { enabled: false, days: 30 } },
+      enrolled: true,
+    });
+    await expect(
+      enrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
+    ).rejects.toThrow(/code is required/i);
+    await expect(
+      enrolled.service.updateSettings({ ...body, password: 'pw', code: '123456' }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { enabled: true } });
+    expect(enrolled.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
+  });
+
+  test('raising days while enabled is a downgrade; raising them while disabled is not', async () => {
+    const enabled = setup({ stored: { trustedDevices: { enabled: true, days: 30 } } });
+    await expect(
+      enabled.service.updateSettings({ trustedDevices: { enabled: true, days: 60 } }, actor)
+    ).rejects.toThrow(/password is required/i);
+    await expect(
+      enabled.service.updateSettings(
+        { trustedDevices: { enabled: true, days: 60 }, password: 'pw' },
+        actor
+      )
+    ).resolves.toMatchObject({ trustedDevices: { days: 60 } });
+
+    const disabled = setup({ stored: { trustedDevices: { enabled: false, days: 30 } } });
+    await expect(
+      disabled.service.updateSettings({ trustedDevices: { enabled: false, days: 60 } }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { enabled: false, days: 60 } });
+  });
+
+  test('lowering days or disabling is not a downgrade', async () => {
+    const { service, validatePassword, assertPasswordAndFactor } = setup({
+      stored: { trustedDevices: { enabled: true, days: 30 } },
+      enrolled: true,
+    });
+
+    await expect(
+      service.updateSettings({ trustedDevices: { enabled: true, days: 7 } }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { days: 7 } });
+    await expect(
+      service.updateSettings({ trustedDevices: { enabled: false, days: 7 } }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { enabled: false } });
+    expect(validatePassword).not.toHaveBeenCalled();
+    expect(assertPasswordAndFactor).not.toHaveBeenCalled();
+  });
+
+  test('the update event carries both objects in previous and next', async () => {
+    const { service, emit } = setup();
+
+    await service.updateSettings({ trustedDevices: { enabled: true, days: 7 } }, actor);
+
+    expect(emit).toHaveBeenCalledWith('admin.security-settings.update', {
+      previous: expect.objectContaining({ trustedDevices: { enabled: true, days: 30 } }),
+      next: expect.objectContaining({ trustedDevices: { enabled: true, days: 7 } }),
+    });
   });
 });

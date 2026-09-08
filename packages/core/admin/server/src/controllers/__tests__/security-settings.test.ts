@@ -18,7 +18,10 @@ const buildCtx = (body: Record<string, unknown> = {}) => {
   return { ctx, notFound };
 };
 
-const settings = { mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } };
+const settings = {
+  mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+  trustedDevices: { enabled: true, days: 30 },
+};
 
 describe('security-settings controller', () => {
   test('both handlers 404 while the feature is off', async () => {
@@ -73,6 +76,36 @@ describe('security-settings controller', () => {
     expect(ctx.body).toEqual({ data: settings });
   });
 
+  test('update accepts a body with only trustedDevices', async () => {
+    const updateSettings = jest.fn(() => Promise.resolve(settings));
+    setStrapi({
+      admin: {
+        services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },
+      },
+    });
+    const body = { trustedDevices: { enabled: false, days: 7 } };
+    const { ctx } = buildCtx(body);
+
+    await controller.update(ctx);
+
+    expect(updateSettings).toHaveBeenCalledWith({ ...body, code: undefined }, { id: 7 });
+  });
+
+  test('update accepts a body with only mfa', async () => {
+    const updateSettings = jest.fn(() => Promise.resolve(settings));
+    setStrapi({
+      admin: {
+        services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },
+      },
+    });
+    const body = { mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } };
+    const { ctx } = buildCtx(body);
+
+    await controller.update(ctx);
+
+    expect(updateSettings).toHaveBeenCalledWith({ ...body, code: undefined }, { id: 7 });
+  });
+
   test.each([
     [{ mfa: { mode: 'sometimes', graceDays: 7, requiredRoles: [] } }],
     [{ mfa: { mode: 'optional', graceDays: 0, requiredRoles: [] } }],
@@ -80,6 +113,14 @@ describe('security-settings controller', () => {
     [{ mfa: { mode: 'optional', graceDays: 7.5, requiredRoles: [] } }],
     [{ mfa: { mode: 'optional', graceDays: 7 } }],
     [{ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [], extra: true } }],
+    [{}],
+    [{ password: 'pw' }],
+    [{ trustedDevices: { enabled: true, days: 0 } }],
+    [{ trustedDevices: { enabled: true, days: 91 } }],
+    [{ trustedDevices: { enabled: true, days: 7.5 } }],
+    [{ trustedDevices: { enabled: 'yes', days: 30 } }],
+    [{ trustedDevices: { enabled: true } }],
+    [{ trustedDevices: { enabled: true, days: 30, extra: true } }],
   ])('update rejects an invalid body %j', async (body) => {
     const updateSettings = jest.fn();
     setStrapi({
