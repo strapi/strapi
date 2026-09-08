@@ -36,6 +36,11 @@ export interface MfaChallengeResponse {
     mfaRequired: true;
     challengeToken: string;
     expiresIn: number;
+    /**
+     * Cycle 3: the trust period the challenge screen may offer ("Trust this device for {n}
+     * days"), or null when the organisation does not offer trusted devices. Never absent.
+     */
+    trustedDeviceDays: number | null;
   };
 }
 
@@ -61,6 +66,8 @@ export declare namespace LoginMfa {
       code: string;
       deviceId?: string;
       rememberMe?: boolean;
+      /** Cycle 3: trust this browser after the code verifies. Ignored when the organisation disallows it. */
+      trustDevice?: boolean;
     };
   }
 

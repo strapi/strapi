@@ -126,6 +126,7 @@ const buildResetStrapi = ({
           isEnrolled,
           createChallenge,
           enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+          trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
         },
         user: { sanitizeUser },
       },
@@ -301,7 +302,12 @@ describe('session issuing paths', () => {
     expect(generateRefreshToken).not.toHaveBeenCalled();
     expect(generateAccessToken).not.toHaveBeenCalled();
     expect(ctx.body).toEqual({
-      data: { mfaRequired: true, challengeToken: 'reset-challenge-token', expiresIn: 300 },
+      data: {
+        mfaRequired: true,
+        challengeToken: 'reset-challenge-token',
+        expiresIn: 300,
+        trustedDeviceDays: 30,
+      },
     });
 
     // Same audit visibility as the login gate, and for the same reason: a gated reset must not

@@ -7,12 +7,15 @@ import { getService } from '../utils';
 import { MfaLockedError } from '../services/mfa-errors';
 import {
   REFRESH_COOKIE_NAME,
+  MFA_TRUST_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
   getSessionManager,
   generateDeviceId,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
   issueSession,
+  clearTrustCookie,
+  setTrustCookie,
 } from '../../../shared/utils/session-auth';
 
 import {
@@ -58,6 +61,16 @@ const enforceMfaOrThrow = async (
   return result.outcome === 'grace' ? { mfaEnrolment: { graceUntil: result.graceUntil } } : {};
 };
 
+/**
+ * Cycle 3: what a challenge response advertises as the trust period, or null when the
+ * organisation does not offer trusted devices. Read per challenge, never cached, so a settings
+ * change shows on the very next login screen.
+ */
+const offeredTrustDays = async (): Promise<number | null> => {
+  const settings = await getService('mfa').trustedDeviceSettings();
+  return settings.enabled ? settings.days : null;
+};
+
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
@@ -96,31 +109,55 @@ export default {
     },
     async (ctx: Context) => {
       const { user } = ctx.state as { user: AdminUser };
+      const userId = String(user.id);
 
       const mfa = getService('mfa');
 
       // Enforcement first: a locked account is refused before anything else, and a graced one
       // carries its deadline into the session below. Enrolled users come back as `none` and take
-      // the challenge branch exactly as in cycle 1.
+      // the trust check or the challenge branch.
       const sessionOptions = await enforceMfaOrThrow(user);
 
-      if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
-        const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
+      if (mfa.isEnabled() && (await mfa.isEnrolled(userId))) {
+        // Cycle 3: a browser trusted after an earlier verified code skips the challenge. Only
+        // here (never on reset-password), only after the password check and `enforce`, only for
+        // an enrolled user, and only through `consumeTrustedDevice`, which compares the row's
+        // owner to this user. A cookie that matches nothing live is cleared so the browser stops
+        // presenting it. Written as a fall-through so `login` keeps a single `issueSession` call
+        // site (see session-issuing-paths.test.ts).
+        const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
+        const trusted = trustToken ? await mfa.consumeTrustedDevice(userId, trustToken) : false;
 
-        // A distinct event, not `admin.auth.success`: the password matched but no session was
-        // issued, so audit consumers (EE audit logs, `admin.auth.events` config hooks) must be
-        // able to see that this login was gated rather than have it look identical to no
-        // attempt at all.
-        const sanitizedUser = getService('user').sanitizeUser(user);
-        strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
+        if (!trusted) {
+          if (trustToken) {
+            clearTrustCookie(ctx);
+          }
 
-        // Deliberately no cookie and no access token here: the challenge token authorises
-        // exactly one endpoint (`/login/mfa`) and mints nothing on its own. A cookie set
-        // alongside this response would make the whole feature a silent no-op.
-        ctx.body = {
-          data: { mfaRequired: true, challengeToken, expiresIn },
-        } satisfies MfaChallengeResponse;
-        return;
+          const { token: challengeToken, expiresIn } = await mfa.createChallenge(userId);
+
+          // A distinct event, not `admin.auth.success`: the password matched but no session was
+          // issued, so audit consumers (EE audit logs, `admin.auth.events` config hooks) must be
+          // able to see that this login was gated rather than have it look identical to no
+          // attempt at all.
+          const sanitizedUser = getService('user').sanitizeUser(user);
+          strapi.eventHub.emit('admin.auth.mfa_required', {
+            user: sanitizedUser,
+            provider: 'local',
+          });
+
+          // Deliberately no cookie and no access token here: the challenge token authorises
+          // exactly one endpoint (`/login/mfa`) and mints nothing on its own. A cookie set
+          // alongside this response would make the whole feature a silent no-op.
+          ctx.body = {
+            data: {
+              mfaRequired: true,
+              challengeToken,
+              expiresIn,
+              trustedDeviceDays: await offeredTrustDays(),
+            },
+          } satisfies MfaChallengeResponse;
+          return;
+        }
       }
 
       const sanitizedUser = getService('user').sanitizeUser(user);
@@ -148,7 +185,8 @@ export default {
       await validateMfaLoginInput(ctx.request.body ?? {});
 
       const mfa = getService('mfa');
-      const { challengeToken, code } = ctx.request.body as LoginMfa.Request['body'];
+      const { challengeToken, code, trustDevice, deviceId } = ctx.request
+        .body as LoginMfa.Request['body'];
 
       // The validator no longer trims `code` (see validation/authentication/mfa.ts): trim it
       // here instead, after validation and before it reaches `verifyChallenge`.
@@ -176,6 +214,19 @@ export default {
       // already closes.
       if (!user || user.isActive !== true) {
         throw new ValidationError('Invalid code');
+      }
+
+      // Cycle 3: any verified challenge may grant trust. The service returns null when the
+      // organisation does not offer it, and a stale checkbox is not an error. The raw token
+      // exists only here and in the Set-Cookie header.
+      if (trustDevice) {
+        const granted = await mfa.trustDevice(String(user.id), {
+          deviceId,
+          userAgent: ctx.request.headers['user-agent'],
+        });
+        if (granted) {
+          setTrustCookie(ctx, granted.token, granted.expiresAt);
+        }
       }
 
       const sanitizedUser = getService('user').sanitizeUser(user);
@@ -266,11 +317,20 @@ export default {
       // second factor, so a reset that lands on an enrolled account gets a challenge instead of
       // a session. Emits the same audit event as the login gate, for the same reason -- a gated
       // reset must not look identical to no attempt at all.
+      //
+      // No trust check here, by design: a password reset is the classic second-factor bypass,
+      // and a trust cookie does not change that. A trust granted through this challenge is still
+      // legitimate, a code was verified.
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
 
       ctx.body = {
-        data: { mfaRequired: true, challengeToken, expiresIn },
+        data: {
+          mfaRequired: true,
+          challengeToken,
+          expiresIn,
+          trustedDeviceDays: await offeredTrustDays(),
+        },
       } satisfies MfaChallengeResponse;
       return;
     }

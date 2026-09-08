@@ -6,7 +6,7 @@ import { errors } from '@strapi/utils';
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
-import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
+import { REFRESH_COOKIE_NAME, MFA_TRUST_COOKIE_NAME } from '../../../../shared/utils/session-auth';
 import { MfaLockedError } from '../../services/mfa-errors';
 // The real implementation, not a canned mock: used wherever a test needs to prove that a field
 // `sanitizeUser` is supposed to strip (e.g. the MFA columns) actually never reaches an
@@ -73,10 +73,21 @@ describe('authentication controller', () => {
         Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
       );
       const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
-      const sessionManagerFn = jest.fn(() => ({ generateRefreshToken, generateAccessToken }));
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const sessionManagerFn = jest.fn(() => ({
+        generateRefreshToken,
+        generateAccessToken,
+        invalidateRefreshToken,
+      }));
       const sanitizeUser = jest.fn(() => sanitizedUser);
       const emit = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(user));
+      // Cycle 3 defaults: trust offered at 30 days, no cookie ever matches, no grant. Tests that
+      // are about trust override these.
+      const trustedDeviceSettings = jest.fn(() => Promise.resolve({ enabled: true, days: 30 }));
+      const consumeTrustedDevice = jest.fn(() => Promise.resolve(false));
+      const trustDevice = jest.fn(() => Promise.resolve(null));
+      const resetPassword = jest.fn(() => Promise.resolve(user));
 
       setStrapi({
         eventHub: { emit },
@@ -85,31 +96,51 @@ describe('authentication controller', () => {
         sessionManager: sessionManagerFn,
         admin: {
           services: {
-            mfa: { enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })), ...mfaOverrides },
+            mfa: {
+              enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+              trustedDeviceSettings,
+              consumeTrustedDevice,
+              trustDevice,
+              ...mfaOverrides,
+            },
             user: { sanitizeUser, findOne, ...userOverrides },
+            auth: { resetPassword },
           },
         },
       });
 
-      return { generateRefreshToken, generateAccessToken, sanitizeUser, emit, findOne };
+      return {
+        generateRefreshToken,
+        generateAccessToken,
+        invalidateRefreshToken,
+        sanitizeUser,
+        emit,
+        findOne,
+        trustedDeviceSettings,
+        consumeTrustedDevice,
+        trustDevice,
+      };
     };
 
-    const buildCtx = (body: Record<string, unknown>) => {
+    const buildCtx = (body: Record<string, unknown>, cookies: Record<string, string> = {}) => {
       const cookiesSet = jest.fn();
+      const cookiesGet = jest.fn((name: string) => cookies[name]);
       const notFound = jest.fn();
+      const internalServerError = jest.fn();
       const ctx = createContext(
         { body },
         {
           state: {},
-          cookies: { set: cookiesSet },
+          cookies: { set: cookiesSet, get: cookiesGet },
           notFound,
+          internalServerError,
           // createContext only builds `request: { query, body }`; issueSession also reads
           // `request.headers` (session metadata) and `request.secure` (cookie options).
           request: { query: {}, body, headers: {}, secure: false },
         }
       ) as any;
 
-      return { ctx, cookiesSet, notFound };
+      return { ctx, cookiesSet, cookiesGet, notFound };
     };
 
     test('an enrolled user receives a challenge and no session cookie', async () => {
@@ -137,6 +168,7 @@ describe('authentication controller', () => {
               isEnrolled,
               createChallenge,
               enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
             },
             user: { sanitizeUser: jest.fn(realSanitizeUser) },
           },
@@ -154,7 +186,12 @@ describe('authentication controller', () => {
       // mfaRequired. A cookie set here would make the whole feature a silent no-op.
       expect(cookiesSet).not.toHaveBeenCalled();
       expect(ctx.body).toEqual({
-        data: { mfaRequired: true, challengeToken: 'challenge-token', expiresIn: 300 },
+        data: {
+          mfaRequired: true,
+          challengeToken: 'challenge-token',
+          expiresIn: 300,
+          trustedDeviceDays: 30,
+        },
       });
       expect((ctx.body as any).data.token).toBeUndefined();
       expect((ctx.body as any).data.accessToken).toBeUndefined();
@@ -519,7 +556,248 @@ describe('authentication controller', () => {
           createChallenge.mock.invocationCallOrder[0]
         );
         expect(ctx.body).toEqual({
-          data: { mfaRequired: true, challengeToken: 'c', expiresIn: 300 },
+          data: { mfaRequired: true, challengeToken: 'c', expiresIn: 300, trustedDeviceDays: 30 },
+        });
+      });
+    });
+
+    describe('trusted devices (cycle 3)', () => {
+      const enrolledMfa = (overrides: Record<string, unknown> = {}) => ({
+        isEnabled: jest.fn(() => true),
+        isEnrolled: jest.fn(() => Promise.resolve(true)),
+        createChallenge: jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        ),
+        ...overrides,
+      });
+
+      test('an enrolled user with a live trust cookie gets a session and no challenge', async () => {
+        mockPassportUser(user);
+        const consumeTrustedDevice = jest.fn(() => Promise.resolve(true));
+        const createChallenge = jest.fn();
+        const { generateRefreshToken, emit } = buildIssuingStrapi(
+          enrolledMfa({ consumeTrustedDevice, createChallenge })
+        );
+        const { ctx, cookiesSet } = buildCtx(
+          { email: user.email, password: 'Password123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
+        );
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(consumeTrustedDevice).toHaveBeenCalledWith(String(user.id), 'trust-token');
+        expect(createChallenge).not.toHaveBeenCalled();
+        expect(generateRefreshToken).toHaveBeenCalled();
+        expect((ctx.body as any).data.mfaRequired).toBeUndefined();
+        expect((ctx.body as any).data.token).toBe('access-token');
+        expect(emit).toHaveBeenCalledWith(
+          'admin.auth.success',
+          expect.objectContaining({ provider: 'local' })
+        );
+        // The trust cookie is left alone; only the refresh cookie is written.
+        expect(cookiesSet).toHaveBeenCalledTimes(1);
+        expect(cookiesSet).toHaveBeenCalledWith(
+          REFRESH_COOKIE_NAME,
+          'refresh-token',
+          expect.any(Object)
+        );
+      });
+
+      test('a trust cookie that matches nothing is cleared and the challenge follows', async () => {
+        mockPassportUser(user);
+        const consumeTrustedDevice = jest.fn(() => Promise.resolve(false));
+        const { generateRefreshToken } = buildIssuingStrapi(enrolledMfa({ consumeTrustedDevice }));
+        const { ctx, cookiesSet } = buildCtx(
+          { email: user.email, password: 'Password123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'stale-token' }
+        );
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(consumeTrustedDevice).toHaveBeenCalledWith(String(user.id), 'stale-token');
+        expect(cookiesSet).toHaveBeenCalledTimes(1);
+        expect(cookiesSet).toHaveBeenCalledWith(
+          MFA_TRUST_COOKIE_NAME,
+          '',
+          expect.objectContaining({ expires: new Date(0) })
+        );
+        expect(generateRefreshToken).not.toHaveBeenCalled();
+        expect(ctx.body).toEqual({
+          data: {
+            mfaRequired: true,
+            challengeToken: 'challenge-token',
+            expiresIn: 300,
+            trustedDeviceDays: 30,
+          },
+        });
+      });
+
+      test('without a cookie the challenge is issued and the trust lookup never runs', async () => {
+        mockPassportUser(user);
+        const consumeTrustedDevice = jest.fn();
+        buildIssuingStrapi(enrolledMfa({ consumeTrustedDevice }));
+        const { ctx, cookiesSet } = buildCtx({ email: user.email, password: 'Password123' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(consumeTrustedDevice).not.toHaveBeenCalled();
+        expect(cookiesSet).not.toHaveBeenCalled();
+        expect((ctx.body as any).data.mfaRequired).toBe(true);
+      });
+
+      test('the challenge advertises null when the organisation does not offer trust', async () => {
+        mockPassportUser(user);
+        buildIssuingStrapi(
+          enrolledMfa({
+            trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: false, days: 30 })),
+          })
+        );
+        const { ctx } = buildCtx({ email: user.email, password: 'Password123' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect((ctx.body as any).data.trustedDeviceDays).toBeNull();
+      });
+
+      test('a locked account is refused before the trust cookie is consulted', async () => {
+        mockPassportUser(user);
+        const consumeTrustedDevice = jest.fn(() => Promise.resolve(true));
+        buildIssuingStrapi(
+          enrolledMfa({
+            consumeTrustedDevice,
+            enforce: jest.fn(() => Promise.resolve({ outcome: 'refused' })),
+          })
+        );
+        const { ctx } = buildCtx(
+          { email: user.email, password: 'Password123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
+        );
+
+        await expect(authenticationController.login(ctx, jest.fn())).rejects.toBeInstanceOf(
+          MfaLockedError
+        );
+        expect(consumeTrustedDevice).not.toHaveBeenCalled();
+      });
+
+      test('an unenrolled user is never asked for a cookie', async () => {
+        mockPassportUser(user);
+        const consumeTrustedDevice = jest.fn();
+        buildIssuingStrapi(
+          enrolledMfa({ isEnrolled: jest.fn(() => Promise.resolve(false)), consumeTrustedDevice })
+        );
+        const { ctx, cookiesGet } = buildCtx(
+          { email: user.email, password: 'Password123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
+        );
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(cookiesGet).not.toHaveBeenCalled();
+        expect(consumeTrustedDevice).not.toHaveBeenCalled();
+      });
+
+      test('/login/mfa with trustDevice grants trust and sets the cookie beside the session', async () => {
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const trustDevice = jest.fn(() => Promise.resolve({ token: 'trust-token', expiresAt }));
+        const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge, trustDevice });
+        const { ctx, cookiesSet } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+          trustDevice: true,
+          deviceId: '11111111-1111-4111-8111-111111111111',
+        });
+        ctx.request.headers['user-agent'] = 'jest-agent';
+
+        await authenticationController.loginMfa(ctx, jest.fn());
+
+        expect(trustDevice).toHaveBeenCalledWith(String(user.id), {
+          deviceId: '11111111-1111-4111-8111-111111111111',
+          userAgent: 'jest-agent',
+        });
+        expect(cookiesSet).toHaveBeenCalledWith(
+          MFA_TRUST_COOKIE_NAME,
+          'trust-token',
+          expect.objectContaining({ httpOnly: true, expires: expiresAt })
+        );
+        expect(cookiesSet).toHaveBeenCalledWith(
+          REFRESH_COOKIE_NAME,
+          'refresh-token',
+          expect.any(Object)
+        );
+        expect((ctx.body as any).data.token).toBe('access-token');
+      });
+
+      test('/login/mfa ignores trustDevice when the organisation does not offer trust', async () => {
+        const trustDevice = jest.fn(() => Promise.resolve(null));
+        const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge, trustDevice });
+        const { ctx, cookiesSet } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+          trustDevice: true,
+        });
+
+        await authenticationController.loginMfa(ctx, jest.fn());
+
+        expect(trustDevice).toHaveBeenCalled();
+        expect(cookiesSet).not.toHaveBeenCalledWith(
+          MFA_TRUST_COOKIE_NAME,
+          expect.anything(),
+          expect.anything()
+        );
+        expect((ctx.body as any).data.token).toBe('access-token');
+      });
+
+      test('/login/mfa without trustDevice grants nothing', async () => {
+        const trustDevice = jest.fn();
+        const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge, trustDevice });
+        const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
+
+        await authenticationController.loginMfa(ctx, jest.fn());
+
+        expect(trustDevice).not.toHaveBeenCalled();
+      });
+
+      test('/login/mfa rejects a non-boolean trustDevice before verifying anything', async () => {
+        const verifyChallenge = jest.fn();
+        buildIssuingStrapi({ isEnabled: jest.fn(() => true), verifyChallenge });
+        const { ctx } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+          trustDevice: 'yes',
+        });
+
+        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toThrow();
+        expect(verifyChallenge).not.toHaveBeenCalled();
+      });
+
+      test('/reset-password: an enrolled user gets a challenge advertising the trust period, and the cookie is never read', async () => {
+        const createChallenge = jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        );
+        const consumeTrustedDevice = jest.fn(() => Promise.resolve(true));
+        const { generateRefreshToken } = buildIssuingStrapi(
+          enrolledMfa({ createChallenge, consumeTrustedDevice })
+        );
+        const { ctx, cookiesGet } = buildCtx(
+          { resetPasswordToken: 'reset-token', password: 'NewPassword123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
+        );
+
+        await authenticationController.resetPassword(ctx);
+
+        expect(cookiesGet).not.toHaveBeenCalled();
+        expect(consumeTrustedDevice).not.toHaveBeenCalled();
+        expect(generateRefreshToken).not.toHaveBeenCalled();
+        expect(ctx.body).toEqual({
+          data: {
+            mfaRequired: true,
+            challengeToken: 'challenge-token',
+            expiresIn: 300,
+            trustedDeviceDays: 30,
+          },
         });
       });
     });

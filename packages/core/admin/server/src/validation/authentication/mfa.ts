@@ -17,6 +17,9 @@ import { yup, validateYupSchema } from '@strapi/utils';
  * `issueSession` reads both from the request body via `extractDeviceParams`, so `/login/mfa`
  * must accept them too, or `.noUnknown()` below would reject a body that legitimately carries
  * them and silently lose the caller's "remember me" choice.
+ *
+ * `trustDevice` (cycle 3) is the "trust this device" checkbox; a non-boolean is a 400 before any
+ * code is checked.
  */
 const mfaLoginSchema = yup
   .object()
@@ -25,6 +28,7 @@ const mfaLoginSchema = yup
     code: yup.string().min(6).max(32).required(),
     deviceId: yup.string().uuid().optional(),
     rememberMe: yup.boolean().optional(),
+    trustDevice: yup.boolean().optional(),
   })
   .required()
   .noUnknown();
