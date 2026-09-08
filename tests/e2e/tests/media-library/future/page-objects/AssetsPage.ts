@@ -41,6 +41,10 @@ export class AssetsPage {
 
   async goto() {
     await this.page.goto('/admin/plugins/upload');
+
+    // `New` only renders once RBAC has resolved, and the page paints before that — so landing
+    // and interacting immediately races the permission check.
+    await this.newButton.waitFor({ state: 'visible' });
   }
 
   /**
