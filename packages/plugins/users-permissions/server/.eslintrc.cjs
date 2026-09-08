@@ -1,0 +1,20 @@
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
+  root: true,
+  extends: ['eslint-config-custom/back/typescript'],
+  ignorePatterns: ['.eslintrc.cjs'],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ['./tsconfig.eslint.json'],
+  },
+
+  rules: {
+    // TODO: Remove this when all files are migrated to TypeScript
+    '@typescript-eslint/no-var-requires': 'off',
+    strict: 'off',
+  },
+};
+
+module.exports = config;

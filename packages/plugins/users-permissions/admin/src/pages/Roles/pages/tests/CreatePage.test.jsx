@@ -50,7 +50,7 @@ describe('Roles – CreatePage', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders correctly', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, findByRole } = render();
 
     expect(getByRole('heading', { name: 'Create a role' })).toBeInTheDocument();
     expect(getByRole('heading', { name: 'Role details' })).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('Roles – CreatePage', () => {
     /**
      * This means the `usePlugins` hook has finished fetching
      */
-    await waitFor(() => expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument());
+    await findByRole('heading', { name: 'Permissions' });
 
     expect(getByRole('heading', { name: 'Advanced settings' })).toBeInTheDocument();
 
@@ -84,9 +84,9 @@ describe('Roles – CreatePage', () => {
   });
 
   it('will show an error if the user does not fill the name or description field', async () => {
-    const { getByRole } = render();
+    const { getByRole, findByRole } = render();
 
-    await waitFor(() => expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument());
+    await findByRole('heading', { name: 'Permissions' });
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
@@ -98,9 +98,9 @@ describe('Roles – CreatePage', () => {
   });
 
   it('can create a new role and show a notification', async () => {
-    const { getByRole, getByText, user } = render();
+    const { getByRole, user, findByRole, findByText } = render();
 
-    await waitFor(() => expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument());
+    await findByRole('heading', { name: 'Permissions' });
 
     await user.type(getByRole('textbox', { name: 'Name' }), 'Test role');
     await user.type(getByRole('textbox', { name: 'Description' }), 'This is a test role');
@@ -114,6 +114,6 @@ describe('Roles – CreatePage', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(getByText('Role created')).toBeInTheDocument());
+    await findByText('Role created');
   });
 });

@@ -29,8 +29,10 @@ describe('Admin | containers | ProvidersPage', () => {
 
     await waitFor(() => {
       expect(getByText('email')).toBeInTheDocument();
-      expect(getByTestId('enable-email').textContent).toEqual('Enabled');
-      expect(getByTestId('enable-discord').textContent).toEqual('Disabled');
+      // eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+      expect(getByTestId('enable-email')).toHaveTextContent('Enabled');
+      // eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+      expect(getByTestId('enable-discord')).toHaveTextContent('Disabled');
     });
   });
 });
