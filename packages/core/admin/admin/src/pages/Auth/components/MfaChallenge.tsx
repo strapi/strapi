@@ -30,6 +30,12 @@ export interface MfaChallengeLocationState {
   challengeToken: string;
   expiresIn: number;
   rememberMe: boolean;
+  /**
+   * Cycle 3: the trust period the organisation offers ("Trust this device for {n} days"), or
+   * null when it offers none. Missing in a state written by an older bundle mid-flight, which is
+   * read as null.
+   */
+  trustedDeviceDays?: number | null;
 }
 
 const isChallengeState = (value: unknown): value is MfaChallengeLocationState =>
@@ -37,7 +43,10 @@ const isChallengeState = (value: unknown): value is MfaChallengeLocationState =>
   value !== null &&
   typeof (value as MfaChallengeLocationState).challengeToken === 'string' &&
   typeof (value as MfaChallengeLocationState).expiresIn === 'number' &&
-  typeof (value as MfaChallengeLocationState).rememberMe === 'boolean';
+  typeof (value as MfaChallengeLocationState).rememberMe === 'boolean' &&
+  (typeof (value as MfaChallengeLocationState).trustedDeviceDays === 'number' ||
+    (value as MfaChallengeLocationState).trustedDeviceDays === null ||
+    (value as MfaChallengeLocationState).trustedDeviceDays === undefined);
 
 // Same bounds as the server's validator: a 6-8 digit TOTP code or a 10-character recovery code
 // the user may have typed with dashes or spaces. Which factor it is gets decided server-side.
@@ -51,6 +60,7 @@ const MFA_SCHEMA = yup.object().shape({
     // `formatMessage` throw and crash the form.
     .min(6, { ...translatedErrors.minLength, values: { min: 6 } })
     .max(32, { ...translatedErrors.maxLength, values: { max: 32 } }),
+  trustDevice: yup.bool().nullable(),
 });
 
 const MfaChallenge = () => {
@@ -68,6 +78,8 @@ const MfaChallenge = () => {
   const [challenge] = React.useState<MfaChallengeLocationState | null>(() =>
     isChallengeState(location.state) ? location.state : null
   );
+
+  const trustedDeviceDays = challenge?.trustedDeviceDays ?? null;
 
   const hasClearedHistoryStateRef = React.useRef(false);
 
@@ -91,13 +103,21 @@ const MfaChallenge = () => {
     return <Navigate to={{ pathname: '/auth/login', search: location.search }} replace />;
   }
 
-  const handleSubmit = async ({ code }: { code: string }) => {
+  const handleSubmit = async ({
+    code,
+    trustDevice,
+  }: {
+    code: string;
+    trustDevice?: boolean | null;
+  }) => {
     setApiError(undefined);
 
     const res = await loginMfa({
       challengeToken: challenge.challengeToken,
       code,
       rememberMe: challenge.rememberMe,
+      // Only meaningful when the organisation offers trust; the server ignores it otherwise.
+      trustDevice: trustedDeviceDays !== null && trustDevice === true,
     });
 
     if ('error' in res) {
@@ -144,7 +164,7 @@ const MfaChallenge = () => {
           </Column>
           <Form
             method="POST"
-            initialValues={{ code: '' }}
+            initialValues={{ code: '', trustDevice: false }}
             onSubmit={handleSubmit}
             validationSchema={MFA_SCHEMA}
           >
@@ -160,6 +180,20 @@ const MfaChallenge = () => {
                 autoComplete="one-time-code"
                 maxLength={32}
               />
+              {trustedDeviceDays !== null ? (
+                <InputRenderer
+                  label={formatMessage(
+                    {
+                      id: 'Auth.form.mfa.trustDevice.label',
+                      defaultMessage:
+                        'Trust this device for {days, plural, one {# day} other {# days}}',
+                    },
+                    { days: trustedDeviceDays }
+                  )}
+                  name="trustDevice"
+                  type="checkbox"
+                />
+              ) : null}
               <Button fullWidth type="submit">
                 {formatMessage({ id: 'Auth.form.mfa.button.verify', defaultMessage: 'Verify' })}
               </Button>

@@ -91,6 +91,7 @@ const Login = ({ children }: LoginProps) => {
         challengeToken: res.data.challengeToken,
         expiresIn: res.data.expiresIn,
         rememberMe: body.rememberMe,
+        trustedDeviceDays: res.data.trustedDeviceDays ?? null,
       };
       navigate({ pathname: '/auth/mfa', search: searchString }, { state });
     } else {

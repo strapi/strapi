@@ -1,4 +1,4 @@
-import { render, server, screen, fireEvent } from '@tests/utils';
+import { render, server, screen, fireEvent, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
@@ -23,7 +23,12 @@ const MfaStateProbe = () => {
   return <pre data-testid="state-probe">{JSON.stringify(state)}</pre>;
 };
 
-const STATE = { challengeToken: 'a'.repeat(64), expiresIn: 300, rememberMe: false };
+const STATE = {
+  challengeToken: 'a'.repeat(64),
+  expiresIn: 300,
+  rememberMe: false,
+  trustedDeviceDays: null,
+};
 
 const renderChallenge = (state: object | null = STATE, search = '') =>
   render(
@@ -162,5 +167,59 @@ describe('MfaChallenge', () => {
 
     const errorMessage = await screen.findByText(/Too many requests/);
     expect(errorMessage).toHaveAttribute('role', 'alert');
+  });
+
+  it('offers "Trust this device" only when the organisation allows it', () => {
+    renderChallenge({ ...STATE, trustedDeviceDays: 30 });
+    const box = screen.getByRole('checkbox', { name: 'Trust this device for 30 days' });
+    expect(box).not.toBeChecked();
+
+    renderChallenge(STATE);
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1);
+  });
+
+  it('uses the singular when the period is one day', () => {
+    renderChallenge({ ...STATE, trustedDeviceDays: 1 });
+    expect(
+      screen.getByRole('checkbox', { name: 'Trust this device for 1 day' })
+    ).toBeInTheDocument();
+  });
+
+  it('sends trustDevice only when the box is ticked', async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    server.use(
+      http.post('/admin/login/mfa', async ({ request }) => {
+        bodies.push((await request.json()) as Record<string, unknown>);
+        return HttpResponse.json({
+          data: {
+            token: 'session-token',
+            user: { id: 1, email: 'test@testing.com', firstname: 'T', lastname: 'U', roles: [] },
+          },
+        });
+      })
+    );
+
+    const unticked = renderChallenge({ ...STATE, trustedDeviceDays: 30 });
+    await unticked.user.type(screen.getByLabelText('Authentication code*'), '123456');
+    submitVerify();
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0].trustDevice).toBe(false);
+    unticked.unmount();
+
+    const ticked = renderChallenge({ ...STATE, trustedDeviceDays: 30 });
+    await ticked.user.click(
+      screen.getByRole('checkbox', { name: 'Trust this device for 30 days' })
+    );
+    await ticked.user.type(screen.getByLabelText('Authentication code*'), '123456');
+    submitVerify();
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1].trustDevice).toBe(true);
+  });
+
+  it('still renders a challenge whose state predates the trust period field', () => {
+    renderChallenge({ challengeToken: 'a'.repeat(64), expiresIn: 300, rememberMe: false });
+
+    expect(screen.getByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Trust this device/ })).not.toBeInTheDocument();
   });
 });

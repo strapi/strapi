@@ -42,6 +42,7 @@
   "Auth.form.mfa.locked.message": "This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.",
   "Auth.form.mfa.subtitle": "Enter the code from your authenticator app, or one of your recovery codes.",
   "Auth.form.mfa.title": "Two-factor authentication",
+  "Auth.form.mfa.trustDevice.label": "Trust this device for {days, plural, one {# day} other {# days}}",
   "Auth.form.password.hide-password": "Hide password",
   "Auth.form.password.hint": "Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number",
   "Auth.form.password.show-password": "Show password",
