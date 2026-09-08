@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { ErrorMessage } from '../../../../Profile/DialogUtils';
+import { ErrorMessage } from '../../../../../components/ErrorMessage';
 
 interface DowngradeCredentials {
   password: string;

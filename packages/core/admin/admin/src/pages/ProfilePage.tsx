@@ -11,6 +11,7 @@ import { InputRenderer } from '../components/FormInputs/Renderer';
 import { useGuidedTour } from '../components/GuidedTour/Context';
 import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
+import { Panel } from '../components/Panel';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
@@ -23,7 +24,6 @@ import { isBaseQueryError } from '../utils/baseQuery';
 import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
-import { Panel } from './Profile/Panel';
 import { TwoFactorSection } from './Profile/TwoFactorSection';
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 

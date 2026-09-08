@@ -53,6 +53,14 @@ describe('TwoFactorEnforcementCard', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 
+  it('keeps Save disabled while isRefreshing, even with a modified draft', async () => {
+    const { user } = renderCard({ isRefreshing: true });
+
+    await user.click(screen.getByRole('radio', { name: /^Required/ }));
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
   it('disables every control and Save without the update permission', () => {
     renderCard({ canUpdate: false });
 

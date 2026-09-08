@@ -39,6 +39,34 @@ describe('SecurityPage', () => {
     expect(screen.getByRole('checkbox', { name: 'Author (0 users)' })).not.toBeChecked();
   });
 
+  it('keeps showing the loading state, not an empty card, while /admin/roles is still in flight', async () => {
+    server.use(
+      settings(),
+      me(true),
+      http.get('/admin/roles', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({
+          data: [
+            { id: 1, code: 'strapi-editor', name: 'Editor' },
+            { id: 2, code: 'strapi-author', name: 'Author' },
+          ],
+        });
+      })
+    );
+    render(<SecurityPage />);
+
+    // The settings query (and RBAC) can resolve well before the roles query even starts; the
+    // card must stay hidden behind Page.Loading for that whole stretch rather than flashing with
+    // an empty role list.
+    expect(screen.getByText('Loading content.')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Two-factor authentication' })
+    ).not.toBeInTheDocument();
+
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+    expect(screen.getByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
+  });
+
   it('shows the disabled-feature state when the API answers 404', async () => {
     server.use(
       http.get('/admin/security-settings', () => new HttpResponse(null, { status: 404 })),
@@ -50,6 +78,26 @@ describe('SecurityPage', () => {
       await screen.findByText(/Two-factor authentication is turned off on this instance/)
     ).toBeInTheDocument();
     expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+  });
+
+  it('renders Page.Error, not the disabled-feature copy, when the API answers 500', async () => {
+    server.use(
+      http.get('/admin/security-settings', () =>
+        HttpResponse.json(
+          { error: { status: 500, name: 'InternalServerError', message: 'boom' } },
+          { status: 500 }
+        )
+      ),
+      me(false)
+    );
+    render(<SecurityPage />);
+
+    expect(
+      await screen.findByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Two-factor authentication is turned off on this instance/)
+    ).not.toBeInTheDocument();
   });
 
   it('renders the card read-only for a user with read but not update permission', async () => {

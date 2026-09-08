@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Box, Button, Dialog, Flex, Typography } from '@strapi/design-system';
+import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
+import { Panel } from '../../../../../components/Panel';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useUnlockUserMfaMutation } from '../../../../../services/mfa';
@@ -117,53 +118,43 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   }
 
   return (
-    <Box
-      background="neutral0"
-      hasRadius
-      shadow="filterShadow"
-      paddingTop={6}
-      paddingBottom={6}
-      paddingLeft={7}
-      paddingRight={7}
-    >
-      <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" tag="h2">
-          {formatMessage({
-            id: 'Settings.permissions.users.mfa.title',
-            defaultMessage: 'Two-factor authentication',
-          })}
-        </Typography>
-        <Flex justifyContent="space-between" alignItems="flex-start" gap={4} wrap="wrap">
-          {state}
-          {user.mfaLockedAt ? (
-            <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <Dialog.Trigger>
-                <Button variant="secondary" disabled={!canUpdate} loading={isLoading}>
-                  {formatMessage({
-                    id: 'Settings.permissions.users.mfa.unlock',
-                    defaultMessage: 'Unlock',
-                  })}
-                </Button>
-              </Dialog.Trigger>
-              <ConfirmDialog
-                variant="default"
-                title={formatMessage({
-                  id: 'Settings.permissions.users.mfa.unlock.title',
-                  defaultMessage: 'Unlock this account?',
-                })}
-                onConfirm={handleUnlock}
-              >
+    <Panel>
+      <Typography variant="delta" tag="h2">
+        {formatMessage({
+          id: 'Settings.permissions.users.mfa.title',
+          defaultMessage: 'Two-factor authentication',
+        })}
+      </Typography>
+      <Flex justifyContent="space-between" alignItems="flex-start" gap={4} wrap="wrap">
+        {state}
+        {user.mfaLockedAt ? (
+          <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <Dialog.Trigger>
+              <Button variant="secondary" disabled={!canUpdate} loading={isLoading}>
                 {formatMessage({
-                  id: 'Settings.permissions.users.mfa.unlock.body',
-                  defaultMessage:
-                    'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
+                  id: 'Settings.permissions.users.mfa.unlock',
+                  defaultMessage: 'Unlock',
                 })}
-              </ConfirmDialog>
-            </Dialog.Root>
-          ) : null}
-        </Flex>
+              </Button>
+            </Dialog.Trigger>
+            <ConfirmDialog
+              variant="default"
+              title={formatMessage({
+                id: 'Settings.permissions.users.mfa.unlock.title',
+                defaultMessage: 'Unlock this account?',
+              })}
+              onConfirm={handleUnlock}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.users.mfa.unlock.body',
+                defaultMessage:
+                  'The user can log in with their password again. A new grace period to set up two-factor authentication starts at their next login.',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
+        ) : null}
       </Flex>
-    </Box>
+    </Panel>
   );
 };
 

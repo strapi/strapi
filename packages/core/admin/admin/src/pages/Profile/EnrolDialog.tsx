@@ -5,13 +5,14 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { ErrorMessage } from '../../components/ErrorMessage';
+import { useToMessage } from '../../hooks/useToMessage';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useEnrolMfaMutation,
   useVerifyMfaEnrolmentMutation,
 } from '../../services/mfa';
 
-import { ErrorMessage, useToMessage } from './DialogUtils';
 import { RecoveryCodes } from './RecoveryCodes';
 
 interface EnrolDialogProps {

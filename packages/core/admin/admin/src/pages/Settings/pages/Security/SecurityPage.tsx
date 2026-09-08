@@ -36,14 +36,29 @@ const SecurityPage = () => {
     readRoles: permissions.settings?.roles.read ?? [],
   });
 
-  const { data: settings, error, isLoading: isLoadingSettings } = useGetSecuritySettingsQuery();
-  const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, { skip: !canReadRoles });
+  const {
+    data: settings,
+    error,
+    isLoading: isLoadingSettings,
+    isFetching: isFetchingSettings,
+  } = useGetSecuritySettingsQuery();
+  const {
+    roles,
+    isLoading: isLoadingRoles,
+    isUninitialized: isUninitializedRoles,
+  } = useAdminRoles(undefined, { skip: !canReadRoles });
   // The caller's own enrolment decides whether a downgrade needs a code; a 404 here is the same
   // feature-off signal and simply reads as "not enrolled".
   const { data: mfaStatus } = useGetMfaStatusQuery();
 
   const isFeatureOff = isNotFoundError(error);
-  const isLoading = isLoadingRBAC || isLoadingSettings || (canReadRoles && isLoadingRoles);
+  // While `canReadRoles` is true, the roles query starts out uninitialized (its `isLoading` is
+  // false) for the render where RBAC first resolves, which would otherwise paint the card with an
+  // empty role list for one frame before the roles request even starts.
+  const isLoading =
+    isLoadingRBAC ||
+    isLoadingSettings ||
+    (canReadRoles && (isLoadingRoles || isUninitializedRoles));
 
   return (
     <Page.Main>
@@ -83,6 +98,7 @@ const SecurityPage = () => {
               roles={roles}
               canUpdate={canUpdate}
               callerEnrolled={Boolean(mfaStatus?.enabled)}
+              isRefreshing={isFetchingSettings}
             />
           </Flex>
         )}

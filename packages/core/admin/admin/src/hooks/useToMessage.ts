@@ -1,26 +1,10 @@
-import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
-import { BaseQueryError, isBaseQueryError } from '../../utils/baseQuery';
+import { BaseQueryError, isBaseQueryError } from '../utils/baseQuery';
+
+import { useAPIErrorHandler } from './useAPIErrorHandler';
 
 import type { SerializedError } from '@reduxjs/toolkit';
-
-/**
- * Shared "the last mutation in this dialog failed" banner, used by both `EnrolDialog` and
- * `ReAuthDialog`. Renders nothing when there's no error to show.
- */
-const ErrorMessage = ({ error }: { error?: string }) => {
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <Typography role="alert" textColor="danger600">
-      {error}
-    </Typography>
-  );
-};
 
 /**
  * Shared error-to-string mapping for the MFA dialogs: a `BaseQueryError` (the server actually
@@ -38,4 +22,4 @@ const useToMessage = () => {
       : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' });
 };
 
-export { ErrorMessage, useToMessage };
+export { useToMessage };

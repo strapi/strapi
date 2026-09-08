@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Alert, Button, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { Panel } from '../../components/Panel';
 import { formatMfaNotice } from '../../features/MfaNotices';
 import {
   useGetMfaNoticesQuery,
@@ -12,7 +13,6 @@ import {
 import { isNotFoundError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
-import { Panel } from './Panel';
 import { ReAuthDialog } from './ReAuthDialog';
 
 import type { Me, MfaEventNotice } from '../../../../shared/contracts/mfa';

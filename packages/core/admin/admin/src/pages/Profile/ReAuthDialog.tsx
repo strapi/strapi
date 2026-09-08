@@ -3,14 +3,15 @@ import * as React from 'react';
 import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
+import { useToMessage } from '../../hooks/useToMessage';
 import {
   useAcknowledgeRecoveryCodesMutation,
   useDisableMfaMutation,
   useRegenerateRecoveryCodesMutation,
 } from '../../services/mfa';
 
-import { ErrorMessage, useToMessage } from './DialogUtils';
 import { RecoveryCodes } from './RecoveryCodes';
 
 interface ReAuthDialogProps {
@@ -69,8 +70,8 @@ const COPY = {
  * One form, two intents: re-authenticate with the current password plus a second factor (a TOTP
  * code or an unused recovery code), then either regenerate the recovery-code set or disable MFA
  * entirely. Modeled on `EnrolDialog` -- same `Modal` skeleton, same reset-on-close and
- * unmount-safety-net pattern (see that file for the full rationale); `ErrorMessage`/`useToMessage`
- * are shared with it via `DialogUtils.tsx`.
+ * unmount-safety-net pattern (see that file for the full rationale); `ErrorMessage`
+ * (`components/ErrorMessage.tsx`) and `useToMessage` (`hooks/useToMessage.ts`) are shared with it.
  *
  * `regenerate` and `disable` share this dialog because they share the same re-authentication gate
  * (`RegenerateRecoveryCodes`/`Disable` in `shared/contracts/mfa.ts` both take `{ password, code
