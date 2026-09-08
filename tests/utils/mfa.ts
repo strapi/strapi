@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+
 import type { Page } from '@playwright/test';
 import { base32Decode, generateTotp } from '@strapi/utils';
 
@@ -44,4 +46,39 @@ export const enrolViaUi = async (page: Page, password: string) => {
   await dialog.waitFor({ state: 'hidden' });
 
   return { secret, recoveryCodes: recoveryCodes.map((c) => c.trim()) };
+};
+
+/**
+ * Backdates a user's enrolment deadline so their next password login (or token refresh) locks
+ * the account. Writes `admin_users.mfa_grace_until` directly in the e2e app's SQLite database
+ * (`<TEST_APP_PATH>/.tmp/data.db`, the same file `tests/utils/get-db-counts.js` reads), through
+ * the app's own `better-sqlite3` so no dependency is added to the monorepo root.
+ *
+ * Strapi writes datetimes to SQLite as epoch milliseconds (knex's better-sqlite3 client binds a
+ * `Date` via `valueOf()`; `DatetimeField.fromDB` accepts either), so the value is an integer.
+ */
+export const expireMfaGrace = (email: string): void => {
+  const appPath = process.env.TEST_APP_PATH;
+  if (!appPath) {
+    throw new Error('expireMfaGrace: TEST_APP_PATH is not set; run through `yarn test:e2e`.');
+  }
+
+  const script = `
+    const path = require('path');
+    const Database = require('better-sqlite3');
+    const db = new Database(path.join(process.cwd(), '.tmp', 'data.db'));
+    const info = db
+      .prepare('UPDATE admin_users SET mfa_grace_until = ? WHERE email = ?')
+      .run(Date.now() - 60_000, process.argv[1]);
+    db.close();
+    if (info.changes !== 1) {
+      console.error('expected to update 1 row, updated ' + info.changes);
+      process.exit(1);
+    }
+  `;
+
+  const result = spawnSync('node', ['-e', script, email], { cwd: appPath, encoding: 'utf8' });
+  if (result.status !== 0) {
+    throw new Error(`expireMfaGrace failed: ${result.stderr || result.stdout}`);
+  }
 };
