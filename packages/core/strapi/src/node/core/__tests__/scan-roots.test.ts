@@ -175,6 +175,8 @@ describe('getScanRoots', () => {
 
 describe('the host admin packages', () => {
   const packageRoot = path.dirname(HOST_MANIFEST_PATH);
+  // Three levels up from `packages/core/strapi/package.json` is the monorepo root
+  const monorepoPath = path.dirname(path.dirname(path.dirname(packageRoot)));
 
   // The file re-exports the same packages, so the matches need a dedupe
   const imported = () => [
@@ -191,9 +193,21 @@ describe('the host admin packages', () => {
     expect([...HOST_ADMIN_PACKAGES].sort()).toEqual(imported().sort());
   });
 
+  test('each hold a development alias that names a directory which exists', () => {
+    // The alias table decides the development scan roots, so a missing entry scans a stale `dist`
+    const { getMonorepoAliases: actualGetMonorepoAliases } =
+      jest.requireActual<typeof import('../aliases')>('../aliases');
+    const aliases = actualGetMonorepoAliases({ monorepo: { path: monorepoPath } });
+
+    HOST_ADMIN_PACKAGES.forEach((name) => {
+      const source = aliases[`${name}/strapi-admin`];
+
+      expect(source).toBeDefined();
+      expect(existsSync(String(source))).toBe(true);
+    });
+  });
+
   test('name an Enterprise source directory that exists', () => {
-    // Three levels up from `packages/core/strapi/package.json` is the monorepo root
-    const monorepoPath = path.dirname(path.dirname(path.dirname(packageRoot)));
     const eeAdminSource = getMonorepoEeAdminSource({ monorepo: { path: monorepoPath } });
 
     expect(eeAdminSource).toBeDefined();

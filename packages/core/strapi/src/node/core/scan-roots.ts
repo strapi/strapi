@@ -36,9 +36,10 @@ const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> =
   const manifestPath = require.resolve('@strapi/strapi/package.json');
   const requireFromHost = createRequire(manifestPath);
 
-  // The alias wins, because it names the directory Vite serves and not an unbuilt `dist`
   const hostRoots = HOST_ADMIN_PACKAGES.map((name) => {
     const modulePath = `${name}/strapi-admin`;
+
+    // The alias wins, because it names the directory Vite serves and not an unbuilt `dist`
     return aliases[modulePath] ?? path.dirname(requireFromHost.resolve(modulePath));
   });
 
@@ -51,14 +52,16 @@ const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> =
   const eeAdminSource = getMonorepoEeAdminSource({ monorepo });
   const eeRoots = eeAdminSource ? [eeAdminSource] : [];
 
-  // `customisations.path` is the `app.{js,ts,…}` file, so the root is its directory
   const appRoots = ctx.customisations ? [path.dirname(ctx.customisations.path)] : [];
 
   // A package can be both a host dependency and an enabled plugin
   return [...new Set([...hostRoots, ...pluginRoots, ...eeRoots, ...appRoots])];
 };
 
-/** A glob separator is a forward slash on every platform, so replace every backslash */
+/**
+ * Converts a system path to the glob form the `@source` lines need. A glob separator is a forward
+ * slash on every platform, Windows included
+ */
 const toGlobPath = (value: string): string => value.replace(/\\/g, '/');
 
 export { getScanRoots, toGlobPath, HOST_ADMIN_PACKAGES };
