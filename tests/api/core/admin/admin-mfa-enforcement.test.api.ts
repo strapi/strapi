@@ -53,7 +53,10 @@ describe('Admin MFA enforcement', () => {
   test('defaults: optional, 7 days, no required roles', async () => {
     const res = await rq({ url: '/admin/security-settings', method: 'GET' });
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toEqual({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } });
+    expect(res.body.data).toEqual({
+      mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+      trustedDevices: { enabled: true, days: 30 },
+    });
   });
 
   test('the role API rejects mfaRequired', async () => {
