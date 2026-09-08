@@ -278,6 +278,20 @@ describe('upload MCP tool registration', () => {
       expect(description).toMatch(/not documents/i);
     });
 
+    test('warns in media_move_assets that a folder id moves the asset sharing its number', () => {
+      // The server cannot catch this — asset and folder ids are independently numbered and a
+      // bare `ids` array cannot say which namespace was meant — so the description IS the
+      // mitigation. It must not imply a folder id is harmless here.
+      const { description } = byName.media_move_assets;
+
+      expect(description).toMatch(/NEVER PASS A FOLDER ID/);
+      expect(description).toMatch(/same number often names both/i);
+      expect(description).toMatch(/media_list_assets/);
+      // ...and it must not claim the tool refuses folder ids, which it cannot do.
+      expect(description).not.toMatch(/folder ids are rejected/i);
+      expect(description).not.toMatch(/does not resolve to an asset is refused/i);
+    });
+
     test('warns in media_move_assets that a partial failure is not rolled back', () => {
       // An agent that reads a failed call as all-or-nothing would either retry moves that
       // already happened or abandon ones that did not.

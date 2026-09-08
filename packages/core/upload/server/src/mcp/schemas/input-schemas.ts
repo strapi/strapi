@@ -256,9 +256,16 @@ export const mediaDeleteFolderInputSchema = z
  * `folder` is required, including an explicit null for the root, for the same reason `media_move_folder`
  * requires `parent`: a move needs a destination, and an omitted key would silently become a no-op.
  *
- * ASSET ids only. Asset ids and folder ids are indistinguishable integers from separate
- * namespaces, and nothing in the schema can tell them apart — the handler rejects an id that
- * does not resolve to an asset, and `media_move_folder` is the tool for folders.
+ * ASSET ids only, and the schema CANNOT enforce it. Asset ids and folder ids are independently
+ * numbered, so the same integer routinely names both; the handler resolves ids in the file table,
+ * which means a folder id whose number collides with an asset moves that asset — and reports it
+ * as a success. Only an id matching no asset at all is reported as failed.
+ *
+ * This is an accepted risk, not an oversight: with a bare `ids: number[]` there is no way for the
+ * caller to say which namespace it meant, and refusing every colliding id would make those assets
+ * permanently unmovable over MCP. The mitigation is the tool description. The durable fix is
+ * namespaced handles (`asset:1` / `folder:1`) across the whole media surface, which is a breaking
+ * change to the read tools and belongs to its own ticket.
  */
 export const moveMediaInputSchema = z
   .object(
@@ -268,7 +275,7 @@ export const moveMediaInputSchema = z
         .min(1)
         .max(100)
         .describe(
-          'Numeric ids of the assets to move (1-100). ASSET ids only — folder ids are a separate namespace of integers and are rejected here; use media_move_folder to move a folder.'
+          'Numeric ids of the assets to move (1-100). ASSET ids only, taken from media_list_assets or media_get_asset — never from media_list_folders. Folder ids are numbered separately and the same number often names both an asset and a folder, so a folder id here moves the asset sharing that number; use media_move_folder to move a folder.'
         ),
       folder: folderIdSchema
         .nullable()
