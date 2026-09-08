@@ -47,7 +47,7 @@ export const sortSchema = z
     `Sort expression. One of: ${ALLOWED_SORT_STRINGS.join(', ')}. Defaults to "createdAt:DESC".`
   );
 
-export const listMediaInputSchema = z.object({
+export const mediaListAssetsInputSchema = z.object({
   folderId: folderIdSchema
     .optional()
     .describe(
@@ -71,8 +71,8 @@ export const listMediaInputSchema = z.object({
   sort: sortSchema,
 });
 
-export const getMediaInputSchema = z.object({
+export const mediaGetAssetInputSchema = z.object({
   id: mediaIdSchema,
 });
 
-export const listFoldersInputSchema = z.object({});
+export const mediaListFoldersInputSchema = z.object({});

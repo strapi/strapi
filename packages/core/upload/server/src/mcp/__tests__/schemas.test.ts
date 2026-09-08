@@ -1,20 +1,20 @@
 import {
-  listMediaInputSchema,
-  getMediaInputSchema,
-  listMediaOutputSchema,
-  getMediaOutputSchema,
-  listFoldersOutputSchema,
+  mediaListAssetsInputSchema,
+  mediaGetAssetInputSchema,
+  mediaListAssetsOutputSchema,
+  mediaGetAssetOutputSchema,
+  mediaListFoldersOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
 describe('upload MCP schemas', () => {
-  describe('list_media input', () => {
+  describe('media_list_assets input', () => {
     test('accepts an empty object — every filter is optional', () => {
-      expect(listMediaInputSchema.safeParse({}).success).toBe(true);
+      expect(mediaListAssetsInputSchema.safeParse({}).success).toBe(true);
     });
 
     test('accepts the documented filters', () => {
-      const parsed = listMediaInputSchema.safeParse({
+      const parsed = mediaListAssetsInputSchema.safeParse({
         folderId: 3,
         mime: 'image/png',
         name: 'logo',
@@ -27,44 +27,46 @@ describe('upload MCP schemas', () => {
     });
 
     test('accepts folderId: null to mean the media library root', () => {
-      expect(listMediaInputSchema.safeParse({ folderId: null }).success).toBe(true);
+      expect(mediaListAssetsInputSchema.safeParse({ folderId: null }).success).toBe(true);
     });
 
     test.each(ALLOWED_SORT_STRINGS)('accepts the allowed sort string %s', (sort) => {
-      expect(listMediaInputSchema.safeParse({ sort }).success).toBe(true);
+      expect(mediaListAssetsInputSchema.safeParse({ sort }).success).toBe(true);
     });
 
     test('rejects a sort on a private column', () => {
       // folderPath is `private: true` on the file content-type and must not be sortable.
-      expect(listMediaInputSchema.safeParse({ sort: 'folderPath:ASC' }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ sort: 'folderPath:ASC' }).success).toBe(false);
     });
 
     test('rejects a non-integer or out-of-range page size', () => {
-      expect(listMediaInputSchema.safeParse({ pageSize: 0 }).success).toBe(false);
-      expect(listMediaInputSchema.safeParse({ pageSize: 101 }).success).toBe(false);
-      expect(listMediaInputSchema.safeParse({ pageSize: 1.5 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 0 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 101 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 1.5 }).success).toBe(false);
     });
 
     test('rejects a zero or negative page', () => {
-      expect(listMediaInputSchema.safeParse({ page: 0 }).success).toBe(false);
-      expect(listMediaInputSchema.safeParse({ page: -1 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ page: 0 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ page: -1 }).success).toBe(false);
     });
   });
 
-  describe('get_media input', () => {
+  describe('media_get_asset input', () => {
     test('requires a positive integer id', () => {
-      expect(getMediaInputSchema.safeParse({ id: 42 }).success).toBe(true);
-      expect(getMediaInputSchema.safeParse({ id: 0 }).success).toBe(false);
-      expect(getMediaInputSchema.safeParse({ id: 1.5 }).success).toBe(false);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 42 }).success).toBe(true);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 0 }).success).toBe(false);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 1.5 }).success).toBe(false);
     });
 
     test('rejects a documentId in place of a numeric id', () => {
       // Media files are not documents; a string identifier is a caller error worth surfacing.
-      expect(getMediaInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b' }).success).toBe(false);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b' }).success).toBe(
+        false
+      );
     });
 
     test('requires the id', () => {
-      expect(getMediaInputSchema.safeParse({}).success).toBe(false);
+      expect(mediaGetAssetInputSchema.safeParse({}).success).toBe(false);
     });
   });
 
@@ -86,21 +88,21 @@ describe('upload MCP schemas', () => {
     };
 
     test('validates a sanitized asset', () => {
-      expect(getMediaOutputSchema.safeParse({ data: asset }).success).toBe(true);
+      expect(mediaGetAssetOutputSchema.safeParse({ data: asset }).success).toBe(true);
     });
 
     test('accepts a null folder for a root-level asset', () => {
-      expect(getMediaOutputSchema.safeParse({ data: { ...asset, folder: null } }).success).toBe(
-        true
-      );
+      expect(
+        mediaGetAssetOutputSchema.safeParse({ data: { ...asset, folder: null } }).success
+      ).toBe(true);
     });
 
     test('accepts a null data payload', () => {
-      expect(getMediaOutputSchema.safeParse({ data: null }).success).toBe(true);
+      expect(mediaGetAssetOutputSchema.safeParse({ data: null }).success).toBe(true);
     });
 
     test('strips fields outside the allowlist', () => {
-      const parsed = getMediaOutputSchema.parse({
+      const parsed = mediaGetAssetOutputSchema.parse({
         data: {
           ...asset,
           provider: 'aws-s3',
@@ -119,7 +121,7 @@ describe('upload MCP schemas', () => {
     });
 
     test('validates a paginated list payload', () => {
-      const parsed = listMediaOutputSchema.safeParse({
+      const parsed = mediaListAssetsOutputSchema.safeParse({
         results: [asset],
         pagination: { page: 1, pageSize: 25, pageCount: 1, total: 1 },
       });
@@ -128,7 +130,7 @@ describe('upload MCP schemas', () => {
     });
 
     test('validates an arbitrarily nested folder tree', () => {
-      const parsed = listFoldersOutputSchema.safeParse({
+      const parsed = mediaListFoldersOutputSchema.safeParse({
         data: [
           {
             id: 1,
@@ -144,9 +146,9 @@ describe('upload MCP schemas', () => {
     });
 
     test('rejects a folder node missing children', () => {
-      expect(listFoldersOutputSchema.safeParse({ data: [{ id: 1, name: 'root' }] }).success).toBe(
-        false
-      );
+      expect(
+        mediaListFoldersOutputSchema.safeParse({ data: [{ id: 1, name: 'root' }] }).success
+      ).toBe(false);
     });
   });
 });

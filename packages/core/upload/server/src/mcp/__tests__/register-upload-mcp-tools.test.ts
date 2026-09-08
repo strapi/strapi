@@ -25,10 +25,24 @@ describe('upload MCP tool registration', () => {
 
       expect(registerTool).toHaveBeenCalledTimes(3);
       expect(registerTool.mock.calls.map(([tool]) => tool.name)).toEqual([
-        'list_media',
-        'get_media',
-        'list_folders',
+        'media_list_assets',
+        'media_get_asset',
+        'media_list_folders',
       ]);
+    });
+
+    test('names every tool so the content-manager can never derive the same one', () => {
+      // The content-manager derives `<verb>_<slug>` per content type, in bootstrap — after this
+      // runs in register. registerTool throws on a duplicate name and nothing catches it, so a
+      // project with a content type named `media` or `folders` would fail to boot on a clash.
+      // Every derived name starts with a verb, so a media_ prefix is unreachable by derivation.
+      const { strapi, registerTool } = makeStrapi();
+
+      registerUploadMcpTools({ strapi });
+
+      for (const [tool] of registerTool.mock.calls) {
+        expect(tool.name).toMatch(/^media_/);
+      }
     });
 
     test('registers the tools even when the MCP server is disabled', () => {
@@ -85,14 +99,14 @@ describe('upload MCP tool registration', () => {
 
     test('documents that media uses numeric ids, not documentIds', () => {
       // The content-manager tools key on documentId, which files do not have.
-      expect(byName.get_media.description).toMatch(/numeric id/i);
-      expect(byName.get_media.description).toMatch(/not documents/i);
+      expect(byName.media_get_asset.description).toMatch(/numeric id/i);
+      expect(byName.media_get_asset.description).toMatch(/not documents/i);
     });
 
     test('exposes an input schema for the tools that take arguments, and none for the folder tree', () => {
-      expect(byName.list_media.resolveInputSchema).toBeDefined();
-      expect(byName.get_media.resolveInputSchema).toBeDefined();
-      expect(byName.list_folders.resolveInputSchema).toBeUndefined();
+      expect(byName.media_list_assets.resolveInputSchema).toBeDefined();
+      expect(byName.media_get_asset.resolveInputSchema).toBeDefined();
+      expect(byName.media_list_folders.resolveInputSchema).toBeUndefined();
     });
   });
 });

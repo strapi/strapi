@@ -27,7 +27,7 @@ type GetMediaArgs = {
 };
 
 /**
- * Builds the `filters` clause for `list_media`.
+ * Builds the `filters` clause for `media_list_assets`.
  *
  * `folderId: null` is meaningfully different from an omitted `folderId`: null means "assets at
  * the media library root" (no folder relation), while omitting it means "any folder".
@@ -58,13 +58,13 @@ const buildAssetFilters = (args: ListMediaArgs): Record<string, unknown> => {
 };
 
 /**
- * `list_media` — paginated, filtered listing of media files.
+ * `media_list_assets` — paginated, filtered listing of media files.
  *
  * Permission conditions are applied through the permissions manager
  * (`addPermissionsQueryTo`) so a token restricted by a condition — e.g. own-assets-only —
  * sees the same subset it would through the admin API.
  */
-export const createListMediaHandler =
+export const createMediaListAssetsHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
@@ -91,12 +91,12 @@ export const createListMediaHandler =
   };
 
 /**
- * `get_media` — a single asset by numeric id.
+ * `media_get_asset` — a single asset by numeric id.
  *
  * The entity-level `cannot(action, subject)` check is what enforces permission *conditions*:
  * `pm.isAllowed` only proves the action is permitted on the model, not on this row.
  */
-export const createGetMediaHandler =
+export const createMediaGetAssetHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
@@ -122,13 +122,13 @@ export const createGetMediaHandler =
   };
 
 /**
- * `list_folders` — the nested folder structure, reusing `folder.getStructure()`.
+ * `media_list_folders` — the nested folder structure, reusing `folder.getStructure()`.
  *
  * `getStructure()` returns the whole tree in one query and has no permission-condition
  * filtering, so this is gated on the model-level read permission only — matching
  * `GET /upload/folder-structure` in the admin API.
  */
-export const createListFoldersHandler =
+export const createMediaListFoldersHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async (): Promise<Modules.MCP.McpToolHandlerReturn> => {
     assertMediaPermission(strapi, context, ACTIONS.read, FOLDER_MODEL_UID);
