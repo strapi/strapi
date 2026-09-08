@@ -12,7 +12,7 @@ import {
   MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND,
   MCP_MOVE_MEDIA_ID_NOT_FOUND,
   MCP_MOVE_MEDIA_ID_FORBIDDEN,
-  MCP_MOVE_MEDIA_NOTHING_MOVED,
+  MCP_MOVE_MEDIA_ID_FAILED,
 } from './constants';
 import { ok } from '../utils';
 
@@ -192,6 +192,17 @@ export const createMoveMediaHandler =
           id,
           strapi
         );
+        const updated = await getService('upload', strapi).updateFileInfo(
+          id,
+          // `updateFileInfo` reads `undefined` as "keep the stored folder" and null as the root,
+          // so the destination is forwarded as-is.
+          { folder },
+          { user: context.user }
+        );
+
+        // `updateFileInfo` resolves the row it wrote without the `folder` relation populated, so
+        // the destination is attached here instead of costing a read-back per asset.
+        moved.push(sanitizeMediaAsset({ ...updated, folder: destinationFolder }));
       } catch (error) {
         if (error instanceof errors.NotFoundError) {
           failed.push({ id, reason: MCP_MOVE_MEDIA_ID_NOT_FOUND });
@@ -203,36 +214,37 @@ export const createMoveMediaHandler =
           continue;
         }
 
-        // Anything else (a DB failure, say) is not this id's fault and must not be reported as
-        // one: it fails the call so the agent sees the real error instead of a bogus per-id
-        // verdict. The moves already applied stand — they are committed.
-        throw error;
+        /**
+         * Any other failure — a DB error, a provider fault — is reported against this id too,
+         * rather than thrown.
+         *
+         * Throwing here would be the one way to lose committed work silently: a tool error
+         * reaches the client as `{ content: [text], isError: true }` with NO
+         * `structuredContent` (see `tool-registry.ts`), so an error on the third id would
+         * discard the report saying the first two had already moved. The agent would be left
+         * unable to tell which ids to retry — exactly the recoverability this tool exists to
+         * provide.
+         *
+         * The message is carried through verbatim so the real fault is still legible, and the
+         * loop continues: one broken asset must not strand the rest of a reorganisation.
+         */
+        failed.push({
+          id,
+          reason: MCP_MOVE_MEDIA_ID_FAILED(error instanceof Error ? error.message : String(error)),
+        });
       }
-
-      const updated = await getService('upload', strapi).updateFileInfo(
-        id,
-        // `updateFileInfo` reads `undefined` as "keep the stored folder" and null as the root,
-        // so the destination is forwarded as-is.
-        { folder },
-        { user: context.user }
-      );
-
-      // `updateFileInfo` resolves the row it wrote without the `folder` relation populated, so
-      // the destination is attached here instead of costing a read-back per asset.
-      moved.push(sanitizeMediaAsset({ ...updated, folder: destinationFolder }));
     }
 
     /**
-     * Nothing moved is a failed call, not an empty success.
+     * A request where nothing moved still returns the per-id report.
      *
-     * Partial success stays a successful response — there is real work the agent must not retry,
-     * and the per-id report is what tells it which ids to retry instead. But when every id
-     * failed there is nothing to preserve, and returning an OK result would let an agent read a
-     * wholly rejected request as a completed reorganisation.
+     * `moved: []` alongside a populated `failed` is not ambiguous — it says plainly that nothing
+     * moved and why, per id. Throwing instead would drop `structuredContent` entirely (a tool
+     * error carries text only), so `ids: [999]` would get prose while `ids: [1, 999]` got a
+     * machine-readable entry, for the same class of mistake.
+     *
+     * The only failure that still rejects the whole call is an invalid destination folder, which
+     * is checked before the loop: nothing has moved, so there is no report to preserve.
      */
-    if (moved.length === 0) {
-      throw new errors.ValidationError(MCP_MOVE_MEDIA_NOTHING_MOVED(failed.map(({ id }) => id)));
-    }
-
     return ok({ destinationFolder, moved, failed });
   };
