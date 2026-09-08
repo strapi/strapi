@@ -71,6 +71,41 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   };
 };
 
+/**
+ * Cycle 3: the "trust this device" cookie. A random 32-byte token whose sha256 is stored in
+ * `admin::mfa-trusted-device`; presenting it on `/login` lets an enrolled user skip the second
+ * factor until the row's effective expiry. It inherits every scope option of the refresh cookie
+ * (httpOnly, path, domain, secure, sameSite) so any deployment where the refresh cookie already
+ * works is covered, and it carries an absolute `expires` rather than the refresh cookie's
+ * idle/absolute pair: trust never slides.
+ */
+export const MFA_TRUST_COOKIE_NAME = 'strapi_admin_mfa_trust';
+
+export const buildTrustCookieOptions = (expiresAt: Date, secureRequest?: boolean) => {
+  const base = getRefreshCookieOptions(secureRequest);
+  return {
+    ...base,
+    expires: expiresAt,
+    maxAge: Math.max(0, expiresAt.getTime() - Date.now()),
+  };
+};
+
+export const setTrustCookie = (ctx: Context, token: string, expiresAt: Date): void => {
+  ctx.cookies.set(
+    MFA_TRUST_COOKIE_NAME,
+    token,
+    buildTrustCookieOptions(expiresAt, ctx.request.secure)
+  );
+};
+
+/** Same scope options as the set, so the browser matches and drops the right cookie. */
+export const clearTrustCookie = (ctx: Context): void => {
+  ctx.cookies.set(MFA_TRUST_COOKIE_NAME, '', {
+    ...getRefreshCookieOptions(ctx.request.secure),
+    expires: new Date(0),
+  });
+};
+
 const getLifespansForType = (
   type: 'refresh' | 'session'
 ): { idleSeconds: number; maxSeconds: number } => {

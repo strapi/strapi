@@ -7,6 +7,10 @@ import {
   resolveLogoutDeviceId,
   issueSession,
   REFRESH_COOKIE_NAME,
+  MFA_TRUST_COOKIE_NAME,
+  buildTrustCookieOptions,
+  setTrustCookie,
+  clearTrustCookie,
 } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
 import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
@@ -341,5 +345,87 @@ describe('issueSession', () => {
     expect(cookiesSet).toHaveBeenCalled();
     expect(internalServerError).toHaveBeenCalled();
     expect(ctx.body).toBeUndefined();
+  });
+});
+
+describe('trust cookie helpers', () => {
+  const setStrapi = (config: Record<string, unknown> = {}) => {
+    (globalThis as any).strapi = {
+      config: { get: jest.fn((key: string) => config[key]) },
+      log: { warn: jest.fn() },
+    };
+  };
+
+  const buildCtx = (secure = false) => {
+    const set = jest.fn();
+    return { ctx: { cookies: { set }, request: { secure } } as any, set };
+  };
+
+  beforeEach(() => {
+    setStrapi();
+  });
+
+  test('the cookie name is fixed', () => {
+    expect(MFA_TRUST_COOKIE_NAME).toBe('strapi_admin_mfa_trust');
+  });
+
+  test('buildTrustCookieOptions is the refresh cookie scope with an absolute expiry', () => {
+    const expiresAt = new Date(Date.now() + 60_000);
+
+    const options = buildTrustCookieOptions(expiresAt, false);
+
+    expect(options).toMatchObject({
+      httpOnly: true,
+      path: '/admin',
+      sameSite: 'lax',
+      overwrite: true,
+      expires: expiresAt,
+    });
+    expect(options.maxAge).toBeGreaterThan(0);
+    expect(options.maxAge).toBeLessThanOrEqual(60_000);
+  });
+
+  test('buildTrustCookieOptions honours the configured cookie path and domain', () => {
+    setStrapi({
+      'admin.auth.cookie.path': '/dashboard',
+      'admin.auth.cookie.domain': 'example.com',
+    });
+
+    const options = buildTrustCookieOptions(new Date(Date.now() + 1_000));
+
+    expect(options.path).toBe('/dashboard');
+    expect(options.domain).toBe('example.com');
+  });
+
+  test('a past expiry yields a zero maxAge rather than a negative one', () => {
+    const options = buildTrustCookieOptions(new Date(Date.now() - 1_000));
+
+    expect(options.maxAge).toBe(0);
+  });
+
+  test('setTrustCookie writes the raw token under the trust cookie name', () => {
+    const { ctx, set } = buildCtx();
+    const expiresAt = new Date(Date.now() + 5_000);
+
+    setTrustCookie(ctx, 'raw-token', expiresAt);
+
+    expect(set).toHaveBeenCalledWith(
+      MFA_TRUST_COOKIE_NAME,
+      'raw-token',
+      expect.objectContaining({ httpOnly: true, expires: expiresAt })
+    );
+  });
+
+  test('clearTrustCookie expires the cookie in the past with the same scope', () => {
+    setStrapi({ 'admin.auth.cookie.path': '/dashboard' });
+    const { ctx, set } = buildCtx();
+
+    clearTrustCookie(ctx);
+
+    expect(set).toHaveBeenCalledWith(
+      MFA_TRUST_COOKIE_NAME,
+      '',
+      expect.objectContaining({ httpOnly: true, path: '/dashboard', expires: new Date(0) })
+    );
   });
 });
