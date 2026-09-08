@@ -85,9 +85,17 @@ export const sanitizeMediaFolder = (
 
   const parent = folder.parent as RawFolder | number | null | undefined;
 
-  // `parent` arrives either populated (an object) or as a bare id, depending on the query.
+  /**
+   * `parent: null` is a claim, not a default: the output contract defines it as "this folder
+   * sits at the media library root". A row selected without the relation cannot support that
+   * claim — it knows nothing about the parent either way — so the key is omitted rather than
+   * asserted as null, which would report a nested folder as root-level.
+   *
+   * A populated relation arrives either as an object or as a bare id, depending on the query.
+   */
   const parentValue = (() => {
-    if (parent === null || parent === undefined) return null;
+    if ('parent' in folder === false || parent === undefined) return undefined;
+    if (parent === null) return null;
     if (typeof parent === 'number') return { id: parent };
     if (parent.id === undefined) return null;
     return { id: Number(parent.id), name: String(parent.name ?? '') };
@@ -96,7 +104,7 @@ export const sanitizeMediaFolder = (
   return {
     id: Number(folder.id),
     name: String(folder.name ?? ''),
-    parent: parentValue,
+    ...(parentValue === undefined ? {} : { parent: parentValue }),
     createdAt: toNullableString(folder.createdAt),
     updatedAt: toNullableString(folder.updatedAt),
   };

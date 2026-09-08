@@ -148,7 +148,8 @@ describe('sanitizeMediaFolder', () => {
   };
 
   test('exposes only the allowlisted folder fields', () => {
-    expect(sanitizeMediaFolder(rawFolder)).toEqual({
+    // With the relation loaded, every allowlisted key is present and nothing else is.
+    expect(sanitizeMediaFolder({ ...rawFolder, parent: null })).toEqual({
       id: 4,
       name: 'Campaigns',
       parent: null,
@@ -178,7 +179,25 @@ describe('sanitizeMediaFolder', () => {
 
   test('reports a root-level folder as parent: null', () => {
     expect(sanitizeMediaFolder({ ...rawFolder, parent: null })?.parent).toBeNull();
-    expect(sanitizeMediaFolder(rawFolder)?.parent).toBeNull();
+  });
+
+  test('omits parent entirely when the relation was not loaded', () => {
+    // `parent: null` is a claim that the folder sits at the root. A row selected without the
+    // relation cannot support it: `rawFolder` has path /1/4, so it demonstrably HAS a parent.
+    // Reporting null here would tell an agent a nested folder is root-level — which matters
+    // most in a destructive delete preview.
+    const sanitized = sanitizeMediaFolder(rawFolder);
+
+    expect(sanitized).not.toHaveProperty('parent');
+    expect(sanitized?.parent).toBeUndefined();
+  });
+
+  test('distinguishes an unloaded parent from an explicit root', () => {
+    const unloaded = sanitizeMediaFolder({ id: 2, name: 'Child', path: '/1/2' });
+    const atRoot = sanitizeMediaFolder({ id: 2, name: 'Child', path: '/2', parent: null });
+
+    expect('parent' in unloaded!).toBe(false);
+    expect(atRoot?.parent).toBeNull();
   });
 
   test('returns null for a missing row rather than throwing', () => {

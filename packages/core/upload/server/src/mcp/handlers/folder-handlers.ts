@@ -11,7 +11,7 @@ import {
   MCP_FOLDER_NAME_TAKEN,
   MCP_PARENT_FOLDER_NOT_FOUND,
   MCP_FOLDER_MOVE_INTO_SELF,
-  MCP_DELETE_FOLDER_NO_MATCH,
+  MCP_DELETE_FOLDER_UNRESOLVED_IDS,
 } from './constants';
 import { ok } from '../utils';
 
@@ -296,14 +296,29 @@ export const createDeleteFolderHandler =
       where: { id: { $in: ids } },
     });
 
-    // Every id missing means the caller is almost certainly holding asset ids, which are
-    // indistinguishable integers — worth an error rather than a zero-count success.
-    if (matched.length === 0) {
-      throw new errors.ValidationError(MCP_DELETE_FOLDER_NO_MATCH);
+    /**
+     * All-or-nothing: any id that does not resolve to a folder rejects the whole call, before
+     * anything is deleted.
+     *
+     * Folder ids and asset ids are indistinguishable integers, so a list mixing the two is the
+     * mistake this tool exists to catch — and deleting the folders that did match while
+     * reporting the rest back would be exactly the silent confusion that requirement forbids,
+     * with the cascade already gone by the time the agent reads the response.
+     *
+     * An unresolvable id cannot be diagnosed further from here (an asset id and a deleted
+     * folder id look identical), and it does not need to be: either way it is unusable.
+     *
+     * The dry run rejects on the same rule. A preview that reported a cascade for a request the
+     * executing call would refuse is worse than no preview — it is a confirmation an agent
+     * cannot act on.
+     */
+    const matchedIds = new Set(matched.map((folder) => folder.id));
+    const unresolvedIds = ids.filter((id) => matchedIds.has(id) === false);
+
+    if (unresolvedIds.length > 0) {
+      throw new errors.ValidationError(MCP_DELETE_FOLDER_UNRESOLVED_IDS(unresolvedIds));
     }
 
-    const matchedIds = new Set(matched.map((folder) => folder.id));
-    const missingIds = ids.filter((id) => matchedIds.has(id) === false);
     const folders = matched.map((folder) => sanitizeMediaFolder(folder));
 
     if (dryRun) {
@@ -312,7 +327,7 @@ export const createDeleteFolderHandler =
         matched.map((folder) => folder.path)
       );
 
-      return ok({ dryRun: true, folders, ...counts, missingIds });
+      return ok({ dryRun: true, folders, ...counts });
     }
 
     const { totalFolderNumber, totalFileNumber } = await getService('folder', strapi).deleteByIds(
@@ -324,6 +339,5 @@ export const createDeleteFolderHandler =
       folders,
       totalFolderNumber,
       totalFileNumber,
-      missingIds,
     });
   };

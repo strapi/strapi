@@ -12,7 +12,7 @@ import {
   MCP_FOLDER_NAME_TAKEN,
   MCP_PARENT_FOLDER_NOT_FOUND,
   MCP_FOLDER_MOVE_INTO_SELF,
-  MCP_DELETE_FOLDER_NO_MATCH,
+  MCP_DELETE_FOLDER_UNRESOLVED_IDS,
 } from '../handlers/constants';
 import { ACTIONS, FOLDER_MODEL_UID } from '../../constants';
 
@@ -412,27 +412,64 @@ describe('folder MCP handlers', () => {
       });
     });
 
-    test('reports ids that matched no folder instead of failing the whole call', async () => {
-      setupStrapi();
-
-      const result = await invokeDelete({ ids: [1, 999], dryRun: false });
-
-      expect(result.structuredContent?.missingIds).toEqual([999]);
-    });
-
-    test('rejects a call whose ids match no folder at all, naming delete_media', async () => {
+    test('rejects the whole call when one id among valid ones does not resolve', async () => {
       const { deleteByIds } = setupStrapi();
 
-      // Folder and asset ids are indistinguishable integers, so the likeliest cause is an
-      // agent passing asset ids — the error has to say so.
-      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(
+      // The dangerous case: a mixed list must not delete the folders that did match. Folder
+      // and asset ids are indistinguishable integers, so this is the confusion the tool exists
+      // to catch — and a partial delete would report it only after the cascade was gone.
+      await expect(invokeDelete({ ids: [1, 4242], dryRun: false })).rejects.toThrow(
         errors.ValidationError
       );
-      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(
-        MCP_DELETE_FOLDER_NO_MATCH
-      );
-      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(/delete_media/);
       expect(deleteByIds).not.toHaveBeenCalled();
+    });
+
+    test('names the offending ids, so the agent knows which entries to correct', async () => {
+      setupStrapi();
+
+      await expect(invokeDelete({ ids: [1, 4242], dryRun: false })).rejects.toThrow(/4242/);
+      // ...without blaming the ids that were fine.
+      await expect(invokeDelete({ ids: [1, 4242], dryRun: false })).rejects.not.toThrow(
+        /folder: 1,|ids: 1,/
+      );
+    });
+
+    test('points an unresolved id at delete_media without asserting it is one', async () => {
+      setupStrapi();
+
+      // An asset id is the likeliest cause, but a deleted folder id is indistinguishable from
+      // here — the message must offer both rather than mis-diagnose.
+      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(/delete_media/);
+      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(/already be gone/);
+    });
+
+    test('rejects on the same rule during a dry run, before any counting', async () => {
+      const { deleteByIds } = setupStrapi();
+
+      // A preview that reported a cascade for a request the executing call would refuse is a
+      // confirmation the agent cannot act on.
+      await expect(invokeDelete({ ids: [1, 4242] })).rejects.toThrow(errors.ValidationError);
+      await expect(invokeDelete({ ids: [1, 4242], dryRun: true })).rejects.toThrow(
+        errors.ValidationError
+      );
+      expect(deleteByIds).not.toHaveBeenCalled();
+    });
+
+    test('rejects a call whose ids match no folder at all', async () => {
+      const { deleteByIds } = setupStrapi();
+
+      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(
+        MCP_DELETE_FOLDER_UNRESOLVED_IDS([4242])
+      );
+      expect(deleteByIds).not.toHaveBeenCalled();
+    });
+
+    test('reports no skipped-ids field, since every id is accounted for on success', async () => {
+      setupStrapi();
+
+      const result = await invokeDelete({ ids: [1], dryRun: false });
+
+      expect(result.structuredContent).not.toHaveProperty('missingIds');
     });
 
     test('returns the matched folders sanitized, without path bookkeeping', async () => {
