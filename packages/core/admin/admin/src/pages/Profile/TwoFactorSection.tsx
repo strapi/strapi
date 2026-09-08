@@ -14,6 +14,7 @@ import { isNotFoundError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
 import { ReAuthDialog } from './ReAuthDialog';
+import { TrustedDevices } from './TrustedDevices';
 
 import type { Me, MfaEventNotice } from '../../../../shared/contracts/mfa';
 
@@ -257,6 +258,12 @@ const TwoFactorSection = () => {
           </Flex>
         )}
       </Flex>
+      {/*
+       * Cycle 3. Only for an enrolled user (an unenrolled one has nothing to skip) and only while
+       * the organisation offers trust: `trustedDevicesEnabled` comes from `/mfa/me`, and the
+       * server empties the table when the setting is turned off.
+       */}
+      {status.enabled && status.trustedDevicesEnabled ? <TrustedDevices /> : null}
       {notices && notices.length > 0 ? (
         <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
       ) : null}

@@ -2,8 +2,9 @@ import * as React from 'react';
 
 import { render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
+import { createIntl } from 'react-intl';
 
-import { MfaNotices } from '../MfaNotices';
+import { MfaNotices, formatMfaNotice } from '../MfaNotices';
 
 /**
  * jsdom does not implement the Pointer Events capture API. Sonner (the toast library backing
@@ -257,5 +258,24 @@ describe('MfaNotices', () => {
       expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument()
     );
     expect(seenCalled).toBe(false);
+  });
+});
+
+describe('formatMfaNotice (cycle 3 device notices)', () => {
+  const intl = createIntl({ locale: 'en', messages: {} });
+  const base = { id: 1, createdAt: '2026-09-08T10:00:00.000Z', seenAt: null } as const;
+  const format = (notice: Parameters<typeof formatMfaNotice>[0]) =>
+    formatMfaNotice(notice, intl.formatMessage, intl.formatDate);
+
+  it('names the administrator only when the revocation carries byUserId', () => {
+    expect(
+      format({ ...base, type: 'device_trust_revoked', metadata: { count: 2, byUserId: '9' } })
+    ).toMatch(/^Trusted devices were revoked by an administrator \(/);
+    expect(format({ ...base, type: 'device_trust_revoked', metadata: { count: 1 } })).toMatch(
+      /^Trusted devices were revoked \(/
+    );
+    expect(format({ ...base, type: 'device_trusted', metadata: { days: 30 } })).toMatch(
+      /^A device was trusted to skip the two-factor code \(/
+    );
   });
 });

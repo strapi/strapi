@@ -27,6 +27,7 @@ const status = (overrides = {}) =>
         codesAcknowledged: false,
         required: false,
         graceUntil: null,
+        trustedDevicesEnabled: false,
         ...overrides,
       },
     })
@@ -352,5 +353,37 @@ describe('TwoFactorSection', () => {
 
     expect(screen.getByRole('dialog', { name: 'Replace authenticator' })).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('lists trusted devices when enrolled and the organisation offers trust', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        trustedDevicesEnabled: true,
+      }),
+      http.get('/admin/mfa/trusted-devices', () => HttpResponse.json({ data: [] }))
+    );
+    renderSection();
+
+    expect(await screen.findByRole('heading', { name: 'Trusted devices' })).toBeInTheDocument();
+  });
+
+  it('hides the trusted devices block when the organisation does not offer trust', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        trustedDevicesEnabled: false,
+      })
+    );
+    renderSection();
+
+    expect(await screen.findByText(/^Enabled/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Trusted devices' })).not.toBeInTheDocument();
   });
 });

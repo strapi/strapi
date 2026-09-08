@@ -71,6 +71,21 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
 };
 
 /**
+ * `device_trust_revoked` carries `byUserId` when an administrator did it (cycle 3), and the
+ * notice should say so. Chosen here from the metadata rather than by a fourth event type: the
+ * server records one type for both and keeps the distinction in the event's metadata.
+ */
+const REVOKED_BY_ADMIN_COPY = {
+  id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked.byAdmin',
+  defaultMessage: 'Trusted devices were revoked by an administrator',
+};
+
+const copyFor = (notice: MfaEventNotice) =>
+  notice.type === 'device_trust_revoked' && typeof notice.metadata.byUserId === 'string'
+    ? REVOKED_BY_ADMIN_COPY
+    : NOTICE_COPY[notice.type];
+
+/**
  * Renders one notice as `"<copy> (<date>)"`, e.g. "A recovery code was used to log in (Sep 1,
  * 2026, 11:00 AM)". Shared by the profile section's "Recent security events" list; the next-login
  * toast only needs a count, so it does not call this.
@@ -80,7 +95,7 @@ export const formatMfaNotice = (
   formatMessage: IntlFormatters['formatMessage'],
   formatDate: IntlFormatters['formatDate']
 ): string =>
-  `${formatMessage(NOTICE_COPY[notice.type])} (${formatDate(notice.createdAt, {
+  `${formatMessage(copyFor(notice))} (${formatDate(notice.createdAt, {
     dateStyle: 'medium',
     timeStyle: 'short',
   })})`;
