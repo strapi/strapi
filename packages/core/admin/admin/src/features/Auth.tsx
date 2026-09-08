@@ -52,9 +52,13 @@ interface AuthContextValue {
   /**
    * Completes a login that `login` answered with the challenge shape. Persists the resulting
    * session token exactly as `login` does; `rememberMe` decides between cookie and localStorage.
+   * `trustDevice` (cycle 3) asks the server to trust this browser; the trust itself arrives as an
+   * httpOnly cookie the panel never sees.
    */
   loginMfa: (
-    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code'> & { rememberMe: boolean }
+    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
   logout: () => Promise<void>;
   /**

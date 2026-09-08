@@ -62,7 +62,12 @@ describe('ResetPassword', () => {
       server.use(
         http.post('/admin/login', () =>
           HttpResponse.json({
-            data: { mfaRequired: true, challengeToken: 'a'.repeat(64), expiresIn: 300 },
+            data: {
+              mfaRequired: true,
+              challengeToken: 'a'.repeat(64),
+              expiresIn: 300,
+              trustedDeviceDays: null,
+            },
           })
         )
       );

@@ -1,6 +1,7 @@
 import type {
   MfaEnforcementMode,
   MfaEnforcementSettings,
+  TrustedDeviceSettings,
 } from '../../../../../../../shared/contracts/security-settings';
 
 const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
@@ -30,3 +31,14 @@ export const isSecurityDowngrade = (
 
   return next.graceDays > previous.graceDays;
 };
+
+/**
+ * Cycle 3 twin of `isSecurityDowngrade`, for the trusted-devices card. Mirrors `widensTrust` in
+ * the server's `updateSettings`: offering trust where none was offered, or promising a longer
+ * trust while it is offered, both let a browser skip the second factor for longer than before.
+ * Disabling or shortening only ever cuts trust short, so neither needs credentials.
+ */
+export const isTrustedDevicesDowngrade = (
+  previous: TrustedDeviceSettings,
+  next: TrustedDeviceSettings
+): boolean => (!previous.enabled && next.enabled) || (next.enabled && next.days > previous.days);
