@@ -46,3 +46,27 @@ export const MCP_MOVE_ASSETS_ID_FORBIDDEN =
  */
 export const MCP_MOVE_ASSETS_ID_FAILED = (cause: string) =>
   `Moving this asset failed: ${cause}. This is not a problem with the id itself — the asset exists and this token may edit it — so retrying may succeed. Any assets listed under \`moved\` were still moved.`;
+
+/**
+ * Per-id `failed` reasons for `media_delete_assets`, and the dry-run's `unresolved` reason.
+ *
+ * Reported per id rather than thrown, because a delete is irreversible: an error carries no
+ * `structuredContent`, so throwing on the third id would discard the report saying the first
+ * two are already gone — and no re-read can recover what was deleted.
+ */
+export const MCP_DELETE_MEDIA_ID_NOT_FOUND =
+  'No media asset has this id. Asset ids and folder ids are indistinguishable integers: if this is a folder id, use media_delete_folder — media_delete_assets never deletes a folder. Otherwise the asset may already be deleted; use media_list_assets to discover valid asset ids.';
+
+export const MCP_DELETE_MEDIA_ID_FORBIDDEN =
+  'This token is not allowed to delete this asset. A permission condition on plugin::upload.assets.update excludes it.';
+
+/**
+ * Returned when the deletion of one asset failed for a reason that is not a missing asset or a
+ * permission denial — a DB error, say, or an upload-provider fault.
+ *
+ * `cause` is the underlying message, kept verbatim so the real fault stays legible. The asset
+ * may be half-removed (the provider file gone, the row still present, or the reverse), so the
+ * wording tells the agent to re-read rather than assume either outcome.
+ */
+export const MCP_DELETE_MEDIA_ID_FAILED = (cause: string) =>
+  `Deleting this asset failed: ${cause}. The asset may be partially removed — re-read it with media_get_asset before retrying. Any assets listed under \`deleted\` are gone for good.`;

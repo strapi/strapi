@@ -13,8 +13,13 @@ import {
   MCP_MOVE_ASSETS_ID_NOT_FOUND,
   MCP_MOVE_ASSETS_ID_FORBIDDEN,
   MCP_MOVE_ASSETS_ID_FAILED,
+  MCP_DELETE_MEDIA_ID_NOT_FOUND,
+  MCP_DELETE_MEDIA_ID_FORBIDDEN,
+  MCP_DELETE_MEDIA_ID_FAILED,
 } from './constants';
 import { ok } from '../utils';
+
+import type { File } from '../../types';
 
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema
 // before the handler runs, so unknown keys never reach here.
@@ -31,6 +36,10 @@ type MediaMoveAssetsArgs = {
 };
 
 /** The metadata keys `media_update_asset` may write. Everything else is rejected by the schema. */
+type DeleteMediaArgs = {
+  ids: number[];
+  dryRun?: boolean;
+};
 const WRITABLE_FIELDS = ['name', 'alternativeText', 'caption'] as const;
 
 /**
@@ -247,4 +256,119 @@ export const createMediaMoveAssetsHandler =
      * is checked before the loop: nothing has moved, so there is no report to preserve.
      */
     return ok({ destinationFolder, moved, failed });
+  };
+
+/**
+ * `media_delete_assets` — previews or performs the permanent deletion of assets, in bulk.
+ *
+ * Two branches behind one tool, for the same reason as `media_delete_folder`: the preview and the
+ * deletion must agree on what would be destroyed, and splitting them across tools would both let
+ * the two drift apart and let an agent reach the destructive one without ever seeing a preview.
+ * `dryRun` defaults to true (see the input schema), so omitting the flag previews and deleting
+ * takes an explicit `dryRun: false`.
+ *
+ * Per-id, not all-or-nothing — the opposite of `media_delete_folder`, on purpose. A folder delete
+ * cascades, so a mixed id list there is refused outright rather than half-applied over an unknown
+ * amount of content. Here each id is exactly one asset, the blast radius of a bad one is nil, and
+ * the requirement is explicit: a bad id among good ones must not discard the valid deletions.
+ * The dry run reports the same per-id split, so an agent sees which ids will not resolve *before*
+ * anything is destroyed rather than after.
+ *
+ * This does not reuse `file.deleteByIds` (the admin `/actions/bulk-delete` path). That helper
+ * fires `upload.remove` under a single `Promise.all`, so the first rejection discards the report
+ * of everything already deleted — unrecoverable for an operation with no undo. The removals are
+ * driven one at a time here instead, through the same `upload.remove` service, which deletes the
+ * provider file and every generated format, emits `media.delete`, and then deletes the row.
+ *
+ * The deletions are sequential on purpose: each one performs provider I/O, and a bounded batch
+ * (100 ids max, per the input schema) is not worth firing at a provider in parallel.
+ */
+export const createDeleteMediaHandler =
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  async ({
+    args,
+  }: {
+    args: Record<string, unknown>;
+  }): Promise<Modules.MCP.McpToolHandlerReturn> => {
+    const { ids, dryRun = true } = args as DeleteMediaArgs;
+
+    // Model-level gate first, so a token without the action is refused before any DB read.
+    // The preview takes the same gate: it reveals which assets exist and what they are.
+    assertMediaPermission(strapi, context, ACTIONS.update, FILE_MODEL_UID);
+
+    const deleted: ReturnType<typeof sanitizeMediaAsset>[] = [];
+    const failed: { id: number; reason: string }[] = [];
+
+    // `ids` can repeat an id; de-duplicating keeps the report one entry per id, and stops the
+    // second occurrence of an already-deleted asset from being reported as a missing one.
+    for (const id of [...new Set(ids)]) {
+      let file: Record<string, unknown>;
+
+      try {
+        // Row-level check, shared with the admin controller: an owner-scoped permission
+        // condition is evaluated against the same subject the REST API would build. Run on the
+        // dry run too — a preview must not list an asset the executing call would refuse.
+        ({ file } = await findEntityAndCheckPermissions(
+          context.userAbility,
+          ACTIONS.update,
+          FILE_MODEL_UID,
+          id,
+          strapi
+        ));
+      } catch (error) {
+        if (error instanceof errors.NotFoundError) {
+          failed.push({ id, reason: MCP_DELETE_MEDIA_ID_NOT_FOUND });
+          continue;
+        }
+
+        if (error instanceof errors.ForbiddenError) {
+          failed.push({ id, reason: MCP_DELETE_MEDIA_ID_FORBIDDEN });
+          continue;
+        }
+
+        failed.push({
+          id,
+          reason: MCP_DELETE_MEDIA_ID_FAILED(
+            error instanceof Error ? error.message : String(error)
+          ),
+        });
+        continue;
+      }
+
+      // The preview stops here: the asset resolved and this token may delete it, which is
+      // everything the agent needs to confirm — reported in the same shape the real run uses.
+      if (dryRun) {
+        deleted.push(sanitizeMediaAsset(file));
+        continue;
+      }
+
+      try {
+        await getService('upload', strapi).remove(file as unknown as File);
+
+        // Reported from the row read before the delete: the asset no longer exists, so this is
+        // the only description of it the agent will ever get.
+        deleted.push(sanitizeMediaAsset(file));
+      } catch (error) {
+        /**
+         * A failed removal is reported against its own id rather than thrown, for the reason
+         * spelled out on `media_move_assets` — a tool error carries no `structuredContent`, so throwing
+         * on the third id would discard the report saying the first two are gone. Here that
+         * matters more: the earlier deletions cannot be re-read, undone or discovered afterwards.
+         */
+        failed.push({
+          id,
+          reason: MCP_DELETE_MEDIA_ID_FAILED(
+            error instanceof Error ? error.message : String(error)
+          ),
+        });
+      }
+    }
+
+    /**
+     * A request where nothing was deleted still returns the per-id report, on both branches:
+     * `deleted: []` with every id in `failed` says plainly that nothing happened and why, per id.
+     * Throwing instead would drop `structuredContent` entirely, so `ids: [999]` would get prose
+     * where `ids: [1, 999]` gets a machine-readable entry, for the same class of mistake.
+     */
+    return ok({ dryRun, deleted, failed, totalFileNumber: deleted.length });
   };
