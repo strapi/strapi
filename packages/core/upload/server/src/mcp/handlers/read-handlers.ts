@@ -4,6 +4,7 @@ import type { Core, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 import { ACTIONS, FILE_MODEL_UID, FOLDER_MODEL_UID } from '../../constants';
 import { assertMediaPermission } from '../permissions';
+import { findEntityAndCheckPermissions } from '../../controllers/utils/find-entity-and-check-permissions';
 import { sanitizeMediaAsset, sanitizeMediaFolderTree } from '../sanitizers/sanitize-media';
 import { MCP_NOT_FOUND_ASSET } from './constants';
 import { ok } from '../utils';
@@ -93,8 +94,11 @@ export const createMediaListAssetsHandler =
 /**
  * `media_get_asset` — a single asset by numeric id.
  *
- * The entity-level `cannot(action, subject)` check is what enforces permission *conditions*:
- * `pm.isAllowed` only proves the action is permitted on the model, not on this row.
+ * Row-level permission *conditions* are enforced by `findEntityAndCheckPermissions`, the same
+ * helper the admin `findOne` controller uses: it populates `createdBy` and the creator's roles
+ * before building the CASL subject, which is what the admin conditions read. Checking a subject
+ * without those fields would deny a conditioned grant its own assets, and would disagree with
+ * `media_list_assets`, where the condition is pushed into the query instead.
  */
 export const createMediaGetAssetHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -104,18 +108,26 @@ export const createMediaGetAssetHandler =
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { id } = args as GetMediaArgs;
-    const pm = assertMediaPermission(strapi, context, ACTIONS.read, FILE_MODEL_UID);
 
-    const asset = await getService('upload', strapi).findOne(id, {
-      folder: { fields: ['id', 'name'] },
-    });
+    // Model-level gate first, so a token without upload read at all is refused before a lookup.
+    assertMediaPermission(strapi, context, ACTIONS.read, FILE_MODEL_UID);
 
-    if (asset === null || asset === undefined) {
-      throw new errors.NotFoundError(MCP_NOT_FOUND_ASSET);
-    }
-
-    if (pm.ability.cannot(pm.action, pm.toSubject(asset))) {
-      throw new errors.ForbiddenError();
+    let asset;
+    try {
+      ({ file: asset } = await findEntityAndCheckPermissions(
+        context.userAbility,
+        ACTIONS.read,
+        FILE_MODEL_UID,
+        id,
+        strapi
+      ));
+    } catch (error) {
+      // The helper is written for HTTP, where a bare NotFoundError is enough. MCP answers an
+      // agent, so restate it with the message the other media tools use.
+      if (error instanceof errors.NotFoundError) {
+        throw new errors.NotFoundError(MCP_NOT_FOUND_ASSET);
+      }
+      throw error;
     }
 
     return ok({ data: sanitizeMediaAsset(asset) });

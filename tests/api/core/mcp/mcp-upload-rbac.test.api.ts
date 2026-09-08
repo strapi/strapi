@@ -330,6 +330,84 @@ describe('MCP upload read tools RBAC (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Permission conditions
+  //
+  // A conditioned grant has to agree across both tools: media_list_assets applies the condition
+  // through the query, media_get_asset by testing the loaded row against the ability. The row
+  // check needs `createdBy` (and the creator's roles) populated to match `admin::is-creator`,
+  // so a get that skipped that populate would forbid exactly the assets the list returned.
+  // ---------------------------------------------------------------------------
+
+  describe('the admin::is-creator condition', () => {
+    const createOwnAssetsTokenSession = async (): Promise<AdminToken> => {
+      const token = await createAdminToken([
+        { ...permission(UPLOAD_ACTIONS.read), conditions: ['admin::is-creator'] },
+      ]);
+      await mcp.initializeSession(token.accessKey);
+      return token;
+    };
+
+    /** The token is minted by the super-admin request, so that user is its creator. */
+    const superAdminId = async (): Promise<number> => {
+      const user = await strapi.db
+        .query('admin::user')
+        .findOne({ where: { email: 'admin@strapi.io' } });
+
+      expect(user).not.toBeNull();
+      return user.id;
+    };
+
+    test('media_get_asset returns an asset the token owner created', async () => {
+      const ownerId = await superAdminId();
+      const seeded = await seeder.seedAsset({
+        name: 'mine.jpg',
+        createdBy: { id: ownerId },
+      });
+
+      const token = await createOwnAssetsTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_get_asset', { id: seeded.id });
+
+      expect(response.error).toBeUndefined();
+      expect(response.result?.isError).not.toBe(true);
+      expect(response.result?.structuredContent?.data).toMatchObject({
+        id: seeded.id,
+        name: 'mine.jpg',
+      });
+    });
+
+    test('media_get_asset is forbidden on an asset created by somebody else', async () => {
+      const seeded = await seeder.seedAsset({ name: 'theirs.jpg' });
+
+      const token = await createOwnAssetsTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_get_asset', { id: seeded.id });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('media_list_assets and media_get_asset agree on what the condition allows', async () => {
+      const ownerId = await superAdminId();
+      const own = await seeder.seedAsset({ name: 'own.jpg', createdBy: { id: ownerId } });
+      await seeder.seedAsset({ name: 'other.jpg' });
+
+      const token = await createOwnAssetsTokenSession();
+
+      const listed = await mcp.callTool(token.accessKey, 'media_list_assets', {});
+      const results = listed.result?.structuredContent?.results as { id: number }[];
+      expect(results.map((asset) => asset.id)).toEqual([own.id]);
+
+      // Every id the list handed back must also be gettable, or an agent cannot act on them.
+      for (const asset of results) {
+        const got = await mcp.callTool(token.accessKey, 'media_get_asset', { id: asset.id });
+
+        expect(got.error).toBeUndefined();
+        expect(got.result?.isError).not.toBe(true);
+      }
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // media_list_folders
   // ---------------------------------------------------------------------------
 

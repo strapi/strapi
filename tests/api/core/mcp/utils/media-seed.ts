@@ -33,6 +33,12 @@ export type SeedAssetOptions = {
   folderId?: number | null;
   alternativeText?: string;
   caption?: string;
+  /**
+   * Admin user to record as the asset's creator. Needed by tests that exercise permission
+   * conditions: `admin::is-creator` matches on `createdBy.id`, so an asset seeded without a
+   * creator can never satisfy it.
+   */
+  createdBy?: { id: number | string };
 };
 
 /**
@@ -69,7 +75,7 @@ export const createMediaSeeder = (strapi: Core.Strapi) => {
    * it is handed, and a committed fixture must survive the test run.
    */
   const seedAsset = async (options: SeedAssetOptions = {}): Promise<SeededAsset> => {
-    const { fixture = 'strapi.jpg', name, folderId, alternativeText, caption } = options;
+    const { fixture = 'strapi.jpg', name, folderId, alternativeText, caption, createdBy } = options;
 
     const source = path.join(FIXTURES_DIR, fixture);
     const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'strapi-mcp-media-'));
@@ -89,17 +95,21 @@ export const createMediaSeeder = (strapi: Core.Strapi) => {
       data.fileInfo = { ...fileInfo, folder: folderId };
     }
 
-    const [uploaded] = await uploadService().upload({
-      data,
-      files: [
-        {
-          filepath,
-          originalFilename,
-          mimetype: mimeForFixture(fixture),
-          size,
-        },
-      ],
-    });
+    const [uploaded] = await uploadService().upload(
+      {
+        data,
+        files: [
+          {
+            filepath,
+            originalFilename,
+            mimetype: mimeForFixture(fixture),
+            size,
+          },
+        ],
+      },
+      // `user` goes in the options argument; the service passes it to setCreatorFields.
+      createdBy ? { user: createdBy } : undefined
+    );
 
     await fs.promises.rm(tmpDir, { recursive: true, force: true });
 
