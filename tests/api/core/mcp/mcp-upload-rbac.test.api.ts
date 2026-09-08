@@ -13,6 +13,15 @@ const UPLOAD_ACTIONS = {
 
 const READ_TOOLS = ['media_list_assets', 'media_get_asset', 'media_list_folders'] as const;
 
+const FOLDER_WRITE_TOOLS = [
+  'create_folder',
+  'rename_folder',
+  'move_folder',
+  'delete_folder',
+] as const;
+
+const WRITE_TOOLS = ['media_update_asset', ...FOLDER_WRITE_TOOLS] as const;
+
 /** Fields that must never reach an MCP client. */
 const FORBIDDEN_ASSET_FIELDS = [
   'provider',
@@ -94,7 +103,12 @@ describe('MCP upload tools RBAC (api)', () => {
     return token;
   };
 
-  /** A session that can both write metadata and read it back for verification. */
+  /**
+   * A session that can both write and read back for verification.
+   *
+   * Folder writes inherit `plugin::upload.assets.update` — the same action as asset metadata —
+   * so one token covers both surfaces. There is no folder-specific MCP permission.
+   */
   const createUpdateTokenSession = async (): Promise<AdminToken> => {
     const token = await createAdminToken([
       permission(UPLOAD_ACTIONS.read),
@@ -145,17 +159,22 @@ describe('MCP upload tools RBAC (api)', () => {
       const toolNames = await mcp.listToolNames(token.accessKey);
 
       // Anchored on the media_ prefix every upload tool carries, so this stays exact as the
-      // surface grows. A loose /media|folders/ would match content-manager tools too.
+      // surface grows. A loose /media|folder/ would match content-manager tools too.
       expect(toolNames.filter((name) => /^media_/.test(name)).sort()).toEqual(
         [...READ_TOOLS].sort()
       );
-      expect(toolNames).not.toContain('media_update_asset');
+      for (const tool of WRITE_TOOLS) {
+        expect(toolNames).not.toContain(tool);
+      }
     });
 
-    test('a token with plugin::upload.assets.update sees the metadata tool', async () => {
+    test('a token with plugin::upload.assets.update sees every write tool', async () => {
       const token = await createUpdateTokenSession();
+      const toolNames = await mcp.listToolNames(token.accessKey);
 
-      expect(await mcp.listToolNames(token.accessKey)).toContain('media_update_asset');
+      for (const tool of WRITE_TOOLS) {
+        expect(toolNames).toContain(tool);
+      }
     });
   });
 
@@ -697,6 +716,618 @@ describe('MCP upload tools RBAC (api)', () => {
       });
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+  });
+  // ---------------------------------------------------------------------------
+  // Folder CRUD
+  // ---------------------------------------------------------------------------
+
+  describe('folder CRUD', () => {
+    const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
+      response.result?.structuredContent?.data as Record<string, unknown>;
+
+    /** The folder tree as `media_list_folders` reports it, for read-back assertions. */
+    const readTree = async (accessKey: string) => {
+      const response = await mcp.callTool(accessKey, 'media_list_folders', {});
+      expect(response.error).toBeUndefined();
+      return response.result?.structuredContent?.data as Array<Record<string, unknown>>;
+    };
+
+    const folderRow = async (id: number) =>
+      strapi.db.query('plugin::upload.folder').findOne({ where: { id } });
+
+    const countFolders = async () => strapi.db.query('plugin::upload.folder').count({});
+    const countFiles = async () => strapi.db.query('plugin::upload.file').count({});
+
+    describe('create_folder', () => {
+      test('creates a folder at the root, visible to media_list_folders', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+          name: 'Campaigns',
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(response.result?.isError).not.toBe(true);
+        expect(structured(response)).toMatchObject({ name: 'Campaigns', parent: null });
+
+        const tree = await readTree(token.accessKey);
+        expect(tree).toHaveLength(1);
+        expect(tree[0]).toMatchObject({ name: 'Campaigns', children: [] });
+      });
+
+      test('nests a folder under an existing parent', async () => {
+        const parent = await seeder.seedFolder('Parent');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+          name: 'Nested',
+          parent: parent.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(structured(response)).toMatchObject({
+          name: 'Nested',
+          parent: { id: parent.id },
+        });
+
+        const tree = await readTree(token.accessKey);
+        expect(tree[0].children).toHaveLength(1);
+        expect((tree[0].children as Array<Record<string, unknown>>)[0]).toMatchObject({
+          name: 'Nested',
+        });
+      });
+
+      test('does not expose the internal path bookkeeping', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'Clean' });
+
+        expect(structured(response)).not.toHaveProperty('path');
+        expect(structured(response)).not.toHaveProperty('pathId');
+      });
+
+      test('rejects a duplicate name within the same parent', async () => {
+        const parent = await seeder.seedFolder('Parent');
+        await seeder.seedFolder('Taken', parent.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+          name: 'Taken',
+          parent: parent.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(2);
+      });
+
+      test('allows the same name under a different parent', async () => {
+        const first = await seeder.seedFolder('First');
+        const second = await seeder.seedFolder('Second');
+        await seeder.seedFolder('Shared', first.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+          name: 'Shared',
+          parent: second.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+      });
+
+      test('rejects a parent that does not exist', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+          name: 'Orphan',
+          parent: 999999,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(0);
+      });
+
+      test('rejects a name containing a slash', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'a/b' });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(0);
+      });
+
+      test('denies the write to a token without plugin::upload.assets.update', async () => {
+        const token = await createReadTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'Denied' });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(0);
+      });
+    });
+
+    describe('rename_folder', () => {
+      test('renames a folder, confirmed by media_list_folders', async () => {
+        const folder = await seeder.seedFolder('Before');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'After',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(structured(response)).toMatchObject({ id: folder.id, name: 'After' });
+
+        const tree = await readTree(token.accessKey);
+        expect(tree[0]).toMatchObject({ id: folder.id, name: 'After' });
+      });
+
+      test('leaves the folder location and its contents in place', async () => {
+        const parent = await seeder.seedFolder('Parent');
+        const folder = await seeder.seedFolder('Child', parent.id);
+        const asset = await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
+        const token = await createUpdateTokenSession();
+
+        const before = await folderRow(folder.id);
+
+        await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'Renamed child',
+        });
+
+        // A rename must not touch the materialized path, so nothing below it moves.
+        const after = await folderRow(folder.id);
+        expect(after.path).toBe(before.path);
+
+        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', { folderId: folder.id });
+        expect(
+          (listed.result?.structuredContent?.results as Record<string, unknown>[]).map(
+            (file) => file.id
+          )
+        ).toEqual([asset.id]);
+      });
+
+      test('rejects a duplicate name within the same parent', async () => {
+        const parent = await seeder.seedFolder('Parent');
+        await seeder.seedFolder('Sibling', parent.id);
+        const folder = await seeder.seedFolder('Target', parent.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'Sibling',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(folder.id)).name).toBe('Target');
+      });
+
+      test('accepts renaming a folder to its own current name', async () => {
+        // The uniqueness check excludes the folder itself, so this must not self-collide.
+        const folder = await seeder.seedFolder('Unchanged');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'Unchanged',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+      });
+
+      test('rejects a parent, pointing the caller at move_folder', async () => {
+        const folder = await seeder.seedFolder('Fixed');
+        const destination = await seeder.seedFolder('Destination');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'Fixed',
+          parent: destination.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(JSON.stringify(response)).toMatch(/move_folder/);
+      });
+
+      test('errors for an unknown folder id', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: 999999,
+          name: 'Ghost',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+      });
+
+      test('denies the write to a token without plugin::upload.assets.update', async () => {
+        const folder = await seeder.seedFolder('Protected');
+        const token = await createReadTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+          id: folder.id,
+          name: 'Hijacked',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(folder.id)).name).toBe('Protected');
+      });
+    });
+
+    describe('move_folder', () => {
+      test('re-parents a folder, confirmed by media_list_folders', async () => {
+        const source = await seeder.seedFolder('Source');
+        const destination = await seeder.seedFolder('Destination');
+        const moved = await seeder.seedFolder('Moving', source.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: moved.id,
+          parent: destination.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(structured(response)).toMatchObject({
+          id: moved.id,
+          name: 'Moving',
+          parent: { id: destination.id },
+        });
+
+        const tree = await readTree(token.accessKey);
+        const byName = Object.fromEntries(tree.map((node) => [node.name, node]));
+        expect(byName.Source.children).toEqual([]);
+        expect((byName.Destination.children as Array<Record<string, unknown>>)[0]).toMatchObject({
+          name: 'Moving',
+        });
+      });
+
+      test('carries subfolders and files with it, rewriting their paths', async () => {
+        const destination = await seeder.seedFolder('Destination');
+        const moved = await seeder.seedFolder('Moving');
+        const child = await seeder.seedFolder('Deep', moved.id);
+        const asset = await seeder.seedAsset({ name: 'carried.jpg', folderId: child.id });
+        const token = await createUpdateTokenSession();
+
+        await mcp.callTool(token.accessKey, 'move_folder', {
+          id: moved.id,
+          parent: destination.id,
+        });
+
+        // The service rewrites the whole subtree inside a transaction: the descendant folder
+        // and the contained file must both sit under the new path.
+        const destinationRow = await folderRow(destination.id);
+        const childRow = await folderRow(child.id);
+        expect(childRow.path.startsWith(`${destinationRow.path}/`)).toBe(true);
+
+        const file = await strapi.db
+          .query('plugin::upload.file')
+          .findOne({ where: { id: asset.id } });
+        expect(file.folderPath.startsWith(`${destinationRow.path}/`)).toBe(true);
+
+        // ...and the asset is still reachable through its folder.
+        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', { folderId: child.id });
+        expect(
+          (listed.result?.structuredContent?.results as Record<string, unknown>[]).map(
+            (entry) => entry.id
+          )
+        ).toEqual([asset.id]);
+      });
+
+      test('moves a folder to the media library root with parent: null', async () => {
+        const parent = await seeder.seedFolder('Parent');
+        const child = await seeder.seedFolder('Child', parent.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: child.id,
+          parent: null,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(structured(response)).toMatchObject({ parent: null });
+
+        const tree = await readTree(token.accessKey);
+        expect(tree.map((node) => node.name).sort()).toEqual(['Child', 'Parent']);
+      });
+
+      test('rejects a move into the folder itself', async () => {
+        const folder = await seeder.seedFolder('Selfish');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: folder.id,
+          parent: folder.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(folder.id)).path).toBe(folder.path);
+      });
+
+      test('rejects a move into its own subtree, leaving the tree intact', async () => {
+        const parent = await seeder.seedFolder('Ancestor');
+        const child = await seeder.seedFolder('Descendant', parent.id);
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: parent.id,
+          parent: child.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+
+        // A cycle here would orphan the whole subtree, so the paths must be untouched.
+        expect((await folderRow(parent.id)).path).toBe(parent.path);
+        expect((await folderRow(child.id)).path).toBe(child.path);
+      });
+
+      test('rejects a destination that does not exist', async () => {
+        const folder = await seeder.seedFolder('Stuck');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: folder.id,
+          parent: 999999,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(folder.id)).path).toBe(folder.path);
+      });
+
+      test('rejects a move that would collide with a name in the destination', async () => {
+        const destination = await seeder.seedFolder('Destination');
+        await seeder.seedFolder('Clash', destination.id);
+        const moving = await seeder.seedFolder('Clash');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: moving.id,
+          parent: destination.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(moving.id)).path).toBe(moving.path);
+      });
+
+      test('rejects a name, pointing the caller at rename_folder', async () => {
+        const folder = await seeder.seedFolder('Named');
+        const destination = await seeder.seedFolder('Destination');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: folder.id,
+          parent: destination.id,
+          name: 'Renamed',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(JSON.stringify(response)).toMatch(/rename_folder/);
+      });
+
+      test('denies the write to a token without plugin::upload.assets.update', async () => {
+        const folder = await seeder.seedFolder('Protected');
+        const destination = await seeder.seedFolder('Destination');
+        const token = await createReadTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+          id: folder.id,
+          parent: destination.id,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect((await folderRow(folder.id)).path).toBe(folder.path);
+      });
+    });
+
+    describe('delete_folder', () => {
+      /**
+       * A folder holding one file, one subfolder, and one file inside that subfolder:
+       * deleting the root of it must cascade to 2 folders and 2 files.
+       */
+      const seedCascade = async () => {
+        const root = await seeder.seedFolder('Doomed');
+        const child = await seeder.seedFolder('Doomed child', root.id);
+        const rootAsset = await seeder.seedAsset({ name: 'top.jpg', folderId: root.id });
+        const childAsset = await seeder.seedAsset({ name: 'deep.jpg', folderId: child.id });
+
+        return { root, child, rootAsset, childAsset };
+      };
+
+      test('dry-runs by default: reports the cascade counts and deletes nothing', async () => {
+        const { root } = await seedCascade();
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(response.result?.structuredContent).toMatchObject({
+          dryRun: true,
+          totalFolderNumber: 2,
+          totalFileNumber: 2,
+        });
+
+        // Proven by reading back: every folder and file is still in place.
+        expect(await countFolders()).toBe(2);
+        expect(await countFiles()).toBe(2);
+        const tree = await readTree(token.accessKey);
+        expect(tree).toHaveLength(1);
+        expect(tree[0].children).toHaveLength(1);
+      });
+
+      test('dry-runs with dryRun: true, leaving everything in place', async () => {
+        const { root } = await seedCascade();
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [root.id],
+          dryRun: true,
+        });
+
+        expect(response.result?.structuredContent).toMatchObject({
+          dryRun: true,
+          totalFolderNumber: 2,
+          totalFileNumber: 2,
+        });
+        expect(await countFolders()).toBe(2);
+        expect(await countFiles()).toBe(2);
+      });
+
+      test('names the folders it would delete without exposing their paths', async () => {
+        const { root } = await seedCascade();
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+        const folders = response.result?.structuredContent?.folders as Record<string, unknown>[];
+
+        expect(folders).toHaveLength(1);
+        expect(folders[0]).toMatchObject({ id: root.id, name: 'Doomed' });
+        expect(folders[0]).not.toHaveProperty('path');
+        expect(folders[0]).not.toHaveProperty('pathId');
+      });
+
+      test('deletes with dryRun: false, cascading over subfolders and files', async () => {
+        const { root } = await seedCascade();
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [root.id],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+
+        // The counts actually removed match what the dry run predicted for the same seed.
+        expect(response.result?.structuredContent).toMatchObject({
+          dryRun: false,
+          totalFolderNumber: 2,
+          totalFileNumber: 2,
+        });
+
+        expect(await countFolders()).toBe(0);
+        expect(await countFiles()).toBe(0);
+        expect(await readTree(token.accessKey)).toEqual([]);
+      });
+
+      test('the dry-run counts match what the destructive call then removes', async () => {
+        const { root } = await seedCascade();
+        const token = await createUpdateTokenSession();
+
+        const preview = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+        const executed = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [root.id],
+          dryRun: false,
+        });
+
+        // The two branches must agree — a preview an agent cannot trust is worse than none.
+        expect(executed.result?.structuredContent?.totalFolderNumber).toBe(
+          preview.result?.structuredContent?.totalFolderNumber
+        );
+        expect(executed.result?.structuredContent?.totalFileNumber).toBe(
+          preview.result?.structuredContent?.totalFileNumber
+        );
+      });
+
+      test('leaves folders outside the cascade untouched', async () => {
+        const { root } = await seedCascade();
+        const survivor = await seeder.seedFolder('Survivor');
+        const survivingAsset = await seeder.seedAsset({
+          name: 'safe.jpg',
+          folderId: survivor.id,
+        });
+        const token = await createUpdateTokenSession();
+
+        await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id], dryRun: false });
+
+        expect(await folderRow(survivor.id)).toMatchObject({ name: 'Survivor' });
+        expect(
+          await strapi.db.query('plugin::upload.file').findOne({ where: { id: survivingAsset.id } })
+        ).toMatchObject({ name: 'safe.jpg' });
+      });
+
+      test('deletes several folders in one call', async () => {
+        const first = await seeder.seedFolder('First');
+        const second = await seeder.seedFolder('Second');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [first.id, second.id],
+          dryRun: false,
+        });
+
+        expect(response.result?.structuredContent).toMatchObject({
+          dryRun: false,
+          totalFolderNumber: 2,
+        });
+        expect(await countFolders()).toBe(0);
+      });
+
+      test('reports ids that matched no folder instead of failing the call', async () => {
+        const folder = await seeder.seedFolder('Real');
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [folder.id, 999999],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expect(response.result?.structuredContent?.missingIds).toEqual([999999]);
+        expect(await countFolders()).toBe(0);
+      });
+
+      test('rejects asset ids, naming delete_media', async () => {
+        // Folder and asset ids are indistinguishable integers, so an asset id here is a likely
+        // agent mistake that must not be reported as an empty cascade.
+        const asset = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [asset.id],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(JSON.stringify(response)).toMatch(/delete_media/);
+
+        // The asset must survive an attempt to delete it through the folder tool.
+        expect(await countFiles()).toBe(1);
+      });
+
+      test('rejects an empty id list', async () => {
+        const token = await createUpdateTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+      });
+
+      test('denies the delete to a token without plugin::upload.assets.update', async () => {
+        const { root } = await seedCascade();
+        const token = await createReadTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+          ids: [root.id],
+          dryRun: false,
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(2);
+        expect(await countFiles()).toBe(2);
+      });
+
+      test('denies even the dry run to a read-only token', async () => {
+        const { root } = await seedCascade();
+        const token = await createReadTokenSession();
+
+        // The preview reveals how much content a folder holds, so it takes the write action too.
+        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+      });
     });
   });
 });

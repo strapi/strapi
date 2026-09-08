@@ -63,7 +63,7 @@ const create = async (
  * @param ids ids of the folders to delete
  * @returns {Promise<Object[]>}
  */
-const deleteByIds = async (ids = []) => {
+const deleteByIds = async (ids: number[] = []) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
     return {
@@ -116,7 +116,11 @@ const update = async (
     parent,
   }: {
     name: string;
-    parent: number | null;
+    /**
+     * Omit to rename in place: the name-only branch skips the transaction that rewrites
+     * descendant paths. Pass a number to re-parent, or null to move to the root.
+     */
+    parent?: number | null;
   },
   { user }: { user: { id: string | number } }
 ) => {
