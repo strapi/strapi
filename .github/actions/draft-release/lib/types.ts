@@ -46,6 +46,7 @@ export type IgnoreReason = (typeof IGNORE_REASONS)[number];
 
 /** Every mutation the action can perform, as recorded in the write journal. */
 export const JOURNAL_OPS = [
+  'branch.delete',
   'branch.push',
   'issue.milestone.clear',
   'issue.milestone.set',
@@ -53,12 +54,40 @@ export const JOURNAL_OPS = [
   'milestone.create',
   'milestone.rename',
   'pr.body',
+  'pr.close',
   'pr.comment',
   'pr.create',
   'pr.label',
 ] as const;
 
 export type JournalOp = (typeof JOURNAL_OPS)[number];
+
+/**
+ * How far a recorded mutation got.
+ *
+ * `failed` and `indeterminate` are deliberately separate. A run that dies halfway is finished by
+ * hand, and the person doing it needs to know the difference between a write the server refused and
+ * a write whose outcome nobody can vouch for.
+ */
+export const JOURNAL_ENTRY_STATES = [
+  'planned',
+  'attempted',
+  'applied',
+  'failed',
+  'indeterminate',
+] as const;
+
+export type JournalEntryState = (typeof JOURNAL_ENTRY_STATES)[number];
+
+/**
+ * What a run does with the release candidate.
+ *
+ * `draft` opens one, `refresh` advances the one in flight, and `redraft` replaces it because the
+ * version it was cut under no longer matches what landed.
+ */
+export const RELEASE_MODES = ['draft', 'refresh', 'redraft'] as const;
+
+export type ReleaseMode = (typeof RELEASE_MODES)[number];
 
 export const CLEANUP_ACTIONS = ['keep', 'move', 'clear'] as const;
 
@@ -108,13 +137,22 @@ export type PullPayload = {
   number: number;
   title?: string | null;
   html_url?: string | null;
+  body?: string | null;
   merged_at?: string | null;
   merge_commit_sha?: string | null;
   base?: { ref?: string | null } | null;
-  head?: { ref?: string | null; sha?: string | null } | null;
+  head?: {
+    ref?: string | null;
+    sha?: string | null;
+    /** `null` when the head repository was deleted, which only a fork can be. */
+    repo?: { full_name?: string | null } | null;
+  } | null;
   user?: { login?: string | null } | null;
   milestone?: { title?: string | null } | null;
 };
+
+/** A pull request the API reports as merged, produced only by the `isMerged` guard. */
+export type MergedPull = PullPayload & { merged_at: string };
 
 /** The projection of a pull request that reaches the report. */
 export type PullSummary = {
@@ -125,6 +163,13 @@ export type PullSummary = {
   baseRef: string;
   headRef: string;
   milestone: string | null;
+  /**
+   * When the pull request landed, ISO 8601, from `merged_at`.
+   *
+   * Always a real timestamp: a summary is only ever projected from a {@link MergedPull}, which is
+   * the type the `isMerged` guard produces, so the payload cannot have arrived without one.
+   */
+  mergedAt: string;
 };
 
 /** One integration, decided. Always carries the rule that decided it. */
@@ -195,18 +240,43 @@ export type Milestone = {
   state?: string;
 };
 
+/**
+ * One milestone the run has to end up with, and how it gets there.
+ *
+ * `number` and `currentTitle` are `null` only with `create`, where the milestone does not exist
+ * until the run applies.
+ */
+export type MilestoneTarget = {
+  action: 'create' | 'keep' | 'rename';
+  number: number | null;
+  currentTitle: string | null;
+  title: string;
+};
+
 export type MilestonePlan = {
-  shipping: {
-    action: 'create' | 'rename' | 'keep';
-    number: number | null;
-    currentTitle: string | null;
-    title: string;
+  shipping: MilestoneTarget & {
+    /**
+     * Whether the run still has to close it.
+     *
+     * `false` on a refresh, where the milestone was already closed by the run that drafted the
+     * candidate. A closed milestone still accepts item assignments through the REST API, which is
+     * what lets a refresh keep filling it without reopening it first.
+     */
+    close: boolean;
   };
-  next: {
-    action: 'create' | 'reuse';
-    number: number | null;
-    title: string;
-  };
+  next: MilestoneTarget;
+};
+
+/**
+ * A pull request whose milestone disagrees with what history says.
+ *
+ * History is the authority: a pull request merged inside the range ships in this release whatever
+ * milestone its author picked, so the milestone is corrected rather than obeyed.
+ */
+export type RealignItem = {
+  number: number;
+  from: string | null;
+  toTitle: string;
 };
 
 /** An issue or pull request carrying a milestone, as returned by the issues endpoint. */
@@ -247,7 +317,9 @@ export type JournalEntry = {
   after: string | null;
   detail: string | null;
   at: string;
-  applied: boolean;
+  state: JournalEntryState;
+  /** The failure that stopped this write, `null` while it has not failed. */
+  error: string | null;
 };
 
 export type JournalSnapshot = {
@@ -270,6 +342,71 @@ export type PinnedRange = {
   toSha: string;
 };
 
+/**
+ * A release candidate already in flight, discovered from its open pull request.
+ *
+ * The pull request is the only artifact whose lifecycle matches the candidate's, and only one whose
+ * head lives in this repository qualifies. A release branch
+ * outlives it, because the ruleset that protects release branches forbids deleting them without a
+ * bypass, and a milestone is renamed by this very action.
+ */
+export type Candidate = {
+  /** The version the candidate was cut under, as its branch name spells it. */
+  version: string;
+  /** The same version parsed once, because the branch pattern already proved it is `x.y.z`. */
+  parsedVersion: StableVersion;
+  branch: string;
+  pullNumber: number;
+  pullUrl: string;
+};
+
+/**
+ * Everything the run decided, before it wrote anything.
+ *
+ * Producing this is the only phase allowed to refuse. Once a plan exists, every remaining step is a
+ * write, so a refusal can never leave the repository half-changed.
+ */
+export type ReleasePlan = {
+  mode: ReleaseMode;
+  candidate: Candidate | null;
+  previousVersion: string;
+  version: string;
+  bumpKind: BumpKind;
+  classification: BumpClassification;
+  versionSource: VersionSource;
+  range: PinnedRange;
+  integrationCount: number;
+  pullRequests: AttributedPull[];
+  attention: AttentionRecord[];
+  warnings: string[];
+  milestones: MilestonePlan;
+  branch: string;
+  /** `false` when the branch already points at the pinned head, so nothing has to be pushed. */
+  branchAdvances: boolean;
+  /**
+   * The head git resolved for the candidate's branch during preflight, `null` without a candidate.
+   *
+   * A redraft deletes that branch under a lease on this value, so a commit pushed to it after the
+   * preflight fails the delete instead of being lost.
+   */
+  candidateHeadSha: string | null;
+  realignment: RealignItem[];
+};
+
+/**
+ * What the writes produced that the plan could not know.
+ *
+ * The numbers GitHub assigned to whatever this run created, and the milestone drift read once the
+ * realignment had run. Every field is `null` on a dry run that would have created the thing.
+ */
+export type ReleaseOutcome = {
+  shippingNumber: number | null;
+  nextNumber: number | null;
+  pullNumber: number | null;
+  pullUrl: string | null;
+  reconciliation: Reconciliation;
+};
+
 /** The machine-readable payload embedded in the release pull request body. */
 export type ReleasePayload = {
   schemaVersion: number;
@@ -281,6 +418,8 @@ export type ReleasePayload = {
     bump: BumpKind;
     previousVersion: string;
     source: VersionSource;
+    /** Whether this run opened the candidate, advanced it, or replaced it. */
+    mode: ReleaseMode;
   };
   range: PinnedRange & { integrationCount: number };
   /** What later automation needs to find this candidate again, without re-deriving any of it. */
@@ -291,6 +430,13 @@ export type ReleasePayload = {
     headSha: string;
     /** The artifact `publish-pr-experimental.yml` publishes from `headSha`. */
     expectedExperimentalVersion: string;
+    /**
+     * Whether this run moved the branch.
+     *
+     * `false` when the branch already pointed at the pinned head, which means the experimental
+     * artifact a reader may already have tested is still the current one.
+     */
+    branchAdvanced: boolean;
     /** The release pull request, `null` on a dry run where no pull request is created. */
     pullRequestNumber: number | null;
     pullRequestUrl: string | null;
@@ -350,7 +496,12 @@ export type GitAdapter = {
   isAncestor: (ancestor: string, descendant: string) => boolean;
   listIntegrations: (fromSha: string, toSha: string) => Integration[];
   pushBranch: (sha: string, branch: string) => void;
+  /** Deletes under a lease: the push fails unless the remote head is still `expectedSha`. */
+  deleteBranch: (branch: string, expectedSha: string) => void;
   remoteBranchExists: (branch: string) => boolean;
+  /** Brings a remote branch into `refs/remotes/origin`, so a guard never rests on how the
+   * workflow's checkout was configured. */
+  fetchBranch: (branch: string) => void;
 };
 
 export type GithubAdapter = {
@@ -358,6 +509,7 @@ export type GithubAdapter = {
   getRepository: () => Promise<RepositoryMergeSettings>;
   listPullsForCommit: (sha: string) => Promise<PullPayload[]>;
   getPull: (pullNumber: number) => Promise<PullPayload>;
+  listPulls: (input: { state: 'open' | 'closed' | 'all'; base: string }) => Promise<PullPayload[]>;
   listPullCommits: (pullNumber: number) => Promise<PullCommit[]>;
   listMilestones: (state: 'open' | 'closed' | 'all') => Promise<Milestone[]>;
   createMilestone: (title: string) => Promise<Milestone>;
@@ -374,6 +526,7 @@ export type GithubAdapter = {
     body: string;
   }) => Promise<{ number: number; html_url?: string | null }>;
   updatePullBody: (pullNumber: number, body: string) => Promise<void>;
+  closePull: (pullNumber: number) => Promise<void>;
   addLabels: (issueNumber: number, labels: string[]) => Promise<void>;
   createComment: (issueNumber: number, body: string) => Promise<void>;
 };
@@ -390,5 +543,4 @@ export type Clock = () => string;
 export type DraftReleaseInputs = {
   version: string;
   dryRun: boolean;
-  sourceRef: string;
 };

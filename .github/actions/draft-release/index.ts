@@ -62,7 +62,6 @@ async function main(env: ActionsEnv): Promise<void> {
       inputs: {
         version: getInput(env, 'version'),
         dryRun: getBooleanInput(env, 'dry_run'),
-        sourceRef: getInput(env, 'source_ref') || 'develop',
       },
       git: createGitAdapter(createGitExec()),
       gh: createGithubAdapter(
@@ -79,6 +78,7 @@ async function main(env: ActionsEnv): Promise<void> {
 
     setOutput(env, 'version', result.version);
     setOutput(env, 'bump', result.bump);
+    setOutput(env, 'mode', result.mode);
     setOutput(env, 'branch', result.branch);
     setOutput(env, 'pr_number', result.pullNumber === null ? '' : String(result.pullNumber));
     setOutput(env, 'pr_url', result.pullUrl ?? '');

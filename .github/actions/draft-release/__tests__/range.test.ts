@@ -106,6 +106,51 @@ describe('createGitAdapter', () => {
     );
   });
 
+  it('deletes a remote branch under a lease on the head it expects', () => {
+    const seen: string[][] = [];
+    const exec: GitExec = (args) => {
+      seen.push(args);
+
+      return { status: 0, stdout: '', stderr: '' };
+    };
+
+    createGitAdapter(exec).deleteBranch('releases/5.52.4', 'face0000');
+
+    assert.deepEqual(seen, [
+      [
+        'push',
+        '--force-with-lease=refs/heads/releases/5.52.4:face0000',
+        'origin',
+        ':refs/heads/releases/5.52.4',
+      ],
+    ]);
+  });
+
+  it('forces the remote-tracking ref when fetching a branch, since it is only a read cache', () => {
+    const seen: string[] = [];
+    const exec: GitExec = (args) => {
+      seen.push(args.join(' '));
+
+      return { status: 0, stdout: '', stderr: '' };
+    };
+
+    createGitAdapter(exec).fetchBranch('releases/5.53.0');
+
+    assert.equal(
+      seen[0],
+      'fetch --force origin refs/heads/releases/5.53.0:refs/remotes/origin/releases/5.53.0'
+    );
+  });
+
+  it('carries the exit code on the error, because git updates a ref atomically', () => {
+    const exec = execStub({ push: { status: 1, stdout: '', stderr: 'GH013 rule violations' } });
+
+    assert.throws(
+      () => createGitAdapter(exec).pushBranch('abc', 'releases/5.53.0'),
+      (error: unknown) => (error as { status?: unknown }).status === 1
+    );
+  });
+
   it('reports a missing remote branch when ls-remote finds nothing', () => {
     const exec = execStub({ 'ls-remote': { status: 2, stdout: '', stderr: '' } });
 
@@ -142,6 +187,8 @@ describe('pinRange', () => {
       isAncestor: () => true,
       listIntegrations: () => [],
       pushBranch() {},
+      deleteBranch() {},
+      fetchBranch() {},
       remoteBranchExists: () => false,
       ...overrides,
     };

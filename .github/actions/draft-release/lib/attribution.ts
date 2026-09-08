@@ -3,6 +3,7 @@ import type {
   AttributionLookup,
   AttributionRecord,
   Integration,
+  MergedPull,
   PullPayload,
   PullSummary,
   RepositoryMergeSettings,
@@ -44,8 +45,14 @@ export function parseSubjectReference(subject: string): number | null {
   return null;
 }
 
-function isMerged(pull: PullPayload): boolean {
-  return pull.merged_at !== null && pull.merged_at !== undefined;
+/**
+ * The only place a {@link MergedPull} comes from.
+ *
+ * A guard rather than a boolean check, so the merge timestamp is carried in the type from here on
+ * and no projection downstream has to invent a value for a payload that never merged.
+ */
+function isMerged(pull: PullPayload): pull is MergedPull {
+  return typeof pull.merged_at === 'string';
 }
 
 /**
@@ -59,9 +66,9 @@ export function selectExactCandidates(
   integration: Pick<Integration, 'sha'>,
   pulls: readonly PullPayload[],
   targetBase: string
-): PullPayload[] {
+): MergedPull[] {
   return pulls.filter(
-    (pull) =>
+    (pull): pull is MergedPull =>
       isMerged(pull) === true &&
       pull.base?.ref === targetBase &&
       pull.merge_commit_sha === integration.sha
@@ -139,7 +146,7 @@ export function deriveAuthorName(integration: Integration, login: string): strin
  * The integration is passed in because the payload alone cannot answer who wrote the pull request
  * by name. See {@link deriveAuthorName}.
  */
-export function summarisePull(pull: PullPayload, integration: Integration): PullSummary {
+export function summarisePull(pull: MergedPull, integration: Integration): PullSummary {
   const login = pull.user?.login ?? '';
 
   return {
@@ -150,6 +157,7 @@ export function summarisePull(pull: PullPayload, integration: Integration): Pull
     baseRef: pull.base?.ref ?? '',
     headRef: pull.head?.ref ?? '',
     milestone: pull.milestone?.title ?? null,
+    mergedAt: pull.merged_at,
   };
 }
 
@@ -175,7 +183,11 @@ async function resolveBySubject(
 
   const pull = await lookup.getPull(referenced).catch(() => null);
 
-  if (pull === null || isMerged(pull) === false || pull.base?.ref !== targetBase) {
+  if (pull === null || isMerged(pull) === false) {
+    return null;
+  }
+
+  if (pull.base?.ref !== targetBase) {
     return null;
   }
 

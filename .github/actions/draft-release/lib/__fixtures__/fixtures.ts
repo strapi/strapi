@@ -1,4 +1,11 @@
-import type { Integration, MilestoneItem, PullCommit, PullPayload } from '../types.ts';
+import type {
+  Integration,
+  MergedPull,
+  MilestoneItem,
+  PullCommit,
+  PullPayload,
+  ReleasePlan,
+} from '../types.ts';
 
 /**
  * Fixtures modelled on the real `v5.52.3..develop` range, including the cases that proved the
@@ -7,6 +14,8 @@ import type { Integration, MilestoneItem, PullCommit, PullPayload } from '../typ
  */
 
 export const SHA = {
+  /** Where a release branch already points, one integration behind `develop`. */
+  CANDIDATE_HEAD: 'face0000face0000face0000face0000face0000',
   BACK_MERGE: 'ca560c0d681a696a497cb1a68245b002fd9810bf',
   DIRECT: 'aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000',
   MERGE: 'b912880160c178af6171de530e830b3174a2b1d4',
@@ -29,7 +38,8 @@ export function integration(overrides: Partial<Integration> = {}): Integration {
   };
 }
 
-export function pull(overrides: Partial<PullPayload> = {}): PullPayload {
+/** A merged pull request, because everything attribution accepts has already merged. */
+export function pull(overrides: Partial<MergedPull> = {}): MergedPull {
   return {
     number: 27482,
     title: 'fix(content-type-builder): default new private fields to not searchable',
@@ -45,7 +55,7 @@ export function pull(overrides: Partial<PullPayload> = {}): PullPayload {
 }
 
 /** A pull request merged into `main`, only indirectly associated with a develop integration. */
-export function indirectPull(): PullPayload {
+export function indirectPull(): MergedPull {
   return pull({
     number: 27470,
     title: 'Releases/5.52.2',
@@ -56,7 +66,7 @@ export function indirectPull(): PullPayload {
 }
 
 /** The release back-merge: head is `main`, so its commits already shipped. */
-export function backMergePull(): PullPayload {
+export function backMergePull(): MergedPull {
   return pull({
     number: 27527,
     title: 'chore: release v5.52.3 update develop',
@@ -80,4 +90,97 @@ export function pullRequestItem(
   mergedAt: string | null
 ): MilestoneItem {
   return milestoneItem({ number, state, pull_request: { merged_at: mergedAt } });
+}
+
+/** The repository the pipeline fixtures run against, as `head.repo.full_name` spells it. */
+export const OWN_REPOSITORY = 'strapi/strapi';
+
+/** The head of a release pull request cut by this repository's own automation. */
+export function candidateHead(
+  version: string,
+  sha: string = SHA.CANDIDATE_HEAD
+): NonNullable<PullPayload['head']> {
+  return { ref: `releases/${version}`, sha, repo: { full_name: OWN_REPOSITORY } };
+}
+
+/** The open pull request that identifies a release candidate in flight. */
+export function candidatePull(overrides: Partial<PullPayload> = {}): PullPayload {
+  const version = '5.53.0';
+
+  return {
+    number: 27600,
+    title: `Release ${version}`,
+    html_url: 'https://github.com/strapi/strapi/pull/27600',
+    body: `Release \`${version}\`.`,
+    merged_at: null,
+    base: { ref: 'main' },
+    head: candidateHead(version),
+    user: { login: 'strapi-release-bot' },
+    milestone: null,
+    ...overrides,
+  };
+}
+
+/** A fresh draft, decided: `5.52.3` → `5.53.0` off one `feat`, the open `5.52.4` milestone renamed. */
+export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
+  return {
+    mode: 'draft',
+    candidate: null,
+    previousVersion: '5.52.3',
+    version: '5.53.0',
+    bumpKind: 'minor',
+    classification: {
+      features: [
+        {
+          sha: 'c'.repeat(40),
+          pr: 27436,
+          subject: 'feat(content-releases): audit logs',
+          via: 'subject',
+        },
+      ],
+      breaking: [],
+      ignored: [],
+      unparsed: [],
+    },
+    versionSource: 'computed',
+    range: {
+      fromRef: 'v5.52.3',
+      fromSha: 'a'.repeat(40),
+      toRef: 'origin/develop',
+      toSha: 'b'.repeat(40),
+    },
+    integrationCount: 12,
+    pullRequests: [
+      {
+        number: 27436,
+        title: 'feat(content-releases): audit logs',
+        author: { login: 'someone', name: 'Someone Real' },
+        url: 'https://github.com/strapi/strapi/pull/27436',
+        baseRef: 'develop',
+        headRef: 'feat/audit-logs',
+        milestone: '5.52.4',
+        mergedAt: '2026-09-05T09:59:00Z',
+        status: 'resolved',
+        basis: 'exact-merge-sha',
+        integrationShas: ['c'.repeat(40)],
+      },
+    ],
+    attention: [],
+    warnings: [],
+    milestones: {
+      shipping: {
+        action: 'rename',
+        number: 430,
+        currentTitle: '5.52.4',
+        title: '5.53.0',
+        close: true,
+      },
+      next: { action: 'create', number: null, currentTitle: null, title: '5.53.1' },
+    },
+    branch: 'releases/5.53.0',
+    branchAdvances: true,
+    candidateHeadSha: null,
+    realignment: [],
+    ...overrides,
+  };
 }

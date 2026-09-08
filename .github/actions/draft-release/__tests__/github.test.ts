@@ -89,6 +89,17 @@ describe('createRestClient', () => {
     );
   });
 
+  it('carries the response status on the error, so the journal can tell a refusal apart', async () => {
+    const { request } = stubRequest([
+      response({ ok: false, status: 422, payload: { message: 'already_exists' } }),
+    ]);
+
+    await assert.rejects(
+      () => createRestClient('t', request).send('PATCH', '/repos/a/b/milestones/430', {}),
+      (error: unknown) => (error as { status?: unknown }).status === 422
+    );
+  });
+
   it('surfaces a non-JSON failure body verbatim', async () => {
     const { request } = stubRequest([
       response({ ok: false, status: 502, text: async () => 'bad gateway' }),
@@ -166,5 +177,23 @@ describe('createGithubAdapter', () => {
 
     assert.match(calls[0]?.url ?? '', /\/issues\/27700\/labels$/u);
     assert.equal(calls[0]?.body, '{"labels":["publish-experimental"]}');
+  });
+
+  it('lists the pull requests open against one base', async () => {
+    const { request, calls } = stubRequest([response({ payload: [] })]);
+
+    await createGithubAdapter('t', coords, request).listPulls({ state: 'open', base: 'main' });
+
+    assert.match(calls[0]?.url ?? '', /\/pulls\?state=open&base=main&per_page=100$/u);
+  });
+
+  it('closes a pull request without touching its body', async () => {
+    const { request, calls } = stubRequest([response({ payload: { number: 27600 } })]);
+
+    await createGithubAdapter('t', coords, request).closePull(27600);
+
+    assert.match(calls[0]?.url ?? '', /\/pulls\/27600$/u);
+    assert.equal(calls[0]?.method, 'PATCH');
+    assert.equal(calls[0]?.body, '{"state":"closed"}');
   });
 });

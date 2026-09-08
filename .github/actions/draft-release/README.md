@@ -4,20 +4,55 @@ Prepares a Strapi CMS release candidate. It pins the shipping range against the 
 baseline, decides the version from the commits that landed, cuts `releases/x.y.z`, opens the draft
 pull request against `main`, attributes every shipping pull request, and reconciles milestones.
 
+It is built to run **more than once per release**. `develop` keeps moving while a candidate is open,
+so a later run folds whatever landed since into the same release rather than starting a new one.
+
 Triggered by hand from the Actions tab through [`draft-release.yml`](../../workflows/draft-release.yml).
 
 ## What it does
 
-| Step         | Effect                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------ |
-| Pin          | Resolves the npm `latest` baseline, the `v<latest>` tag and the source branch head to fixed SHAs.            |
-| Attribute    | Resolves each first-parent integration to the pull request that produced it.                                 |
-| Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                                      |
-| Milestones   | Renames the open milestone to the shipping version, opens the next patch milestone, closes the shipping one. |
-| Branch       | Pushes `releases/x.y.z` at the pinned SHA.                                                                   |
-| Pull request | Opens the draft PR `Release x.y.z` against `main` and labels it `publish-experimental`.                      |
-| Report       | Writes the shipping table and a machine-readable JSON block into the PR body.                                |
-| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue, then comments.             |
+| Step         | Effect                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| Pin          | Resolves the npm `latest` baseline, the `v<latest>` tag and `origin/develop` to fixed SHAs.         |
+| Attribute    | Resolves each first-parent integration to the pull request that produced it.                        |
+| Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                             |
+| Discover     | Finds the candidate already in flight, and decides whether to draft, refresh or redraft.            |
+| Branch       | Pushes `releases/x.y.z` at the pinned SHA, or advances it.                                          |
+| Pull request | Opens the draft PR `Release x.y.z` against `main`, or reuses the one in flight.                     |
+| Milestones   | Makes the shipping milestone name the version that ships, keeps the next one open, closes shipping. |
+| Realign      | Pulls every pull request that shipped onto the shipping milestone, whatever its author picked.      |
+| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue.                   |
+| Report       | Writes the shipping table and a machine-readable JSON block into the PR body, then comments.        |
+
+Every refusal happens in the preflight, before the first write. A run that stops leaves the
+repository untouched; only a run that dies mid-write leaves it half-changed, and the journal is what
+makes finishing that by hand mechanical.
+
+The branch push and the pull request are the first writes because they are the two most likely to
+fail on permissions: the push needs a bypass on the ruleset over `releases/*`, and the pull request
+needs the app's scopes. A run that fails there leaves at most one write to undo, where the milestone
+phase alone is dozens.
+
+## Running more than once
+
+The open pull request against `main` whose head is `releases/x.y.z` and lives in this repository is
+what identifies the candidate in flight. A pull request from a fork is never a candidate, whatever
+its branch is named, because anyone can open one. Nothing else works as a key: a release branch
+outlives its candidate, because the ruleset over `releases/*` forbids deleting one, and a milestone
+is renamed by this very action.
+
+| Mode      | When                                                     | What it does                                                                                                                                         |
+| --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draft`   | No candidate is open.                                    | Cuts the branch, opens the pull request, closes the shipping milestone.                                                                              |
+| `refresh` | A candidate is open and the version still agrees.        | Fast-forwards the branch, refills the shipping milestone, rewrites the body, comments. The pull request keeps its number, its reviews and its label. |
+| `redraft` | A candidate is open and the commits changed the version. | Opens a replacement pull request, renames both milestones, then comments on, closes and deletes the one it replaced.                                 |
+
+A `refresh` that finds the branch already at `develop`'s head pushes nothing. Pushing would fire
+`synchronize` on the pull request and publish another identical experimental artifact for nothing.
+
+`redraft` is the expensive path. A `feat` landing after a patch was drafted changes the version, and
+the version is in the branch name, so the candidate has to be re-keyed. The replacement is opened
+before the old candidate is retired, so the release is never without one.
 
 ## Version rule
 
@@ -75,12 +110,14 @@ must never be mistaken for a commit pushed straight to `develop`.
 
 ## Inputs
 
-| Input        | Default   | Purpose                                                              |
-| ------------ | --------- | -------------------------------------------------------------------- |
-| `token`      | required  | GitHub App token.                                                    |
-| `version`    | `''`      | Explicit `x.y.z`. Bypasses the commit rule.                          |
-| `dry_run`    | `true`    | Compute everything, record the planned writes, perform none of them. |
-| `source_ref` | `develop` | Branch the release is cut from.                                      |
+| Input     | Default  | Purpose                                                              |
+| --------- | -------- | -------------------------------------------------------------------- |
+| `token`   | required | GitHub App token.                                                    |
+| `version` | `''`     | Explicit `x.y.z`. Bypasses the commit rule.                          |
+| `dry_run` | `true`   | Compute everything, record the planned writes, perform none of them. |
+
+There is no source-branch input. A candidate always comes from the protected `develop` head, so
+nothing about the release content can be chosen at dispatch time.
 
 The default `GITHUB_TOKEN` is not enough. A pull request opened with it does not trigger
 `pull_request` workflows, so the release PR would get no CI, and a label applied with it does not
@@ -89,7 +126,7 @@ would never run.
 
 ## Outputs
 
-`version`, `bump`, `branch`, `pr_number`, `pr_url`, `journal_path`.
+`version`, `bump`, `mode`, `branch`, `pr_number`, `pr_url`, `journal_path`.
 
 ## The release candidate block
 
@@ -98,12 +135,17 @@ The pull request body carries a JSON block between `STRAPI_RELEASE_CANDIDATE_STA
 
 `candidate` is the part that identifies the release without re-deriving any of it:
 
-| Field                                 | Meaning                                                                   |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| `branch`                              | The release branch, `releases/x.y.z`.                                     |
-| `headSha`                             | The commit the branch was cut at. Always the same value as `range.toSha`. |
-| `expectedExperimentalVersion`         | `0.0.0-experimental.<headSha>`, the artifact published from that commit.  |
-| `pullRequestNumber`, `pullRequestUrl` | The release pull request, both `null` on a dry run.                       |
+| Field                                 | Meaning                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `branch`                              | The release branch, `releases/x.y.z`.                                                                                    |
+| `headSha`                             | The commit the branch points at. Always the same value as `range.toSha`.                                                 |
+| `expectedExperimentalVersion`         | `0.0.0-experimental.<headSha>`, the artifact published from that commit.                                                 |
+| `branchAdvanced`                      | Whether this run moved the branch. `false` means the artifact a reader may already have tested is still the current one. |
+| `pullRequestNumber`, `pullRequestUrl` | The release pull request, both `null` on a dry run.                                                                      |
+
+`release.mode` says whether the run opened the candidate, advanced it or replaced it. The body is
+rewritten wholesale on every run, so it is always the current truth; the comments are the per-run
+record of which run pulled which work in, and they are never rewritten.
 
 `pullRequests[].author` carries both halves of an identity:
 
@@ -135,11 +177,29 @@ This action does not roll back. A run that dies halfway leaves the repository ha
 human finishes or reverts it, so every mutation is recorded before the next one starts. The journal
 is written to the step summary and uploaded as an artifact whether the run succeeds or fails.
 
+Each entry carries how far it got, so it never claims more certainty than the run has:
+
+| `state`         | Meaning                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| `planned`       | A dry run recorded it and called nothing.                                                |
+| `attempted`     | The call left and has not come back. Only ever seen on a journal flushed mid-write.      |
+| `applied`       | The call returned. This is the only state worth undoing.                                 |
+| `failed`        | The server or git answered with a refusal, so nothing changed. The answer is in `error`. |
+| `indeterminate` | The call failed in a way that proves nothing, a socket closed after the request left.    |
+
+A GitHub response status and a git exit code both mean the operation reached a verdict, and git
+updates a ref atomically, so a push that exits non-zero left the ref alone. An error carrying
+neither is `indeterminate` rather than assumed harmless.
+
 A dry run fills the same structure without calling the API. That is the rehearsal: a reviewable,
 line-by-line list of every milestone rename, pull request reassignment and ref push the real run
 would perform.
 
 ### Undoing a partial run
+
+Undo an entry only when its `state` is `applied`. A `failed` entry changed nothing. An
+`indeterminate` one has to be checked against GitHub before anything is touched, because nobody can
+vouch for whether it landed.
 
 | `op`                    | Undo                                                                          |
 | ----------------------- | ----------------------------------------------------------------------------- |
@@ -149,24 +209,47 @@ would perform.
 | `issue.milestone.set`   | `gh api -X PATCH repos/strapi/strapi/issues/<n> -F milestone=<before number>` |
 | `issue.milestone.clear` | same, with the milestone number recorded in `before`                          |
 | `branch.push`           | `git push origin --delete releases/<version>`                                 |
+| `branch.delete`         | `git push origin <before sha>:refs/heads/<branch>`                            |
 | `pr.create`             | `gh pr close <n> --delete-branch`                                             |
+| `pr.close`              | `gh pr reopen <n>`                                                            |
 | `pr.label`              | `gh pr edit <n> --remove-label publish-experimental`                          |
 | `pr.body`, `pr.comment` | Edit or delete by hand.                                                       |
 
+`branch.delete` is a compare-and-swap on the head the preflight saw: the push carries
+`--force-with-lease` against that SHA, so a commit pushed to the old branch mid-run makes the delete
+fail instead of losing the commit. The same SHA is what `before` records, and what the undo restores.
+
+## Repository settings this action depends on
+
+`releases/*` is covered by a repository ruleset carrying `deletion`, `non_fast_forward` and
+`required_status_checks`. `required_status_checks` gates ref **updates**, not only pull request
+merges, and the required contexts are all `pull_request` checks that never exist on a `develop`
+commit. The release GitHub App therefore has to be a bypass actor on the ruleset covering
+`releases/*`, or the branch can be neither created nor advanced. Bypass is granted per actor and not
+per rule, so that ruleset should cover `releases/*` alone and leave `main`, `develop` and `v4` with
+no bypass actors at all.
+
 ## Stops
 
-The run refuses to continue on any of these:
+The run refuses to continue on any of these, all of them before the first write:
 
 1. npm `latest` disagrees with the highest published stable version.
 2. The `v<latest>` tag is missing.
-3. The baseline is not an ancestor of the source ref.
+3. The baseline is not an ancestor of `origin/develop`.
 4. Rebase merges are enabled on the repository.
 5. The range carries a breaking change.
 6. The range is empty.
-7. Zero or more than one open milestone.
-8. `releases/<version>` already exists.
+7. More than one open milestone.
+8. `releases/<version>` exists with no open pull request drafting it.
 9. The `version` input is malformed or not greater than the baseline.
 10. Any commit-to-pulls lookup failed.
+11. More than one release pull request is open against `main`.
+12. The candidate's version is at or below the published baseline, so that release already shipped.
+13. The candidate's branch head is not contained in `origin/develop`, so someone pushed to it.
+14. The range now computes a version below the candidate's, so history was rewritten.
+15. No milestone is titled after the candidate's version, or the open one is not the candidate's next.
+16. A milestone already holds the title this run would rename another one onto.
+17. A candidate's pull request is open but its branch is gone from the remote.
 
 `ambiguous` and `unresolved` records do not stop the run. They are listed in the pull request body
 under "Needs a human".
@@ -213,6 +296,8 @@ lib/types.ts     the domain vocabulary; every runtime union is derived from its 
 lib/actions.ts   the Actions runtime protocol
 lib/github.ts    the GitHub REST adapter
 lib/range.ts     the Git adapter and the first-parent log parser
+lib/candidate.ts finding the candidate in flight, and deciding draft / refresh / redraft
+lib/pipeline.ts  `preflightRelease` decides and refuses, `applyRelease` writes
 lib/*.ts         one module per decision, pure
 __tests__/*.ts   node:test suites, one per module
 ```
