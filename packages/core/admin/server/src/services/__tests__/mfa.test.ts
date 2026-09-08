@@ -5,8 +5,10 @@ import {
   base32Decode,
   base32Encode,
   errors,
+  getDeviceName,
 } from '@strapi/utils';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
+import { hashTrustToken } from '../mfa-trusted-devices';
 import { MFA_DEFAULTS } from '../../config/mfa';
 
 const DEFAULT_USER_TABLE = 'admin_users';
@@ -19,6 +21,7 @@ const CHALLENGE_UID = 'admin::mfa-challenge';
 const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
 const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
+const TRUSTED_UID = 'admin::mfa-trusted-device';
 
 type UserRow = Record<string, unknown>;
 type ResolveKey = (column: string) => string;
@@ -155,6 +158,45 @@ interface EventRow {
   createdAt: Date;
   [key: string]: unknown;
 }
+
+interface TrustedRow {
+  id: number;
+  userId: string;
+  tokenHash: string;
+  deviceId: string | null;
+  deviceName: string | null;
+  expiresAt: Date;
+  lastUsedAt: Date | null;
+  createdAt: Date;
+  [key: string]: unknown;
+}
+
+/**
+ * `orderBy` as the query engine accepts it -- one `{ field: direction }` clause or an array of
+ * them -- evaluated left to right until a clause distinguishes two rows. Same semantics the event
+ * mocks implement inline; extracted here for the trusted-device mocks.
+ */
+const applyOrderBy = <T extends Record<string, unknown>>(rows: T[], orderBy: unknown): T[] => {
+  let clauses: Array<Record<string, string>> = [];
+  if (Array.isArray(orderBy)) {
+    clauses = orderBy;
+  } else if (orderBy) {
+    clauses = [orderBy as Record<string, string>];
+  }
+
+  return [...rows].sort((a, b) => {
+    for (const clause of clauses) {
+      for (const [field, direction] of Object.entries(clause)) {
+        const left = asComparable(a[field]);
+        const right = asComparable(b[field]);
+        if (left !== right) {
+          return direction === 'desc' ? right - left : left - right;
+        }
+      }
+    }
+    return 0;
+  });
+};
 
 /**
  * Coerces a value to something orderable for the `$gt`/`$lt` family. Deliberately narrow and
@@ -715,6 +757,56 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     }),
   };
 
+  // Cycle 3. Every row handed out is a snapshot, every write mutates the live array, exactly as
+  // the challenge and event stores above. `findMany` honours `where` and `orderBy` (the cap and
+  // the list both order by `createdAt` desc, `id` desc); `select` is accepted and ignored.
+  const trustedRows: TrustedRow[] = [];
+  let nextTrustedId = 1;
+  const trustedMocks = {
+    create: jest.fn(async ({ data }: any) => {
+      const row: TrustedRow = {
+        id: nextTrustedId,
+        createdAt: new Date(),
+        deviceId: null,
+        deviceName: null,
+        lastUsedAt: null,
+        ...data,
+      };
+      nextTrustedId += 1;
+      trustedRows.push(row);
+      return { ...row };
+    }),
+    findOne: jest.fn(async ({ where }: any) => {
+      const row = trustedRows.find((r) => matchesWhere(r, where));
+      return row ? { ...row } : null;
+    }),
+    findMany: jest.fn(async ({ where, orderBy }: any = {}) =>
+      applyOrderBy(
+        trustedRows.filter((r) => matchesWhere(r, where)),
+        orderBy
+      ).map((r) => ({ ...r }))
+    ),
+    update: jest.fn(async ({ where, data }: any) => {
+      const row = trustedRows.find((r) => matchesWhere(r, where));
+      if (!row) return null;
+      Object.assign(row, data);
+      return { ...row };
+    }),
+    deleteMany: jest.fn(async ({ where }: any) => {
+      let count = 0;
+      for (let i = trustedRows.length - 1; i >= 0; i -= 1) {
+        if (matchesWhere(trustedRows[i], where)) {
+          trustedRows.splice(i, 1);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
+    count: jest.fn(
+      async ({ where }: any = {}) => trustedRows.filter((r) => matchesWhere(r, where)).length
+    ),
+  };
+
   const userConnection = buildConnection(users, userTable, resolveUserKey);
   const recoveryConnection = buildRecoveryConnection(
     recoveryRows,
@@ -759,6 +851,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             return challengeMocks;
           case EVENT_UID:
             return eventMocks;
+          case TRUSTED_UID:
+            return trustedMocks;
           default:
             throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
@@ -782,6 +876,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         const recoverySnapshot = recoveryRows.map((row) => ({ ...row }));
         const challengesSnapshot = challenges.map((row) => ({ ...row }));
         const eventsSnapshot = events.map((row) => ({ ...row }));
+        const trustedSnapshot = trustedRows.map((row) => ({ ...row }));
 
         try {
           return await run({ trx: {} });
@@ -791,6 +886,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
           recoveryRows.splice(0, recoveryRows.length, ...recoverySnapshot);
           challenges.splice(0, challenges.length, ...challengesSnapshot);
           events.splice(0, events.length, ...eventsSnapshot);
+          trustedRows.splice(0, trustedRows.length, ...trustedSnapshot);
           throw error;
         }
       }),
@@ -816,6 +912,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     challenges,
     events,
     eventMocks,
+    trustedRows,
+    trustedMocks,
   };
 };
 
@@ -2951,5 +3049,286 @@ describe('mfa service: enforce', () => {
 
       expect(events[0].metadata).toEqual({ via: 'cli' });
     });
+  });
+});
+
+describe('mfa service: trusted devices', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const CHROME_UA =
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+  /**
+   * `stored` is the live store document: a test mutates `stored.trustedDevices.days` (or
+   * `.enabled`) mid-flight to change policy, the way an officer's save would.
+   */
+  const setup = (trusted: Partial<{ enabled: boolean; days: number }> = {}) => {
+    const stored = { trustedDevices: { enabled: true, days: 30, ...trusted } };
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+      },
+    });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, stored };
+  };
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('trustDevice stores only a hash, with the label and an absolute expiry, and returns the token once', async () => {
+    const { service, trustedRows, events, strapi } = setup();
+    const before = Date.now();
+
+    const granted = await service.trustDevice('1', { deviceId: 'dev-1', userAgent: CHROME_UA });
+
+    expect(granted).not.toBeNull();
+    expect(granted!.token).toMatch(/^[0-9a-f]{64}$/);
+    expect(trustedRows).toHaveLength(1);
+    const [row] = trustedRows;
+    expect(row.userId).toBe('1');
+    expect(row.tokenHash).not.toBe(granted!.token);
+    expect(row.tokenHash).toBe(hashTrustToken(granted!.token));
+    expect(row.deviceId).toBe('dev-1');
+    expect(row.deviceName).toBe(getDeviceName(CHROME_UA));
+    expect(row.expiresAt.getTime()).toBeGreaterThanOrEqual(before + 30 * DAY);
+    expect(row.expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + 30 * DAY);
+    expect(granted!.expiresAt).toEqual(row.expiresAt);
+    expect(row.lastUsedAt).toBeNull();
+
+    const event = events.find((e) => e.type === 'device_trusted');
+    expect(event).toMatchObject({
+      userId: '1',
+      metadata: { days: 30, deviceName: row.deviceName },
+    });
+    expect(JSON.stringify(events)).not.toContain(granted!.token);
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.device.trusted', { userId: '1' });
+  });
+
+  test('a granted token is honoured for its owner, stamps lastUsedAt and emits the audit event only', async () => {
+    const { service, trustedRows, events, strapi } = setup();
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(true);
+
+    expect(trustedRows[0].lastUsedAt).toBeInstanceOf(Date);
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.trusted.device.used', {
+      userId: '1',
+    });
+    expect(events.filter((e) => e.type === 'trusted_device_used')).toHaveLength(0);
+  });
+
+  test("another user's token, or an unknown one, is refused and nothing is stamped or deleted", async () => {
+    const { service, trustedRows } = setup();
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    await expect(service.consumeTrustedDevice('2', token)).resolves.toBe(false);
+    await expect(service.consumeTrustedDevice('1', 'not-a-token')).resolves.toBe(false);
+
+    expect(trustedRows).toHaveLength(1);
+    expect(trustedRows[0].lastUsedAt).toBeNull();
+  });
+
+  test('a token past its stored expiry is refused and its row deleted by that read', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, trustedRows } = setup({ days: 1 });
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    jest.setSystemTime(now + 2 * DAY);
+
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
+    expect(trustedRows).toHaveLength(0);
+  });
+
+  test('lowering days cuts an existing trust at once, deletes it on read, and a later raise cannot revive it', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, trustedRows, stored } = setup({ days: 30 });
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    jest.setSystemTime(now + 8 * DAY);
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(true);
+
+    stored.trustedDevices.days = 7;
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
+    expect(trustedRows).toHaveLength(0);
+
+    stored.trustedDevices.days = 30;
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
+  });
+
+  test('raising days never extends a trust granted under a shorter promise', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, stored } = setup({ days: 7 });
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    stored.trustedDevices.days = 30;
+    jest.setSystemTime(now + 8 * DAY);
+
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
+  });
+
+  test('with the setting off, trustDevice grants nothing and consume refuses an existing token', async () => {
+    const { service, trustedRows, stored } = setup();
+    const { token } = (await service.trustDevice('1', {}))!;
+
+    stored.trustedDevices.enabled = false;
+
+    await expect(service.trustDevice('1', {})).resolves.toBeNull();
+    await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
+    expect(trustedRows).toHaveLength(1);
+  });
+
+  test('the eleventh grant evicts the oldest, so a user never holds more than ten', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, trustedRows } = setup();
+    const tokens: string[] = [];
+    for (let i = 0; i < 11; i += 1) {
+      jest.setSystemTime(now + i * 1000);
+      // eslint-disable-next-line no-await-in-loop
+      tokens.push((await service.trustDevice('1', {}))!.token);
+    }
+
+    expect(trustedRows).toHaveLength(10);
+    await expect(service.consumeTrustedDevice('1', tokens[0])).resolves.toBe(false);
+    await expect(service.consumeTrustedDevice('1', tokens[1])).resolves.toBe(true);
+    await expect(service.consumeTrustedDevice('1', tokens[10])).resolves.toBe(true);
+  });
+
+  test('listTrustedDevices hides the hash, marks the presented token current and sorts it first', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service } = setup();
+    const first = (await service.trustDevice('1', {}))!;
+    jest.setSystemTime(now + 1000);
+    await service.trustDevice('1', {});
+    await service.trustDevice('2', {});
+
+    const list = await service.listTrustedDevices('1', first.token);
+
+    expect(list).toHaveLength(2);
+    expect(list[0]).toEqual({
+      id: expect.any(String),
+      deviceName: null,
+      createdAt: new Date(now).toISOString(),
+      expiresAt: new Date(now + 30 * DAY).toISOString(),
+      lastUsedAt: null,
+      current: true,
+    });
+    expect(list[1].current).toBe(false);
+    expect(JSON.stringify(list)).not.toContain(hashTrustToken(first.token));
+    expect(JSON.stringify(list)).not.toContain(first.token);
+
+    const anonymous = await service.listTrustedDevices('1');
+    expect(anonymous.every((device) => device.current === false)).toBe(true);
+  });
+
+  test('listTrustedDevices reports the effective expiry and prunes dead rows', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, trustedRows, stored } = setup({ days: 30 });
+    await service.trustDevice('1', {});
+    jest.setSystemTime(now + 10 * DAY);
+    await service.trustDevice('1', {});
+    stored.trustedDevices.days = 12;
+
+    const list = await service.listTrustedDevices('1');
+
+    expect(list.map((device) => device.expiresAt)).toEqual([
+      new Date(now + 10 * DAY + 12 * DAY).toISOString(),
+      new Date(now + 12 * DAY).toISOString(),
+    ]);
+
+    stored.trustedDevices.days = 7;
+    const pruned = await service.listTrustedDevices('1');
+    expect(pruned).toHaveLength(1);
+    expect(trustedRows).toHaveLength(1);
+  });
+
+  test("revokeTrustedDevice deletes only the caller's row and reports whether it was the presented one", async () => {
+    const { service, trustedRows, events } = setup();
+    const mine = (await service.trustDevice('1', {}))!;
+    const other = (await service.trustDevice('1', {}))!;
+    await service.trustDevice('2', {});
+    const idOf = (token: string) =>
+      String(trustedRows.find((r) => r.tokenHash === hashTrustToken(token))!.id);
+    const theirsId = String(trustedRows.find((r) => r.userId === '2')!.id);
+
+    await expect(service.revokeTrustedDevice('1', theirsId, mine.token)).resolves.toEqual({
+      revoked: false,
+      current: false,
+    });
+    expect(trustedRows).toHaveLength(3);
+
+    await expect(service.revokeTrustedDevice('1', idOf(mine.token), other.token)).resolves.toEqual({
+      revoked: true,
+      current: false,
+    });
+    await expect(service.revokeTrustedDevice('1', idOf(other.token), other.token)).resolves.toEqual(
+      { revoked: true, current: true }
+    );
+    expect(trustedRows.map((r) => r.userId)).toEqual(['2']);
+    expect(events.filter((e) => e.type === 'device_trust_revoked')).toHaveLength(2);
+  });
+
+  test('revokeAllTrustedDevices deletes every row of the user, records the count and names the administrator', async () => {
+    const { service, trustedRows, events, strapi } = setup();
+    await service.trustDevice('1', {});
+    await service.trustDevice('1', {});
+    await service.trustDevice('2', {});
+
+    await expect(service.revokeAllTrustedDevices('1', { byUserId: '9' })).resolves.toBe(2);
+
+    expect(trustedRows.map((r) => r.userId)).toEqual(['2']);
+    expect(events.find((e) => e.type === 'device_trust_revoked')).toMatchObject({
+      userId: '1',
+      metadata: { count: 2, byUserId: '9' },
+    });
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.device.trust.revoked', {
+      userId: '1',
+      count: 2,
+      byUserId: '9',
+    });
+
+    await expect(service.revokeAllTrustedDevices('1')).resolves.toBe(0);
+    expect(events.filter((e) => e.type === 'device_trust_revoked')).toHaveLength(1);
+  });
+
+  test('clearTrustedDevices and clearAllTrustedDevices delete silently', async () => {
+    const { service, trustedRows, events } = setup();
+    await service.trustDevice('1', {});
+    await service.trustDevice('2', {});
+    const before = events.length;
+
+    await expect(service.clearTrustedDevices('1')).resolves.toBe(1);
+    await expect(service.clearAllTrustedDevices()).resolves.toBe(1);
+
+    expect(trustedRows).toHaveLength(0);
+    expect(events).toHaveLength(before);
+  });
+
+  test('sweepExpiredTrustedDevices deletes rows past their stored expiry only', async () => {
+    const now = Date.now();
+    jest.useFakeTimers({ now });
+    const { service, trustedRows, stored } = setup({ days: 1 });
+    await service.trustDevice('1', {});
+    stored.trustedDevices.days = 30;
+    jest.setSystemTime(now + 1000);
+    await service.trustDevice('1', {});
+    jest.setSystemTime(now + 2 * DAY);
+
+    await expect(service.sweepExpiredTrustedDevices()).resolves.toBe(1);
+    expect(trustedRows).toHaveLength(1);
+  });
+
+  test('trustedDeviceSettings exposes the live policy', async () => {
+    const { service, stored } = setup({ days: 14 });
+
+    await expect(service.trustedDeviceSettings()).resolves.toEqual({ enabled: true, days: 14 });
+    stored.trustedDevices.enabled = false;
+    await expect(service.trustedDeviceSettings()).resolves.toEqual({ enabled: false, days: 14 });
   });
 });

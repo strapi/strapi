@@ -13,8 +13,9 @@ import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
-import { readMfaEnforcement } from './security-settings';
+import { readMfaEnforcement, readTrustedDeviceSettings } from './security-settings';
 import type { MfaEnforcement } from '../../../shared/contracts/security-settings';
+import { createTrustedDevices } from './mfa-trusted-devices';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -184,6 +185,10 @@ export interface MfaServiceDeps {
  *  - Enforcement (cycle 2): `isExemptFromMfa`, `isMfaRequiredFor`, `enforce`, `unlock` — the
  *    session-issue policy check, the grace/lock lifecycle it drives, and the administrator
  *    override that lifts a lock.
+ *  - Trusted devices (cycle 3, `mfa-trusted-devices.ts`): `trustDevice`, `consumeTrustedDevice`,
+ *    `listTrustedDevices`, `revokeTrustedDevice`, `revokeAllTrustedDevices`, `clearTrustedDevices`,
+ *    `clearAllTrustedDevices`, `sweepExpiredTrustedDevices`, `trustedDeviceSettings` — a browser's
+ *    right to skip the second factor for a bounded period.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -1051,6 +1056,17 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     });
   };
 
+  // --- Trusted devices (cycle 3) ------------------------------------------
+  // Own module, composed here so callers keep one service. `settings` is the store reader from
+  // `security-settings.ts`, injected rather than imported inside the module so its tests can hand
+  // it any policy without a store double.
+  const trustedDevices = createTrustedDevices({
+    strapi,
+    settings: () => readTrustedDeviceSettings(strapi),
+    recordEvent,
+    notify,
+  });
+
   /**
    * A `where` fragment excluding the `recovery_codes_issued` acknowledgement marker: it is not a
    * security notice, so it must never surface from `unseenEvents` or be touched by
@@ -1455,6 +1471,15 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     assertPasswordAndFactor,
     disable,
     sweepExpiredChallenges,
+    trustDevice: trustedDevices.trustDevice,
+    consumeTrustedDevice: trustedDevices.consumeTrustedDevice,
+    listTrustedDevices: trustedDevices.listTrustedDevices,
+    revokeTrustedDevice: trustedDevices.revokeTrustedDevice,
+    revokeAllTrustedDevices: trustedDevices.revokeAllTrustedDevices,
+    clearTrustedDevices: trustedDevices.clearTrustedDevices,
+    clearAllTrustedDevices: trustedDevices.clearAllTrustedDevices,
+    sweepExpiredTrustedDevices: trustedDevices.sweepExpiredTrustedDevices,
+    trustedDeviceSettings: trustedDevices.trustedDeviceSettings,
   };
 };
 
