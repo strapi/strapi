@@ -625,15 +625,17 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
 
   if (isCurrentFile) {
     // Determinate only once bytes are actually being reported — a known `size` is not
-    // enough. The two upload flows differ here:
-    //  - the direct-file flow streams real byte counts from XHR, so `uploadedBytes`
-    //    climbs and a determinate bar is meaningful;
-    //  - the URL flow learns the size from the `file:uploading` SSE event but receives
-    //    no incremental counts at all (the next event is `file:complete`), so
-    //    `uploadedBytes` stays 0 for the whole transfer.
-    // Keying off `size` alone froze URL rows at a determinate 0% for the entire upload;
+    // enough. Both flows can report bytes, but neither always does:
+    //  - the direct-file flow streams real byte counts from XHR;
+    //  - the URL flow streams `file:progress` SSE frames while the server fetches the
+    //    remote file, but only when the remote sent a usable Content-Length. Without one
+    //    there is no denominator, nothing is dispatched, and `uploadedBytes` stays 0.
+    // Keying off `size` alone froze such rows at a determinate 0% for the entire upload;
     // keying off reported bytes keeps them animating until there is a fraction to show.
-    const hasReportedProgress = file.size > 0 && file.uploadedBytes > 0;
+    // Back to indeterminate once every byte is in: the server is still working (the URL
+    // flow's provider upload, the direct flow awaiting its response), not stuck at 100%.
+    const hasReportedProgress =
+      file.size > 0 && file.uploadedBytes > 0 && file.uploadedBytes < file.size;
 
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
