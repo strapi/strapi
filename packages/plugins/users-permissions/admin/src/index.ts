@@ -1,3 +1,5 @@
+import { PluginDefinition } from '@strapi/admin/strapi-admin';
+
 import { strapi as pkgStrapi } from '../../package.json';
 
 import { PERMISSIONS } from './constants';
@@ -6,7 +8,7 @@ import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pkgStrapi.name;
 
-export default {
+const admin: PluginDefinition = {
   register(app) {
     // Create the plugin's settings section
     app.createSettingSection(
@@ -95,3 +97,5 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+export default admin;

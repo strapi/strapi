@@ -4,14 +4,14 @@ import { baseConfig } from '../../../rollup.utils.mjs';
 export default defineConfig([
   baseConfig({
     input: {
-      index: './admin/src/index.js',
+      index: './admin/src/index.ts',
     },
     rootDir: './admin/src',
     outDir: './dist/admin',
   }),
   baseConfig({
     input: {
-      index: './server/src/index.js',
+      index: './server/src/index.ts',
     },
     rootDir: './server/src',
     outDir: './dist/server',
