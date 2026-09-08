@@ -1364,6 +1364,44 @@ describe('mfa service: enrolment', () => {
         jest.useRealTimers();
       }
     });
+
+    test('a completed replacement revokes every trusted device; a first enrolment touches none', async () => {
+      const stored = { trustedDevices: { enabled: true, days: 30 } };
+      const store = jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() }));
+      const { strapi, trustedRows } = buildStrapi({ store });
+      const service = createMfaService(defaultDeps(strapi));
+
+      // First enrolment: nothing to revoke, and the row created before it must survive.
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+      await service.trustDevice('1', {});
+      await service.trustDevice('2', {});
+      expect(trustedRows).toHaveLength(2);
+
+      // Replacement: a current code starts it, a code from the pending secret completes it.
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const replacement = await service.beginEnrolment(
+          '1',
+          'pw',
+          generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+        );
+        jest.setSystemTime(now + 60_000);
+        const result = await service.completeEnrolment(
+          '1',
+          generateTotp({ secret: base32Decode(replacement.secret), step: 30, digits: 6 })
+        );
+        expect(result.replaced).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
+
+      expect(trustedRows.map((r) => r.userId)).toEqual(['2']);
+    });
   });
 });
 
@@ -2387,6 +2425,23 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // too when the final statement fails.
       expect(recoveryRows.filter((r) => r.userId === '1')).toHaveLength(codesBefore);
       expect(challenges.filter((c) => c.userId === '1')).toHaveLength(challengesBefore);
+    });
+
+    test('deletes the trusted devices too, inside the same transaction', async () => {
+      const stored = { trustedDevices: { enabled: true, days: 30 } };
+      const fixture = buildMfaFixture({
+        strapiOverrides: {
+          store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        },
+      });
+      const service = createMfaService(defaultDeps(fixture.strapi));
+      await service.trustDevice('1', {});
+      await service.trustDevice('2', {});
+
+      await service.disable('1');
+
+      expect(fixture.trustedRows.map((r) => r.userId)).toEqual(['2']);
+      expect(fixture.strapi.db.transaction).toHaveBeenCalled();
     });
   });
 });

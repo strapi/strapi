@@ -660,6 +660,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       throw new ValidationError('No enrolment in progress');
     }
 
+    // Cycle 3: the trusts on file were granted against the authenticator the user just retired.
+    // Conservative by design -- the cost is one code per browser at its next login -- and only on
+    // a replacement: a first enrolment has nothing to revoke.
+    if (replaced) {
+      await trustedDevices.clearTrustedDevices(userId);
+    }
+
     return { recoveryCodes, replaced };
   };
 
@@ -1408,11 +1415,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * would leave `mfaEnabledAt`/`mfaSecret` still set -- so a code is still demanded on every
    * future request -- with the recovery codes already deleted, and a replacement enrolment demands
    * a current factor. That is a permanent lockout with no way back in short of the CLI reset.
+   *
+   * Cycle 3 adds the trusted-device rows to the same transaction: a disabled account has no second
+   * factor for a trust to bypass, and the CLI reset (which calls `disable`) must leave none behind
+   * either.
    */
   const disable = async (userId: string): Promise<void> => {
     await strapi.db.transaction(async () => {
       await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
       await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      await trustedDevices.clearTrustedDevices(userId);
       await userQuery().update({
         where: { id: userId },
         data: {

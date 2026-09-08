@@ -161,6 +161,7 @@ describe('security-settings: service', () => {
     });
     const emit = jest.fn();
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
+    const clearAllTrustedDevices = jest.fn(() => Promise.resolve(0));
     const validatePassword = jest.fn(() => Promise.resolve(options.passwordOk ?? true));
     const transaction = jest.fn(async (run: () => Promise<unknown>) => run());
 
@@ -221,6 +222,7 @@ describe('security-settings: service', () => {
             isExemptFromMfa: jest.fn(() => Promise.resolve(options.exempt ?? false)),
             isEnrolled: jest.fn(() => Promise.resolve(options.enrolled ?? false)),
             assertPasswordAndFactor,
+            clearAllTrustedDevices,
           };
         }
         if (uid === 'admin::auth') return { validatePassword };
@@ -236,6 +238,7 @@ describe('security-settings: service', () => {
       storeSet,
       emit,
       assertPasswordAndFactor,
+      clearAllTrustedDevices,
       validatePassword,
       transaction,
     };
@@ -598,5 +601,27 @@ describe('security-settings: service', () => {
       previous: expect.objectContaining({ trustedDevices: { enabled: true, days: 30 } }),
       next: expect.objectContaining({ trustedDevices: { enabled: true, days: 7 } }),
     });
+  });
+
+  test('turning trusted devices off empties the table inside the write; nothing else touches it', async () => {
+    const on = setup({ stored: { trustedDevices: { enabled: true, days: 30 } } });
+    await on.service.updateSettings({ trustedDevices: { enabled: false, days: 30 } }, actor);
+    expect(on.clearAllTrustedDevices).toHaveBeenCalledTimes(1);
+    expect(on.transaction).toHaveBeenCalledTimes(1);
+
+    const lower = setup({ stored: { trustedDevices: { enabled: true, days: 30 } } });
+    await lower.service.updateSettings({ trustedDevices: { enabled: true, days: 7 } }, actor);
+    expect(lower.clearAllTrustedDevices).not.toHaveBeenCalled();
+
+    const alreadyOff = setup({ stored: { trustedDevices: { enabled: false, days: 30 } } });
+    await alreadyOff.service.updateSettings({ trustedDevices: { enabled: false, days: 7 } }, actor);
+    expect(alreadyOff.clearAllTrustedDevices).not.toHaveBeenCalled();
+
+    const mfaOnly = setup({ stored: { trustedDevices: { enabled: true, days: 30 } } });
+    await mfaOnly.service.updateSettings(
+      { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } },
+      actor
+    );
+    expect(mfaOnly.clearAllTrustedDevices).not.toHaveBeenCalled();
   });
 });

@@ -221,7 +221,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // Housekeeping. Expired challenges are also rejected lazily on read, so this is only about
     // not letting the table grow — nothing about the security of the flow depends on it having
     // run, which is exactly why it is wrapped: a cleanup that cannot fail safely would otherwise
-    // be able to stop the admin from booting at all.
+    // be able to stop the admin from booting at all. Trusted-device rows (cycle 3) are swept here
+    // for the same reason and with the same safety: a dead row is already refused, and deleted,
+    // on read.
     //
     // The delete is unbounded, deliberately. Challenge rows come only from `createChallenge`,
     // which is throttled per account and rate limited per IP, and they expire after
@@ -229,9 +231,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // would be the fix if that ever changed.
     try {
       await mfaService.sweepExpiredChallenges();
+      await mfaService.sweepExpiredTrustedDevices();
     } catch (error) {
       strapi.log.warn(
-        `Could not sweep expired two-factor challenges: ${
+        `Could not sweep expired two-factor challenges or trusted devices: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

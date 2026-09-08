@@ -153,6 +153,8 @@ interface MfaServiceLike {
   }): Promise<boolean>;
   isEnrolled(userId: string): Promise<boolean>;
   assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
+  /** Cycle 3: every trusted-device row, every user. Called on the transition to `enabled: false`. */
+  clearAllTrustedDevices(): Promise<number>;
 }
 
 interface AuthServiceLike {
@@ -286,6 +288,13 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
           trustedDevices: { enabled: nextTrusted.enabled, days: nextTrusted.days },
         },
       });
+
+      // Turning trusted devices off means "no browser may bypass the code". Leaving rows in place
+      // would let a later re-enable silently revive trusts granted under the old policy, so the
+      // transition deletes them, in the same transaction as the setting that forbids them.
+      if (previous.trustedDevices.enabled && !nextTrusted.enabled) {
+        await mfa().clearAllTrustedDevices();
+      }
 
       if (input.mfa) {
         if (requiredRoles.length > 0) {
