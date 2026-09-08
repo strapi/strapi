@@ -12,6 +12,8 @@ import {
   mediaDeleteFolderInputSchema,
   mediaMoveAssetsInputSchema,
   mediaMoveAssetsOutputSchema,
+  deleteMediaInputSchema,
+  deleteMediaOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -548,6 +550,161 @@ describe('upload MCP schemas', () => {
         destinationFolder: null,
         moved: [MOVED_ASSET],
         failed: [{ id: 999 }],
+      });
+
+      expect(parsed.success).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // media_delete_assets
+  // ---------------------------------------------------------------------------
+
+  describe('media_delete_assets input', () => {
+    test('accepts a list of asset ids, with no dryRun flag', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [1, 2] }).success).toBe(true);
+    });
+
+    test('accepts a single-element array — there is no separate single-asset tool', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [42] }).success).toBe(true);
+    });
+
+    test('does not default dryRun at the schema level — the handler owns the safe default', () => {
+      // Same rule as media_delete_folder: a schema default would be published as a JSON Schema default
+      // a client could serialise away, and the safe branch must not depend on that.
+      const parsed = deleteMediaInputSchema.safeParse({ ids: [1] });
+
+      expect(parsed.success).toBe(true);
+      expect((parsed as { data: Record<string, unknown> }).data.dryRun).toBeUndefined();
+    });
+
+    test('accepts an explicit dryRun on both branches', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [1], dryRun: true }).success).toBe(true);
+      expect(deleteMediaInputSchema.safeParse({ ids: [1], dryRun: false }).success).toBe(true);
+    });
+
+    test('requires at least one id', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [] }).success).toBe(false);
+      expect(deleteMediaInputSchema.safeParse({}).success).toBe(false);
+    });
+
+    test('caps the batch size', () => {
+      const ids = Array.from({ length: 101 }, (_, index) => index + 1);
+      expect(deleteMediaInputSchema.safeParse({ ids }).success).toBe(false);
+    });
+
+    test('rejects non-integer, non-positive and string ids', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [0] }).success).toBe(false);
+      expect(deleteMediaInputSchema.safeParse({ ids: [1.5] }).success).toBe(false);
+      expect(deleteMediaInputSchema.safeParse({ ids: ['1'] }).success).toBe(false);
+    });
+
+    test('rejects a documentId in place of the numeric ids', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: ['z7v8zma53x01r6oceimv922b'] }).success).toBe(
+        false
+      );
+    });
+
+    test('points a scalar `id` at the bulk `ids` array', () => {
+      const parsed = deleteMediaInputSchema.safeParse({ id: 1 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
+    });
+
+    test('points `fileIds` — the admin REST field name — at `ids`', () => {
+      const parsed = deleteMediaInputSchema.safeParse({ fileIds: [1] });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
+    });
+
+    test('points `folderIds` at media_delete_folder, since this tool deletes assets only', () => {
+      // `/actions/bulk-delete` accepts both id lists; this tool deliberately does not.
+      const parsed = deleteMediaInputSchema.safeParse({ ids: [1], folderIds: [2] });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/media_delete_folder/);
+    });
+
+    test('rejects an unknown key rather than silently ignoring it', () => {
+      expect(deleteMediaInputSchema.safeParse({ ids: [1], force: true }).success).toBe(false);
+    });
+  });
+
+  describe('media_delete_assets output', () => {
+    const DELETED_ASSET = {
+      id: 1,
+      name: 'photo.jpg',
+      url: '/uploads/photo.jpg',
+      mime: 'image/jpeg',
+      size: 12.5,
+      folder: { id: 3, name: 'Archive' },
+    };
+
+    test('accepts a dry run listing what would be deleted', () => {
+      const parsed = deleteMediaOutputSchema.safeParse({
+        dryRun: true,
+        deleted: [DELETED_ASSET],
+        failed: [],
+        totalFileNumber: 1,
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a performed deletion in the same shape', () => {
+      // One contract for both branches: only `dryRun` distinguishes them.
+      const parsed = deleteMediaOutputSchema.safeParse({
+        dryRun: false,
+        deleted: [DELETED_ASSET],
+        failed: [],
+        totalFileNumber: 1,
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a partial success carrying both lists', () => {
+      const parsed = deleteMediaOutputSchema.safeParse({
+        dryRun: false,
+        deleted: [DELETED_ASSET],
+        failed: [{ id: 999, reason: 'No media asset has this id.' }],
+        totalFileNumber: 1,
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('requires dryRun, so a preview is never mistaken for a deletion', () => {
+      const parsed = deleteMediaOutputSchema.safeParse({
+        deleted: [DELETED_ASSET],
+        failed: [],
+        totalFileNumber: 1,
+      });
+
+      expect(parsed.success).toBe(false);
+    });
+
+    test('requires both lists, so every requested id is accounted for', () => {
+      expect(
+        deleteMediaOutputSchema.safeParse({
+          dryRun: false,
+          deleted: [DELETED_ASSET],
+          totalFileNumber: 1,
+        }).success
+      ).toBe(false);
+      expect(
+        deleteMediaOutputSchema.safeParse({ dryRun: false, failed: [], totalFileNumber: 0 }).success
+      ).toBe(false);
+    });
+
+    test('requires a reason on every failure', () => {
+      const parsed = deleteMediaOutputSchema.safeParse({
+        dryRun: false,
+        deleted: [],
+        failed: [{ id: 999 }],
+        totalFileNumber: 0,
       });
 
       expect(parsed.success).toBe(false);

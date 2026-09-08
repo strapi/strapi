@@ -171,3 +171,53 @@ export const mediaMoveAssetsOutputSchema = z.object({
       'The ids that were not moved, each with a reason. The moves reported in `moved` still happened — retry only these.'
     ),
 });
+
+/**
+ * `media_delete_assets` output — one contract for both branches, with a per-id account of every
+ * requested id.
+ *
+ * `dryRun` echoes which branch ran: on true `deleted` is what *would* be removed and nothing was
+ * touched; on false it is what actually was. Echoing it back means an agent can tell a preview
+ * from a completed deletion without tracking what it sent — the difference matters more here
+ * than anywhere else in this surface, because one branch is irreversible.
+ *
+ * `deleted` carries the full asset rather than a bare id, so the agent can report what it
+ * destroyed after the row is gone and no read can recover it. On a dry run it is the same shape,
+ * which is exactly what makes the preview a confirmation an agent can act on.
+ *
+ * Unlike `media_delete_folder`, an unresolvable id does NOT reject the call: deletions are performed
+ * per asset and reported per id, so a bad id among good ones neither rolls back the valid
+ * deletions nor stops them from happening. `deleted` and `failed` together account for every id
+ * in the request, on every successful response.
+ */
+export const deleteMediaFailureSchema = z.object({
+  id: z.number().describe('The requested asset id that was not deleted.'),
+  reason: z
+    .string()
+    .describe(
+      'Why this id was not deleted — a missing asset (possibly a folder id), or one this token may not delete.'
+    ),
+});
+
+export const deleteMediaOutputSchema = z.object({
+  dryRun: z
+    .boolean()
+    .describe(
+      'True when this was a preview and NOTHING was deleted. False when the deletion was performed and is irreversible.'
+    ),
+  deleted: z
+    .array(mediaAssetOutputSchema)
+    .describe(
+      'On a dry run, the assets that WOULD be permanently deleted. On a real run, the assets that were deleted — they no longer exist and cannot be read back.'
+    ),
+  failed: z
+    .array(deleteMediaFailureSchema)
+    .describe(
+      'The ids that were not deleted, each with a reason. On a real run the deletions reported in `deleted` still happened — retry only these.'
+    ),
+  totalFileNumber: z
+    .number()
+    .describe(
+      'How many assets are in `deleted` — the count that WOULD be removed on a dry run, or that was removed on a real one.'
+    ),
+});
