@@ -1,6 +1,19 @@
 import { render } from '@tests/utils';
 
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListPage } from '../ListPage';
+
+jest.mock('../../../../../hooks/useRBAC', () => ({
+  useRBAC: jest.fn(() => ({
+    isLoading: false,
+    allowedActions: {
+      canCreate: true,
+      canDelete: true,
+      canRead: true,
+      canUpdate: true,
+    },
+  })),
+}));
 
 jest.mock('../../../../../hooks/useAdminRoles', () => ({
   useAdminRoles: jest.fn(() => ({
@@ -21,6 +34,24 @@ jest.mock('../../../../../hooks/useAdminRoles', () => ({
 
 describe('<ListPage />', () => {
   it('should show a list of roles', async () => {
+    const { findByText } = render(<ListPage />);
+
+    expect(await findByText('Super Admin')).toBeInTheDocument();
+  });
+
+  it('should render roles without crashing when canCreate is false and canUpdate is true', async () => {
+    // @ts-ignore
+    useRBAC.mockReturnValueOnce({
+      isLoading: false,
+      allowedActions: {
+        canCreate: false,
+        canDelete: false,
+        canRead: true,
+        canUpdate: true,
+      },
+      permissions: [],
+    });
+
     const { findByText } = render(<ListPage />);
 
     expect(await findByText('Super Admin')).toBeInTheDocument();
