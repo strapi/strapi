@@ -132,12 +132,46 @@ describe('ai-translations service', () => {
     expect(service.isEnabled()).toBe(true);
   });
 
-  test('a registered provider follows the AI availability switch', async () => {
-    const service = createAITranslationsService({
-      strapi: createMockStrapi({ isAvailable: false, isStrapiManagedAiEnabled: false }),
-    });
+  test('ignores a provider registered while AI is unavailable', async () => {
+    const strapi = createMockStrapi({ isAvailable: false, isStrapiManagedAiEnabled: false });
+    const service = createAITranslationsService({ strapi });
+    const provider = createProvider();
+
+    service.registerProvider({ provider });
+
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      'The AI translations provider "byok" was ignored: AI features require an Enterprise license and "admin.ai.enabled" to be true.'
+    );
+    expect(service.isEnabled()).toBe(false);
+    await expect(service.generateTranslations(PARAMS)).rejects.toThrow(
+      'No AI translations provider is registered.'
+    );
+    expect(provider.generateTranslations).not.toHaveBeenCalled();
+  });
+
+  test('an ignored provider does not block a later registration', () => {
+    const strapi = createMockStrapi({ isAvailable: false });
+    const service = createAITranslationsService({ strapi });
 
     service.registerProvider({ provider: createProvider() });
+
+    strapi.ai.admin.isAvailable.mockReturnValue(true);
+
+    expect(() =>
+      service.registerProvider({ provider: createProvider({ name: 'other-byok' }) })
+    ).not.toThrow();
+    expect(service.isEnabled()).toBe(true);
+  });
+
+  test('a registered provider follows the AI availability switch at runtime', async () => {
+    const strapi = createMockStrapi({ isStrapiManagedAiEnabled: false });
+    const service = createAITranslationsService({ strapi });
+
+    service.registerProvider({ provider: createProvider() });
+
+    expect(service.isEnabled()).toBe(true);
+
+    strapi.ai.admin.isAvailable.mockReturnValue(false);
 
     expect(service.isEnabled()).toBe(false);
     await expect(service.generateTranslations(PARAMS)).rejects.toThrow(

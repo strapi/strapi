@@ -48,6 +48,13 @@ const createAITranslationsService = ({
     },
 
     registerProvider({ provider }: { provider: AiTranslationsProvider }) {
+      if (!strapi.ai.admin.isAvailable()) {
+        strapi.log.warn(
+          `The AI translations provider "${provider.name}" was ignored: AI features require an Enterprise license and "admin.ai.enabled" to be true.`
+        );
+        return;
+      }
+
       if (registeredProvider !== null) {
         throw new Error(
           `The AI translations provider "${registeredProvider.name}" is already registered, "${provider.name}" cannot replace it.`
