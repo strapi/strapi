@@ -1119,4 +1119,24 @@ describe('Admin Content API Token CRUD (api)', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.data.kind).toBe('content-api');
   });
+  test('Switches a custom token to read-only with permissions: null (the admin UI body)', async () => {
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => ['api::foo.foo.find']);
+
+    const token = await createValidToken({ type: 'custom', permissions: ['api::foo.foo.find'] });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'PUT',
+      body: {
+        name: token.name,
+        description: token.description,
+        type: 'read-only',
+        permissions: null,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.type).toBe('read-only');
+    expect(res.body.data.permissions).toEqual([]);
+  });
 });
