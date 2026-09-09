@@ -9,7 +9,7 @@ export const MCP_FOLDER_NAME_TAKEN =
   'A folder with this name already exists in the same parent folder. Folder names must be unique among siblings.';
 
 export const MCP_PARENT_FOLDER_NOT_FOUND =
-  'The parent folder does not exist. Use list_folders to discover valid folder ids, or pass null for the media library root.';
+  'The parent folder does not exist. Use media_list_folders to discover valid folder ids, or pass null for the media library root.';
 
 export const MCP_FOLDER_MOVE_INTO_SELF =
   'A folder cannot be moved into itself or into one of its own descendants.';
@@ -24,4 +24,4 @@ export const MCP_FOLDER_MOVE_INTO_SELF =
  * covers both rather than asserting one.
  */
 export const MCP_DELETE_FOLDER_UNRESOLVED_IDS = (ids: number[]) =>
-  `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — media_delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use media_delete_assets instead; otherwise the folders may already be gone. Use list_folders to discover valid folder ids.`;
+  `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — media_delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use media_delete_assets instead; otherwise the folders may already be gone. Use media_list_folders to discover valid folder ids.`;

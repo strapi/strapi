@@ -155,7 +155,7 @@ export const folderNameSchema = z
 const parentFolderIdSchema = folderIdSchema
   .nullable()
   .describe(
-    'Numeric id of the containing folder. Pass null for the media library root. Use list_folders to discover folder ids.'
+    'Numeric id of the containing folder. Pass null for the media library root. Use media_list_folders to discover folder ids.'
   );
 
 export const mediaCreateFolderInputSchema = z
@@ -220,6 +220,11 @@ export const mediaMoveFolderInputSchema = z
  * `dryRun` defaults to true: the safe branch is the one an agent gets when it omits the flag, so
  * a destructive cascade is never the path of least resistance (the initiative card's mitigation
  * for irreversible MCP operations). Deleting requires saying `dryRun: false` on purpose.
+ *
+ * That default lives in the handler (`folder-handlers.ts`, `dryRun = true`), NOT in this schema:
+ * `.default(true)` here is deliberately avoided so an omitted flag is a preview no matter how a
+ * client serialises the advertised schema. The `.describe()` text below is what tells an agent
+ * the default, so the two must be kept in step — do not "fix" this to `.default(true)`.
  */
 export const mediaDeleteFolderInputSchema = z
   .object({
