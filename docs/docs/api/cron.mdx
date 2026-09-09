@@ -40,7 +40,7 @@ Adds one or more cron tasks to the service.
 - Each value of the `tasks` object can be either a function, or an object with two properties: `task` and `options`.
 - If the value is a function, it is used as the task to be executed when the cron expression is met.
   - The key will be considered as the cron expression
-- If the value is an object, its `task` property is used as the task function, and its `options` property is used as the schedule: a cron `string`, a one-shot `Date` (or timestamp `number`), or `{ rule, tz?, start?, end? }` (the documented timezone form).
+- If the value is an object, its `task` property is used as the task function, and its `options` property is used as the schedule: a cron `string`, a one-shot `Date` (or timestamp `number`), `{ rule, tz?, start?, end? }`, or a node-schedule-style recurrence object (`{ dayOfWeek, hour, minute, … }`). `start`/`end` may be `Date`, timestamp, or ISO string. The task is called as `task({ strapi }, fireDate)`.
 
 #### Example
 
@@ -195,8 +195,8 @@ cron.destroy();
 
   - <Type>Object</Type>
 
-    - `job`: [<Type>Cron</Type>](https://github.com/Hexagon/croner) - Job object from croner
-    - `options`: <Type>String</Type> | <Type>Number</Type> | <Type>Date</Type> | <Type>Object</Type> - Cron string, timestamp, one-shot `Date`, or `{ rule, tz?, start?, end? }`
+    - `job`: [<Type>Cron</Type>](https://github.com/Hexagon/croner) - Croner job, with node-schedule aliases `invoke`, `cancel`, `nextInvocation`, and `reschedule`
+    - `options`: <Type>String</Type> | <Type>Number</Type> | <Type>Date</Type> | <Type>Object</Type> - Cron string, timestamp, one-shot `Date`, `{ rule, tz?, start?, end? }`, or a recurrence object
     - `name`: <Type>String</Type> - The name of the task associated to the job
 
 An array of the cron jobs added to the service.

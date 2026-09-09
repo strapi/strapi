@@ -106,7 +106,7 @@ describe('Cron service', () => {
     await sleep(350);
 
     expect(task).toHaveBeenCalledTimes(1);
-    expect(task).toHaveBeenCalledWith({ strapi: global.strapi });
+    expect(task).toHaveBeenCalledWith({ strapi: global.strapi }, expect.any(Date));
 
     await sleep(200);
     expect(task).toHaveBeenCalledTimes(1);
@@ -350,6 +350,84 @@ describe('Cron service', () => {
 
     expect(cron.jobs).toHaveLength(1);
     expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+  });
+
+  it('accepts node-schedule recurrence objects and string start/end', () => {
+    cron.start();
+
+    cron.add({
+      objLit: {
+        task: jest.fn(),
+        options: { dayOfWeek: 1, hour: 1, minute: 0, tz: 'UTC' },
+      },
+      recurrenceRuleShaped: {
+        task: jest.fn(),
+        options: {
+          recurs: true,
+          dayOfWeek: 1,
+          hour: 1,
+          minute: 0,
+          second: 0,
+          tz: 'UTC',
+        },
+      },
+      stringWindow: {
+        task: jest.fn(),
+        options: {
+          rule: '0 0 * * *',
+          start: '2027-06-01T00:00:00.000Z',
+          end: '2027-06-15T00:00:00.000Z',
+        },
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(3);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+    expect(cron.jobs[1].job.nextRun()).toBeInstanceOf(Date);
+    expect(cron.jobs[2].job.nextRun()).toBeInstanceOf(Date);
+    expect(global.strapi.log.error).not.toHaveBeenCalled();
+  });
+
+  it('exposes node-schedule job aliases and rejects from invoke()', async () => {
+    cron.start();
+    cron.add({
+      boom: {
+        async task() {
+          throw new Error('cron-boom');
+        },
+        options: new Date(Date.now() + 60_000),
+      },
+    });
+
+    const { job } = cron.jobs[0];
+    expect(typeof job.invoke).toBe('function');
+    expect(typeof job.cancel).toBe('function');
+    expect(typeof job.nextInvocation).toBe('function');
+    expect(typeof job.reschedule).toBe('function');
+    expect(job.nextInvocation()).toBeInstanceOf(Date);
+
+    await expect(job.invoke()).rejects.toThrow('cron-boom');
+  });
+
+  it('reschedule replaces the job after a sibling is removed', () => {
+    cron.start();
+    cron.add({
+      first: {
+        task: jest.fn(),
+        options: '0 0 * * *',
+      },
+      second: {
+        task: jest.fn(),
+        options: new Date(Date.now() + 60_000),
+      },
+    });
+
+    cron.remove('first');
+    const later = new Date(Date.now() + 120_000);
+    expect(cron.jobs[0].job.reschedule(later)).toBe(true);
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].options).toEqual(later);
+    expect(cron.jobs[0].job.nextInvocation()).toBeInstanceOf(Date);
   });
 
   it('rejects request as a task function property', () => {

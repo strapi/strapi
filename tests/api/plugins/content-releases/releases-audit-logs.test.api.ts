@@ -131,7 +131,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       (jobSpec: { name: string | null }) => jobSpec.name === `publishRelease_${releaseId}`
     );
     expect(spec).toBeDefined();
-    await spec.job.trigger();
+    await spec.job.invoke();
   };
 
   beforeAll(async () => {
@@ -452,7 +452,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       await clearAuditLogs();
 
-      await runScheduledJob(release.id);
+      await expect(runScheduledJob(release.id)).rejects.toThrow();
 
       const log = await waitForLog('release.trigger');
       expect(log.user).toBeNull();
