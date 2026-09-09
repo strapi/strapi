@@ -128,7 +128,7 @@ The bounding box of that group is computed in `computeGroupRect`, via `getBlocks
 
 Fresh discovery (`findBlocksContainer`), run only when there's no cached container:
 
-1. Walk up the DOM from the first span in the group looking for an ancestor whose direct children include a block-level tag (`P`, `H1`–`H6`, `UL`, `OL`, `BLOCKQUOTE`, `PRE`), skipping `LI` elements (a list item can have a nested `<ul>`/`<ol>` as a direct child, which would satisfy the check but is not the container).
+1. Walk up the DOM from the first span in the group looking for an ancestor whose direct children include a block-level tag (`P`, `H1`–`H6`, `UL`, `OL`, `BLOCKQUOTE`, `PRE`), skipping `LI`, `UL`, and `OL` elements themselves — a list item can have a nested `<ul>`/`<ol>` as a direct child (which would satisfy the check but is not the container), and `@strapi/blocks-react-renderer` places nested lists directly inside `<ul>`/`<ol>` rather than wrapped in an `<li>`, so list containers also need to be skipped as candidates.
 2. Reject the candidate if its area is more than `MAX_CONTAINER_AREA_RATIO` (6x) larger than the union of the group's own marked elements — this stops an image-only field (no block-level tags of its own) from escaping into an unrelated, page-level ancestor and swallowing the whole page.
 3. Use the container's `getBoundingClientRect()` as the highlight rect. This includes container padding and empty trailing blocks that have no stega spans.
 4. Fallback (if no container is found): union of all span rects plus an 80 px bottom buffer so that empty trailing blocks remain clickable.
@@ -151,7 +151,7 @@ Double-clicking a blocks field highlight opens the editor at the clicked block.
 4. `InputPopover` receives the message and calls `setPopoverField` with both the field metadata and the `blockIndex`.
 5. `InputPopoverProvider` makes `blockIndex` available via `usePreviewPopoverBlockIndex()` to all inputs rendered inside the popover.
 6. `InputRenderer` picks up `blockIndex` and passes it — along with `livePreviewSync={true}` — to `BlocksInput` → `BlocksEditor`.
-7. `BlocksEditor`'s `blockIndex` effect runs on mount: it calls `Transforms.select` to position the Slate cursor at `[targetIndex, 0]` (clamped to the last block if the index is out of range) and focuses the editor. A `requestAnimationFrame` callback then scrolls that block into view inside the editor's scroll container.
+7. `BlocksEditor`'s `blockIndex` effect runs on mount: it calls `Transforms.select(editor, Editor.start(editor, [targetIndex]))` to position the Slate cursor (clamped to the last block if the index is out of range) and focuses the editor. `Editor.start` — rather than a literal `[targetIndex, 0]` path — resolves the actual first valid text point inside that block, which matters for blocks whose first child isn't a plain text leaf (list items, headings with nested inline formatting). A `requestAnimationFrame` callback then scrolls that block into view inside the editor's scroll container.
 
 ### Live sync
 

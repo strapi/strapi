@@ -63,6 +63,26 @@ const isAudioMedia = (value) => {
   );
 };
 
+// Immutably sets a dotted path (e.g. "teamMembers.bio" or "components.2.title")
+// on a clone of `obj`. Only the objects/arrays actually on the path get cloned —
+// string-key indexing works the same for array segments as for object keys, so
+// numeric path segments naturally index into arrays without special-casing.
+const setDeep = (obj, path, value) => {
+  const keys = path.split('.');
+  const clone = Array.isArray(obj) ? [...obj] : { ...obj };
+  let cursor = clone;
+  keys.forEach((key, index) => {
+    if (index === keys.length - 1) {
+      cursor[key] = value;
+      return;
+    }
+    const next = cursor[key];
+    cursor[key] = Array.isArray(next) ? [...next] : { ...(next ?? {}) };
+    cursor = cursor[key];
+  });
+  return clone;
+};
+
 const isBlocksValue = (value) =>
   Array.isArray(value) &&
   value.length > 0 &&
@@ -243,8 +263,18 @@ const PreviewComponent = () => {
   const revalidator = useRevalidator();
 
   // Live blocks field overrides — updated by strapiFieldChange events so that
-  // BlocksRenderer re-renders in real time while the popover is open.
+  // BlocksRenderer re-renders in real time while the popover is open. Keyed by
+  // the raw dotted field path (e.g. "teamMembers.bio"), applied onto `main` via
+  // setDeep at render time so nested component/DZ fields update in place too.
   const [liveFields, setLiveFields] = React.useState({});
+
+  const mergedData = React.useMemo(
+    () =>
+      main
+        ? Object.entries(liveFields).reduce((acc, [path, value]) => setDeep(acc, path, value), main)
+        : main,
+    [main, liveFields]
+  );
 
   React.useEffect(() => {
     const handleMessage = (event) => {
@@ -364,7 +394,7 @@ const PreviewComponent = () => {
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
               {main ? (
                 <>
-                  <Entry data={{ ...main, ...liveFields }} />
+                  <Entry data={mergedData} />
                   <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (
