@@ -94,6 +94,40 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
     ]);
   });
 
+  it('records a collision-free reuse path in edit order (a -> c, b -> a, a -> b)', () => {
+    let state = reducer(
+      buildState([
+        { name: 'a', type: 'string', status: 'UNCHANGED' },
+        { name: 'b', type: 'string', status: 'UNCHANGED' },
+      ]),
+      editName(uid, 'a', 'c')
+    );
+    state = reducer(state, editName(uid, 'b', 'a'));
+    state = reducer(state, editName(uid, 'a', 'b'));
+
+    expect(getRenames(state, uid)).toEqual([
+      { oldName: 'a', newName: 'c' },
+      { oldName: 'b', newName: 'a' },
+      { oldName: 'a', newName: 'b' },
+    ]);
+  });
+
+  it('does not record a declined per-edit migration', () => {
+    const state = reducer(
+      buildState([{ name: 'title', type: 'string', status: 'UNCHANGED' }]),
+      actions.editAttribute({
+        attributeToSet: { type: 'string', name: 'heading' } as AnyAttribute,
+        forTarget: 'contentType',
+        targetUid: uid as Internal.UID.ContentType,
+        name: 'title',
+        recordRename: false,
+      })
+    );
+
+    expect(getRenames(state, uid)).toBeUndefined();
+    expect(getAttr(state, uid, 'heading')).toBeDefined();
+  });
+
   it('does not record a rename when editing other props without a name change', () => {
     const state = reducer(
       buildState([{ name: 'title', type: 'string', status: 'UNCHANGED' }]),

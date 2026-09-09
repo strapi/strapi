@@ -7,7 +7,7 @@ import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
-import type { RenameMigrationMode } from '../config';
+import type { AttributeRenameMigrationMode, MigrationFileFormat } from '../config';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
@@ -72,11 +72,23 @@ interface CollectedRename {
   newName: string;
 }
 
-const getRenameMigrationMode = (): RenameMigrationMode => {
+const getAttributeRenameMigrationMode = (): AttributeRenameMigrationMode => {
   try {
-    return strapi.plugin('content-type-builder').config('renameMigrations', 'prompt');
+    return strapi
+      .plugin('content-type-builder')
+      .config('renameMigrations.attributes', 'prompt-before-save');
   } catch {
-    return 'prompt';
+    return 'prompt-before-save';
+  }
+};
+
+const getMigrationFileFormat = (): MigrationFileFormat => {
+  try {
+    return strapi
+      .plugin('content-type-builder')
+      .config('renameMigrations.migrationFile.format', 'javascript');
+  } catch {
+    return 'javascript';
   }
 };
 
@@ -143,11 +155,8 @@ const collectComponentRenames = (schema: CTBSchema): CollectedComponentRename[] 
  * still reflects the old (pre-rename) schema.
  */
 const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
-  // 'never' never generates. 'always' and 'prompt' both generate a migration
-  // for every rename that reaches the server: in 'prompt' mode the admin prompts
-  // the user and strips any refused rename from the payload before sending, so
-  // by the time we get here the remaining renames are exactly the accepted ones.
-  if (getRenameMigrationMode() === 'never') {
+  // In prompt modes the admin strips refused renames before sending the payload.
+  if (getAttributeRenameMigrationMode() === 'never') {
     return;
   }
 
@@ -176,7 +185,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   }
 
   if (migrationBuilder.hasChanges()) {
-    await migrationBuilder.writeFiles();
+    await migrationBuilder.writeFiles({ format: getMigrationFileFormat() });
   }
 };
 
@@ -412,9 +421,9 @@ export const getSchema = async () => {
     contentTypes,
     components,
     settings: {
-      // Surface the rename-migration mode so the admin can decide whether to
-      // prompt, always generate, or never generate rename migrations.
-      renameMigrations: getRenameMigrationMode(),
+      renameMigrations: {
+        attributes: getAttributeRenameMigrationMode(),
+      },
     },
   };
 };

@@ -1,6 +1,7 @@
 import { snakeCase } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
+import type { MigrationFileFormat } from '../../config';
 
 export interface RenameNames {
   oldName: string;
@@ -448,8 +449,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return migrationFileBuilder.build({ name: 'rename-fields' });
     },
 
-    async writeFiles(): Promise<string | null> {
-      return migrationFileBuilder.writeFiles({ name: 'rename-fields' });
+    async writeFiles({
+      format = 'javascript',
+    }: {
+      format?: MigrationFileFormat;
+    } = {}): Promise<string | null> {
+      return migrationFileBuilder.writeFiles({ name: 'rename-fields', format });
     },
   };
 };

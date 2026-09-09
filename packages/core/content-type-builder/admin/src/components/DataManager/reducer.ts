@@ -125,6 +125,7 @@ type EditAttributePayload = {
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
+  recordRename?: boolean;
 };
 
 type EditCustomFieldAttributePayload = {
@@ -132,6 +133,7 @@ type EditCustomFieldAttributePayload = {
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
+  recordRename?: boolean;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
@@ -464,7 +466,13 @@ const slice = createUndoRedoSlice(
         attr.components = updatedComponents;
       },
       editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
-        const { name, attributeToSet, forTarget, targetUid } = action.payload;
+        const {
+          name,
+          attributeToSet,
+          forTarget,
+          targetUid,
+          recordRename: shouldRecordRename = true,
+        } = action.payload;
 
         const type = getType(state, { forTarget, targetUid });
 
@@ -476,7 +484,9 @@ const slice = createUndoRedoSlice(
 
         const previousAttribute = type.attributes[initialAttributeIndex];
 
-        recordRename(type, previousAttribute, (attributeToSet as AnyAttribute).name);
+        if (shouldRecordRename) {
+          recordRename(type, previousAttribute, (attributeToSet as AnyAttribute).name);
+        }
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
 
@@ -546,14 +556,24 @@ const slice = createUndoRedoSlice(
         }
       },
       editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
-        const { forTarget, targetUid, name, attributeToSet } = action.payload;
+        const {
+          forTarget,
+          targetUid,
+          name,
+          attributeToSet,
+          recordRename: shouldRecordRename = true,
+        } = action.payload;
 
         const initialAttributeName = name;
         const type = getType(state, { forTarget, targetUid });
 
         const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
+        const previousAttribute = type.attributes[initialAttributeIndex];
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+        if (shouldRecordRename) {
+          recordRename(type, previousAttribute, (attributeToSet as AnyAttribute).name);
+        }
       },
       reloadPlugin: () => {
         return initialState;

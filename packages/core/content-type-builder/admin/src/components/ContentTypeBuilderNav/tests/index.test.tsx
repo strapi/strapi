@@ -50,6 +50,9 @@ const mockDataManager = ({
   moveAttribute() {},
   addCustomFieldAttribute() {},
   editCustomFieldAttribute() {},
+  async confirmAttributeRenameMigration() {
+    return true;
+  },
   addCreatedComponentToDynamicZone() {},
   createComponentSchema() {},
   createSchema() {},

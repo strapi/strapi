@@ -45,7 +45,8 @@ jest.mock('../migration-builder', () => ({
 // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
 const { createMigrationBuilder } = require('../migration-builder');
 
-let renameMode = 'prompt';
+let renameMode = 'prompt-before-save';
+let migrationFileFormat = 'javascript';
 
 const getServiceMock = jest.fn().mockImplementation((service) => {
   if (service === 'content-types') {
@@ -79,7 +80,8 @@ describe('Content Type Builder - Schema service', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    renameMode = 'prompt';
+    renameMode = 'prompt-before-save';
+    migrationFileFormat = 'javascript';
     migrationBuilderMock.hasChanges.mockReturnValue(true);
     migrationBuilderMock.getUnsupported.mockReturnValue([]);
 
@@ -96,7 +98,15 @@ describe('Content Type Builder - Schema service', () => {
       // so we expose the plugin config through `plugins` here.
       plugins: {
         'content-type-builder': {
-          config: (_key: string, defaultValue: unknown) => renameMode ?? defaultValue,
+          config(key: string, defaultValue: unknown) {
+            if (key === 'renameMigrations.attributes') {
+              return renameMode;
+            }
+            if (key === 'renameMigrations.migrationFile.format') {
+              return migrationFileFormat;
+            }
+            return defaultValue;
+          },
         },
       },
     } as any;
@@ -790,6 +800,15 @@ describe('Content Type Builder - Schema service', () => {
         newName: 'heading',
       });
       expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith({ format: 'javascript' });
+    });
+
+    it('uses the configured TypeScript migration file format', async () => {
+      migrationFileFormat = 'typescript';
+
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith({ format: 'typescript' });
     });
 
     it('forwards every rename hop in order (e.g. a user-routed swap)', async () => {

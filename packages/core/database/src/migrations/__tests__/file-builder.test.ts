@@ -95,6 +95,18 @@ describe('MigrationFileBuilder', () => {
       );
     });
 
+    it('renders a typed ESM migration when TypeScript is configured', () => {
+      const builder = createMigrationFileBuilder({ db: createDbMock() });
+      builder.renameColumn({ table: 'articles', from: 'old_title', to: 'heading' });
+
+      const result = builder.build({ name: 'rename-fields', format: 'typescript' })!;
+
+      expect(result.filename).toMatch(/\.rename-fields\.ts$/);
+      expect(result.content).toContain('export default');
+      expect(result.content).toContain("knex: import('knex').Knex");
+      expect(result.content).toContain("renameColumn('old_title', 'heading')");
+    });
+
     it('returns null when there are no operations', () => {
       const builder = createMigrationFileBuilder({ db: createDbMock() });
       expect(builder.hasChanges()).toBe(false);

@@ -350,6 +350,30 @@ describe('MigrationBuilder', () => {
       ]);
     });
 
+    it('replays a -> c, b -> a, a -> b using each in-flight column', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'finalTitle',
+      });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'summary',
+        newName: 'oldTitle',
+      });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'summary',
+      });
+
+      expect(renamesFrom(builder.build()!.content)).toEqual([
+        ['old_title', 'final_title'],
+        ['summary', 'old_title'],
+        ['old_title', 'summary'],
+      ]);
+    });
+
     it('replays a rename-back (a -> b -> a) verbatim (net no-op at runtime)', () => {
       const strapi = createStrapiMock({ metas: scalarMeta });
       const builder = createMigrationBuilder({ strapi });

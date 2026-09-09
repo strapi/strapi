@@ -1,6 +1,4 @@
-import * as React from 'react';
-
-import { Button, Checkbox, Flex, Modal, Typography } from '@strapi/design-system';
+import { Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -21,31 +19,14 @@ export interface PendingRename {
 
 interface RenameMigrationModalProps {
   renames: PendingRename[];
-  /** Resolves with the set of accepted hop keys (migration is generated for those). */
+  /** Resolves with every hop for preserve, or an empty set for do not preserve. */
   onConfirm: (acceptedKeys: Set<string>) => void;
-  /** Aborts the whole save and returns to editing. */
+  /** Aborts the current edit or save and returns to editing. */
   onCancel: () => void;
 }
 
 const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationModalProps) => {
   const { formatMessage } = useIntl();
-
-  // Default: generate a migration for every rename (the data-preserving choice).
-  const [accepted, setAccepted] = React.useState<Set<string>>(
-    () => new Set(renames.map((rename) => rename.key))
-  );
-
-  const toggle = (key: string) => {
-    setAccepted((previous) => {
-      const next = new Set(previous);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
 
   return (
     <Modal.Root open onOpenChange={(open) => !open && onCancel()}>
@@ -64,7 +45,7 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
               {formatMessage({
                 id: getTrad('migration.confirmation.description'),
                 defaultMessage:
-                  'You renamed the fields below. Keeping a rename selected generates a migration that preserves existing data by renaming the underlying database column. Clearing a rename lets the field be dropped and recreated empty.',
+                  'You renamed the fields below. Strapi can generate a migration for all of them to preserve existing data by renaming the underlying database columns.',
               })}
             </Typography>
             <Flex direction="column" alignItems="stretch" gap={2}>
@@ -98,16 +79,6 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
                       )}
                     </Typography>
                   </Flex>
-                  <Checkbox
-                    name={`rename-${rename.key}`}
-                    checked={accepted.has(rename.key)}
-                    onCheckedChange={() => toggle(rename.key)}
-                  >
-                    {formatMessage({
-                      id: getTrad('migration.confirmation.field.preserve'),
-                      defaultMessage: 'Preserve data',
-                    })}
-                  </Checkbox>
                 </Flex>
               ))}
             </Flex>
@@ -122,10 +93,16 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
               })}
             </Button>
           </Modal.Close>
-          <Button onClick={() => onConfirm(accepted)}>
+          <Button variant="secondary" onClick={() => onConfirm(new Set())}>
+            {formatMessage({
+              id: getTrad('migration.confirmation.decline'),
+              defaultMessage: "Don't preserve data",
+            })}
+          </Button>
+          <Button onClick={() => onConfirm(new Set(renames.map((rename) => rename.key)))}>
             {formatMessage({
               id: getTrad('migration.confirmation.confirm'),
-              defaultMessage: 'Save',
+              defaultMessage: 'Preserve data',
             })}
           </Button>
         </Modal.Footer>

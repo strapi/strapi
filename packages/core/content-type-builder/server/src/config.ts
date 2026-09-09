@@ -1,33 +1,71 @@
-/**
- * Controls whether renaming an attribute (and, later, a content-type/component)
- * in the Content-Type Builder generates a database migration that preserves the
- * underlying data instead of letting schema-sync drop and recreate the column.
- *
- * - 'never':  never generate a rename migration (legacy behaviour).
- * - 'always': generate a migration for every rename, without prompting.
- * - 'prompt': prompt the user per rename (default).
- */
-export const RENAME_MIGRATION_MODES = ['prompt', 'always', 'never'] as const;
+export const ATTRIBUTE_RENAME_MIGRATION_MODES = [
+  'always',
+  'never',
+  'prompt-after-edit',
+  'prompt-before-save',
+] as const;
 
-export type RenameMigrationMode = (typeof RENAME_MIGRATION_MODES)[number];
+export const MIGRATION_FILE_FORMATS = ['javascript', 'typescript'] as const;
+
+export type AttributeRenameMigrationMode = (typeof ATTRIBUTE_RENAME_MIGRATION_MODES)[number];
+export type MigrationFileFormat = (typeof MIGRATION_FILE_FORMATS)[number];
+
+export interface RenameMigrationsConfig {
+  /**
+   * Attribute rename behavior. A contentTypes setting can be added alongside
+   * this later without changing the public configuration shape.
+   */
+  attributes: AttributeRenameMigrationMode;
+  migrationFile: {
+    format: MigrationFileFormat;
+  };
+}
 
 export interface ContentTypeBuilderConfig {
-  renameMigrations: RenameMigrationMode;
+  renameMigrations: RenameMigrationsConfig;
 }
+
+type ContentTypeBuilderUserConfig = {
+  renameMigrations?: {
+    attributes?: AttributeRenameMigrationMode;
+    migrationFile?: {
+      format?: MigrationFileFormat;
+    };
+  };
+};
 
 export default {
   default: {
-    renameMigrations: 'prompt',
+    renameMigrations: {
+      attributes: 'prompt-before-save',
+      migrationFile: {
+        format: 'javascript',
+      },
+    },
   } satisfies ContentTypeBuilderConfig,
-  validator(config: Partial<ContentTypeBuilderConfig>) {
+  validator(config: ContentTypeBuilderUserConfig) {
+    const renameMigrations = config.renameMigrations;
+    if (renameMigrations === undefined) {
+      return;
+    }
+
     if (
-      config.renameMigrations !== undefined &&
-      !RENAME_MIGRATION_MODES.includes(config.renameMigrations)
+      renameMigrations.attributes !== undefined &&
+      !ATTRIBUTE_RENAME_MIGRATION_MODES.includes(renameMigrations.attributes)
     ) {
       throw new Error(
-        `[content-type-builder] 'renameMigrations' must be one of: ${RENAME_MIGRATION_MODES.join(
+        `[content-type-builder] 'renameMigrations.attributes' must be one of: ${ATTRIBUTE_RENAME_MIGRATION_MODES.join(
           ', '
-        )}. Received: ${JSON.stringify(config.renameMigrations)}`
+        )}. Received: ${JSON.stringify(renameMigrations.attributes)}`
+      );
+    }
+
+    const format = renameMigrations.migrationFile?.format;
+    if (format !== undefined && !MIGRATION_FILE_FORMATS.includes(format)) {
+      throw new Error(
+        `[content-type-builder] 'renameMigrations.migrationFile.format' must be one of: ${MIGRATION_FILE_FORMATS.join(
+          ', '
+        )}. Received: ${JSON.stringify(format)}`
       );
     }
   },

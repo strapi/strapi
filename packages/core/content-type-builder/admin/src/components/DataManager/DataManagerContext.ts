@@ -18,6 +18,7 @@ export interface DataManagerContextValue {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
+    recordRename?: boolean;
   }) => void;
   moveAttribute: (opts: {
     forTarget: Struct.ModelType;
@@ -35,7 +36,13 @@ export interface DataManagerContextValue {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
+    recordRename?: boolean;
   }) => void;
+  confirmAttributeRenameMigration: (rename: {
+    uid: Internal.UID.Schema;
+    oldName: string;
+    newName: string;
+  }) => Promise<boolean | null>;
   addCreatedComponentToDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;

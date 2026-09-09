@@ -50,10 +50,14 @@ type SchemaResponse = {
     components: Components;
     contentTypes: ContentTypes;
     settings?: {
-      renameMigrations?: 'prompt' | 'always' | 'never';
+      renameMigrations?: {
+        attributes?: AttributeRenameMigrationMode;
+      };
     };
   };
 };
+
+type AttributeRenameMigrationMode = 'always' | 'never' | 'prompt-after-edit' | 'prompt-before-save';
 
 type ReservedNamesResponse = DataManagerContextValue['reservedNames'];
 
@@ -111,9 +115,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
-  // Rename-migration mode from server config ('prompt' | 'always' | 'never'),
-  // read from the schema response on load.
-  const renameMigrationModeRef = React.useRef<'prompt' | 'always' | 'never'>('prompt');
+  const renameMigrationModeRef = React.useRef<AttributeRenameMigrationMode>('prompt-before-save');
 
   // When `modal` mode prompts the user, we hold the pending renames plus the
   // promise resolver here so `saveSchema` can await the decision.
@@ -141,8 +143,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       const { components, contentTypes, settings } = schemaResponse.data.data;
 
-      if (settings?.renameMigrations) {
-        renameMigrationModeRef.current = settings.renameMigrations;
+      if (settings?.renameMigrations?.attributes) {
+        renameMigrationModeRef.current = settings.renameMigrations.attributes;
       }
 
       dispatch(
@@ -224,6 +226,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     await refetchPermissions();
   };
 
+  const requestRenameDecision = async (renames: PendingRename[]) => {
+    const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
+      setRenameModal({ renames, resolve });
+    });
+    setRenameModal(null);
+
+    return acceptedKeys;
+  };
+
   const saveSchema = async () => {
     setIsSaving(true);
 
@@ -246,19 +257,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
-    // In `prompt` mode, prompt the user per rename before saving: accepting keeps
-    // the rename in the payload (the server generates a data-preserving
-    // migration for it), refusing strips it (the field is dropped and recreated
-    // empty). `always` skips the prompt; the server ignores renames entirely
-    // in `never`.
-    if (renameMigrationModeRef.current === 'prompt') {
+    if (renameMigrationModeRef.current === 'prompt-before-save') {
       const pendingRenames = collectPendingRenames(requestData);
 
       if (pendingRenames.length > 0) {
-        const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
-          setRenameModal({ renames: pendingRenames, resolve });
-        });
-        setRenameModal(null);
+        const acceptedKeys = await requestRenameDecision(pendingRenames);
 
         // The user cancelled the whole save — return to editing untouched.
         if (acceptedKeys === null) {
@@ -395,6 +398,37 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
           attributeToSet: payload.attributeToSet as AnyAttribute,
         })
       );
+    },
+    async confirmAttributeRenameMigration({ uid, oldName, newName }) {
+      if (oldName === newName) {
+        return true;
+      }
+
+      if (renameMigrationModeRef.current === 'never') {
+        return false;
+      }
+
+      if (renameMigrationModeRef.current !== 'prompt-after-edit') {
+        return true;
+      }
+
+      const schema =
+        contentTypes[uid as Internal.UID.ContentType] ?? components[uid as Internal.UID.Component];
+      const acceptedKeys = await requestRenameDecision([
+        {
+          key: `${uid}:edit`,
+          uid,
+          typeName: schema?.info.displayName ?? uid,
+          oldName,
+          newName,
+        },
+      ]);
+
+      if (acceptedKeys === null) {
+        return null;
+      }
+
+      return acceptedKeys.has(`${uid}:edit`);
     },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
