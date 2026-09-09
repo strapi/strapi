@@ -8,14 +8,14 @@ import {
   mediaListAssetsOutputSchema,
   mediaGetAssetOutputSchema,
   mediaListFoldersOutputSchema,
-  updateMediaInputSchema,
-  updateMediaOutputSchema,
+  mediaUpdateAssetInputSchema,
+  mediaUpdateAssetOutputSchema,
 } from './schemas';
 import {
   createMediaListAssetsHandler,
   createMediaGetAssetHandler,
   createMediaListFoldersHandler,
-  createUpdateMediaHandler,
+  createMediaUpdateAssetHandler,
 } from './handlers';
 
 /**
@@ -55,15 +55,15 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     createHandler: createMediaListFoldersHandler,
   },
   {
-    name: 'update_media',
+    name: 'media_update_asset',
     title: 'Media: update asset metadata',
     description:
-      "Update the editable metadata of a Media Library asset, identified by its numeric id. Only name, alternativeText and caption can be written: use move_media to change an asset's folder, and note that url, mime, size and the file contents are owned by the upload provider and cannot be edited over MCP.",
+      "Update the editable metadata of a Media Library asset, identified by its numeric id. Only name, alternativeText and caption can be written: use media_move_assets to change an asset's folder, and note that url, mime, size and the file contents are owned by the upload provider and cannot be edited over MCP.",
     telemetry: { source: 'upload', name: 'update' },
     auth: { policies: [{ action: ACTIONS.update }] },
-    resolveInputSchema: () => updateMediaInputSchema,
-    resolveOutputSchema: () => updateMediaOutputSchema,
-    createHandler: createUpdateMediaHandler,
+    resolveInputSchema: () => mediaUpdateAssetInputSchema,
+    resolveOutputSchema: () => mediaUpdateAssetOutputSchema,
+    createHandler: createMediaUpdateAssetHandler,
   },
 ];
 

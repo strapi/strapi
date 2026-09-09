@@ -30,7 +30,7 @@ describe('upload MCP tool registration', () => {
         'media_list_assets',
         'media_get_asset',
         'media_list_folders',
-        'update_media',
+        'media_update_asset',
       ]);
     });
 
@@ -79,9 +79,9 @@ describe('upload MCP tool registration', () => {
       }
     });
 
-    test('gates update_media on plugin::upload.assets.update, not on read', () => {
+    test('gates media_update_asset on plugin::upload.assets.update, not on read', () => {
       // A read-only token must never reach a write tool, so the write action is the gate.
-      expect(byName.update_media.auth.policies).toEqual([{ action: ACTIONS.update }]);
+      expect(byName.media_update_asset.auth.policies).toEqual([{ action: ACTIONS.update }]);
     });
 
     test('does not pin a policy to a subject the action was never registered with', () => {
@@ -122,21 +122,21 @@ describe('upload MCP tool registration', () => {
     test('exposes an input schema for the tools that take arguments, and none for the folder tree', () => {
       expect(byName.media_list_assets.resolveInputSchema).toBeDefined();
       expect(byName.media_get_asset.resolveInputSchema).toBeDefined();
-      expect(byName.update_media.resolveInputSchema).toBeDefined();
+      expect(byName.media_update_asset.resolveInputSchema).toBeDefined();
       expect(byName.media_list_folders.resolveInputSchema).toBeUndefined();
     });
 
-    test('points update_media at the right tool for a folder change', () => {
+    test('points media_update_asset at the right tool for a folder change', () => {
       // An agent that wants to move an asset must be steered from the tool description alone.
-      expect(byName.update_media.description).toMatch(/move_media/);
-      expect(byName.update_media.description).toMatch(/numeric id/i);
+      expect(byName.media_update_asset.description).toMatch(/media_move_assets/);
+      expect(byName.media_update_asset.description).toMatch(/numeric id/i);
     });
 
-    test('publishes update_media as a plain object schema the registry can expose', () => {
+    test('publishes media_update_asset as a plain object schema the registry can expose', () => {
       // A `.refine()` would make this a ZodEffects, which the tool registry cannot convert to
       // an input JSON Schema — the "at least one field" rule lives in the handler instead.
-      const schema = byName.update_media.resolveInputSchema?.(
-        {} as Parameters<NonNullable<typeof byName.update_media.resolveInputSchema>>[0]
+      const schema = byName.media_update_asset.resolveInputSchema?.(
+        {} as Parameters<NonNullable<typeof byName.media_update_asset.resolveInputSchema>>[0]
       );
 
       expect(schema?.shape).toBeDefined();

@@ -11,14 +11,14 @@ import { ok } from '../utils';
 
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema
 // before the handler runs, so unknown keys never reach here.
-type UpdateMediaArgs = {
+type MediaUpdateAssetArgs = {
   id: number;
   name?: string;
   alternativeText?: string | null;
   caption?: string | null;
 };
 
-/** The metadata keys `update_media` may write. Everything else is rejected by the schema. */
+/** The metadata keys `media_update_asset` may write. Everything else is rejected by the schema. */
 const WRITABLE_FIELDS = ['name', 'alternativeText', 'caption'] as const;
 
 /**
@@ -29,7 +29,7 @@ const WRITABLE_FIELDS = ['name', 'alternativeText', 'caption'] as const;
  * instead of "clear it". Clearing is expressed as an empty string, which is what the admin
  * panel writes when the field is emptied.
  */
-const buildFileInfo = (args: UpdateMediaArgs): Record<string, string> => {
+const buildFileInfo = (args: MediaUpdateAssetArgs): Record<string, string> => {
   const fileInfo: Record<string, string> = {};
 
   for (const field of WRITABLE_FIELDS) {
@@ -44,7 +44,7 @@ const buildFileInfo = (args: UpdateMediaArgs): Record<string, string> => {
 };
 
 /**
- * `update_media` — edits the writable metadata of one asset.
+ * `media_update_asset` — edits the writable metadata of one asset.
  *
  * Gated on `plugin::upload.assets.update` and mirrors `PUT /upload/files/:id`: the same
  * `findEntityAndCheckPermissions` row-level check, the same `updateFileInfo` service call, and
@@ -54,15 +54,15 @@ const buildFileInfo = (args: UpdateMediaArgs): Record<string, string> => {
  * the write without a second `media_get_asset` round-trip — and so provider fields stay
  * invisible on the write path too.
  */
-export const createUpdateMediaHandler =
+export const createMediaUpdateAssetHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
-    const { id, ...metadata } = args as UpdateMediaArgs;
-    const fileInfo = buildFileInfo(metadata as UpdateMediaArgs);
+    const { id, ...metadata } = args as MediaUpdateAssetArgs;
+    const fileInfo = buildFileInfo(metadata as MediaUpdateAssetArgs);
 
     // A patch with no writable field is a caller error, not a no-op success: the schema cannot
     // express "at least one of" without becoming a ZodEffects the registry can't publish.

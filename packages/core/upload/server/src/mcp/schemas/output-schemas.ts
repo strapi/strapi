@@ -64,9 +64,9 @@ export const mediaListFoldersOutputSchema = z.object({
 });
 
 /**
- * `update_media` output — the updated asset in the same shape the read tools return,
+ * `media_update_asset` output — the updated asset in the same shape the read tools return,
  * so an agent can confirm the write without a follow-up `media_get_asset` call.
  */
-export const updateMediaOutputSchema = z.object({
+export const mediaUpdateAssetOutputSchema = z.object({
   data: mediaAssetOutputSchema,
 });

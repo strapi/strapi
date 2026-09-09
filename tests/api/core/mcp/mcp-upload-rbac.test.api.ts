@@ -149,13 +149,13 @@ describe('MCP upload tools RBAC (api)', () => {
       expect(toolNames.filter((name) => /^media_/.test(name)).sort()).toEqual(
         [...READ_TOOLS].sort()
       );
-      expect(toolNames).not.toContain('update_media');
+      expect(toolNames).not.toContain('media_update_asset');
     });
 
     test('a token with plugin::upload.assets.update sees the metadata tool', async () => {
       const token = await createUpdateTokenSession();
 
-      expect(await mcp.listToolNames(token.accessKey)).toContain('update_media');
+      expect(await mcp.listToolNames(token.accessKey)).toContain('media_update_asset');
     });
   });
 
@@ -463,10 +463,10 @@ describe('MCP upload tools RBAC (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // update_media
+  // media_update_asset
   // ---------------------------------------------------------------------------
 
-  describe('update_media', () => {
+  describe('media_update_asset', () => {
     const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
       response.result?.structuredContent?.data as Record<string, unknown>;
 
@@ -480,7 +480,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const seeded = await seeder.seedAsset({ name: 'before.jpg', alternativeText: 'old alt' });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         name: 'after.jpg',
         alternativeText: 'new alt',
@@ -529,7 +529,7 @@ describe('MCP upload tools RBAC (api)', () => {
       });
       const token = await createUpdateTokenSession();
 
-      await mcp.callTool(token.accessKey, 'update_media', {
+      await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         caption: 'only the caption changed',
       });
@@ -548,7 +548,7 @@ describe('MCP upload tools RBAC (api)', () => {
       });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         alternativeText: null,
       });
@@ -564,7 +564,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
       const before = await readBack(token.accessKey, seeded.id);
 
-      await mcp.callTool(token.accessKey, 'update_media', {
+      await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         name: 'new-label.jpg',
       });
@@ -582,7 +582,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const seeded = await seeder.seedAsset({ name: 'sanitized.jpg' });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         caption: 'a caption',
       });
@@ -611,7 +611,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const seeded = await seeder.seedAsset({ name: 'guarded.jpg', alternativeText: 'untouched' });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         name: 'attempted.jpg',
         [field]: value,
@@ -620,7 +620,7 @@ describe('MCP upload tools RBAC (api)', () => {
       expect(response.error ?? response.result?.isError).toBeTruthy();
 
       if (field === 'folder' || field === 'folderId' || field === 'folderPath') {
-        expect(JSON.stringify(response)).toMatch(/move_media/);
+        expect(JSON.stringify(response)).toMatch(/media_move_assets/);
       }
 
       // A rejected call must not partially apply: the legitimate `name` in the same payload
@@ -635,18 +635,18 @@ describe('MCP upload tools RBAC (api)', () => {
       const seeded = await seeder.seedAsset({ name: 'nothing.jpg' });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
       });
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
-      expect(JSON.stringify(response)).toMatch(/move_media/);
+      expect(JSON.stringify(response)).toMatch(/media_move_assets/);
     });
 
     test('rejects a documentId in place of a numeric id', async () => {
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: 'z7v8zma53x01r6oceimv922b',
         name: 'x.jpg',
       });
@@ -657,7 +657,7 @@ describe('MCP upload tools RBAC (api)', () => {
     test('errors for an unknown id', async () => {
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: 999999,
         name: 'ghost.jpg',
       });
@@ -671,7 +671,7 @@ describe('MCP upload tools RBAC (api)', () => {
       // A read-granted token: it can see the asset but must not be able to edit it.
       const token = await createReadTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         name: 'hijacked.jpg',
       });
@@ -689,9 +689,9 @@ describe('MCP upload tools RBAC (api)', () => {
       const token = await createAdminToken([permission(UPLOAD_ACTIONS.settingsRead)]);
       await mcp.initializeSession(token.accessKey);
 
-      expect(await mcp.listToolNames(token.accessKey)).not.toContain('update_media');
+      expect(await mcp.listToolNames(token.accessKey)).not.toContain('media_update_asset');
 
-      const response = await mcp.callTool(token.accessKey, 'update_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
         id: seeded.id,
         name: 'hijacked.jpg',
       });

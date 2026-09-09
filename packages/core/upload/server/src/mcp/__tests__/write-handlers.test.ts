@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
-import { createUpdateMediaHandler } from '../handlers/write-handlers';
+import { createMediaUpdateAssetHandler } from '../handlers/write-handlers';
 import { MCP_NOT_FOUND_ASSET, MCP_UPDATE_ASSET_NO_FIELDS } from '../handlers/constants';
 import { ACTIONS, FILE_MODEL_UID } from '../../constants';
 
@@ -75,12 +75,12 @@ const context = { userAbility: {}, user: SESSION_USER } as unknown as Modules.MC
 
 // Pass the fully shaped instance produced by the unit-test setter to the handler explicitly.
 const invoke = (args: Record<string, unknown>) =>
-  createUpdateMediaHandler(
+  createMediaUpdateAssetHandler(
     (global as unknown as { strapi: Core.Strapi }).strapi,
     context
   )({ args });
 
-describe('update_media handler', () => {
+describe('media_update_asset handler', () => {
   afterEach(() => {
     // `tests/setup/unit.setup.js` defines the global `strapi` as an accessor, so it is
     // reassigned per test rather than deleted.
@@ -169,9 +169,9 @@ describe('update_media handler', () => {
     test('names the right tool when the caller sends nothing writable', async () => {
       setupStrapi();
 
-      // The error is the agent's only recovery hint, so it must point at move_media
+      // The error is the agent's only recovery hint, so it must point at media_move_assets
       // rather than just restating that the patch was empty.
-      await expect(invoke({ id: 1 })).rejects.toThrow(/move_media/);
+      await expect(invoke({ id: 1 })).rejects.toThrow(/media_move_assets/);
     });
 
     test('never forwards a field outside the allowlist to the upload service', async () => {
