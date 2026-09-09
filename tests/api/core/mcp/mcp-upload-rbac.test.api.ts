@@ -2,8 +2,48 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
 import type { Core } from '@strapi/types';
 
-import { createMcpClient, type AdminPermission, type AdminToken } from './utils/mcp-client';
+import {
+  createMcpClient,
+  expectExecutionError,
+  expectInputValidationError,
+  expectToolDisabled,
+  expectToolOk,
+  type AdminPermission,
+  type AdminToken,
+} from './utils/mcp-client';
+import { getStrictClientUsableTools, JSON_SCHEMA_2020_12 } from './utils/strict-tool-client';
 import { createMediaSeeder } from './utils/media-seed';
+
+/**
+ * The distinguishing fragment of each failure message this surface produces, so an assertion can
+ * name the *kind* of failure it expects rather than just "something failed".
+ *
+ * These are deliberately fragments, not whole messages: the domain wording is long, agent-facing
+ * prose owned by `server/src/mcp/handlers/constants.ts`, and the validation strings come from Zod
+ * through the MCP SDK rather than from Strapi. Matching the identifying clause pins which error
+ * was returned while leaving the prose free to be reworded. The suite runs against the built app,
+ * so importing the constants themselves would mean a deep `dist` import no other api test makes.
+ */
+const MESSAGES = {
+  // Domain failures, thrown by the handlers.
+  assetNotFound: 'Media asset not found.',
+  folderNotFound: 'Media folder not found.',
+  forbidden: 'Forbidden access',
+  noWritableField: 'Provide at least one field to update',
+  folderNameTaken: 'A folder with this name already exists in the same parent folder',
+  parentFolderNotFound: 'The parent folder does not exist',
+  moveIntoSelf: 'A folder cannot be moved into itself',
+  destinationNotFound: 'The destination folder does not exist',
+  unresolvedFolderIds: 'These ids do not match any media folder',
+  // Schema rejections, produced by Zod via the MCP SDK.
+  invalidSort: 'sort: Invalid option',
+  expectedNumber: 'Invalid input: expected number',
+  expectedArray: 'Invalid input: expected array',
+  emptyIdList: 'Too small: expected array to have',
+  folderNameSlash: 'Folder name cannot contain slash',
+  renameOnlyName: 'media_rename_folder only changes a fol',
+  moveFolderOnlyParent: 'media_move_folder only changes a folder',
+} as const;
 
 const UPLOAD_ACTIONS = {
   read: 'plugin::upload.read',
@@ -155,6 +195,50 @@ describe('MCP upload tools RBAC (api)', () => {
       }
     });
 
+    /**
+     * The `media_*` schemas are advertised over JSON-RPC and must survive a strict
+     * schema-validating client, which silently drops a tool whose schema will not compile.
+     *
+     * Unit tests parse the Zod schemas in-process and so cannot catch this: the risk is in the
+     * emitted JSON Schema. `media_list_folders` is the tool that carries it — its folder tree is
+     * recursive, which Zod emits as a `$defs` entry referring to itself — and several tools
+     * advertise nullable fields (`folderId`, `folder`, `parent`).
+     */
+    test('a strict client retains every advertised media tool for a read token', async () => {
+      const token = await createReadTokenSession();
+
+      const advertisedTools = await mcp.listTools(token.accessKey);
+      const mediaTools = advertisedTools.filter((tool) => /^media_/.test(tool.name));
+
+      expect(mediaTools.map((tool) => tool.name).sort()).toEqual([...READ_TOOLS].sort());
+      expect(getStrictClientUsableTools(mediaTools)).toHaveLength(mediaTools.length);
+
+      for (const tool of mediaTools) {
+        expect([undefined, JSON_SCHEMA_2020_12]).toContain(tool.inputSchema.$schema);
+        if (tool.outputSchema !== undefined) {
+          expect([undefined, JSON_SCHEMA_2020_12]).toContain(tool.outputSchema.$schema);
+        }
+      }
+
+      // Pin the recursive folder tree specifically: this is the construct a strict client is
+      // most likely to reject, so a passing filter above must not be a vacuous one.
+      const listFolders = mediaTools.find((tool) => tool.name === 'media_list_folders');
+      expect(listFolders?.outputSchema).toHaveProperty('$defs');
+    });
+
+    test('a strict client retains every advertised media tool for a read + write token', async () => {
+      const token = await createUpdateTokenSession();
+
+      const advertisedTools = await mcp.listTools(token.accessKey);
+      const mediaTools = advertisedTools.filter((tool) => /^media_/.test(tool.name));
+
+      // The full media surface, so the strict gate covers the write schemas too.
+      expect(mediaTools.map((tool) => tool.name).sort()).toEqual(
+        [...READ_TOOLS, ...WRITE_TOOLS].sort()
+      );
+      expect(getStrictClientUsableTools(mediaTools)).toHaveLength(mediaTools.length);
+    });
+
     test('a token without plugin::upload.read neither lists nor can call the read tools', async () => {
       await seeder.seedAsset({ name: 'private.jpg' });
 
@@ -171,7 +255,7 @@ describe('MCP upload tools RBAC (api)', () => {
       for (const tool of READ_TOOLS) {
         const response = await mcp.callTool(token.accessKey, tool, {});
         // Denied either as a JSON-RPC error (unknown tool) or a tool-level error.
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, tool);
       }
     });
 
@@ -342,7 +426,7 @@ describe('MCP upload tools RBAC (api)', () => {
         sort: 'folderPath:ASC',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.invalidSort);
     });
   });
 
@@ -385,7 +469,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
       const response = await mcp.callTool(token.accessKey, 'media_get_asset', { id: 999999 });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_get_asset', MESSAGES.assetNotFound);
     });
 
     test('rejects a documentId in place of a numeric id', async () => {
@@ -395,7 +479,7 @@ describe('MCP upload tools RBAC (api)', () => {
         id: 'z7v8zma53x01r6oceimv922b',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedNumber);
     });
   });
 
@@ -453,7 +537,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
       const response = await mcp.callTool(token.accessKey, 'media_get_asset', { id: seeded.id });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_get_asset', MESSAGES.forbidden);
     });
 
     test('media_list_assets and media_get_asset agree on what the condition allows', async () => {
@@ -605,7 +689,7 @@ describe('MCP upload tools RBAC (api)', () => {
         alternativeText: null,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
       expect(await readBack(token.accessKey, seeded.id)).toMatchObject({ alternativeText: '' });
     });
 
@@ -669,7 +753,7 @@ describe('MCP upload tools RBAC (api)', () => {
         [field]: value,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response);
 
       if (field === 'folder' || field === 'folderId' || field === 'folderPath') {
         expect(JSON.stringify(response)).toMatch(/media_move_assets/);
@@ -691,7 +775,7 @@ describe('MCP upload tools RBAC (api)', () => {
         id: seeded.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_update_asset', MESSAGES.noWritableField);
       expect(JSON.stringify(response)).toMatch(/media_move_assets/);
     });
 
@@ -703,7 +787,7 @@ describe('MCP upload tools RBAC (api)', () => {
         name: 'x.jpg',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedNumber);
     });
 
     test('errors for an unknown id', async () => {
@@ -714,7 +798,7 @@ describe('MCP upload tools RBAC (api)', () => {
         name: 'ghost.jpg',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_update_asset', MESSAGES.assetNotFound);
     });
 
     test('denies the write to a token without plugin::upload.assets.update', async () => {
@@ -728,7 +812,7 @@ describe('MCP upload tools RBAC (api)', () => {
         name: 'hijacked.jpg',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_update_asset');
       expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
         name: 'readonly.jpg',
         alternativeText: 'untouched',
@@ -748,7 +832,7 @@ describe('MCP upload tools RBAC (api)', () => {
         name: 'hijacked.jpg',
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_update_asset');
     });
   });
   /**
@@ -801,7 +885,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: parent.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
         expect(structured(response)).toMatchObject({
           name: 'Nested',
           parent: { id: parent.id },
@@ -835,7 +919,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: parent.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_create_folder', MESSAGES.folderNameTaken);
         expect(await countFolders()).toBe(2);
       });
 
@@ -850,7 +934,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: second.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
       });
 
       test('rejects a parent that does not exist', async () => {
@@ -861,7 +945,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: 999999,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_create_folder', MESSAGES.parentFolderNotFound);
         expect(await countFolders()).toBe(0);
       });
 
@@ -872,7 +956,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'a/b',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectInputValidationError(response, MESSAGES.folderNameSlash);
         expect(await countFolders()).toBe(0);
       });
 
@@ -883,7 +967,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Denied',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_create_folder');
         expect(await countFolders()).toBe(0);
       });
 
@@ -911,7 +995,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'After',
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
         expect(structured(response)).toMatchObject({ id: folder.id, name: 'After' });
 
         const tree = await readTree(token.accessKey);
@@ -956,7 +1040,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Sibling',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_rename_folder', MESSAGES.folderNameTaken);
         expect((await folderRow(folder.id)).name).toBe('Target');
       });
 
@@ -970,7 +1054,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Unchanged',
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
       });
 
       test('rejects a parent, pointing the caller at media_move_folder', async () => {
@@ -984,7 +1068,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: destination.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectInputValidationError(response, MESSAGES.renameOnlyName);
         expect(JSON.stringify(response)).toMatch(/media_move_folder/);
       });
 
@@ -996,7 +1080,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Ghost',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_rename_folder', MESSAGES.folderNotFound);
       });
 
       test('denies the write to a token without plugin::upload.assets.update', async () => {
@@ -1008,7 +1092,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Hijacked',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_rename_folder');
         expect((await folderRow(folder.id)).name).toBe('Protected');
       });
     });
@@ -1025,7 +1109,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: destination.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
         expect(structured(response)).toMatchObject({
           id: moved.id,
           name: 'Moving',
@@ -1084,7 +1168,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: null,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
         expect(structured(response)).toMatchObject({ parent: null });
 
         const tree = await readTree(token.accessKey);
@@ -1100,7 +1184,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: folder.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_move_folder', MESSAGES.moveIntoSelf);
         expect((await folderRow(folder.id)).path).toBe(folder.path);
       });
 
@@ -1114,7 +1198,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: child.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_move_folder', MESSAGES.moveIntoSelf);
 
         // A cycle here would orphan the whole subtree, so the paths must be untouched.
         expect((await folderRow(parent.id)).path).toBe(parent.path);
@@ -1130,7 +1214,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: 999999,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_move_folder', MESSAGES.parentFolderNotFound);
         expect((await folderRow(folder.id)).path).toBe(folder.path);
       });
 
@@ -1145,7 +1229,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: destination.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_move_folder', MESSAGES.folderNameTaken);
         expect((await folderRow(moving.id)).path).toBe(moving.path);
       });
 
@@ -1160,7 +1244,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Renamed',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectInputValidationError(response, MESSAGES.moveFolderOnlyParent);
         expect(JSON.stringify(response)).toMatch(/media_rename_folder/);
       });
 
@@ -1174,7 +1258,7 @@ describe('MCP upload tools RBAC (api)', () => {
           parent: destination.id,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_move_folder');
         expect((await folderRow(folder.id)).path).toBe(folder.path);
       });
     });
@@ -1201,7 +1285,7 @@ describe('MCP upload tools RBAC (api)', () => {
           ids: [root.id],
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
         expect(response.result?.structuredContent).toMatchObject({
           dryRun: true,
           totalFolderNumber: 2,
@@ -1277,7 +1361,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeFalsy();
+        expectToolOk(response);
 
         // The counts actually removed match what the dry run predicted for the same seed.
         expect(response.result?.structuredContent).toMatchObject({
@@ -1358,7 +1442,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_delete_folder', MESSAGES.unresolvedFolderIds);
         expect(JSON.stringify(response)).toMatch(/999999/);
 
         // The valid folder in the same request must survive: all or nothing.
@@ -1380,7 +1464,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_delete_folder', MESSAGES.unresolvedFolderIds);
         expect(JSON.stringify(response)).toMatch(/media_delete_assets/);
 
         // Nothing at all was removed — not the folder, not the file it contained.
@@ -1401,7 +1485,7 @@ describe('MCP upload tools RBAC (api)', () => {
         });
 
         // A preview must not describe a cascade the executing call would refuse.
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_delete_folder', MESSAGES.unresolvedFolderIds);
         expect(response.result?.structuredContent?.totalFolderNumber).toBeUndefined();
         expect(await countFolders()).toBe(1);
       });
@@ -1417,7 +1501,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectExecutionError(response, 'media_delete_folder', MESSAGES.unresolvedFolderIds);
         expect(JSON.stringify(response)).toMatch(/media_delete_assets/);
 
         // The asset must survive an attempt to delete it through the folder tool.
@@ -1432,7 +1516,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectInputValidationError(response, MESSAGES.emptyIdList);
       });
 
       test('denies the delete to a token without plugin::upload.assets.update', async () => {
@@ -1444,7 +1528,7 @@ describe('MCP upload tools RBAC (api)', () => {
           dryRun: false,
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_delete_folder');
         expect(await countFolders()).toBe(2);
         expect(await countFiles()).toBe(2);
       });
@@ -1458,7 +1542,7 @@ describe('MCP upload tools RBAC (api)', () => {
           ids: [root.id],
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_delete_folder');
       });
     });
   });
@@ -1535,7 +1619,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { destinationFolder, moved, failed } = structured(response);
       expect(destinationFolder).toMatchObject({ id: destination.id, name: 'Destination' });
@@ -1569,7 +1653,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: null,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { destinationFolder, moved } = structured(response);
       expect(destinationFolder).toBeNull();
@@ -1599,7 +1683,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
       expect(structured(response).moved.map((asset) => asset.id)).toEqual([seeded.id]);
     });
 
@@ -1684,7 +1768,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
       // Partial success is reported, not discarded: the call succeeds and the report says
       // exactly which id to retry.
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { moved, failed } = structured(response);
       expect(moved.map((asset) => asset.id).sort()).toEqual([good.id, alsoGood.id].sort());
@@ -1816,7 +1900,7 @@ describe('MCP upload tools RBAC (api)', () => {
       // A tool error would carry no structuredContent at all, so a single bad id would get
       // prose where a mixed request gets a machine-readable entry — the same mistake, two
       // different contracts.
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { moved, failed } = structured(response);
       expect(moved).toEqual([]);
@@ -1835,7 +1919,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: 999999,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_move_assets', MESSAGES.destinationNotFound);
       expect(JSON.stringify(response)).toMatch(/media_list_folders/);
 
       // A bad destination is a property of the request, so nothing moves — not even valid ids.
@@ -1857,7 +1941,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: notAFolder.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectExecutionError(response, 'media_move_assets', MESSAGES.destinationNotFound);
       expect(await fileRow(seeded.id)).toMatchObject({ folder: { id: source.id } });
     });
 
@@ -1869,7 +1953,7 @@ describe('MCP upload tools RBAC (api)', () => {
         ids: [seeded.id],
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedNumber);
     });
 
     test('rejects a scalar id, pointing the caller at the bulk ids array', async () => {
@@ -1882,7 +1966,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedArray);
       expect(await fileRow(seeded.id)).toMatchObject({ folder: null });
     });
 
@@ -1895,7 +1979,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedNumber);
     });
 
     test('rejects an empty id list', async () => {
@@ -1907,7 +1991,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.emptyIdList);
     });
 
     test('denies the move to a token without plugin::upload.assets.update', async () => {
@@ -1923,7 +2007,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_move_assets');
       expect(await readBack(token.accessKey, seeded.id)).toMatchObject({
         folder: { id: source.id, name: 'Read only' },
       });
@@ -1943,7 +2027,7 @@ describe('MCP upload tools RBAC (api)', () => {
         folder: destination.id,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_move_assets');
       expect(await fileRow(seeded.id)).toMatchObject({ folder: null });
     });
   });
@@ -2010,7 +2094,7 @@ describe('MCP upload tools RBAC (api)', () => {
         ids: [first.id, second.id],
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { dryRun, deleted, failed, totalFileNumber } = structured(response);
       expect(dryRun).toBe(true);
@@ -2070,7 +2154,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
       expect(structured(response)).toMatchObject({ dryRun: false, totalFileNumber: 2 });
 
       expect(await countFiles()).toBe(0);
@@ -2147,7 +2231,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { deleted, failed, totalFileNumber } = structured(response);
 
@@ -2268,7 +2352,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expectToolOk(response);
 
       const { deleted, failed, totalFileNumber } = structured(response);
       expect(deleted).toEqual([]);
@@ -2284,7 +2368,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.expectedNumber);
     });
 
     test('rejects an empty id list', async () => {
@@ -2295,7 +2379,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectInputValidationError(response, MESSAGES.emptyIdList);
     });
 
     test('denies the deletion to a token without plugin::upload.assets.update', async () => {
@@ -2309,7 +2393,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_delete_assets');
       expect(await fileRow(asset.id)).toMatchObject({ name: 'protected.jpg' });
       expect(await countFiles()).toBe(1);
     });
@@ -2323,7 +2407,7 @@ describe('MCP upload tools RBAC (api)', () => {
         ids: [asset.id],
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_delete_assets');
       expect(await countFiles()).toBe(1);
     });
 
@@ -2340,7 +2424,7 @@ describe('MCP upload tools RBAC (api)', () => {
         dryRun: false,
       });
 
-      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expectToolDisabled(response, 'media_delete_assets');
       expect(await fileRow(asset.id)).toMatchObject({ name: 'unrelated.jpg' });
     });
   });
