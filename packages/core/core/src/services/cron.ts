@@ -89,6 +89,9 @@ const isRecurrenceSpec = (value: unknown): value is RecurrenceSpecObjLit =>
 const toDate = (value: Date | number | string): Date =>
   value instanceof Date ? value : new Date(value);
 
+const toSegmentPart = (value: unknown): string | null =>
+  typeof value === 'number' || typeof value === 'string' ? String(value) : null;
+
 const segmentToField = (segment: unknown, fallback = '*'): string => {
   if (segment == null) {
     return fallback;
@@ -99,15 +102,16 @@ const segmentToField = (segment: unknown, fallback = '*'): string => {
   }
 
   if (Array.isArray(segment)) {
-    return segment.map((part) => String(part)).join(',');
+    return segment.map(String).join(',');
   }
 
   if (isPlainObject(segment)) {
-    const start = segment.start ?? segment.from;
-    const end = segment.end ?? segment.to;
-    if (start != null && end != null) {
-      const step = segment.step;
-      return step != null ? `${start}-${end}/${step}` : `${start}-${end}`;
+    const start = toSegmentPart(segment.start ?? segment.from);
+    const end = toSegmentPart(segment.end ?? segment.to);
+    if (start !== null && end !== null) {
+      const range = `${start}-${end}`;
+      const step = toSegmentPart(segment.step);
+      return step === null ? range : `${range}/${step}`;
     }
   }
 
@@ -142,6 +146,28 @@ const recurrenceToCron = (spec: RecurrenceSpecObjLit): string => {
   return `${second} ${minute} ${hour} ${date} ${month} ${dayOfWeek}`;
 };
 
+type ScheduleWindow = {
+  tz?: string;
+  start?: Date | number | string;
+  end?: Date | number | string;
+};
+
+const toCronerOptions = ({ tz, start, end }: ScheduleWindow): Record<string, unknown> => {
+  const cronerOptions: Record<string, unknown> = {};
+
+  if (tz) {
+    cronerOptions.timezone = tz;
+  }
+  if (start != null) {
+    cronerOptions.startAt = toDate(start);
+  }
+  if (end != null) {
+    cronerOptions.stopAt = toDate(end);
+  }
+
+  return cronerOptions;
+};
+
 const toCronerArgs = (
   options: CronSchedule
 ): { pattern: string | Date; cronerOptions: Record<string, unknown> } => {
@@ -158,31 +184,14 @@ const toCronerArgs = (
   }
 
   if (isRecurrenceSpec(options)) {
-    const cronerOptions: Record<string, unknown> = {};
-    if (options.tz) {
-      cronerOptions.timezone = options.tz;
-    }
-    if (options.start != null) {
-      cronerOptions.startAt = toDate(options.start);
-    }
-    if (options.end != null) {
-      cronerOptions.stopAt = toDate(options.end);
-    }
-    return { pattern: recurrenceToCron(options), cronerOptions };
+    return {
+      pattern: recurrenceToCron(options),
+      cronerOptions: toCronerOptions(options),
+    };
   }
 
   if (isRuleOptions(options)) {
-    const cronerOptions: Record<string, unknown> = {};
-
-    if (options.tz) {
-      cronerOptions.timezone = options.tz;
-    }
-    if (options.start != null) {
-      cronerOptions.startAt = toDate(options.start);
-    }
-    if (options.end != null) {
-      cronerOptions.stopAt = toDate(options.end);
-    }
+    const cronerOptions = toCronerOptions(options);
 
     let pattern: string | Date = options.rule as string | Date;
     if (isRecurrenceSpec(options.rule)) {

@@ -5,6 +5,7 @@ import type { Strapi } from '../core';
  * (`month` is 0–11).
  */
 export type RecurrenceSegment = number | string | number[];
+export type CronDate = Date | number | string;
 
 export interface RecurrenceSpecObjLit {
   date?: RecurrenceSegment | null;
@@ -15,8 +16,8 @@ export interface RecurrenceSpecObjLit {
   second?: RecurrenceSegment | null;
   year?: RecurrenceSegment | null;
   tz?: string;
-  start?: Date | number | string;
-  end?: Date | number | string;
+  start?: CronDate;
+  end?: CronDate;
   recurs?: boolean;
 }
 
@@ -27,8 +28,8 @@ export interface RecurrenceSpecObjLit {
 export interface CronRuleOptions {
   rule: string | Date | RecurrenceSpecObjLit;
   tz?: string;
-  start?: Date | number | string;
-  end?: Date | number | string;
+  start?: CronDate;
+  end?: CronDate;
 }
 
 export type CronSchedule = string | number | Date | CronRuleOptions | RecurrenceSpecObjLit;
