@@ -23,7 +23,7 @@ const IMAGE_1 = path.join(UPLOADS_DIR, 'test-image-1.jpg');
 const IMAGE_2 = path.join(UPLOADS_DIR, 'test-image-2.jpg');
 const BLOCKED_FILE = path.join(UPLOADS_DIR, 'blocked-file.exe');
 
-// The fixture the URL-import proxy serves is a 1x1 PNG.
+// The imported fixture is a 1x1 PNG (despite its .jpg name).
 const FIXTURE_WIDTH = 1;
 const FIXTURE_HEIGHT = 1;
 
@@ -31,13 +31,17 @@ const FIXTURE_HEIGHT = 1;
 const UPLOAD_ROUTE = '**/upload/**';
 
 /**
- * The app fetches import URLs server-side, and that fetch refuses loopback and
- * private addresses to prevent SSRF — so the suite cannot host the file itself.
- * This address is reserved for documentation (RFC 5737), which the guard allows;
- * `HTTP_PROXY` then routes the request to the local fixture proxy, so nothing is
- * ever sent to it. The filename comes from this path.
+ * The app fetches import URLs server-side and refuses loopback and private addresses to
+ * prevent SSRF, so the suite cannot host the file itself. This is one of the repo's own
+ * e2e fixtures served over raw.githubusercontent: no third party, and GitHub being
+ * reachable is already a precondition for CI running at all.
+ *
+ * Pinned to a commit rather than `develop` so moving or renaming the fixture cannot
+ * break this test retroactively. The imported asset takes its name from this path.
  */
-const URL_IMPORT_URL = 'http://192.0.2.1/url-import.png';
+const URL_IMPORT_URL =
+  'https://raw.githubusercontent.com/strapi/strapi/0a8a9b40d0642b221c1841ae72295f830352e8ce/tests/e2e/data/uploads/test-image-1.jpg';
+const URL_IMPORT_NAME = 'test-image-1.jpg';
 
 // How long each upload request is held open when a step needs files to still be in
 // flight. Deliberate knob, not a sleep: the fixtures are tiny, so at full speed a
@@ -59,12 +63,20 @@ const adminToken = async (request: APIRequestContext) => {
   return token;
 };
 
-const findAsset = async (request: APIRequestContext, name: string) => {
+/**
+ * Every asset carrying `name`, newest first.
+ *
+ * A list rather than a single hit, and ordered: the imported fixture shares its filename
+ * with the one the file-picker step uploads, so "an asset with this name exists" would be
+ * true before the import ran. The count moving is what proves the import landed.
+ */
+const findAssetsNamed = async (request: APIRequestContext, name: string) => {
   const token = await adminToken(request);
-  const listed = await request.get(`/upload/files?filters[name][$eq]=${encodeURIComponent(name)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return (await listed.json())?.results?.[0];
+  const listed = await request.get(
+    `/upload/files?filters[name][$eq]=${encodeURIComponent(name)}&sort=id:desc`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return ((await listed.json())?.results ?? []) as Record<string, unknown>[];
 };
 
 const countAssets = async (request: APIRequestContext) => {
@@ -188,20 +200,55 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       });
 
       await test.step('I upload from a URL', async () => {
+        // Checked before the upload so an unreachable fixture is reported as what it is.
+        // Without this the symptom is `waitForUploadProgressSuccess` timing out, which
+        // reads as a broken Media Library rather than a missing file.
+        const reachable = await page.request
+          .head(URL_IMPORT_URL, { timeout: 15_000 })
+          .catch((error: Error) => error);
+
+        if (reachable instanceof Error) {
+          throw new Error(
+            `Cannot reach the import fixture, so this step cannot run.\n` +
+              `  URL:   ${URL_IMPORT_URL}\n` +
+              `  Error: ${reachable.message}\n` +
+              `This step needs raw.githubusercontent.com. Nothing is wrong with the Media Library.`
+          );
+        }
+
+        expect(
+          reachable.status(),
+          `The import fixture returned ${reachable.status()} instead of 200.\n` +
+            `  URL: ${URL_IMPORT_URL}\n` +
+            `A 404 means the fixture moved or the pinned commit is gone — update the URL. ` +
+            `Anything else is GitHub being unavailable, not a Media Library failure.`
+        ).toBe(200);
+
+        const before = await findAssetsNamed(page.request, URL_IMPORT_NAME);
+
         await assetsPage.uploadFilesFromUrl(URL_IMPORT_URL);
         await expect(assetsPage.uploadProgressDialog).toBeVisible();
         await assetsPage.waitForUploadProgressSuccess();
         await assetsPage.closeUploadProgressDialog();
 
-        await expect(assetsPage.getAssetRow('url-import.png')).toBeVisible();
+        await expect(assetsPage.getAssetRow(URL_IMPORT_NAME)).toBeVisible();
 
-        // Prove the proxy served it. A network that answers for the unroutable
-        // address returns an HTML error page, which would otherwise land under the
-        // expected filename and pass.
-        const imported = await findAsset(page.request, 'url-import.png');
-        expect(imported?.mime).toBe('image/png');
-        // Dimensions, not bytes: the upload pipeline re-encodes images, and an HTML
-        // error page from a network that answers for the address has none at all.
+        // The dialog reporting success is not the same as the fetch having landed, and the
+        // filename already exists here — so the count is what carries the assertion.
+        const after = await findAssetsNamed(page.request, URL_IMPORT_NAME);
+        expect(
+          after,
+          `The dialog reported success but no new "${URL_IMPORT_NAME}" reached the library ` +
+            `(${before.length} before, ${after.length} after). The fixture was reachable from ` +
+            `the test runner, so the server-side fetch is what failed — check the app logs for ` +
+            `a file:error event.`
+        ).toHaveLength(before.length + 1);
+
+        // Dimensions rather than bytes: the pipeline re-encodes images, while anything the
+        // network substitutes for the real file (an error page, a redirect) has none.
+        const [imported] = after;
+        // `image/jpeg` from the response's declared type, not the fixture's actual PNG bytes.
+        expect(imported?.mime).toBe('image/jpeg');
         expect([imported?.width, imported?.height]).toEqual([FIXTURE_WIDTH, FIXTURE_HEIGHT]);
       });
 

@@ -44,8 +44,6 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
   // `test-apps/e2e/test-results/` folder, and the HTML reporter defaults to cwd `playwright-report/`,
   // so parallel `yarn test:e2e` runs overwrite each other without subfolders.
   const artifactKey = `${domain}-${port}`;
-  // Offset from the app port so parallel test apps get their own proxy.
-  const uploadProxyPort = port + 100;
   const outputDirBase = getEnvString(
     process.env.PLAYWRIGHT_OUTPUT_DIR,
     path.join('..', 'test-results')
@@ -164,15 +162,6 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
         env: {
           PORT: String(port),
           HOST: '127.0.0.1',
-          // Routes the app's outbound fetches — and so the server-side URL
-          // upload — at the fixture proxy below, using Node's own proxy support.
-          // Strapi's `server.proxy.fetch` cannot be used: it hands an `undici`
-          // ProxyAgent to Node's built-in fetch, which rejects it on Node 26
-          // ("invalid onError method").
-          NODE_USE_ENV_PROXY: '1',
-          HTTP_PROXY: `http://127.0.0.1:${uploadProxyPort}`,
-          // Everything the suite itself talks to is local and must go direct.
-          NO_PROXY: '127.0.0.1,localhost',
         },
         /* default Strapi server startup timeout to 160s */
         timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
@@ -180,15 +169,6 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
         // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
         // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
         // server up. CI always starts fresh.
-        reuseExistingServer: process.env.CI
-          ? false
-          : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
-        stdout: 'pipe',
-      },
-      {
-        command: `node ${path.join(__dirname, 'tests', 'utils', 'upload-url-proxy.js')}`,
-        url: `http://127.0.0.1:${uploadProxyPort}/__health`,
-        env: { E2E_UPLOAD_PROXY_PORT: String(uploadProxyPort) },
         reuseExistingServer: process.env.CI
           ? false
           : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
