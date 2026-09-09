@@ -145,14 +145,14 @@ export const mediaDeleteFolderOutputSchema = z.object({
  * `moved` carries the full asset in the same shape the read tools return, so the new folder can
  * be confirmed without a follow-up `media_get_asset`.
  */
-export const moveMediaFailureSchema = z.object({
+export const mediaMoveAssetsFailureSchema = z.object({
   id: z.number().describe('The requested asset id that was not moved.'),
   reason: z
     .string()
     .describe('Why this id was not moved — a missing asset, or one this token may not edit.'),
 });
 
-export const moveMediaOutputSchema = z.object({
+export const mediaMoveAssetsOutputSchema = z.object({
   destinationFolder: z
     .object({
       id: z.number(),
@@ -166,7 +166,7 @@ export const moveMediaOutputSchema = z.object({
     .array(mediaAssetOutputSchema)
     .describe('The assets that were moved, in their new location.'),
   failed: z
-    .array(moveMediaFailureSchema)
+    .array(mediaMoveAssetsFailureSchema)
     .describe(
       'The ids that were not moved, each with a reason. The moves reported in `moved` still happened — retry only these.'
     ),

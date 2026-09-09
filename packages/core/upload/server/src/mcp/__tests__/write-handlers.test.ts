@@ -1,14 +1,17 @@
 import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
-import { createMediaUpdateAssetHandler, createMoveMediaHandler } from '../handlers/write-handlers';
+import {
+  createMediaUpdateAssetHandler,
+  createMediaMoveAssetsHandler,
+} from '../handlers/write-handlers';
 import {
   MCP_NOT_FOUND_ASSET,
   MCP_UPDATE_ASSET_NO_FIELDS,
-  MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND,
-  MCP_MOVE_MEDIA_ID_NOT_FOUND,
-  MCP_MOVE_MEDIA_ID_FORBIDDEN,
-  MCP_MOVE_MEDIA_ID_FAILED,
+  MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND,
+  MCP_MOVE_ASSETS_ID_NOT_FOUND,
+  MCP_MOVE_ASSETS_ID_FORBIDDEN,
+  MCP_MOVE_ASSETS_ID_FAILED,
 } from '../handlers/constants';
 import { ACTIONS, FILE_MODEL_UID } from '../../constants';
 
@@ -329,7 +332,7 @@ describe('media_move_assets handler', () => {
   };
 
   const move = (args: Record<string, unknown>) =>
-    createMoveMediaHandler(
+    createMediaMoveAssetsHandler(
       (global as unknown as { strapi: Core.Strapi }).strapi,
       context
     )({ args });
@@ -418,7 +421,7 @@ describe('media_move_assets handler', () => {
 
       await expect(move({ ids: [1, 4], folder: 999 })).rejects.toThrow(errors.ValidationError);
       await expect(move({ ids: [1, 4], folder: 999 })).rejects.toThrow(
-        MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND
+        MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND
       );
 
       // A bad destination is a property of the request, not of any id: it must be refused before
@@ -445,7 +448,7 @@ describe('media_move_assets handler', () => {
       // moves that succeeded.
       expect(updateFileInfo).toHaveBeenCalledTimes(2);
       expect(moved.map((asset) => asset.id)).toEqual([1, 4]);
-      expect(failed).toEqual([{ id: 999, reason: MCP_MOVE_MEDIA_ID_NOT_FOUND }]);
+      expect(failed).toEqual([{ id: 999, reason: MCP_MOVE_ASSETS_ID_NOT_FOUND }]);
     });
 
     test('names media_move_folder in the reason, since a folder id is the likeliest bad id', async () => {
@@ -462,7 +465,7 @@ describe('media_move_assets handler', () => {
       const { moved, failed } = structured(await move({ ids: [1, 55], folder: 3 }));
 
       expect(moved.map((asset) => asset.id)).toEqual([1]);
-      expect(failed).toEqual([{ id: 55, reason: MCP_MOVE_MEDIA_ID_FORBIDDEN }]);
+      expect(failed).toEqual([{ id: 55, reason: MCP_MOVE_ASSETS_ID_FORBIDDEN }]);
       expect(updateFileInfo).not.toHaveBeenCalledWith(55, expect.anything(), expect.anything());
     });
 
@@ -486,7 +489,7 @@ describe('media_move_assets handler', () => {
 
       expect(moved).toEqual([]);
       expect(failed.map(({ id }) => id)).toEqual([999, 998]);
-      expect(failed[0].reason).toBe(MCP_MOVE_MEDIA_ID_NOT_FOUND);
+      expect(failed[0].reason).toBe(MCP_MOVE_ASSETS_ID_NOT_FOUND);
     });
 
     test('reports a write failure against its own id, keeping the earlier moves in the report', async () => {
@@ -508,7 +511,7 @@ describe('media_move_assets handler', () => {
       // no `structuredContent`, discarding the fact that asset 1 had already moved — the agent
       // could not tell which ids to retry.
       expect(moved.map((asset) => asset.id)).toEqual([1]);
-      expect(failed).toEqual([{ id: 4, reason: MCP_MOVE_MEDIA_ID_FAILED('connection lost') }]);
+      expect(failed).toEqual([{ id: 4, reason: MCP_MOVE_ASSETS_ID_FAILED('connection lost') }]);
     });
 
     test('carries the underlying message through, so the real fault stays legible', async () => {

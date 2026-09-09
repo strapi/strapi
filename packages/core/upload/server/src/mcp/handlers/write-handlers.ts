@@ -9,10 +9,10 @@ import { sanitizeMediaAsset } from '../sanitizers/sanitize-media';
 import {
   MCP_NOT_FOUND_ASSET,
   MCP_UPDATE_ASSET_NO_FIELDS,
-  MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND,
-  MCP_MOVE_MEDIA_ID_NOT_FOUND,
-  MCP_MOVE_MEDIA_ID_FORBIDDEN,
-  MCP_MOVE_MEDIA_ID_FAILED,
+  MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND,
+  MCP_MOVE_ASSETS_ID_NOT_FOUND,
+  MCP_MOVE_ASSETS_ID_FORBIDDEN,
+  MCP_MOVE_ASSETS_ID_FAILED,
 } from './constants';
 import { ok } from '../utils';
 
@@ -25,7 +25,7 @@ type MediaUpdateAssetArgs = {
   caption?: string | null;
 };
 
-type MoveMediaArgs = {
+type MediaMoveAssetsArgs = {
   ids: number[];
   folder: number | null;
 };
@@ -137,7 +137,7 @@ const resolveDestinationFolder = async (strapi: Core.Strapi, folder: number | nu
   });
 
   if (destination === null || destination === undefined) {
-    throw new errors.ValidationError(MCP_MOVE_MEDIA_DESTINATION_NOT_FOUND);
+    throw new errors.ValidationError(MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND);
   }
 
   return { id: Number(destination.id), name: String(destination.name ?? '') };
@@ -162,14 +162,14 @@ const resolveDestinationFolder = async (strapi: Core.Strapi, folder: number | nu
  * asset, and a bounded reorganisation (100 ids max, per the input schema) is not worth the
  * connection-pool contention of firing them in parallel.
  */
-export const createMoveMediaHandler =
+export const createMediaMoveAssetsHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
-    const { ids, folder } = args as MoveMediaArgs;
+    const { ids, folder } = args as MediaMoveAssetsArgs;
 
     // Model-level gate first, so a token without the action is refused before any DB read.
     assertMediaPermission(strapi, context, ACTIONS.update, FILE_MODEL_UID);
@@ -205,12 +205,12 @@ export const createMoveMediaHandler =
         moved.push(sanitizeMediaAsset({ ...updated, folder: destinationFolder }));
       } catch (error) {
         if (error instanceof errors.NotFoundError) {
-          failed.push({ id, reason: MCP_MOVE_MEDIA_ID_NOT_FOUND });
+          failed.push({ id, reason: MCP_MOVE_ASSETS_ID_NOT_FOUND });
           continue;
         }
 
         if (error instanceof errors.ForbiddenError) {
-          failed.push({ id, reason: MCP_MOVE_MEDIA_ID_FORBIDDEN });
+          failed.push({ id, reason: MCP_MOVE_ASSETS_ID_FORBIDDEN });
           continue;
         }
 
@@ -230,7 +230,7 @@ export const createMoveMediaHandler =
          */
         failed.push({
           id,
-          reason: MCP_MOVE_MEDIA_ID_FAILED(error instanceof Error ? error.message : String(error)),
+          reason: MCP_MOVE_ASSETS_ID_FAILED(error instanceof Error ? error.message : String(error)),
         });
       }
     }
