@@ -296,8 +296,17 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
+    /* Checks whether the app has an EE license and AI is on in the config.
+     *   AI can work in this app, with any provider */
     isAvailable,
+    /* `true` when the license has the `cms-ai` entitlement, so the AI is managed by Strapi.
+         This boolean is needed while all AI features are being ported to providers architecture.
+         Once all compatibility has been tested, this flag will most likely be deprecated. */
     isStrapiManagedAiEnabled,
+    /* Returns one flag per feature, each saying if it has a
+     *   usable provider:
+     *     - With Strapi-managed, every feature says yes.
+     *     - With an external provider, only the features already migrated will say yes. */
     getAiFeatureConfig,
     getAiToken,
     getAiUsage,
