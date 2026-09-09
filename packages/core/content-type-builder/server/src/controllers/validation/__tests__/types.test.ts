@@ -369,6 +369,48 @@ describe('Type validators', () => {
     });
   });
 
+  describe('enumeration type', () => {
+    /**
+     * GraphQL forbids enum *names* `true` / `false` / `null`, but Strapi stores them as strings.
+     * The GraphQL plugin maps the identifier; schema validation must still allow the values.
+     * See strapi/strapi#23720.
+     */
+    test.each(['true', 'false', 'null'])(
+      'allows GraphQL reserved enum value %s as a string',
+      (value) => {
+        const attributes = {
+          status: {
+            type: 'enumeration',
+            enum: [value],
+          },
+        } satisfies Struct.SchemaAttributes;
+
+        const validator = getTypeValidator(attributes.status, {
+          types: ['enumeration'],
+          attributes,
+        });
+
+        expect(validator.isValidSync(attributes.status)).toBe(true);
+      }
+    );
+
+    test('allows mixed enum arrays that include a GraphQL reserved value', () => {
+      const attributes = {
+        status: {
+          type: 'enumeration',
+          enum: ['draft', 'true', 'false'],
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.status, {
+        types: ['enumeration'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.status)).toBe(true);
+    });
+  });
+
   describe('media type', () => {
     test('Validates allowedTypes', () => {
       // @ts-expect-error - Silence the cast as Struct.SchemaAttributes since allowedTypes expects one of 'audios',
