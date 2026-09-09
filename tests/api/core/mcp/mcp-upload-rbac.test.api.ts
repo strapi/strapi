@@ -14,10 +14,10 @@ const UPLOAD_ACTIONS = {
 const READ_TOOLS = ['media_list_assets', 'media_get_asset', 'media_list_folders'] as const;
 
 const FOLDER_WRITE_TOOLS = [
-  'create_folder',
-  'rename_folder',
-  'move_folder',
-  'delete_folder',
+  'media_create_folder',
+  'media_rename_folder',
+  'media_move_folder',
+  'media_delete_folder',
 ] as const;
 
 const WRITE_TOOLS = ['media_update_asset', ...FOLDER_WRITE_TOOLS] as const;
@@ -739,11 +739,11 @@ describe('MCP upload tools RBAC (api)', () => {
     const countFolders = async () => strapi.db.query('plugin::upload.folder').count({});
     const countFiles = async () => strapi.db.query('plugin::upload.file').count({});
 
-    describe('create_folder', () => {
+    describe('media_create_folder', () => {
       test('creates a folder at the root, visible to media_list_folders', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Campaigns',
         });
 
@@ -760,7 +760,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const parent = await seeder.seedFolder('Parent');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Nested',
           parent: parent.id,
         });
@@ -781,7 +781,9 @@ describe('MCP upload tools RBAC (api)', () => {
       test('does not expose the internal path bookkeeping', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'Clean' });
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
+          name: 'Clean',
+        });
 
         expect(structured(response)).not.toHaveProperty('path');
         expect(structured(response)).not.toHaveProperty('pathId');
@@ -792,7 +794,7 @@ describe('MCP upload tools RBAC (api)', () => {
         await seeder.seedFolder('Taken', parent.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Taken',
           parent: parent.id,
         });
@@ -807,7 +809,7 @@ describe('MCP upload tools RBAC (api)', () => {
         await seeder.seedFolder('Shared', first.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Shared',
           parent: second.id,
         });
@@ -818,7 +820,7 @@ describe('MCP upload tools RBAC (api)', () => {
       test('rejects a parent that does not exist', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Orphan',
           parent: 999999,
         });
@@ -830,7 +832,9 @@ describe('MCP upload tools RBAC (api)', () => {
       test('rejects a name containing a slash', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'a/b' });
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
+          name: 'a/b',
+        });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
         expect(await countFolders()).toBe(0);
@@ -839,19 +843,21 @@ describe('MCP upload tools RBAC (api)', () => {
       test('denies the write to a token without plugin::upload.assets.update', async () => {
         const token = await createReadTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'create_folder', { name: 'Denied' });
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
+          name: 'Denied',
+        });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
         expect(await countFolders()).toBe(0);
       });
     });
 
-    describe('rename_folder', () => {
+    describe('media_rename_folder', () => {
       test('renames a folder, confirmed by media_list_folders', async () => {
         const folder = await seeder.seedFolder('Before');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'After',
         });
@@ -871,7 +877,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
         const before = await folderRow(folder.id);
 
-        await mcp.callTool(token.accessKey, 'rename_folder', {
+        await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'Renamed child',
         });
@@ -880,7 +886,9 @@ describe('MCP upload tools RBAC (api)', () => {
         const after = await folderRow(folder.id);
         expect(after.path).toBe(before.path);
 
-        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', { folderId: folder.id });
+        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', {
+          folderId: folder.id,
+        });
         expect(
           (listed.result?.structuredContent?.results as Record<string, unknown>[]).map(
             (file) => file.id
@@ -894,7 +902,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Target', parent.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'Sibling',
         });
@@ -908,7 +916,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Unchanged');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'Unchanged',
         });
@@ -916,25 +924,25 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(response.error ?? response.result?.isError).toBeFalsy();
       });
 
-      test('rejects a parent, pointing the caller at move_folder', async () => {
+      test('rejects a parent, pointing the caller at media_move_folder', async () => {
         const folder = await seeder.seedFolder('Fixed');
         const destination = await seeder.seedFolder('Destination');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'Fixed',
           parent: destination.id,
         });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
-        expect(JSON.stringify(response)).toMatch(/move_folder/);
+        expect(JSON.stringify(response)).toMatch(/media_move_folder/);
       });
 
       test('errors for an unknown folder id', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: 999999,
           name: 'Ghost',
         });
@@ -946,7 +954,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Protected');
         const token = await createReadTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'rename_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_rename_folder', {
           id: folder.id,
           name: 'Hijacked',
         });
@@ -956,14 +964,14 @@ describe('MCP upload tools RBAC (api)', () => {
       });
     });
 
-    describe('move_folder', () => {
+    describe('media_move_folder', () => {
       test('re-parents a folder, confirmed by media_list_folders', async () => {
         const source = await seeder.seedFolder('Source');
         const destination = await seeder.seedFolder('Destination');
         const moved = await seeder.seedFolder('Moving', source.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: moved.id,
           parent: destination.id,
         });
@@ -990,7 +998,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const asset = await seeder.seedAsset({ name: 'carried.jpg', folderId: child.id });
         const token = await createUpdateTokenSession();
 
-        await mcp.callTool(token.accessKey, 'move_folder', {
+        await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: moved.id,
           parent: destination.id,
         });
@@ -1007,7 +1015,9 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(file.folderPath.startsWith(`${destinationRow.path}/`)).toBe(true);
 
         // ...and the asset is still reachable through its folder.
-        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', { folderId: child.id });
+        const listed = await mcp.callTool(token.accessKey, 'media_list_assets', {
+          folderId: child.id,
+        });
         expect(
           (listed.result?.structuredContent?.results as Record<string, unknown>[]).map(
             (entry) => entry.id
@@ -1020,7 +1030,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const child = await seeder.seedFolder('Child', parent.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: child.id,
           parent: null,
         });
@@ -1036,7 +1046,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Selfish');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: folder.id,
           parent: folder.id,
         });
@@ -1050,7 +1060,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const child = await seeder.seedFolder('Descendant', parent.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: parent.id,
           parent: child.id,
         });
@@ -1066,7 +1076,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Stuck');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: folder.id,
           parent: 999999,
         });
@@ -1081,7 +1091,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const moving = await seeder.seedFolder('Clash');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: moving.id,
           parent: destination.id,
         });
@@ -1090,19 +1100,19 @@ describe('MCP upload tools RBAC (api)', () => {
         expect((await folderRow(moving.id)).path).toBe(moving.path);
       });
 
-      test('rejects a name, pointing the caller at rename_folder', async () => {
+      test('rejects a name, pointing the caller at media_rename_folder', async () => {
         const folder = await seeder.seedFolder('Named');
         const destination = await seeder.seedFolder('Destination');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: folder.id,
           parent: destination.id,
           name: 'Renamed',
         });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
-        expect(JSON.stringify(response)).toMatch(/rename_folder/);
+        expect(JSON.stringify(response)).toMatch(/media_rename_folder/);
       });
 
       test('denies the write to a token without plugin::upload.assets.update', async () => {
@@ -1110,7 +1120,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const destination = await seeder.seedFolder('Destination');
         const token = await createReadTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'move_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_move_folder', {
           id: folder.id,
           parent: destination.id,
         });
@@ -1120,7 +1130,7 @@ describe('MCP upload tools RBAC (api)', () => {
       });
     });
 
-    describe('delete_folder', () => {
+    describe('media_delete_folder', () => {
       /**
        * A folder holding one file, one subfolder, and one file inside that subfolder:
        * deleting the root of it must cascade to 2 folders and 2 files.
@@ -1138,7 +1148,9 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
+          ids: [root.id],
+        });
 
         expect(response.error ?? response.result?.isError).toBeFalsy();
         expect(response.result?.structuredContent).toMatchObject({
@@ -1159,7 +1171,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [root.id],
           dryRun: true,
         });
@@ -1177,7 +1189,9 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
+          ids: [root.id],
+        });
         const folders = response.result?.structuredContent?.folders as Record<string, unknown>[];
 
         expect(folders).toHaveLength(1);
@@ -1194,7 +1208,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const nested = await seeder.seedFolder('Nested', parent.id);
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [nested.id],
         });
 
@@ -1209,7 +1223,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [root.id],
           dryRun: false,
         });
@@ -1232,8 +1246,10 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createUpdateTokenSession();
 
-        const preview = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
-        const executed = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const preview = await mcp.callTool(token.accessKey, 'media_delete_folder', {
+          ids: [root.id],
+        });
+        const executed = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [root.id],
           dryRun: false,
         });
@@ -1256,7 +1272,10 @@ describe('MCP upload tools RBAC (api)', () => {
         });
         const token = await createUpdateTokenSession();
 
-        await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id], dryRun: false });
+        await mcp.callTool(token.accessKey, 'media_delete_folder', {
+          ids: [root.id],
+          dryRun: false,
+        });
 
         expect(await folderRow(survivor.id)).toMatchObject({ name: 'Survivor' });
         expect(
@@ -1269,7 +1288,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const second = await seeder.seedFolder('Second');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [first.id, second.id],
           dryRun: false,
         });
@@ -1285,7 +1304,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const folder = await seeder.seedFolder('Real');
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [folder.id, 999999],
           dryRun: false,
         });
@@ -1307,13 +1326,13 @@ describe('MCP upload tools RBAC (api)', () => {
         const asset = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [folder.id, asset.id],
           dryRun: false,
         });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
-        expect(JSON.stringify(response)).toMatch(/delete_media/);
+        expect(JSON.stringify(response)).toMatch(/media_delete_assets/);
 
         // Nothing at all was removed — not the folder, not the file it contained.
         expect(await countFolders()).toBe(1);
@@ -1328,7 +1347,7 @@ describe('MCP upload tools RBAC (api)', () => {
         await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [folder.id, 999999],
         });
 
@@ -1338,19 +1357,19 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(await countFolders()).toBe(1);
       });
 
-      test('rejects an asset id, naming delete_media', async () => {
+      test('rejects an asset id, naming media_delete_assets', async () => {
         // Folder and asset ids are indistinguishable integers, so an asset id here is a likely
         // agent mistake that must be refused rather than reported as an empty cascade.
         const asset = await seeder.seedAsset({ name: 'not-a-folder.jpg' });
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [asset.id],
           dryRun: false,
         });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
-        expect(JSON.stringify(response)).toMatch(/delete_media/);
+        expect(JSON.stringify(response)).toMatch(/media_delete_assets/);
 
         // The asset must survive an attempt to delete it through the folder tool.
         expect(await countFiles()).toBe(1);
@@ -1359,7 +1378,7 @@ describe('MCP upload tools RBAC (api)', () => {
       test('rejects an empty id list', async () => {
         const token = await createUpdateTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [],
           dryRun: false,
         });
@@ -1371,7 +1390,7 @@ describe('MCP upload tools RBAC (api)', () => {
         const { root } = await seedCascade();
         const token = await createReadTokenSession();
 
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', {
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
           ids: [root.id],
           dryRun: false,
         });
@@ -1386,7 +1405,9 @@ describe('MCP upload tools RBAC (api)', () => {
         const token = await createReadTokenSession();
 
         // The preview reveals how much content a folder holds, so it takes the write action too.
-        const response = await mcp.callTool(token.accessKey, 'delete_folder', { ids: [root.id] });
+        const response = await mcp.callTool(token.accessKey, 'media_delete_folder', {
+          ids: [root.id],
+        });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
       });

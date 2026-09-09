@@ -9,10 +9,10 @@ export {
   mediaGetAssetInputSchema,
   mediaListFoldersInputSchema,
   mediaUpdateAssetInputSchema,
-  createFolderInputSchema,
-  renameFolderInputSchema,
-  moveFolderInputSchema,
-  deleteFolderInputSchema,
+  mediaCreateFolderInputSchema,
+  mediaRenameFolderInputSchema,
+  mediaMoveFolderInputSchema,
+  mediaDeleteFolderInputSchema,
 } from './input-schemas';
 export {
   mediaAssetOutputSchema,
@@ -22,9 +22,9 @@ export {
   mediaListFoldersOutputSchema,
   mediaUpdateAssetOutputSchema,
   mediaFolderOutputSchema,
-  createFolderOutputSchema,
-  renameFolderOutputSchema,
-  moveFolderOutputSchema,
-  deleteFolderOutputSchema,
+  mediaCreateFolderOutputSchema,
+  mediaRenameFolderOutputSchema,
+  mediaMoveFolderOutputSchema,
+  mediaDeleteFolderOutputSchema,
   type MediaFolderNode,
 } from './output-schemas';

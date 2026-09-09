@@ -15,7 +15,7 @@ export const MCP_FOLDER_MOVE_INTO_SELF =
   'A folder cannot be moved into itself or into one of its own descendants.';
 
 /**
- * Returned when `delete_folder` is handed any id that does not resolve to a folder.
+ * Returned when `media_delete_folder` is handed any id that does not resolve to a folder.
  *
  * Names the offending ids, because the call rejects as a whole: the agent has to know which
  * entries to drop or correct, and cannot infer that from a generic failure. Folder ids and
@@ -24,4 +24,4 @@ export const MCP_FOLDER_MOVE_INTO_SELF =
  * covers both rather than asserting one.
  */
 export const MCP_DELETE_FOLDER_UNRESOLVED_IDS = (ids: number[]) =>
-  `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use delete_media instead; otherwise the folders may already be gone. Use list_folders to discover valid folder ids.`;
+  `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — media_delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use media_delete_assets instead; otherwise the folders may already be gone. Use list_folders to discover valid folder ids.`;
