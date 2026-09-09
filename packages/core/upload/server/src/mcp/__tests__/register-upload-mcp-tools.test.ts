@@ -162,10 +162,10 @@ describe('upload MCP tool registration', () => {
 
     test('gives every folder write a short-verb telemetry name', () => {
       const expected = {
-        media_create_folder: 'media_create_folder',
-        media_rename_folder: 'media_rename_folder',
-        media_move_folder: 'media_move_folder',
-        media_delete_folder: 'media_delete_folder',
+        media_create_folder: 'create_folder',
+        media_rename_folder: 'rename_folder',
+        media_move_folder: 'move_folder',
+        media_delete_folder: 'delete_folder',
       };
 
       for (const [name, telemetryName] of Object.entries(expected)) {
