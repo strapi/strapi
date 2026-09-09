@@ -213,11 +213,30 @@ describe('folder MCP handlers', () => {
       expect(data).not.toHaveProperty('pathId');
     });
 
-    test('denies the write without plugin::upload.assets.update', async () => {
+    test('denies the write without plugin::upload.assets.create', async () => {
       const { create } = setupStrapi({ isAllowed: false });
 
       await expect(invokeCreate({ name: 'Denied' })).rejects.toThrow(errors.ForbiddenError);
       expect(create).not.toHaveBeenCalled();
+    });
+
+    test('binds the permissions manager to the create action, matching POST /upload/folders', async () => {
+      // Not `update`, unlike the other folder writes: the admin route for this same operation
+      // requires `assets.create`, so a role with Update but not Create must be refused here too.
+      setupStrapi();
+      const { createPermissionsManager } = (
+        global as unknown as {
+          strapi: { admin: { services: { permission: { createPermissionsManager: jest.Mock } } } };
+        }
+      ).strapi.admin.services.permission;
+
+      await invokeCreate({ name: 'New folder' });
+
+      expect(createPermissionsManager).toHaveBeenCalledWith({
+        ability: context.userAbility,
+        action: ACTIONS.create,
+        model: FOLDER_MODEL_UID,
+      });
     });
   });
 

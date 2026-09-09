@@ -9,6 +9,7 @@ const UPLOAD_ACTIONS = {
   read: 'plugin::upload.read',
   settingsRead: 'plugin::upload.settings.read',
   assetsUpdate: 'plugin::upload.assets.update',
+  assetsCreate: 'plugin::upload.assets.create',
 } as const;
 
 const READ_TOOLS = ['media_list_assets', 'media_get_asset', 'media_list_folders'] as const;
@@ -106,10 +107,26 @@ describe('MCP upload tools RBAC (api)', () => {
   /**
    * A session that can both write and read back for verification.
    *
-   * Folder writes inherit `plugin::upload.assets.update` — the same action as asset metadata —
-   * so one token covers both surfaces. There is no folder-specific MCP permission.
+   * Folder writes inherit the existing asset permissions rather than folder-specific ones, but
+   * not all the same one: `media_create_folder` needs `assets.create` (matching the admin's
+   * `POST /upload/folders`), while rename, move and delete need `assets.update`. This token
+   * holds both so it covers every write surface.
    */
   const createUpdateTokenSession = async (): Promise<AdminToken> => {
+    const token = await createAdminToken([
+      permission(UPLOAD_ACTIONS.read),
+      permission(UPLOAD_ACTIONS.assetsUpdate),
+      permission(UPLOAD_ACTIONS.assetsCreate),
+    ]);
+    await mcp.initializeSession(token.accessKey);
+    return token;
+  };
+
+  /**
+   * A session holding Update but NOT Create — the role that could once create a folder over MCP
+   * while being refused the same operation in the admin panel.
+   */
+  const createUpdateOnlyTokenSession = async (): Promise<AdminToken> => {
     const token = await createAdminToken([
       permission(UPLOAD_ACTIONS.read),
       permission(UPLOAD_ACTIONS.assetsUpdate),
@@ -168,11 +185,22 @@ describe('MCP upload tools RBAC (api)', () => {
       }
     });
 
-    test('a token with plugin::upload.assets.update sees every write tool', async () => {
+    test('a token with the asset write actions sees every write tool', async () => {
       const token = await createUpdateTokenSession();
       const toolNames = await mcp.listToolNames(token.accessKey);
 
       for (const tool of WRITE_TOOLS) {
+        expect(toolNames).toContain(tool);
+      }
+    });
+
+    test('a token with Update but not Create is not offered media_create_folder', async () => {
+      const token = await createUpdateOnlyTokenSession();
+      const toolNames = await mcp.listToolNames(token.accessKey);
+
+      expect(toolNames).not.toContain('media_create_folder');
+      // The `assets.update` writes stay available — only creation is gated differently.
+      for (const tool of ['media_rename_folder', 'media_move_folder', 'media_delete_folder']) {
         expect(toolNames).toContain(tool);
       }
     });
@@ -840,11 +868,24 @@ describe('MCP upload tools RBAC (api)', () => {
         expect(await countFolders()).toBe(0);
       });
 
-      test('denies the write to a token without plugin::upload.assets.update', async () => {
+      test('denies the write to a token without plugin::upload.assets.create', async () => {
         const token = await createReadTokenSession();
 
         const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
           name: 'Denied',
+        });
+
+        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expect(await countFolders()).toBe(0);
+      });
+
+      test('denies a token holding Update but not Create, matching POST /upload/folders', async () => {
+        // The admin route for this operation requires `assets.create`, so Update alone must not
+        // be enough here either — otherwise MCP grants what the panel refuses.
+        const token = await createUpdateOnlyTokenSession();
+
+        const response = await mcp.callTool(token.accessKey, 'media_create_folder', {
+          name: 'Escalated',
         });
 
         expect(response.error ?? response.result?.isError).toBeTruthy();
