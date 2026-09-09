@@ -1,5 +1,5 @@
 import { async } from '@strapi/utils';
-import { signEntityMedia } from './utils';
+import { signEntityMedia, unsignEntityMedia } from './utils';
 
 const signFileUrlsOnDocumentService = async () => {
   const { provider } = strapi.plugins.upload;
@@ -12,6 +12,14 @@ const signFileUrlsOnDocumentService = async () => {
 
   strapi.documents.use(async (ctx, next) => {
     const uid = ctx.uid;
+
+    // Never persist a signature: richtext / blocks embed the URL itself, so an
+    // expiring one would be frozen in the row. The response is signed again
+    // below, so callers still get a usable URL back.
+    if ((ctx.action === 'create' || ctx.action === 'update') && ctx.params?.data) {
+      ctx.params.data = await unsignEntityMedia(ctx.params.data, uid);
+    }
+
     const result: any = await next();
 
     if (ctx.action === 'findMany') {
