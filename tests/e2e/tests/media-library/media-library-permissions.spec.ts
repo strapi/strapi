@@ -1,3 +1,5 @@
+import path from 'path';
+
 import { test, expect, type Page } from '@playwright/test';
 
 import {
@@ -35,6 +37,10 @@ import { AssetsPage } from './page-objects/AssetsPage';
  * rendered but disabled, not hidden.
  */
 
+const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
+const IMAGE = path.join(UPLOADS_DIR, 'test-image.jpg');
+const IMAGE_1 = path.join(UPLOADS_DIR, 'test-image-1.jpg');
+
 const UPLOADER_ROLE = 'E2E Media Library Uploader';
 const READ_ONLY_ROLE = 'E2E Media Library Read Only';
 
@@ -42,7 +48,7 @@ const READ_ONLY_ROLE = 'E2E Media Library Read Only';
 // scenario never needs the upload permission it's specifically missing.
 const SEEDED_ASSET_NAME = 'ted_lasso_profile';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Journey 5: Permissions',
   () => {
     test.describe.configure({ timeout: 420_000 });
@@ -69,9 +75,27 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
 
+      // All three upload entry points the ticket names are offered.
       await expect(page.getByRole('button', { name: 'New' })).toBeVisible();
       await assetsPage.openNewMenu();
       await expect(page.getByRole('menuitem', { name: 'File upload', exact: true })).toBeVisible();
+      await expect(page.getByRole('menuitem', { name: 'File upload from URL' })).toBeVisible();
+      await page.keyboard.press('Escape');
+
+      // "sees and *can use*": complete a real upload through the file picker
+      // rather than stopping at the menu entry being visible.
+      await assetsPage.uploadFilesWithFilePicker(IMAGE);
+      await assetsPage.completeUpload();
+      await assetsPage.switchToTableView();
+      await expect(assetsPage.getAssetRow('test-image.jpg')).toBeVisible();
+
+      // …and through the drag-and-drop drop zone, which is the same path the
+      // read-only scenario below asserts is inert. `uploadFilesWithDragAndDrop`
+      // waits on the drop-zone overlay, so reaching the progress dialog proves
+      // the zone accepted the file.
+      await assetsPage.uploadFilesWithDragAndDrop(IMAGE_1);
+      await assetsPage.completeUpload();
+      await expect(assetsPage.getAssetRow('test-image-1.jpg')).toBeVisible();
     });
 
     test('a user whose role lacks any permission beyond read sees a fully read-only library', async ({
@@ -113,9 +137,24 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.goto();
       await assetsPage.switchToTableView();
 
-      // canCreate: no upload entry points at all, and dragging a file does
-      // nothing (no drop-zone overlay ever appears to drag onto).
+      // canCreate: no upload entry points at all.
       await expect(page.getByRole('button', { name: 'New' })).not.toBeVisible();
+
+      // …and dragging a file onto the page does nothing. Note the drop zone
+      // element is still in the DOM: `AssetsPage.tsx` renders
+      // `<UploadDropZoneProvider disabled={!canCreate}>` rather than omitting
+      // it, so its absence is the wrong thing to assert. What must not happen
+      // is the overlay inviting a drop, or an upload starting.
+      const dataTransfer = await page.evaluateHandle(() => {
+        const dt = new DataTransfer();
+        dt.items.add(new File([new Uint8Array([0])], 'blocked.png', { type: 'image/png' }));
+        return dt;
+      });
+      await assetsPage.dropZone.dispatchEvent('dragenter', { dataTransfer });
+      await assetsPage.dropZone.dispatchEvent('dragover', { dataTransfer });
+      await expect(assetsPage.getDropZoneMessage()).not.toBeVisible();
+      await assetsPage.dropZone.dispatchEvent('drop', { dataTransfer });
+      await expect(assetsPage.uploadProgressDialog).not.toBeVisible();
 
       // canUpdate: no selection affordances anywhere, so no bulk bar either.
       await expect(page.getByRole('checkbox', { name: 'Select all' })).not.toBeVisible();
