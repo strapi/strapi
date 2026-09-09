@@ -669,6 +669,18 @@ const updateAttributeSchema = (meta: SchemaMeta) =>
     properties: attributePropertiesSchema(meta),
   });
 
+// Ordered list of attribute rename hops performed by the user for a given
+// content-type / component, used to generate a data-preserving rename migration.
+// The order is significant: the migration replays each hop verbatim.
+const renamesSchema = z
+  .array(
+    z.object({
+      oldName: z.string(),
+      newName: z.string(),
+    })
+  )
+  .optional();
+
 const deleteAttributeSchema = z.object({
   action: z.literal('delete'),
   name: z.string(),
@@ -708,6 +720,7 @@ const createComponentSchema = baseComponentSchema.extend({
 const updateComponentSchema = baseComponentSchema.extend({
   action: z.literal('update'),
   category: categorySchema.optional(),
+  renames: renamesSchema,
   attributes: z
     .array(
       z.discriminatedUnion('action', [
@@ -783,6 +796,7 @@ const createCollectionTypeSchema = baseCreateContentTypeSchema.extend({
 
 const baseUpdateContentTypeSchema = baseContentTypeSchema.extend({
   action: z.literal('update'),
+  renames: renamesSchema,
 });
 
 const updateSingleTypeSchema = baseUpdateContentTypeSchema.extend({

@@ -182,7 +182,7 @@ const runAction =
   (...args: unknown[]) => {
     assertCwdContainsStrapiProject(name);
 
-    Promise.resolve()
+    return Promise.resolve()
       .then(() => {
         return action(...args);
       })
