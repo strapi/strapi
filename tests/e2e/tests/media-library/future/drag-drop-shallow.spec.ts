@@ -9,6 +9,9 @@ import { AssetsPage } from './page-objects/AssetsPage';
 
 const FIXTURE_IMAGE = path.join(__dirname, '../../../data/uploads/test-image.jpg');
 
+// Sub-pixel layout rounding only — the modifier centres the chip exactly.
+const CHIP_CENTRE_TOLERANCE_PX = 1;
+
 describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Drag and Drop Shallow',
   () => {
@@ -103,7 +106,10 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         await assetsPage.goto();
 
         await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
-        await assetsPage.waitForUploadSuccess();
+        // The progress dialog, not a toast: uploading emits no notification in this
+        // library. It also has to be dismissed before the drag, since it covers the list.
+        await assetsPage.waitForUploadProgressSuccess();
+        await assetsPage.closeUploadProgressDialog();
 
         if (view === 'grid') {
           await assetsPage.switchToGridView();
@@ -118,10 +124,16 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         const chipBox = await assetsPage.dragOverlayChip.boundingBox();
         expect(chipBox).not.toBeNull();
 
-        expect(pointer.x).toBeGreaterThanOrEqual(chipBox!.x);
-        expect(pointer.x).toBeLessThanOrEqual(chipBox!.x + chipBox!.width);
-        expect(pointer.y).toBeGreaterThanOrEqual(chipBox!.y);
-        expect(pointer.y).toBeLessThanOrEqual(chipBox!.y + chipBox!.height);
+        // The chip's centre, not merely its bounds: the chip is far wider than it is tall,
+        // so "the pointer is somewhere inside it" would accept a regression of half its
+        // width horizontally. `AssetsDndProvider` centres it exactly, which the unit test
+        // asserts to the pixel — allow a pixel here for sub-pixel layout rounding.
+        expect(Math.abs(chipBox!.x + chipBox!.width / 2 - pointer.x)).toBeLessThanOrEqual(
+          CHIP_CENTRE_TOLERANCE_PX
+        );
+        expect(Math.abs(chipBox!.y + chipBox!.height / 2 - pointer.y)).toBeLessThanOrEqual(
+          CHIP_CENTRE_TOLERANCE_PX
+        );
 
         await page.mouse.up();
       });
