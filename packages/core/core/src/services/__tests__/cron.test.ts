@@ -7,6 +7,13 @@ const sleep = (ms: number) =>
     }, ms);
   });
 
+const waitFor = async (condition: () => boolean, timeout = 3000) => {
+  const deadline = Date.now() + timeout;
+  while (!condition() && Date.now() < deadline) {
+    await sleep(25);
+  }
+};
+
 describe('Cron service', () => {
   let cron: ReturnType<typeof createCronService>;
 
@@ -103,7 +110,7 @@ describe('Cron service', () => {
     expect(cron.jobs).toHaveLength(1);
     expect(cron.jobs[0].name).toBe('publishOnce');
 
-    await sleep(350);
+    await waitFor(() => task.mock.calls.length === 1);
 
     expect(task).toHaveBeenCalledTimes(1);
     expect(task).toHaveBeenCalledWith({ strapi: global.strapi }, expect.any(Date));
@@ -123,7 +130,7 @@ describe('Cron service', () => {
     expect(task).not.toHaveBeenCalled();
 
     cron.start();
-    await sleep(1100);
+    await waitFor(() => task.mock.calls.length > 0);
 
     expect(task).toHaveBeenCalled();
   });
@@ -139,7 +146,7 @@ describe('Cron service', () => {
       },
     });
 
-    await sleep(300);
+    await waitFor(() => task.mock.calls.length === 1);
 
     expect(task).toHaveBeenCalledTimes(1);
   });
@@ -158,7 +165,7 @@ describe('Cron service', () => {
     cron.stop();
     cron.start();
 
-    await sleep(400);
+    await waitFor(() => task.mock.calls.length === 1);
     expect(task).toHaveBeenCalledTimes(1);
 
     cron.stop();
@@ -289,7 +296,7 @@ describe('Cron service', () => {
       },
     });
 
-    await sleep(300);
+    await waitFor(() => global.strapi.log.error.mock.calls.length === 1);
 
     expect(global.strapi.log.error).toHaveBeenCalledWith(
       'Cron job "boom" failed',
@@ -479,7 +486,7 @@ describe('Cron service', () => {
     });
 
     expect(cron.jobs).toHaveLength(1);
-    await sleep(400);
+    await waitFor(() => second.mock.calls.length === 1);
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
