@@ -504,6 +504,21 @@ describe('MCP upload tools RBAC (api)', () => {
         alternativeText: 'new alt',
         caption: 'new caption',
       });
+
+      // Read the row directly, outside MCP: a symmetric bug across the read and write pair
+      // would round-trip cleanly above while the stored row was wrong. This also pins the
+      // `updatedBy` attribution, which the MCP-only assertions never observe.
+      const row = await strapi.db.query('plugin::upload.file').findOne({
+        where: { id: seeded.id },
+        populate: { updatedBy: true },
+      });
+
+      expect(row).toMatchObject({
+        name: 'after.jpg',
+        alternativeText: 'new alt',
+        caption: 'new caption',
+      });
+      expect(row?.updatedBy).toBeTruthy();
     });
 
     test('leaves the fields the caller omitted untouched', async () => {

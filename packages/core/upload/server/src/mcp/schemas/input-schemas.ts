@@ -104,12 +104,16 @@ export const updateMediaInputSchema = z
         .string()
         .nullable()
         .optional()
-        .describe('Alt text used by the frontend for accessibility. Pass null to clear it.'),
+        .describe(
+          'Alt text used by the frontend for accessibility. Pass null to clear it; the field then reads back as an empty string.'
+        ),
       caption: z
         .string()
         .nullable()
         .optional()
-        .describe('Caption shown alongside the asset. Pass null to clear it.'),
+        .describe(
+          'Caption shown alongside the asset. Pass null to clear it; the field then reads back as an empty string.'
+        ),
     },
     {
       error(issue) {
