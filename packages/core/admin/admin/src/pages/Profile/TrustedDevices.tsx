@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {
   Badge,
   Button,
@@ -44,6 +42,10 @@ const TrustedDevices = () => {
   const { data: devices = [], isLoading, error } = useGetTrustedDevicesQuery();
   const [revokeDevice] = useRevokeTrustedDeviceMutation();
   const [revokeAll] = useRevokeAllTrustedDevicesMutation();
+
+  // Keeps the error, empty and table states mutually exclusive: a stale, previously-successful
+  // `devices` array must not render the table (or the Revoke all button) underneath an error.
+  const hasDevices = !error && devices.length > 0;
 
   const dateTime = (value: string) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
@@ -91,7 +93,7 @@ const TrustedDevices = () => {
             defaultMessage: 'Trusted devices',
           })}
         </Typography>
-        {devices.length > 0 ? (
+        {hasDevices ? (
           <Dialog.Root>
             <Dialog.Trigger>
               <Button variant="danger-light">
@@ -108,11 +110,16 @@ const TrustedDevices = () => {
               })}
               onConfirm={handleRevokeAll}
             >
-              {formatMessage({
-                id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.body',
-                defaultMessage:
-                  'Every browser, including this one, will ask for a code at its next login.',
-              })}
+              {devices.some((device) => device.current)
+                ? formatMessage({
+                    id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.body',
+                    defaultMessage:
+                      'Every browser, including this one, will ask for a code at its next login.',
+                  })
+                : formatMessage({
+                    id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.bodyOthers',
+                    defaultMessage: 'Every trusted browser will ask for a code at its next login.',
+                  })}
             </ConfirmDialog>
           </Dialog.Root>
         ) : null}
@@ -125,7 +132,7 @@ const TrustedDevices = () => {
         })}
       </Typography>
       {error ? <ErrorMessage error={toMessage(error)} /> : null}
-      {!error && devices.length === 0 ? (
+      {!error && !hasDevices ? (
         <Typography textColor="neutral600">
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.trustedDevices.empty',
@@ -134,7 +141,7 @@ const TrustedDevices = () => {
           })}
         </Typography>
       ) : null}
-      {devices.length > 0 ? (
+      {hasDevices ? (
         <Table colCount={5} rowCount={devices.length}>
           <Thead>
             <Tr>

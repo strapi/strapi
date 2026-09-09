@@ -126,10 +126,17 @@ const mfaService = adminApi
         },
         providesTags: (_res, _err, { id }) => [{ type: 'UserTrustedDevices', id }],
       }),
-      /** Administrator revocation (`admin::users.update`); refreshes that user's list. */
+      /**
+       * Administrator revocation (`admin::users.update`); refreshes that user's list. Also
+       * invalidates `TrustedDevices`: an administrator may be revoking their own user page, and
+       * that must refresh their own profile list too.
+       */
       revokeUserTrustedDevices: builder.mutation<void, RevokeUserTrustedDevices.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/users/${id}/trusted-devices` }),
-        invalidatesTags: (_res, _err, { id }) => [{ type: 'UserTrustedDevices', id }],
+        invalidatesTags: (_res, _err, { id }) => [
+          { type: 'UserTrustedDevices', id },
+          'TrustedDevices',
+        ],
       }),
     }),
     overrideExisting: false,

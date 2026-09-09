@@ -134,7 +134,16 @@ const TrustedDevicesCard = ({
           name="trusted-devices-enabled"
           disabled={!canUpdate}
           checked={enabled}
-          onCheckedChange={(checked) => setEnabled(checked === true)}
+          onCheckedChange={(checked) => {
+            const isChecked = checked === true;
+            setEnabled(isChecked);
+            if (!isChecked) {
+              // The days field is disabled while trust is off, so a value it holds from before
+              // unticking (invalid or not) must never be able to block saving `enabled: false`.
+              setDays(settings.days);
+              setDaysError(undefined);
+            }
+          }}
         >
           {formatMessage({
             id: 'Settings.security.trustedDevices.enabled.label',
@@ -152,7 +161,7 @@ const TrustedDevicesCard = ({
           hint={formatMessage({
             id: 'Settings.security.trustedDevices.days.hint',
             defaultMessage:
-              'How long a trusted browser skips the code. Shortening it cuts existing trusts at once; lengthening it never extends a trust already granted.',
+              'How long a trusted browser skips the code. Shortening it cuts existing trusts at once; lengthening it never extends a trust already granted. Changing a password does not revoke trust; revoking a device does.',
           })}
         >
           <Field.Label>

@@ -13,7 +13,7 @@ import type {
  */
 const securitySettingsService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['SecuritySettings', 'Mfa'],
+    addTagTypes: ['SecuritySettings', 'Mfa', 'TrustedDevices', 'UserTrustedDevices'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -33,8 +33,10 @@ const securitySettingsService = adminApi
           return res.data;
         },
         // `Mfa` too: the caller's own `/admin/mfa/me` `required` flag follows the mode and the
-        // role list, so the profile section and the grace banner must re-read it.
-        invalidatesTags: ['SecuritySettings', 'Mfa'],
+        // role list, so the profile section and the grace banner must re-read it. `TrustedDevices`
+        // and `UserTrustedDevices`: turning trust off empties every trusted-devices table
+        // server-side, so both the profile list and any open user-edit panel must refetch.
+        invalidatesTags: ['SecuritySettings', 'Mfa', 'TrustedDevices', 'UserTrustedDevices'],
       }),
     }),
     overrideExisting: false,

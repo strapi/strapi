@@ -80,10 +80,39 @@ const REVOKED_BY_ADMIN_COPY = {
   defaultMessage: 'Trusted devices were revoked by an administrator',
 };
 
-const copyFor = (notice: MfaEventNotice) =>
-  notice.type === 'device_trust_revoked' && typeof notice.metadata.byUserId === 'string'
-    ? REVOKED_BY_ADMIN_COPY
-    : NOTICE_COPY[notice.type];
+/**
+ * `device_trusted` carries `deviceName` and `days` (cycle 3) when the server could name the
+ * browser that was trusted, and the notice should say so instead of the generic static copy.
+ */
+const DEVICE_TRUSTED_NAMED_COPY = {
+  id: 'Settings.profile.form.section.mfa.notice.device_trusted.named',
+  defaultMessage:
+    'A device was trusted for {days, plural, one {# day} other {# days}}: {deviceName}',
+};
+
+interface NoticeCopy {
+  descriptor: { id: string; defaultMessage: string };
+  values?: Record<string, unknown>;
+}
+
+const copyFor = (notice: MfaEventNotice): NoticeCopy => {
+  if (notice.type === 'device_trust_revoked' && typeof notice.metadata.byUserId === 'string') {
+    return { descriptor: REVOKED_BY_ADMIN_COPY };
+  }
+
+  if (
+    notice.type === 'device_trusted' &&
+    typeof notice.metadata.deviceName === 'string' &&
+    typeof notice.metadata.days === 'number'
+  ) {
+    return {
+      descriptor: DEVICE_TRUSTED_NAMED_COPY,
+      values: { days: notice.metadata.days, deviceName: notice.metadata.deviceName },
+    };
+  }
+
+  return { descriptor: NOTICE_COPY[notice.type] };
+};
 
 /**
  * Renders one notice as `"<copy> (<date>)"`, e.g. "A recovery code was used to log in (Sep 1,
@@ -94,11 +123,13 @@ export const formatMfaNotice = (
   notice: MfaEventNotice,
   formatMessage: IntlFormatters['formatMessage'],
   formatDate: IntlFormatters['formatDate']
-): string =>
-  `${formatMessage(copyFor(notice))} (${formatDate(notice.createdAt, {
+): string => {
+  const copy = copyFor(notice);
+  return `${formatMessage(copy.descriptor, copy.values)} (${formatDate(notice.createdAt, {
     dateStyle: 'medium',
     timeStyle: 'short',
   })})`;
+};
 
 /**
  * The spec's primary notification channel: unseen `admin::mfa-event` rows become one warning

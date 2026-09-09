@@ -46,9 +46,14 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   // Cycle 3. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
-  // the query is skipped otherwise. A failed read hides the line rather than showing a false zero.
-  const { data: trustedDevices = [], isError: trustedDevicesFailed } =
-    useGetUserTrustedDevicesQuery({ id: user.id }, { skip: !user.mfaEnabledAt });
+  // the query is skipped otherwise. A failed read hides the line rather than showing a false zero,
+  // and gating on `isSuccess` (rather than defaulting `data` to `[]`) keeps the line from flashing
+  // "No trusted devices" while the request is still in flight.
+  const {
+    data: trustedDevices = [],
+    isSuccess: trustedDevicesLoaded,
+    isError: trustedDevicesFailed,
+  } = useGetUserTrustedDevicesQuery({ id: user.id }, { skip: !user.mfaEnabledAt });
   const [revokeTrustedDevices, { isLoading: isRevokingTrust }] =
     useRevokeUserTrustedDevicesMutation();
   const [revokeTrustOpen, setRevokeTrustOpen] = React.useState(false);
@@ -192,7 +197,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
           </Dialog.Root>
         ) : null}
       </Flex>
-      {user.mfaEnabledAt && !trustedDevicesFailed ? (
+      {user.mfaEnabledAt && trustedDevicesLoaded && !trustedDevicesFailed ? (
         <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
           <Typography textColor="neutral600">
             {formatMessage(

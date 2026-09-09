@@ -150,7 +150,7 @@ const authService = adminApi
         }),
       }),
       resetPassword: builder.mutation<
-        ResetPassword.Response['data'],
+        ResetPassword.Response['data'] | MfaChallengeResponse['data'],
         ResetPassword.Request['body']
       >({
         query: (body) => ({
@@ -158,7 +158,13 @@ const authService = adminApi
           url: '/admin/reset-password',
           data: body,
         }),
-        transformResponse(res: ResetPassword.Response) {
+        transformResponse(res: ResetPassword.Response | MfaChallengeResponse) {
+          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
+          // the caller narrow on `mfaRequired` before treating the result as a session.
+          if ('mfaRequired' in res.data) {
+            return res.data;
+          }
+
           return res.data;
         },
       }),
