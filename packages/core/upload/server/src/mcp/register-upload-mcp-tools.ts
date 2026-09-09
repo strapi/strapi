@@ -90,7 +90,10 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     description:
       'Create a Media Library folder, optionally inside an existing one. Folders are identified by a numeric id: pass `parent` to nest the new folder, or omit it to create the folder at the media library root. The name must be unique among its siblings and cannot contain slashes.',
     telemetry: { source: 'upload', name: 'media_create_folder' },
-    auth: { policies: [{ action: ACTIONS.update }] },
+    // `create`, not `update`, to match `POST /upload/folders` — the admin route for the same
+    // operation gates on `assets.create`. The other folder tools use `update` because their
+    // admin counterparts (`PUT /folders/:id` and both bulk actions) do.
+    auth: { policies: [{ action: ACTIONS.create }] },
     resolveInputSchema: () => mediaCreateFolderInputSchema,
     resolveOutputSchema: () => mediaCreateFolderOutputSchema,
     createHandler: createMediaCreateFolderHandler,

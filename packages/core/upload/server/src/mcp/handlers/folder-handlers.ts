@@ -164,9 +164,12 @@ const countCascade = async (strapi: Core.Strapi, paths: string[]) => {
 /**
  * `media_create_folder` — a new folder, optionally nested.
  *
- * Gated on `plugin::upload.assets.update` and mirrors `POST /upload/folders`: the same
- * uniqueness and parent-existence validation, the same `folder.create()` call, and the same
- * `createdBy` attribution from the session user.
+ * Gated on `plugin::upload.assets.create` and mirrors `POST /upload/folders`: the same
+ * permission, the same uniqueness and parent-existence validation, the same `folder.create()`
+ * call, and the same `createdBy` attribution from the session user.
+ *
+ * `create` rather than the `update` the other folder tools use: creating a folder is the one
+ * folder operation whose admin route gates on `assets.create`.
  */
 export const createMediaCreateFolderHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -177,7 +180,7 @@ export const createMediaCreateFolderHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { name, parent = null } = args as CreateFolderArgs;
 
-    assertMediaPermission(strapi, context, ACTIONS.update, FOLDER_MODEL_UID);
+    assertMediaPermission(strapi, context, ACTIONS.create, FOLDER_MODEL_UID);
 
     await assertParentExists(strapi, parent);
     await assertNameAvailable(strapi, name, parent);

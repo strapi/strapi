@@ -108,10 +108,16 @@ describe('upload MCP tool registration', () => {
       expect(actions).not.toContain(ACTIONS.create);
     });
 
-    test('never gates a tool on the create action — uploading is out of scope', () => {
-      const actions = tools.flatMap((tool) => tool.auth.policies.map((policy) => policy.action));
+    test('gates only media_create_folder on the create action — uploading is out of scope', () => {
+      // `assets.create` is the permission the admin's own `POST /upload/folders` route requires,
+      // so creating a folder over MCP has to ask for it too — a role with Update but not Create
+      // cannot create a folder in the panel and must not be able to over MCP. No tool uploads a
+      // file, which is what keeps `create` off every other definition.
+      const gatedOnCreate = tools
+        .filter((tool) => tool.auth.policies.some((policy) => policy.action === ACTIONS.create))
+        .map((tool) => tool.name);
 
-      expect(actions).not.toContain(ACTIONS.create);
+      expect(gatedOnCreate).toEqual(['media_create_folder']);
     });
 
     test('tags telemetry with the upload source', () => {
@@ -139,10 +145,17 @@ describe('upload MCP tool registration', () => {
       expect(byName.media_update_asset.description).toMatch(/numeric id/i);
     });
 
-    test('gates every folder write on plugin::upload.assets.update', () => {
-      // Folder writes inherit the existing asset permission rather than a folder-specific
-      // one: MCP-specific folder RBAC is explicitly out of scope.
-      for (const name of FOLDER_WRITE_TOOLS) {
+    test('gates each folder write on the same action as its admin route', () => {
+      // Folder writes inherit the existing asset permissions rather than folder-specific ones:
+      // MCP-specific folder RBAC is explicitly out of scope. Which asset permission is not
+      // uniform, though — it mirrors the admin route for the same operation, so that a role can
+      // do exactly as much over MCP as it can in the panel:
+      //   POST   /upload/folders      -> assets.create
+      //   PUT    /upload/folders/:id  -> assets.update  (rename + move)
+      //   bulk delete                 -> assets.update
+      expect(byName.media_create_folder.auth.policies).toEqual([{ action: ACTIONS.create }]);
+
+      for (const name of ['media_rename_folder', 'media_move_folder', 'media_delete_folder']) {
         expect(byName[name].auth.policies).toEqual([{ action: ACTIONS.update }]);
       }
     });
