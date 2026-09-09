@@ -46,15 +46,13 @@ import {
  * Renaming and moving are separate tools for both objects — rename/update changes attributes,
  * move changes location — so an agent selects by intent instead of assembling a combined patch.
  *
- * `media_move_assets` and `media_move_folder` stay separate even though `/actions/bulk-move` accepts both id
- * lists at once. Asset ids and folder ids are indistinguishable integers from separate
- * namespaces, and both `media_list_assets` and `media_list_folders` return a plain `id` — a combined tool
- * would let an agent pass folder ids where assets were meant with nothing to object.
- *
- * `media_delete_assets` and `media_delete_folder` stay separate for the same reason, even though
- * `/actions/bulk-delete` accepts `fileIds` and `folderIds` together. On the delete side that
- * mistake is unrecoverable, and two tools also let each description carry the warning matched to
- * its own blast radius.
+ * The asset and folder tools stay separate for both move and delete, even though
+ * `/actions/bulk-move` accepts both id lists at once and `/actions/bulk-delete` accepts `fileIds`
+ * and `folderIds` together. Asset ids and folder ids are indistinguishable integers from separate
+ * namespaces, and both `media_list_assets` and `media_list_folders` return a plain `id`, so a
+ * combined tool would let an agent pass folder ids where assets were meant with nothing to
+ * object. On the delete side that mistake is unrecoverable, and two tools also let each
+ * description carry the warning matched to its own blast radius.
  */
 export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
   {
