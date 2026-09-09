@@ -1,0 +1,9 @@
+{
+  "extends": "tsconfig/client.json",
+  "include": ["./src"],
+  "exclude": ["**/*.test.js", "**/*.test.ts"],
+  "compilerOptions": {
+    "types": ["@testing-library/jest-dom"],
+    "allowJs": true
+  }
+}

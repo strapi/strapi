@@ -213,7 +213,7 @@ module.exports = ({ strapi }) => ({
 
       const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
       if (mode === 'refresh') {
-        return sendRefreshAuthResponse(strapi, ctx, user, {
+        return await sendRefreshAuthResponse(strapi, ctx, user, {
           metadata: buildSessionMetadataFromContext(ctx),
         });
       }
