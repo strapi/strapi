@@ -4,7 +4,17 @@ import type { Strapi } from '../core';
  * node-schedule RecurrenceSpecObjLit / RecurrenceRule-shaped objects
  * (`month` is 0–11).
  */
-export type RecurrenceSegment = number | string | number[];
+export interface RecurrenceRange {
+  start: number;
+  end: number;
+  step?: number;
+}
+
+export type RecurrenceSegment =
+  | number
+  | string
+  | RecurrenceRange
+  | Array<number | string | RecurrenceRange>;
 export type CronDate = Date | number | string;
 
 export interface RecurrenceSpecObjLit {
@@ -26,7 +36,7 @@ export interface RecurrenceSpecObjLit {
  * (`rule` + optional `tz` / `start` / `end`).
  */
 export interface CronRuleOptions {
-  rule: string | Date | RecurrenceSpecObjLit;
+  rule: CronDate | RecurrenceSpecObjLit;
   tz?: string;
   start?: CronDate;
   end?: CronDate;

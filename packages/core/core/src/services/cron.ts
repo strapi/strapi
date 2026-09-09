@@ -2,7 +2,17 @@ import { isFunction } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import type { Cron } from 'croner';
 
-export type RecurrenceSegment = number | string | number[];
+export type RecurrenceRange = {
+  start: number;
+  end: number;
+  step?: number;
+};
+
+export type RecurrenceSegment =
+  | number
+  | string
+  | RecurrenceRange
+  | Array<number | string | RecurrenceRange>;
 
 /**
  * node-schedule RecurrenceSpecObjLit / RecurrenceRule-shaped objects
@@ -23,7 +33,7 @@ export type RecurrenceSpecObjLit = {
 };
 
 export type CronRuleOptions = {
-  rule: string | Date | RecurrenceSpecObjLit;
+  rule: string | number | Date | RecurrenceSpecObjLit;
   tz?: string;
   start?: Date | number | string;
   end?: Date | number | string;
@@ -89,25 +99,30 @@ const isRecurrenceSpec = (value: unknown): value is RecurrenceSpecObjLit =>
 const toDate = (value: Date | number | string): Date =>
   value instanceof Date ? value : new Date(value);
 
-const toSegmentPart = (value: unknown): string | null =>
-  typeof value === 'number' || typeof value === 'string' ? String(value) : null;
+const toSegmentPart = (value: unknown, offset = 0): string | null => {
+  if (typeof value === 'number') {
+    return String(value + offset);
+  }
+  return typeof value === 'string' ? value : null;
+};
 
-const segmentToField = (segment: unknown, fallback = '*'): string => {
+const segmentToField = (segment: unknown, fallback = '*', offset = 0): string => {
   if (segment == null) {
     return fallback;
   }
 
-  if (typeof segment === 'number' || typeof segment === 'string') {
-    return String(segment);
+  const part = toSegmentPart(segment, offset);
+  if (part !== null) {
+    return part;
   }
 
   if (Array.isArray(segment)) {
-    return segment.map(String).join(',');
+    return segment.map((item) => segmentToField(item, fallback, offset)).join(',');
   }
 
   if (isPlainObject(segment)) {
-    const start = toSegmentPart(segment.start ?? segment.from);
-    const end = toSegmentPart(segment.end ?? segment.to);
+    const start = toSegmentPart(segment.start ?? segment.from, offset);
+    const end = toSegmentPart(segment.end ?? segment.to, offset);
     if (start !== null && end !== null) {
       const range = `${start}-${end}`;
       const step = toSegmentPart(segment.step);
@@ -118,32 +133,16 @@ const segmentToField = (segment: unknown, fallback = '*'): string => {
   return fallback;
 };
 
-const bumpMonth = (segment: unknown): unknown => {
-  if (segment == null) {
-    return segment;
-  }
-  if (typeof segment === 'number') {
-    return segment + 1;
-  }
-  if (Array.isArray(segment)) {
-    return segment.map((part) => (typeof part === 'number' ? part + 1 : part));
-  }
-  return segment;
-};
-
 const recurrenceToCron = (spec: RecurrenceSpecObjLit): string => {
-  if (spec.year != null) {
-    throw new Error('Unsupported cron schedule: year is not supported');
-  }
-
   const second = segmentToField(spec.second, '0');
   const minute = segmentToField(spec.minute);
   const hour = segmentToField(spec.hour);
   const date = segmentToField(spec.date);
-  const month = segmentToField(bumpMonth(spec.month));
+  const month = segmentToField(spec.month, '*', 1);
   const dayOfWeek = segmentToField(spec.dayOfWeek);
+  const fields = `${second} ${minute} ${hour} ${date} ${month} ${dayOfWeek}`;
 
-  return `${second} ${minute} ${hour} ${date} ${month} ${dayOfWeek}`;
+  return spec.year == null ? fields : `${fields} ${segmentToField(spec.year)}`;
 };
 
 type ScheduleWindow = {
@@ -166,6 +165,24 @@ const toCronerOptions = ({ tz, start, end }: ScheduleWindow): Record<string, unk
   }
 
   return cronerOptions;
+};
+
+const ruleToPattern = (
+  rule: CronRuleOptions['rule']
+): { pattern: string | Date; oneShot: boolean } => {
+  if (typeof rule === 'number') {
+    return { pattern: new Date(rule), oneShot: true };
+  }
+  if (rule instanceof Date) {
+    return { pattern: rule, oneShot: true };
+  }
+  if (typeof rule === 'string') {
+    return { pattern: rule, oneShot: false };
+  }
+  if (isRecurrenceSpec(rule)) {
+    return { pattern: recurrenceToCron(rule), oneShot: false };
+  }
+  throw new Error('Unsupported cron rule');
 };
 
 const toCronerArgs = (
@@ -192,13 +209,9 @@ const toCronerArgs = (
 
   if (isRuleOptions(options)) {
     const cronerOptions = toCronerOptions(options);
-
-    let pattern: string | Date = options.rule as string | Date;
-    if (isRecurrenceSpec(options.rule)) {
-      pattern = recurrenceToCron(options.rule);
-    } else if (options.rule instanceof Date) {
+    const { pattern, oneShot } = ruleToPattern(options.rule);
+    if (oneShot) {
       cronerOptions.maxRuns = 1;
-      pattern = options.rule;
     }
 
     return { pattern, cronerOptions };
@@ -211,47 +224,74 @@ const createCronService = () => {
   let jobsSpecs: JobSpec[] = [];
   let running = false;
 
-  const attachHandle = (job: Cron, fn: TaskFn, jobLabel: string): CronJobHandle => {
-    const handle = job as CronJobHandle;
+  const createRunner = (fn: TaskFn) => {
+    let nextFireDate: Date | null = null;
 
-    handle.invoke = async () => {
-      const fireDate = handle.currentRun() ?? new Date();
+    return {
+      async run(self?: Cron): Promise<void> {
+        const fireDate = nextFireDate ?? self?.currentRun() ?? new Date();
+        nextFireDate = self?.nextRun(fireDate) ?? null;
+        await fn({ strapi }, fireDate);
+      },
+      setNextRun(date: Date | null) {
+        nextFireDate = date;
+      },
+    };
+  };
+
+  const createCronJob = (
+    pattern: string | Date,
+    cronerOptions: Record<string, unknown>,
+    fn: TaskFn,
+    jobLabel: string
+  ) => {
+    const { Cron: CronJob } = getCroner();
+    const runner = createRunner(fn);
+    const job = new CronJob(
+      pattern,
+      {
+        paused: !running,
+        ...cronerOptions,
+        catch(error: unknown) {
+          strapi.log.error(`Cron job "${jobLabel}" failed`, error);
+        },
+      },
+      runner.run
+    );
+    runner.setNextRun(job.nextRun());
+    return job;
+  };
+
+  const attachHandle = (job: Cron, fn: TaskFn, jobLabel: string): CronJobHandle => {
+    let current = job;
+    let handle: CronJobHandle;
+
+    const invoke = async () => {
+      const fireDate = current.currentRun() ?? new Date();
       return fn({ strapi }, fireDate);
     };
 
-    handle.cancel = () => {
-      handle.stop();
+    const cancel = () => {
+      current.stop();
       return true;
     };
-    handle.nextInvocation = () => handle.nextRun();
 
-    handle.reschedule = (spec: CronSchedule) => {
+    const nextInvocation = () => current.nextRun();
+
+    const reschedule = (spec: CronSchedule) => {
       try {
         const idx = jobsSpecs.findIndex((jobSpec) => jobSpec.job === handle);
         if (idx === -1) {
           return false;
         }
 
-        const { Cron: CronJob } = getCroner();
         const { pattern, cronerOptions } = toCronerArgs(spec);
-        handle.stop();
+        const next = createCronJob(pattern, cronerOptions, fn, jobLabel);
 
-        const next = new CronJob(
-          pattern,
-          {
-            paused: !running,
-            ...cronerOptions,
-            catch(error: unknown) {
-              strapi.log.error(`Cron job "${jobLabel}" failed`, error);
-            },
-          },
-          createRunner(fn)
-        );
-
-        const nextHandle = attachHandle(next, fn, jobLabel);
+        current.stop();
+        current = next;
         jobsSpecs[idx] = {
           ...jobsSpecs[idx],
-          job: nextHandle,
           options: spec,
         };
         return true;
@@ -261,20 +301,23 @@ const createCronService = () => {
       }
     };
 
-    return handle;
-  };
+    handle = new Proxy(job as CronJobHandle, {
+      get(_target, property) {
+        if (property === 'invoke') return invoke;
+        if (property === 'cancel') return cancel;
+        if (property === 'nextInvocation') return nextInvocation;
+        if (property === 'reschedule') return reschedule;
 
-  const createRunner = (fn: TaskFn) => {
-    return async (self?: Cron): Promise<void> => {
-      const fireDate = self?.currentRun() ?? new Date();
-      await fn({ strapi }, fireDate);
-    };
+        const value = Reflect.get(current, property, current);
+        return typeof value === 'function' ? value.bind(current) : value;
+      },
+    });
+
+    return handle;
   };
 
   return {
     add(tasks: Tasks = {}) {
-      const { Cron: CronJob } = getCroner();
-
       for (const taskExpression of Object.keys(tasks)) {
         const taskValue = tasks[taskExpression];
 
@@ -299,18 +342,7 @@ const createCronService = () => {
 
         try {
           const { pattern, cronerOptions } = toCronerArgs(options);
-
-          const job: Cron = new CronJob(
-            pattern,
-            {
-              paused: !running,
-              ...cronerOptions,
-              catch(error: unknown) {
-                strapi.log.error(`Cron job "${jobLabel}" failed`, error);
-              },
-            },
-            createRunner(fn)
-          );
+          const job = createCronJob(pattern, cronerOptions, fn, jobLabel);
 
           jobsSpecs.push({
             job: attachHandle(job, fn, jobLabel),
