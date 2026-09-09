@@ -21,7 +21,9 @@ const RoleRow = ({
   cursor,
 }: RoleRowProps) => {
   const { formatMessage } = useIntl();
-  const [, editObject] = icons;
+  const editObject = icons.find(
+    (icon) => icon.label === formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' })
+  );
 
   const usersCountText = formatMessage(
     {
@@ -37,7 +39,7 @@ const RoleRow = ({
       aria-rowindex={rowIndex}
       key={id}
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
-      onClick={canUpdate ? editObject.onClick : undefined}
+      onClick={canUpdate ? editObject?.onClick : undefined}
     >
       <Td maxWidth={`13rem`}>
         <Typography ellipsis textColor="neutral800">
