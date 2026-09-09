@@ -1,6 +1,7 @@
 import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash/fp';
 import { getService } from './utils';
+import { createStrapiManagedAiTranslationsProvider } from './services/ai-translations-strapi-managed';
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({
@@ -102,7 +103,17 @@ export default async () => {
   registerModelsHooks();
 
   // AI Localizations
-  getService('ai-localizations').setupMiddleware();
+  if (strapi.ai.admin.isAvailable()) {
+    const aiTranslations = getService('ai-translations');
+
+    if (!aiTranslations.hasProvider() && strapi.ai.admin.isStrapiManagedAiEnabled()) {
+      aiTranslations.registerProvider({
+        provider: createStrapiManagedAiTranslationsProvider({ strapi }),
+      });
+    }
+
+    getService('ai-localizations').setupMiddleware();
+  }
 
   sendDidInitializeEvent();
 };

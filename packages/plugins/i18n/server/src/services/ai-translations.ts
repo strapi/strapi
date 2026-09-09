@@ -1,7 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
 
-import { createStrapiManagedAiTranslationsProvider } from './ai-translations-strapi-managed';
-
 export type GenerateTranslationsParams = {
   sourceLocale: string;
   targetLocales: string[];
@@ -18,7 +16,7 @@ export type AiTranslationsProvider = Modules.AI.AiProvider & {
 };
 
 export interface AiTranslationsService {
-  isEnabled(): boolean;
+  hasProvider(): boolean;
   registerProvider(params: { provider: AiTranslationsProvider }): void;
   generateTranslations(params: GenerateTranslationsParams): Promise<GenerateTranslationsResult>;
 }
@@ -28,8 +26,6 @@ const createAITranslationsService = ({
 }: {
   strapi: Core.Strapi;
 }): AiTranslationsService => {
-  const strapiManagedProvider = createStrapiManagedAiTranslationsProvider({ strapi });
-
   let registeredProvider: AiTranslationsProvider | null = null;
 
   const resolveProvider = (): AiTranslationsProvider | null => {
@@ -37,13 +33,11 @@ const createAITranslationsService = ({
       return null;
     }
 
-    const provider = registeredProvider ?? strapiManagedProvider;
-
-    return provider.isAvailable?.() === false ? null : provider;
+    return registeredProvider;
   };
 
   return {
-    isEnabled(): boolean {
+    hasProvider(): boolean {
       return resolveProvider() !== null;
     },
 

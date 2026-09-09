@@ -24,8 +24,6 @@ const createStrapiManagedAiTranslationsProvider = ({
   return {
     name: 'strapi-managed',
 
-    isAvailable: () => strapi.ai.admin.isStrapiManagedAiEnabled(),
-
     async generateTranslations({ sourceLocale, targetLocales, content, contentTypeSchema }) {
       const token = await getAiToken();
 

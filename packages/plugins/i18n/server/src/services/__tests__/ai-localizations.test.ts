@@ -575,7 +575,7 @@ describe('ai-localizations service', () => {
             services: {
               'ai-localization-jobs': jobsService,
               'ai-translations': {
-                isEnabled: () => true,
+                hasProvider: () => true,
                 generateTranslations,
               },
               settings: settingsService,

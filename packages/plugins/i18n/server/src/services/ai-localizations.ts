@@ -144,7 +144,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      if (getService('ai-translations').isEnabled() === false) {
+      if (getService('ai-translations').hasProvider() === false) {
         return false;
       }
       const settings = getService('settings');

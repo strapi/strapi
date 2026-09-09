@@ -2,7 +2,6 @@ import type * as MCP from './mcp';
 
 export type AiProvider = {
   name: string;
-  isAvailable?: () => boolean;
 };
 
 /**

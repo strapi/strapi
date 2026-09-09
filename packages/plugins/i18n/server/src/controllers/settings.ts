@@ -22,7 +22,7 @@ export default {
     ctx.body = {
       data: {
         ...settings,
-        aiLocalizationsAvailable: getService('ai-translations').isEnabled(),
+        aiLocalizationsAvailable: getService('ai-translations').hasProvider(),
       },
     };
   },
