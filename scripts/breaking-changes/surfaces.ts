@@ -57,6 +57,9 @@ const RULES: Array<[RegExp, Surface]> = [
   [/^packages\/core\/types\//, { tier: 1, name: '@strapi/types published types' }],
   [/^packages\/providers\//, { tier: 1, name: 'provider interface' }],
   [/^packages\/cli\//, { tier: 1, name: 'CLI' }],
+  // Admin API routes must be checked before the generic routes rule below — they are
+  // Tier 2 ("the Admin API that powers the admin panel"), not Tier 1 HTTP routes.
+  [/^packages\/core\/admin\/server\//, { tier: 2, name: 'Admin API' }],
   [/(^|\/)routes(\/|\.[cm]?[jt]s)/, { tier: 1, name: 'HTTP routes' }],
   [/(^|\/)content-types\/.*schema\.json$/, { tier: 1, name: 'content-type schema' }],
   [/(^|\/)schema\.json$/, { tier: 1, name: 'content-type schema' }],
@@ -71,7 +74,12 @@ const RULES: Array<[RegExp, Surface]> = [
     /^packages\/.*\/src\/(index|admin|strapi-server|strapi-admin)\.[cm]?[jt]sx?$/,
     { tier: 2, name: 'package public exports' },
   ],
-  [/^packages\/core\/admin\/server\//, { tier: 2, name: 'Admin API' }],
+  // Documented today (`strapi.db.query`), so treated as Tier 1 pending the open question
+  // in the skill about whether it stays supported alongside the Document Service.
+  [
+    /^packages\/core\/database\/src\/query\//,
+    { tier: 1, name: 'Query Engine API (strapi.db.query) — see open question in skill' },
+  ],
   [/^packages\/core\/database\//, { tier: 3, name: 'database layer' }],
   [/^packages\//, { tier: 3, name: 'package internals' }],
 ];
@@ -145,7 +153,7 @@ export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 
     findings.push({
       tier: 1,
       rule: 'engines:changed',
-      detail: `engines.node changed from "${String(beforeEngines)}" to "${String(afterEngines)}" — dropping a version that is still supported upstream is a Tier 1 break`,
+      detail: `engines.node changed from "${String(beforeEngines)}" to "${String(afterEngines)}" — confirm whether this narrows supported versions; dropping one still supported upstream is a Tier 1 break`,
     });
   }
 
@@ -163,7 +171,7 @@ export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 
       findings.push({
         tier: 1,
         rule: 'peer-deps:changed',
-        detail: `peerDependency "${name}" moved from "${String(range)}" to "${String(afterPeers[name])}" — narrowing forces users to upgrade`,
+        detail: `peerDependency "${name}" moved from "${String(range)}" to "${String(afterPeers[name])}" — confirm whether this narrows supported versions; narrowing forces users to upgrade`,
       });
     }
   }
@@ -294,19 +302,53 @@ export const collectNamedExports = (source: string): Set<string> => {
   return names;
 };
 
+/**
+ * `export default <expression>` (a reference, class expression, object literal, …) has no
+ * identifier for `collectNamedExports` to pick up, so a default export slot needs its own
+ * best-effort detector — otherwise removing `export default admin;` goes unnoticed.
+ */
+export const hasDefaultExport = (source: string): boolean => {
+  if (/export\s+default\b/.test(source)) {
+    return true;
+  }
+
+  for (const match of source.matchAll(NAMED_EXPORT_PATTERNS[1])) {
+    for (const entry of match[1].split(',')) {
+      const parts = entry.trim().split(/\s+as\s+/);
+      const exposed = (parts[1] ?? parts[0]).trim();
+
+      if (exposed === 'default') {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
 export const diffNamedExports = (
   before: string,
   after: string
 ): Omit<Finding, 'path' | 'surface'>[] => {
   const afterNames = collectNamedExports(after);
 
-  return [...collectNamedExports(before)]
+  const findings = [...collectNamedExports(before)]
     .filter((name) => afterNames.has(name) === false)
     .map((name) => ({
       tier: 2 as Tier,
       rule: 'exports:removed-symbol',
       detail: `"${name}" is no longer exported — Tier 1 if it is documented, Tier 2 otherwise`,
     }));
+
+  if (hasDefaultExport(before) === true && hasDefaultExport(after) === false) {
+    findings.push({
+      tier: 2,
+      rule: 'exports:removed-default',
+      detail: `the default export was removed — Tier 1 if it is documented, Tier 2 otherwise`,
+    });
+  }
+
+  return findings;
 };
 
 /** Route paths declared in a routes file. Regex-based: approximate by design. */
@@ -321,6 +363,6 @@ export const diffRoutes = (before: string, after: string): Omit<Finding, 'path' 
     .map((routePath) => ({
       tier: 1 as Tier,
       rule: 'routes:removed-path',
-      detail: `route "${routePath}" is gone — Tier 1 if documented, Tier 2 if it is an Admin API endpoint`,
+      detail: `route "${routePath}" is gone — this tool can't tell Content API from Admin API routes; confirm the surface and documentation status on docs.strapi.io before deciding between Tier 1 and Tier 2`,
     }));
 };

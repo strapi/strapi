@@ -48,6 +48,15 @@ describe('classifyPath', () => {
     );
   });
 
+  it('treats Admin API routes as tier 2, not the generic tier 1 routes rule', () => {
+    assert.equal(classifyPath('packages/core/admin/server/src/routes/authentication.ts')?.tier, 2);
+  });
+
+  it('treats the Query Engine as tier 1, separately from the rest of the database layer', () => {
+    assert.equal(classifyPath('packages/core/database/src/query/query-builder.ts')?.tier, 1);
+    assert.equal(classifyPath('packages/core/database/src/schema/diff.ts')?.tier, 3);
+  });
+
   it('treats unremarkable package internals as tier 3', () => {
     assert.equal(
       classifyPath('packages/core/core/src/services/entity-validator/helpers.ts')?.tier,
@@ -203,6 +212,21 @@ describe('diffNamedExports', () => {
 
     assert.deepEqual(
       diffNamedExports('export const a = 1;', 'export const a = 1;\nexport const c = 3;'),
+      []
+    );
+  });
+
+  it('flags a removed default export, including a bare reference default export', () => {
+    const removed = diffNamedExports(
+      'const admin = {};\nexport default admin;',
+      'const admin = {};\nexport { admin };'
+    );
+
+    assert.equal(removed.length, 1);
+    assert.equal(removed[0].rule, 'exports:removed-default');
+
+    assert.deepEqual(
+      diffNamedExports('export default admin;', 'export default admin;\nexport const b = 2;'),
       []
     );
   });
