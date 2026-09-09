@@ -493,8 +493,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      // Same shape as `upload`: everything besides `fileInfo` is metas.
-      const { fileInfo, ...metas } = data;
+      // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
+      // them into a one-element `related` array, and a bare array reaches the morph join as
+      // `set` — which deletes every row for this file, detaching it from every other entry
+      // that uses it. Attaching an existing file to an entry is the content API's job.
+      const { fileInfo, refId: _refId, ref: _ref, field: _field, ...metas } = data;
       fileData = await enhanceAndValidateFile(file, fileInfo, metas);
 
       // Replacing a file writes new bytes just like creating one, so it has to

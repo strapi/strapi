@@ -216,7 +216,13 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
   });
 
-  test('forwards the relation metas', async () => {
+  /**
+   * `formatFileInfo` turns the triplet into a one-element `related` array, and the database
+   * layer reads a bare array as `set` — whose morphToMany branch deletes every join row for
+   * the file before inserting. Writing `related` here would therefore detach the file from
+   * every other entry using it, so the triplet is dropped instead of forwarded.
+   */
+  test('does not write related, even when the relation triplet is sent', async () => {
     currentDbFile = {
       id: 8,
       hash: 'related_mno',
@@ -235,9 +241,31 @@ describe('Upload service - replace()', () => {
       file: inputFile() as any,
     });
 
-    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
-      related: [{ id: 12, __type: 'api::article.article', __pivot: { field: 'cover' } }],
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
+  test('still forwards the other metas when the triplet is sent alongside them', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_with_path',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+        path: 'baz/qux',
+      },
+      file: inputFile() as any,
     });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
   });
 
   test('does not invent a path or a relation when no metas are sent', async () => {
