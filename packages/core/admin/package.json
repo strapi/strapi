@@ -89,6 +89,7 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.1.11",
     "@reduxjs/toolkit": "1.9.7",
+    "@simplewebauthn/server": "14.0.1",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
     "@strapi/permissions": "5.52.3",
