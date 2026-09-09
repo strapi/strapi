@@ -22,6 +22,6 @@ program
     process.exit(1);
   })
   .helpOption('-h, --help', 'Print command line options')
-  .addHelpCommand('help [command]', 'Print options for a specific command')
+  .helpCommand('help [command]', 'Print options for a specific command')
   .version(packageJSONVersion)
   .parse(process.argv);

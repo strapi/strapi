@@ -63,7 +63,7 @@
     "@strapi/logger": "5.52.3",
     "@strapi/permissions": "5.52.3",
     "@strapi/utils": "5.52.3",
-    "commander": "8.3.0",
+    "commander": "14.0.3",
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
     "koa-body": "6.0.1",

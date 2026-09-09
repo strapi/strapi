@@ -55,7 +55,7 @@
     "boxen": "5.1.2",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
-    "commander": "8.3.0",
+    "commander": "14.0.3",
     "eventsource": "2.0.2",
     "fast-safe-stringify": "2.1.1",
     "fs-extra": "11.3.4",
