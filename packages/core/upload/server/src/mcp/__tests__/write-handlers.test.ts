@@ -4,7 +4,7 @@ import type { Core, Modules } from '@strapi/types';
 import {
   createMediaUpdateAssetHandler,
   createMediaMoveAssetsHandler,
-  createDeleteMediaHandler,
+  createMediaDeleteAssetsHandler,
 } from '../handlers/write-handlers';
 import {
   MCP_NOT_FOUND_ASSET,
@@ -13,9 +13,9 @@ import {
   MCP_MOVE_ASSETS_ID_NOT_FOUND,
   MCP_MOVE_ASSETS_ID_FORBIDDEN,
   MCP_MOVE_ASSETS_ID_FAILED,
-  MCP_DELETE_MEDIA_ID_NOT_FOUND,
-  MCP_DELETE_MEDIA_ID_FORBIDDEN,
-  MCP_DELETE_MEDIA_ID_FAILED,
+  MCP_DELETE_ASSETS_ID_NOT_FOUND,
+  MCP_DELETE_ASSETS_ID_FORBIDDEN,
+  MCP_DELETE_ASSETS_ID_FAILED,
 } from '../handlers/constants';
 import { ACTIONS, FILE_MODEL_UID } from '../../constants';
 
@@ -620,7 +620,7 @@ describe('media_delete_assets handler', () => {
   };
 
   const del = (args: Record<string, unknown>) =>
-    createDeleteMediaHandler(
+    createMediaDeleteAssetsHandler(
       (global as unknown as { strapi: Core.Strapi }).strapi,
       context
     )({ args });
@@ -679,8 +679,8 @@ describe('media_delete_assets handler', () => {
       // An agent must see which ids will not resolve *before* it deletes, not after.
       expect(deleted.map((asset) => asset.id)).toEqual([1]);
       expect(failed).toEqual([
-        { id: 999, reason: MCP_DELETE_MEDIA_ID_NOT_FOUND },
-        { id: 55, reason: MCP_DELETE_MEDIA_ID_FORBIDDEN },
+        { id: 999, reason: MCP_DELETE_ASSETS_ID_NOT_FOUND },
+        { id: 55, reason: MCP_DELETE_ASSETS_ID_FORBIDDEN },
       ]);
       expect(totalFileNumber).toBe(1);
     });
@@ -786,7 +786,7 @@ describe('media_delete_assets handler', () => {
       // deletions that succeeded — and here they cannot be undone or re-read.
       expect(remove).toHaveBeenCalledTimes(2);
       expect(deleted.map((asset) => asset.id)).toEqual([1, 4]);
-      expect(failed).toEqual([{ id: 999, reason: MCP_DELETE_MEDIA_ID_NOT_FOUND }]);
+      expect(failed).toEqual([{ id: 999, reason: MCP_DELETE_ASSETS_ID_NOT_FOUND }]);
     });
 
     test('never deletes for an id that does not resolve to an asset', async () => {
@@ -799,7 +799,7 @@ describe('media_delete_assets handler', () => {
       // accepted risk; see the api tests for the forced-collision case).
       expect(remove).not.toHaveBeenCalled();
       expect(deleted).toEqual([]);
-      expect(failed).toEqual([{ id: 999, reason: MCP_DELETE_MEDIA_ID_NOT_FOUND }]);
+      expect(failed).toEqual([{ id: 999, reason: MCP_DELETE_ASSETS_ID_NOT_FOUND }]);
     });
 
     test('names media_delete_folder in the reason, since a folder id is the likeliest bad id', async () => {
@@ -816,7 +816,7 @@ describe('media_delete_assets handler', () => {
       const { deleted, failed } = structured(await del({ ids: [1, 55], dryRun: false }));
 
       expect(deleted.map((asset) => asset.id)).toEqual([1]);
-      expect(failed).toEqual([{ id: 55, reason: MCP_DELETE_MEDIA_ID_FORBIDDEN }]);
+      expect(failed).toEqual([{ id: 55, reason: MCP_DELETE_ASSETS_ID_FORBIDDEN }]);
       expect(remove).not.toHaveBeenCalledWith(expect.objectContaining({ id: 55 }));
     });
 
@@ -857,7 +857,7 @@ describe('media_delete_assets handler', () => {
       // `structuredContent`, discarding the fact that asset 1 is already permanently gone.
       expect(deleted.map((asset) => asset.id)).toEqual([1]);
       expect(failed).toEqual([
-        { id: 4, reason: MCP_DELETE_MEDIA_ID_FAILED('provider unreachable') },
+        { id: 4, reason: MCP_DELETE_ASSETS_ID_FAILED('provider unreachable') },
       ]);
     });
 

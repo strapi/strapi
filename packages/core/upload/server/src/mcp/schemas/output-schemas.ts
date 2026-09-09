@@ -190,7 +190,7 @@ export const mediaMoveAssetsOutputSchema = z.object({
  * deletions nor stops them from happening. `deleted` and `failed` together account for every id
  * in the request, on every successful response.
  */
-export const deleteMediaFailureSchema = z.object({
+export const mediaDeleteAssetsFailureSchema = z.object({
   id: z.number().describe('The requested asset id that was not deleted.'),
   reason: z
     .string()
@@ -199,7 +199,7 @@ export const deleteMediaFailureSchema = z.object({
     ),
 });
 
-export const deleteMediaOutputSchema = z.object({
+export const mediaDeleteAssetsOutputSchema = z.object({
   dryRun: z
     .boolean()
     .describe(
@@ -211,7 +211,7 @@ export const deleteMediaOutputSchema = z.object({
       'On a dry run, the assets that WOULD be permanently deleted. On a real run, the assets that were deleted — they no longer exist and cannot be read back.'
     ),
   failed: z
-    .array(deleteMediaFailureSchema)
+    .array(mediaDeleteAssetsFailureSchema)
     .describe(
       'The ids that were not deleted, each with a reason. On a real run the deletions reported in `deleted` still happened — retry only these.'
     ),

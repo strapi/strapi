@@ -21,7 +21,12 @@ const FOLDER_WRITE_TOOLS = [
   'media_delete_folder',
 ] as const;
 
-const WRITE_TOOLS = ['media_update_asset', 'media_move_assets', 'media_delete_assets', ...FOLDER_WRITE_TOOLS] as const;
+const WRITE_TOOLS = [
+  'media_update_asset',
+  'media_move_assets',
+  'media_delete_assets',
+  ...FOLDER_WRITE_TOOLS,
+] as const;
 
 /** Fields that must never reach an MCP client. */
 const FORBIDDEN_ASSET_FIELDS = [
@@ -2073,7 +2078,9 @@ describe('MCP upload tools RBAC (api)', () => {
       const asset = await seeder.seedAsset({ name: 'described.jpg', folderId: folder.id });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', { ids: [asset.id] });
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+      });
       const { deleted } = structured(response);
 
       // An agent has to report what it is about to destroy, so a bare count is not enough.
@@ -2156,7 +2163,10 @@ describe('MCP upload tools RBAC (api)', () => {
       const asset = await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
       const token = await createUpdateTokenSession();
 
-      await mcp.callTool(token.accessKey, 'media_delete_assets', { ids: [asset.id], dryRun: false });
+      await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: false,
+      });
 
       expect(await countFiles()).toBe(0);
       expect(await folderRow(folder.id)).toMatchObject({ name: 'Keeps its folder' });
@@ -2234,7 +2244,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const { collidingId, assetName } = await seedIdCollision('collides.jpg');
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'delete_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
         ids: [collidingId],
         dryRun: false,
       });
@@ -2255,7 +2265,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const { collidingId, assetName } = await seedIdCollision('previewed.jpg');
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'delete_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
         ids: [collidingId],
       });
 
@@ -2344,7 +2354,9 @@ describe('MCP upload tools RBAC (api)', () => {
       const token = await createReadTokenSession();
 
       // The preview reveals which ids exist and what they are, so it takes the write action too.
-      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', { ids: [asset.id] });
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+      });
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
       expect(await countFiles()).toBe(1);
