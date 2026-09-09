@@ -324,9 +324,9 @@ jobs:
   # through dnd-kit and the move never fires; they fail independently of this flag.
   #
   # The filter names their describe blocks (`Drag and Drop Deep` / `Shallow`) rather
-  # than just `Drag and Drop`: the looser pattern also caught
-  # `file-upload.spec.ts › should upload a file via drag and drop`, which works and
-  # has nothing to do with the folder-move problem.
+  # than just `Drag and Drop`: the looser pattern also caught the upload journey's
+  # own drag-and-drop step, which works and has nothing to do with the folder-move
+  # problem.
   #
   # This is a bigger gap than a broken helper. Nothing else in the e2e suite tests
   # a pointer drag: the one reordering test we have
@@ -357,7 +357,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Monorepo build
         uses: ./.github/actions/run-build

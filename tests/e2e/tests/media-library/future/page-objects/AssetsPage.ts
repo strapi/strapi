@@ -40,11 +40,10 @@ export class AssetsPage {
   }
 
   async goto() {
+    // Deliberately no wait for `New` here: a role without `assets.create` never gets it,
+    // so a spec covering a read-only user would hang rather than fail. A spec that acts
+    // on a create affordance as its first move waits for it itself.
     await this.page.goto('/admin/plugins/upload');
-
-    // `New` only renders once RBAC has resolved, and the page paints before that — so landing
-    // and interacting immediately races the permission check.
-    await this.newButton.waitFor({ state: 'visible' });
   }
 
   /**

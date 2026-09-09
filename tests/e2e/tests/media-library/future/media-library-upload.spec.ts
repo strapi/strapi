@@ -10,11 +10,11 @@ import { describeOnCondition } from '../../../../utils/shared';
 import { AssetsPage } from './page-objects/AssetsPage';
 
 /**
- * Journey 1 — Upload my assets (CMS-1066).
+ * Journey 1 — Upload my assets.
  *
  * A content manager fills an empty library through every upload path. Broad and
  * shallow: chains every capability once in a single flow rather than isolating
- * each one, per the journey's own framing in CMS-1066.
+ * each one, per the journey's own framing.
  */
 
 const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
@@ -34,8 +34,8 @@ const UPLOAD_ROUTE = '**/upload/**';
  * The app fetches import URLs server-side, and that fetch refuses loopback and
  * private addresses to prevent SSRF — so the suite cannot host the file itself.
  * This address is reserved for documentation (RFC 5737), which the guard allows;
- * `server.proxy.fetch` then routes the request to the local fixture proxy, so
- * nothing is ever sent to it. The filename comes from this path.
+ * `HTTP_PROXY` then routes the request to the local fixture proxy, so nothing is
+ * ever sent to it. The filename comes from this path.
  */
 const URL_IMPORT_URL = 'http://192.0.2.1/url-import.png';
 
@@ -133,6 +133,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         await expect(assetsPage.uploadProgressDialog).toBeVisible();
         await assetsPage.waitForUploadProgressSuccess();
         await assetsPage.closeUploadProgressDialog();
+        await expect(assetsPage.uploadProgressDialog).not.toBeVisible();
 
         await expect(assetsPage.getAssetRow('test-image.jpg')).toBeVisible();
       });
@@ -149,7 +150,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         // Still working — the success state has not been reached yet.
         await expect(assetsPage.uploadProgressDialog.getByText('Upload successful!')).toBeHidden();
 
-        // the dialog persists while I navigate elsewhere in the admin  [CMS-107/1105].
+        // the dialog persists while I navigate elsewhere in the admin.
         // Client-side navigation only: `page.goto()` is a full document load, which
         // tears down the SPA and the in-flight upload state along with it.
         await page.getByRole('link', { name: 'Content Manager' }).click();
@@ -231,7 +232,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       });
 
       await test.step('I am stopped from uploading unsupported types', async () => {
-        // valid files in the same batch still upload                [CMS-249]
+        // valid files in the same batch still upload
         await assetsPage.uploadFilesWithFilePicker([BLOCKED_FILE, IMAGE]);
         await expect(assetsPage.uploadProgressDialog).toBeVisible();
         await expect(
@@ -252,7 +253,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       });
 
       await test.step('I bulk upload many files', async () => {
-        // uploading > 20 files completes with no server crash        [CMS-358]
+        // uploading > 20 files completes with no server crash
         const beforeBatch = await countAssets(page.request);
         const bigBatch = Array(25).fill(IMAGE);
 
@@ -269,7 +270,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
         expect(await countAssets(page.request)).toBeGreaterThanOrEqual(beforeBatch + 25);
       });
 
-      // I upload files concurrently                                  [CMS-1111] (backlog)
+      // I upload files concurrently — backlog
       // Not shipped yet — nothing to assert until concurrency config lands.
     });
   }
