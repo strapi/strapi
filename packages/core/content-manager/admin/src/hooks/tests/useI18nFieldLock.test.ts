@@ -9,6 +9,10 @@ type I18nLocalesQueryResult = {
 const mockUseQueryParams = jest.fn(() => [{ query: {} }]);
 const mockUseDocumentContext = jest.fn();
 const mockUseGetI18nLocalesQuery = jest.fn((): I18nLocalesQueryResult => ({ data: undefined }));
+const mockUseI18nSharedFieldsLock = jest.fn(
+  (_name: string, selector: (state: { isUnlocked: boolean }) => unknown) =>
+    selector({ isUnlocked: false })
+);
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -23,11 +27,19 @@ jest.mock('../../services/documents', () => ({
   useGetI18nLocalesQuery: () => mockUseGetI18nLocalesQuery(),
 }));
 
+jest.mock('../../features/I18nSharedFieldsLock', () => ({
+  useI18nSharedFieldsLock: (name: string, selector: (state: { isUnlocked: boolean }) => unknown) =>
+    mockUseI18nSharedFieldsLock(name, selector),
+}));
+
 describe('useI18nFieldLock', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryParams.mockReturnValue([{ query: {} }]);
     mockUseGetI18nLocalesQuery.mockReturnValue({ data: undefined });
+    mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+      selector({ isUnlocked: false })
+    );
     mockUseDocumentContext.mockReturnValue({
       currentDocument: {
         schema: { pluginOptions: { i18n: { localized: true } } },
@@ -277,6 +289,29 @@ describe('useI18nFieldLock', () => {
       });
 
       const { result } = renderHook(() => useShouldLockNonLocalizedField(undefined));
+      expect(result.current).toBe(false);
+    });
+
+    it('does not lock shared fields after the editor accepts the unlock warning', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
+        },
+      });
+      mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+        selector({ isUnlocked: true })
+      );
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
       expect(result.current).toBe(false);
     });
   });

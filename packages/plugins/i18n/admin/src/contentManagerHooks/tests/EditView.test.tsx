@@ -16,11 +16,20 @@ jest.mock('react-router-dom', () => {
 
 // Mock CM hooks used by tests
 const mockUseDocumentLayout = jest.fn(() => ({ edit: undefined as unknown as EditLayout }));
+const mockSharedFieldsLock = {
+  isUnlocked: false,
+  unlock: jest.fn(),
+  relock: jest.fn(),
+};
 jest.mock('@strapi/content-manager/strapi-admin', () => {
   const actual = jest.requireActual('@strapi/content-manager/strapi-admin');
   return {
     ...actual,
     unstable_useDocumentLayout: () => mockUseDocumentLayout(),
+    useI18nSharedFieldsLock: (
+      _name: string,
+      selector: (state: { isUnlocked: boolean }) => unknown
+    ) => selector(mockSharedFieldsLock),
   };
 });
 
@@ -43,6 +52,7 @@ jest.mock('@strapi/admin/strapi-admin', () => {
 
 afterEach(() => {
   jest.clearAllMocks();
+  mockSharedFieldsLock.isUnlocked = false;
 });
 
 describe('mutateEditViewHook – label action injection and localization', () => {
@@ -183,6 +193,32 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     render(action);
     expect(
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
+    ).toBeInTheDocument();
+  });
+
+  it('shows an unlocked tooltip after the editor accepts the warning', () => {
+    mockSharedFieldsLock.isUnlocked = true;
+
+    const titleField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(
+      screen.getByText(/This value is common to all locales. Saving will update every locale./i)
     ).toBeInTheDocument();
   });
 

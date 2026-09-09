@@ -16,6 +16,7 @@ import {
   unstable_useDocumentActions as useDocumentActions,
   buildValidParams,
   HeaderActionProps,
+  useI18nSharedFieldsLock,
 } from '@strapi/content-manager/strapi-admin';
 import {
   Flex,
@@ -31,7 +32,17 @@ import {
   Box,
   Link,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle, Loader } from '@strapi/icons';
+import {
+  WarningCircle,
+  ListPlus,
+  Trash,
+  Earth,
+  Cross,
+  Plus,
+  Sparkle,
+  Loader,
+  Lock,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -623,6 +634,122 @@ const FillFromAnotherLocaleAction = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * UnlockSharedFieldsAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const UnlockSharedFieldsAction = () => {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { hasI18n } = useI18n();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const { isUnlocked, unlock, relock } = useI18nSharedFieldsLock(
+    'UnlockSharedFieldsAction',
+    (state) => state
+  );
+
+  const currentLocaleCode = query.plugins?.i18n?.locale;
+  const defaultLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.isDefault)
+    : undefined;
+  const currentLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === currentLocaleCode)
+    : undefined;
+  const isSecondaryLocale = Boolean(
+    currentLocaleCode && defaultLocale?.code && currentLocaleCode !== defaultLocale.code
+  );
+
+  if (!hasI18n || !isSecondaryLocale) {
+    return null;
+  }
+
+  if (isUnlocked) {
+    return {
+      type: 'icon' as const,
+      icon: <Lock />,
+      label: formatMessage({
+        id: getTranslation('CMEditViewUnlockSharedFields.lock-text'),
+        defaultMessage: 'Keep shared fields locked',
+      }),
+      onClick: () => {
+        relock();
+        return true;
+      },
+    };
+  }
+
+  const defaultLocaleLabel = defaultLocale
+    ? `${defaultLocale.name} (${defaultLocale.code})`
+    : formatMessage({
+        id: getTranslation('CMEditViewUnlockSharedFields.default-locale'),
+        defaultMessage: 'the default locale',
+      });
+  const currentLocaleLabel = currentLocale
+    ? `${currentLocale.name} (${currentLocale.code})`
+    : currentLocaleCode;
+
+  return {
+    type: 'icon' as const,
+    icon: <Lock />,
+    label: formatMessage({
+      id: getTranslation('CMEditViewUnlockSharedFields.unlock-text'),
+      defaultMessage: 'Edit shared fields',
+    }),
+    dialog: {
+      type: 'dialog' as const,
+      title: formatMessage({
+        id: getTranslation('CMEditViewUnlockSharedFields.dialog.title'),
+        defaultMessage: 'Edit fields common to all locales?',
+      }),
+      content: ({ onClose }: { onClose: () => void }) => (
+        <>
+          <Dialog.Body>
+            <Flex direction="column" gap={3}>
+              <WarningCircle width="24px" height="24px" fill="danger600" />
+              <Typography textAlign="center">
+                {formatMessage(
+                  {
+                    id: getTranslation('CMEditViewUnlockSharedFields.dialog.body'),
+                    defaultMessage:
+                      'These values are shared across every locale. Saving changes will update {defaultLocale} and all other translations, not just {currentLocale}.',
+                  },
+                  {
+                    defaultLocale: defaultLocaleLabel,
+                    currentLocale: currentLocaleLabel,
+                  }
+                )}
+              </Typography>
+            </Flex>
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Flex gap={2} width="100%">
+              <Button flex="auto" variant="tertiary" onClick={onClose}>
+                {formatMessage({
+                  id: getTranslation('CMEditViewUnlockSharedFields.cancel-text'),
+                  defaultMessage: 'No, cancel',
+                })}
+              </Button>
+              <Button
+                flex="auto"
+                variant="danger"
+                onClick={() => {
+                  unlock();
+                  onClose();
+                }}
+              >
+                {formatMessage({
+                  id: getTranslation('CMEditViewUnlockSharedFields.submit-text'),
+                  defaultMessage: 'Yes, edit shared fields',
+                })}
+              </Button>
+            </Flex>
+          </Dialog.Footer>
+        </>
+      ),
+    },
+  };
+};
+
+/* -------------------------------------------------------------------------------------------------
  * DeleteLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
@@ -1099,5 +1226,6 @@ export {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  UnlockSharedFieldsAction,
   AITranslationStatusAction,
 };
