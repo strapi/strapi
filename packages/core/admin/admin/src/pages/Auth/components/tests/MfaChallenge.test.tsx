@@ -170,12 +170,13 @@ describe('MfaChallenge', () => {
   });
 
   it('offers "Trust this device" only when the organisation allows it', () => {
-    renderChallenge({ ...STATE, trustedDeviceDays: 30 });
+    const withTrust = renderChallenge({ ...STATE, trustedDeviceDays: 30 });
     const box = screen.getByRole('checkbox', { name: 'Trust this device for 30 days' });
     expect(box).not.toBeChecked();
+    withTrust.unmount();
 
     renderChallenge(STATE);
-    expect(screen.getAllByRole('checkbox')).toHaveLength(1);
+    expect(screen.queryByRole('checkbox', { name: /Trust this device/ })).not.toBeInTheDocument();
   });
 
   it('uses the singular when the period is one day', () => {

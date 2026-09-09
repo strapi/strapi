@@ -244,6 +244,24 @@ describe('Users | EditPage', () => {
       expect(called).toBe(false);
     });
 
+    it('shows the count but no Revoke button without the update permission', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [DEVICE] }))
+      );
+      render(<EditPage />, {
+        initialEntries: ['/settings/users/1'],
+        providerOptions: {
+          permissions: (defaults) => defaults.filter((p) => p.action !== 'admin::users.update'),
+        },
+      });
+
+      expect(await screen.findByText('1 trusted device')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Revoke trusted devices' })
+      ).not.toBeInTheDocument();
+    });
+
     it('toasts the server message when the revocation is refused', async () => {
       server.use(
         enrolled(),

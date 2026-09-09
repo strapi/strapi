@@ -100,6 +100,28 @@ describe('TrustedDevices', () => {
     expect(await screen.findByText(/^No trusted devices\./)).toBeInTheDocument();
   });
 
+  it('the confirmation for a non-current row says the OTHER browser will ask for a code', async () => {
+    server.use(list(DEVICES));
+    const { user } = render(<TrustedDevices />);
+    await screen.findByText('Chrome on macOS');
+
+    await user.click(screen.getAllByRole('button', { name: 'Revoke trust' })[1]);
+    expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
+      'That browser will ask for a code at its next login.'
+    );
+  });
+
+  it('the revoke-all confirmation says every trusted browser when none of them is the current one', async () => {
+    server.use(list(DEVICES.map((device) => ({ ...device, current: false }))));
+    const { user } = render(<TrustedDevices />);
+    await screen.findByText('Chrome on macOS');
+
+    await user.click(screen.getByRole('button', { name: 'Revoke all' }));
+    expect(
+      screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' })
+    ).toHaveTextContent('Every trusted browser will ask for a code at its next login.');
+  });
+
   it('toasts the server message when a revoke is refused', async () => {
     server.use(
       list(DEVICES),

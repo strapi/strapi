@@ -83,6 +83,9 @@ test.describe('Trusted devices', () => {
       .click();
     await expect(page.getByText('Device no longer trusted')).toBeVisible();
     await expect(page.getByText(/^No trusted devices\./)).toBeVisible();
+    expect(
+      (await context.cookies()).find((cookie) => cookie.name === TRUST_COOKIE)
+    ).toBeUndefined();
 
     // 5. The next login is challenged again.
     await logOutKeepingTrust(page, context);

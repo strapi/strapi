@@ -141,6 +141,22 @@ describe('TrustedDevicesCard', () => {
     expect(bodies).toHaveLength(0);
   });
 
+  it('unticking resets an invalid period back to the stored value so it cannot block saving enabled: false', async () => {
+    const bodies = captureSave();
+    const { user } = renderCard();
+
+    await user.clear(daysField());
+    await user.type(daysField(), '91');
+    await user.click(enabledBox());
+    save();
+
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]).toEqual({ trustedDevices: { enabled: false, days: 30 } });
+    expect(
+      screen.queryByText('Enter a whole number of days between 1 and 90')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows a server refusal inline', async () => {
     server.use(
       http.put('/admin/security-settings', () =>

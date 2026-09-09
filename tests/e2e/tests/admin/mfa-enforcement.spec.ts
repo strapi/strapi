@@ -7,8 +7,10 @@ import { ADMIN_PASSWORD, EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD, TITLE_HOME } fro
 const LOCKED_MESSAGE =
   'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.';
 
-/** Sets the requirement to Required from the Security page (the caller must be enrolled). */
-// The Security page has one Save per card; the two-factor enforcement card is first.
+/**
+ * Sets the requirement to Required from the Security page (the caller must be enrolled).
+ * The Security page has one Save per card; the two-factor enforcement card is first.
+ */
 const requireTwoFactorForEveryone = async (page: Page) => {
   await page.goto('/admin/settings/security');
   await page.getByRole('radio', { name: /^Required/ }).check();

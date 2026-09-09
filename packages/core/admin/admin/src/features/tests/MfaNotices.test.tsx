@@ -278,4 +278,24 @@ describe('formatMfaNotice (cycle 3 device notices)', () => {
       /^A device was trusted to skip the two-factor code \(/
     );
   });
+
+  it('names the device only when the revocation carries both deviceName and days', () => {
+    expect(
+      format({
+        ...base,
+        type: 'device_trusted',
+        metadata: { days: 30, deviceName: 'Chrome on macOS' },
+      })
+    ).toMatch(/^A device was trusted for 30 days: Chrome on macOS \(/);
+    expect(
+      format({
+        ...base,
+        type: 'device_trusted',
+        metadata: { days: 1, deviceName: 'Safari on iOS' },
+      })
+    ).toMatch(/^A device was trusted for 1 day: Safari on iOS \(/);
+    expect(format({ ...base, type: 'device_trusted', metadata: { days: 30 } })).toMatch(
+      /^A device was trusted to skip the two-factor code \(/
+    );
+  });
 });
