@@ -42,10 +42,20 @@ type DeleteFolderArgs = {
 /** The folder fields the handlers need; `path` drives the cascade and subtree checks. */
 type FolderRow = Pick<Folder, 'id' | 'name' | 'path'>;
 
-const findFolderById = async (strapi: Core.Strapi, id: number): Promise<FolderRow | null> =>
+/**
+ * `withParent` populates the parent relation in the same round trip. Rename needs the parent id
+ * to scope its sibling-uniqueness check, so it would otherwise read the same row twice; the
+ * subtree and cascade callers do not, and skip the join.
+ */
+const findFolderById = async (
+  strapi: Core.Strapi,
+  id: number,
+  { withParent = false }: { withParent?: boolean } = {}
+): Promise<(FolderRow & { parent?: { id: number } | null }) | null> =>
   strapi.db.query(FOLDER_MODEL_UID).findOne({
     select: ['id', 'name', 'path'],
     where: { id },
+    ...(withParent ? { populate: { parent: { select: ['id'] } } } : {}),
   });
 
 /**
@@ -212,7 +222,7 @@ export const createMediaRenameFolderHandler =
 
     assertMediaPermission(strapi, context, ACTIONS.update, FOLDER_MODEL_UID);
 
-    const folder = await findFolderById(strapi, id);
+    const folder = await findFolderById(strapi, id, { withParent: true });
 
     if (folder === null) {
       throw new errors.NotFoundError(MCP_NOT_FOUND_FOLDER);
@@ -220,11 +230,7 @@ export const createMediaRenameFolderHandler =
 
     // Siblings are the folders sharing this folder's parent, so uniqueness is checked against
     // the current location — a rename never changes it.
-    const current = await strapi.db.query(FOLDER_MODEL_UID).findOne({
-      where: { id },
-      populate: { parent: { select: ['id'] } },
-    });
-    const parentId = current?.parent?.id ?? null;
+    const parentId = folder.parent?.id ?? null;
 
     await assertNameAvailable(strapi, name, parentId, id);
 
