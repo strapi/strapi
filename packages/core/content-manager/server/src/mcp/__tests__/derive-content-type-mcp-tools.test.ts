@@ -88,12 +88,11 @@ const makeFieldRestrictedAbility = (
 const mockUser = { id: 42 };
 const mockContext = { userAbility: makeUserAbility(), user: mockUser };
 
-const mockExtra: HandlerParams['extra'] = {
-  signal: new AbortController().signal,
+const mockExtra = {
   requestId: 'test-request-id',
-  sendNotification: jest.fn(),
-  sendRequest: jest.fn(),
-};
+  signal: new AbortController().signal,
+  _meta: undefined,
+} satisfies HandlerParams['extra'];
 
 const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   cannot: {
