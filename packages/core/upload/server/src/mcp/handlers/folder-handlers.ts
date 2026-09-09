@@ -162,13 +162,13 @@ const countCascade = async (strapi: Core.Strapi, paths: string[]) => {
 };
 
 /**
- * `create_folder` — a new folder, optionally nested.
+ * `media_create_folder` — a new folder, optionally nested.
  *
  * Gated on `plugin::upload.assets.update` and mirrors `POST /upload/folders`: the same
  * uniqueness and parent-existence validation, the same `folder.create()` call, and the same
  * `createdBy` attribution from the session user.
  */
-export const createCreateFolderHandler =
+export const createMediaCreateFolderHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
@@ -191,14 +191,14 @@ export const createCreateFolderHandler =
   };
 
 /**
- * `rename_folder` — changes a folder's name and nothing else.
+ * `media_rename_folder` — changes a folder's name and nothing else.
  *
  * Deliberately does not forward `parent` to `folder.update()`: the service branches on
  * `isUndefined(parent)`, and the name-only branch skips the transaction that rewrites descendant
  * paths. Passing the folder's existing parent would take the move branch and rewrite the whole
  * subtree to compute the identical paths.
  */
-export const createRenameFolderHandler =
+export const createMediaRenameFolderHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
@@ -232,13 +232,13 @@ export const createRenameFolderHandler =
   };
 
 /**
- * `move_folder` — re-parents a folder, carrying its whole subtree with it.
+ * `media_move_folder` — re-parents a folder, carrying its whole subtree with it.
  *
  * `folder.update()` recalculates the materialized `path` of every descendant folder and the
  * `folderPath` of every contained file inside a transaction, so the move is atomic and no
  * separate bookkeeping is needed here.
  */
-export const createMoveFolderHandler =
+export const createMediaMoveFolderHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
@@ -271,7 +271,7 @@ export const createMoveFolderHandler =
   };
 
 /**
- * `delete_folder` — previews or performs a cascading folder deletion.
+ * `media_delete_folder` — previews or performs a cascading folder deletion.
  *
  * Two branches behind one tool, because the preview and the deletion must agree on what the
  * cascade covers; splitting them across tools would let the two drift apart, and an agent could
@@ -280,7 +280,7 @@ export const createMoveFolderHandler =
  * `dryRun` defaults to true (see the input schema): omitting the flag previews, and deleting
  * takes an explicit `dryRun: false`.
  */
-export const createDeleteFolderHandler =
+export const createMediaDeleteFolderHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,

@@ -18,7 +18,12 @@ const makeStrapi = (options: { isEnabled?: boolean; withAi?: boolean } = {}) => 
 
 const READ_TOOLS = ['media_list_assets', 'media_get_asset', 'media_list_folders'];
 
-const FOLDER_WRITE_TOOLS = ['create_folder', 'rename_folder', 'move_folder', 'delete_folder'];
+const FOLDER_WRITE_TOOLS = [
+  'media_create_folder',
+  'media_rename_folder',
+  'media_move_folder',
+  'media_delete_folder',
+];
 
 const WRITE_TOOLS = ['media_update_asset', ...FOLDER_WRITE_TOOLS];
 
@@ -144,10 +149,10 @@ describe('upload MCP tool registration', () => {
 
     test('gives every folder write a short-verb telemetry name', () => {
       const expected = {
-        create_folder: 'create_folder',
-        rename_folder: 'rename_folder',
-        move_folder: 'move_folder',
-        delete_folder: 'delete_folder',
+        media_create_folder: 'media_create_folder',
+        media_rename_folder: 'media_rename_folder',
+        media_move_folder: 'media_move_folder',
+        media_delete_folder: 'media_delete_folder',
       };
 
       for (const [name, telemetryName] of Object.entries(expected)) {
@@ -158,24 +163,24 @@ describe('upload MCP tool registration', () => {
     test('registers rename and move as two separate tools', () => {
       // Both call `folder.update` underneath, but an agent picks by intent: rename changes an
       // attribute, move changes a location — the same split as the asset surface.
-      expect(byName.rename_folder).toBeDefined();
-      expect(byName.move_folder).toBeDefined();
-      expect(byName.rename_folder.description).toMatch(/move_folder/);
-      expect(byName.move_folder.description).toMatch(/rename_folder/);
+      expect(byName.media_rename_folder).toBeDefined();
+      expect(byName.media_move_folder).toBeDefined();
+      expect(byName.media_rename_folder.description).toMatch(/media_move_folder/);
+      expect(byName.media_move_folder.description).toMatch(/media_rename_folder/);
     });
 
-    test('states that rename_folder does not change a folder location', () => {
-      expect(byName.rename_folder.description).toMatch(/name only/i);
+    test('states that media_rename_folder does not change a folder location', () => {
+      expect(byName.media_rename_folder.description).toMatch(/name only/i);
     });
 
-    test('states that move_folder carries the subtree and rejects its own descendants', () => {
-      expect(byName.move_folder.description).toMatch(/subfolders and files/i);
-      expect(byName.move_folder.description).toMatch(/cannot be moved into itself/i);
+    test('states that media_move_folder carries the subtree and rejects its own descendants', () => {
+      expect(byName.media_move_folder.description).toMatch(/subfolders and files/i);
+      expect(byName.media_move_folder.description).toMatch(/cannot be moved into itself/i);
     });
 
-    test('names the destructive, irreversible, cascading behaviour in delete_folder', () => {
+    test('names the destructive, irreversible, cascading behaviour in media_delete_folder', () => {
       // An agent reads the description as its only warning before an irreversible call.
-      const { description } = byName.delete_folder;
+      const { description } = byName.media_delete_folder;
 
       expect(description).toMatch(/destructive/i);
       expect(description).toMatch(/irreversible/i);
@@ -184,28 +189,28 @@ describe('upload MCP tool registration', () => {
       expect(description).toMatch(/no undo/i);
     });
 
-    test('warns in delete_folder that usage information is unavailable', () => {
+    test('warns in media_delete_folder that usage information is unavailable', () => {
       // "Used in" detection is not in the Media Library MVP, so the tool cannot say whether
       // a contained asset is referenced by a live entry — and must say so.
-      const { description } = byName.delete_folder;
+      const { description } = byName.media_delete_folder;
 
       expect(description).toMatch(/used in/i);
       expect(description).toMatch(/cannot (tell|be checked)/i);
     });
 
-    test('steers delete_folder to the dry run first, and to delete_media for assets', () => {
-      const { description } = byName.delete_folder;
+    test('steers media_delete_folder to the dry run first, and to media_delete_assets for assets', () => {
+      const { description } = byName.media_delete_folder;
 
       expect(description).toMatch(/dryRun/);
-      expect(description).toMatch(/delete_media/);
+      expect(description).toMatch(/media_delete_assets/);
       expect(description).toMatch(/FOLDER ids only/);
     });
 
-    test('defaults delete_folder to a preview, so deleting needs an explicit opt-in', () => {
+    test('defaults media_delete_folder to a preview, so deleting needs an explicit opt-in', () => {
       // `dryRun` is optional and the handler defaults it to true: omitting the flag must be the
       // safe branch, never the destructive one.
-      const schema = byName.delete_folder.resolveInputSchema?.(
-        {} as Parameters<NonNullable<typeof byName.delete_folder.resolveInputSchema>>[0]
+      const schema = byName.media_delete_folder.resolveInputSchema?.(
+        {} as Parameters<NonNullable<typeof byName.media_delete_folder.resolveInputSchema>>[0]
       );
 
       const parsed = schema?.safeParse({ ids: [1] });
@@ -224,7 +229,7 @@ describe('upload MCP tool registration', () => {
       // into an input JSON Schema.
       for (const name of FOLDER_WRITE_TOOLS) {
         const schema = byName[name].resolveInputSchema?.(
-          {} as Parameters<NonNullable<typeof byName.create_folder.resolveInputSchema>>[0]
+          {} as Parameters<NonNullable<typeof byName.media_create_folder.resolveInputSchema>>[0]
         );
 
         expect(schema?.shape).toBeDefined();

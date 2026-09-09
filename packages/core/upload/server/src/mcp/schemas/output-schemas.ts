@@ -94,20 +94,20 @@ export const mediaFolderOutputSchema = z.object({
   updatedAt: z.string().nullable().optional(),
 });
 
-export const createFolderOutputSchema = z.object({
+export const mediaCreateFolderOutputSchema = z.object({
   data: mediaFolderOutputSchema,
 });
 
-export const renameFolderOutputSchema = z.object({
+export const mediaRenameFolderOutputSchema = z.object({
   data: mediaFolderOutputSchema,
 });
 
-export const moveFolderOutputSchema = z.object({
+export const mediaMoveFolderOutputSchema = z.object({
   data: mediaFolderOutputSchema,
 });
 
 /**
- * `delete_folder` output — the same shape for both branches, so an agent reads one contract.
+ * `media_delete_folder` output — the same shape for both branches, so an agent reads one contract.
  *
  * `dryRun` echoes which branch ran: on true the counts are what *would* be removed and nothing
  * was touched; on false they are what actually was. Echoing it back means the agent can tell a
@@ -116,7 +116,7 @@ export const moveFolderOutputSchema = z.object({
  * There is no "skipped ids" field: an id that does not resolve to a folder rejects the whole
  * call, so every id in the request is accounted for by `folders` on any successful response.
  */
-export const deleteFolderOutputSchema = z.object({
+export const mediaDeleteFolderOutputSchema = z.object({
   dryRun: z
     .boolean()
     .describe(

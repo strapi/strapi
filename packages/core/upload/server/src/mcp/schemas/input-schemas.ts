@@ -149,8 +149,8 @@ export const folderNameSchema = z
 
 /**
  * `parent` is nullable-with-meaning: null is the media library root, an id nests the folder.
- * The two are distinct from *omitting* the key, which `move_folder` forbids (a move needs a
- * destination) and `create_folder` reads as the root.
+ * The two are distinct from *omitting* the key, which `media_move_folder` forbids (a move needs a
+ * destination) and `media_create_folder` reads as the root.
  */
 const parentFolderIdSchema = folderIdSchema
   .nullable()
@@ -158,7 +158,7 @@ const parentFolderIdSchema = folderIdSchema
     'Numeric id of the containing folder. Pass null for the media library root. Use list_folders to discover folder ids.'
   );
 
-export const createFolderInputSchema = z
+export const mediaCreateFolderInputSchema = z
   .object({
     name: folderNameSchema,
     parent: parentFolderIdSchema
@@ -170,11 +170,11 @@ export const createFolderInputSchema = z
   .strict();
 
 /**
- * `rename_folder` deliberately takes no `parent`: renaming and moving are separate tools, so an
- * agent picks by intent. A `parent` here is a sign the caller wanted `move_folder`, and the
+ * `media_rename_folder` deliberately takes no `parent`: renaming and moving are separate tools, so an
+ * agent picks by intent. A `parent` here is a sign the caller wanted `media_move_folder`, and the
  * custom object error says so rather than letting Zod's generic "unrecognized key" stand.
  */
-export const renameFolderInputSchema = z
+export const mediaRenameFolderInputSchema = z
   .object(
     {
       id: folderIdSchema,
@@ -183,7 +183,7 @@ export const renameFolderInputSchema = z
     {
       error(issue) {
         if (issue.code === 'unrecognized_keys' && issue.keys.includes('parent')) {
-          return 'rename_folder only changes a folder name. Use move_folder to change a folder location.';
+          return 'media_rename_folder only changes a folder name. Use media_move_folder to change a folder location.';
         }
 
         return undefined;
@@ -193,10 +193,10 @@ export const renameFolderInputSchema = z
   .strict();
 
 /**
- * `move_folder` requires `parent` — including an explicit null for the root. Making it required
+ * `media_move_folder` requires `parent` — including an explicit null for the root. Making it required
  * is what keeps a mistyped move from silently becoming a no-op update.
  */
-export const moveFolderInputSchema = z
+export const mediaMoveFolderInputSchema = z
   .object(
     {
       id: folderIdSchema,
@@ -205,7 +205,7 @@ export const moveFolderInputSchema = z
     {
       error(issue) {
         if (issue.code === 'unrecognized_keys' && issue.keys.includes('name')) {
-          return 'move_folder only changes a folder location. Use rename_folder to change a folder name.';
+          return 'media_move_folder only changes a folder location. Use media_rename_folder to change a folder name.';
         }
 
         return undefined;
@@ -215,20 +215,20 @@ export const moveFolderInputSchema = z
   .strict();
 
 /**
- * `delete_folder` input.
+ * `media_delete_folder` input.
  *
  * `dryRun` defaults to true: the safe branch is the one an agent gets when it omits the flag, so
  * a destructive cascade is never the path of least resistance (the initiative card's mitigation
  * for irreversible MCP operations). Deleting requires saying `dryRun: false` on purpose.
  */
-export const deleteFolderInputSchema = z
+export const mediaDeleteFolderInputSchema = z
   .object({
     ids: z
       .array(folderIdSchema)
       .min(1)
       .max(100)
       .describe(
-        'Numeric ids of the folders to delete (1-100). FOLDER ids only — asset ids are a separate namespace of integers and are rejected here; use delete_media for assets.'
+        'Numeric ids of the folders to delete (1-100). FOLDER ids only — asset ids are a separate namespace of integers and are rejected here; use media_delete_assets for assets.'
       ),
     dryRun: z
       .boolean()

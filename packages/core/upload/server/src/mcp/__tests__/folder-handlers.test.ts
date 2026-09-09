@@ -2,10 +2,10 @@ import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
 import {
-  createCreateFolderHandler,
-  createRenameFolderHandler,
-  createMoveFolderHandler,
-  createDeleteFolderHandler,
+  createMediaCreateFolderHandler,
+  createMediaRenameFolderHandler,
+  createMediaMoveFolderHandler,
+  createMediaDeleteFolderHandler,
 } from '../handlers/folder-handlers';
 import {
   MCP_NOT_FOUND_FOLDER,
@@ -136,13 +136,13 @@ const context = { userAbility: {}, user: SESSION_USER } as unknown as Modules.MC
 const strapiInstance = () => (global as unknown as { strapi: Core.Strapi }).strapi;
 
 const invokeCreate = (args: Record<string, unknown>) =>
-  createCreateFolderHandler(strapiInstance(), context)({ args });
+  createMediaCreateFolderHandler(strapiInstance(), context)({ args });
 const invokeRename = (args: Record<string, unknown>) =>
-  createRenameFolderHandler(strapiInstance(), context)({ args });
+  createMediaRenameFolderHandler(strapiInstance(), context)({ args });
 const invokeMove = (args: Record<string, unknown>) =>
-  createMoveFolderHandler(strapiInstance(), context)({ args });
+  createMediaMoveFolderHandler(strapiInstance(), context)({ args });
 const invokeDelete = (args: Record<string, unknown>) =>
-  createDeleteFolderHandler(strapiInstance(), context)({ args });
+  createMediaDeleteFolderHandler(strapiInstance(), context)({ args });
 
 describe('folder MCP handlers', () => {
   afterEach(() => {
@@ -150,10 +150,10 @@ describe('folder MCP handlers', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // create_folder
+  // media_create_folder
   // ---------------------------------------------------------------------------
 
-  describe('create_folder', () => {
+  describe('media_create_folder', () => {
     test('creates a folder at the root when no parent is given, attributing the session user', async () => {
       const { create } = setupStrapi();
 
@@ -222,10 +222,10 @@ describe('folder MCP handlers', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // rename_folder
+  // media_rename_folder
   // ---------------------------------------------------------------------------
 
-  describe('rename_folder', () => {
+  describe('media_rename_folder', () => {
     test('renames without forwarding a parent, so the subtree is not rewritten', async () => {
       const { update } = setupStrapi();
 
@@ -274,10 +274,10 @@ describe('folder MCP handlers', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // move_folder
+  // media_move_folder
   // ---------------------------------------------------------------------------
 
-  describe('move_folder', () => {
+  describe('media_move_folder', () => {
     test('re-parents the folder, keeping its name', async () => {
       const { update } = setupStrapi();
 
@@ -352,10 +352,10 @@ describe('folder MCP handlers', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // delete_folder
+  // media_delete_folder
   // ---------------------------------------------------------------------------
 
-  describe('delete_folder', () => {
+  describe('media_delete_folder', () => {
     test('previews by default, without deleting anything', async () => {
       const { deleteByIds } = setupStrapi({
         counts: { [FOLDER_MODEL_UID]: 3, 'plugin::upload.file': 7 },
@@ -434,12 +434,14 @@ describe('folder MCP handlers', () => {
       );
     });
 
-    test('points an unresolved id at delete_media without asserting it is one', async () => {
+    test('points an unresolved id at media_delete_assets without asserting it is one', async () => {
       setupStrapi();
 
       // An asset id is the likeliest cause, but a deleted folder id is indistinguishable from
       // here — the message must offer both rather than mis-diagnose.
-      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(/delete_media/);
+      await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(
+        /media_delete_assets/
+      );
       await expect(invokeDelete({ ids: [4242], dryRun: false })).rejects.toThrow(/already be gone/);
     });
 

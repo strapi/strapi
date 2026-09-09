@@ -5,10 +5,10 @@ export {
 } from './read-handlers';
 export { createMediaUpdateAssetHandler } from './write-handlers';
 export {
-  createCreateFolderHandler,
-  createRenameFolderHandler,
-  createMoveFolderHandler,
-  createDeleteFolderHandler,
+  createMediaCreateFolderHandler,
+  createMediaRenameFolderHandler,
+  createMediaMoveFolderHandler,
+  createMediaDeleteFolderHandler,
 } from './folder-handlers';
 export {
   MCP_NOT_FOUND_ASSET,
