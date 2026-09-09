@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
-import { getService } from '../../utils';
+import { getFolderService } from '../folder-service';
 import { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } from '../../constants';
 import { isFolderOrChild } from '../../controllers/utils/folders';
 import { assertMediaPermission } from '../permissions';
@@ -90,7 +90,7 @@ const assertParentExists = async (strapi: Core.Strapi, parent: number | null | u
     return;
   }
 
-  const exists = await getService('folder', strapi).exists({ id: parent });
+  const exists = await getFolderService(strapi).exists({ id: parent });
 
   if (!exists) {
     throw new errors.ValidationError(MCP_PARENT_FOLDER_NOT_FOUND);
@@ -116,7 +116,7 @@ const assertNameAvailable = async (
     filters.id = { $ne: excludeId };
   }
 
-  if (await getService('folder', strapi).exists(filters)) {
+  if (await getFolderService(strapi).exists(filters)) {
     throw new errors.ValidationError(MCP_FOLDER_NAME_TAKEN);
   }
 };
@@ -195,10 +195,7 @@ export const createMediaCreateFolderHandler =
     await assertParentExists(strapi, parent);
     await assertNameAvailable(strapi, name, parent);
 
-    const created = await getService('folder', strapi).create(
-      { name, parent },
-      { user: context.user }
-    );
+    const created = await getFolderService(strapi).create({ name, parent }, { user: context.user });
 
     return ok({ data: await readFolderForOutput(strapi, created.id, created) });
   };
@@ -235,7 +232,7 @@ export const createMediaRenameFolderHandler =
     await assertNameAvailable(strapi, name, parentId, id);
 
     // `parent` is omitted on purpose — see the note above.
-    const renamed = await getService('folder', strapi).update(id, { name }, { user: context.user });
+    const renamed = await getFolderService(strapi).update(id, { name }, { user: context.user });
 
     return ok({ data: await readFolderForOutput(strapi, id, renamed ?? { ...folder, name }) });
   };
@@ -270,7 +267,7 @@ export const createMediaMoveFolderHandler =
     // A folder keeps its name across a move, so uniqueness must hold in the destination.
     await assertNameAvailable(strapi, folder.name, parent, id);
 
-    const moved = await getService('folder', strapi).update(
+    const moved = await getFolderService(strapi).update(
       id,
       { name: folder.name, parent },
       { user: context.user }
@@ -339,7 +336,7 @@ export const createMediaDeleteFolderHandler =
       return ok({ dryRun: true, folders, ...counts });
     }
 
-    const { totalFolderNumber, totalFileNumber } = await getService('folder', strapi).deleteByIds(
+    const { totalFolderNumber, totalFileNumber } = await getFolderService(strapi).deleteByIds(
       matched.map((folder) => folder.id)
     );
 
