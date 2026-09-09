@@ -17,6 +17,7 @@ const NonRepeatableComponent = ({
   name,
   children,
   layout,
+  disabled,
 }: NonRepeatableComponentProps) => {
   const componentId = useForm(
     'NonRepeatableComponent',
@@ -39,7 +40,12 @@ const NonRepeatableComponent = ({
         hasRadius={isNested}
         borderColor={isNested || isMobile ? 'neutral200' : undefined}
       >
-        <NonRepeatableComponentFields attribute={attribute} name={name} layout={layout}>
+        <NonRepeatableComponentFields
+          attribute={attribute}
+          name={name}
+          layout={layout}
+          disabled={disabled}
+        >
           {children}
         </NonRepeatableComponentFields>
       </Box>
@@ -48,10 +54,13 @@ const NonRepeatableComponent = ({
 };
 
 interface NonRepeatableComponentFieldsProps
-  extends Pick<NonRepeatableComponentProps, 'attribute' | 'children' | 'layout' | 'name'> {}
+  extends Pick<
+    NonRepeatableComponentProps,
+    'attribute' | 'children' | 'layout' | 'name' | 'disabled'
+  > {}
 
 const NonRepeatableComponentFields = React.memo(
-  ({ attribute, children, layout, name }: NonRepeatableComponentFieldsProps) => {
+  ({ attribute, children, layout, name, disabled }: NonRepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -84,6 +93,8 @@ const NonRepeatableComponentFields = React.memo(
                   >
                     {children({
                       ...field,
+                      // Inherit parent disable (e.g. locked non-localized component on a secondary locale)
+                      disabled: field.disabled || disabled,
                       label: translatedLabel,
                       name: completeFieldName,
                     })}

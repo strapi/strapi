@@ -15,6 +15,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
+import { useShouldLockNonLocalizedField } from '../../../hooks/useI18nFieldLock';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
@@ -26,6 +27,7 @@ import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
+import { useComponent } from './FormInputs/ComponentContext';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { RelationsInput } from './FormInputs/Relations/Relations';
@@ -70,6 +72,7 @@ const BaseInputRenderer = ({
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
   const isInPreviewPopover = useHasInputPopoverParent();
   const shouldIgnorePermissions = isInDynamicZone || isInPreviewPopover;
+  const componentLevel = useComponent('InputRenderer', (state) => state.level);
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
@@ -102,6 +105,9 @@ const BaseInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const isNonLocalizedFieldLocked = useShouldLockNonLocalizedField(props.attribute, {
+    isInsideComponent: componentLevel >= 0,
+  });
   const renderComponentInput = React.useCallback(
     (componentInputProps: InputRendererProps) => (
       <MemoizedInputRenderer
@@ -127,7 +133,10 @@ const BaseInputRenderer = ({
   }
 
   const fieldIsDisabled =
-    (!canUserEditField && !shouldIgnorePermissions) || props.disabled || isFormDisabled;
+    (!canUserEditField && !shouldIgnorePermissions) ||
+    props.disabled ||
+    isFormDisabled ||
+    isNonLocalizedFieldLocked;
 
   /**
    * Because a custom field has a unique prop but the type could be confused with either

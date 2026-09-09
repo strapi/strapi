@@ -352,6 +352,7 @@ const DynamicComponent = ({
                     index={index}
                     layout={componentUid ? components[componentUid]?.layout : undefined}
                     name={name}
+                    disabled={disabled}
                   >
                     {children}
                   </DynamicComponentFields>
@@ -396,7 +397,7 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   margin: 0;
 `;
 
-interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
+interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children' | 'disabled'> {
   componentUid?: string;
   index: number;
   layout?: EditFieldLayout[][];
@@ -404,7 +405,7 @@ interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'child
 }
 
 const DynamicComponentFields = React.memo(
-  ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
+  ({ children, componentUid, index, layout, name, disabled }: DynamicComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -419,6 +420,8 @@ const DynamicComponentFields = React.memo(
 
                     const fieldWithTranslatedLabel = {
                       ...field,
+                      // Inherit parent disable (e.g. locked non-localized DZ on a secondary locale)
+                      disabled: field.disabled || disabled,
                       label: formatMessage({
                         id: `content-manager.components.${componentUid}.${field.name}`,
                         defaultMessage: field.label,
