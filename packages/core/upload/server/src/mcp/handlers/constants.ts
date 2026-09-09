@@ -54,10 +54,10 @@ export const MCP_MOVE_ASSETS_ID_FAILED = (cause: string) =>
  * `structuredContent`, so throwing on the third id would discard the report saying the first
  * two are already gone — and no re-read can recover what was deleted.
  */
-export const MCP_DELETE_MEDIA_ID_NOT_FOUND =
+export const MCP_DELETE_ASSETS_ID_NOT_FOUND =
   'No media asset has this id, so nothing was deleted for it. If this is a folder id, use media_delete_folder — and note that a folder id only fails like this when no asset happens to share the number; when one does, media_delete_assets deletes that asset instead. Otherwise the asset may already be deleted; use media_list_assets to discover valid asset ids.';
 
-export const MCP_DELETE_MEDIA_ID_FORBIDDEN =
+export const MCP_DELETE_ASSETS_ID_FORBIDDEN =
   'This token is not allowed to delete this asset. A permission condition on plugin::upload.assets.update excludes it.';
 
 /**
@@ -68,5 +68,5 @@ export const MCP_DELETE_MEDIA_ID_FORBIDDEN =
  * may be half-removed (the provider file gone, the row still present, or the reverse), so the
  * wording tells the agent to re-read rather than assume either outcome.
  */
-export const MCP_DELETE_MEDIA_ID_FAILED = (cause: string) =>
+export const MCP_DELETE_ASSETS_ID_FAILED = (cause: string) =>
   `Deleting this asset failed: ${cause}. The asset may be partially removed — re-read it with media_get_asset before retrying. Any assets listed under \`deleted\` are gone for good.`;

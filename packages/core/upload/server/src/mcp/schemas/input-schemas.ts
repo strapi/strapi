@@ -325,7 +325,7 @@ export const mediaMoveAssetsInputSchema = z
  * durable fix is namespaced handles (`asset:1` / `folder:1`) across the whole media surface, which
  * is a breaking change to the read tools and belongs to its own ticket.
  */
-export const deleteMediaInputSchema = z
+export const mediaDeleteAssetsInputSchema = z
   .object(
     {
       ids: z
