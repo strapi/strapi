@@ -38,6 +38,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/config/permissions/prune                                                   │
 │ POST               │ /api/config/permissions/resync-super-admin                                      │
 │ POST               │ /api/config/resettransfertoken                                                  │
+│ POST               │ /api/config/reset-admin-fixture                                                 │
 │ HEAD|GET           │ /api/countries                                                                  │
 │ HEAD|GET           │ /api/countries/:id                                                              │
 │ POST               │ /api/countries                                                                  │

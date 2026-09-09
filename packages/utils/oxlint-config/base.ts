@@ -53,5 +53,7 @@ export const base = {
     // .github/actions/check-pr-status has an Nx lint target; these paths do not.
     '.github/scripts/**',
     '.github/actions/community-pr-triage/**',
+    // Parser TS(1016) on can/cannot cannot be suppressed locally; restore via CMS-1692.
+    'packages/core/content-manager/server/src/services/permission-checker.ts',
   ],
 } satisfies Partial<OxlintConfig>;

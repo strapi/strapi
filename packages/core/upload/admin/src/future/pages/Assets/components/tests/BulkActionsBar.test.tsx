@@ -116,6 +116,78 @@ describe('BulkActionsBar', () => {
     );
   });
 
+  describe('space reserved at the end of the list', () => {
+    // Restored individually: `jest.restoreAllMocks()` would also drop the
+    // `window.matchMedia` mock the shared test setup installs, which every
+    // later test in this file needs.
+    let rectSpy: jest.SpyInstance | undefined;
+
+    // jsdom has no layout engine, so the bar's geometry is the one thing that
+    // has to be supplied.
+    const stubBarGeometry = ({ top, height }: { top: number; height: number }) => {
+      rectSpy = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+        top,
+        height,
+        bottom: top + height,
+        left: 0,
+        right: 0,
+        width: 0,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      } as DOMRect);
+    };
+
+    const selectOne = async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+      await screen.findByRole('region', { name: 'Bulk actions' });
+    };
+
+    beforeEach(() => {
+      window.innerHeight = 768;
+    });
+
+    afterEach(() => {
+      rectSpy?.mockRestore();
+      rectSpy = undefined;
+    });
+
+    it('reserves nothing without a selection', () => {
+      setup();
+
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(document.querySelector('[data-bar-spacer]')).not.toBeInTheDocument();
+    });
+
+    it("reserves the bar's height plus the gap it floats above the viewport edge", async () => {
+      // 48 tall, sitting 16 clear of the bottom edge — the desktop pill.
+      stubBarGeometry({ top: 704, height: 48 });
+
+      await selectOne();
+
+      await waitFor(() =>
+        // 64, not 48: reserving only the height would leave the gap uncovered.
+        // eslint-disable-next-line testing-library/no-node-access
+        expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '64px' })
+      );
+    });
+
+    it('reserves nothing while the bar is hidden', async () => {
+      // What `display: none` reports — a zero-height rect at the origin, which
+      // measured naively would reserve the whole viewport.
+      stubBarGeometry({ top: 0, height: 0 });
+
+      await selectOne();
+
+      await waitFor(() =>
+        // eslint-disable-next-line testing-library/no-node-access
+        expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '0px' })
+      );
+    });
+  });
+
   // jsdom matches no breakpoint, so these read the mobile rules.
   describe('mobile layout with the metadata action', () => {
     const openBar = async () => {
