@@ -102,14 +102,6 @@ export default async () => {
   registerModelsHooks();
 
   // AI Localizations
-  const aiTranslations = getService('ai-translations');
-
-  try {
-    await aiTranslations.validateProvider();
-  } catch (error) {
-    strapi.log.error(error instanceof Error ? error.message : String(error));
-  }
-
   getService('ai-localizations').setupMiddleware();
 
   sendDidInitializeEvent();

@@ -21,7 +21,6 @@ export interface AiTranslationsService {
   isEnabled(): boolean;
   registerProvider(params: { provider: AiTranslationsProvider }): void;
   generateTranslations(params: GenerateTranslationsParams): Promise<GenerateTranslationsResult>;
-  validateProvider(): Promise<void>;
 }
 
 const createAITranslationsService = ({
@@ -32,13 +31,9 @@ const createAITranslationsService = ({
   const strapiManagedProvider = createStrapiManagedAiTranslationsProvider({ strapi });
 
   let registeredProvider: AiTranslationsProvider | null = null;
-  // Providers can only be registered during the `register()` lifecycle phase. `validateProvider()`
-  // runs once, during `bootstrap()`, and closes registration from then on.
-  let registrationClosed = false;
-  let isProviderInvalid = false;
 
   const resolveProvider = (): AiTranslationsProvider | null => {
-    if (!strapi.ai.admin.isAvailable() || isProviderInvalid) {
+    if (!strapi.ai.admin.isAvailable()) {
       return null;
     }
 
@@ -53,12 +48,6 @@ const createAITranslationsService = ({
     },
 
     registerProvider({ provider }: { provider: AiTranslationsProvider }) {
-      if (registrationClosed) {
-        throw new Error(
-          `Cannot register the AI translations provider "${provider.name}": provider registration is closed. Providers must be registered during the "register" lifecycle phase.`
-        );
-      }
-
       if (registeredProvider !== null) {
         throw new Error(
           `The AI translations provider "${registeredProvider.name}" is already registered, "${provider.name}" cannot replace it.`
@@ -78,31 +67,6 @@ const createAITranslationsService = ({
       }
 
       return provider.generateTranslations(params);
-    },
-
-    async validateProvider() {
-      registrationClosed = true;
-
-      const provider = resolveProvider();
-
-      if (!provider?.validate) {
-        isProviderInvalid = false;
-        return;
-      }
-
-      try {
-        await provider.validate();
-        isProviderInvalid = false;
-      } catch (error) {
-        isProviderInvalid = true;
-
-        throw new Error(
-          `The AI translations provider "${provider.name}" is not correctly configured: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-          { cause: error instanceof Error ? error : undefined }
-        );
-      }
     },
   };
 };
