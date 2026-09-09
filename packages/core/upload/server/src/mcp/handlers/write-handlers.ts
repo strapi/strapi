@@ -301,7 +301,7 @@ export const createMediaDeleteAssetsHandler =
 
     // `ids` can repeat an id; de-duplicating keeps the report one entry per id, and stops the
     // second occurrence of an already-deleted asset from being reported as a missing one.
-    for (const id of [...new Set(ids)]) {
+    for (const id of new Set(ids)) {
       let file: Record<string, unknown>;
 
       try {

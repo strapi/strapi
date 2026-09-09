@@ -25,7 +25,12 @@ const FOLDER_WRITE_TOOLS = [
   'media_delete_folder',
 ];
 
-const WRITE_TOOLS = ['media_update_asset', 'media_move_assets', 'media_delete_assets', ...FOLDER_WRITE_TOOLS];
+const WRITE_TOOLS = [
+  'media_update_asset',
+  'media_move_assets',
+  'media_delete_assets',
+  ...FOLDER_WRITE_TOOLS,
+];
 
 describe('upload MCP tool registration', () => {
   describe('registration', () => {
