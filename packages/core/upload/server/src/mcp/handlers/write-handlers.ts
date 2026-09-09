@@ -181,7 +181,7 @@ export const createMediaMoveAssetsHandler =
 
     // `ids` can repeat an id; de-duplicating keeps the report one entry per id rather than
     // reporting the same asset twice for a request that moved it once.
-    for (const id of [...new Set(ids)]) {
+    for (const id of new Set(ids)) {
       try {
         // Row-level check, shared with the admin controller: an owner-scoped permission
         // condition is evaluated against the same subject the REST API would build.
