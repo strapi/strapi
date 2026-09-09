@@ -10,8 +10,8 @@ import {
   mediaRenameFolderInputSchema,
   mediaMoveFolderInputSchema,
   mediaDeleteFolderInputSchema,
-  moveMediaInputSchema,
-  moveMediaOutputSchema,
+  mediaMoveAssetsInputSchema,
+  mediaMoveAssetsOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -417,60 +417,61 @@ describe('upload MCP schemas', () => {
 
   describe('media_move_assets input', () => {
     test('accepts a list of asset ids with a destination folder', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [1, 2], folder: 3 }).success).toBe(true);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1, 2], folder: 3 }).success).toBe(true);
     });
 
     test('accepts folder: null to move assets to the media library root', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [1], folder: null }).success).toBe(true);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: null }).success).toBe(true);
     });
 
     test('accepts a single-element array — there is no separate single-asset tool', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [42], folder: 3 }).success).toBe(true);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [42], folder: 3 }).success).toBe(true);
     });
 
     test('requires the destination, so a mistyped move cannot become a silent no-op', () => {
       // Same rule as media_move_folder: omitting the key is not the root, null is.
-      expect(moveMediaInputSchema.safeParse({ ids: [1] }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1] }).success).toBe(false);
     });
 
     test('requires at least one id', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [], folder: 3 }).success).toBe(false);
-      expect(moveMediaInputSchema.safeParse({ folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ folder: 3 }).success).toBe(false);
     });
 
     test('caps the batch size', () => {
       const ids = Array.from({ length: 101 }, (_, index) => index + 1);
-      expect(moveMediaInputSchema.safeParse({ ids, folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids, folder: 3 }).success).toBe(false);
     });
 
     test('rejects non-integer, non-positive and string ids', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [0], folder: 3 }).success).toBe(false);
-      expect(moveMediaInputSchema.safeParse({ ids: [1.5], folder: 3 }).success).toBe(false);
-      expect(moveMediaInputSchema.safeParse({ ids: ['1'], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [0], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1.5], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: ['1'], folder: 3 }).success).toBe(false);
     });
 
     test('rejects a documentId in place of the numeric ids', () => {
       expect(
-        moveMediaInputSchema.safeParse({ ids: ['z7v8zma53x01r6oceimv922b'], folder: 3 }).success
+        mediaMoveAssetsInputSchema.safeParse({ ids: ['z7v8zma53x01r6oceimv922b'], folder: 3 })
+          .success
       ).toBe(false);
     });
 
     test('rejects a non-integer destination folder id', () => {
-      expect(moveMediaInputSchema.safeParse({ ids: [1], folder: 0 }).success).toBe(false);
-      expect(moveMediaInputSchema.safeParse({ ids: [1], folder: 1.5 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 0 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 1.5 }).success).toBe(false);
     });
 
     test('points a scalar `id` at the bulk `ids` array', () => {
       // A single-asset move is an array of one, and the error has to say so rather than leave
       // the agent to guess from a generic "unrecognized key".
-      const parsed = moveMediaInputSchema.safeParse({ id: 1, folder: 3 });
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ id: 1, folder: 3 });
 
       expect(parsed.success).toBe(false);
       expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
     });
 
     test('points `fileIds` — the admin REST field name — at `ids`', () => {
-      const parsed = moveMediaInputSchema.safeParse({ fileIds: [1], folder: 3 });
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ fileIds: [1], folder: 3 });
 
       expect(parsed.success).toBe(false);
       expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
@@ -478,7 +479,7 @@ describe('upload MCP schemas', () => {
 
     test('points `folderIds` at media_move_folder, since this tool moves assets only', () => {
       // `/actions/bulk-move` accepts both id lists; this tool deliberately does not.
-      const parsed = moveMediaInputSchema.safeParse({ ids: [1], folderIds: [2], folder: 3 });
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ ids: [1], folderIds: [2], folder: 3 });
 
       expect(parsed.success).toBe(false);
       expect(JSON.stringify(parsed.error)).toMatch(/media_move_folder/);
@@ -486,7 +487,8 @@ describe('upload MCP schemas', () => {
 
     test('rejects an unknown key rather than silently ignoring it', () => {
       expect(
-        moveMediaInputSchema.safeParse({ ids: [1], folder: 3, destinationFolderId: 4 }).success
+        mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 3, destinationFolderId: 4 })
+          .success
       ).toBe(false);
     });
   });
@@ -502,7 +504,7 @@ describe('upload MCP schemas', () => {
     };
 
     test('accepts a full move with no failures', () => {
-      const parsed = moveMediaOutputSchema.safeParse({
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
         destinationFolder: { id: 3, name: 'Archive' },
         moved: [MOVED_ASSET],
         failed: [],
@@ -512,7 +514,7 @@ describe('upload MCP schemas', () => {
     });
 
     test('accepts a partial success carrying both lists', () => {
-      const parsed = moveMediaOutputSchema.safeParse({
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
         destinationFolder: { id: 3, name: 'Archive' },
         moved: [MOVED_ASSET],
         failed: [{ id: 999, reason: 'No media asset has this id.' }],
@@ -522,7 +524,7 @@ describe('upload MCP schemas', () => {
     });
 
     test('accepts destinationFolder: null for a move to the root', () => {
-      const parsed = moveMediaOutputSchema.safeParse({
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
         destinationFolder: null,
         moved: [{ ...MOVED_ASSET, folder: null }],
         failed: [],
@@ -533,15 +535,16 @@ describe('upload MCP schemas', () => {
 
     test('requires both lists, so every requested id is accounted for', () => {
       expect(
-        moveMediaOutputSchema.safeParse({ destinationFolder: null, moved: [MOVED_ASSET] }).success
+        mediaMoveAssetsOutputSchema.safeParse({ destinationFolder: null, moved: [MOVED_ASSET] })
+          .success
       ).toBe(false);
-      expect(moveMediaOutputSchema.safeParse({ destinationFolder: null, failed: [] }).success).toBe(
-        false
-      );
+      expect(
+        mediaMoveAssetsOutputSchema.safeParse({ destinationFolder: null, failed: [] }).success
+      ).toBe(false);
     });
 
     test('requires a reason on every failure', () => {
-      const parsed = moveMediaOutputSchema.safeParse({
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
         destinationFolder: null,
         moved: [MOVED_ASSET],
         failed: [{ id: 999 }],

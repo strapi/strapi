@@ -267,7 +267,7 @@ export const mediaDeleteFolderInputSchema = z
  * namespaced handles (`asset:1` / `folder:1`) across the whole media surface, which is a breaking
  * change to the read tools and belongs to its own ticket.
  */
-export const moveMediaInputSchema = z
+export const mediaMoveAssetsInputSchema = z
   .object(
     {
       ids: z

@@ -1715,7 +1715,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const destination = await seeder.seedFolder('Destination');
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'move_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
         ids: [collidingId],
         folder: destination.id,
       });
@@ -1764,7 +1764,7 @@ describe('MCP upload tools RBAC (api)', () => {
     });
 
     test('never re-parents the folder itself, whether or not its id collides', async () => {
-      // The one thing that holds in both branches above: move_media writes to the file table
+      // The one thing that holds in both branches above: media_move_assets writes to the file table
       // only, so a folder passed in `ids` keeps its parent either way. Asserted on the folder
       // tree, which is what an agent would see next.
       const { collidingId, folderName } = await seedIdCollision('shares-a-number.jpg');
@@ -1778,7 +1778,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'move_media', {
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
         ids: [collidingId, untouched.id, unmatchedId],
         folder: destination.id,
       });
@@ -1860,7 +1860,9 @@ describe('MCP upload tools RBAC (api)', () => {
       const seeded = await seeder.seedAsset({ name: 'needs-destination.jpg' });
       const token = await createUpdateTokenSession();
 
-      const response = await mcp.callTool(token.accessKey, 'media_move_assets', { ids: [seeded.id] });
+      const response = await mcp.callTool(token.accessKey, 'media_move_assets', {
+        ids: [seeded.id],
+      });
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
     });

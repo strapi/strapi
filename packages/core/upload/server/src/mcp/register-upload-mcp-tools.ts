@@ -18,8 +18,8 @@ import {
   mediaMoveFolderOutputSchema,
   mediaDeleteFolderInputSchema,
   mediaDeleteFolderOutputSchema,
-  moveMediaInputSchema,
-  moveMediaOutputSchema,
+  mediaMoveAssetsInputSchema,
+  mediaMoveAssetsOutputSchema,
 } from './schemas';
 import {
   createMediaListAssetsHandler,
@@ -30,7 +30,7 @@ import {
   createMediaRenameFolderHandler,
   createMediaMoveFolderHandler,
   createMediaDeleteFolderHandler,
-  createMoveMediaHandler,
+  createMediaMoveAssetsHandler,
 } from './handlers';
 
 /**
@@ -99,9 +99,9 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
       "Move Media Library assets into a different folder, in bulk. Takes `ids` — an array of numeric ASSET ids — and `folder`, the numeric id of the destination; pass `folder: null` to move them to the media library root. Both are required: use an array of one to move a single asset, and say null explicitly for the root.\n\nTakes ASSET ids only. Media files are not documents: use numeric ids, not documentIds.\n\nNEVER PASS A FOLDER ID. Asset ids and folder ids are separate, independently numbered namespaces, and the SAME NUMBER OFTEN NAMES BOTH an asset and a folder. This tool always reads the number as an ASSET id: hand it a folder id and it will move whichever unrelated asset happens to share that number, reporting that move as a success, while leaving the folder exactly where it was. Nothing in the request can express which one you meant, so the server cannot catch this for you — only an id matching no asset at all is reported as failed. Take ids only from media_list_assets or media_get_asset, never from media_list_folders, and use media_move_folder to move a folder (which carries its whole subtree).\n\nMoving changes the folder only. Names, alt text, captions and the assets' public URLs are unaffected, so nothing referencing them breaks — use media_update_asset to edit metadata.\n\nPARTIAL SUCCESS IS POSSIBLE: a bad id among good ones does NOT roll the valid moves back. The response always reports `moved` (the assets that were moved) and `failed` (each remaining id with a reason), which together account for every id you passed — so retry only the ids in `failed`, and treat `moved` as done. This holds even when nothing moved at all: `moved` is then empty and every id is in `failed`. The one error that rejects the whole call is a destination folder that does not exist, which is checked before anything is moved.",
     telemetry: { source: 'upload', name: 'move' },
     auth: { policies: [{ action: ACTIONS.update }] },
-    resolveInputSchema: () => moveMediaInputSchema,
-    resolveOutputSchema: () => moveMediaOutputSchema,
-    createHandler: createMoveMediaHandler,
+    resolveInputSchema: () => mediaMoveAssetsInputSchema,
+    resolveOutputSchema: () => mediaMoveAssetsOutputSchema,
+    createHandler: createMediaMoveAssetsHandler,
   },
   {
     name: 'media_create_folder',
