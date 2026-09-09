@@ -134,6 +134,7 @@ type UseDocumentActions = (
       collectionType: string;
       model: string;
       documentId?: string;
+      baseVersion?: string;
       params?: QueryParams;
     },
     document: Partial<Document>
@@ -148,6 +149,7 @@ type UseDocumentActions = (
       collectionType: string;
       model: string;
       documentId?: string;
+      baseVersion?: string;
       params?: QueryParams;
     },
     document: Partial<Document>,
@@ -351,7 +353,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const [publishDocument, { isLoading: isPublishing }] = usePublishDocumentMutation();
 
   const publish: IUseDocumentActs['publish'] = React.useCallback(
-    async ({ collectionType, model, documentId, params }, data) => {
+    async ({ collectionType, model, documentId, baseVersion, params }, data) => {
       try {
         trackUsage('willPublishEntry', { documentId });
 
@@ -359,7 +361,7 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           documentId,
-          data,
+          data: { ...data, baseVersion },
           params,
         });
 
@@ -450,7 +452,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [updateDocument, { isLoading: isUpdating }] = useUpdateDocumentMutation();
   const update: IUseDocumentActs['update'] = React.useCallback(
-    async ({ collectionType, model, documentId, params }, data, trackerProperty) => {
+    async ({ collectionType, model, documentId, baseVersion, params }, data, trackerProperty) => {
       try {
         trackUsage('willEditEntry', trackerProperty);
 
@@ -459,11 +461,14 @@ const useDocumentActions: UseDocumentActions = () => {
           model,
           documentId,
           data,
+          baseVersion,
           params,
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+          if (!('status' in res.error) || res.error.status !== 409) {
+            toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+          }
 
           trackUsage('didNotEditEntry', { error: res.error, ...trackerProperty });
 

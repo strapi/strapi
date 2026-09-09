@@ -1,8 +1,7 @@
-import { difference, omit } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
-import { FIELDS_TO_IGNORE } from '../constants';
+import { getSchemaAttributesDiff as getSchemaAttributesDiffUtil } from '../../services/utils/schema-diff';
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
@@ -22,41 +21,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   const getSchemaAttributesDiff = (
     versionSchemaAttributes: CreateHistoryVersion['schema'],
     contentTypeSchemaAttributes: Struct.SchemaAttributes
-  ) => {
-    // Omit the same fields that were omitted when creating a history version
-    const sanitizedContentTypeSchemaAttributes = omit(
-      FIELDS_TO_IGNORE,
-      contentTypeSchemaAttributes
-    );
-
-    const reduceDifferenceToAttributesObject = (
-      diffKeys: string[],
-      source: CreateHistoryVersion['schema']
-    ) => {
-      return diffKeys.reduce<CreateHistoryVersion['schema']>(
-        (previousAttributesObject, diffKey) => {
-          previousAttributesObject[diffKey] = source[diffKey];
-
-          return previousAttributesObject;
-        },
-        {}
-      );
-    };
-
-    const versionSchemaKeys = Object.keys(versionSchemaAttributes);
-    const contentTypeSchemaAttributesKeys = Object.keys(sanitizedContentTypeSchemaAttributes);
-    // The attribute is new if it's on the content type schema but not on the version schema
-    const uniqueToContentType = difference(contentTypeSchemaAttributesKeys, versionSchemaKeys);
-    const added = reduceDifferenceToAttributesObject(
-      uniqueToContentType,
-      sanitizedContentTypeSchemaAttributes
-    );
-    // The attribute was removed or renamed if it's on the version schema but not on the content type schema
-    const uniqueToVersion = difference(versionSchemaKeys, contentTypeSchemaAttributesKeys);
-    const removed = reduceDifferenceToAttributesObject(uniqueToVersion, versionSchemaAttributes);
-
-    return { added, removed };
-  };
+  ) => getSchemaAttributesDiffUtil(versionSchemaAttributes, contentTypeSchemaAttributes);
 
   /**
    * @description

@@ -28,6 +28,7 @@ export const ALLOWED_DOCUMENT_PARAM_KEYS = [...SHARED_QUERY_PARAM_KEYS, 'withCou
 export const ALLOWED_DOCUMENT_ROOT_PARAM_KEYS = [
   ...ALLOWED_DOCUMENT_PARAM_KEYS,
   'data',
+  'baseVersion',
   'pagination',
   'count',
   'ordering',

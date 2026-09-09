@@ -9,6 +9,36 @@ import { mockData } from './mockData';
 export const handlers: HttpHandler[] = [
   /**
    *
+   * AUTOSAVE
+   *
+   * Declared before the generic document handlers so `/autosaves/...` is not mistaken for a
+   * collection type route.
+   */
+  http.get('/content-manager/autosaves/:model/:documentId', () => {
+    return HttpResponse.json({ data: null });
+  }),
+  http.put<{ model: string; documentId: string }, { data: object; baseVersion?: string }>(
+    '/content-manager/autosaves/:model/:documentId',
+    async ({ params, request }) => {
+      const body = await request.json();
+
+      return HttpResponse.json({
+        data: {
+          contentType: params.model,
+          documentId: params.documentId,
+          locale: null,
+          data: body.data,
+          baseVersion: body.baseVersion ?? null,
+          savedAt: '2026-01-01T00:00:00.000Z',
+        },
+      });
+    }
+  ),
+  http.delete('/content-manager/autosaves/:model/:documentId', () => {
+    return HttpResponse.json({ data: null });
+  }),
+  /**
+   *
    * CONTENT_MANAGER
    *
    */

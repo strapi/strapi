@@ -15,6 +15,10 @@ const mapErrorsAndStatus = [
     status: 404,
   },
   {
+    classError: errors.ConflictError,
+    status: 409,
+  },
+  {
     classError: errors.PayloadTooLargeError,
     status: 413,
   },

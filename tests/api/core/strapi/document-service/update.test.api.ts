@@ -90,6 +90,91 @@ describe('Document Service', () => {
       });
     });
 
+    it('updates when baseVersion matches updatedAt', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+      const article = await updateArticle({
+        documentId: articleDb.documentId,
+        baseVersion: new Date(articleDb.updatedAt).toISOString(),
+        data: { title: 'Updated with version' },
+      });
+
+      expect(article).toMatchObject({ title: 'Updated with version' });
+    });
+
+    it('rejects an update when baseVersion is stale', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+      const baseVersion = new Date(0).toISOString();
+
+      await expect(
+        updateArticle({
+          documentId: articleDb.documentId,
+          baseVersion,
+          data: { title: 'Stale update' },
+        })
+      ).rejects.toMatchObject({
+        name: 'ConflictError',
+        details: {
+          expected: baseVersion,
+          current: expect.any(String),
+        },
+      });
+    });
+
+    it('allows only one concurrent update for the same baseVersion', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+      const baseVersion = new Date(articleDb.updatedAt).toISOString();
+
+      const results = await Promise.allSettled([
+        updateArticle({
+          documentId: articleDb.documentId,
+          baseVersion,
+          data: { title: 'Concurrent update one' },
+        }),
+        updateArticle({
+          documentId: articleDb.documentId,
+          baseVersion,
+          data: { title: 'Concurrent update two' },
+        }),
+      ]);
+
+      expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1);
+      expect(results.filter(({ status }) => status === 'rejected')).toHaveLength(1);
+      expect(results.find(({ status }) => status === 'rejected')).toMatchObject({
+        reason: { name: 'ConflictError' },
+      });
+    });
+
+    it('rejects an invalid baseVersion', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+      for (const baseVersion of ['', 'not-a-date', '2026-01-01', false, null]) {
+        await expect(
+          updateArticle({
+            documentId: articleDb.documentId,
+            baseVersion,
+            data: { title: 'Invalid version update' },
+          } as Parameters<typeof updateArticle>[0])
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+      }
+    });
+
+    it('rejects a versioned update when the target no longer exists', async () => {
+      await expect(
+        updateArticle({
+          documentId: 'missing-document',
+          baseVersion: new Date(0).toISOString(),
+          data: { title: 'Missing version update' },
+        })
+      ).rejects.toMatchObject({
+        name: 'ConflictError',
+        details: {
+          expected: new Date(0).toISOString(),
+          current: null,
+        },
+      });
+    });
+
     it('Can update a draft article in dutch', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
 
@@ -146,6 +231,7 @@ describe('Document Service', () => {
 
       const article = await updateArticle({
         documentId: articleDb.documentId,
+        baseVersion: new Date(articleDb.updatedAt).toISOString(),
         data: { title: 'Updated Document' },
         status: 'published',
       });

@@ -39,7 +39,7 @@ export declare namespace Find {
  */
 export declare namespace CreateOrUpdate {
   export interface Request {
-    body: Document;
+    body: Document & { baseVersion?: string };
     query: {
       plugins: {
         i18n: {
@@ -52,7 +52,7 @@ export declare namespace CreateOrUpdate {
   export interface Response {
     data: Document;
     meta: DocumentMetadata;
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError | errors.ApplicationError<'ConflictError'>;
   }
 }
 
@@ -79,7 +79,7 @@ export declare namespace Delete {
  */
 export declare namespace Publish {
   export interface Request {
-    body: {};
+    body: Partial<Document> & { baseVersion?: string };
     query: {
       locale: string;
     };

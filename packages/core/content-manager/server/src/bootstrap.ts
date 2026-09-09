@@ -1,5 +1,6 @@
 import { getService } from './utils';
 import { ALLOWED_WEBHOOK_EVENTS } from './constants';
+import autosave from './autosave';
 import history from './history';
 import preview from './preview';
 import { registerContentManagerMcpTools } from './mcp/register-content-manager-mcp-tools';
@@ -16,6 +17,7 @@ export default async () => {
 
   await registerContentManagerMcpTools({ strapi });
 
+  await autosave.bootstrap?.({ strapi });
   await history.bootstrap?.({ strapi });
   await preview.bootstrap?.({ strapi });
 };

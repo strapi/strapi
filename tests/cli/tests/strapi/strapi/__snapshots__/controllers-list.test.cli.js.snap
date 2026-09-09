@@ -9,6 +9,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ plugin::content-manager.relations                    │
 │ plugin::content-manager.single-types                 │
 │ plugin::content-manager.uid                          │
+│ plugin::content-manager.autosave                     │
 │ plugin::content-manager.preview                      │
 │ plugin::content-manager.homepage                     │
 │ plugin::content-type-builder.builder                 │

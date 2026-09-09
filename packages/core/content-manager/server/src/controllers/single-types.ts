@@ -34,6 +34,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
   const { user, userAbility } = ctx.state;
   const { model } = ctx.params;
   const { body, query } = ctx.request;
+  const { baseVersion, ...documentData } = body;
 
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -44,7 +45,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
 
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
 
-  const { locale } = await getDocumentLocaleAndStatus(body, model);
+  const { locale } = await getDocumentLocaleAndStatus(documentData, model);
 
   // Load document version to update
   const [documentVersion, otherDocumentVersion] = await Promise.all([
@@ -75,7 +76,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
     throw new errors.ForbiddenError();
   }
 
-  const sanitizedBody = await sanitizeFn(body);
+  const sanitizedBody = await sanitizeFn(documentData);
 
   if (!documentId) {
     return documentManager.create(model, {
@@ -89,6 +90,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
+    baseVersion,
   });
 };
 

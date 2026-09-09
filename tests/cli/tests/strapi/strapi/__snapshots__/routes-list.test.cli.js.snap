@@ -234,6 +234,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /content-manager/collection-types/:model/actions/bulkUnpublish                  │
 │ HEAD|GET           │ /content-manager/collection-types/:model/:id/actions/countDraftRelations        │
 │ HEAD|GET           │ /content-manager/collection-types/:model/actions/countManyEntriesDraftRelations │
+│ HEAD|GET           │ /content-manager/autosaves/:model/:documentId                                   │
+│ PUT                │ /content-manager/autosaves/:model/:documentId                                   │
+│ DELETE             │ /content-manager/autosaves/:model/:documentId                                   │
 │ HEAD|GET           │ /content-manager/preview/url/:contentType                                       │
 │ HEAD|GET           │ /content-manager/preview/script                                                 │
 │ HEAD|GET           │ /content-manager/homepage/recent-documents                                      │

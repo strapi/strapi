@@ -1,3 +1,4 @@
+export * as Autosave from './autosave';
 export * as CollectionTypes from './collection-types';
 export * as Components from './components';
 export * as ContentTypes from './content-types';
