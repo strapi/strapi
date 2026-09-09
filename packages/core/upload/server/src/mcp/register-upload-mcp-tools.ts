@@ -89,7 +89,7 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     title: 'Media: create folder',
     description:
       'Create a Media Library folder, optionally inside an existing one. Folders are identified by a numeric id: pass `parent` to nest the new folder, or omit it to create the folder at the media library root. The name must be unique among its siblings and cannot contain slashes.',
-    telemetry: { source: 'upload', name: 'media_create_folder' },
+    telemetry: { source: 'upload', name: 'create_folder' },
     // `create`, not `update`, to match `POST /upload/folders` — the admin route for the same
     // operation gates on `assets.create`. The other folder tools use `update` because their
     // admin counterparts (`PUT /folders/:id` and both bulk actions) do.
@@ -103,7 +103,7 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     title: 'Media: rename folder',
     description:
       "Rename a Media Library folder, identified by its numeric id. Changes the folder name only and leaves its location, its contents and their URLs untouched — use media_move_folder to change which folder it sits in. The new name must be unique among the folder's siblings.",
-    telemetry: { source: 'upload', name: 'media_rename_folder' },
+    telemetry: { source: 'upload', name: 'rename_folder' },
     auth: { policies: [{ action: ACTIONS.update }] },
     resolveInputSchema: () => mediaRenameFolderInputSchema,
     resolveOutputSchema: () => mediaRenameFolderOutputSchema,
@@ -114,7 +114,7 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     title: 'Media: move folder',
     description:
       'Move a Media Library folder into a different parent folder, identified by numeric ids. The folder keeps its name and carries all of its subfolders and files with it; pass `parent: null` to move it to the media library root. A folder cannot be moved into itself or into one of its own descendants. Use media_rename_folder to change the name instead.',
-    telemetry: { source: 'upload', name: 'media_move_folder' },
+    telemetry: { source: 'upload', name: 'move_folder' },
     auth: { policies: [{ action: ACTIONS.update }] },
     resolveInputSchema: () => mediaMoveFolderInputSchema,
     resolveOutputSchema: () => mediaMoveFolderOutputSchema,
@@ -125,7 +125,7 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     title: 'Media: delete folder (destructive)',
     description:
       'DESTRUCTIVE AND IRREVERSIBLE. Deletes Media Library folders by numeric id and CASCADES: every subfolder and every file inside them is permanently deleted from the database and from the storage provider. There is no undo, no trash and no recycle bin, and the deleted files stop being served — any live entry or page still referencing one will break.\n\nWHETHER THE CONTAINED ASSETS ARE USED IN PUBLISHED CONTENT CANNOT BE CHECKED: Strapi does not expose "used in" information over this API, so this tool cannot tell you whether a file is referenced by an entry. Confirm with the user before deleting.\n\nCall it first WITHOUT `dryRun` (or with `dryRun: true`) to preview: nothing is deleted and the response reports how many folders and files WOULD be removed. Only after reporting those counts should you call it again with `dryRun: false` to actually delete. Takes FOLDER ids only — asset ids are a separate namespace of integers; use media_delete_assets for individual assets. All or nothing: if ANY id does not resolve to a folder the whole call is rejected and nothing is deleted, so a list mixing folder and asset ids never deletes half of what it names.',
-    telemetry: { source: 'upload', name: 'media_delete_folder' },
+    telemetry: { source: 'upload', name: 'delete_folder' },
     auth: { policies: [{ action: ACTIONS.update }] },
     resolveInputSchema: () => mediaDeleteFolderInputSchema,
     resolveOutputSchema: () => mediaDeleteFolderOutputSchema,
