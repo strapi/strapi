@@ -195,6 +195,35 @@ describe('Restore ', () => {
     expect(count).toBe(3);
   });
 
+  test('Should keep included content type filtering when restore filters are empty', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query,
+      getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['foo'],
+        filters: [],
+      },
+    });
+
+    expect(count).toBe(3);
+  });
+
   test('Should only delete chosen model ', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
@@ -221,6 +250,35 @@ describe('Restore ', () => {
     });
 
     expect(count).toBe(1);
+  });
+
+  test('Should keep excluded content types when restore filters are empty', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query,
+      getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        exclude: ['foo'],
+        filters: [],
+      },
+    });
+
+    expect(count).toBe(6);
   });
 
   test('Should add core store data', async () => {
