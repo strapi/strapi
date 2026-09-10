@@ -8,10 +8,11 @@ import {
   getDeviceName,
 } from '@strapi/utils';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
-import { verifyRegistrationResponse } from '@simplewebauthn/server';
+import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
 import { hashTrustToken } from '../mfa-trusted-devices';
 import { MFA_DEFAULTS } from '../../config/mfa';
+import { resetSecuritySettingsWarnings } from '../security-settings';
 
 /**
  * Cycle 4 mocks exactly the two verification functions and nothing else. What is under test here
@@ -4057,5 +4058,392 @@ describe('mfa service: passkey registration', () => {
     expect(passkeyRows).toHaveLength(0);
     // The caller's own event (`disabled`, or the settings update) covers both.
     expect(events.filter((e) => e.type === 'passkey_removed')).toHaveLength(0);
+  });
+});
+
+describe('mfa service: passkey login', () => {
+  const ADMIN_URL = 'https://cms.example.com/admin';
+
+  const setup = ({
+    enabled = true,
+    adminUrl = ADMIN_URL,
+    mfaConfig = {},
+  }: {
+    enabled?: boolean;
+    adminUrl?: string;
+    mfaConfig?: Record<string, unknown>;
+  } = {}) => {
+    const stored = { passkeys: { enabled } };
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.auth.mfa') return { enabled: true, ...mfaConfig };
+            if (key === 'admin.absoluteUrl') return adminUrl;
+            return defaultValue;
+          }),
+        },
+      },
+    });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, stored };
+  };
+
+  /** A stored credential for `userId`, matching what `registerPasskey` writes. */
+  const seedCredential = (
+    rows: PasskeyRowFixture[],
+    userId: string,
+    overrides: Partial<PasskeyRowFixture> = {}
+  ): PasskeyRowFixture => {
+    const row: PasskeyRowFixture = {
+      id: 100 + rows.length,
+      userId,
+      credentialId: `cred-${userId}`,
+      publicKey: isoBase64URL.fromBuffer(new Uint8Array([9, 8, 7])),
+      // Deliberately a string: `biginteger` reads back from the database as one, and the library
+      // wants a number.
+      counter: '5',
+      transports: 'internal',
+      name: 'Phone',
+      lastUsedAt: null,
+      createdAt: new Date(),
+      ...overrides,
+    };
+    rows.push(row);
+    return row;
+  };
+
+  const assertionFor = (credentialId: string) => ({
+    id: credentialId,
+    rawId: credentialId,
+    type: 'public-key' as const,
+    clientExtensionResults: {},
+    response: {
+      clientDataJSON: 'not-parsed-here',
+      authenticatorData: 'not-parsed-here',
+      signature: 'not-parsed-here',
+    },
+  });
+
+  const authVerified = (newCounter = 6) => ({
+    verified: true,
+    authenticationInfo: { newCounter, credentialID: 'cred-1', userVerified: false },
+  });
+
+  beforeEach(() => {
+    jest.mocked(verifyAuthenticationResponse).mockReset();
+    // `resolveWebauthnRp`'s refusal logs through `warnOnce`, which is deliberately once-per-key-
+    // per-process (see `security-settings.ts`) so a misconfigured deployment doesn't spam the
+    // log on every request. Two tests below each need a fresh log call for the same
+    // `'webauthn.rp'` key, and the registration suite earlier in this file already spent it once
+    // -- reset here, exactly as `mfa-passkeys-rp.test.ts` does, so each test starts clean.
+    resetSecuritySettingsWarnings();
+  });
+
+  test('options stores the challenge on the challenge row and allows only the owner credentials', async () => {
+    const { service, passkeyRows, challenges } = setup();
+    const mine = seedCredential(passkeyRows, '1');
+    seedCredential(passkeyRows, '2', { credentialId: 'cred-other' });
+    const { token } = await service.createChallenge('1');
+
+    const options = await service.authenticationOptions(token);
+
+    expect(options.rpId).toBe('cms.example.com');
+    expect(options.userVerification).toBe('preferred');
+    // `type: 'public-key'` is the real (unmocked) `generateAuthenticationOptions`' own addition to
+    // every `allowCredentials` entry -- the same thing the registration suite's
+    // `excludeCredentials` assertions already account for.
+    expect(options.allowCredentials).toEqual([
+      { id: mine.credentialId, transports: ['internal'], type: 'public-key' },
+    ]);
+    expect(challenges[0].webauthnChallenge).toBe(options.challenge);
+
+    // A retry re-mints cleanly: keyed on the row id alone, overwriting any previous value.
+    const again = await service.authenticationOptions(token);
+    expect(again.challenge).not.toBe(options.challenge);
+    expect(challenges[0].webauthnChallenge).toBe(again.challenge);
+  });
+
+  test('options charges no attempt: it evaluates no factor', async () => {
+    const { service, passkeyRows, challenges } = setup();
+    seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+
+    await service.authenticationOptions(token);
+
+    expect(challenges[0].attempts).toBe(0);
+  });
+
+  test.each([
+    ['an unknown token', async (fixture: ReturnType<typeof setup>, token: string) => `${token}x`],
+    [
+      'a consumed challenge',
+      async (fixture: ReturnType<typeof setup>, token: string) => {
+        fixture.challenges.splice(0, fixture.challenges.length);
+        return token;
+      },
+    ],
+    [
+      'an expired challenge',
+      async (fixture: ReturnType<typeof setup>, token: string) => {
+        fixture.challenges[0].expiresAt = new Date(Date.now() - 1000);
+        return token;
+      },
+    ],
+    [
+      'an unparseable expiry',
+      async (fixture: ReturnType<typeof setup>, token: string) => {
+        fixture.challenges[0].expiresAt = 'nonsense' as unknown as Date;
+        return token;
+      },
+    ],
+  ])('options refuses %s with one generic message', async (_label, arrange) => {
+    const fixture = setup();
+    seedCredential(fixture.passkeyRows, '1');
+    const { token } = await fixture.service.createChallenge('1');
+    const submitted = await arrange(fixture, token);
+
+    await expect(fixture.service.authenticationOptions(submitted)).rejects.toThrow(
+      'Could not verify that passkey.'
+    );
+  });
+
+  test('options refuses when the policy is off, or when the user holds no passkey', async () => {
+    const off = setup({ enabled: false });
+    seedCredential(off.passkeyRows, '1');
+    const offToken = (await off.service.createChallenge('1')).token;
+    await expect(off.service.authenticationOptions(offToken)).rejects.toThrow(
+      'Could not verify that passkey.'
+    );
+
+    const none = setup();
+    const noneToken = (await none.service.createChallenge('1')).token;
+    await expect(none.service.authenticationOptions(noneToken)).rejects.toThrow(
+      'Could not verify that passkey.'
+    );
+  });
+
+  test('options refuses a throttled account with a RateLimitError, before reading any credential', async () => {
+    const { service, passkeyRows, events } = setup({ mfaConfig: { maxUserAttempts: 1 } });
+    seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    events.push({
+      id: 999,
+      userId: '1',
+      type: 'challenge_failed',
+      metadata: {},
+      seenAt: null,
+      createdAt: new Date(),
+    });
+
+    await expect(service.authenticationOptions(token)).rejects.toThrow(errors.RateLimitError);
+  });
+
+  test('options returns the generic message on an RP misconfiguration, with the cause only in the log', async () => {
+    const { service, passkeyRows, strapi } = setup({ adminUrl: 'http://0.0.0.0:1337/admin' });
+    seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+
+    // Deployment information is not something the holder of a challenge token gets to learn.
+    await expect(service.authenticationOptions(token)).rejects.toThrow(
+      'Could not verify that passkey.'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+  });
+
+  test('a successful assertion updates the counter and lastUsedAt, notifies without a row, and consumes the challenge', async () => {
+    const { service, passkeyRows, challenges, events, strapi } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified(11) as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).resolves.toEqual({ userId: '1' });
+
+    // `Number(row.counter)` on a `biginteger` read back as a string.
+    expect(jest.mocked(verifyAuthenticationResponse)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expectedRPID: 'cms.example.com',
+        expectedOrigin: ['https://cms.example.com'],
+        requireUserVerification: false,
+        credential: {
+          id: row.credentialId,
+          publicKey: isoBase64URL.toBuffer(row.publicKey),
+          counter: 5,
+          transports: ['internal'],
+        },
+      })
+    );
+
+    expect(passkeyRows[0].counter).toBe(11);
+    expect(passkeyRows[0].lastUsedAt).toBeInstanceOf(Date);
+    expect(challenges).toHaveLength(0);
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.passkey.used', { userId: '1' });
+    expect(events.filter((e) => e.type === 'passkey_used')).toHaveLength(0);
+  });
+
+  test('two concurrent successful assertions: exactly one wins the challenge', async () => {
+    const { service, passkeyRows } = setup({ mfaConfig: { maxChallengeAttempts: 5 } });
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+
+    const results = await Promise.allSettled([
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never),
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never),
+    ]);
+
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  });
+
+  test('a failed assertion charges both tiers: the per-challenge counter and challenge_failed', async () => {
+    const { service, passkeyRows, challenges, events, strapi } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges[0].attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.challenge.failed', {
+      userId: '1',
+    });
+  });
+
+  test('the attempt is charged before verification, so a crashing verifier still costs one', async () => {
+    const { service, passkeyRows, challenges, events } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    // The library raises on a counter regression -- the clone signal -- and this is that path.
+    jest
+      .mocked(verifyAuthenticationResponse)
+      .mockRejectedValue(new Error('Response counter value 3 was lower than 5') as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges[0].attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    expect(passkeyRows[0].counter).toBe('5');
+    expect(passkeyRows[0].lastUsedAt).toBeNull();
+  });
+
+  test('running the per-challenge cap out destroys the challenge', async () => {
+    const { service, passkeyRows, challenges } = setup({ mfaConfig: { maxChallengeAttempts: 1 } });
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges).toHaveLength(0);
+  });
+
+  test('verify without options: no stored WebAuthn challenge is a charged failure', async () => {
+    const { service, passkeyRows, challenges, events } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges[0].attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    expect(jest.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
+  });
+
+  test("another account's passkey finds no row: the lookup is scoped to the challenge's owner", async () => {
+    const { service, passkeyRows, events } = setup();
+    seedCredential(passkeyRows, '1');
+    const theirs = seedCredential(passkeyRows, '2', { credentialId: 'cred-theirs' });
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(theirs.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(jest.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    // Untouched: a foreign row is refused, never modified.
+    expect(passkeyRows.find((r) => r.credentialId === 'cred-theirs')!.lastUsedAt).toBeNull();
+  });
+
+  test('the policy off refuses with rows still present, charging no attempt and recording nothing', async () => {
+    const { service, passkeyRows, challenges, events, stored } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    stored.passkeys.enabled = false;
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges[0].attempts).toBe(0);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
+  });
+
+  test('an RP misconfiguration met mid-verify charges the attempt but records no event', async () => {
+    // A deployment fault is not a verification outcome, so it must not look like one in the
+    // account's failure history -- but it is met after the increment, which is what stops a
+    // misconfiguration being distinguishable from a bad credential.
+    const { service, passkeyRows, challenges, events, strapi } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    strapi.config.get = jest.fn((key: string, defaultValue?: unknown) => {
+      if (key === 'admin.auth.mfa') return { enabled: true };
+      if (key === 'admin.absoluteUrl') return 'http://0.0.0.0:1337/admin';
+      return defaultValue;
+    });
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+
+    expect(challenges[0].attempts).toBe(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+  });
+
+  test('a throttled account is a RateLimitError, before any attempt is charged', async () => {
+    const { service, passkeyRows, challenges, events } = setup({
+      mfaConfig: { maxUserAttempts: 1 },
+    });
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    events.push({
+      id: 998,
+      userId: '1',
+      type: 'challenge_failed',
+      metadata: {},
+      seenAt: null,
+      createdAt: new Date(),
+    });
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow(errors.RateLimitError);
+    expect(challenges[0].attempts).toBe(0);
   });
 });

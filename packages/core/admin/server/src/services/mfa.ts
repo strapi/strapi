@@ -1542,6 +1542,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     deletePasskey: passkeys.deletePasskey,
     clearPasskeys: passkeys.clearPasskeys,
     clearAllPasskeys: passkeys.clearAllPasskeys,
+    authenticationOptions: passkeys.authenticationOptions,
+    verifyAssertion: passkeys.verifyAssertion,
     passkeySettings: passkeys.passkeySettings,
   };
 };

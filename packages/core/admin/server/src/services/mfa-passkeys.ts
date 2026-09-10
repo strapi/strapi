@@ -1,10 +1,17 @@
 import { isIP } from 'node:net';
 import { errors } from '@strapi/utils';
-import { generateRegistrationOptions, verifyRegistrationResponse } from '@simplewebauthn/server';
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
 import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
 import type {
+  AuthenticationResponseJSON,
   AuthenticatorTransport,
   PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/server';
 import type { Core, Data } from '@strapi/types';
@@ -14,14 +21,9 @@ import type { MfaConfig } from '../config/mfa';
 import type { MfaEventMetadata, MfaEventType } from './mfa';
 import { warnOnce } from './security-settings';
 
-// `RateLimitError` is unused until Task 6 (the login ceremony) throttles a spent challenge token.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
 const USER_UID = 'admin::user';
-// `CHALLENGE_UID` is unused until Task 6 resolves `admin::mfa-challenge`'s webauthn-challenge
-// column for the login ceremony.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CHALLENGE_UID = 'admin::mfa-challenge';
 
 export const PASSKEY_UID = 'admin::mfa-passkey';
@@ -330,12 +332,9 @@ const readCeremonyChallenge = (registration: RegistrationResponseJSON): string |
 export const createPasskeys = ({
   strapi,
   settings,
-  // Task 6 (the login ceremony) is the consumer of `config` and `isAccountThrottled`.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   config,
   recordEvent,
   notify,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isAccountThrottled,
 }: PasskeyDeps) => {
   const query = () => strapi.db.query(PASSKEY_UID);
@@ -367,6 +366,258 @@ export const createPasskeys = ({
     }
 
     return { tableName: metadata.tableName, challengeColumn };
+  };
+
+  const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
+
+  /**
+   * Physical names for the three raw statements on the login path: the conditional attempt
+   * increment, the challenge write, and the single-DELETE consume. Resolved from metadata for the
+   * same reasons as `challengeTable()` in `mfa.ts` -- and resolved *here* rather than injected,
+   * so this module stays self-contained the way cycle 3's does.
+   */
+  const challengeTable = (): {
+    tableName: string;
+    attemptsColumn: string;
+    webauthnColumn: string;
+  } => {
+    const metadata = strapi.db.metadata.get(CHALLENGE_UID);
+    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
+    // attributes and attempts' static type is the full Attribute union. Optional chaining guards
+    // a missing attribute so the actionable ApplicationError below is what surfaces.
+    const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
+    // @ts-expect-error - same reasoning for the cycle 4 column.
+    const webauthnColumn: string | undefined = metadata.attributes.webauthnChallenge?.columnName;
+
+    if (!attemptsColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::mfa-challenge.attempts'
+      );
+    }
+    if (!webauthnColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::mfa-challenge.webauthnChallenge'
+      );
+    }
+
+    return { tableName: metadata.tableName, attemptsColumn, webauthnColumn };
+  };
+
+  /**
+   * The challenge row, or null when it cannot authorise anything. Mirrors `verifyChallenge`'s own
+   * opening checks, including the fail-closed expiry: `new Date('nonsense') <= new Date()` is
+   * false for an Invalid Date, so comparing without the NaN guard would turn a missing or
+   * malformed `expiresAt` into a challenge that never expires.
+   */
+  const usableChallenge = async (
+    challengeToken: string
+  ): Promise<{ id: unknown; userId: string; webauthnChallenge?: string | null } | null> => {
+    const challenge = await challengeQuery().findOne({ where: { token: challengeToken } });
+    if (!challenge || challenge.consumedAt) {
+      return null;
+    }
+
+    const expiresAt = new Date(challenge.expiresAt);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+      return null;
+    }
+
+    return challenge;
+  };
+
+  const authenticationOptions = async (
+    challengeToken: string
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> => {
+    const challenge = await usableChallenge(challengeToken);
+    if (!challenge) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+    const userId = String(challenge.userId);
+
+    // Checked but not charged: this handler evaluates no factor, so it costs no attempt -- and
+    // checking the throttle and the challenge's usability is what stops it being an unmetered
+    // oracle.
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
+    const rows = (await query().findMany({
+      where: { userId },
+      select: ['credentialId', 'transports'],
+    })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
+
+    // The client gates on `passkeyAvailable` and should not have called; either way this is the
+    // same generic message as every other failure of this pair.
+    if (!(await settings()).enabled || rows.length === 0) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    // On these two unauthenticated routes an RP refusal returns the generic message and writes
+    // the actionable detail to the log (`resolveWebauthnRp` already did): the config key is
+    // deployment information and the caller holds only a challenge token.
+    let rp: WebauthnRp;
+    try {
+      rp = resolveWebauthnRp(strapi);
+    } catch {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID: rp.rpId,
+      allowCredentials: rows.map((row) => ({
+        id: row.credentialId,
+        transports: splitTransports(row.transports),
+      })),
+      userVerification: 'preferred',
+    });
+
+    // Keyed on the row id alone, overwriting any previous value so a retry re-mints cleanly. No
+    // `consumedAt IS NULL` guard: `consumeChallenge` spends a challenge by *deleting* the row, so
+    // a consumed challenge is a missing row and the id match is the whole check -- a `consumedAt`
+    // predicate here would read as protection it is not providing.
+    const { tableName, webauthnColumn } = challengeTable();
+    await strapi.db
+      .connection(tableName)
+      .where({ id: challenge.id })
+      .update({ [webauthnColumn]: options.challenge });
+
+    return options;
+  };
+
+  const verifyAssertion = async (
+    challengeToken: string,
+    assertion: AuthenticationResponseJSON
+  ): Promise<{ userId: string }> => {
+    const challenge = await usableChallenge(challengeToken);
+    if (!challenge) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+    const userId = String(challenge.userId);
+
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
+    // Defence in depth, not a hole being closed: the cascade runs inside `updateSettings`'s own
+    // transaction, so the setting and the rows cannot diverge through it, and the tolerant read
+    // falls back to `enabled: true`, so it cannot manufacture this state either. What this does
+    // cover is a hand-edited `core_store` row and any future caller that clears the setting
+    // without the cascade -- the same class of reason cycle 1 gives for its fail-closed expiry
+    // checks. No attempt charged and no event: nothing was evaluated.
+    if (!(await settings()).enabled) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    const { tableName, attemptsColumn } = challengeTable();
+
+    // The same conditional increment `verifyChallenge` uses -- `UPDATE ... SET attempts =
+    // attempts + 1 WHERE id = ? AND attempts < ?` -- whose affected-row count is the decision,
+    // run *before* any verification so a request that crashes mid-verification has still cost an
+    // attempt. Both tiers are charged on this path: charging one but not the other is a hole in
+    // the other, and a passkey path that charged neither would be the way around cycle 1's
+    // throttle entirely.
+    const accepted = await strapi.db
+      .connection(tableName)
+      .where({ id: challenge.id })
+      .where(attemptsColumn, '<', config().maxChallengeAttempts)
+      .increment(attemptsColumn, 1);
+
+    if (accepted !== 1) {
+      // The cap was already reached. Destroy the challenge rather than leave a dead row, exactly
+      // as `verifyChallenge` does for `exhausted`.
+      await challengeQuery().deleteMany({ where: { id: challenge.id } });
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    /** One spent attempt at the account tier too, then the one generic message. */
+    const fail = async (): Promise<never> => {
+      await recordEvent(userId, 'challenge_failed');
+      notify(userId, 'challenge_failed');
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    };
+
+    // The client called verify without calling options.
+    if (!challenge.webauthnChallenge) {
+      return fail();
+    }
+
+    const credentialId = typeof assertion?.id === 'string' ? assertion.id : '';
+    if (!credentialId) {
+      return fail();
+    }
+
+    // Scoped to the challenge's owner in the `where` itself, never a global lookup followed by an
+    // owner comparison: that is the same thing until somebody edits it, and scoping the query
+    // means a valid assertion from another account's passkey finds no row.
+    const row = (await query().findOne({
+      where: { userId, credentialId },
+    })) as PasskeyRow | null;
+    if (!row) {
+      return fail();
+    }
+
+    // Resolved here rather than earlier so a misconfiguration cannot be told apart from a bad
+    // credential. A refusal charges no event -- it is a deployment fault, not a verification
+    // outcome -- and its cause is already in the log at error level.
+    let rp: WebauthnRp;
+    try {
+      rp = resolveWebauthnRp(strapi);
+    } catch {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    let verification;
+    try {
+      verification = await verifyAuthenticationResponse({
+        response: assertion,
+        expectedChallenge: challenge.webauthnChallenge,
+        expectedOrigin: rp.origins,
+        expectedRPID: rp.rpId,
+        requireUserVerification: false,
+        credential: {
+          id: row.credentialId,
+          publicKey: isoBase64URL.toBuffer(row.publicKey),
+          // `biginteger` reads back from the database as a string; the library wants a number.
+          counter: Number(row.counter),
+          transports: splitTransports(row.transports),
+        },
+      });
+    } catch (error) {
+      // The library raises on a counter regression, which is the clone signal, and skips that
+      // check when both counters are 0 (most platform passkeys report 0 forever). A raise is
+      // treated as a failure like any other.
+      strapi.log.warn(
+        `A passkey assertion could not be verified for admin user ${userId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return fail();
+    }
+
+    if (!verification.verified) {
+      return fail();
+    }
+
+    await query().update({
+      where: { id: row.id },
+      data: {
+        counter: verification.authenticationInfo.newCounter,
+        lastUsedAt: new Date(),
+      },
+    });
+
+    // Hub only, no row -- exactly like cycle 3's `trusted_device_used`.
+    notify(userId, 'passkey_used');
+
+    // The same single DELETE `consumeChallenge` uses: whoever removes the row wins, so a token
+    // cannot authorise two operations even if two concurrent requests each present a genuine
+    // assertion.
+    const consumed = await strapi.db.connection(tableName).where({ id: challenge.id }).del();
+    if (consumed !== 1) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
+    return { userId };
   };
 
   const passkeyRegistrationOptions = async (
@@ -664,6 +915,8 @@ export const createPasskeys = ({
     deletePasskey,
     clearPasskeys,
     clearAllPasskeys,
+    authenticationOptions,
+    verifyAssertion,
     passkeySettings,
   };
 };
