@@ -36,6 +36,43 @@ const mfaLoginSchema = yup
 export const validateMfaLoginInput = validateYupSchema(mfaLoginSchema);
 
 /**
+ * /admin/login/mfa/webauthn/options - the challenge token is the only credential. Same 64-hex
+ * bound as `mfaLoginSchema`.
+ */
+const mfaWebauthnOptionsSchema = yup
+  .object()
+  .shape({
+    challengeToken: yup.string().max(64).required(),
+  })
+  .required()
+  .noUnknown();
+
+/**
+ * /admin/login/mfa/webauthn - `assertion` is a required object handed to
+ * `@simplewebauthn/server` otherwise unvalidated (same reasoning as `registerPasskeySchema`).
+ *
+ * `deviceId` / `rememberMe` are not decoration and `trustDevice` is not either: `issueSession`
+ * reads the first two from the request body via `extractDeviceParams`, which is why
+ * `mfaLoginSchema` declares them, and `.noUnknown()` below would otherwise reject a body that
+ * legitimately carries them -- silently losing the caller's "remember me" choice and leaving the
+ * trusted-device row's `deviceId` null.
+ */
+const mfaWebauthnLoginSchema = yup
+  .object()
+  .shape({
+    challengeToken: yup.string().max(64).required(),
+    assertion: yup.object().required(),
+    trustDevice: yup.boolean().optional(),
+    deviceId: yup.string().uuid().optional(),
+    rememberMe: yup.boolean().optional(),
+  })
+  .required()
+  .noUnknown();
+
+export const validateMfaWebauthnOptionsInput = validateYupSchema(mfaWebauthnOptionsSchema);
+export const validateMfaWebauthnLoginInput = validateYupSchema(mfaWebauthnLoginSchema);
+
+/**
  * /mfa/enrol - a password starts a fresh enrolment; an already-enrolled account must also send
  * `code` (a current TOTP code or a recovery code) to replace its authenticator. Same bounds and
  * no-`.trim()` reasoning as `mfaLoginSchema`.

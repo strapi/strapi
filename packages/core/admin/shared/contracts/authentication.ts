@@ -41,6 +41,13 @@ export interface MfaChallengeResponse {
      * days"), or null when the organisation does not offer trusted devices. Never absent.
      */
     trustedDeviceDays: number | null;
+    /**
+     * Cycle 4: whether the challenge screen may offer "Use a passkey" -- the organisation allows
+     * passkeys *and* this account holds at least one. Never absent. Telling a caller who already
+     * proved the password that this account has passkeys is not a new disclosure: the challenge
+     * itself already reveals that the account is enrolled.
+     */
+    passkeyAvailable: boolean;
   };
 }
 

@@ -30,6 +30,7 @@ const setStrapi = (value: object) => {
 const DECIDED_CALL_SITES = [
   'login', // gated: issues a challenge instead
   'loginMfa', // the gate itself
+  'loginMfaWebauthn', // the same gate, satisfied by a passkey instead of a code
   'register', // no gate: invite acceptance, the user cannot be enrolled yet
   'registerAdmin', // no gate: first admin bootstrap, no mfa can exist
   'resetPassword', // gated: issues a challenge instead
@@ -127,6 +128,7 @@ const buildResetStrapi = ({
           createChallenge,
           enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
           trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+          countPasskeys: jest.fn(() => Promise.resolve(1)),
         },
         user: { sanitizeUser },
       },
@@ -208,6 +210,7 @@ const buildPath = (
             Promise.resolve({ token: 'path-challenge-token', expiresIn: 300 })
           ),
           enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
+          countPasskeys: jest.fn(() => Promise.resolve(0)),
           ...mfaOverrides,
         },
       },
@@ -250,6 +253,14 @@ describe('session issuing paths', () => {
     const callSites = [...controller.matchAll(/issueSession\(/g)];
 
     expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
+
+    // `login` still funnels both its branches (challenge, session) through one call site: cycles
+    // 3 and 4 both fall through to it rather than adding a second.
+    const loginBlock = controller.slice(
+      controller.indexOf('login: compose('),
+      controller.indexOf('loginMfa: compose(')
+    );
+    expect([...loginBlock.matchAll(/issueSession\(/g)]).toHaveLength(1);
 
     expect(controller).not.toMatch(/generateRefreshToken\(/);
 
@@ -307,6 +318,7 @@ describe('session issuing paths', () => {
         challengeToken: 'reset-challenge-token',
         expiresIn: 300,
         trustedDeviceDays: 30,
+        passkeyAvailable: true,
       },
     });
 
@@ -500,7 +512,7 @@ describe('session issuing paths', () => {
  * `extractDeviceParams` to read, so it does not go through `issueSession`). This scans the whole
  * surface -- `server/src`, `ee/server/src`, and `shared` (where `issueSession` itself is
  * implemented) -- for both ways a session gets minted, and pins the exact, decided set: exactly
- * the CE controller's five `issueSession(` calls (`DECIDED_CALL_SITES` above), `issueSession`'s
+ * the CE controller's **six** `issueSession(` calls (`DECIDED_CALL_SITES` above), `issueSession`'s
  * own `generateRefreshToken(` call in `shared/utils/session-auth.ts`, and the EE SSO callback's
  * `generateRefreshToken(` call. A new call site anywhere in this surface -- a helper that mints a
  * session outside `issueSession`, or a second EE integration that mints one directly -- changes
@@ -533,8 +545,9 @@ describe('generateRefreshToken / issueSession call-site inventory (F4)', () => {
     }
 
     expect(found).toEqual({
-      // The five decided CE call sites (`login`, `loginMfa`, `register`, `registerAdmin`,
-      // `resetPassword`) -- already enumerated and reasoned about individually above.
+      // The six decided CE call sites (`login`, `loginMfa`, `loginMfaWebauthn`, `register`,
+      // `registerAdmin`, `resetPassword`) -- already enumerated and reasoned about individually
+      // above.
       [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueSession(`]:
         DECIDED_CALL_SITES.length,
       // `issueSession`'s own implementation: every CE flow above funnels through this one call.

@@ -1231,7 +1231,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       data: {
         token,
         userId: String(userId),
-        factorType: 'totp',
+        // Cycle 4: this stopped being an honest `'totp'` the moment a passkey assertion could
+        // consume the same row -- `verifyChallenge` (TOTP/recovery code) and `verifyAssertion`
+        // (passkey) both call `consumeChallenge` on whichever one the caller completes first, and
+        // neither reads this column to decide anything (dispatch is on the submitted credential's
+        // own shape, never on what was minted). `'any'` records what is actually true: any factor
+        // the account currently has enrolled may satisfy this row.
+        factorType: 'any',
         attempts: 0,
         expiresAt: new Date(Date.now() + challengeTtl * 1000),
         consumedAt: null,

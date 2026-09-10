@@ -3,8 +3,10 @@ import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
 import { errors } from '@strapi/utils';
+import type { AuthenticationResponseJSON } from '@simplewebauthn/server';
 import { getService } from '../utils';
 import { MfaLockedError } from '../services/mfa-errors';
+import { PASSKEY_VERIFY_FAILED } from '../services/mfa-passkeys';
 import {
   REFRESH_COOKIE_NAME,
   MFA_TRUST_COOKIE_NAME,
@@ -26,7 +28,11 @@ import {
   validateResetPasswordInput,
   validateLoginSessionInput,
 } from '../validation/authentication';
-import { validateMfaLoginInput } from '../validation/authentication/mfa';
+import {
+  validateMfaLoginInput,
+  validateMfaWebauthnLoginInput,
+  validateMfaWebauthnOptionsInput,
+} from '../validation/authentication/mfa';
 
 import type {
   ForgotPassword,
@@ -38,6 +44,7 @@ import type {
   RegistrationInfo,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
+import type { MfaWebauthnLogin, MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
@@ -69,6 +76,29 @@ const enforceMfaOrThrow = async (
 const offeredTrustDays = async (): Promise<number | null> => {
   const settings = await getService('mfa').trustedDeviceSettings();
   return settings.enabled ? settings.days : null;
+};
+
+/**
+ * Cycle 4: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
+ * while the organisation has turned passkeys off, so this is exactly "the policy allows them and
+ * this account holds at least one" in a single call.
+ */
+const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
+  (await getService('mfa').countPasskeys(userId)) > 0;
+
+/**
+ * The flag check runs before body validation, matching `controllers/mfa.ts`'s `requireEnabled`
+ * ordering: validating first would make flag-off return 400 for a malformed body and 404 for a
+ * well-formed one, and that difference is itself a feature-presence tell on a route that is
+ * supposed to behave as though it does not exist. Shared by all three challenge-completing
+ * routes since cycle 4 added two more.
+ */
+const requireMfaEnabled = async (ctx: Context, next: Next) => {
+  if (!getService('mfa').isEnabled()) {
+    return ctx.notFound();
+  }
+
+  return next();
 };
 
 export default {
@@ -131,6 +161,15 @@ export default {
         // `issueSession` call site (see session-issuing-paths.test.ts).
         const trustedDeviceDays = await offeredTrustDays();
 
+        // Read in the same step as `trustedDeviceDays` and for the same recorded reason: every
+        // store and database read this response needs happens *before* `createChallenge` mints
+        // its row, so a blip cannot 500 a response whose challenge already exists and make the
+        // retry mint a second, orphaned one. Not the same read: `offeredTrustDays` is a store
+        // read with no userId, while this needs a store read *and* a per-user COUNT. The cost is
+        // one indexed COUNT per enrolled login, including the ones a trust cookie then skips --
+        // accepted, because reordering it is the thing the rule forbids.
+        const passkeyAvailable = await passkeyAvailableFor(userId);
+
         const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
         const trusted = trustToken ? await mfa.consumeTrustedDevice(userId, trustToken) : false;
 
@@ -160,6 +199,7 @@ export default {
               challengeToken,
               expiresIn,
               trustedDeviceDays,
+              passkeyAvailable,
             },
           } satisfies MfaChallengeResponse;
           return;
@@ -174,19 +214,7 @@ export default {
   ]),
 
   loginMfa: compose([
-    // The flag check runs before body validation, matching `controllers/mfa.ts`'s
-    // `requireEnabled` ordering: validating first would make flag-off return 400 for a malformed
-    // body and 404 for a well-formed one, and that difference is itself a feature-presence tell on
-    // a route that is supposed to behave as though it does not exist.
-    async (ctx: Context, next: Next) => {
-      const mfa = getService('mfa');
-
-      if (!mfa.isEnabled()) {
-        return ctx.notFound();
-      }
-
-      return next();
-    },
+    requireMfaEnabled,
     async (ctx: Context) => {
       await validateMfaLoginInput(ctx.request.body ?? {});
 
@@ -225,6 +253,85 @@ export default {
       // Cycle 3: any verified challenge may grant trust. The service returns null when the
       // organisation does not offer it, and a stale checkbox is not an error. The raw token
       // exists only here and in the Set-Cookie header.
+      if (trustDevice) {
+        const granted = await mfa.trustDevice(String(user.id), {
+          deviceId,
+          userAgent: ctx.request.headers['user-agent'],
+        });
+        if (granted) {
+          setTrustCookie(ctx, granted.token, granted.expiresAt);
+        }
+      }
+
+      const sanitizedUser = getService('user').sanitizeUser(user);
+      strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
+
+      return issueSession(ctx, user);
+    },
+  ]),
+
+  /**
+   * Cycle 4: start an authentication ceremony against a challenge `/login` or `/reset-password`
+   * already minted. Unauthenticated and rate-limited; the challenge token is the only credential.
+   * Charges no attempt -- it evaluates no factor -- but the service still checks the throttle and
+   * the challenge's usability, so it cannot be used as an unmetered oracle.
+   */
+  loginMfaWebauthnOptions: compose([
+    requireMfaEnabled,
+    async (ctx: Context) => {
+      await validateMfaWebauthnOptionsInput(ctx.request.body ?? {});
+      const { challengeToken } = ctx.request.body as MfaWebauthnOptions.Request['body'];
+
+      const options = await getService('mfa').authenticationOptions(challengeToken);
+
+      // Spread rather than passed straight through: the library's options type is an `interface`,
+      // and TypeScript only grants an implicit index signature to an object *literal* type. The
+      // wire shape is unchanged -- the browser helper consumes it verbatim.
+      ctx.body = { data: { ...options } } satisfies MfaWebauthnOptions.Response;
+    },
+  ]),
+
+  /**
+   * Complete it. `verifyChallenge` is deliberately not extended for this: it dispatches on the
+   * submitted code's own shape, which is how the factor-switching bypass is avoided, and an
+   * assertion is not a code. Both counters `verifyChallenge` charges are charged here too (see
+   * `verifyAssertion`).
+   */
+  loginMfaWebauthn: compose([
+    requireMfaEnabled,
+    async (ctx: Context) => {
+      await validateMfaWebauthnLoginInput(ctx.request.body ?? {});
+
+      const mfa = getService('mfa');
+      // `rememberMe` is deliberately not destructured: `issueSession` reads it (and `deviceId`)
+      // from the request body itself via `extractDeviceParams`. It still has to be in the
+      // validator, or `.noUnknown()` rejects the body that carries it.
+      const { challengeToken, assertion, trustDevice, deviceId } = ctx.request
+        .body as MfaWebauthnLogin.Request['body'];
+
+      // Throws `RateLimitError` (429) when the account is throttled, and one generic
+      // `ValidationError` for every other outcome, so no caller can tell an expired challenge
+      // from a wrong credential from a policy that is off.
+      const { userId } = await mfa.verifyAssertion(
+        challengeToken,
+        assertion as unknown as AuthenticationResponseJSON
+      );
+
+      const user = await getService('user').findOne(userId);
+
+      // Exactly what `loginMfa` does, and for the same reason: a challenge can outlive an account
+      // being disabled inside its (default five-minute) window, and `verifyAssertion` has no
+      // equivalent gate. Mirrors `checkCredentials` -- it does not consult `blocked` -- and
+      // reuses this pair's one generic message rather than revealing "this account is disabled".
+      // It runs *before* the trust grant, or a deactivated account would also collect a 30-day
+      // trust cookie.
+      if (!user || user.isActive !== true) {
+        throw new ValidationError(PASSKEY_VERIFY_FAILED);
+      }
+
+      // Cycle 3's seam: the grant is factor-agnostic, so this is byte for byte what `/login/mfa`
+      // does. The service returns null when the organisation does not offer trust, and a stale
+      // checkbox is not an error. The raw token exists only here and in the Set-Cookie header.
       if (trustDevice) {
         const granted = await mfa.trustDevice(String(user.id), {
           deviceId,
@@ -320,6 +427,7 @@ export default {
       // Read before `createChallenge` mints its row, for the same reason as `login`: a store-read
       // failure here must not risk a 500 on a response whose challenge already exists.
       const trustedDeviceDays = await offeredTrustDays();
+      const passkeyAvailable = await passkeyAvailableFor(String(user.id));
 
       const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
@@ -340,6 +448,7 @@ export default {
           challengeToken,
           expiresIn,
           trustedDeviceDays,
+          passkeyAvailable,
         },
       } satisfies MfaChallengeResponse;
       return;

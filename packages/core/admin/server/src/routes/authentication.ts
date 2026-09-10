@@ -19,6 +19,24 @@ export default [
   },
   {
     method: 'POST',
+    path: '/login/mfa/webauthn/options',
+    handler: 'authentication.loginMfaWebauthnOptions',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
+    method: 'POST',
+    path: '/login/mfa/webauthn',
+    handler: 'authentication.loginMfaWebauthn',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
+    method: 'POST',
     path: '/access-token',
     handler: 'authentication.accessToken',
     config: {
