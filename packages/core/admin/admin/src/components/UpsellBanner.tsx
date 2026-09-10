@@ -20,12 +20,16 @@ const BannerBackground = styled(Flex)`
   position: relative;
 `;
 
-const FixedButtonWrapper = styled(Box)`
-  position: fixed;
+const ReopenButtonWrapper = styled(Box)`
   display: flex;
-  flex-direction: column;
-  z-index: 11;
-  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 9px 16px;
+`;
+
+const CloseButtonWrapper = styled(Box)`
+  position: absolute;
+  display: flex;
+  z-index: 1;
   top: 9px;
   right: 16px;
 `;
@@ -114,19 +118,19 @@ const Banner = ({
             </LinkButton>
           </Box>
         </Flex>
+        <CloseButtonWrapper>
+          <IconButton
+            withTooltip={false}
+            label={formatMessage({
+              id: 'app.components.UpsellBanner.close',
+              defaultMessage: 'Close',
+            })}
+            onClick={onDismiss}
+          >
+            <Cross />
+          </IconButton>
+        </CloseButtonWrapper>
       </BannerBackground>
-      <FixedButtonWrapper>
-        <IconButton
-          withTooltip={false}
-          label={formatMessage({
-            id: 'app.components.UpsellBanner.close',
-            defaultMessage: 'Close',
-          })}
-          onClick={onDismiss}
-        >
-          <Cross />
-        </IconButton>
-      </FixedButtonWrapper>
     </>
   );
 };
@@ -188,7 +192,7 @@ const UpsellBanner = () => {
 
   if (isDismissed) {
     return (
-      <FixedButtonWrapper>
+      <ReopenButtonWrapper>
         <IconButton
           withTooltip={false}
           label={formatMessage({
@@ -199,7 +203,7 @@ const UpsellBanner = () => {
         >
           <ArrowsOut />
         </IconButton>
-      </FixedButtonWrapper>
+      </ReopenButtonWrapper>
     );
   }
 
