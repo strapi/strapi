@@ -1592,6 +1592,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     verifyAssertion: passkeys.verifyAssertion,
     passkeySettings: passkeys.passkeySettings,
     passkeysConfigured: passkeys.passkeysConfigured,
+    warnIfPasskeysMisconfigured: passkeys.warnIfPasskeysMisconfigured,
   };
 };
 

@@ -1130,6 +1130,32 @@ export const createPasskeys = ({
     }
   };
 
+  /**
+   * Boot-time discoverability for the one misconfiguration that hides the whole feature.
+   *
+   * `resolveWebauthnRp`'s refusal is already logged at error level with the config key that fixes
+   * it, but until this existed the first thing to ask was `passkeysConfigured` on `/mfa/me` -- so
+   * the line only appeared once somebody loaded the admin, buried in request logs, long after the
+   * operator had stopped watching the console. Reached from `bootstrap.ts` instead, the cause is
+   * in the startup log beside every other configuration complaint.
+   *
+   * Called for its side effect rather than its answer: there is nothing to decide at boot, and
+   * `passkeysConfigured` swallowing the throw is exactly the behaviour wanted here too. `warnOnce`
+   * keys this to `webauthn.rp`, so spending the once at boot is deliberate -- the later lazy
+   * callers stay silent because the operator has already been told.
+   *
+   * Silent when the organisation has passkeys switched off: there is no feature to be missing, and
+   * an error about an unused config key is noise. That also means the check only runs where it can
+   * matter, since the store read below is the only work it does.
+   */
+  const warnIfPasskeysMisconfigured = async (): Promise<void> => {
+    if (!(await settings()).enabled) {
+      return;
+    }
+
+    passkeysConfigured();
+  };
+
   return {
     passkeyRegistrationOptions,
     registerPasskey,
@@ -1142,5 +1168,6 @@ export const createPasskeys = ({
     verifyAssertion,
     passkeySettings,
     passkeysConfigured,
+    warnIfPasskeysMisconfigured,
   };
 };

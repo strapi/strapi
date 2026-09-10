@@ -43,17 +43,35 @@ export default ({ env }) => ({
 Both keys are optional and default to being derived from `admin.absoluteUrl`: its hostname becomes
 the relying-party id and its origin becomes the single expected origin.
 
-:::caution
-**Derivation is not the same as "works with no configuration".** `getAbsoluteAdminUrl` only
-rewrites the host to `localhost` when `config.environment === 'development'`. In production, with
-the default `server.url` of `''` and the `HOST=0.0.0.0` every `create-strapi-app` template writes,
-`admin.absoluteUrl` is `http://0.0.0.0:1337/admin`, whose hostname is an IP literal and therefore
-not a valid relying-party id.
+Two common deployments therefore need **no passkey configuration at all**:
 
-**A default self-hosted deployment must set `admin.auth.mfa.webauthn.rpId`**, or passkeys stay
-hidden and unavailable. The refusal is logged once per process at **error** level with the config
-key that fixes it.
+- **Development.** `getAbsoluteAdminUrl` rewrites a loopback or wildcard host to `localhost` when
+  `config.environment === 'development'`, and `localhost` is a valid relying-party id and a secure
+  context. So `yarn develop` works as-is, provided the browser reaches the admin at `localhost` and
+  not at `127.0.0.1` (WebAuthn compares the origin exactly).
+- **Any deployment that sets `server.url` or `admin.url`.** When either is an absolute URL,
+  `getConfigUrls` returns it verbatim and the host-guessing branch never runs, so `rpId` and
+  `origins` derive from the real public hostname. A Strapi behind a proxy has to set this anyway,
+  or its webhook URLs, password-reset links and preview URLs are all wrong too.
+
+:::caution
+**The gap is a production deployment that never set `server.url`.** `admin.absoluteUrl` then falls
+back to `http://<server.host>:<server.port>/admin`, and with the `HOST=0.0.0.0` every
+`create-strapi-app` template writes, that is `http://0.0.0.0:1337/admin`. An IP literal is not a
+valid relying-party id, so passkeys hide themselves everywhere and no ceremony can start. **TOTP,
+enforcement and trusted devices are unaffected.**
+
+The fix is either `server.url` (the one that fixes everything else too) or
+`admin.auth.mfa.webauthn.rpId`. The refusal is logged at **error** level with the config key that
+fixes it, once per process, and `bootstrap` asks for it at startup when the policy is on, so the
+line appears in the startup log rather than only on the first `/mfa/me`.
 :::
+
+An IP literal cannot be made to work by configuration: the WebAuthn spec requires the relying-party
+id to be a valid domain string, and browsers reject an address. `localhost` is the only host that
+works without a domain. Mapping `0.0.0.0` to `localhost` outside development would be worse than
+refusing, because in production that host means "bind every interface" and the real public hostname
+is unknown, so the credentials minted would be bound to an origin nobody reaches the admin at.
 
 The relying-party identity is deliberately **not** taken from the request's `Origin` header, even
 though that would need no configuration and would survive any proxy. A fixed relying-party identity

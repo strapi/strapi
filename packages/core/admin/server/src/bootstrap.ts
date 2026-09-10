@@ -239,5 +239,26 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
         }`
       );
     }
+
+    // Cycle 4 discoverability. A deployment whose `admin.absoluteUrl` yields no usable
+    // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed --
+    // and used to say so only lazily, on whichever `/mfa/me` happened first. Asking here puts the
+    // cause and the config key that fixes it in the startup log, where an operator is actually
+    // looking. In practice this fires for a production deployment that never set `server.url`, so
+    // `admin.absoluteUrl` falls back to `http://<host>:<port>` and the template's `HOST=0.0.0.0`
+    // makes that an IP literal.
+    //
+    // Wrapped separately from the sweeps above, for two reasons: a store read that fails here
+    // must not be reported as a sweep failure, and -- like the sweeps -- a diagnostic must never
+    // be able to stop the admin from booting.
+    try {
+      await mfaService.warnIfPasskeysMisconfigured();
+    } catch (error) {
+      strapi.log.warn(
+        `Could not check the passkey relying-party configuration: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 };

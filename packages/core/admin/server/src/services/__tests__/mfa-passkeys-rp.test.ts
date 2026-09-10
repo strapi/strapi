@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 import type { Core } from '@strapi/types';
-import { resolveWebauthnRp, PASSKEY_RP_NOT_CONFIGURED } from '../mfa-passkeys';
+import { resolveWebauthnRp, createPasskeys, PASSKEY_RP_NOT_CONFIGURED } from '../mfa-passkeys';
 import { resetSecuritySettingsWarnings } from '../security-settings';
 
 /**
@@ -390,5 +390,87 @@ describe('resolveWebauthnRp', () => {
       expect((thrown as Error).message).toBe(PASSKEY_RP_NOT_CONFIGURED);
       expect((thrown as Error).message).not.toContain('0.0.0.0');
     }
+  });
+});
+
+/**
+ * The boot-time half of the same misconfiguration. `resolveWebauthnRp` already logs the cause, but
+ * before this the first thing to ask it was `/mfa/me`, so the line surfaced only once somebody
+ * loaded the admin -- in request logs, well after an operator had stopped reading the console.
+ */
+describe('warnIfPasskeysMisconfigured', () => {
+  const buildService = (config: Record<string, unknown>, enabled: boolean) => {
+    const { strapi, error, warn } = buildStrapi(config);
+    const passkeys = createPasskeys({
+      strapi,
+      settings: async () => ({ enabled }),
+      config: () => ({}) as never,
+      recordEvent: jest.fn(),
+      notify: jest.fn(),
+      isAccountThrottled: jest.fn(),
+    } as never);
+
+    return { passkeys, error, warn };
+  };
+
+  beforeEach(() => {
+    resetSecuritySettingsWarnings();
+  });
+
+  test('logs the cause and the config key that fixes it when the relying party cannot resolve', async () => {
+    // The shape a production deployment that never set `server.url` actually lands in.
+    const { passkeys, error } = buildService(
+      { 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' },
+      true
+    );
+
+    await passkeys.warnIfPasskeysMisconfigured();
+
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
+  });
+
+  test('resolves without throwing, so a misconfiguration can never stop the admin booting', async () => {
+    const { passkeys } = buildService({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' }, true);
+
+    await expect(passkeys.warnIfPasskeysMisconfigured()).resolves.toBeUndefined();
+  });
+
+  test('says nothing when the relying party resolves', async () => {
+    const { passkeys, error, warn } = buildService(DERIVED, true);
+
+    await passkeys.warnIfPasskeysMisconfigured();
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  test('says nothing when the organisation has passkeys switched off', async () => {
+    // No feature to be missing, so an error about an unused config key would be pure noise -- and
+    // the config here is the broken one, so this pins the policy check rather than a lucky pass.
+    const { passkeys, error, warn } = buildService(
+      { 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' },
+      false
+    );
+
+    await passkeys.warnIfPasskeysMisconfigured();
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  test('spends the once-per-process budget at boot, so the lazy callers stay quiet afterwards', async () => {
+    // Deliberate: the operator has already been told, and `warnOnce` keys this to `webauthn.rp`.
+    const { passkeys, error } = buildService(
+      { 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' },
+      true
+    );
+
+    await passkeys.warnIfPasskeysMisconfigured();
+    expect(passkeys.passkeysConfigured()).toBe(false);
+    expect(passkeys.passkeysConfigured()).toBe(false);
+
+    expect(error).toHaveBeenCalledTimes(1);
   });
 });
