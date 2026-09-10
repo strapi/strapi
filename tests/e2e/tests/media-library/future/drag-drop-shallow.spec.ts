@@ -9,6 +9,9 @@ import { AssetsPage } from './page-objects/AssetsPage';
 
 const FIXTURE_IMAGE = path.join(__dirname, '../../../data/uploads/test-image.jpg');
 
+// Sub-pixel layout rounding only — the modifier centres the chip exactly.
+const CHIP_CENTRE_TOLERANCE_PX = 1;
+
 describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
   'Media Library - Drag and Drop Shallow',
   () => {
@@ -96,6 +99,45 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await expect(assetsPage.getFolderRow('Self Folder')).toBeVisible();
       await expect(assetsPage.getMoveSuccessNotification()).not.toBeVisible();
     });
+
+    for (const view of ['grid', 'table'] as const) {
+      test(`keeps the drag preview under the cursor in ${view} view`, async ({ page }) => {
+        const assetsPage = new AssetsPage(page);
+        await assetsPage.goto();
+
+        await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
+        // The progress dialog, not a toast: uploading emits no notification in this
+        // library. It also has to be dismissed before the drag, since it covers the list.
+        await assetsPage.waitForUploadProgressSuccess();
+        await assetsPage.closeUploadProgressDialog();
+
+        if (view === 'grid') {
+          await assetsPage.switchToGridView();
+        } else {
+          await assetsPage.switchToTableView();
+        }
+
+        const pointer = await assetsPage.grabItemAndHold('test-image.jpg', view);
+
+        await expect(assetsPage.dragOverlayChip).toBeVisible();
+
+        const chipBox = await assetsPage.dragOverlayChip.boundingBox();
+        expect(chipBox).not.toBeNull();
+
+        // The chip's centre, not merely its bounds: the chip is far wider than it is tall,
+        // so "the pointer is somewhere inside it" would accept a regression of half its
+        // width horizontally. `AssetsDndProvider` centres it exactly, which the unit test
+        // asserts to the pixel — allow a pixel here for sub-pixel layout rounding.
+        expect(Math.abs(chipBox!.x + chipBox!.width / 2 - pointer.x)).toBeLessThanOrEqual(
+          CHIP_CENTRE_TOLERANCE_PX
+        );
+        expect(Math.abs(chipBox!.y + chipBox!.height / 2 - pointer.y)).toBeLessThanOrEqual(
+          CHIP_CENTRE_TOLERANCE_PX
+        );
+
+        await page.mouse.up();
+      });
+    }
 
     test('shows success toast and removes item from current view after drop', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
