@@ -35,5 +35,12 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
+  modulePathIgnorePatterns: [
+    '[/\\\\]\\.cache[/\\\\]',
+    '[/\\\\]dist[/\\\\]',
+    // A generated e2e app keeps real copies of the packages under `.yalc`,
+    // which the module map reads as a second `@strapi/core`; the API tests
+    // never load those apps.
+    '[/\\\\]test-apps[/\\\\]e2e[/\\\\]',
+  ],
 };

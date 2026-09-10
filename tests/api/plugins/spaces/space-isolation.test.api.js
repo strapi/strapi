@@ -8,12 +8,8 @@ const ARTICLE_UID = 'api::article.article';
 const CM_URL = `/content-manager/collection-types/${ARTICLE_UID}`;
 const SPACE_HEADER = 'X-Strapi-Space-Id';
 
+// No `pluginOptions.spaces` on purpose: user content types carry a workspace by default.
 const articleModel = {
-  pluginOptions: {
-    spaces: {
-      scope: 'space',
-    },
-  },
   attributes: {
     title: {
       type: 'string',
@@ -79,7 +75,7 @@ describe('Spaces — space isolation', () => {
         headers: { [SPACE_HEADER]: 'default' },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       data.defaultArticle = res.body.data ?? res.body;
       expect(data.defaultArticle.documentId).toEqual(expect.any(String));
 
@@ -130,6 +126,31 @@ describe('Spaces — space isolation', () => {
     });
   });
 
+  describe('Content-Type Builder from a sub-workspace', () => {
+    test('The schema is readable', async () => {
+      const res = await rq({
+        url: '/content-type-builder/schema',
+        method: 'GET',
+        headers: { [SPACE_HEADER]: 'acme' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Object.keys(res.body.data.contentTypes)).toContain(ARTICLE_UID);
+    });
+
+    test('Schema writes are refused with an explicit message', async () => {
+      const res = await rq({
+        url: '/content-type-builder/update-schema',
+        method: 'POST',
+        body: { components: [], contentTypes: [] },
+        headers: { [SPACE_HEADER]: 'acme' },
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error.message).toContain('managed from the default workspace');
+    });
+  });
+
   describe('Move between spaces', () => {
     test('POST /spaces/move moves the entry to acme', async () => {
       const res = await rq({
@@ -147,7 +168,7 @@ describe('Spaces — space isolation', () => {
       expect(res.body.documentIds).toEqual([data.defaultArticle.documentId]);
     });
 
-    test('After the move the entry lives in acme only', async () => {
+    test('After the move the entry belongs to acme; default still sees it', async () => {
       const fromDefault = await rq({
         url: CM_URL,
         method: 'GET',
@@ -159,7 +180,9 @@ describe('Spaces — space isolation', () => {
         headers: { [SPACE_HEADER]: 'acme' },
       });
 
-      expect(fromDefault.body.results).toHaveLength(0);
+      // The default workspace is a superset: it sees every entry, with its workspace.
+      expect(fromDefault.body.results).toHaveLength(1);
+      expect(fromDefault.body.results[0].space).toMatchObject({ slug: 'acme' });
       expect(fromAcme.body.results).toHaveLength(1);
       expect(fromAcme.body.results[0].title).toBe('Hello from default');
     });
