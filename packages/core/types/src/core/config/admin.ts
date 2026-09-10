@@ -36,6 +36,17 @@ export interface MfaWindow {
   forward: number;
 }
 
+/**
+ * Cycle 4 WebAuthn relying-party overrides. Both optional: the server derives them from
+ * `admin.absoluteUrl`. `rpId` is **required** for any deployment whose `admin.absoluteUrl`
+ * resolves to an IP literal -- the default production shape -- because an IP literal is not a
+ * valid relying-party id. `origins` exists for one deployment served on several hostnames.
+ */
+export interface MfaWebauthn {
+  rpId?: string;
+  origins?: string[];
+}
+
 export interface Mfa {
   enabled?: boolean;
   digits?: number;
@@ -47,6 +58,7 @@ export interface Mfa {
   userAttemptWindow?: number;
   recoveryCodeCount?: number;
   issuer?: string;
+  webauthn?: MfaWebauthn;
   /**
    * Template for the best-effort "your two-factor settings changed" notification email. Same
    * shape `ForgotPassword.emailTemplate` should be -- a subject/text/html triple -- not the bare

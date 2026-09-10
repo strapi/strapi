@@ -1,7 +1,10 @@
 import type { Core } from '@strapi/types';
 
+// `webauthn` is omitted rather than given a default: `validateMfaConfig` exists to keep the TOTP
+// numbers interoperable, and there is no safe default for a relying-party id -- a wrong one is a
+// refusal (`resolveWebauthnRp`), not a value to fall back to.
 export type MfaConfig = Required<
-  Omit<NonNullable<Core.Config.Admin['auth']['mfa']>, 'issuer' | 'emailTemplate'>
+  Omit<NonNullable<Core.Config.Admin['auth']['mfa']>, 'issuer' | 'emailTemplate' | 'webauthn'>
 > & {
   issuer?: string;
 };
