@@ -911,32 +911,46 @@ describe('authentication controller', () => {
       });
 
       test('trustDevice grants and sets the cookie, byte for byte what /login/mfa does', async () => {
-        const trustDevice = jest.fn(() =>
-          Promise.resolve({ token: 'raw-trust-token', expiresAt: new Date(Date.now() + 1000) })
-        );
+        const expiresAt = new Date(Date.now() + 1000);
+        const trustDevice = jest.fn(() => Promise.resolve({ token: 'raw-trust-token', expiresAt }));
         // The default `findOne` double (defined in the outer scope) resolves the *outer* fixture
         // user (id 7), not this describe's own `user` (id 5) that `verifyAssertion` reports --
         // overridden here so the account this test recovers actually matches the id assertions
         // below check for.
-        buildIssuingStrapi(webauthnMfa({ trustDevice }), {
+        const doubles = buildIssuingStrapi(webauthnMfa({ trustDevice }), {
           findOne: jest.fn(() => Promise.resolve(user)),
         });
         const { ctx, cookiesSet } = buildCtx(
           body({ trustDevice: true, deviceId: '11111111-1111-4111-8111-111111111111' })
         );
-        // `expect.anything()` below needs a real header to match against, exactly like the
-        // analogous `/login/mfa` trustDevice test.
+        // A real header, exactly like the analogous `/login/mfa` trustDevice test -- and, per
+        // finding 5, asserted against below exactly rather than with `expect.anything()`, which
+        // would still pass if the controller hardcoded a literal `userAgent` instead of reading
+        // it off the request.
         ctx.request.headers['user-agent'] = 'jest-agent';
 
         await authenticationController.loginMfaWebauthn(ctx, jest.fn());
 
         expect(trustDevice).toHaveBeenCalledWith(String(user.id), {
           deviceId: '11111111-1111-4111-8111-111111111111',
-          userAgent: expect.anything(),
+          userAgent: 'jest-agent',
         });
+        // Exact `expires`, not `expect.any(Object)` (finding 5): pins that the cookie carries the
+        // service's own `expiresAt`, and `httpOnly`, byte for byte with the /login/mfa version of
+        // this test.
         expect(cookiesSet).toHaveBeenCalledWith(
           MFA_TRUST_COOKIE_NAME,
           'raw-trust-token',
+          expect.objectContaining({ httpOnly: true, expires: expiresAt })
+        );
+        // Finding 5b: the submitted `deviceId` must reach `issueSession` itself (i.e.
+        // `generateRefreshToken`'s device-id argument), not just `trustDevice` -- a handler that
+        // minted its own fresh device id for the refresh token while still forwarding the
+        // caller's to `trustDevice` would satisfy every assertion above but desynchronize the
+        // trusted-device row from the session it is meant to cover.
+        expect(doubles.generateRefreshToken).toHaveBeenCalledWith(
+          String(user.id),
+          '11111111-1111-4111-8111-111111111111',
           expect.any(Object)
         );
       });
@@ -970,6 +984,190 @@ describe('authentication controller', () => {
           expect.any(String),
           expect.objectContaining({ type: 'refresh' })
         );
+      });
+
+      // F4: neither `mfaWebauthnOptionsSchema` nor `mfaWebauthnLoginSchema` had a single test --
+      // gutting either one (e.g. making `challengeToken`/`assertion` optional and unbounded) left
+      // 48/48 green. These are controller-level, like the rest of this file's validator coverage
+      // (e.g. `'a challengeToken over 64 characters is rejected...'` above): the schemas
+      // themselves are not exported, only the wrapped `validate*` functions.
+      describe('webauthn validators (finding 4)', () => {
+        test('loginMfaWebauthn: a missing assertion is rejected before verifyAssertion runs', async () => {
+          const verifyAssertion = jest.fn();
+          const doubles = buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx({ challengeToken: 'c'.repeat(64) });
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+          expect(doubles.generateRefreshToken).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthn: assertion: null is rejected before verifyAssertion runs', async () => {
+          const verifyAssertion = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx(body({ assertion: null }));
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthn: a challengeToken over 64 characters is rejected before verifyAssertion runs', async () => {
+          const verifyAssertion = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx(body({ challengeToken: 'c'.repeat(65) }));
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthn: an unknown body key is rejected by .noUnknown() before verifyAssertion runs', async () => {
+          const verifyAssertion = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx(body({ userId: 99 }));
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+        });
+
+        // `deviceId`/`rememberMe` are declared verbatim from `mfaLoginSchema` (per the brief), so
+        // they must carry the same constraints: a uuid-shaped `deviceId` and a boolean
+        // `rememberMe`. Neither was ever exercised against a bad value on this route.
+        test('loginMfaWebauthn: a non-uuid deviceId is rejected, mirroring mfaLoginSchema', async () => {
+          const verifyAssertion = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx(body({ trustDevice: true, deviceId: 'not-a-uuid' }));
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthn: a non-boolean rememberMe is rejected, mirroring mfaLoginSchema', async () => {
+          const verifyAssertion = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
+          const { ctx } = buildCtx(body({ rememberMe: 'yes' }));
+
+          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          expect(verifyAssertion).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthnOptions: a missing challengeToken is rejected before authenticationOptions runs', async () => {
+          const authenticationOptions = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ authenticationOptions }));
+          const { ctx } = buildCtx({});
+
+          await expect(
+            authenticationController.loginMfaWebauthnOptions(ctx, jest.fn())
+          ).rejects.toThrow();
+          expect(authenticationOptions).not.toHaveBeenCalled();
+        });
+
+        test('loginMfaWebauthnOptions: an unknown body key is rejected by .noUnknown() before authenticationOptions runs', async () => {
+          const authenticationOptions = jest.fn();
+          buildIssuingStrapi(webauthnMfa({ authenticationOptions }));
+          // `mfaWebauthnOptionsSchema` has no `assertion` field at all -- a real caller of this
+          // route never sends one, so an object value (not an explicit `undefined`, which trips
+          // `.noUnknown()` for an unrelated reason -- see the options-route test above) proves the
+          // schema itself rejects an extra key rather than merely a malformed one.
+          const { ctx } = buildCtx({ challengeToken: 'c'.repeat(64), assertion: { id: 'cred-1' } });
+
+          await expect(
+            authenticationController.loginMfaWebauthnOptions(ctx, jest.fn())
+          ).rejects.toThrow();
+          expect(authenticationOptions).not.toHaveBeenCalled();
+        });
+      });
+    });
+
+    // Findings 2, 3 & 6: nothing pinned which user `countPasskeys` was asked about, that it runs
+    // before `createChallenge` mints a row, or that the trusted-cookie fast path never pays for it
+    // at all. Substituting a hardcoded `passkeyAvailableFor('999')`, or moving either read to
+    // after its `createChallenge` call, left every existing assertion green.
+    describe('passkeyAvailable: read timing, identity, and the trusted-cookie fast path (findings 2, 3 & 6)', () => {
+      test('login: countPasskeys is asked about this user, before createChallenge mints a row', async () => {
+        mockPassportUser(user);
+        const countPasskeys = jest.fn(() => Promise.resolve(0));
+        const createChallenge = jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        );
+        buildIssuingStrapi(enrolledMfa({ countPasskeys, createChallenge }));
+        const { ctx } = buildCtx({ email: user.email, password: 'Password123' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(countPasskeys).toHaveBeenCalledWith(String(user.id));
+        expect(countPasskeys.mock.invocationCallOrder[0]).toBeLessThan(
+          createChallenge.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('login: a countPasskeys failure aborts before any challenge row is minted', async () => {
+        mockPassportUser(user);
+        const createChallenge = jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        );
+        buildIssuingStrapi(
+          enrolledMfa({
+            countPasskeys: jest.fn(() => Promise.reject(new Error('store unavailable'))),
+            createChallenge,
+          })
+        );
+        const { ctx } = buildCtx({ email: user.email, password: 'Password123' });
+
+        await expect(authenticationController.login(ctx, jest.fn())).rejects.toThrow(
+          'store unavailable'
+        );
+        expect(createChallenge).not.toHaveBeenCalled();
+      });
+
+      // The whole point of finding 6: a trusted browser must not pay for a value it discards.
+      test('login: a live trust cookie never triggers countPasskeys at all', async () => {
+        mockPassportUser(user);
+        const countPasskeys = jest.fn(() => Promise.resolve(0));
+        const consumeTrustedDevice = jest.fn(() => Promise.resolve(true));
+        buildIssuingStrapi(enrolledMfa({ countPasskeys, consumeTrustedDevice }));
+        const { ctx } = buildCtx(
+          { email: user.email, password: 'Password123' },
+          { [MFA_TRUST_COOKIE_NAME]: 'trust-token' }
+        );
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(consumeTrustedDevice).toHaveBeenCalledWith(String(user.id), 'trust-token');
+        expect(countPasskeys).not.toHaveBeenCalled();
+      });
+
+      test('/reset-password: countPasskeys is asked about this user, before createChallenge mints a row', async () => {
+        const countPasskeys = jest.fn(() => Promise.resolve(0));
+        const createChallenge = jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        );
+        buildIssuingStrapi(enrolledMfa({ countPasskeys, createChallenge }));
+        const { ctx } = buildCtx({ resetPasswordToken: 'reset-token', password: 'NewPassword123' });
+
+        await authenticationController.resetPassword(ctx);
+
+        expect(countPasskeys).toHaveBeenCalledWith(String(user.id));
+        expect(countPasskeys.mock.invocationCallOrder[0]).toBeLessThan(
+          createChallenge.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('/reset-password: a countPasskeys failure aborts before any challenge row is minted', async () => {
+        const createChallenge = jest.fn(() =>
+          Promise.resolve({ token: 'challenge-token', expiresIn: 300 })
+        );
+        buildIssuingStrapi(
+          enrolledMfa({
+            countPasskeys: jest.fn(() => Promise.reject(new Error('store unavailable'))),
+            createChallenge,
+          })
+        );
+        const { ctx } = buildCtx({ resetPasswordToken: 'reset-token', password: 'NewPassword123' });
+
+        await expect(authenticationController.resetPassword(ctx)).rejects.toThrow(
+          'store unavailable'
+        );
+        expect(createChallenge).not.toHaveBeenCalled();
       });
     });
   });

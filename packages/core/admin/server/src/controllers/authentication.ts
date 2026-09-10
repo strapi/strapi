@@ -161,15 +161,6 @@ export default {
         // `issueSession` call site (see session-issuing-paths.test.ts).
         const trustedDeviceDays = await offeredTrustDays();
 
-        // Read in the same step as `trustedDeviceDays` and for the same recorded reason: every
-        // store and database read this response needs happens *before* `createChallenge` mints
-        // its row, so a blip cannot 500 a response whose challenge already exists and make the
-        // retry mint a second, orphaned one. Not the same read: `offeredTrustDays` is a store
-        // read with no userId, while this needs a store read *and* a per-user COUNT. The cost is
-        // one indexed COUNT per enrolled login, including the ones a trust cookie then skips --
-        // accepted, because reordering it is the thing the rule forbids.
-        const passkeyAvailable = await passkeyAvailableFor(userId);
-
         const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
         const trusted = trustToken ? await mfa.consumeTrustedDevice(userId, trustToken) : false;
 
@@ -177,6 +168,15 @@ export default {
           if (trustToken) {
             clearTrustCookie(ctx);
           }
+
+          // Read here, immediately before `createChallenge`, for the same recorded reason as
+          // `trustedDeviceDays` above: every store and database read this response needs happens
+          // *before* `createChallenge` mints its row, so a blip cannot 500 a response whose
+          // challenge already exists and make the retry mint a second, orphaned one. Unlike
+          // `trustedDeviceDays`, this read is scoped to inside the trust-cookie branch: a trusted
+          // browser's happy path never needs this value (it is discarded when `trusted` is true),
+          // so paying a per-user COUNT and a new 500 surface for it there would be pure waste.
+          const passkeyAvailable = await passkeyAvailableFor(userId);
 
           const { token: challengeToken, expiresIn } = await mfa.createChallenge(userId);
 
