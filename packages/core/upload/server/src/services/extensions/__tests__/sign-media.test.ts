@@ -204,7 +204,7 @@ describe('Upload | extensions | entity-manager', () => {
      * signature always replaces whatever query string the stored URL had.
      */
     const fakeSignFileUrls = jest.fn(async (file: any) => {
-      const isOwned = (url: string) => url.startsWith(BUCKET_URL);
+      const isOwned = (url: string) => url.startsWith(`${BUCKET_URL}/`);
       const sign = (url: string) => (isOwned(url) ? `${url.split('?')[0]}?signature=fresh` : url);
       const signed = { ...file, isUrlSigned: false };
 
