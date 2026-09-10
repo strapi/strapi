@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 
 import { PERMISSIONS } from '../constants';
 import {
+  useGetMineSpacesQuery,
   useMoveToSpaceMutation,
   useOverrideEntryMutation,
   useResetOverrideMutation,
@@ -73,24 +74,26 @@ const DefaultWorkspacePanelContent = ({ model, documentId, state }: WorkspacePan
 
   return (
     <Flex direction="column" alignItems="stretch" gap={3}>
-      <Flex direction="column" alignItems="flex-start" gap={1}>
+      {isShared ? (
+        /* One sentence: a chip saying "Shared" next to it says the same thing
+           twice, and the workspaces that read the original are everyone. */
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
-            id: getTranslation('panel.belongsTo'),
-            defaultMessage: 'This entry belongs to',
+            id: getTranslation('panel.shared.summary'),
+            defaultMessage: 'This entry is shared with every workspace.',
           })}
         </Typography>
-        <WorkspaceChip space={state.space} />
-        {state.space === null ? (
+      ) : (
+        <Flex direction="column" alignItems="flex-start" gap={1}>
           <Typography variant="pi" textColor="neutral600">
             {formatMessage({
-              id: getTranslation('panel.shared.hint'),
-              defaultMessage:
-                'Visible in every workspace, editable from the Default workspace only.',
+              id: getTranslation('panel.belongsTo'),
+              defaultMessage: 'This entry belongs to',
             })}
           </Typography>
-        ) : null}
-      </Flex>
+          <WorkspaceChip space={state.space} />
+        </Flex>
+      )}
 
       {isShared ? <InheritanceSection model={model} documentId={documentId} /> : null}
 
@@ -193,6 +196,12 @@ const DefaultWorkspacePanelContent = ({ model, documentId, state }: WorkspacePan
  */
 const SubWorkspacePanelContent = ({ model, documentId, state }: WorkspacePanelContentProps) => {
   const { formatMessage } = useIntl();
+  // The workspace an inherited entry comes from, by its name rather than the
+  // slug — installs rename the default workspace ("Main", "Head office").
+  const { data: spaces } = useGetMineSpacesQuery();
+  const originName =
+    spaces?.find((space) => space.slug === DEFAULT_SPACE_SLUG)?.name ??
+    formatMessage({ id: getTranslation('panel.origin.fallback'), defaultMessage: 'Default' });
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
@@ -252,15 +261,18 @@ const SubWorkspacePanelContent = ({ model, documentId, state }: WorkspacePanelCo
   if (state.isOverride) {
     return (
       <Flex direction="column" alignItems="stretch" gap={3}>
-        <Flex direction="column" alignItems="flex-start" gap={1}>
-          <Typography variant="pi" textColor="neutral600">
-            {formatMessage({
+        {/* Naming the workspace you are standing in tells you nothing; where
+            the entry came from does. */}
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage(
+            {
               id: getTranslation('panel.override.own'),
-              defaultMessage: 'This workspace has its own version of this entry.',
-            })}
-          </Typography>
-          <WorkspaceChip space={state.space} />
-        </Flex>
+              defaultMessage:
+                'This workspace’s own version of an entry from {origin}. Changes made there no longer reach it.',
+            },
+            { origin: originName }
+          )}
+        </Typography>
         <Dialog.Root open={isResetOpen} onOpenChange={setIsResetOpen}>
           <Dialog.Trigger>
             <Button variant="tertiary" startIcon={<ArrowRight />} fullWidth>

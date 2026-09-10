@@ -16,6 +16,7 @@ import {
   resetWorkspaces,
   shareEntries,
   waitForAdminReady,
+  workspaceSwitcher,
 } from './utils';
 
 const ENTRY = 'Company handbook';
@@ -56,7 +57,8 @@ test.describe('Workspaces — inherited entries and overrides', () => {
     await page.getByRole('button', { name: 'Override', exact: true }).click();
 
     await expect(titleField(page)).toBeEnabled();
-    await expect(page.getByText('This workspace has its own version of this entry.')).toBeVisible();
+    // Says where the entry came from, not which workspace you are standing in.
+    await expect(page.getByText(/own version of an entry from Default/)).toBeVisible();
 
     await titleField(page).fill(LOCAL_TITLE);
     await page.getByRole('button', { name: 'Save' }).click();
@@ -81,8 +83,16 @@ test.describe('Workspaces — inherited entries and overrides', () => {
 
     // …and says who has stopped following it.
     await page.goto(`${ARTICLE_LIST_URL}/${documentId}`);
-    await expect(page.getByText('Inheritance')).toBeVisible();
-    await expect(page.getByText('1 workspace has its own version')).toBeVisible();
+    await expect(page.getByText('This entry is shared with every workspace.')).toBeVisible();
+    await expect(page.getByText('Overridden in 1 workspace')).toBeVisible();
+
+    // …and the workspace that overrode it is a way in: one click and the same
+    // entry opens there, as that workspace reads it.
+    await page
+      .getByRole('button', { name: `Open this entry in ${WORKSPACE_NAMES[SUB_WORKSPACE]}` })
+      .click();
+    await expect(workspaceSwitcher(page)).toContainText(WORKSPACE_NAMES[SUB_WORKSPACE]);
+    await expect(titleField(page)).toHaveValue(LOCAL_TITLE);
   });
 
   test('resetting puts the workspace back on the original', async ({ page }) => {
@@ -130,6 +140,7 @@ test.describe('Workspaces — inherited entries and overrides', () => {
     await page.goto(`${ARTICLE_LIST_URL}/${documentId}`);
 
     await expect(page.getByRole('button', { name: 'Override in this workspace' })).toBeHidden();
-    await expect(page.getByText('No workspace has overridden it.')).toBeVisible();
+    await expect(page.getByText('This entry is shared with every workspace.')).toBeVisible();
+    await expect(page.getByText(/Overridden in/)).toBeHidden();
   });
 });

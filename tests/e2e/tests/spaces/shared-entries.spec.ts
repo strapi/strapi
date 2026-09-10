@@ -138,9 +138,7 @@ test.describe('Workspaces — shared entries', () => {
 
     await page.goto(`${ARTICLE_LIST_URL}/${sharedId}`);
 
-    await expect(
-      page.getByText('Visible in every workspace, editable from the Default workspace only.')
-    ).toBeVisible();
+    await expect(page.getByText('This entry is shared with every workspace.')).toBeVisible();
     await expect(page.getByText('Move to a workspace…')).toBeHidden();
   });
 
