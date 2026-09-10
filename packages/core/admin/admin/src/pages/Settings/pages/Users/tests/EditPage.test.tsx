@@ -281,5 +281,113 @@ describe('Users | EditPage', () => {
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();
     });
+
+    it('shows the passkey count for an enrolled user and removes them after confirmation', async () => {
+      let count = 2;
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count } })),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] })),
+        http.delete('/admin/mfa/users/1/passkeys', () => {
+          count = 0;
+          return new HttpResponse(null, { status: 204 });
+        })
+      );
+      const { user } = renderEdit();
+
+      expect(await screen.findByText('2 passkeys')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
+      expect(
+        screen.getByRole('alertdialog', { name: "Remove this user's passkeys?" })
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByText('Passkeys removed')).toBeInTheDocument();
+      expect(await screen.findByText('No passkeys')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Remove passkeys' })).not.toBeInTheDocument();
+    });
+
+    it('uses the singular for one passkey', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count: 1 } })),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] }))
+      );
+      renderEdit();
+
+      expect(await screen.findByText('1 passkey')).toBeInTheDocument();
+    });
+
+    it('shows the count but no Remove button without the update permission', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count: 1 } })),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] }))
+      );
+      render(<EditPage />, {
+        initialEntries: ['/settings/users/1'],
+        providerOptions: {
+          permissions: (defaults) => defaults.filter((p) => p.action !== 'admin::users.update'),
+        },
+      });
+
+      expect(await screen.findByText('1 passkey')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Remove passkeys' })).not.toBeInTheDocument();
+    });
+
+    it('does not ask for passkeys when the user is not enrolled', async () => {
+      let called = false;
+      server.use(
+        userWith({ mfaEnabledAt: null, mfaGraceUntil: null, mfaLockedAt: null }),
+        http.get('/admin/mfa/users/1/passkeys', () => {
+          called = true;
+          return HttpResponse.json({ data: { count: 0 } });
+        })
+      );
+      renderEdit();
+
+      await screen.findByText('Not enrolled');
+      expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
+      expect(called).toBe(false);
+    });
+
+    it('hides the line rather than showing a false zero when the read fails', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/passkeys', () =>
+          HttpResponse.json(
+            { error: { status: 500, name: 'InternalServerError', message: 'boom', details: {} } },
+            { status: 500 }
+          )
+        ),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] }))
+      );
+      renderEdit();
+
+      await screen.findByText(/^Enrolled since/);
+      await waitFor(() => expect(screen.queryByText('No passkeys')).not.toBeInTheDocument());
+      expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
+    });
+
+    it('toasts the server message when the removal is refused', async () => {
+      server.use(
+        enrolled(),
+        http.get('/admin/mfa/users/1/passkeys', () => HttpResponse.json({ data: { count: 1 } })),
+        http.get('/admin/mfa/users/1/trusted-devices', () => HttpResponse.json({ data: [] })),
+        http.delete('/admin/mfa/users/1/passkeys', () =>
+          HttpResponse.json(
+            { error: { status: 404, name: 'NotFoundError', message: 'User does not exist' } },
+            { status: 404 }
+          )
+        )
+      );
+      const { user } = renderEdit();
+
+      await screen.findByText('1 passkey');
+      await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByText('User does not exist')).toBeInTheDocument();
+    });
   });
 });

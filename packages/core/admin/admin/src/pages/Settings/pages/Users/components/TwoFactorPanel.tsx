@@ -8,6 +8,8 @@ import { Panel } from '../../../../../components/Panel';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import {
+  useDeleteUserPasskeysMutation,
+  useGetUserPasskeysQuery,
   useGetUserTrustedDevicesQuery,
   useRevokeUserTrustedDevicesMutation,
   useUnlockUserMfaMutation,
@@ -37,6 +39,12 @@ interface TwoFactorPanelProps {
  * devices" action (`DELETE /admin/mfa/users/:id/trusted-devices`, behind `admin::users.update`).
  * Revoking trust is security-positive, it forces the second factor back on, so unlike a reset it
  * needs no re-authentication.
+ *
+ * Cycle 4 adds the same pair for passkeys: how many the user has registered and a "Remove
+ * passkeys" action (`DELETE /admin/mfa/users/:id/passkeys`, behind the same `admin::users.update`).
+ * Removing them is security-positive in the same way revoking trust is -- the account falls back
+ * to its authenticator app -- so, like revocation and unlike a reset, it needs no
+ * re-authentication. The count endpoint deliberately returns a number and no names.
  */
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
@@ -57,6 +65,19 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [revokeTrustedDevices, { isLoading: isRevokingTrust }] =
     useRevokeUserTrustedDevicesMutation();
   const [revokeTrustOpen, setRevokeTrustOpen] = React.useState(false);
+
+  // Cycle 4. Same two guards as the trusted-device query above, for the same two reasons: only an
+  // enrolled user can hold a passkey (a passkey is always a second factor, and `disable` deletes
+  // them), and gating on `isSuccess` keeps the line from flashing "No passkeys" while the request
+  // is in flight or from showing a false zero after a failed read. The response is a count, not a
+  // list: an administrator gets a number, never an inventory of somebody's hardware.
+  const {
+    data: passkeys,
+    isSuccess: passkeysLoaded,
+    isError: passkeysFailed,
+  } = useGetUserPasskeysQuery({ id: user.id }, { skip: !user.mfaEnabledAt });
+  const [deletePasskeys, { isLoading: isRemovingPasskeys }] = useDeleteUserPasskeysMutation();
+  const [removePasskeysOpen, setRemovePasskeysOpen] = React.useState(false);
 
   const dateTime = (value: string | Date) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
@@ -99,6 +120,27 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.trustedDevices.revoke.success',
         defaultMessage: 'Trusted devices revoked',
+      }),
+    });
+  };
+
+  const handleRemovePasskeys = async () => {
+    const res = await deletePasskeys({ id: user.id });
+    setRemovePasskeysOpen(false);
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: isBaseQueryError(res.error)
+          ? formatAPIError(res.error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+      return;
+    }
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: 'Settings.permissions.users.mfa.passkeys.remove.success',
+        defaultMessage: 'Passkeys removed',
       }),
     });
   };
@@ -230,6 +272,45 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                   id: 'Settings.permissions.users.mfa.trustedDevices.revoke.body',
                   defaultMessage:
                     'Every browser this user trusted will ask for a code at its next login. They keep their authenticator and recovery codes.',
+                })}
+              </ConfirmDialog>
+            </Dialog.Root>
+          ) : null}
+        </Flex>
+      ) : null}
+      {user.mfaEnabledAt && passkeysLoaded && !passkeysFailed ? (
+        <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
+          <Typography textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'Settings.permissions.users.mfa.passkeys.count',
+                defaultMessage:
+                  '{count, plural, =0 {No passkeys} one {# passkey} other {# passkeys}}',
+              },
+              { count: passkeys?.count ?? 0 }
+            )}
+          </Typography>
+          {(passkeys?.count ?? 0) > 0 && canUpdate ? (
+            <Dialog.Root open={removePasskeysOpen} onOpenChange={setRemovePasskeysOpen}>
+              <Dialog.Trigger>
+                <Button variant="danger-light" loading={isRemovingPasskeys}>
+                  {formatMessage({
+                    id: 'Settings.permissions.users.mfa.passkeys.remove',
+                    defaultMessage: 'Remove passkeys',
+                  })}
+                </Button>
+              </Dialog.Trigger>
+              <ConfirmDialog
+                title={formatMessage({
+                  id: 'Settings.permissions.users.mfa.passkeys.remove.title',
+                  defaultMessage: "Remove this user's passkeys?",
+                })}
+                onConfirm={handleRemovePasskeys}
+              >
+                {formatMessage({
+                  id: 'Settings.permissions.users.mfa.passkeys.remove.body',
+                  defaultMessage:
+                    'Every passkey this user registered will stop working. They keep their authenticator app and recovery codes.',
                 })}
               </ConfirmDialog>
             </Dialog.Root>
