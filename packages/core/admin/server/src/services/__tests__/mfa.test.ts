@@ -11,6 +11,7 @@ import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
 import { hashTrustToken } from '../mfa-trusted-devices';
+import { PASSKEY_UID } from '../mfa-passkeys';
 import { MFA_DEFAULTS } from '../../config/mfa';
 import { resetSecuritySettingsWarnings } from '../security-settings';
 
@@ -39,11 +40,13 @@ const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
 const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
 const TRUSTED_UID = 'admin::mfa-trusted-device';
-const PASSKEY_UID = 'admin::mfa-passkey';
+// `PASSKEY_UID` is imported from `../mfa-passkeys` (M6): it used to be re-declared here as its
+// own literal, which let the two silently drift.
 // The physical table name asserted against below, in the unique-constraint-translation test: the
 // dialect error names it, and the generic message the caller actually sees must not.
 const PASSKEY_TABLE = 'strapi_admin_mfa_passkeys';
 const DEFAULT_PASSKEY_CHALLENGE_COLUMN = 'mfa_passkey_challenge';
+const DEFAULT_PASSKEY_CHALLENGE_EXPIRES_COLUMN = 'mfa_passkey_challenge_expires_at';
 const DEFAULT_CHALLENGE_WEBAUTHN_COLUMN = 'webauthn_challenge';
 
 type UserRow = Record<string, unknown>;
@@ -517,8 +520,10 @@ interface FixtureOptions {
   challengeTableName?: string;
   challengeAttemptsColumn?: string;
   userPasskeyChallengeColumn?: string;
-  /** Drops `mfaPasskeyChallenge` from the USER_UID metadata entirely, so a test can prove the
-   * `ApplicationError` guard for a missing physical column. */
+  /** M7: the sibling expiry stamp, nulled alongside `mfaPasskeyChallenge` in the same statement. */
+  userPasskeyChallengeExpiresAtColumn?: string;
+  /** Drops `mfaPasskeyChallenge` (and its sibling expiry column) from the USER_UID metadata
+   * entirely, so a test can prove the `ApplicationError` guard for a missing physical column. */
   omitUserPasskeyChallengeColumn?: boolean;
   challengeWebauthnColumn?: string;
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
@@ -552,6 +557,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const challengeAttemptsColumn = options.challengeAttemptsColumn ?? CHALLENGE_ATTEMPTS_COLUMN;
   const userPasskeyChallengeColumn =
     options.userPasskeyChallengeColumn ?? DEFAULT_PASSKEY_CHALLENGE_COLUMN;
+  const userPasskeyChallengeExpiresAtColumn =
+    options.userPasskeyChallengeExpiresAtColumn ?? DEFAULT_PASSKEY_CHALLENGE_EXPIRES_COLUMN;
   const omitUserPasskeyChallengeColumn = options.omitUserPasskeyChallengeColumn ?? false;
   const challengeWebauthnColumn =
     options.challengeWebauthnColumn ?? DEFAULT_CHALLENGE_WEBAUTHN_COLUMN;
@@ -559,6 +566,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const resolveUserKey: ResolveKey = (column) => {
     if (column === userStepColumn) return 'mfaLastUsedStep';
     if (column === userPasskeyChallengeColumn) return 'mfaPasskeyChallenge';
+    if (column === userPasskeyChallengeExpiresAtColumn) return 'mfaPasskeyChallengeExpiresAt';
     return column;
   };
 
@@ -586,7 +594,12 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             mfaLastUsedStep: { columnName: userStepColumn },
             ...(omitUserPasskeyChallengeColumn
               ? {}
-              : { mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn } }),
+              : {
+                  mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn },
+                  mfaPasskeyChallengeExpiresAt: {
+                    columnName: userPasskeyChallengeExpiresAtColumn,
+                  },
+                }),
           },
         };
       case RECOVERY_UID:
@@ -3655,6 +3668,12 @@ describe('mfa service: passkey registration', () => {
    * `stored` is the live store document: a test mutates `stored.passkeys.enabled` mid-flight the
    * way an officer's save would. `adminUrl` is what `resolveWebauthnRp` derives from, so a test
    * can hand it the broken production default (`http://0.0.0.0:1337/admin`) and see the refusal.
+   *
+   * `enrolled` defaults to `true`: I2 moved the registration pair's enrolment invariant into the
+   * service itself, so every test in this block that expects to reach *past* that guard needs the
+   * fixture user to already hold a TOTP factor -- `isEnrolled` only checks `mfaSecret` and
+   * `mfaEnabledAt` for truthiness, never decrypts either, so placeholders are enough. Only the
+   * tests that are specifically about the new guard pass `enrolled: false`.
    */
   const setup = ({
     enabled = true,
@@ -3662,12 +3681,14 @@ describe('mfa service: passkey registration', () => {
     userTableName,
     userPasskeyChallengeColumn,
     omitUserPasskeyChallengeColumn = false,
+    enrolled = true,
   }: {
     enabled?: boolean;
     adminUrl?: string;
     userTableName?: string;
     userPasskeyChallengeColumn?: string;
     omitUserPasskeyChallengeColumn?: boolean;
+    enrolled?: boolean;
   } = {}) => {
     const stored = { passkeys: { enabled } };
     const fixture = buildMfaFixture({
@@ -3685,6 +3706,11 @@ describe('mfa service: passkey registration', () => {
         },
       },
     });
+    if (enrolled) {
+      const user = fixture.users.get('1')!;
+      user.mfaSecret = 'enc:seed-secret';
+      user.mfaEnabledAt = new Date();
+    }
     const service = createMfaService(defaultDeps(fixture.strapi));
     return { ...fixture, service, stored };
   };
@@ -3751,6 +3777,79 @@ describe('mfa service: passkey registration', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  // I2: both invariants used to live only in `controllers/mfa.ts`'s
+  // `assertPasskeyRegistrationAllowed`. These four call the SERVICE directly -- the same surface
+  // `strapi.service('admin::mfa')` exposes to any other caller -- to prove the guard now holds
+  // there too, not only when the request happens to arrive through the controller.
+  describe('I2: the registration pair enforces its own invariants, not only through the controller', () => {
+    test('options refuses at the service layer when the policy is off', async () => {
+      const { service } = setup({ enabled: false });
+
+      await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(
+        'Passkeys are disabled'
+      );
+    });
+
+    test("options refuses at the service layer for an unenrolled caller: a passkey is never a user's only factor", async () => {
+      const { service } = setup({ enrolled: false });
+
+      await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(
+        'Set up an authenticator app before adding a passkey.'
+      );
+    });
+
+    test('register refuses at the service layer when the policy is off', async () => {
+      const { service } = setup({ enabled: false });
+
+      await expect(
+        service.registerPasskey('1', 'Nope', registrationFor('whatever-challenge') as never)
+      ).rejects.toThrow('Passkeys are disabled');
+    });
+
+    test("register refuses at the service layer for an unenrolled caller: a passkey is never a user's only factor", async () => {
+      const { service } = setup({ enrolled: false });
+
+      await expect(
+        service.registerPasskey('1', 'Nope', registrationFor('whatever-challenge') as never)
+      ).rejects.toThrow('Set up an authenticator app before adding a passkey.');
+    });
+  });
+
+  // I1: `passkeysConfigured` is the boolean wrapper both `passkeysEnabled` on `/mfa/me`
+  // (`controllers/mfa.ts`) and `passkeyAvailable` on the challenge response
+  // (`controllers/authentication.ts`) compose with the organisation policy, so a deployment whose
+  // `admin.absoluteUrl` cannot resolve to an RP (the default production shape) stops advertising a
+  // passkey entry point that could never work -- without ever 500ing on account of asking.
+  describe('I1: passkeysConfigured swallows an RP refusal into a boolean', () => {
+    // `resolveWebauthnRp`'s refusal logs through `warnOnce`, deliberately once-per-key-per-process
+    // (`security-settings.ts`), and this describe block is the only place in the registration
+    // suite that deliberately triggers a refusal outside the dedicated "rp cannot be resolved"
+    // test below -- reset before and after each test here so neither steals the other's one log
+    // call, exactly as `mfa-passkeys-rp.test.ts` and the passkey-login describe below do.
+    beforeEach(() => {
+      resetSecuritySettingsWarnings();
+    });
+    afterEach(() => {
+      resetSecuritySettingsWarnings();
+    });
+
+    test('true when the RP resolves', async () => {
+      const { service } = setup();
+
+      expect(service.passkeysConfigured()).toBe(true);
+    });
+
+    test('false, not a throw, when the RP cannot be resolved', async () => {
+      const { service, strapi } = setup({ adminUrl: 'http://0.0.0.0:1337/admin' });
+
+      expect(() => service.passkeysConfigured()).not.toThrow();
+      expect(service.passkeysConfigured()).toBe(false);
+      // The cause is still logged where the refusal actually happens; the wrapper only swallows
+      // it from the caller's point of view.
+      expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('IP literal'));
+    });
   });
 
   test('options mints a ceremony, stores it with a deadline, and derives the rp from the admin url', async () => {
@@ -3890,6 +3989,21 @@ describe('mfa service: passkey registration', () => {
     await expect(service.registerPasskey('1', 'Two', response as never)).rejects.toThrow(
       'That passkey could not be verified.'
     );
+  });
+
+  // M7: only `disable` used to clear `mfaPasskeyChallengeExpiresAt`; a successful registration
+  // nulled the challenge column but left the stamp behind indefinitely.
+  test('a successful registration clears the pending expiry stamp alongside the challenge', async () => {
+    const { service, users } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    expect(users.get('1')!.mfaPasskeyChallengeExpiresAt).not.toBeNull();
+
+    await service.registerPasskey('1', 'Phone', registrationFor(options.challenge) as never);
+
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+    expect(users.get('1')!.mfaPasskeyChallengeExpiresAt).toBeNull();
   });
 
   test('resolves the user table and the passkey-challenge column from strapi.db.metadata rather than hardcoding them', async () => {
@@ -4060,6 +4174,19 @@ describe('mfa service: passkey registration', () => {
     expect(JSON.stringify(list)).not.toContain('AQID');
     expect(JSON.stringify(list)).not.toContain('seed-0');
     await expect(service.countPasskeys('1')).resolves.toBe(2);
+  });
+
+  // M12: `toIso(row.lastUsedAt)` was already guarded (only called when truthy); `toIso(row.createdAt)`
+  // was not, and `new Date(undefined).toISOString()` throws a `RangeError` -- a 500 on the list
+  // route for a row a migration never backfilled.
+  test('a row with no createdAt reads as the epoch instead of throwing', async () => {
+    const { service, passkeyRows } = setup();
+    seedPasskeys(passkeyRows, '1', 1);
+    (passkeyRows[0] as unknown as { createdAt: unknown }).createdAt = undefined;
+
+    const [entry] = await service.listPasskeys('1');
+
+    expect(entry.createdAt).toBe(new Date(0).toISOString());
   });
 
   test('with the policy off the list reads empty and the count reads zero, rows or not', async () => {
@@ -4435,6 +4562,27 @@ describe('mfa service: passkey login', () => {
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
   });
 
+  // M3: the write is scoped by row id alone, contradicting the rule `deletePasskey` states and
+  // follows two hundred lines later in the same module -- a read and a write are two separate
+  // statements, so only carrying the scope on the read is the hazard the factory doc-comment
+  // names. This write matters more: it advances the clone-detection counter.
+  test("a successful assertion's counter/lastUsedAt write is scoped by userId as well as id, not id alone", async () => {
+    const { service, passkeyRows, passkeyMocks } = setup();
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).resolves.toEqual({ userId: '1' });
+
+    expect(passkeyMocks.update).toHaveBeenCalledWith({
+      where: { id: row.id, userId: '1' },
+      data: { counter: 6, lastUsedAt: expect.any(Date) },
+    });
+  });
+
   test('a failed assertion charges both tiers: the per-challenge counter and challenge_failed', async () => {
     const { service, passkeyRows, challenges, events, strapi } = setup();
     const row = seedCredential(passkeyRows, '1');
@@ -4487,6 +4635,55 @@ describe('mfa service: passkey login', () => {
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
     ).rejects.toThrow('Could not verify that passkey.');
 
+    expect(challenges).toHaveLength(0);
+  });
+
+  // M9: nothing pinned that the per-challenge attempt budget is SHARED across the TOTP/recovery
+  // path (`verifyChallenge`) and the passkey path (`verifyAssertion`) -- every existing exhaustion
+  // test only ever spends its own path's guesses against a cap sized for it. Both charge the same
+  // `attempts` column on the same challenge row with the same `WHERE id = ? AND attempts < ?`
+  // predicate, so this interleaves two TOTP guesses and two passkey guesses against one challenge
+  // configured for four attempts, then proves the fifth guess -- on either path -- finds the
+  // budget already spent.
+  test('the per-challenge attempt budget is shared with the TOTP/recovery path, not tracked separately', async () => {
+    const cap = 4;
+    const { service, passkeyRows, challenges } = setup({
+      mfaConfig: { maxChallengeAttempts: cap },
+    });
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+
+    // Two wrong TOTP codes against this challenge...
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'invalid',
+    });
+    expect(challenges[0].attempts).toBe(2);
+
+    // ...and two wrong passkey assertions against the SAME token spend the rest of the SAME
+    // budget, not a fresh one of their own.
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+    expect(challenges[0].attempts).toBe(3);
+
+    await expect(
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never)
+    ).rejects.toThrow('Could not verify that passkey.');
+    expect(challenges[0].attempts).toBe(4);
+
+    // A fifth guess, on EITHER path, finds the budget already spent and destroys the row -- proof
+    // there is one counter shared by both paths, not two independent ones.
+    await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
+      ok: false,
+      reason: 'exhausted',
+    });
     expect(challenges).toHaveLength(0);
   });
 

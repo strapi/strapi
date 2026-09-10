@@ -296,6 +296,51 @@ describe('resolveWebauthnRp', () => {
     }
   );
 
+  test.each([['co.kr'], ['com.tr'], ['co.il'], ['net.au'], ['org.au'], ['gov.au']])(
+    'M4: a common second-level suffix under a ccTLD (%s) is refused even though it has no named entry',
+    (rpId) => {
+      // These are not in `KNOWN_PUBLIC_SUFFIXES`'s twelve named entries, which is exactly the gap
+      // M4 reports: before the widening, each of these was accepted here and then failed in every
+      // browser with an opaque `SecurityError` and no server-side trace of why.
+      const { strapi, error } = buildStrapi({
+        'admin.absoluteUrl': 'https://cms.example.com/admin',
+        'admin.auth.mfa.webauthn.rpId': rpId,
+      });
+
+      expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
+      expect(error).toHaveBeenCalledWith(
+        expect.stringContaining('public suffix (or a bare label)')
+      );
+    }
+  );
+
+  test('M4: a genuine two-label domain that does not match the generic ccTLD shape is still accepted', () => {
+    // Guards the widened check against being so broad it starts refusing real registrable
+    // domains: `example.com`'s first label is seven characters, nowhere near the generic
+    // second-level label set, so it must not be caught by the new shape rule.
+    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'https://example.com/admin' });
+
+    expect(resolveWebauthnRp(strapi)).toEqual({
+      rpId: 'example.com',
+      origins: ['https://example.com'],
+    });
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  test('M2: the refusal logs under [admin.auth.mfa], not [security-settings], and the trailing sentence is level-aware', () => {
+    const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' });
+
+    expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
+
+    expect(error).toHaveBeenCalledTimes(1);
+    const [message] = error.mock.calls[0];
+    expect(message).toContain('[admin.auth.mfa]');
+    expect(message).not.toContain('[security-settings]');
+    // Logged at error level, so the trailing sentence must call itself a message, not a warning.
+    expect(message).toContain('this message is logged once per process');
+    expect(message).not.toContain('this warning is logged once per process');
+  });
+
   test.each([[undefined], [''], ['not a url'], ['/admin']])(
     'an unparseable admin.absoluteUrl (%p) surfaces the config key',
     (adminUrl) => {

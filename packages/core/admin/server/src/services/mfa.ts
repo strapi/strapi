@@ -10,6 +10,7 @@ import {
   verifyTotp,
 } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
+import type { RegistrationResponseJSON } from '@simplewebauthn/server';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
@@ -20,7 +21,7 @@ import {
 } from './security-settings';
 import type { MfaEnforcement } from '../../../shared/contracts/security-settings';
 import { createTrustedDevices } from './mfa-trusted-devices';
-import { createPasskeys } from './mfa-passkeys';
+import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -199,8 +200,10 @@ export interface MfaServiceDeps {
  *    right to skip the second factor for a bounded period.
  *  - Passkeys (cycle 4, `mfa-passkeys.ts`): `passkeyRegistrationOptions`, `registerPasskey`,
  *    `listPasskeys`, `countPasskeys`, `deletePasskey`, `clearPasskeys`, `clearAllPasskeys`,
- *    `authenticationOptions`, `verifyAssertion`, `passkeySettings` -- WebAuthn credentials as a
- *    second factor, origin-bound by the browser and therefore unphishable.
+ *    `authenticationOptions`, `verifyAssertion`, `passkeySettings`, `passkeysConfigured` --
+ *    WebAuthn credentials as a second factor, origin-bound by the browser and therefore
+ *    unphishable. The first two are wrapped here (not re-exported directly) so the policy and
+ *    enrolment invariants hold for any caller, not only `controllers/mfa.ts`.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -1215,6 +1218,25 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isAccountThrottled,
   });
 
+  /**
+   * I2: the same two invariants `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` checks
+   * before calling either of the functions below -- moved here too, so the service stays safe for
+   * any caller reaching `strapi.service('admin::mfa')` and not only the controller. `isEnrolled`
+   * is already in scope at this point in the file (no new dependency needed in `PasskeyDeps`), and
+   * `readPasskeySettings` is the same tolerant store reader the passkey module itself is given.
+   * The controller's own checks stay too -- a duplicated cheap check is the correct price for
+   * keeping the spec's ordering (flag, then policy, then enrolment, then body validation) so no
+   * password/code attempt is spent on a request that could never succeed.
+   */
+  const assertPasskeyRegistrationAllowed = async (userId: string): Promise<void> => {
+    if (!(await readPasskeySettings(strapi)).enabled) {
+      throw new ValidationError(PASSKEYS_DISABLED);
+    }
+    if (!(await isEnrolled(userId))) {
+      throw new ValidationError(PASSKEY_NEEDS_TOTP);
+    }
+  };
+
   const createChallenge = async (userId: string): Promise<{ token: string; expiresIn: number }> => {
     // Checked here as well as in `verifyChallenge`: throttling only one of the two leaves the
     // other as the way around it.
@@ -1551,8 +1573,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     clearAllTrustedDevices: trustedDevices.clearAllTrustedDevices,
     sweepExpiredTrustedDevices: trustedDevices.sweepExpiredTrustedDevices,
     trustedDeviceSettings: trustedDevices.trustedDeviceSettings,
-    passkeyRegistrationOptions: passkeys.passkeyRegistrationOptions,
-    registerPasskey: passkeys.registerPasskey,
+    // I2: wrapped, not re-exported directly -- `assertPasskeyRegistrationAllowed` runs first so
+    // the invariant holds for any caller of the composed service, not only `controllers/mfa.ts`.
+    async passkeyRegistrationOptions(userId: string) {
+      await assertPasskeyRegistrationAllowed(userId);
+      return passkeys.passkeyRegistrationOptions(userId);
+    },
+    async registerPasskey(userId: string, name: string, registration: RegistrationResponseJSON) {
+      await assertPasskeyRegistrationAllowed(userId);
+      return passkeys.registerPasskey(userId, name, registration);
+    },
     listPasskeys: passkeys.listPasskeys,
     countPasskeys: passkeys.countPasskeys,
     deletePasskey: passkeys.deletePasskey,
@@ -1561,6 +1591,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     authenticationOptions: passkeys.authenticationOptions,
     verifyAssertion: passkeys.verifyAssertion,
     passkeySettings: passkeys.passkeySettings,
+    passkeysConfigured: passkeys.passkeysConfigured,
   };
 };
 

@@ -26,6 +26,9 @@ const { ApplicationError, RateLimitError, ValidationError } = errors;
 const USER_UID = 'admin::user';
 const CHALLENGE_UID = 'admin::mfa-challenge';
 
+/** The one symbol of this module's five originally-exported constants/types that a test actually
+ * needs (`services/__tests__/mfa.test.ts` imports it rather than re-declaring the literal). The
+ * other four stay unexported: nothing outside this module reaches them. */
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
 /**
@@ -37,7 +40,7 @@ export const PASSKEY_UID = 'admin::mfa-passkey';
 export const MAX_PASSKEYS_PER_USER = 10;
 
 /** How long a pending *registration* ceremony stays valid, in seconds. */
-export const PASSKEY_CEREMONY_TTL_SECONDS = 300;
+const PASSKEY_CEREMONY_TTL_SECONDS = 300;
 
 /**
  * `credentialId` is a `string`, i.e. varchar(255), so the unique index stays portable across
@@ -46,7 +49,7 @@ export const PASSKEY_CEREMONY_TTL_SECONDS = 300;
  */
 export const MAX_CREDENTIAL_ID_LENGTH = 255;
 
-export const RP_NAME = 'Strapi';
+const RP_NAME = 'Strapi';
 
 /**
  * Every literal cycle 4 introduces, in one place. The first two are *shared*: each covers every
@@ -71,12 +74,17 @@ export interface WebauthnRp {
 }
 
 /**
- * A deliberate approximation of the public suffix list. Browsers reject a relying-party id that
- * is itself a public suffix, and shipping (or fetching) the real PSL for one validation check is
- * not a trade this cycle makes -- so a dotless rpId other than `localhost` is refused outright
- * (which covers `com`, `io`, `dev`) plus the handful of second-level suffixes an operator is
- * actually likely to type. A suffix this misses fails in the browser instead, which is the
- * pre-existing behaviour, not a regression.
+ * A deliberate approximation of the public suffix list, not the list itself: shipping (or
+ * fetching) the real PSL for one validation check is not a trade this cycle makes. A dotless
+ * rpId other than `localhost` is refused outright (which covers `com`, `io`, `dev`); the named
+ * set below covers the handful of second-level suffixes an operator is actually likely to type;
+ * and `isGenericSecondLevelSuffix` below covers the *shape* almost every other second-level
+ * suffix takes -- a short generic label (`co`, `com`, `net`, ...) plus a two-letter country code
+ * (`co.kr`, `com.tr`, `net.au`, ...), which the named set does not enumerate. Between the two,
+ * `co.*` and `com.*` are covered for every two-letter country code, not only the ones named
+ * explicitly. This remains an approximation, not the Public Suffix List: a suffix that doesn't
+ * fit either check still fails in the browser instead, with no server-side trace of why, which is
+ * the pre-existing behaviour, not a regression.
  */
 const KNOWN_PUBLIC_SUFFIXES = new Set([
   'co.uk',
@@ -92,6 +100,38 @@ const KNOWN_PUBLIC_SUFFIXES = new Set([
   'com.mx',
   'com.cn',
 ]);
+
+/**
+ * The generic first label of nearly every second-level public suffix in current use (`co.uk`,
+ * `com.br`, `org.uk`, `gov.uk`, `ac.uk`, and their equivalents across dozens of other ccTLDs).
+ * Paired with a two-character second label in `isGenericSecondLevelSuffix`, this is the shape
+ * check that widens M4's coverage past the twelve entries named above -- `co.kr`, `com.tr`,
+ * `co.il`, `net.au` and similar all match it without needing their own entry.
+ */
+const GENERIC_SECOND_LEVEL_LABELS = new Set([
+  'co',
+  'com',
+  'net',
+  'org',
+  'gov',
+  'edu',
+  'ac',
+  'or',
+  'ne',
+  'go',
+  'mil',
+  'int',
+]);
+
+/** A two-label host whose first label is one of the generic labels above and whose second label
+ * is exactly two characters -- the shape of a second-level public suffix under a ccTLD. No
+ * registrable domain looks like this, so refusing on shape alone costs nothing real. */
+const isGenericSecondLevelSuffix = (rpId: string): boolean => {
+  const labels = rpId.split('.');
+  return (
+    labels.length === 2 && GENERIC_SECOND_LEVEL_LABELS.has(labels[0]) && labels[1].length === 2
+  );
+};
 
 /** `new URL('http://[::1]:1337').hostname` keeps the brackets; `isIP` does not want them. */
 const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(/\]$/, '');
@@ -115,7 +155,7 @@ const isPublicSuffix = (rpId: string): boolean => {
   if (!rpId.includes('.')) {
     return true;
   }
-  return KNOWN_PUBLIC_SUFFIXES.has(rpId);
+  return KNOWN_PUBLIC_SUFFIXES.has(rpId) || isGenericSecondLevelSuffix(rpId);
 };
 
 /** WebAuthn needs a secure context: https anywhere, or http on localhost. */
@@ -145,8 +185,11 @@ const isSecureOrigin = (url: URL): boolean =>
  * information is not theirs to learn.
  */
 export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
+  // `[admin.auth.mfa]`, not the shared helper's `[security-settings]` default: this is a config
+  // fault, not a database-backed security-settings one, and an operator grepping for the passkey
+  // problem greps for the config key, not the store.
   const refuse = (cause: string): never => {
-    warnOnce(strapi, 'webauthn.rp', `admin.auth.mfa.webauthn: ${cause}`, 'error');
+    warnOnce(strapi, 'webauthn.rp', cause, 'error', '[admin.auth.mfa]');
     throw new ValidationError(PASSKEY_RP_NOT_CONFIGURED);
   };
 
@@ -286,7 +329,15 @@ export interface PasskeyDeps {
   isAccountThrottled: (userId: string) => Promise<boolean>;
 }
 
-const toIso = (value: Date | string): string => new Date(value).toISOString();
+// `new Date(undefined).toISOString()` throws a `RangeError`. `createdAt` comes from the default
+// timestamps so it is always present in practice -- unlike `lastUsedAt`, which is guarded by its
+// caller below because it is genuinely nullable -- but a hand-edited row (or a migration that
+// never backfilled it) must not turn a list read into a 500. Falling back to the epoch reads as
+// "unknown", which is honest, rather than crashing the route.
+const toIso = (value: Date | string): string => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date(0).toISOString() : date.toISOString();
+};
 
 /** The only shape a passkey ever leaves the server in. */
 const toPublicPasskey = (row: PasskeyRow): Passkey => ({
@@ -349,23 +400,37 @@ export const createPasskeys = ({
    * resolved from metadata for exactly the reasons `consumeTotpStep` gives: the raw connection
    * speaks columns, not attributes, and a schema or migration problem must surface as an
    * actionable error rather than as a `TypeError` or -- far worse -- as an UPDATE that silently
-   * affects nothing and therefore reads as "already consumed".
+   * affects nothing and therefore reads as "already consumed". Resolves both pending-ceremony
+   * columns: M7's fix nulls `mfaPasskeyChallengeExpiresAt` in the same conditional statement as
+   * `mfaPasskeyChallenge`, mirroring the mirror `disable` already keeps between the two.
    */
-  const userChallengeTable = (): { tableName: string; challengeColumn: string } => {
+  const userChallengeTable = (): {
+    tableName: string;
+    challengeColumn: string;
+    challengeExpiresAtColumn: string;
+  } => {
     const metadata = strapi.db.metadata.get(USER_UID);
     // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
     // attributes and mfaPasskeyChallenge's static type is the full Attribute union. Optional
     // chaining also guards a missing attribute (a migration that has not run), which would
     // otherwise throw before the actionable ApplicationError below can be raised.
     const challengeColumn: string | undefined = metadata.attributes.mfaPasskeyChallenge?.columnName;
+    const expiresAttr = metadata.attributes.mfaPasskeyChallengeExpiresAt;
+    // @ts-expect-error - same reasoning, for the sibling expiry stamp M7 now also nulls.
+    const challengeExpiresAtColumn: string | undefined = expiresAttr?.columnName;
 
     if (!challengeColumn) {
       throw new ApplicationError(
         'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
       );
     }
+    if (!challengeExpiresAtColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::user.mfaPasskeyChallengeExpiresAt'
+      );
+    }
 
-    return { tableName: metadata.tableName, challengeColumn };
+    return { tableName: metadata.tableName, challengeColumn, challengeExpiresAtColumn };
   };
 
   const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
@@ -639,8 +704,14 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
 
+    // Scoped by `userId` as well as `id`, not id alone, for the exact reason `deletePasskey`
+    // states below: the row was already read scoped to the challenge's owner, but a read and a
+    // write are two separate statements, and only carrying the scope on the read is the hazard
+    // this module's own factory doc-comment names. This write matters more than that one -- it
+    // advances the clone-detection counter -- so the rule has to be uniform, not just followed
+    // where it was first noticed.
     await query().update({
-      where: { id: row.id },
+      where: { id: row.id, userId },
       data: {
         counter: verification.authenticationInfo.newCounter,
         lastUsedAt: new Date(),
@@ -763,12 +834,15 @@ export const createPasskeys = ({
     // submissions of the same ceremony cannot both land. The submitted challenge is bound as a
     // non-null string, so a response signed over a different challenge matches nothing and leaves
     // the genuine ceremony pending.
-    const { tableName, challengeColumn } = userChallengeTable();
+    const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
+    // M7: nulls `mfaPasskeyChallengeExpiresAt` in the same statement, alongside the challenge
+    // itself -- the stamp used to survive a successful registration and only `disable` ever
+    // cleared it, which is the mirror `disable`'s own comment already claims is kept.
     const affected = await strapi.db
       .connection(tableName)
       .where({ id: userId })
       .where({ [challengeColumn]: submitted })
-      .update({ [challengeColumn]: null });
+      .update({ [challengeColumn]: null, [challengeExpiresAtColumn]: null });
 
     if (affected !== 1) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
@@ -777,7 +851,8 @@ export const createPasskeys = ({
     // Expiry fails closed (cycle 1's rule): `new Date('nonsense') <= new Date()` is false for an
     // Invalid Date, so a missing or hand-edited stamp must not read as a ceremony that never
     // expires. The stamp itself decides nothing else -- the guard above is on the challenge
-    // column alone -- and the next options call overwrites it.
+    // column alone -- and the next options call overwrites it. Read here before the row this
+    // registration lands in is even created, and cleared above regardless of what it reads.
     const expiresAt = new Date(user.mfaPasskeyChallengeExpiresAt);
     if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
@@ -940,6 +1015,24 @@ export const createPasskeys = ({
 
   const passkeySettings = (): Promise<PasskeySettings> => settings();
 
+  /**
+   * I1: whether a webauthn ceremony can even be attempted in this deployment, without leaking why
+   * not to whichever caller asks -- `resolveWebauthnRp`'s refusal is already logged at error level
+   * (through `warnOnce`) where it happens, so this wrapper only ever needs to swallow it into a
+   * boolean. Composed with the organisation policy by both `passkeysEnabled` on `/mfa/me`
+   * (`controllers/mfa.ts`) and `passkeyAvailable` on the challenge response
+   * (`controllers/authentication.ts`), so neither ever advertises a passkey button a
+   * misconfigured deployment cannot honour, and neither can 500 on account of asking.
+   */
+  const passkeysConfigured = (): boolean => {
+    try {
+      resolveWebauthnRp(strapi);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     passkeyRegistrationOptions,
     registerPasskey,
@@ -951,5 +1044,6 @@ export const createPasskeys = ({
     authenticationOptions,
     verifyAssertion,
     passkeySettings,
+    passkeysConfigured,
   };
 };

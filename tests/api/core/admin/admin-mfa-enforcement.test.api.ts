@@ -5,6 +5,8 @@ import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
 import { base32Decode, generateTotp } from '@strapi/utils';
 
+import { resetSharedMfaState } from './utils/mfa-state';
+
 jest.setTimeout(120_000);
 
 const totpFor = (secret: string) =>
@@ -16,6 +18,7 @@ describe('Admin MFA enforcement', () => {
   let utils: any;
   let editorRole: any;
   let editor: any;
+  let superAdminId: number;
   const editorPassword = 'Password123';
 
   beforeAll(async () => {
@@ -27,6 +30,16 @@ describe('Admin MFA enforcement', () => {
     });
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
+
+    const me = await rq({ url: '/admin/users/me', method: 'GET' });
+    superAdminId = me.body.data.id;
+
+    // M10: this suite IS cycle 1's original MFA API suite, and it is the only one of the three
+    // with no reset -- its `defaults` test's exact `toEqual` was safe only because both sibling
+    // suites happen to call `resetSharedMfaState` in their own `afterAll`. `yarn test:api` runs
+    // every admin suite --runInBand against one shared SQLite app, so start from the exact state
+    // this suite asserts, whatever ran before it, the same way the other two do.
+    await resetSharedMfaState(strapi, { userIds: [superAdminId] });
 
     editorRole = await utils.createRole({ name: 'mfa_enforcement_editor', description: 'test' });
     editor = await utils.createUser({
@@ -41,6 +54,7 @@ describe('Admin MFA enforcement', () => {
   afterAll(async () => {
     await utils.deleteUsersById([editor.id]);
     await utils.deleteRolesById([editorRole.id]);
+    await resetSharedMfaState(strapi, { userIds: [superAdminId] });
     await strapi.destroy();
   });
 

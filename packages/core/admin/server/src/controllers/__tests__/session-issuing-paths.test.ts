@@ -129,6 +129,7 @@ const buildResetStrapi = ({
           enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
           trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
           countPasskeys: jest.fn(() => Promise.resolve(1)),
+          passkeysConfigured: jest.fn(() => true),
         },
         user: { sanitizeUser },
       },

@@ -152,6 +152,9 @@ describe('authentication controller', () => {
       isEnrolled: jest.fn(() => Promise.resolve(true)),
       createChallenge: jest.fn(() => Promise.resolve({ token: 'challenge-token', expiresIn: 300 })),
       countPasskeys: jest.fn(() => Promise.resolve(0)),
+      // I1: `passkeyAvailableFor` ANDs this with `countPasskeys > 0`, so it is only ever reached
+      // (and only ever needs a stub) when a test overrides `countPasskeys` to something truthy.
+      passkeysConfigured: jest.fn(() => true),
       ...overrides,
     });
 
@@ -841,6 +844,23 @@ describe('authentication controller', () => {
         await authenticationController.login(ctx, jest.fn());
 
         expect((ctx.body as any).data.passkeyAvailable).toBe(true);
+      });
+
+      // I1: `countPasskeys > 0` alone used to decide `passkeyAvailable`, so a deployment whose RP
+      // cannot resolve still offered a "use a passkey" button that every ceremony would refuse.
+      // This pins the AND: holding a credential is not enough on its own.
+      test('passkeyAvailable is false when the account holds a credential but the RP cannot be resolved', async () => {
+        mockPassportUser(user);
+        const passkeysConfigured = jest.fn(() => false);
+        buildIssuingStrapi(
+          enrolledMfa({ countPasskeys: jest.fn(() => Promise.resolve(2)), passkeysConfigured })
+        );
+        const { ctx } = buildCtx({ email: user.email, password: 'Password123' });
+
+        await authenticationController.login(ctx, jest.fn());
+
+        expect(passkeysConfigured).toHaveBeenCalled();
+        expect((ctx.body as any).data.passkeyAvailable).toBe(false);
       });
 
       test('both routes 404 while the feature is off, before the body is validated', async () => {

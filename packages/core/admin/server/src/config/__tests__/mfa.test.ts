@@ -202,4 +202,18 @@ describe('validateMfaConfig', () => {
     expect(MFA_DEFAULTS.digits).toBe(originalDigits);
     expect(MFA_DEFAULTS.window.back).toBe(originalBack);
   });
+
+  // M11: `MfaConfig` deliberately omits `webauthn` (it has no safe default and is validated
+  // separately by `resolveWebauthnRp`), but the naive `{ ...MFA_DEFAULTS, ...input }` spread used
+  // to carry it through onto the returned object anyway -- a runtime value the type says cannot
+  // exist. `toEqual` alone would not catch this (it treats a present-but-undefined key the same
+  // as an absent one), so this asserts the key's actual presence on the object.
+  test('a stored webauthn key does not survive onto the validated result', () => {
+    const logger = makeLogger();
+    const raw = { webauthn: { rpId: 'example.com' } };
+
+    const result = validateMfaConfig(raw, logger);
+
+    expect(Object.prototype.hasOwnProperty.call(result, 'webauthn')).toBe(false);
+  });
 });

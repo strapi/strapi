@@ -80,11 +80,14 @@ const offeredTrustDays = async (): Promise<number | null> => {
 
 /**
  * Cycle 4: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
- * while the organisation has turned passkeys off, so this is exactly "the policy allows them and
- * this account holds at least one" in a single call.
+ * while the organisation has turned passkeys off, so this is "the policy allows them and this
+ * account holds at least one" -- and I1 adds a third term: the RP must actually resolve, so a
+ * misconfigured deployment (an IP-literal `admin.absoluteUrl`) never offers a button every
+ * ceremony would refuse. `passkeysConfigured` swallows that refusal into a boolean, the same
+ * wrapper `/mfa/me`'s `passkeysEnabled` reads, so this can never 500 either.
  */
 const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
-  (await getService('mfa').countPasskeys(userId)) > 0;
+  (await getService('mfa').countPasskeys(userId)) > 0 && getService('mfa').passkeysConfigured();
 
 /**
  * The flag check runs before body validation, matching `controllers/mfa.ts`'s `requireEnabled`

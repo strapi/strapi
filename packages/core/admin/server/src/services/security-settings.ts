@@ -72,19 +72,25 @@ const warnedKeys = new Set<WarnableKey>();
  * through this same helper, so there is still exactly one deduplication surface (and
  * `resetSecuritySettingsWarnings` below still gives the tests a clean slate). `level` exists for
  * that caller: an RP misconfiguration is an operator error with an action attached, so it is
- * logged at error level, while every stored-value fallback stays a warning.
+ * logged at error level, while every stored-value fallback stays a warning. `prefix` exists for
+ * the same caller: an `admin.auth.mfa.webauthn` misconfiguration is a **config** fault, not a
+ * database-backed security-settings one, so it logs under its own tag rather than
+ * `[security-settings]` -- and the trailing sentence names itself accurately for the level it is
+ * actually logged at, rather than always calling an error-level line a "warning".
  */
 export const warnOnce = (
   strapi: Core.Strapi,
   key: WarnableKey,
   message: string,
-  level: 'warn' | 'error' = 'warn'
+  level: 'warn' | 'error' = 'warn',
+  prefix = '[security-settings]'
 ): void => {
   if (warnedKeys.has(key)) {
     return;
   }
   warnedKeys.add(key);
-  strapi.log[level](`[security-settings] ${message} (this warning is logged once per process).`);
+  const noun = level === 'error' ? 'message' : 'warning';
+  strapi.log[level](`${prefix} ${message} (this ${noun} is logged once per process).`);
 };
 
 /** Test-only: clears the per-process warning dedupe so each test starts from a clean slate. */

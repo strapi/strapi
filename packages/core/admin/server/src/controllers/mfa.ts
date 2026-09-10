@@ -96,8 +96,11 @@ export default {
         // offers trust at all.
         trustedDevicesEnabled: (await mfa.trustedDeviceSettings()).enabled,
         // Cycle 4: the profile decides whether to render the passkey section from this; the list
-        // endpoint stays the source of truth for the rows.
-        passkeysEnabled: (await mfa.passkeySettings()).enabled,
+        // endpoint stays the source of truth for the rows. I1: not the org policy alone -- the
+        // default production deployment (an IP-literal `admin.absoluteUrl`) would otherwise
+        // advertise a section whose "Add a passkey" button cannot work. `passkeysConfigured`
+        // swallows the RP refusal into a boolean, so this can never 500 on a misconfiguration.
+        passkeysEnabled: (await mfa.passkeySettings()).enabled && mfa.passkeysConfigured(),
       },
     } satisfies Me.Response;
   },

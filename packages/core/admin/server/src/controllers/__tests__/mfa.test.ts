@@ -142,6 +142,7 @@ describe('mfa controller', () => {
             isMfaRequiredFor,
             trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
             passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+            passkeysConfigured: jest.fn(() => true),
           },
         },
       },
@@ -185,6 +186,7 @@ describe('mfa controller', () => {
               isMfaRequiredFor,
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
               passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: jest.fn(() => true),
             },
           },
         },
@@ -219,6 +221,7 @@ describe('mfa controller', () => {
               isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
               passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: jest.fn(() => true),
             },
           },
         },
@@ -240,6 +243,7 @@ describe('mfa controller', () => {
               isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: false, days: 30 })),
               passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: jest.fn(() => true),
             },
           },
         },
@@ -269,6 +273,34 @@ describe('mfa controller', () => {
 
       await mfaController.me(ctx);
 
+      expect(ctx.body.data.passkeysEnabled).toBe(false);
+    });
+
+    // I1: the org policy alone used to decide `passkeysEnabled`, so a deployment whose RP cannot
+    // resolve (the default production shape -- an IP-literal `admin.absoluteUrl`) still advertised
+    // a passkey section with a button that could never work. This pins the AND: the policy being
+    // on is not enough on its own.
+    test('reports passkeysEnabled: false when the policy is on but the RP cannot be resolved', async () => {
+      const passkeysConfigured = jest.fn(() => false);
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured,
+            },
+          },
+        },
+      });
+      const { ctx } = buildCtx();
+
+      await mfaController.me(ctx);
+
+      expect(passkeysConfigured).toHaveBeenCalled();
       expect(ctx.body.data.passkeysEnabled).toBe(false);
     });
   });
