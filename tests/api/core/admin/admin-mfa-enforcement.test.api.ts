@@ -56,6 +56,7 @@ describe('Admin MFA enforcement', () => {
     expect(res.body.data).toEqual({
       mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
   });
 

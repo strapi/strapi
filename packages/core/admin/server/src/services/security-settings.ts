@@ -3,6 +3,7 @@ import type { Core, Data } from '@strapi/types';
 import type {
   MfaEnforcement,
   MfaEnforcementMode,
+  PasskeySettings,
   SecuritySettings,
   TrustedDeviceSettings,
   UpdateSecuritySettings,
@@ -24,10 +25,13 @@ export const DEFAULT_TRUSTED_DEVICES: TrustedDeviceSettings = { enabled: true, d
 export const MIN_TRUST_DAYS = 1;
 export const MAX_TRUST_DAYS = 90;
 
+export const DEFAULT_PASSKEYS: PasskeySettings = { enabled: true };
+
 /** The persisted shape. `requiredRoles` lives on `admin::role`, not here. */
 export interface StoredSecuritySettings {
   mfa?: Partial<MfaEnforcement>;
   trustedDevices?: Partial<TrustedDeviceSettings>;
+  passkeys?: Partial<PasskeySettings>;
 }
 
 const isMode = (value: unknown): value is MfaEnforcementMode =>
@@ -47,7 +51,14 @@ const isTrustDays = (value: unknown): value is number =>
 
 const adminStore = (strapi: Core.Strapi) => strapi.store({ type: 'core', name: 'admin' });
 
-type WarnableKey = 'mode' | 'graceDays' | 'trustedDevices.enabled' | 'trustedDevices.days';
+type WarnableKey =
+  | 'mode'
+  | 'graceDays'
+  | 'trustedDevices.enabled'
+  | 'trustedDevices.days'
+  | 'passkeys.enabled'
+  /** Cycle 4: `resolveWebauthnRp`'s refusal cause, logged at error level from `mfa-passkeys.ts`. */
+  | 'webauthn.rp';
 
 /**
  * Which stored keys have already logged their corrupt-value warning this process. Both readers
@@ -56,12 +67,24 @@ type WarnableKey = 'mode' | 'graceDays' | 'trustedDevices.enabled' | 'trustedDev
  */
 const warnedKeys = new Set<WarnableKey>();
 
-const warnOnce = (strapi: Core.Strapi, key: WarnableKey, message: string): void => {
+/**
+ * Exported for cycle 4: `resolveWebauthnRp` in `services/mfa-passkeys.ts` logs its refusal cause
+ * through this same helper, so there is still exactly one deduplication surface (and
+ * `resetSecuritySettingsWarnings` below still gives the tests a clean slate). `level` exists for
+ * that caller: an RP misconfiguration is an operator error with an action attached, so it is
+ * logged at error level, while every stored-value fallback stays a warning.
+ */
+export const warnOnce = (
+  strapi: Core.Strapi,
+  key: WarnableKey,
+  message: string,
+  level: 'warn' | 'error' = 'warn'
+): void => {
   if (warnedKeys.has(key)) {
     return;
   }
   warnedKeys.add(key);
-  strapi.log.warn(`[security-settings] ${message} (this warning is logged once per process).`);
+  strapi.log[level](`[security-settings] ${message} (this warning is logged once per process).`);
 };
 
 /** Test-only: clears the per-process warning dedupe so each test starts from a clean slate. */
@@ -140,6 +163,34 @@ export const readTrustedDeviceSettings = async (
   return { enabled, days };
 };
 
+/**
+ * Cycle 4 policy: whether users may register and sign in with a passkey. Same tolerance as the
+ * other two readers -- it is read on every login (`passkeyAvailable`) and on every passkey route,
+ * so a hand-edited or corrupt row warns once and falls back rather than throwing. The fallback is
+ * the default (`enabled: true`) because a corrupt value is not a decision to turn a security
+ * feature off; it also means this reader can never manufacture the "policy off with rows still
+ * present" state the verify route defends against.
+ */
+export const readPasskeySettings = async (strapi: Core.Strapi): Promise<PasskeySettings> => {
+  const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
+    | StoredSecuritySettings
+    | null
+    | undefined;
+  const raw = stored?.passkeys ?? {};
+
+  const enabled = typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULT_PASSKEYS.enabled;
+
+  if (raw.enabled !== undefined && typeof raw.enabled !== 'boolean') {
+    warnOnce(
+      strapi,
+      'passkeys.enabled',
+      `stored passkeys.enabled is not a boolean; using ${enabled}`
+    );
+  }
+
+  return { enabled };
+};
+
 export const GUARD_MESSAGE = 'Enrol in two-factor authentication before requiring it for others';
 
 const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
@@ -185,22 +236,24 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
   const getSettings = async (): Promise<SecuritySettings> => ({
     mfa: { ...(await readMfaEnforcement(strapi)), requiredRoles: await listRequiredRoleIds() },
     trustedDevices: await readTrustedDeviceSettings(strapi),
+    passkeys: await readPasskeySettings(strapi),
   });
 
   const updateSettings = async (
     input: UpdateSecuritySettings.Request['body'],
     actor: { id: Data.ID }
   ): Promise<SecuritySettings> => {
-    // Per-object, no merge inside an object: a present `mfa` or `trustedDevices` replaces its
-    // object whole, an absent one is left exactly as stored. The validator already enforces the
-    // shape of each; this is the one rule it cannot express.
-    if (!input.mfa && !input.trustedDevices) {
-      throw new ValidationError('Provide mfa or trustedDevices');
+    // Per-object, no merge inside an object: a present `mfa`, `trustedDevices` or `passkeys`
+    // replaces its object whole, an absent one is left exactly as stored. The validator already
+    // enforces the shape of each; this is the one rule it cannot express.
+    if (!input.mfa && !input.trustedDevices && !input.passkeys) {
+      throw new ValidationError('Provide mfa, trustedDevices or passkeys');
     }
 
     const previous = await getSettings();
     const nextMfa = input.mfa ?? previous.mfa;
     const nextTrusted = input.trustedDevices ?? previous.trustedDevices;
+    const nextPasskeys = input.passkeys ?? previous.passkeys;
     const requiredRoles = Array.from(new Set(nextMfa.requiredRoles.map(String)));
 
     if (input.mfa && requiredRoles.length > 0) {
@@ -251,30 +304,41 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     const widensTrust =
       (!previous.trustedDevices.enabled && nextTrusted.enabled) ||
       (nextTrusted.enabled && nextTrusted.days > previous.trustedDevices.days);
-    if (lowersEnforcement || widensTrust) {
-      // A downgrade requires re-authentication, and an account with no local password (SSO-only,
-      // the same condition `isExemptFromMfa` treats as exempt) has no local credential to
-      // present. Refused explicitly, before the password/code checks below: `auth.validatePassword`
-      // would otherwise be asked to compare a password against a null hash.
-      if (!actorRow.password) {
+    // Cycle 4: turning passkeys off is an organisation-wide, irreversible deletion of every
+    // phishing-resistant credential every administrator holds (the cascade runs in the
+    // transaction below), so it joins the branch on cycle 2's stated grounds -- a stolen session
+    // must not be able to wipe every passkey with one unauthenticated PUT and a dialog the
+    // attacker is not looking at. Turning them *on* needs nothing: it strengthens the second
+    // factor and destroys nothing.
+    const disablesPasskeys = previous.passkeys.enabled && !nextPasskeys.enabled;
+
+    if (lowersEnforcement || widensTrust || disablesPasskeys) {
+      // An account with no local password (SSO-only, the same condition `isExemptFromMfa` treats
+      // as exempt) has no local credential to present. Cycle 2 accepted that dead end for
+      // *lowering enforcement*, where the caller is lowering the bar on their own account. It is
+      // not acceptable for a feature toggle: in an SSO-only organisation every administrator is
+      // password-less, so nobody could ever turn passkeys off. So a save whose only triggering
+      // term is `disablesPasskeys` proceeds on session authority; combined with either of the
+      // others it is refused exactly as before.
+      if (!actorRow.password && (lowersEnforcement || widensTrust)) {
         throw new ValidationError(
           'Your account has no local password, so it cannot lower two-factor authentication requirements. Ask an administrator who signs in with a password.'
         );
       }
-      if (!input.password) {
-        throw new ValidationError(
-          'Your password is required to lower two-factor authentication requirements'
-        );
-      }
-      if (actorEnrolled) {
-        if (!input.code) {
-          throw new ValidationError(
-            'A two-factor code is required to lower two-factor authentication requirements'
-          );
+      if (actorRow.password) {
+        if (!input.password) {
+          throw new ValidationError('Your password is required to change two-factor settings');
         }
-        await mfa().assertPasswordAndFactor(String(actorRow.id), input.password, input.code);
-      } else if (!(await auth().validatePassword(input.password, actorRow.password))) {
-        throw new ValidationError('Invalid credentials');
+        if (actorEnrolled) {
+          if (!input.code) {
+            throw new ValidationError(
+              'A two-factor code is required to change two-factor settings'
+            );
+          }
+          await mfa().assertPasswordAndFactor(String(actorRow.id), input.password, input.code);
+        } else if (!(await auth().validatePassword(input.password, actorRow.password))) {
+          throw new ValidationError('Invalid credentials');
+        }
       }
     }
 
@@ -286,6 +350,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
         value: {
           mfa: { mode: nextMfa.mode, graceDays: nextMfa.graceDays },
           trustedDevices: { enabled: nextTrusted.enabled, days: nextTrusted.days },
+          passkeys: { enabled: nextPasskeys.enabled },
         },
       });
 
@@ -295,6 +360,9 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       if (previous.trustedDevices.enabled && !nextTrusted.enabled) {
         await mfa().clearAllTrustedDevices();
       }
+
+      // Cycle 4's off-transition cascade lands here (Task 7), beside cycle 3's and for the same
+      // reason: credentials left in place would silently reactivate if the setting came back on.
 
       if (input.mfa) {
         if (requiredRoles.length > 0) {

@@ -21,6 +21,7 @@ const buildCtx = (body: Record<string, unknown> = {}) => {
 const settings = {
   mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
   trustedDevices: { enabled: true, days: 30 },
+  passkeys: { enabled: true },
 };
 
 describe('security-settings controller', () => {

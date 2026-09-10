@@ -30,9 +30,19 @@ export interface TrustedDeviceSettings {
   days: number;
 }
 
+/**
+ * Cycle 4: whether users may register and sign in with a passkey. Stored beside `mfa` and
+ * `trustedDevices` in the same `security-settings` document. Turning it off deletes every
+ * registered passkey, which is why the `PUT` that does so carries credentials like a downgrade.
+ */
+export interface PasskeySettings {
+  enabled: boolean;
+}
+
 export interface SecuritySettings {
   mfa: MfaEnforcementSettings;
   trustedDevices: TrustedDeviceSettings;
+  passkeys: PasskeySettings;
 }
 
 /**
@@ -47,16 +57,19 @@ export declare namespace GetSecuritySettings {
 
 /**
  * PUT /admin/security-settings - per object, no merge inside an object: each of `mfa` /
- * `trustedDevices` present in the body replaces its object whole, an absent one is untouched, a
- * body with neither is rejected. `password` (and `code` when the caller is enrolled) are required
- * only when the change lowers protection: a lower `mode`, a role removed from `requiredRoles`, a
- * longer `graceDays`, enabling trusted devices, or a longer trust `days` while enabled.
+ * `trustedDevices` / `passkeys` present in the body replaces its object whole, an absent one is
+ * untouched, a body with none is rejected. `password` (and `code` when the caller is enrolled) are
+ * required only when the change relaxes protection: a lower `mode`, a role removed from
+ * `requiredRoles`, a longer `graceDays`, enabling trusted devices, a longer trust `days` while
+ * enabled, or disabling passkeys -- which deletes every phishing-resistant credential every
+ * administrator holds.
  */
 export declare namespace UpdateSecuritySettings {
   export interface Request {
     body: {
       mfa?: MfaEnforcementSettings;
       trustedDevices?: TrustedDeviceSettings;
+      passkeys?: PasskeySettings;
       password?: string;
       code?: string;
     };

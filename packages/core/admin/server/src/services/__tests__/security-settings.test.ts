@@ -2,9 +2,11 @@ import type { Core } from '@strapi/types';
 import {
   DEFAULT_MFA_ENFORCEMENT,
   DEFAULT_TRUSTED_DEVICES,
+  DEFAULT_PASSKEYS,
   SECURITY_SETTINGS_KEY,
   readMfaEnforcement,
   readTrustedDeviceSettings,
+  readPasskeySettings,
   resetSecuritySettingsWarnings,
   createSecuritySettingsService,
 } from '../security-settings';
@@ -107,6 +109,52 @@ describe('security-settings: readTrustedDeviceSettings', () => {
       expect(strapi.log.warn).toHaveBeenCalledTimes(1);
       expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('trustedDevices.days'));
       await expect(readTrustedDeviceSettings(strapi)).resolves.toEqual({ enabled: true, days: 30 });
+    }
+  );
+});
+
+describe('security-settings: readPasskeySettings', () => {
+  beforeEach(() => {
+    resetSecuritySettingsWarnings();
+  });
+
+  test('defaults to enabled when nothing is stored', async () => {
+    const { strapi } = buildStrapi(null);
+
+    await expect(readPasskeySettings(strapi)).resolves.toEqual(DEFAULT_PASSKEYS);
+    expect(DEFAULT_PASSKEYS).toEqual({ enabled: true });
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  test('returns the stored object', async () => {
+    const { strapi } = buildStrapi({ passkeys: { enabled: false } });
+
+    await expect(readPasskeySettings(strapi)).resolves.toEqual({ enabled: false });
+  });
+
+  test('a document with only the other two objects falls back without a warning', async () => {
+    const { strapi } = buildStrapi({
+      mfa: { mode: 'off', graceDays: 3 },
+      trustedDevices: { enabled: true, days: 30 },
+    });
+
+    await expect(readPasskeySettings(strapi)).resolves.toEqual(DEFAULT_PASSKEYS);
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+
+  test.each([['yes'], [1], [null], [{}]])(
+    'enabled %p is corrupt and warns once',
+    async (enabled) => {
+      const { strapi } = buildStrapi({ passkeys: { enabled } });
+
+      await readPasskeySettings(strapi);
+      await readPasskeySettings(strapi);
+
+      // The fallback is the default, not "off": a corrupt value is not a decision to turn a
+      // security feature off.
+      await expect(readPasskeySettings(strapi)).resolves.toEqual({ enabled: true });
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+      expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('passkeys.enabled'));
     }
   );
 });
@@ -252,6 +300,7 @@ describe('security-settings: service', () => {
     await expect(service.getSettings()).resolves.toEqual({
       mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
   });
 
@@ -284,6 +333,7 @@ describe('security-settings: service', () => {
     ).resolves.toEqual({
       mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '3'] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
   });
 
@@ -320,12 +370,14 @@ describe('security-settings: service', () => {
     expect(result).toEqual({
       mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
     expect(storeSet).toHaveBeenCalledWith({
       key: 'security-settings',
       value: {
         mfa: { mode: 'required', graceDays: 5 },
         trustedDevices: { enabled: true, days: 30 },
+        passkeys: { enabled: true },
       },
     });
     expect(roles.map((r) => [r.id, r.mfaRequired])).toEqual([
@@ -338,6 +390,7 @@ describe('security-settings: service', () => {
       previous: {
         mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] },
         trustedDevices: { enabled: true, days: 30 },
+        passkeys: { enabled: true },
       },
       next: result,
     });
@@ -383,6 +436,7 @@ describe('security-settings: service', () => {
     ).resolves.toEqual({
       mfa: { mode: 'required', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
   });
 
@@ -478,6 +532,7 @@ describe('security-settings: service', () => {
     ).resolves.toEqual({
       mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] },
       trustedDevices: { enabled: true, days: 30 },
+      passkeys: { enabled: true },
     });
   });
 
@@ -492,6 +547,7 @@ describe('security-settings: service', () => {
     ).resolves.toEqual({
       mfa: { mode: 'required', graceDays: 3, requiredRoles: ['2'] },
       trustedDevices: { enabled: true, days: 7 },
+      passkeys: { enabled: true },
     });
 
     expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
@@ -504,6 +560,7 @@ describe('security-settings: service', () => {
       value: {
         mfa: { mode: 'required', graceDays: 3 },
         trustedDevices: { enabled: true, days: 7 },
+        passkeys: { enabled: true },
       },
     });
   });
@@ -527,11 +584,11 @@ describe('security-settings: service', () => {
     });
   });
 
-  test('a body with neither object is rejected before anything is read or written', async () => {
+  test('a body with none of the three objects is rejected before anything is read or written', async () => {
     const { service, storeSet } = setup();
 
     await expect(service.updateSettings({ password: 'pw' }, actor)).rejects.toThrow(
-      /mfa or trustedDevices/
+      /mfa, trustedDevices or passkeys/
     );
     expect(storeSet).not.toHaveBeenCalled();
   });
@@ -627,5 +684,107 @@ describe('security-settings: service', () => {
       actor
     );
     expect(mfaOnly.clearAllTrustedDevices).not.toHaveBeenCalled();
+  });
+
+  test('a body with only passkeys leaves mfa, the role flags and trustedDevices untouched', async () => {
+    const { service, roles, storeSet } = setup({
+      stored: {
+        mfa: { mode: 'required', graceDays: 3 },
+        trustedDevices: { enabled: false, days: 14 },
+      },
+      enrolled: true,
+    });
+
+    await expect(service.updateSettings({ passkeys: { enabled: true } }, actor)).resolves.toEqual({
+      mfa: { mode: 'required', graceDays: 3, requiredRoles: ['2'] },
+      trustedDevices: { enabled: false, days: 14 },
+      passkeys: { enabled: true },
+    });
+
+    expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
+    expect(storeSet).toHaveBeenCalledWith({
+      key: SECURITY_SETTINGS_KEY,
+      value: {
+        mfa: { mode: 'required', graceDays: 3 },
+        trustedDevices: { enabled: false, days: 14 },
+        passkeys: { enabled: true },
+      },
+    });
+  });
+
+  test('turning passkeys ON needs no credentials: it strengthens the second factor', async () => {
+    const { service, storeSet } = setup({ stored: { passkeys: { enabled: false } } });
+
+    await expect(
+      service.updateSettings({ passkeys: { enabled: true } }, actor)
+    ).resolves.toMatchObject({ passkeys: { enabled: true } });
+    expect(storeSet).toHaveBeenCalled();
+  });
+
+  test('turning passkeys OFF needs the password, and a code when the caller is enrolled', async () => {
+    const unenrolled = setup({ stored: { passkeys: { enabled: true } } });
+    const body = { passkeys: { enabled: false } };
+
+    await expect(unenrolled.service.updateSettings(body, actor)).rejects.toThrow(
+      /password is required to change two-factor settings/i
+    );
+    expect(unenrolled.storeSet).not.toHaveBeenCalled();
+
+    await expect(
+      unenrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
+    ).resolves.toMatchObject({ passkeys: { enabled: false } });
+    expect(unenrolled.validatePassword).toHaveBeenCalledWith('pw', 'hashed');
+
+    const enrolled = setup({ stored: { passkeys: { enabled: true } }, enrolled: true });
+    await expect(
+      enrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
+    ).rejects.toThrow(/code is required to change two-factor settings/i);
+    await expect(
+      enrolled.service.updateSettings({ ...body, password: 'pw', code: '123456' }, actor)
+    ).resolves.toMatchObject({ passkeys: { enabled: false } });
+    expect(enrolled.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
+  });
+
+  test('the re-authentication messages are neutral: disabling passkeys is not "lowering requirements"', async () => {
+    const { service } = setup({ stored: { passkeys: { enabled: true } } });
+
+    await expect(service.updateSettings({ passkeys: { enabled: false } }, actor)).rejects.toThrow(
+      /change two-factor settings/
+    );
+    await expect(
+      service.updateSettings({ passkeys: { enabled: false } }, actor)
+    ).rejects.not.toThrow(/lower two-factor authentication requirements/);
+  });
+
+  test('a password-less (SSO-only) caller may disable passkeys, but nothing else', async () => {
+    // In an SSO-only organisation every administrator is password-less, so the cycle 2 refusal
+    // would make this a setting nobody could ever change, and the CLI offers no escape. Accepted
+    // cost: a stolen SSO session can wipe the organisation's passkeys -- everything that session
+    // could do instead (resetting each user's MFA through `admin::users.update`) is already worse.
+    const passwordless = { password: null };
+
+    const only = setup({
+      stored: { passkeys: { enabled: true } },
+      actor: passwordless,
+      exempt: true,
+    });
+    await expect(
+      only.service.updateSettings({ passkeys: { enabled: false } }, actor)
+    ).resolves.toMatchObject({ passkeys: { enabled: false } });
+    expect(only.validatePassword).not.toHaveBeenCalled();
+
+    // Combined with a real downgrade it is refused exactly as today.
+    const combined = setup({
+      stored: { mfa: { mode: 'required', graceDays: 7 }, passkeys: { enabled: true } },
+      actor: passwordless,
+      exempt: true,
+    });
+    await expect(
+      combined.service.updateSettings(
+        { mfa: { mode: 'off', graceDays: 7, requiredRoles: [] }, passkeys: { enabled: false } },
+        actor
+      )
+    ).rejects.toThrow(/no local password/);
+    expect(combined.storeSet).not.toHaveBeenCalled();
   });
 });

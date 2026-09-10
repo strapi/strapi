@@ -8,11 +8,11 @@ import {
 } from '../services/security-settings';
 
 /**
- * PUT /admin/security-settings, per object: `mfa` and `trustedDevices` are each optional, but
- * whichever is present is validated whole (no merge inside an object), and at least one must be
- * present. `password`/`code` are optional here; the service demands them when the change is a
- * downgrade. `code` bounds mirror `validation/authentication/mfa.ts` (no `.trim()` under strict
- * yup).
+ * PUT /admin/security-settings, per object: `mfa`, `trustedDevices` and `passkeys` are each
+ * optional, but whichever is present is validated whole (no merge inside an object), and at least
+ * one must be present. `password`/`code` are optional here; the service demands them when the
+ * change is a downgrade. `code` bounds mirror `validation/authentication/mfa.ts` (no `.trim()`
+ * under strict yup).
  */
 const mfaSchema = yup
   .object()
@@ -34,11 +34,19 @@ const trustedDevicesSchema = yup
   })
   .noUnknown();
 
+const passkeysSchema = yup
+  .object()
+  .shape({
+    enabled: yup.boolean().required(),
+  })
+  .noUnknown();
+
 const updateSecuritySettingsSchema = yup
   .object()
   .shape({
     mfa: mfaSchema.optional(),
     trustedDevices: trustedDevicesSchema.optional(),
+    passkeys: passkeysSchema.optional(),
     password: yup.string().optional(),
     code: yup.string().min(6).max(32).optional(),
   })
@@ -46,9 +54,9 @@ const updateSecuritySettingsSchema = yup
   .noUnknown()
   .test(
     'one-object',
-    'Provide mfa or trustedDevices',
-    (value: { mfa?: unknown; trustedDevices?: unknown } | undefined) =>
-      Boolean(value?.mfa || value?.trustedDevices)
+    'Provide mfa, trustedDevices or passkeys',
+    (value: { mfa?: unknown; trustedDevices?: unknown; passkeys?: unknown } | undefined) =>
+      Boolean(value?.mfa || value?.trustedDevices || value?.passkeys)
   );
 
 export const validateUpdateSecuritySettings = validateYupSchema(updateSecuritySettingsSchema);
