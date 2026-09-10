@@ -1,0 +1,58 @@
+name: Blast radius (advisory)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: blast-radius-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    name: Blast radius (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/pull/${{ github.event.number }}/merge
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Analyze blast radius
+        shell: bash
+        env:
+          RESULT_PATH: ${{ runner.temp }}/blast-radius.json
+        run: |
+          set -euo pipefail
+          yarn tsx scripts/blast-radius/index.ts --json > "$RESULT_PATH"
+      - name: Validate classifier JSON
+        shell: bash
+        env:
+          RESULT_PATH: ${{ runner.temp }}/blast-radius.json
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require('node:fs');
+          const output = readFileSync(process.env.RESULT_PATH, 'utf8');
+          if (output.trim().length === 0) throw new Error('Classifier produced an empty JSON result.');
+          const result = JSON.parse(output);
+          if (result.schemaVersion !== 2 || result.classifierVersion !== 2) {
+            throw new Error('Classifier produced an unsupported result version.');
+          }
+          NODE
+      - name: Publish advisory job summary
+        shell: bash
+        env:
+          RESULT_PATH: ${{ runner.temp }}/blast-radius.json
+        run: |
+          set -euo pipefail
+          yarn tsx scripts/blast-radius/summary.ts "$RESULT_PATH" | tee -a "$GITHUB_STEP_SUMMARY"
+          test -s "$GITHUB_STEP_SUMMARY"

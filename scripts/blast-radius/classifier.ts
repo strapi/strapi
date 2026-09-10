@@ -1,14 +1,15 @@
-export type Radius = 'NON_RUNTIME' | 'LOCAL' | 'FEATURE' | 'WIDE' | 'REPOSITORY';
+import type { Radius } from './types';
+
 export function classify(input: {
   affectedProjects: readonly string[];
   totalProjects: number;
   globalMatches: ReadonlyArray<{ category: string; path: string }>;
   allPathsRecognizedNonRuntime: boolean;
-}) {
+}): { radius: Radius; reasons: string[] } {
   const count = input.affectedProjects.length;
   if (input.globalMatches.length)
     return {
-      radius: 'REPOSITORY' as Radius,
+      radius: 'REPOSITORY',
       reasons: input.globalMatches
         .map(
           ({ category, path }) =>
@@ -16,32 +17,28 @@ export function classify(input: {
         )
         .sort(),
     };
+  if (input.totalProjects <= 0) throw new Error('Workspace project count must be positive.');
   if (count / input.totalProjects >= 0.5)
     return {
-      radius: 'REPOSITORY' as Radius,
+      radius: 'REPOSITORY',
       reasons: [
         `${count} of ${input.totalProjects} workspace projects are affected, meeting the repository threshold of at least half.`,
       ],
     };
   if (count === 0 && input.allPathsRecognizedNonRuntime)
-    return {
-      radius: 'NON_RUNTIME' as Radius,
-      reasons: [
-        'No workspace project is affected and all changed paths are recognized as non-runtime.',
-      ],
-    };
+    return { radius: 'NON_RUNTIME', reasons: ['All changed paths are recognized non-runtime.'] };
   if (count === 1)
     return {
-      radius: 'LOCAL' as Radius,
+      radius: 'SINGLE_PACKAGE',
       reasons: [`1 of ${input.totalProjects} workspace projects is affected.`],
     };
   if (count <= 5)
     return {
-      radius: 'FEATURE' as Radius,
+      radius: 'MULTI_PACKAGE',
       reasons: [`${count} of ${input.totalProjects} workspace projects are affected.`],
     };
   return {
-    radius: 'WIDE' as Radius,
+    radius: 'WIDE',
     reasons: [`${count} of ${input.totalProjects} workspace projects are affected.`],
   };
 }
