@@ -7,6 +7,10 @@ import { describeOnCondition } from '../../../../utils/shared';
 
 import { AssetsPage } from './page-objects/AssetsPage';
 
+// The `with-admin` fixture ships nine media files, so the list is never just what
+// a test uploads. Assert the relative order of this test's own items instead.
+const ownItems = (names: string[]) => names.filter((name) => name.startsWith('test-image'));
+
 const FIXTURE_IMAGE_1 = path.join(__dirname, '../../../data/uploads/test-image-1.jpg');
 const FIXTURE_IMAGE_2 = path.join(__dirname, '../../../data/uploads/test-image-2.jpg');
 
@@ -22,7 +26,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker([FIXTURE_IMAGE_1, FIXTURE_IMAGE_2]);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     // Default state advertised on the trigger.
@@ -32,13 +36,13 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     // exclusive). Poll: the re-sorted response can land a tick after the click.
     await assetsPage.pickSortOption('A to Z');
     await expect
-      .poll(() => assetsPage.getTableRowNames())
+      .poll(() => assetsPage.getTableRowNames().then(ownItems))
       .toEqual(['test-image-1.jpg', 'test-image-2.jpg']);
 
     // Flip to Z to A — order inverts.
     await assetsPage.pickSortOption('Z to A');
     await expect
-      .poll(() => assetsPage.getTableRowNames())
+      .poll(() => assetsPage.getTableRowNames().then(ownItems))
       .toEqual(['test-image-2.jpg', 'test-image-1.jpg']);
   });
 
@@ -48,22 +52,22 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
 
     // "test-image-15" sorts between "test-image-1.jpg" and "test-image-2.jpg".
     await assetsPage.createFolder('test-image-15');
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.waitForNotification();
     await assetsPage.uploadFilesWithFilePicker([FIXTURE_IMAGE_1, FIXTURE_IMAGE_2]);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
     await assetsPage.switchToTableView();
 
     await assetsPage.pickSortOption('A to Z');
 
     // Folders on top (default): folder first regardless of name.
     await expect
-      .poll(() => assetsPage.getTableRowNames().then((names) => names[0]))
+      .poll(() => assetsPage.getTableRowNames().then((names) => ownItems(names)[0]))
       .toBe('test-image-15');
 
     // Mixed: the folder slots between the two files alphabetically.
     await assetsPage.pickSortOption('Mixed with files');
     await expect
-      .poll(() => assetsPage.getTableRowNames())
+      .poll(() => assetsPage.getTableRowNames().then(ownItems))
       .toEqual(['test-image-1.jpg', 'test-image-15', 'test-image-2.jpg']);
   });
 
@@ -72,7 +76,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')('Media Library - 
     await assetsPage.goto();
 
     await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE_1);
-    await assetsPage.waitForUploadSuccess();
+    await assetsPage.completeUpload();
 
     await assetsPage.pickSortOption('Oldest uploads');
     await expect(page).toHaveURL(/sort=createdAt%3AASC|sort=createdAt:ASC/);

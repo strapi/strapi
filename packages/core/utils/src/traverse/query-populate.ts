@@ -77,17 +77,21 @@ const populate = traverseFactory()
      */
     const populateObject = pathsToObjectPopulate([populate]);
     const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
-    const [result] = objectPopulateToPaths(traversedPopulate);
+    const paths = objectPopulateToPaths(traversedPopulate);
 
-    return result;
+    // Dot notation cannot represent polymorphic `on` fragments. Keep the object form
+    // when a visitor adds one, rather than trying to serialize it as nested `populate`.
+    return paths ? paths[0] : traversedPopulate;
   })
-  // Array of strings ['foo', 'bar.baz'] => map(recurse), then filter out empty items
+  // Array of strings ['foo', 'bar.baz'] => traverse as one object, then serialize when possible
   .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
-    const paths = await Promise.all(
-      populate.map((subClause) => recurse(visitor, options, subClause))
-    );
+    const populateObject = pathsToObjectPopulate(populate);
+    const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
+    const paths = objectPopulateToPaths(traversedPopulate);
 
-    return paths.filter((item) => !isNil(item));
+    // A string array cannot hold polymorphic `on` fragments. Return the sanitized object
+    // as a whole when one is present, so consumers receive a valid populate representation.
+    return paths ?? traversedPopulate;
   })
   .intercept(isQsArrayLimitPopulateObject, async (_visitor, _options, populate) => {
     throwQsArrayLimitPopulateError(Object.keys(populate).length);
@@ -251,7 +255,7 @@ const populate = traverseFactory()
           { on: value?.on }
         );
 
-        set(key, newValue);
+        set(key, { ...value, ...(newValue as Record<string, unknown>) });
 
         return;
       }
@@ -331,21 +335,29 @@ type PopulateObject = {
   [key: string]: true | { populate: PopulateObject };
 };
 
-const objectPopulateToPaths = (input: PopulateObject): string[] => {
+const objectPopulateToPaths = (input: PopulateObject): string[] | undefined => {
   const paths: string[] = [];
 
-  function traverse(currentObj: PopulateObject, parentPath: string) {
+  function traverse(currentObj: PopulateObject, parentPath: string): boolean {
     for (const [key, value] of Object.entries(currentObj)) {
       const currentPath = parentPath ? `${parentPath}.${key}` : key;
       if (value === true) {
         paths.push(currentPath);
       } else {
-        traverse((value as { populate: PopulateObject }).populate, currentPath);
+        const nestedPopulate = (value as { populate?: PopulateObject }).populate;
+
+        if (!nestedPopulate || !traverse(nestedPopulate, currentPath)) {
+          return false;
+        }
       }
     }
+
+    return true;
   }
 
-  traverse(input, '');
+  if (!traverse(input, '')) {
+    return undefined;
+  }
 
   return paths;
 };
