@@ -381,7 +381,7 @@ describe('MfaChallenge', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the server message when the options call or the verify call is refused', async () => {
+  it('shows the server message when the options call is refused', async () => {
     server.use(
       http.post('/admin/login/mfa/webauthn/options', () =>
         HttpResponse.json(
@@ -404,6 +404,41 @@ describe('MfaChallenge', () => {
     const message = await screen.findByText('Could not verify that passkey.');
     expect(message).toHaveAttribute('role', 'alert');
     expect(jest.mocked(startAuthentication)).not.toHaveBeenCalled();
+  });
+
+  it('shows the server message when the VERIFY call is refused, and does not proceed', async () => {
+    // The options call succeeds and the ceremony runs, so this exercises the guard AFTER
+    // `loginMfaWebauthn` -- which the sibling test above does not reach, because it fails at the
+    // options call and never calls `startAuthentication`. Deleting that guard left every test in
+    // this file green, which is the gap this test closes: a rejected assertion must not navigate
+    // the user forward.
+    server.use(
+      // The options call must SUCCEED here, or the ceremony never runs and this test would be a
+      // second copy of the options-failure test above. There is no default handler for either
+      // route: every test in this block registers its own.
+      http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS })),
+      http.post('/admin/login/mfa/webauthn', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'Could not verify that passkey.',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    const message = await screen.findByText('Could not verify that passkey.');
+    expect(message).toHaveAttribute('role', 'alert');
+    // The ceremony DID run -- this is the verify half failing, not the options half.
+    expect(jest.mocked(startAuthentication)).toHaveBeenCalled();
   });
 
   it('still renders a challenge whose state predates the passkey field', () => {
