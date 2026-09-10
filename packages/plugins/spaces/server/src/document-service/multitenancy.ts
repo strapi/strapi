@@ -41,6 +41,16 @@ export const resolveCreateTarget = async (
   const request = getRequestSpace(strapi);
   const override = getScopeOverride();
 
+  /**
+   * An explicit scope wins over every rule below it. Internal code that entered
+   * `runScoped` has already decided which workspace it is acting for — copying
+   * an inherited entry into one, above all, which the content-type rules that
+   * follow would otherwise refuse on the copy's own creation.
+   */
+  if (override) {
+    return override.target;
+  }
+
   if (isSharedContentType(contentType)) {
     if (request && !request.isDefault && !isSharedEditableContentType(contentType)) {
       throw new WorkspaceAccessError(MESSAGES['shared-content-type'], {
@@ -48,10 +58,6 @@ export const resolveCreateTarget = async (
       });
     }
     return null;
-  }
-
-  if (override) {
-    return override.target;
   }
 
   if (request && !request.isDefault) {

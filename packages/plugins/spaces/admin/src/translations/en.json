@@ -12,6 +12,7 @@
   "createModal.success": "Workspace {name} created. Switch to it from the workspace menu.",
   "createModal.title": "Create a workspace",
   "ctb.readOnly.reason": "Content types are managed from the Default workspace. Switch to it to edit the schema.",
+  "ctb.section.title": "Workspaces",
   "ctb.sharedEditable.description": "Only applies when every entry is shared. Sub-workspaces can then create and edit entries of this type.",
   "ctb.sharedEditable.label": "Let other workspaces edit shared entries",
   "ctb.sharedEntries.description": "Entries are visible in every workspace and edited from the Default workspace. Turning it off makes existing entries exclusive to their workspace again; entries shared one by one stay shared.",

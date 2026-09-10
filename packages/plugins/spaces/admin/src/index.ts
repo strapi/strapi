@@ -34,6 +34,7 @@ import {
 } from './components/UserWorkspacesField';
 import { SpaceSwitcher } from './components/SpaceSwitcher';
 import { SpaceVisibility } from './components/SpaceVisibility';
+import { WorkspacesSectionHeading } from './components/WorkspacesSectionHeading';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { installSpaceHeaderInterceptor } from './utils/fetchInterceptor';
@@ -215,6 +216,10 @@ export default {
       });
 
       ctbFormsAPI.components.add({ id: 'spaces-workspaces', component: SpaceVisibility });
+      ctbFormsAPI.components.add({
+        id: 'spaces-section-heading',
+        component: WorkspacesSectionHeading,
+      });
 
       ctbFormsAPI.extendContentType({
         // `enabled` / `scope` stay accepted so schemas that opt out in
@@ -233,9 +238,21 @@ export default {
           advanced() {
             return [
               {
+                // Decorative: a divider and a title, so the workspace settings
+                // read as a group instead of running on from the ones above.
+                // Full width, and named after a key nothing writes to.
+                name: 'pluginOptions.spaces.__section',
+                type: 'spaces-section-heading',
+                size: 12,
+                intlLabel: {
+                  id: getTranslation('ctb.section.title'),
+                  defaultMessage: 'Workspaces',
+                },
+              },
+              {
                 name: 'pluginOptions.spaces.visibleIn',
                 type: 'spaces-workspaces',
-                size: 6,
+                size: 12,
                 intlLabel: {
                   id: getTranslation('ctb.workspaces.label'),
                   defaultMessage: 'Workspaces',

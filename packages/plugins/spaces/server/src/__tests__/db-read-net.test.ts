@@ -72,14 +72,19 @@ const makeEvent = (where?: unknown) => ({
 const NOT_A_COPY = { $or: [{ space_override: false }, { space_override: { $null: true } }] };
 
 describe('db read net', () => {
-  it('subscribes to find/count on scoped, non-shared models only', () => {
+  /**
+   * Content types whose entries are all shared need no workspace filter, but
+   * they are in the net all the same: a workspace that overrides one of their
+   * entries has to stop seeing the original, and that exclusion lives here.
+   */
+  it('subscribes to find/count on every scoped model, shared ones included', () => {
     const { strapi, subscribe } = makeStrapi(ACME);
 
     registerDbReadNet(strapi);
 
     expect(subscribe).toHaveBeenCalledTimes(1);
     const subscriber = subscribe.mock.calls[0][0];
-    expect(subscriber.models).toEqual([ARTICLE.uid]);
+    expect(subscriber.models).toEqual([ARTICLE.uid, GLOSSARY.uid]);
     expect(Object.keys(subscriber)).toEqual(
       expect.arrayContaining(['beforeFindOne', 'beforeFindMany', 'beforeCount'])
     );

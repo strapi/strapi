@@ -76,29 +76,26 @@ const assertOverridable = (
       'Entries of this content type are editable from every workspace, so there is nothing to override'
     );
   }
-  /**
-   * A content type whose every entry is shared (`sharedEntries`) is left out of
-   * the read net entirely — the column is ignored for visibility there — so a
-   * copy would not shadow anything: the workspace would see the original *and*
-   * its own version of it. Refused rather than half-supported. Sharing entry by
-   * entry from the default workspace is what inheritance is for.
-   */
-  if (isSharedContentType(contentType)) {
-    throw new ValidationError(
-      'Every entry of this content type is shared with every workspace. Overriding one is only possible for entries shared individually from the Default workspace'
-    );
-  }
   if (placements.length === 0) {
     throw new NotFoundError();
   }
   if (placements.some((row) => row.spaceId === spaceId)) {
     throw new ValidationError('This entry is already overridden in this workspace');
   }
-  if (!placements.some((row) => row.spaceId === null && !row.isOverride)) {
-    throw new WorkspaceAccessError(
-      'Only an entry inherited from the default workspace can be overridden',
-      { reason: 'shared-entry' }
-    );
+  /**
+   * There has to be something to inherit *from*: a row this workspace reads but
+   * does not own. On an ordinary content type that is the shared original
+   * (`space_id NULL`); on one whose entries are all shared it is any row that
+   * is not another workspace's copy — including rows stamped with a workspace
+   * before the type was made shared.
+   */
+  const inheritable = isSharedContentType(contentType)
+    ? placements.some((row) => !row.isOverride && row.spaceId !== spaceId)
+    : placements.some((row) => row.spaceId === null && !row.isOverride);
+  if (!inheritable) {
+    throw new WorkspaceAccessError('Only an entry this workspace inherits can be overridden', {
+      reason: 'shared-entry',
+    });
   }
 };
 

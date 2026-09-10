@@ -202,8 +202,14 @@ Decisions worth knowing:
   helper resolves it the same way. Getting this wrong is a coin flip, not a
   crash — which is why it is the part most worth reviewing.
 
-Not supported, deliberately: overriding an entry of a `sharedEditable` content
-type (there is nothing to override — every workspace can already edit it).
+Works on both kinds of sharing: an entry shared one at a time from the default
+workspace, and a content type whose entries are _all_ shared (`sharedEntries`) —
+which is the case an admin reaches by ticking "Share every entry with all
+workspaces" and then wanting one entry to differ in one workspace. On such a
+type nothing is stamped with a workspace, so "inherited" means every row that is
+not somebody's copy, and the read net covers those content types for the
+exclusion alone. Not supported: `sharedEditable` types, where there is nothing
+to override because every workspace can already edit the entry.
 
 Endpoints: `POST /spaces/inheritance/override`, `POST /spaces/inheritance/reset`,
 `GET /spaces/inheritance?contentType=&documentIds=` (batched, one request per

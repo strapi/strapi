@@ -17,14 +17,21 @@ import { getShadowedDocumentId, resolveReadScope } from './utils/space-scope';
  *   - the default workspace, the global write scope, or no request → every
  *     workspace's entries minus the override copies, which are shadows of a
  *     document already in the list;
- *   - a sub-workspace X → its own rows, plus the inherited (shared) ones it has
- *     not overridden.
+ *   - a sub-workspace X → its own rows, plus the inherited ones it has not
+ *     overridden. What counts as inherited depends on the content type: an
+ *     ordinary one shares entry by entry (`space_id NULL`), one flagged
+ *     `sharedEntries` shares all of them and the column says nothing about
+ *     visibility there.
+ *
+ * Content types whose entries are all shared are in the net too, even though
+ * they need no workspace filter: a workspace that overrides one of their
+ * entries has to stop seeing the original, and that exclusion lives here.
  */
 export const registerDbReadNet = (strapi: Core.Strapi) => {
   const { getSpaceScopedContentTypes } = getService('content-types');
-  const models = getSpaceScopedContentTypes(strapi)
-    .filter((contentType: unknown) => !isSharedContentType(contentType))
-    .map((contentType: { uid: string }) => contentType.uid);
+  const models = getSpaceScopedContentTypes(strapi).map(
+    (contentType: { uid: string }) => contentType.uid
+  );
 
   if (models.length === 0) {
     return;
@@ -106,18 +113,22 @@ export const applySpaceFilter = (strapi: Core.Strapi, rawEvent: unknown): void =
   }
 
   const event = rawEvent as ReadEvent;
-  const columns = columnsOf(strapi, event.model?.uid);
+  const uid = event.model?.uid;
+  const columns = columnsOf(strapi, uid);
   if (!columns) {
     return;
   }
 
+  const model = uid ? strapi.contentTypes[uid as never] : undefined;
+  const shared = isSharedContentType(model);
   const conditions: Record<string, unknown>[] = [];
 
   if (scope.kind === 'global') {
     conditions.push(NOT_AN_OVERRIDE(columns.override));
   } else {
     conditions.push(
-      visibleInSpace(strapi, event, columns, scope.id) ?? ownedOrInherited(columns.space, scope.id)
+      visibleInSpace(strapi, event, columns, scope.id, shared) ??
+        (shared ? NOT_AN_OVERRIDE(columns.override) : ownedOrInherited(columns.space, scope.id))
     );
   }
 
@@ -150,7 +161,8 @@ const visibleInSpace = (
   strapi: Core.Strapi,
   event: ReadEvent,
   columns: { space: string; override: string; hasDocuments: boolean },
-  target: number
+  target: number,
+  shared: boolean
 ): Record<string, unknown> | undefined => {
   const tableName = event.model?.tableName;
   if (!tableName || !columns.hasDocuments) {
@@ -164,11 +176,19 @@ const visibleInSpace = (
     .where(columns.override, true)
     .whereNotNull('document_id');
 
+  // On a content type whose entries are all shared, everything is inherited —
+  // the workspace column says nothing about who may see a row, only whose copy
+  // it is. So the branch that would match "my own rows" matches my own copies,
+  // and the inherited branch is every row that is nobody's copy.
+  const inherited = shared
+    ? NOT_AN_OVERRIDE(columns.override)
+    : { [columns.space]: { $null: true } };
+  const own = shared
+    ? { $and: [{ [columns.space]: target }, { [columns.override]: true }] }
+    : { [columns.space]: target };
+
   return {
-    $or: [
-      { [columns.space]: target },
-      { $and: [{ [columns.space]: { $null: true } }, { documentId: { $notIn: overridden } }] },
-    ],
+    $or: [own, { $and: [inherited, { documentId: { $notIn: overridden } }] }],
   };
 };
 

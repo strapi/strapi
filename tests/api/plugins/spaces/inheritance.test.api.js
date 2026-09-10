@@ -5,6 +5,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 
 const POST_UID = 'api::post.post';
+const NOTICE_UID = 'api::notice.notice';
 const SPACE_HEADER = 'X-Strapi-Space-Id';
 const cmUrl = (uid) => `/content-manager/collection-types/${uid}`;
 
@@ -24,6 +25,21 @@ const postModel = {
   displayName: 'Post',
   singularName: 'post',
   pluralName: 'posts',
+  description: '',
+  collectionName: '',
+};
+
+/**
+ * Every entry shared, by the content type rather than one at a time — the case
+ * an admin lands in by ticking "Share every entry with all workspaces".
+ */
+const noticeModel = {
+  draftAndPublish: true,
+  pluginOptions: { spaces: { sharedEntries: true } },
+  attributes: { title: { type: 'string' } },
+  displayName: 'Notice',
+  singularName: 'notice',
+  pluralName: 'notices',
   description: '',
   collectionName: '',
 };
@@ -107,7 +123,7 @@ describe('Spaces — inherited entries and per-workspace overrides', () => {
     });
 
   beforeAll(async () => {
-    await builder.addContentTypes([postModel]).build();
+    await builder.addContentTypes([postModel, noticeModel]).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
@@ -124,6 +140,7 @@ describe('Spaces — inherited entries and per-workspace overrides', () => {
 
   afterAll(async () => {
     await strapi.db.query(POST_UID).deleteMany();
+    await strapi.db.query(NOTICE_UID).deleteMany();
     if (globexId) {
       await strapi.db.query('plugin::spaces.space').delete({ where: { id: globexId } });
     }
@@ -432,6 +449,119 @@ describe('Spaces — inherited entries and per-workspace overrides', () => {
         headers: inSpace('default'),
       });
       expect(after.body.data[documentId].overriddenIn[0].edited).toBe(true);
+    });
+  });
+
+  /**
+   * A content type whose entries are all shared is the case an admin reaches by
+   * ticking "Share every entry with all workspaces" — and then wanting one of
+   * them to differ in one workspace. Nothing here is stamped with a workspace,
+   * so "inherited" is every row, and a copy has to shadow the original just the
+   * same.
+   */
+  describe('A content type where every entry is shared', () => {
+    const createNotice = async (title) => {
+      const created = await rq({
+        url: cmUrl(NOTICE_UID),
+        method: 'POST',
+        body: { title },
+        headers: inSpace('default'),
+      });
+      expect(created.statusCode).toBe(201);
+      return created.body.data.documentId;
+    };
+
+    const overrideNotice = (slug, documentId) =>
+      rq({
+        url: '/spaces/inheritance/override',
+        method: 'POST',
+        body: { uid: NOTICE_UID, documentId },
+        headers: inSpace(slug),
+      });
+
+    beforeEach(async () => {
+      await strapi.db.query(NOTICE_UID).deleteMany();
+    });
+
+    test('a workspace can take its own version of an entry', async () => {
+      const documentId = await createNotice('Opening hours');
+
+      const refused = await rq({
+        url: `${cmUrl(NOTICE_UID)}/${documentId}`,
+        method: 'PUT',
+        body: { title: 'Acme hours' },
+        headers: inSpace('acme'),
+      });
+      expect(refused.statusCode).toBe(403);
+      expect(refused.body.error.details).toEqual({ reason: 'shared-content-type' });
+
+      expect((await overrideNotice('acme', documentId)).statusCode).toBe(200);
+
+      const written = await rq({
+        url: `${cmUrl(NOTICE_UID)}/${documentId}`,
+        method: 'PUT',
+        body: { title: 'Acme hours' },
+        headers: inSpace('acme'),
+      });
+      expect(written.statusCode).toBe(200);
+      expect(written.body.data.title).toBe('Acme hours');
+    });
+
+    test('the copy shadows the original in that workspace, and nowhere else', async () => {
+      const documentId = await createNotice('Opening hours');
+      await overrideNotice('acme', documentId);
+      await rq({
+        url: `${cmUrl(NOTICE_UID)}/${documentId}`,
+        method: 'PUT',
+        body: { title: 'Acme hours' },
+        headers: inSpace('acme'),
+      });
+
+      const fromAcme = await rq({
+        url: `${cmUrl(NOTICE_UID)}?pageSize=100`,
+        method: 'GET',
+        headers: inSpace('acme'),
+      });
+      const acmeRows = fromAcme.body.results.filter((row) => row.documentId === documentId);
+      expect(acmeRows).toHaveLength(1);
+      expect(acmeRows[0].title).toBe('Acme hours');
+
+      for (const slug of ['default', 'globex']) {
+        const list = await rq({
+          url: `${cmUrl(NOTICE_UID)}?pageSize=100`,
+          method: 'GET',
+          headers: inSpace(slug),
+        });
+        const rows = list.body.results.filter((row) => row.documentId === documentId);
+        expect(rows).toHaveLength(1);
+        expect(rows[0].title).toBe('Opening hours');
+      }
+    });
+
+    test('resetting puts the workspace back on the original', async () => {
+      const documentId = await createNotice('Opening hours');
+      await overrideNotice('acme', documentId);
+      await rq({
+        url: `${cmUrl(NOTICE_UID)}/${documentId}`,
+        method: 'PUT',
+        body: { title: 'Acme hours' },
+        headers: inSpace('acme'),
+      });
+
+      const done = await rq({
+        url: '/spaces/inheritance/reset',
+        method: 'POST',
+        body: { uid: NOTICE_UID, documentId },
+        headers: inSpace('acme'),
+      });
+      expect(done.statusCode).toBe(200);
+
+      const after = await rq({
+        url: `${cmUrl(NOTICE_UID)}/${documentId}`,
+        method: 'GET',
+        headers: inSpace('acme'),
+      });
+      expect(after.body.data.title).toBe('Opening hours');
     });
   });
 });

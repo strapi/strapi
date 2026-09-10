@@ -105,6 +105,16 @@ export const decideAccess = ({
     return { visible: true, editable: true };
   }
 
+  /**
+   * A workspace's own copy of an inherited entry is its own content, whatever
+   * the content type says about the rest — taking a copy in order to edit it is
+   * the entire point. Only a copy: a row merely stamped with this workspace on
+   * a type managed from the default one stays read-only, as it was.
+   */
+  if (isOverride && entrySpaceId === request.id) {
+    return { visible: true, editable: true, isOverride: true };
+  }
+
   if (isSharedContentType(model)) {
     return isSharedEditableContentType(model)
       ? { visible: true, editable: true }
