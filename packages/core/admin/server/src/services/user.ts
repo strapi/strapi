@@ -51,6 +51,8 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'mfaPendingSecret',
       'mfaGraceUntil',
       'mfaLockedAt',
+      'mfaPasskeyChallenge',
+      'mfaPasskeyChallengeExpiresAt',
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

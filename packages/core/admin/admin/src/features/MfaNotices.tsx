@@ -68,6 +68,14 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
     id: 'Settings.profile.form.section.mfa.notice.trusted_device_used',
     defaultMessage: 'A trusted device logged in without a code',
   },
+  passkey_registered: {
+    id: 'Settings.profile.form.section.mfa.notice.passkey_registered',
+    defaultMessage: 'A passkey was added to your account',
+  },
+  passkey_removed: {
+    id: 'Settings.profile.form.section.mfa.notice.passkey_removed',
+    defaultMessage: 'A passkey was removed from your account',
+  },
 };
 
 /**

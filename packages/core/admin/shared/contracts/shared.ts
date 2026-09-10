@@ -45,6 +45,10 @@ export interface AdminUser extends Entity {
   mfaPendingSecret?: string | null;
   mfaGraceUntil?: string | Date | null;
   mfaLockedAt?: string | Date | null;
+  // Cycle 4 (passkeys). The one pending registration ceremony and its deadline. Private, declared
+  // here only so the two sanitizers can name them in their omit lists.
+  mfaPasskeyChallenge?: string | null;
+  mfaPasskeyChallengeExpiresAt?: string | Date | null;
 }
 
 export type AdminUserCreationPayload = Omit<
@@ -70,6 +74,8 @@ export type SanitizedAdminUser = Omit<
   | 'mfaPendingSecret'
   | 'mfaGraceUntil'
   | 'mfaLockedAt'
+  | 'mfaPasskeyChallenge'
+  | 'mfaPasskeyChallengeExpiresAt'
 > & {
   roles: SanitizedAdminRole[];
 };

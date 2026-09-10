@@ -100,6 +100,22 @@ export default {
       private: true,
       searchable: false,
     },
+    // Cycle 4: the one pending passkey *registration* ceremony, mirroring `mfaPendingSecret`
+    // exactly -- one per user, overwritten by a new options call, consumed by one conditional
+    // statement, and cleared by `disable`. The login ceremony's challenge lives on the
+    // `admin::mfa-challenge` row instead, so it inherits that row's TTL and throttle.
+    mfaPasskeyChallenge: {
+      type: 'string',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
+    mfaPasskeyChallengeExpiresAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
     registrationToken: {
       type: 'string',
       configurable: false,

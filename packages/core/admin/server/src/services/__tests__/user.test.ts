@@ -60,7 +60,7 @@ describe('User', () => {
       });
     });
 
-    test('Removes every MFA column, cycle 1 and cycle 2 alike', () => {
+    test('Removes every MFA column, cycles 1 to 4 alike', () => {
       const res = sanitizeUser({
         id: 1,
         firstname: 'Test',
@@ -73,6 +73,8 @@ describe('User', () => {
         mfaPendingSecret: 'encrypted-pending-ciphertext',
         mfaGraceUntil: '2026-09-11T00:00:00.000Z',
         mfaLockedAt: '2026-09-12T00:00:00.000Z',
+        mfaPasskeyChallenge: 'pending-ceremony-challenge',
+        mfaPasskeyChallengeExpiresAt: '2026-09-09T00:05:00.000Z',
         roles: [],
       } as any);
 
@@ -89,6 +91,8 @@ describe('User', () => {
         'mfaPendingSecret',
         'mfaGraceUntil',
         'mfaLockedAt',
+        'mfaPasskeyChallenge',
+        'mfaPasskeyChallengeExpiresAt',
       ]) {
         expect(res).not.toHaveProperty(column);
       }

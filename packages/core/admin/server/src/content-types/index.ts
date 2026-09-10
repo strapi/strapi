@@ -10,6 +10,7 @@ import mfaChallenge from './mfa-challenge';
 import mfaRecoveryCode from './mfa-recovery-code';
 import mfaEvent from './mfa-event';
 import mfaTrustedDevice from './mfa-trusted-device';
+import mfaPasskey from './mfa-passkey';
 
 export default {
   permission: { schema: Permission },
@@ -24,4 +25,5 @@ export default {
   'mfa-recovery-code': { schema: mfaRecoveryCode },
   'mfa-event': { schema: mfaEvent },
   'mfa-trusted-device': { schema: mfaTrustedDevice },
+  'mfa-passkey': { schema: mfaPasskey },
 };

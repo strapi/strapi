@@ -23,6 +23,8 @@ describe('EE user service', () => {
       mfaPendingSecret: 'encrypted-pending-ciphertext',
       mfaGraceUntil: '2026-09-11T00:00:00.000Z',
       mfaLockedAt: null,
+      mfaPasskeyChallenge: 'pending-ceremony-challenge',
+      mfaPasskeyChallengeExpiresAt: '2026-09-09T00:05:00.000Z',
     };
     const emit = jest.fn();
     const findOne = jest.fn(() => Promise.resolve(deletedUser));
@@ -59,6 +61,8 @@ describe('EE user service', () => {
       'mfaPendingSecret',
       'mfaGraceUntil',
       'mfaLockedAt',
+      'mfaPasskeyChallenge',
+      'mfaPasskeyChallengeExpiresAt',
     ]) {
       expect(payload).not.toHaveProperty(column);
     }

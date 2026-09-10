@@ -1,5 +1,6 @@
 import type { Data } from '@strapi/types';
 import type { AdminUser } from './shared';
+import type { Login } from './authentication';
 
 /**
  * /mfa/me - Current second-factor status for the authenticated admin user. Never carries the
@@ -186,6 +187,151 @@ export declare namespace RevokeUserTrustedDevices {
 }
 
 /**
+ * One registered passkey, as the owner's list and the registration response render it (cycle 4).
+ * Exactly four fields: `publicKey`, `counter`, `credentialId` and `transports` never leave the
+ * server.
+ */
+export interface Passkey {
+  id: string;
+  /** User-supplied at registration, 1..50 characters. There is no rename route. */
+  name: string;
+  /** ISO, shown as "Added". */
+  createdAt: string;
+  /** ISO, the last challenge this passkey satisfied; null until it has. */
+  lastUsedAt: string | null;
+}
+
+/**
+ * GET /mfa/passkeys - The caller's own passkeys, newest first. An empty list when the
+ * organisation has turned passkeys off, so the list and the administrator count never disagree.
+ */
+export declare namespace ListPasskeys {
+  export interface Response {
+    data: Passkey[];
+  }
+}
+
+/**
+ * POST /mfa/passkeys/options - Start a registration ceremony. Costs the current password *and* a
+ * live second factor (`assertPasswordAndFactor`): under this cycle's factor model the new
+ * credential satisfies every future challenge on its own, so password-only would be a weaker gate
+ * on a stronger operation.
+ *
+ * The response is the library's `PublicKeyCredentialCreationOptionsJSON`, passed through
+ * verbatim for `@simplewebauthn/browser`'s `startRegistration({ optionsJSON })` to consume.
+ * Typed structurally rather than imported from `@simplewebauthn/server`, which is a server-only
+ * dependency: the browser half has its own identical type in `@simplewebauthn/browser`.
+ */
+export declare namespace PasskeyRegistrationOptions {
+  export interface Request {
+    body: {
+      password: string;
+      code: string;
+    };
+  }
+
+  export interface Response {
+    data: Record<string, unknown>;
+  }
+}
+
+/**
+ * POST /mfa/passkeys - Finish the ceremony started by the options route. No password or code: the
+ * ceremony this completes was already authorised there, and it is single-use.
+ */
+export declare namespace RegisterPasskey {
+  export interface Request {
+    body: {
+      /** Trimmed, 1..50 characters. */
+      name: string;
+      /** The browser's `RegistrationResponseJSON`, structurally typed for the same reason as above. */
+      registration: Record<string, unknown>;
+    };
+  }
+
+  export interface Response {
+    data: Passkey;
+  }
+}
+
+/**
+ * DELETE /mfa/passkeys/:id - Remove one of the caller's own passkeys. 204 with no body, or 404
+ * when the row is not theirs. Costs nothing: TOTP always survives a passkey deletion, so there is
+ * no lockout path, and it works even while the policy is off -- removing a credential is never
+ * the dangerous direction.
+ */
+export declare namespace DeletePasskey {
+  export interface Params {
+    id: string;
+  }
+}
+
+/**
+ * GET /mfa/users/:id/passkeys - How many passkeys another user holds (`admin::users.read`). A
+ * number, not an inventory of somebody's hardware. `{ count: 0 }` when the policy is off.
+ */
+export declare namespace ListUserPasskeys {
+  export interface Params {
+    id: Data.ID;
+  }
+  export interface Response {
+    data: {
+      count: number;
+    };
+  }
+}
+
+/**
+ * DELETE /mfa/users/:id/passkeys - Remove every passkey of another user (`admin::users.update`,
+ * the permission that already lets an administrator reset a second factor). 204, 404 for an
+ * unknown user, and it works while the policy is off.
+ */
+export declare namespace DeleteUserPasskeys {
+  export interface Params {
+    id: Data.ID;
+  }
+}
+
+/**
+ * POST /admin/login/mfa/webauthn/options - Start an authentication ceremony against a challenge
+ * minted by `/login` or `/reset-password`. Unauthenticated; the challenge token is the only
+ * credential. Charges no attempt: it evaluates no factor. The response is the library's
+ * `PublicKeyCredentialRequestOptionsJSON`, structurally typed as above.
+ */
+export declare namespace MfaWebauthnOptions {
+  export interface Request {
+    body: {
+      challengeToken: string;
+    };
+  }
+
+  export interface Response {
+    data: Record<string, unknown>;
+  }
+}
+
+/**
+ * POST /admin/login/mfa/webauthn - Complete that ceremony and receive a session, exactly as
+ * `/login/mfa` does for a code. `deviceId` and `rememberMe` are not decoration: `issueSession`
+ * reads both from the request body via `extractDeviceParams`, so omitting them would lose the
+ * caller's "remember me" choice and leave a trusted-device row's `deviceId` null.
+ */
+export declare namespace MfaWebauthnLogin {
+  export interface Request {
+    body: {
+      challengeToken: string;
+      /** The browser's `AuthenticationResponseJSON`. */
+      assertion: Record<string, unknown>;
+      trustDevice?: boolean;
+      deviceId?: string;
+      rememberMe?: boolean;
+    };
+  }
+
+  export type Response = Login.Response;
+}
+
+/**
  * A single security notice: `admin::mfa-event` rows the caller has not yet seen. Never carries a
  * code, a secret or an otpauth URI -- `metadata` is limited to neutral context (see `MfaEventType`
  * in `admin::mfa`).
@@ -204,7 +350,9 @@ export interface MfaEventNotice {
     | 'authenticator_replaced'
     | 'device_trusted'
     | 'device_trust_revoked'
-    | 'trusted_device_used';
+    | 'trusted_device_used'
+    | 'passkey_registered'
+    | 'passkey_removed';
   metadata: Record<string, unknown>;
   createdAt: string;
   seenAt: string | null;
