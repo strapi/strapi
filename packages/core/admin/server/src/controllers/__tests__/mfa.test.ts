@@ -976,6 +976,34 @@ describe('mfa controller', () => {
       expect(ctx.body.data).toMatchObject({ challenge: 'opts-challenge' });
     });
 
+    // F1: the single most important property of this handler -- a password alone must never
+    // authorise a brand-new second factor. The gate is `validatePasskeyOptionsInput` requiring
+    // `code` plus `assertPasswordAndFactor` verifying it; both halves are pinned so neither can be
+    // silently loosened (e.g. `code` becoming optional in the schema) without a red test here.
+    test('a password alone does not authorise a new factor', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx } = buildCtx({ password: 'pw' }); // no code
+
+      await expect(mfaController.passkeyRegistrationOptions(ctx)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
+      expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
+      expect(doubles.passkeyRegistrationOptions).not.toHaveBeenCalled();
+    });
+
+    test('a wrong code refuses even with the right password, and issues no ceremony', async () => {
+      const doubles = buildStrapiWithPasskeys({
+        assertPasswordAndFactor: jest.fn(() =>
+          Promise.reject(new errors.ValidationError('Invalid code'))
+        ),
+      });
+      const { ctx } = buildCtx({ password: 'pw', code: '000000' });
+
+      await expect(mfaController.passkeyRegistrationOptions(ctx)).rejects.toThrow('Invalid code');
+      expect(doubles.passkeyRegistrationOptions).not.toHaveBeenCalled();
+      expect(ctx.body).toBeUndefined();
+    });
+
     test('register trims the name and returns only the four public fields', async () => {
       const doubles = buildStrapiWithPasskeys();
       const registration = { id: 'cred-1', response: {} };
@@ -990,10 +1018,16 @@ describe('mfa controller', () => {
     });
 
     test.each([[''], ['   '], ['x'.repeat(51)]])('register rejects the name %p', async (name) => {
-      buildStrapiWithPasskeys();
+      // F4: a bare `rejects.toThrow()` passes on any rejection at all, including one caused by a
+      // missing mock, and discarding the doubles meant nothing pinned that the refusal happens
+      // *before* the service is reached. Both are asserted explicitly now.
+      const doubles = buildStrapiWithPasskeys();
       const { ctx } = buildCtx({ name, registration: { id: 'cred-1' } });
 
-      await expect(mfaController.registerPasskey(ctx)).rejects.toThrow();
+      await expect(mfaController.registerPasskey(ctx)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
+      expect(doubles.registerPasskey).not.toHaveBeenCalled();
     });
 
     test("the list is the caller's own", async () => {
@@ -1024,6 +1058,16 @@ describe('mfa controller', () => {
       await mfaController.deletePasskey(first.ctx);
       expect(first.notFound).toHaveBeenCalled();
       expect(missing.deletePasskey).toHaveBeenCalledWith('7', '9');
+
+      // F5: an empty body proves nothing about ownership -- a body (or param) that tries to
+      // supply its own owner must be ignored, and the handler must use only the session's user.
+      const spoofed = buildStrapiWithPasskeys({
+        deletePasskey: jest.fn(() => Promise.resolve(false)),
+      });
+      const injected = buildCtx({ userId: '8' }, {}, {}, { params: { id: '9', userId: '8' } });
+      await mfaController.deletePasskey(injected.ctx);
+      expect(injected.notFound).toHaveBeenCalled();
+      expect(spoofed.deletePasskey).toHaveBeenCalledWith('7', '9');
 
       buildStrapiWithPasskeys();
       const second = buildCtx({}, {}, {}, { params: { id: '9' } });
