@@ -980,7 +980,7 @@ describe('MCP upload tools RBAC (api)', () => {
           name: 'Escalated',
         });
 
-        expect(response.error ?? response.result?.isError).toBeTruthy();
+        expectToolDisabled(response, 'media_create_folder');
         expect(await countFolders()).toBe(0);
       });
     });
