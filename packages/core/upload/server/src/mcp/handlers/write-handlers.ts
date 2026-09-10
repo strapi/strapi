@@ -4,7 +4,6 @@ import type { Core, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 import { ACTIONS, FILE_MODEL_UID, FOLDER_MODEL_UID } from '../../constants';
 import { findEntityAndCheckPermissions } from '../../controllers/utils/find-entity-and-check-permissions';
-import { assertAmbientInstance } from '../ambient-instance';
 import { assertMediaPermission } from '../permissions';
 import { sanitizeMediaAsset } from '../sanitizers/sanitize-media';
 import {
@@ -75,13 +74,9 @@ const buildFileInfo = (args: MediaUpdateAssetArgs): Record<string, string> => {
  * the write without a second `media_get_asset` round-trip — and so provider fields stay
  * invisible on the write path too.
  */
-export const createMediaUpdateAssetHandler = (
-  strapi: Core.Strapi,
-  context: Modules.MCP.McpHandlerContext
-) => {
-  assertAmbientInstance(strapi);
-
-  return async ({
+export const createMediaUpdateAssetHandler =
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  async ({
     args,
   }: {
     args: Record<string, unknown>;
@@ -127,7 +122,6 @@ export const createMediaUpdateAssetHandler = (
 
     return ok({ data: sanitizeMediaAsset(updated) });
   };
-};
 
 /**
  * Resolves the destination folder for `media_move_assets`, and rejects one that does not exist.
@@ -176,13 +170,9 @@ const resolveDestinationFolder = async (strapi: Core.Strapi, folder: number | nu
  * asset, and a bounded reorganisation (100 ids max, per the input schema) is not worth the
  * connection-pool contention of firing them in parallel.
  */
-export const createMediaMoveAssetsHandler = (
-  strapi: Core.Strapi,
-  context: Modules.MCP.McpHandlerContext
-) => {
-  assertAmbientInstance(strapi);
-
-  return async ({
+export const createMediaMoveAssetsHandler =
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  async ({
     args,
   }: {
     args: Record<string, unknown>;
@@ -266,7 +256,6 @@ export const createMediaMoveAssetsHandler = (
      */
     return ok({ destinationFolder, moved, failed });
   };
-};
 
 /**
  * `media_delete_assets` — previews or performs the permanent deletion of assets, in bulk.
@@ -293,13 +282,9 @@ export const createMediaMoveAssetsHandler = (
  * The deletions are sequential on purpose: each one performs provider I/O, and a bounded batch
  * (100 ids max, per the input schema) is not worth firing at a provider in parallel.
  */
-export const createMediaDeleteAssetsHandler = (
-  strapi: Core.Strapi,
-  context: Modules.MCP.McpHandlerContext
-) => {
-  assertAmbientInstance(strapi);
-
-  return async ({
+export const createMediaDeleteAssetsHandler =
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  async ({
     args,
   }: {
     args: Record<string, unknown>;
@@ -386,4 +371,3 @@ export const createMediaDeleteAssetsHandler = (
      */
     return ok({ dryRun, deleted, failed, totalFileNumber: deleted.length });
   };
-};
