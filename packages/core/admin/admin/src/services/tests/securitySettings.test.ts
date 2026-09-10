@@ -1,12 +1,22 @@
 import { renderHook, server, waitFor, act } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { useGetPasskeysQuery, useGetUserPasskeysQuery } from '../mfa';
 import {
   useGetSecuritySettingsQuery,
   useUpdateSecuritySettingsMutation,
 } from '../securitySettings';
 
+import type { Passkey } from '../../../../shared/contracts/mfa';
+
 const SETTINGS = { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } } as const;
+
+const A_PASSKEY: Passkey = {
+  id: '1',
+  name: 'MacBook Touch ID',
+  createdAt: '2026-09-01T10:00:00.000Z',
+  lastUsedAt: null,
+};
 
 describe('security-settings service', () => {
   it('reads GET /admin/security-settings and unwraps data', async () => {
@@ -52,5 +62,45 @@ describe('security-settings service', () => {
       password: 'Testing123!',
       code: '123456',
     });
+  });
+
+  it('updating security settings invalidates the passkeys list and a user passkey count (cycle 4)', async () => {
+    let passkeysCalls = 0;
+    let userPasskeysCalls = 0;
+    server.use(
+      http.get('/admin/mfa/passkeys', () => {
+        passkeysCalls += 1;
+        return HttpResponse.json({ data: passkeysCalls === 1 ? [A_PASSKEY] : [] });
+      }),
+      http.get('/admin/mfa/users/42/passkeys', () => {
+        userPasskeysCalls += 1;
+        return HttpResponse.json({ data: { count: userPasskeysCalls === 1 ? 1 : 0 } });
+      }),
+      http.put('/admin/security-settings', () => HttpResponse.json({ data: SETTINGS }))
+    );
+
+    const { result } = renderHook(() => {
+      const passkeys = useGetPasskeysQuery();
+      const userPasskeys = useGetUserPasskeysQuery({ id: 42 });
+      const [update] = useUpdateSecuritySettingsMutation();
+      return { passkeys, userPasskeys, update };
+    });
+
+    await waitFor(() => expect(result.current.passkeys.data).toHaveLength(1));
+    await waitFor(() => expect(result.current.userPasskeys.data).toEqual({ count: 1 }));
+
+    await act(async () => {
+      await result.current.update({
+        passkeys: { enabled: false },
+        password: 'Testing123!',
+        code: '123456',
+      });
+    });
+
+    await waitFor(() => expect(result.current.passkeys.data).toHaveLength(0));
+    await waitFor(() => expect(result.current.userPasskeys.data).toEqual({ count: 0 }));
+
+    expect(passkeysCalls).toBe(2);
+    expect(userPasskeysCalls).toBe(2);
   });
 });

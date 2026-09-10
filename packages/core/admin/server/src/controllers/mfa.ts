@@ -1,6 +1,5 @@
 import type { Context } from 'koa';
 import { errors } from '@strapi/utils';
-import type { RegistrationResponseJSON } from '@simplewebauthn/server';
 import { getService } from '../utils';
 import {
   validateMfaEnrolInput,
@@ -418,13 +417,7 @@ export default {
     const { name, registration } = ctx.request.body as RegisterPasskey.Request['body'];
 
     ctx.body = {
-      data: await mfa.registerPasskey(
-        userId,
-        name.trim(),
-        // The one named cast at the HTTP boundary: the validator guarantees an object and
-        // nothing more, deliberately, because the library does its own structural checks.
-        registration as unknown as RegistrationResponseJSON
-      ),
+      data: await mfa.registerPasskey(userId, name.trim(), registration),
     } satisfies RegisterPasskey.Response;
   },
 

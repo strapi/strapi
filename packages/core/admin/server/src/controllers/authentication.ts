@@ -3,7 +3,6 @@ import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
 import { errors } from '@strapi/utils';
-import type { AuthenticationResponseJSON } from '@simplewebauthn/server';
 import { getService } from '../utils';
 import { MfaLockedError } from '../services/mfa-errors';
 import { PASSKEY_VERIFY_FAILED } from '../services/mfa-passkeys';
@@ -315,10 +314,7 @@ export default {
       // Throws `RateLimitError` (429) when the account is throttled, and one generic
       // `ValidationError` for every other outcome, so no caller can tell an expired challenge
       // from a wrong credential from a policy that is off.
-      const { userId } = await mfa.verifyAssertion(
-        challengeToken,
-        assertion as unknown as AuthenticationResponseJSON
-      );
+      const { userId } = await mfa.verifyAssertion(challengeToken, assertion);
 
       const user = await getService('user').findOne(userId);
 
