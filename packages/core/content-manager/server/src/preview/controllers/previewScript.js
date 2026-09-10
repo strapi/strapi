@@ -147,22 +147,6 @@ function previewScript(config) {
   };
 
   /**
-   * True for content that content-source-maps.ts never stega-encodes by
-   * design — code block text, and images with no (or empty) alt text — as
-   * opposed to content that's merely *not yet* encoded because it's a live,
-   * unsaved edit. Used to decide whether an unmarked double-click should
-   * still resolve a real block index (live-typed content) or stay a
-   * no-cursor-jump (content that will never carry a marker even once saved).
-   * @param {Element} element
-   * @returns {boolean}
-   */
-  const isKnownUnencodedElement = (element) => {
-    if (element.closest('pre')) return true;
-    if (element.tagName === 'IMG' && !element.getAttribute('alt')) return true;
-    return false;
-  };
-
-  /**
    * When a media field's mime type changes (e.g. image -> video), we can't
    * swap the rendered DOM tag in place — the host framework (e.g. React)
    * owns the original element and throws on removeChild if we replaceChild
@@ -1116,18 +1100,22 @@ function previewScript(config) {
           if (exact) {
             blockIndex = findBlockIndex(anchor, groupKey, group);
           } else {
-            // Unmarked doesn't always mean "never marked" — live edits render
-            // before they're saved, so a just-typed paragraph is unmarked the
-            // same way a code block or alt-less image permanently is. Only
-            // the latter should keep blockIndex null; resolve the real
-            // clicked element's own position for everything else.
+            // No exact hit on a marked element — resolve the real clicked
+            // element's own position instead of guessing from the fallback
+            // anchor above (nearest marked sibling), which is only reliable
+            // for "which field", not "which block". findBlockIndex only
+            // needs a genuine DOM descendant of the field container, not a
+            // marked one, so this works whether the element is unmarked
+            // because it's not yet saved (live-typed content) or unmarked by
+            // design (code blocks, alt-less images) — no stega marker needed
+            // either way.
             // elementsFromPoint (not elementFromPoint) skips past the
             // highlight overlay itself, which is what actually received this
             // dblclick and would otherwise be the only hit at this point.
             const clickedElement = document
               .elementsFromPoint(event.clientX, event.clientY)
               .find((el) => !overlay.contains(el));
-            if (clickedElement && !isKnownUnencodedElement(clickedElement)) {
+            if (clickedElement) {
               blockIndex = findBlockIndex(
                 /** @type {HTMLElement} */ (clickedElement),
                 groupKey,

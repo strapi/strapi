@@ -273,12 +273,13 @@ describe('previewScript — findBlockIndex for nested lists', () => {
 
 // pickElementAtPoint only knows about marked (stega-tagged) nodes. Code blocks
 // and images with no alt text are never marked, so a click on one finds no
-// exact hit and falls back to the nearest marked sibling — useful to figure out
-// which *field* was clicked, but that sibling is not the block the user
-// actually clicked. Feeding it into findBlockIndex would jump the Slate cursor
-// to the wrong block, so the double-click handler must only derive a block
-// index from an exact hit.
-describe('previewScript — unmarked click inside a blocks field does not jump the cursor', () => {
+// exact hit against the group's own elements — but that doesn't mean the
+// block can't be resolved: findBlockIndex only needs a genuine DOM descendant
+// of the field container, not a marked one. The double-click handler uses
+// elementsFromPoint to find the real clicked element and resolves its
+// position directly, rather than falling back to the nearest marked sibling
+// (which is only reliable for "which field", not "which block").
+describe('previewScript — unmarked click inside a blocks field resolves its own position', () => {
   const BLOCKS_SOURCE = 'path=content&fieldPath=content&type=blocks&documentId=doc1';
 
   const rect = (left: number, top: number, width: number, height: number) =>
@@ -371,16 +372,18 @@ describe('previewScript — unmarked click inside a blocks field does not jump t
     return (focusIntentCalls[0][0] as { payload: { blockIndex: number | null } }).payload;
   };
 
-  test('double-clicking the empty-alt image does not jump to a neighboring paragraph', () => {
+  test('double-clicking the empty-alt image resolves its own position, not a neighboring paragraph', () => {
     // (10, 30) falls inside the image's rect (20-60), not any marked paragraph's.
     const payload = dblClickAt(10, 30);
-    expect(payload.blockIndex).toBeNull();
+    // Children of #field: para0=0, the-image=1, code-block=2, para1=3.
+    expect(payload.blockIndex).toBe(1);
   });
 
-  test('double-clicking the code block does not jump to a neighboring paragraph', () => {
+  test('double-clicking the code block resolves its own position, not a neighboring paragraph', () => {
     // (10, 80) falls inside the code block's rect (60-100), not any marked paragraph's.
     const payload = dblClickAt(10, 80);
-    expect(payload.blockIndex).toBeNull();
+    // Children of #field: para0=0, the-image=1, code-block=2, para1=3.
+    expect(payload.blockIndex).toBe(2);
   });
 
   test('double-clicking a marked paragraph still resolves its own block index', () => {
@@ -390,11 +393,11 @@ describe('previewScript — unmarked click inside a blocks field does not jump t
     expect(payload.blockIndex).toBe(3);
   });
 
-  test('double-clicking a live-typed (unsaved) paragraph resolves its own position, unlike code/images', () => {
+  test('double-clicking a live-typed (unsaved) paragraph resolves its own position', () => {
     // A paragraph the host just re-rendered from a live, unsaved edit is
-    // unmarked too (nothing gets a stega tag until the field is saved) — but
-    // unlike code blocks/alt-less images, it's only *temporarily* unmarked,
-    // so it should resolve its own position rather than staying null.
+    // unmarked too (nothing gets a stega tag until the field is saved) — same
+    // as code blocks and alt-less images, it resolves via the real clicked
+    // element's DOM position rather than any marker.
     const field = document.getElementById('field') as HTMLElement;
     const liveParagraph = document.createElement('p');
     liveParagraph.id = 'live-para';
