@@ -34,8 +34,9 @@ export const validateAssetMetadata = (metadata: unknown, filename?: string): IFi
   }
 
   const typedFile = file as unknown as IFile;
-  const extension = typeof typedFile.ext === 'string' ? typedFile.ext : '';
-  if (filename && `${typedFile.hash}${extension}` !== filename) {
+  const expectedFilename = `${typedFile.hash}${typedFile.ext ?? ''}`;
+  const legacyFilename = `${typedFile.hash}${typedFile.ext}`;
+  if (filename && filename !== expectedFilename && filename !== legacyFilename) {
     throw new TypeError(`Asset sidecar metadata does not match upload filename "${filename}"`);
   }
 

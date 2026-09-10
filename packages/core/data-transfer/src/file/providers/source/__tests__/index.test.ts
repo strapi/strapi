@@ -105,6 +105,24 @@ describe('File source provider', () => {
       ).toMatchObject({ ext: null, type: null, mainHash: null });
     });
 
+    test.each([
+      [null, 'photonull'],
+      [undefined, 'photoundefined'],
+    ])('validateAssetMetadata accepts legacy filenames for a %s extension', (ext, filename) => {
+      expect(
+        validateAssetMetadata(
+          {
+            ...validAssetMetadata,
+            name: 'photo',
+            hash: 'photo',
+            ext,
+            url: '/uploads/photo',
+          },
+          filename
+        )
+      ).toMatchObject({ hash: 'photo' });
+    });
+
     test('validateAssetMetadata accepts responsive format metadata', () => {
       expect(
         validateAssetMetadata(

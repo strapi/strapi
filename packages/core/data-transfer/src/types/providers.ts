@@ -23,7 +23,13 @@ export interface IProvider {
    * It is used for initialization operations such as making a database connection, opening a file, checking authorization, etc
    */
   bootstrap?(diagnostics?: IDiagnosticReporter): MaybePromise<void>;
-  close?(): MaybePromise<void>; // called during transfer engine close
+
+  /**
+   * Called after a successful transfer and on failure after rollback has been attempted.
+   * Implementations must be safe to close after partial bootstrap and, for destinations, after
+   * rollback. A destination that finalizes output in close() should make it a no-op after rollback.
+   */
+  close?(): MaybePromise<void>;
 
   getMetadata(): MaybePromise<IMetadata | null>; // returns the transfer metadata to be used for version validation
   getSchemas?(): MaybePromise<Record<string, Struct.Schema> | null>; // returns the schemas for the schema validation

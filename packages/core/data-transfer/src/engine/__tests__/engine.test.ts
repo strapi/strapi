@@ -519,6 +519,9 @@ describe('Transfer engine', () => {
       expect(rollback).toHaveBeenCalled();
       expect(source.close).toHaveBeenCalledTimes(1);
       expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        rollback.mock.invocationCallOrder[0]
+      );
     });
 
     test('re-enables local Strapi lifecycles when stage validation fails', async () => {
