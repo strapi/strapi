@@ -1,52 +1,14 @@
 import { isFunction } from 'lodash/fp';
-import type { Core } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 
-export type RecurrenceRange = {
-  start: number;
-  end: number;
-  step?: number;
-};
-
-export type RecurrenceSegment =
-  | number
-  | string
-  | RecurrenceRange
-  | Array<number | string | RecurrenceRange>;
-
-/**
- * node-schedule RecurrenceSpecObjLit / RecurrenceRule-shaped objects
- * (`month` is 0–11, matching Date / node-schedule).
- */
-export type RecurrenceSpecObjLit = {
-  date?: RecurrenceSegment | null;
-  dayOfWeek?: RecurrenceSegment | null;
-  hour?: RecurrenceSegment | null;
-  minute?: RecurrenceSegment | null;
-  month?: RecurrenceSegment | null;
-  second?: RecurrenceSegment | null;
-  year?: RecurrenceSegment | null;
-  tz?: string;
-  start?: Date | number | string;
-  end?: Date | number | string;
-  recurs?: boolean;
-};
-
-export type CronRuleOptions = {
-  rule: string | number | Date | RecurrenceSpecObjLit;
-  tz?: string;
-  start?: Date | number | string;
-  end?: Date | number | string;
-};
-
-export type CronSchedule = string | number | Date | CronRuleOptions | RecurrenceSpecObjLit;
-
-export type CronJobHandle = Cron & {
-  invoke: () => Promise<unknown>;
-  cancel: () => boolean;
-  nextInvocation: () => Date | null;
-  reschedule: (spec: CronSchedule) => boolean;
-};
+type RecurrenceSpecObjLit = Modules.Cron.RecurrenceSpecObjLit;
+type CronRuleOptions = Modules.Cron.CronRuleOptions;
+type CronSchedule = Modules.Cron.CronSchedule;
+type CronJob = Modules.Cron.CronJob;
+type JobSpec = Modules.Cron.JobSpec;
+type TaskFn = Modules.Cron.CronTaskFn;
+type Tasks = Modules.Cron.CronTasks;
 
 let lazyCroner: typeof import('croner') | undefined;
 const getCroner = (): typeof import('croner') => {
@@ -56,25 +18,6 @@ const getCroner = (): typeof import('croner') => {
   }
   return lazyCroner as typeof import('croner');
 };
-
-interface JobSpec {
-  job: CronJobHandle;
-  options: CronSchedule;
-  name: string | null;
-}
-
-type TaskFn = ({ strapi }: { strapi: Core.Strapi }, ...args: unknown[]) => Promise<unknown>;
-
-type Task =
-  | TaskFn
-  | {
-      task: TaskFn;
-      options: CronSchedule;
-    };
-
-interface Tasks {
-  [key: string]: Task;
-}
 
 const RECURRENCE_KEYS = [
   'date',
@@ -245,9 +188,9 @@ const createCronService = () => {
     fn: TaskFn,
     jobLabel: string
   ) => {
-    const { Cron: CronJob } = getCroner();
+    const { Cron: CronCtor } = getCroner();
     const runner = createRunner(fn);
-    const job = new CronJob(
+    const job = new CronCtor(
       pattern,
       {
         paused: !running,
@@ -262,9 +205,9 @@ const createCronService = () => {
     return job;
   };
 
-  const attachHandle = (job: Cron, fn: TaskFn, jobLabel: string): CronJobHandle => {
+  const attachHandle = (job: Cron, fn: TaskFn, jobLabel: string): CronJob => {
     let current = job;
-    let handle: CronJobHandle;
+    let handle: CronJob;
 
     const invoke = async () => {
       const fireDate = current.currentRun() ?? new Date();
@@ -301,7 +244,7 @@ const createCronService = () => {
       }
     };
 
-    handle = new Proxy(job as CronJobHandle, {
+    handle = new Proxy(job as CronJob, {
       get(_target, property) {
         if (property === 'invoke') return invoke;
         if (property === 'cancel') return cancel;

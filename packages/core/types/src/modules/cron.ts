@@ -44,25 +44,25 @@ export interface CronRuleOptions {
 
 export type CronSchedule = string | number | Date | CronRuleOptions | RecurrenceSpecObjLit;
 
-type CronJob = import('croner').Cron & {
+export type CronJob = import('croner').Cron & {
   invoke: () => Promise<unknown>;
   cancel: () => boolean;
   nextInvocation: () => Date | null;
   reschedule: (spec: CronSchedule) => boolean;
 };
 
-interface JobSpec {
+export interface JobSpec {
   job: CronJob;
   options: CronSchedule;
   name: string | null;
 }
 
-type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
+export type CronTaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
 
 export type CronTask =
-  | TaskFn
+  | CronTaskFn
   | {
-      task: TaskFn;
+      task: CronTaskFn;
       options: CronSchedule;
     };
 
