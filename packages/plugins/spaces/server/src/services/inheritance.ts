@@ -2,7 +2,11 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
-import { isSharedEditableContentType, isSpaceScopedContentType } from './content-types';
+import {
+  isSharedContentType,
+  isSharedEditableContentType,
+  isSpaceScopedContentType,
+} from './content-types';
 import { WorkspaceAccessError } from './access';
 import { runScoped, runUnscoped } from '../utils/space-scope';
 
@@ -70,6 +74,18 @@ const assertOverridable = (
   if (isSharedEditableContentType(contentType)) {
     throw new ValidationError(
       'Entries of this content type are editable from every workspace, so there is nothing to override'
+    );
+  }
+  /**
+   * A content type whose every entry is shared (`sharedEntries`) is left out of
+   * the read net entirely — the column is ignored for visibility there — so a
+   * copy would not shadow anything: the workspace would see the original *and*
+   * its own version of it. Refused rather than half-supported. Sharing entry by
+   * entry from the default workspace is what inheritance is for.
+   */
+  if (isSharedContentType(contentType)) {
+    throw new ValidationError(
+      'Every entry of this content type is shared with every workspace. Overriding one is only possible for entries shared individually from the Default workspace'
     );
   }
   if (placements.length === 0) {
