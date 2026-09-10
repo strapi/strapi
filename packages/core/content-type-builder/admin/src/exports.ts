@@ -22,5 +22,6 @@ export {
    * the rule's reason is shown). See `components/DataManager/readOnlyRules.ts`.
    */
   registerReadOnlyRule,
+  registerAvailabilityRule,
 } from './components/DataManager/readOnlyRules';
 export type { ReadOnlyRule, ReadOnlyState } from './components/DataManager/readOnlyRules';

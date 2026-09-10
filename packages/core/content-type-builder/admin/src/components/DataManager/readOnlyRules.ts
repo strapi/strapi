@@ -45,3 +45,44 @@ const useReadOnlyRules = (): ReadOnlyState => {
 
 export { registerReadOnlyRule, getReadOnlyRules, useReadOnlyRules };
 export type { ReadOnlyRule, ReadOnlyState };
+
+/**
+ * Extension point: plugins can take the Content-Type Builder away entirely,
+ * rather than merely making it read-only — "the schema is defined in another
+ * workspace, and this one has no business browsing it". The plugin is then
+ * unreachable by URL as well as absent from the menu, because hiding the link
+ * alone leaves the page one paste away.
+ *
+ * Same shape as the read-only rules above, and registered the same way.
+ */
+interface AvailabilityState {
+  available: boolean;
+}
+
+interface AvailabilityRule {
+  id: string;
+  useRule: () => AvailabilityState;
+}
+
+const availabilityRules: AvailabilityRule[] = [];
+
+const registerAvailabilityRule = (rule: AvailabilityRule): void => {
+  const index = availabilityRules.findIndex((item) => item.id === rule.id);
+  if (index === -1) {
+    availabilityRules.push(rule);
+  } else {
+    availabilityRules[index] = rule;
+  }
+};
+
+const getAvailabilityRules = (): readonly AvailabilityRule[] => availabilityRules;
+
+/** Any rule saying "not here" wins; available when none applies. */
+const useAvailabilityRules = (): AvailabilityState => {
+  const states = getAvailabilityRules().map((rule) => rule.useRule());
+
+  return states.find((state) => !state.available) ?? { available: true };
+};
+
+export { registerAvailabilityRule, getAvailabilityRules, useAvailabilityRules };
+export type { AvailabilityRule, AvailabilityState };

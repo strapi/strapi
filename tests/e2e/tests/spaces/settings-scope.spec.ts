@@ -6,6 +6,7 @@ import {
 } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
 import {
+  ARTICLE_LIST_URL,
   DEFAULT_WORKSPACE,
   SUB_WORKSPACE,
   pinWorkspace,
@@ -80,15 +81,23 @@ test.describe('Workspaces — settings and schema scope', () => {
    * browsable but every editing affordance is gone, and the server refuses the
    * writes as the enforcement half.
    */
-  test('the Content-Type Builder is read-only outside the default workspace', async ({ page }) => {
+  /**
+   * The schema is one shared thing — every workspace's entries are rows of the
+   * same tables — so it is defined in the default workspace and nowhere else.
+   * Not shown read-only elsewhere: not shown at all.
+   */
+  test('the Content-Type Builder does not exist outside the default workspace', async ({
+    page,
+  }) => {
     await pinWorkspace(page, SUB_WORKSPACE);
-    await page.goto(CTB_ARTICLE_URL);
+    await page.goto(ARTICLE_LIST_URL);
 
-    await expect(page.getByText('Article', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
+    await expect(page.getByRole('link', { name: /Content-Type Builder/ })).toBeHidden();
+
+    // …and typing the URL in gets the admin's own refusal, not the builder.
+    await page.goto(CTB_ARTICLE_URL);
     await expect(page.getByRole('button', { name: /Add another field/ })).toBeHidden();
-    await expect(page.getByRole('link', { name: /Create new collection type/ })).toBeHidden();
-    await expect(page.getByText(READ_ONLY_NOTICE).first()).toBeVisible();
+    await expect(page.getByText(/permissions to access that content/i)).toBeVisible();
   });
 
   test('the Content-Type Builder stays editable in the default workspace', async ({ page }) => {

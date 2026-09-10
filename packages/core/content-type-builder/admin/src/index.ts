@@ -1,6 +1,9 @@
 import { Layout } from '@strapi/icons';
 
-import { registerReadOnlyRule } from './components/DataManager/readOnlyRules';
+import {
+  registerAvailabilityRule,
+  registerReadOnlyRule,
+} from './components/DataManager/readOnlyRules';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
@@ -32,6 +35,7 @@ export default {
       apis: {
         forms: formsAPI,
         registerReadOnlyRule,
+        registerAvailabilityRule,
       },
     });
   },

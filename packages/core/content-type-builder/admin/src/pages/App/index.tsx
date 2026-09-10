@@ -15,7 +15,7 @@ import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOve
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import { CTBSessionProvider } from '../../components/CTBSession/CTBSessionProvider';
 import DataManagerProvider from '../../components/DataManager/DataManagerProvider';
-import { useReadOnlyRules } from '../../components/DataManager/readOnlyRules';
+import { useAvailabilityRules, useReadOnlyRules } from '../../components/DataManager/readOnlyRules';
 import { ExitPrompt } from '../../components/ExitPrompt';
 import { FormModal } from '../../components/FormModal/FormModal';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigation/FormModalNavigationProvider';
@@ -34,6 +34,7 @@ const App = () => {
 
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { readOnly } = useReadOnlyRules();
+  const { available } = useAvailabilityRules();
   const isAIEnabled = useAIAvailability();
   const state = useGuidedTour('ContentTypeBuilderApp', (s) => s.state);
   const dispatch = useGuidedTour('ContentTypeBuilderApp', (s) => s.dispatch);
@@ -55,6 +56,18 @@ const App = () => {
       });
     }
   }, [isAIEnabled, state.tours.contentTypeBuilder.tourType, dispatch]);
+
+  if (!available) {
+    // A rule has taken the builder away here (see availabilityRules). Answered
+    // like any other page the user may not open, so a pasted URL lands
+    // somewhere that makes sense instead of on a builder that refuses.
+    return (
+      <>
+        <Page.Title>{title}</Page.Title>
+        <Page.NoPermissions />
+      </>
+    );
+  }
 
   return (
     <Page.Protect permissions={PERMISSIONS.main}>

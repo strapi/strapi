@@ -13,6 +13,7 @@ import { addWorkspaceFilterHook } from './components/WorkspaceFilter';
 import { addWorkspaceColumnHook } from './components/WorkspaceListCell';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import { workspaceEntryLockMiddleware } from './middlewares/rbac-middleware';
+import { workspaceSchemaAccessMiddleware } from './middlewares/schemaAccessMiddleware';
 import {
   getLocaleSpacesInitialValues,
   isLocaleReadOnlyInWorkspace,
@@ -38,7 +39,7 @@ import { WorkspacesSectionHeading } from './components/WorkspacesSectionHeading'
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { installSpaceHeaderInterceptor } from './utils/fetchInterceptor';
-import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug } from './utils/currentSpace';
+import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug, useCurrentSpaceSlug } from './utils/currentSpace';
 import { getTranslation } from './utils/getTranslation';
 import { isReadOnlyInWorkspace } from './utils/workspaceAccess';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
@@ -86,6 +87,7 @@ type ContentTypeBuilderApis = {
     id: string;
     useRule: () => { readOnly: boolean; reason?: { id: string; defaultMessage: string } };
   }) => void;
+  registerAvailabilityRule?: (rule: { id: string; useRule: () => { available: boolean } }) => void;
 };
 
 /** Extension points exposed by i18n's admin (see i18n's `admin/src/i18n-plugin.ts`). */
@@ -111,7 +113,7 @@ export default {
 
     // Entries a sub-workspace may not edit (shared entries) are locked in the
     // Content Manager by dropping the write permissions for that document.
-    app.addRBACMiddleware([workspaceEntryLockMiddleware]);
+    app.addRBACMiddleware([workspaceEntryLockMiddleware, workspaceSchemaAccessMiddleware]);
 
     app.registerPlugin({
       id: pluginId,
@@ -210,6 +212,18 @@ export default {
 
       // The schema is global: outside the default workspace the builder is
       // browsable but read-only (the server refuses schema writes there too).
+      /**
+       * The schema is defined in the default workspace and nowhere else, so
+       * outside it the builder is not shown at all — not shown read-only. The
+       * read-only rule stays registered underneath: it is what a workspace
+       * would fall back to if the builder were ever made visible again, and it
+       * keeps the two decisions in one place.
+       */
+      ctbApis.registerAvailabilityRule?.({
+        id: 'spaces-default-workspace-only',
+        useRule: () => ({ available: useCurrentSpaceSlug() === DEFAULT_SPACE_SLUG }),
+      });
+
       ctbApis.registerReadOnlyRule?.({
         id: 'spaces-default-workspace-only',
         useRule: useWorkspaceReadOnlyRule,
