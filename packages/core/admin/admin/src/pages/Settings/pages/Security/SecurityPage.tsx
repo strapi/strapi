@@ -113,6 +113,7 @@ const SecurityPage = () => {
               settings={settings.passkeys}
               canUpdate={canUpdate}
               callerEnrolled={Boolean(mfaStatus?.enabled)}
+              hasLocalPassword={mfaStatus ? mfaStatus.hasLocalPassword : true}
               isRefreshing={isFetchingSettings}
             />
           </Flex>

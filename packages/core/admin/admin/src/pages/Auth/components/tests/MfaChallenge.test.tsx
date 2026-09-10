@@ -452,4 +452,56 @@ describe('MfaChallenge', () => {
     expect(screen.getByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
   });
+
+  // Fix-wave (finding 8): Verify and Use a passkey both spend the same single-use challenge, so
+  // one must not be clickable while the other is in flight.
+  it('disables Verify while a passkey ceremony is in flight, and re-enables it if the ceremony is dismissed', async () => {
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS }))
+    );
+    let rejectCeremony: (error: unknown) => void = () => {};
+    jest.mocked(startAuthentication).mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectCeremony = reject;
+      }) as never
+    );
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Verify' })).toBeDisabled());
+
+    rejectCeremony(Object.assign(new Error('dismissed'), { name: 'NotAllowedError' }));
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled());
+  });
+
+  it('disables the passkey button while a code submission is in flight', async () => {
+    let resolveLogin: (response: Response) => void = () => {};
+    server.use(
+      http.post(
+        '/admin/login/mfa',
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveLogin = resolve;
+          })
+      )
+    );
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    submitVerify();
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use a passkey' })).toBeDisabled()
+    );
+
+    resolveLogin(HttpResponse.json(SESSION));
+
+    // Success navigates away, unmounting the challenge screen entirely -- proof the busy flag
+    // did its job (rather than staying stuck) is that there is nothing left disabled to check.
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument()
+    );
+  });
 });

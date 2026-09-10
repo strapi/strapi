@@ -169,6 +169,7 @@ describe('mfa controller', () => {
         graceUntil: null,
         trustedDevicesEnabled: true,
         passkeysEnabled: true,
+        hasLocalPassword: false,
       },
     });
     expect(JSON.stringify(ctx.body)).not.toContain('top-secret-ciphertext');
@@ -207,6 +208,7 @@ describe('mfa controller', () => {
           graceUntil: '2026-09-11T10:00:00.000Z',
           trustedDevicesEnabled: true,
           passkeysEnabled: true,
+          hasLocalPassword: false,
         },
       });
     });
@@ -302,6 +304,35 @@ describe('mfa controller', () => {
 
       expect(passkeysConfigured).toHaveBeenCalled();
       expect(ctx.body.data.passkeysEnabled).toBe(false);
+    });
+
+    // Fix-wave (final review finding 1): `PasskeysCard` reads this to know whether the server's
+    // password-less exemption in `updateSettings` could ever apply to the caller. `ctx.state.user`
+    // is the raw `admin::user` row (see `strategies/admin.ts`), so a hashed password on the row
+    // must be reported as `true`, and its absence (the SSO-only shape) as `false`.
+    test('reports hasLocalPassword from the actor row, not just its presence in the default fixture', async () => {
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: jest.fn(() => true),
+            },
+          },
+        },
+      });
+
+      const { ctx: withPassword } = buildCtx({}, { password: 'hashed' });
+      await mfaController.me(withPassword);
+      expect(withPassword.body.data.hasLocalPassword).toBe(true);
+
+      const { ctx: withoutPassword } = buildCtx({}, { password: null });
+      await mfaController.me(withoutPassword);
+      expect(withoutPassword.body.data.hasLocalPassword).toBe(false);
     });
   });
 

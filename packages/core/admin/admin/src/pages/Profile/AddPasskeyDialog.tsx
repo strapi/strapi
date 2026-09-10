@@ -35,10 +35,17 @@ const NAME_MAX = 50;
  * 3. `POST /mfa/passkeys` with the name and the authenticator's response. No password or code:
  *    the ceremony being completed was already authorised in step 1, and it is single-use.
  *
- * Deliberately no `fixedCacheKey` (unlike `EnrolDialog` / `ReAuthDialog`): neither mutation
- * returns secret material -- the options carry a challenge the server has already spent, and the
- * register response is the four public fields -- and the password and code live in this
- * component's own state, which dies with the component.
+ * Deliberately no `fixedCacheKey` (unlike `EnrolDialog` / `ReAuthDialog`): the password and code
+ * live in this component's own state, which dies with the component, and neither mutation is
+ * meant to survive a remount the way a `fixedCacheKey` mutation is. But the options response is
+ * not inert while it sits in the store: it carries a LIVE, unspent registration challenge
+ * (`passkeyRegistrationOptions` mints it with a 300-second TTL, spent only by the following
+ * `POST /mfa/passkeys` or not at all) plus the user's existing credential ids in
+ * `excludeCredentials`. `AddPasskeyDialog` is mounted for the whole life of the Profile page
+ * (`Passkeys.tsx`, the same convention `TwoFactorSection.tsx` documents), so without an explicit
+ * `reset()` that entry would outlive every `close()` and sit in Redux until the page itself
+ * unmounts. Both sibling dialogs (`ReAuthDialog`, `EnrolDialog`) reset their mutations for the
+ * same reason; this one does too, just without a `fixedCacheKey` to key it by.
  *
  * Submission mechanics follow `ReAuthDialog` (see its doc comment): the footer button is
  * `type="submit"` so Enter works with three blocking fields, and a synchronous `inFlightRef`
@@ -57,8 +64,8 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
   const [submitting, setSubmitting] = React.useState(false);
   const inFlightRef = React.useRef(false);
 
-  const [requestOptions] = usePasskeyRegistrationOptionsMutation();
-  const [registerPasskey] = useRegisterPasskeyMutation();
+  const [requestOptions, { reset: resetOptions }] = usePasskeyRegistrationOptionsMutation();
+  const [registerPasskey, { reset: resetRegister }] = useRegisterPasskeyMutation();
 
   const trimmedName = name.trim();
   const canSubmit =
@@ -72,6 +79,8 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
     setPassword('');
     setCode('');
     setError(undefined);
+    resetOptions();
+    resetRegister();
   };
 
   const close = () => {
@@ -166,7 +175,7 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
                 {formatMessage({
                   id: 'Settings.profile.form.section.mfa.passkeys.add.intro',
                   defaultMessage:
-                    'Confirm your password and a code from your authenticator app, then name the passkey. Your device will ask you to approve it.',
+                    'Confirm your password and a code from your authenticator app or an unused recovery code, then name the passkey. Your device will ask you to approve it.',
                 })}
               </Typography>
               <Field.Root

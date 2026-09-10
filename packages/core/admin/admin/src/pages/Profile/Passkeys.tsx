@@ -17,6 +17,7 @@ import {
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../../shared/contracts/mfa';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
@@ -24,8 +25,6 @@ import { useToMessage } from '../../hooks/useToMessage';
 import { useDeletePasskeyMutation, useGetPasskeysQuery } from '../../services/mfa';
 
 import { AddPasskeyDialog } from './AddPasskeyDialog';
-
-import type { Passkey } from '../../../../shared/contracts/mfa';
 
 /**
  * Cycle 4: the WebAuthn credentials this user can sign in with instead of typing a code, inside
@@ -39,6 +38,12 @@ import type { Passkey } from '../../../../shared/contracts/mfa';
  * `browserSupportsWebAuthn()` gates the Add button only. Existing rows stay listed and removable
  * in a browser that cannot run a ceremony: a user who registered a passkey elsewhere must still
  * be able to take it away from here.
+ *
+ * Fix-wave (finding 6): the Add button is also hidden at `MAX_PASSKEYS_PER_USER`, with the same
+ * one-line note shape as the unsupported-browser branch. Without this, the server spends the
+ * password AND a live code (`assertPasswordAndFactor` in `passkeyRegistrationOptions`) before it
+ * ever checks the cap, so offering a button that can only be refused burns a factor attempt on a
+ * guaranteed rejection.
  */
 const Passkeys = () => {
   const { formatMessage, formatDate } = useIntl();
@@ -52,6 +57,7 @@ const Passkeys = () => {
   // array must not render the table underneath an error (cycle 3's correction to this pattern).
   const hasPasskeys = !error && passkeys.length > 0;
   const supported = browserSupportsWebAuthn();
+  const atCap = passkeys.length >= MAX_PASSKEYS_PER_USER;
 
   const dateTime = (value: string) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
@@ -84,7 +90,7 @@ const Passkeys = () => {
             defaultMessage: 'Passkeys',
           })}
         </Typography>
-        {supported ? (
+        {supported && !atCap ? (
           <Button variant="secondary" onClick={() => setAddOpen(true)}>
             {formatMessage({
               id: 'Settings.profile.form.section.mfa.passkeys.add',
@@ -93,10 +99,19 @@ const Passkeys = () => {
           </Button>
         ) : (
           <Typography variant="pi" textColor="neutral600">
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
-              defaultMessage: 'This browser does not support passkeys.',
-            })}
+            {!supported
+              ? formatMessage({
+                  id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
+                  defaultMessage: 'This browser does not support passkeys.',
+                })
+              : formatMessage(
+                  {
+                    id: 'Settings.profile.form.section.mfa.passkeys.cap',
+                    defaultMessage:
+                      'You have reached the limit of {max} passkeys. Remove one to add another.',
+                  },
+                  { max: MAX_PASSKEYS_PER_USER }
+                )}
           </Typography>
         )}
       </Flex>

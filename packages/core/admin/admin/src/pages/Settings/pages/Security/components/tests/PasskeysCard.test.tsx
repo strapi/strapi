@@ -130,4 +130,38 @@ describe('PasskeysCard', () => {
     await user.click(enabledBox());
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
+
+  // Fix-wave (final review finding 1): the server exempts a passkeys-only save from a
+  // password-less (SSO-only) actor's no-local-password refusal, but the pre-fix UI routed the
+  // off-transition through `ConfirmDowngradeDialog` unconditionally, whose Confirm demands a
+  // password such an actor cannot supply -- a dead end. `hasLocalPassword` closes that gap.
+  it('lets a password-less administrator turn passkeys off directly, with no dialog', async () => {
+    const bodies = captureSave();
+    const { user } = renderCard({ hasLocalPassword: false });
+
+    await user.click(enabledBox());
+    save();
+
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]).toEqual({ passkeys: { enabled: false } });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+  });
+
+  it('still asks a password-holding administrator for credentials, explicitly', async () => {
+    const bodies = captureSave();
+    const { user } = renderCard({ hasLocalPassword: true, callerEnrolled: false });
+
+    await user.click(enabledBox());
+    save();
+
+    await screen.findByRole('dialog', { name: 'Turn passkeys off?' });
+    expect(bodies).toHaveLength(0);
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]).toEqual({ passkeys: { enabled: false }, password: 'Testing123!' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
 });

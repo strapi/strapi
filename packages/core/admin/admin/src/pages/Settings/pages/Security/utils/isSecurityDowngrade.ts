@@ -56,3 +56,37 @@ export const isTrustedDevicesDowngrade = (
  */
 export const isPasskeysDisable = (previous: PasskeySettings, next: PasskeySettings): boolean =>
   previous.enabled && !next.enabled;
+
+/**
+ * Fix-wave (final review finding 1): whether a save that disables passkeys needs the caller's
+ * credentials, for a caller who may have no local password at all (an SSO-only administrator).
+ * Mirrors `updateSettings`'s exemption exactly (`security-settings.ts:326-335`):
+ *
+ * ```
+ * if (!actorRow.password && (lowersEnforcement || widensTrust)) { throw ...; }
+ * if (actorRow.password) { // demand credentials }
+ * ```
+ *
+ * A password-less actor is let through with no credentials only when `disablesPasskeys` is the
+ * ONLY term that tripped -- combined with either of the other two, the server still demands
+ * credentials the actor cannot supply (and refuses outright, exactly as it already did before
+ * passkeys existed). A password-holding actor always needs credentials, regardless of which term
+ * tripped.
+ *
+ * `PasskeysCard`'s own `PUT` can only ever trip `disablesPasskeys` -- its patch never carries
+ * `mfa` or `trustedDevices` -- so `lowersEnforcement`/`widensTrust` are always `false` for its own
+ * calls, and it never needs to pass anything but their defaults. They are parameters (not baked
+ * in as `false`) so the exemption's narrowness -- "only when disablesPasskeys is the only
+ * triggering term" -- is provable directly, rather than only by the shape of this card's patch.
+ */
+export const requiresPasskeysCredentials = (
+  hasLocalPassword: boolean,
+  disablesPasskeys: boolean,
+  lowersEnforcement = false,
+  widensTrust = false
+): boolean => {
+  if (!disablesPasskeys && !lowersEnforcement && !widensTrust) {
+    return false;
+  }
+  return hasLocalPassword || lowersEnforcement || widensTrust;
+};

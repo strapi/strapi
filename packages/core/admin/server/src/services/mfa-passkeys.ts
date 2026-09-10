@@ -15,7 +15,7 @@ import type {
   RegistrationResponseJSON,
 } from '@simplewebauthn/server';
 import type { Core, Data } from '@strapi/types';
-import type { Passkey } from '../../../shared/contracts/mfa';
+import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../shared/contracts/mfa';
 import type { PasskeySettings } from '../../../shared/contracts/security-settings';
 import type { MfaConfig } from '../config/mfa';
 import type { MfaEventMetadata, MfaEventType } from './mfa';
@@ -36,8 +36,12 @@ export const PASSKEY_UID = 'admin::mfa-passkey';
  * registration instead of evicting the oldest. Deleting somebody's security key because they
  * registered an eleventh is destroying a credential they may be holding in their hand, and they
  * have a delete button.
+ *
+ * Fix-wave (finding 6): promoted to `shared/contracts/mfa.ts`, which the client now reads too, so
+ * this is a re-export rather than the definition -- every existing caller in this file is
+ * untouched.
  */
-export const MAX_PASSKEYS_PER_USER = 10;
+export { MAX_PASSKEYS_PER_USER };
 
 /** How long a pending *registration* ceremony stays valid, in seconds. */
 const PASSKEY_CEREMONY_TTL_SECONDS = 300;

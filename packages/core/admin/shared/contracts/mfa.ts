@@ -27,6 +27,14 @@ export declare namespace Me {
       trustedDevicesEnabled: boolean;
       /** Cycle 4: whether the organisation lets this user register and use passkeys. */
       passkeysEnabled: boolean;
+      /**
+       * Fix-wave (final review finding 1): whether this account has a local password at all. An
+       * SSO-only administrator has none, and `updateSettings` (`security-settings.ts:326-335`)
+       * exempts exactly that account from presenting credentials to turn passkeys off -- the
+       * `PasskeysCard` reads this to decide whether to route the off-transition through a dialog
+       * that would otherwise be a dead end for them.
+       */
+      hasLocalPassword: boolean;
     };
   }
 }
@@ -193,6 +201,14 @@ export declare namespace RevokeUserTrustedDevices {
     id: Data.ID;
   }
 }
+
+/**
+ * The per-user registration cap (cycle 4). A contract constant, not a server secret: the client
+ * needs it too, to stop offering "Add a passkey" once the server can only ever refuse (fix-wave
+ * finding 6) rather than spending a password and a live code on a guaranteed rejection. Promoted
+ * here from `server/src/services/mfa-passkeys.ts`, which re-exports it for its own call sites.
+ */
+export const MAX_PASSKEYS_PER_USER = 10;
 
 /**
  * One registered passkey, as the owner's list and the registration response render it (cycle 4).

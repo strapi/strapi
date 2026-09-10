@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
 import { Panel } from '../../../../../components/Panel';
 import { useSecuritySettingsSave } from '../hooks/useSecuritySettingsSave';
-import { isPasskeysDisable } from '../utils/isSecurityDowngrade';
+import { isPasskeysDisable, requiresPasskeysCredentials } from '../utils/isSecurityDowngrade';
 
 import { ConfirmDowngradeDialog } from './ConfirmDowngradeDialog';
 
@@ -18,6 +18,13 @@ interface PasskeysCardProps {
   canUpdate: boolean;
   /** `/admin/mfa/me` `enabled` for the caller: decides whether the off-transition needs a code. */
   callerEnrolled: boolean;
+  /**
+   * `/admin/mfa/me` `hasLocalPassword` for the caller (fix-wave, final review finding 1): an
+   * SSO-only administrator has none, and the server exempts exactly that account from presenting
+   * credentials to turn passkeys off. Defaults to `true` -- the pre-fix, always-ask behaviour --
+   * so a caller that has not wired this prop through yet gets the safe direction.
+   */
+  hasLocalPassword?: boolean;
   /** `isFetching` of the `SecuritySettings` query; keeps Save disabled while the saved result lands. */
   isRefreshing?: boolean;
 }
@@ -35,11 +42,17 @@ interface PasskeysCardProps {
  *
  * The dialog's copy is overridden for the same reason: the shared heading names "lowering
  * two-factor requirements", which is not what this save does.
+ *
+ * Fix-wave (final review finding 1): the off-transition's `requiresCredentials` also factors in
+ * `hasLocalPassword`, mirroring the server's password-less exemption -- otherwise an SSO-only
+ * administrator could never complete this save from the UI at all, even though the server lets
+ * them.
  */
 const PasskeysCard = ({
   settings,
   canUpdate,
   callerEnrolled,
+  hasLocalPassword = true,
   isRefreshing = false,
 }: PasskeysCardProps) => {
   const { formatMessage } = useIntl();
@@ -57,7 +70,10 @@ const PasskeysCard = ({
   const { save, isSaving, saveError, downgradeOpen, closeDowngrade, confirmDowngrade } =
     useSecuritySettingsSave({
       patch: { passkeys: next },
-      requiresCredentials: isPasskeysDisable(settings, next),
+      requiresCredentials: requiresPasskeysCredentials(
+        hasLocalPassword,
+        isPasskeysDisable(settings, next)
+      ),
     });
 
   return (

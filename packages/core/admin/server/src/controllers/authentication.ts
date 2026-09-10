@@ -286,10 +286,10 @@ export default {
 
       const options = await getService('mfa').authenticationOptions(challengeToken);
 
-      // Spread rather than passed straight through: the library's options type is an `interface`,
-      // and TypeScript only grants an implicit index signature to an object *literal* type. The
-      // wire shape is unchanged -- the browser helper consumes it verbatim.
-      ctx.body = { data: { ...options } } satisfies MfaWebauthnOptions.Response;
+      // Passed straight through: the contract's `data` is now the same
+      // `PublicKeyCredentialRequestOptionsJSON` the service returns, not the earlier
+      // `Record<string, unknown>`, so no spread is needed to satisfy it.
+      ctx.body = { data: options } satisfies MfaWebauthnOptions.Response;
     },
   ]),
 

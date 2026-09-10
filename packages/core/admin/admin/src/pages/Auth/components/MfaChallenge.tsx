@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
+import {
+  browserSupportsWebAuthn,
+  startAuthentication,
+  type AuthenticationResponseJSON,
+} from '@simplewebauthn/browser';
 import { Box, Button, Checkbox, Flex, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -103,6 +107,14 @@ const MfaChallenge = () => {
    */
   const [trustDevice, setTrustDevice] = React.useState(false);
   const [passkeyBusy, setPasskeyBusy] = React.useState(false);
+  /**
+   * Fix-wave (finding 8): lifted the same way `trustDevice` was, so both submit paths can read
+   * the other's busy flag. Without it, `Verify` and `Use a passkey` could both be in flight at
+   * once, racing the same single-use challenge -- whichever loses shows the same generic refusal
+   * as a genuine failure, and the verify route charges an attempt against the challenge's budget
+   * even for a self-inflicted race.
+   */
+  const [codeBusy, setCodeBusy] = React.useState(false);
 
   const hasClearedHistoryStateRef = React.useRef(false);
 
@@ -127,22 +139,32 @@ const MfaChallenge = () => {
   }
 
   const handleSubmit = async ({ code }: { code: string }) => {
-    setApiError(undefined);
-
-    const res = await loginMfa({
-      challengeToken: challenge.challengeToken,
-      code,
-      rememberMe: challenge.rememberMe,
-      // Only meaningful when the organisation offers trust; the server ignores it otherwise.
-      trustDevice: trustedDeviceDays !== null && trustDevice,
-    });
-
-    if ('error' in res) {
-      setApiError(res.error.message ?? 'Something went wrong');
+    // Mirrors the guard at the top of `handlePasskey`: a disabled submit button already stops a
+    // real click or Enter, this is the same defence-in-depth for whatever triggers `onSubmit`.
+    if (passkeyBusy) {
       return;
     }
+    setApiError(undefined);
+    setCodeBusy(true);
 
-    navigate(getRedirectTo(location.search));
+    try {
+      const res = await loginMfa({
+        challengeToken: challenge.challengeToken,
+        code,
+        rememberMe: challenge.rememberMe,
+        // Only meaningful when the organisation offers trust; the server ignores it otherwise.
+        trustDevice: trustedDeviceDays !== null && trustDevice,
+      });
+
+      if ('error' in res) {
+        setApiError(res.error.message ?? 'Something went wrong');
+        return;
+      }
+
+      navigate(getRedirectTo(location.search));
+    } finally {
+      setCodeBusy(false);
+    }
   };
 
   /**
@@ -160,6 +182,11 @@ const MfaChallenge = () => {
    * this body, and the trust grant is factor-agnostic.
    */
   const handlePasskey = async () => {
+    // Mirrors the guard at the top of `handleSubmit`: a disabled button already stops a real
+    // click, this is the same defence-in-depth for whatever else could call this.
+    if (codeBusy) {
+      return;
+    }
     setApiError(undefined);
     setPasskeyBusy(true);
 
@@ -170,7 +197,7 @@ const MfaChallenge = () => {
         return;
       }
 
-      let assertion;
+      let assertion: AuthenticationResponseJSON;
       try {
         assertion = await startAuthentication({ optionsJSON: optionsRes.data });
       } catch (error) {
@@ -275,7 +302,7 @@ const MfaChallenge = () => {
                   )}
                 </Checkbox>
               ) : null}
-              <Button fullWidth type="submit">
+              <Button fullWidth type="submit" disabled={passkeyBusy}>
                 {formatMessage({ id: 'Auth.form.mfa.button.verify', defaultMessage: 'Verify' })}
               </Button>
               {showPasskey ? (
@@ -285,6 +312,7 @@ const MfaChallenge = () => {
                   variant="tertiary"
                   onClick={handlePasskey}
                   loading={passkeyBusy}
+                  disabled={codeBusy}
                 >
                   {formatMessage({
                     id: 'Auth.form.mfa.passkey.button',

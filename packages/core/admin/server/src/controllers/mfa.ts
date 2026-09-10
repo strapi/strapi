@@ -100,6 +100,12 @@ export default {
         // advertise a section whose "Add a passkey" button cannot work. `passkeysConfigured`
         // swallows the RP refusal into a boolean, so this can never 500 on a misconfiguration.
         passkeysEnabled: (await mfa.passkeySettings()).enabled && mfa.passkeysConfigured(),
+        // Fix-wave (final review finding 1): `ctx.state.user` is the raw `admin::user` row the
+        // auth strategy loaded (`strategies/admin.ts`), so `password` is present whenever the
+        // account has one -- an SSO-only administrator's is `null`/`undefined`. `PasskeysCard`
+        // reads this to know whether the server's password-less exemption in `updateSettings`
+        // could ever apply to this caller.
+        hasLocalPassword: Boolean(user.password),
       },
     } satisfies Me.Response;
   },
@@ -395,11 +401,10 @@ export default {
 
     const options = await mfa.passkeyRegistrationOptions(userId);
 
-    // Spread rather than passed straight through: the library's options type is an `interface`,
-    // and TypeScript only grants an implicit index signature to an object *literal* type, so a
-    // bare assignment would not satisfy the contract's `Record<string, unknown>`. The wire shape
-    // is unchanged -- the browser helper consumes it verbatim.
-    ctx.body = { data: { ...options } } satisfies PasskeyRegistrationOptions.Response;
+    // Passed straight through: the contract's `data` is now the same
+    // `PublicKeyCredentialCreationOptionsJSON` the service returns, not the earlier
+    // `Record<string, unknown>`, so no spread is needed to satisfy it.
+    ctx.body = { data: options } satisfies PasskeyRegistrationOptions.Response;
   },
 
   /**

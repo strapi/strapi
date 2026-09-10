@@ -2,9 +2,8 @@ import { browserSupportsWebAuthn, startRegistration } from '@simplewebauthn/brow
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../../../shared/contracts/mfa';
 import { Passkeys } from '../Passkeys';
-
-import type { Passkey } from '../../../../../shared/contracts/mfa';
 
 // Hoisted above every import by `babel-plugin-jest-hoist`, despite sitting below them: jsdom
 // defines no `window.PublicKeyCredential`, so the real `browserSupportsWebAuthn()` returns false
@@ -86,6 +85,44 @@ describe('Passkeys', () => {
     // existing rows are still listed and still removable from here
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(2);
+  });
+
+  // Fix-wave (finding 6): the server spends the password AND a live TOTP code
+  // (`assertPasswordAndFactor`) before it ever checks the per-user cap, so offering a button that
+  // can only be refused burns a factor attempt on a guaranteed rejection.
+  it('replaces the Add button with a note at the passkey cap, without spending a factor attempt', async () => {
+    const atCap: Passkey[] = Array.from({ length: MAX_PASSKEYS_PER_USER }, (_, index) => ({
+      id: String(index),
+      name: `Key ${index}`,
+      createdAt: '2026-09-01T10:14:00.000Z',
+      lastUsedAt: null,
+    }));
+    server.use(list(atCap));
+    render(<Passkeys />);
+
+    expect(await screen.findByRole('heading', { name: 'Passkeys' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add a passkey' })).not.toBeInTheDocument();
+    expect(
+      screen.getByText('You have reached the limit of 10 passkeys. Remove one to add another.')
+    ).toBeInTheDocument();
+    // existing rows are still listed and still removable from here
+    expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(
+      MAX_PASSKEYS_PER_USER
+    );
+  });
+
+  it('offers the Add button again one below the cap', async () => {
+    const belowCap: Passkey[] = Array.from({ length: MAX_PASSKEYS_PER_USER - 1 }, (_, index) => ({
+      id: String(index),
+      name: `Key ${index}`,
+      createdAt: '2026-09-01T10:14:00.000Z',
+      lastUsedAt: null,
+    }));
+    server.use(list(belowCap));
+    render(<Passkeys />);
+
+    expect(await screen.findByRole('button', { name: 'Add a passkey' })).toBeInTheDocument();
+    expect(screen.queryByText(/reached the limit of 10 passkeys/)).not.toBeInTheDocument();
   });
 
   it('removes one passkey after confirmation, toasts, and the list refreshes', async () => {

@@ -1,4 +1,8 @@
-import { isPasskeysDisable, isTrustedDevicesDowngrade } from '../utils/isSecurityDowngrade';
+import {
+  isPasskeysDisable,
+  isTrustedDevicesDowngrade,
+  requiresPasskeysCredentials,
+} from '../utils/isSecurityDowngrade';
 
 describe('isTrustedDevicesDowngrade', () => {
   const on30 = { enabled: true, days: 30 };
@@ -33,5 +37,32 @@ describe('isPasskeysDisable', () => {
     expect(isPasskeysDisable({ enabled: false }, { enabled: true })).toBe(false);
     expect(isPasskeysDisable({ enabled: true }, { enabled: true })).toBe(false);
     expect(isPasskeysDisable({ enabled: false }, { enabled: false })).toBe(false);
+  });
+});
+
+// Fix-wave (final review finding 1): mirrors the server's password-less exemption in
+// `updateSettings` (`security-settings.ts:326-335`) exactly --
+//   if (!actorRow.password && (lowersEnforcement || widensTrust)) { throw ...; }
+//   if (actorRow.password) { // demand credentials }
+// -- a password-less actor is exempted only when `disablesPasskeys` is the ONLY term that
+// tripped; combined with either of the other two, or for a password-holding actor, credentials
+// are still demanded.
+describe('requiresPasskeysCredentials (fix-wave finding 1: mirrors the server exemption)', () => {
+  it('a password-less administrator turning passkeys off alone needs no credentials', () => {
+    expect(requiresPasskeysCredentials(false, true)).toBe(false);
+  });
+
+  it('a password-holding administrator turning passkeys off still needs credentials', () => {
+    expect(requiresPasskeysCredentials(true, true)).toBe(true);
+  });
+
+  it('combined with lowering enforcement or widening trust, credentials are still demanded even without a password', () => {
+    expect(requiresPasskeysCredentials(false, true, true, false)).toBe(true);
+    expect(requiresPasskeysCredentials(false, true, false, true)).toBe(true);
+  });
+
+  it('is false when nothing actually changed', () => {
+    expect(requiresPasskeysCredentials(false, false)).toBe(false);
+    expect(requiresPasskeysCredentials(true, false)).toBe(false);
   });
 });
