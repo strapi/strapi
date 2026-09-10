@@ -4180,7 +4180,9 @@ describe('mfa service: passkey login', () => {
     [
       'a consumed challenge',
       async (fixture: ReturnType<typeof setup>, token: string) => {
-        fixture.challenges.splice(0, fixture.challenges.length);
+        // The row must stay present with `consumedAt` set -- splicing it out instead exercises
+        // the `!challenge` branch, not the `consumedAt` guard this case claims to cover.
+        fixture.challenges[0].consumedAt = new Date();
         return token;
       },
     ],
@@ -4225,7 +4227,9 @@ describe('mfa service: passkey login', () => {
   });
 
   test('options refuses a throttled account with a RateLimitError, before reading any credential', async () => {
-    const { service, passkeyRows, events } = setup({ mfaConfig: { maxUserAttempts: 1 } });
+    const { service, passkeyRows, passkeyMocks, events } = setup({
+      mfaConfig: { maxUserAttempts: 1 },
+    });
     seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     events.push({
@@ -4238,6 +4242,7 @@ describe('mfa service: passkey login', () => {
     });
 
     await expect(service.authenticationOptions(token)).rejects.toThrow(errors.RateLimitError);
+    expect(passkeyMocks.findMany).not.toHaveBeenCalled();
   });
 
   test('options returns the generic message on an RP misconfiguration, with the cause only in the log', async () => {

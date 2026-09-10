@@ -441,14 +441,39 @@ export const createPasskeys = ({
       throw new RateLimitError();
     }
 
+    // Checked before the row read, matching `verifyAssertion`'s own ordering: the two halves of
+    // this pair should agree, and the policy check is the cheaper one, so a deployment with
+    // passkeys switched off performs no credential query at all.
+    if (!(await settings()).enabled) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
     const rows = (await query().findMany({
       where: { userId },
       select: ['credentialId', 'transports'],
     })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
 
+    // A stored `credentialId` that is not valid base64url makes the real
+    // `generateAuthenticationOptions` throw a bare `Error` -- not a `ValidationError` -- which
+    // would surface as a 500 on this unauthenticated route, echo the stored id back to a caller
+    // who holds only a challenge token, and permanently brick passkey login for that user (one
+    // corrupt row blocks every other, good, credential too). Skip it instead and log it at error
+    // level so the corrupt row gets noticed, exactly as `excludeCredentials` does on the
+    // registration path (below). Filtering before the `length === 0` check is what makes an
+    // all-corrupt set fail closed with the generic message rather than with the library's throw.
+    const usable = rows.filter((row) => {
+      if (isoBase64URL.isBase64URL(row.credentialId)) {
+        return true;
+      }
+      strapi.log.error(
+        `Passkey row for admin user ${userId} has a credentialId that is not valid base64url and was skipped when building allowCredentials: ${row.credentialId}`
+      );
+      return false;
+    });
+
     // The client gates on `passkeyAvailable` and should not have called; either way this is the
     // same generic message as every other failure of this pair.
-    if (!(await settings()).enabled || rows.length === 0) {
+    if (usable.length === 0) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
 
@@ -464,7 +489,7 @@ export const createPasskeys = ({
 
     const options = await generateAuthenticationOptions({
       rpID: rp.rpId,
-      allowCredentials: rows.map((row) => ({
+      allowCredentials: usable.map((row) => ({
         id: row.credentialId,
         transports: splitTransports(row.transports),
       })),
@@ -474,12 +499,18 @@ export const createPasskeys = ({
     // Keyed on the row id alone, overwriting any previous value so a retry re-mints cleanly. No
     // `consumedAt IS NULL` guard: `consumeChallenge` spends a challenge by *deleting* the row, so
     // a consumed challenge is a missing row and the id match is the whole check -- a `consumedAt`
-    // predicate here would read as protection it is not providing.
+    // predicate here would read as protection it is not providing. The affected-row count is
+    // still checked below: a challenge consumed concurrently between `usableChallenge`'s read and
+    // this write must not be silently written to.
     const { tableName, webauthnColumn } = challengeTable();
-    await strapi.db
+    const written = await strapi.db
       .connection(tableName)
       .where({ id: challenge.id })
       .update({ [webauthnColumn]: options.challenge });
+
+    if (written !== 1) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
 
     return options;
   };
@@ -598,6 +629,16 @@ export const createPasskeys = ({
       return fail();
     }
 
+    // The same single DELETE `consumeChallenge` uses: whoever removes the row wins, so a token
+    // cannot authorise two operations even if two concurrent requests each present a genuine
+    // assertion. Run *before* the row update and the notice below, so only the racer that wins
+    // the consume touches the stored counter, and only the winner emits the security notice -- a
+    // loser must not announce success for an operation it was refused.
+    const consumed = await strapi.db.connection(tableName).where({ id: challenge.id }).del();
+    if (consumed !== 1) {
+      throw new ValidationError(PASSKEY_VERIFY_FAILED);
+    }
+
     await query().update({
       where: { id: row.id },
       data: {
@@ -608,14 +649,6 @@ export const createPasskeys = ({
 
     // Hub only, no row -- exactly like cycle 3's `trusted_device_used`.
     notify(userId, 'passkey_used');
-
-    // The same single DELETE `consumeChallenge` uses: whoever removes the row wins, so a token
-    // cannot authorise two operations even if two concurrent requests each present a genuine
-    // assertion.
-    const consumed = await strapi.db.connection(tableName).where({ id: challenge.id }).del();
-    if (consumed !== 1) {
-      throw new ValidationError(PASSKEY_VERIFY_FAILED);
-    }
 
     return { userId };
   };
