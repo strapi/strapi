@@ -194,6 +194,9 @@ const createCronService = () => {
       pattern,
       {
         paused: !running,
+        // cron-parser (via node-schedule) accepted numeric-prefix stepping
+        // like `5/15` as `5-59/15`. Croner 10 rejects it unless this is set.
+        sloppyRanges: true,
         ...cronerOptions,
         catch(error: unknown) {
           strapi.log.error(`Cron job "${jobLabel}" failed`, error);

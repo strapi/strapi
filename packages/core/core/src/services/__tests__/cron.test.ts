@@ -324,6 +324,19 @@ describe('Cron service', () => {
     expect(cron.jobs[1].job.nextRun()).toBeInstanceOf(Date);
   });
 
+  it('accepts numeric-prefix stepping from cron-parser', () => {
+    cron.add({
+      stepped: {
+        task: jest.fn(),
+        options: '0 5/15 * * * *',
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+    expect(global.strapi.log.error).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['Sunday as 0', '0 0 * * 0'],
     ['Sunday as 7', '0 0 * * 7'],
