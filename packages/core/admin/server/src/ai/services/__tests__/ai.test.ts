@@ -47,6 +47,7 @@ describe('AI Container', () => {
       },
       log: {
         info: jest.fn(),
+        warn: jest.fn(),
         error: jest.fn(),
         http: jest.fn(),
       },
@@ -533,6 +534,79 @@ describe('AI Container', () => {
       licensedFeatures.length = 0;
 
       expect(aiContainer.isStrapiManagedAiEnabled()).toBe(false);
+    });
+  });
+
+  describe('authorizeCustomProvider', () => {
+    const createStrapi = ({ configEnabled = true, licensedFeatures = [] as string[] } = {}) =>
+      ({
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return configEnabled ? (defaultValue ?? true) : false;
+            return defaultValue;
+          }),
+        },
+        ee: {
+          isEE: true,
+          features: { isEnabled: jest.fn((name: string) => licensedFeatures.includes(name)) },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
+      }) as any;
+
+    test('returns true and does not log when the cms-byok-ai feature is present', () => {
+      const strapi = createStrapi({ licensedFeatures: ['cms-byok-ai'] });
+      const aiContainer = createAiAdminService({ strapi });
+
+      expect(aiContainer.authorizeCustomProvider()).toBe(true);
+      expect(strapi.log.warn).not.toHaveBeenCalled();
+      expect(strapi.log.info).not.toHaveBeenCalled();
+    });
+
+    test('returns false and calls log.warn once with a message containing cms-byok-ai when the feature is missing', () => {
+      const strapi = createStrapi();
+      const aiContainer = createAiAdminService({ strapi });
+
+      expect(aiContainer.authorizeCustomProvider()).toBe(false);
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+      expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('cms-byok-ai'));
+    });
+
+    test('after one rejection, isAvailable and isStrapiManagedAiEnabled return false, even when features.isEnabled later returns true', () => {
+      const strapi = createStrapi();
+      const aiContainer = createAiAdminService({ strapi });
+
+      expect(aiContainer.authorizeCustomProvider()).toBe(false);
+
+      strapi.ee.features.isEnabled.mockReturnValue(true);
+
+      expect(aiContainer.isAvailable()).toBe(false);
+      expect(aiContainer.isStrapiManagedAiEnabled()).toBe(false);
+    });
+
+    test('returns false, logs info, does not warn, and does not block when admin.ai.enabled is false', () => {
+      let enabled = false;
+      const strapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return enabled;
+            return defaultValue;
+          }),
+        },
+        ee: {
+          isEE: true,
+          features: { isEnabled: jest.fn().mockReturnValue(true) },
+        },
+        log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
+      } as any;
+      const aiContainer = createAiAdminService({ strapi });
+
+      expect(aiContainer.authorizeCustomProvider()).toBe(false);
+      expect(strapi.log.info).toHaveBeenCalledTimes(1);
+      expect(strapi.log.warn).not.toHaveBeenCalled();
+
+      enabled = true;
+
+      expect(aiContainer.isStrapiManagedAiEnabled()).toBe(true);
     });
   });
 
