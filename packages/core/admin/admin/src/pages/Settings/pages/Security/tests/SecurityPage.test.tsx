@@ -10,6 +10,7 @@ const settings = (overrides = {}) =>
       data: {
         mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['1'], ...overrides },
         trustedDevices: { enabled: true, days: 30 },
+        passkeys: { enabled: true },
       },
     })
   );
@@ -152,5 +153,20 @@ describe('SecurityPage', () => {
     // one Save each, reachable without a positional locator -- this is what the e2e specs use
     expect(within(enforcement).getByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(within(trust).getByRole('button', { name: 'Save' })).toBeInTheDocument();
+  });
+
+  it('renders the passkeys card under the trusted devices card, as a third region', async () => {
+    server.use(settings(), me(true));
+    render(<SecurityPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(headings.indexOf('Trusted devices')).toBeLessThan(headings.indexOf('Passkeys'));
+
+    const passkeys = screen.getByRole('region', { name: 'Passkeys' });
+    expect(
+      within(passkeys).getByRole('checkbox', { name: 'Allow users to sign in with a passkey' })
+    ).toBeChecked();
+    expect(within(passkeys).getByRole('button', { name: 'Save' })).toBeInTheDocument();
   });
 });

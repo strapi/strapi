@@ -99,4 +99,33 @@ describe('ConfirmDowngradeDialog', () => {
 
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('renders the caller-supplied title and description instead of the defaults', () => {
+    renderDialog({
+      title: 'Turn passkeys off?',
+      description: 'Turning passkeys off deletes every passkey your users have registered.',
+    });
+
+    expect(screen.getByRole('dialog', { name: 'Turn passkeys off?' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Turning passkeys off deletes every passkey your users have registered.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/This change makes two-factor authentication less strict/)
+    ).not.toBeInTheDocument();
+    // the credential fields are unaffected by the copy override
+    expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+    expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('keeps the default copy when neither prop is given', () => {
+    renderDialog();
+
+    expect(
+      screen.getByRole('dialog', { name: 'Confirm lowering two-factor requirements' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/^This change makes two-factor authentication less strict/)
+    ).toBeInTheDocument();
+  });
 });
