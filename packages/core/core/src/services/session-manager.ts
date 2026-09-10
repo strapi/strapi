@@ -610,6 +610,10 @@ class SessionManager {
         return { error: 'invalid_refresh_token' };
       }
 
+      if (current.status !== 'active') {
+        return { error: 'invalid_refresh_token' };
+      }
+
       // If parent already has a child, return the same child token
       if (current.childId) {
         const child = await this.provider.findBySessionId(current.childId);

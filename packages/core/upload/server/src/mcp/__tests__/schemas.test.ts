@@ -1,0 +1,265 @@
+import {
+  mediaListAssetsInputSchema,
+  mediaGetAssetInputSchema,
+  mediaListAssetsOutputSchema,
+  mediaGetAssetOutputSchema,
+  mediaListFoldersOutputSchema,
+  mediaUpdateAssetInputSchema,
+  mediaUpdateAssetOutputSchema,
+} from '../schemas';
+import { ALLOWED_SORT_STRINGS } from '../../constants';
+
+describe('upload MCP schemas', () => {
+  describe('media_list_assets input', () => {
+    test('accepts an empty object — every filter is optional', () => {
+      expect(mediaListAssetsInputSchema.safeParse({}).success).toBe(true);
+    });
+
+    test('accepts the documented filters', () => {
+      const parsed = mediaListAssetsInputSchema.safeParse({
+        folderId: 3,
+        mime: 'image/png',
+        name: 'logo',
+        page: 2,
+        pageSize: 50,
+        sort: 'name:ASC',
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts folderId: null to mean the media library root', () => {
+      expect(mediaListAssetsInputSchema.safeParse({ folderId: null }).success).toBe(true);
+    });
+
+    test.each(ALLOWED_SORT_STRINGS)('accepts the allowed sort string %s', (sort) => {
+      expect(mediaListAssetsInputSchema.safeParse({ sort }).success).toBe(true);
+    });
+
+    test('rejects a sort on a private column', () => {
+      // folderPath is `private: true` on the file content-type and must not be sortable.
+      expect(mediaListAssetsInputSchema.safeParse({ sort: 'folderPath:ASC' }).success).toBe(false);
+    });
+
+    test('rejects a non-integer or out-of-range page size', () => {
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 0 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 101 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ pageSize: 1.5 }).success).toBe(false);
+    });
+
+    test('rejects a zero or negative page', () => {
+      expect(mediaListAssetsInputSchema.safeParse({ page: 0 }).success).toBe(false);
+      expect(mediaListAssetsInputSchema.safeParse({ page: -1 }).success).toBe(false);
+    });
+  });
+
+  describe('media_get_asset input', () => {
+    test('requires a positive integer id', () => {
+      expect(mediaGetAssetInputSchema.safeParse({ id: 42 }).success).toBe(true);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 0 }).success).toBe(false);
+      expect(mediaGetAssetInputSchema.safeParse({ id: 1.5 }).success).toBe(false);
+    });
+
+    test('rejects a documentId in place of a numeric id', () => {
+      // Media files are not documents; a string identifier is a caller error worth surfacing.
+      expect(mediaGetAssetInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b' }).success).toBe(
+        false
+      );
+    });
+
+    test('requires the id', () => {
+      expect(mediaGetAssetInputSchema.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('media_update_asset input', () => {
+    test('accepts the three writable metadata fields', () => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({
+        id: 1,
+        name: 'renamed.jpg',
+        alternativeText: 'alt',
+        caption: 'caption',
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a partial patch', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, caption: 'only this' }).success).toBe(
+        true
+      );
+    });
+
+    test('accepts null on the nullable text fields, to clear them', () => {
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 1, alternativeText: null, caption: null })
+          .success
+      ).toBe(true);
+    });
+
+    test('rejects a null name — an asset cannot be left unnamed', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, name: null }).success).toBe(false);
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, name: '' }).success).toBe(false);
+    });
+
+    test('requires the numeric id', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ name: 'renamed.jpg' }).success).toBe(false);
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b', name: 'x' }).success
+      ).toBe(false);
+    });
+
+    test.each([
+      ['folder', 3],
+      ['folderId', 3],
+      ['folderPath', '/1/2'],
+    ])('rejects %s and directs the caller to media_move_assets', (field, value) => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({ id: 1, [field]: value });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/media_move_assets/);
+    });
+
+    test.each([
+      ['url', '/uploads/evil.jpg'],
+      ['provider', 'aws-s3'],
+      ['provider_metadata', { secretKey: 'leak' }],
+      ['hash', 'forced_hash'],
+      ['mime', 'text/html'],
+      ['size', 1],
+      ['width', 10],
+      ['height', 10],
+      ['ext', '.png'],
+      ['formats', { thumbnail: {} }],
+    ])('rejects the provider-owned field %s', (field, value) => {
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: value })
+          .success
+      ).toBe(false);
+    });
+
+    test.each(['file', 'files', 'data', 'buffer', 'filepath', 'focalPoint'])(
+      'rejects the out-of-scope field %s',
+      (field) => {
+        // File content is out of MCP scope entirely — MCP is text-only.
+        expect(
+          mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: 'x' })
+            .success
+        ).toBe(false);
+      }
+    );
+
+    test('reports the unrecognised key by name, so an agent can correct itself', () => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'x', folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/folder/);
+    });
+  });
+
+  describe('media_update_asset output', () => {
+    test('returns the asset in the same shape as the read tools', () => {
+      const parsed = mediaUpdateAssetOutputSchema.safeParse({
+        data: {
+          id: 1,
+          name: 'renamed.jpg',
+          alternativeText: 'alt',
+          caption: null,
+          url: '/uploads/photo.jpg',
+          mime: 'image/jpeg',
+          size: 12.5,
+          folder: null,
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('requires data — a successful write always returns the updated asset', () => {
+      expect(mediaUpdateAssetOutputSchema.safeParse({ data: null }).success).toBe(false);
+      expect(mediaUpdateAssetOutputSchema.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('output schemas', () => {
+    const asset = {
+      id: 1,
+      name: 'photo.png',
+      alternativeText: 'a photo',
+      caption: null,
+      url: '/uploads/photo.png',
+      mime: 'image/png',
+      size: 12.5,
+      width: 800,
+      height: 600,
+      ext: '.png',
+      folder: { id: 2, name: 'Photos' },
+      createdAt: '2026-09-02T08:00:00.000Z',
+      updatedAt: '2026-09-02T08:00:00.000Z',
+    };
+
+    test('validates a sanitized asset', () => {
+      expect(mediaGetAssetOutputSchema.safeParse({ data: asset }).success).toBe(true);
+    });
+
+    test('accepts a null folder for a root-level asset', () => {
+      expect(
+        mediaGetAssetOutputSchema.safeParse({ data: { ...asset, folder: null } }).success
+      ).toBe(true);
+    });
+
+    test('accepts a null data payload', () => {
+      expect(mediaGetAssetOutputSchema.safeParse({ data: null }).success).toBe(true);
+    });
+
+    test('strips fields outside the allowlist', () => {
+      const parsed = mediaGetAssetOutputSchema.parse({
+        data: {
+          ...asset,
+          provider: 'aws-s3',
+          provider_metadata: { secretKey: 'super-secret' },
+          hash: 'photo_abc123',
+          folderPath: '/1/2',
+          formats: { thumbnail: {} },
+        },
+      });
+
+      expect(parsed.data).not.toHaveProperty('provider');
+      expect(parsed.data).not.toHaveProperty('provider_metadata');
+      expect(parsed.data).not.toHaveProperty('hash');
+      expect(parsed.data).not.toHaveProperty('folderPath');
+      expect(parsed.data).not.toHaveProperty('formats');
+    });
+
+    test('validates a paginated list payload', () => {
+      const parsed = mediaListAssetsOutputSchema.safeParse({
+        results: [asset],
+        pagination: { page: 1, pageSize: 25, pageCount: 1, total: 1 },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('validates an arbitrarily nested folder tree', () => {
+      const parsed = mediaListFoldersOutputSchema.safeParse({
+        data: [
+          {
+            id: 1,
+            name: 'root',
+            children: [
+              { id: 2, name: 'nested', children: [{ id: 3, name: 'deep', children: [] }] },
+            ],
+          },
+        ],
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('rejects a folder node missing children', () => {
+      expect(
+        mediaListFoldersOutputSchema.safeParse({ data: [{ id: 1, name: 'root' }] }).success
+      ).toBe(false);
+    });
+  });
+});

@@ -548,6 +548,26 @@ const processSSEStream = async ({
           dispatch(setFileUploading({ name: parsed.url as string, index, size: 0, uploadId }));
           break;
         }
+        case 'file:progress': {
+          const payload = parsed as CreateFilesStreamEvents.FileProgressEvent;
+
+          // No usable Content-Length on the remote: leave the row indeterminate
+          if (payload.totalBytes === null) {
+            break;
+          }
+
+          // Already throttled server-side (~5 frames a second per file), so no batching
+          // here. `size` rides along because the row is still at 0 — see `setFileProgress`.
+          dispatch(
+            setFileProgress({
+              index,
+              bytes: payload.loadedBytes,
+              size: payload.totalBytes,
+              uploadId,
+            })
+          );
+          break;
+        }
         case 'file:uploading': {
           const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
           dispatch(setFileUploading({ name: payload.name, index, size: payload.size, uploadId }));

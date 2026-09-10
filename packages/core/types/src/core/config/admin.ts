@@ -100,6 +100,8 @@ export interface Secrets {
 export interface AuditLogs {
   enabled?: boolean;
   retentionDays?: number;
+  exportMaxRows?: number;
+  exportPartRows?: number;
 }
 
 export interface History {

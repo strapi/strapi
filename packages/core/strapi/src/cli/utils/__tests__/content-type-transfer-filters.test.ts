@@ -23,6 +23,10 @@ describe('content type transfer filters', () => {
     expect(entityFilter({ type: 'admin::user' })).toBe(false);
   });
 
+  test('entity filter keeps content-release exclusions client-only', () => {
+    expect(entityFilter({ type: 'plugin::content-releases.release' })).toBe(false);
+  });
+
   test('link filter excludes links touching excluded content types', () => {
     expect(
       linkFilter({
