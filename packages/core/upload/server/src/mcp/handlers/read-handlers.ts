@@ -2,6 +2,7 @@ import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
 import { getService } from '../../utils';
+import { getFolderService } from '../ambient-instance';
 import { ACTIONS, FILE_MODEL_UID, FOLDER_MODEL_UID } from '../../constants';
 import { assertMediaPermission } from '../permissions';
 import { findEntityAndCheckPermissions } from '../../controllers/utils/find-entity-and-check-permissions';
@@ -139,13 +140,17 @@ export const createMediaGetAssetHandler =
  * `getStructure()` returns the whole tree in one query and has no permission-condition
  * filtering, so this is gated on the model-level read permission only — matching
  * `GET /upload/folder-structure` in the admin API.
+ *
+ * The folder service queries the ambient `global.strapi` regardless of the instance passed to
+ * `getService`; `buildUploadMcpToolDefinitions` asserts the two agree before this handler is
+ * ever constructed — see `assertAmbientInstance` for why.
  */
 export const createMediaListFoldersHandler =
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async (): Promise<Modules.MCP.McpToolHandlerReturn> => {
     assertMediaPermission(strapi, context, ACTIONS.read, FOLDER_MODEL_UID);
 
-    const structure = await getService('folder', strapi).getStructure();
+    const structure = await getFolderService(strapi).getStructure();
 
     return ok({ data: sanitizeMediaFolderTree(structure) });
   };
