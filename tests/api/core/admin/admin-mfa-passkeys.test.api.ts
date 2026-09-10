@@ -155,15 +155,11 @@ describe('Admin MFA passkeys', () => {
         expect(res.statusCode).toBe(404);
       }
 
-      for (const url of [
-        `/admin/mfa/users/${editor.id}/passkeys`,
-        `/admin/mfa/users/${editor.id}/passkeys`,
-      ]) {
-        // eslint-disable-next-line no-await-in-loop
-        expect((await rq({ url, method: 'GET' })).statusCode).toBe(404);
-        // eslint-disable-next-line no-await-in-loop
-        expect((await rq({ url, method: 'DELETE' })).statusCode).toBe(404);
-      }
+      // Both administrator routes for this resource share the one path, distinguished only by
+      // method -- so there is exactly one URL to cover here, not a loop over it.
+      const administratorPasskeysUrl = `/admin/mfa/users/${editor.id}/passkeys`;
+      expect((await rq({ url: administratorPasskeysUrl, method: 'GET' })).statusCode).toBe(404);
+      expect((await rq({ url: administratorPasskeysUrl, method: 'DELETE' })).statusCode).toBe(404);
 
       const options = await createRequest({ strapi }).post('/admin/login/mfa/webauthn/options', {
         body: { nonsense: true },
@@ -193,6 +189,17 @@ describe('Admin MFA passkeys', () => {
   });
 
   test('a wrong password is refused without spending a factor attempt', async () => {
+    // The account-scoped throttle (`isAccountThrottled`) is a count of `challenge_failed`
+    // `admin::mfa-event` rows for this user. `assertPasswordAndFactor` throws on a bad password
+    // before `assertFactor` -- the only place that records one -- ever runs, so that count must
+    // not move. Reading it directly is the actual mechanism, not a proxy for it.
+    const countChallengeFailures = () =>
+      strapi.db
+        .query('admin::mfa-event')
+        .count({ where: { userId: String(editor.id), type: 'challenge_failed' } });
+
+    const before = await countChallengeFailures();
+
     const res = await editorRq('/mfa/passkeys/options', 'POST', {
       password: 'not-the-password',
       code: '123456',
@@ -200,6 +207,19 @@ describe('Admin MFA passkeys', () => {
 
     expect(res.statusCode).toBe(400);
     expect(JSON.stringify(res.body)).toContain('Invalid credentials');
+    expect(await countChallengeFailures()).toBe(before);
+  });
+
+  test('a password with no code is refused', async () => {
+    // The registration gate is password *and* a live second factor; a code-less body must be
+    // refused even though this fails at the yup layer (`code` is `.required()`) rather than the
+    // semantic check `assertPasswordAndFactor` makes -- a password alone must never authorise a
+    // new second factor.
+    const res = await editorRq('/mfa/passkeys/options', 'POST', {
+      password: editorPassword,
+    });
+
+    expect(res.statusCode).toBe(400);
   });
 
   test('a wrong code is refused', async () => {
@@ -353,6 +373,7 @@ describe('Admin MFA passkeys', () => {
       method: 'DELETE',
     });
     expect(removed.statusCode).toBe(204);
+    expect(removed.body).toEqual({});
     expect(await passkeyRows(editor.id)).toHaveLength(0);
 
     // And the notice the removal recorded is on the target's feed, not the administrator's.
@@ -449,6 +470,31 @@ describe('Admin MFA passkeys', () => {
     });
     expect(registering.statusCode).toBe(400);
     expect(JSON.stringify(registering.body)).toContain('Passkeys are disabled');
+
+    // Removing a credential is never the dangerous direction (the service's own reasoning for
+    // `deletePasskey`/`clearPasskeys`), so both delete routes must keep working while the policy
+    // is off. A row can only exist here through a direct seed -- registration is refused above --
+    // and while it exists the caller's list and the administrator count still agree with each
+    // other (both stay empty/zero), never disagreeing about what is really in the table.
+    const offRowForSelfDelete = await seedPasskey(editor.id, 800);
+    expect((await editorRq('/mfa/passkeys', 'GET')).body.data).toEqual([]);
+    expect(
+      (await rq({ url: `/admin/mfa/users/${editor.id}/passkeys`, method: 'GET' })).body.data
+    ).toEqual({ count: 0 });
+
+    const selfDeleteWhileOff = await editorRq(`/mfa/passkeys/${offRowForSelfDelete.id}`, 'DELETE');
+    expect(selfDeleteWhileOff.statusCode).toBe(204);
+    expect(selfDeleteWhileOff.body).toEqual({});
+    expect(await passkeyRows(editor.id)).toHaveLength(0);
+
+    await seedPasskey(editor.id, 801);
+    const adminDeleteWhileOff = await rq({
+      url: `/admin/mfa/users/${editor.id}/passkeys`,
+      method: 'DELETE',
+    });
+    expect(adminDeleteWhileOff.statusCode).toBe(204);
+    expect(adminDeleteWhileOff.body).toEqual({});
+    expect(await passkeyRows(editor.id)).toHaveLength(0);
 
     // Turning them back on needs nothing: it strengthens the second factor and destroys nothing.
     const on = await putSettings({ passkeys: { enabled: true } });
