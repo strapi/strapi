@@ -4257,6 +4257,48 @@ describe('mfa service: passkey login', () => {
     expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
   });
 
+  test('options skips a stored credentialId that is not valid base64url, logs it, and keeps the well-formed one', async () => {
+    const { service, passkeyRows, strapi } = setup();
+    const good = seedCredential(passkeyRows, '1', { credentialId: 'good-cred' });
+    // A row reachable only by hand-editing today, since the column is written from the library's
+    // own base64url `credential.id` -- but the real (unmocked) `generateAuthenticationOptions`
+    // throws a bare `Error` for a non-base64url `allowCredentials` entry, which would otherwise
+    // surface as a 500 on this unauthenticated route and permanently brick it for a user who still
+    // holds a perfectly good credential (mirrors the registration path's `excludeCredentials` case
+    // above).
+    seedCredential(passkeyRows, '1', { credentialId: 'not valid!!' });
+    const { token } = await service.createChallenge('1');
+
+    const options = await service.authenticationOptions(token);
+
+    // The shared generic literal is not what the caller sees here: the ceremony still succeeds,
+    // and only the well-formed credential is offered.
+    expect(options.allowCredentials).toEqual([
+      { id: good.credentialId, transports: ['internal'], type: 'public-key' },
+    ]);
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('not valid!!'));
+  });
+
+  test('options refuses when the challenge write finds the row already consumed by a concurrent request', async () => {
+    const { service, passkeyRows, challenges, strapi } = setup();
+    seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+
+    // `usableChallenge`'s own read finds the row -- still present, still valid -- but by the time
+    // this path's conditional write runs, a concurrent request has consumed it. The write's own
+    // affected-row count is what must decide this, not a silent write against a row that is gone.
+    const connectionMock = strapi.db.connection as jest.Mock;
+    const originalConnection = connectionMock.getMockImplementation();
+    connectionMock.mockImplementationOnce((table: string) => {
+      challenges.splice(0, challenges.length);
+      return originalConnection!(table);
+    });
+
+    await expect(service.authenticationOptions(token)).rejects.toThrow(
+      'Could not verify that passkey.'
+    );
+  });
+
   test('a successful assertion updates the counter and lastUsedAt, notifies without a row, and consumes the challenge', async () => {
     const { service, passkeyRows, challenges, events, strapi } = setup();
     const row = seedCredential(passkeyRows, '1');
@@ -4303,6 +4345,31 @@ describe('mfa service: passkey login', () => {
     ]);
 
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  });
+
+  test('two concurrent successful assertions: the loser emits no passkey_used notice and no challenge_failed', async () => {
+    const { service, passkeyRows, events, strapi } = setup({
+      mfaConfig: { maxChallengeAttempts: 5 },
+    });
+    const row = seedCredential(passkeyRows, '1');
+    const { token } = await service.createChallenge('1');
+    await service.authenticationOptions(token);
+    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+
+    const results = await Promise.allSettled([
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never),
+      service.verifyAssertion(token, assertionFor(row.credentialId) as never),
+    ]);
+
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    // The counter/lastUsedAt write and the notify both run after the consume decides the race, so
+    // only the racer that wins ever reaches either -- a lost race must not announce success for an
+    // operation it was refused, and must not be charged as a verification failure either.
+    const passkeyUsedCalls = (strapi.eventHub.emit as jest.Mock).mock.calls.filter(
+      ([type]: [string]) => type === 'admin.mfa.passkey.used'
+    );
+    expect(passkeyUsedCalls).toHaveLength(1);
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
   });
 
   test('a failed assertion charges both tiers: the per-challenge counter and challenge_failed', async () => {
