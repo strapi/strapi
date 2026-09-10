@@ -76,13 +76,16 @@ const KNOWN_PUBLIC_SUFFIXES = new Set([
 const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(/\]$/, '');
 
 /**
- * Lowercase and strip a single trailing DNS root dot before any check runs, so `EXAMPLE.com`,
- * `example.com.` and `example.com` are all treated as the one host a browser treats them as.
- * Applied once, at the point `rpId` is computed, so every later check (IP-literal, public-suffix,
- * and the origin/rpId relation check) and the returned value all see the same normalised form. A
- * leading dot is not stripped -- it is not a valid host, so it is refused explicitly instead.
+ * Lowercase and strip every trailing DNS root dot before any check runs, so `EXAMPLE.com`,
+ * `example.com.`, `example.com..` and `example.com` are all treated as the one host a browser
+ * treats them as. A single-dot strip (`replace(/\.$/, '')`) leaves a residual dot on any host with
+ * two or more trailing dots (`a.b..` -> `a.b.`, still not a valid host), so this must strip the
+ * whole trailing run (`replace(/\.+$/, '')`). Applied once, at the point `rpId` is computed, so
+ * every later check (IP-literal, public-suffix, and the origin/rpId relation check) and the
+ * returned value all see the same normalised form. A leading dot is not stripped -- it is not a
+ * valid host, so it is refused explicitly instead.
  */
-const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.$/, '');
+const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.+$/, '');
 
 const isPublicSuffix = (rpId: string): boolean => {
   if (rpId === 'localhost') {

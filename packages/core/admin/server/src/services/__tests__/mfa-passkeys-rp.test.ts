@@ -102,6 +102,54 @@ describe('resolveWebauthnRp', () => {
     expect(error).toHaveBeenCalledWith(expect.stringContaining('starts with "."'));
   });
 
+  test('two or more trailing dots on a configured rpId are all stripped, not just one', () => {
+    // Task 4 fix round 2: `normalizeHost`'s single-dot strip (`replace(/\.$/, '')`) turned
+    // `a.b..` into `a.b.` -- still not a valid host -- and because the *unnormalised* derived
+    // origin (`https://a.b.`, one dot) then string-matched that leftover-dot rpId exactly, the
+    // call was ACCEPTED with a browser-invalid `rpId: 'a.b.'` and no refusal, no log. Stripping the
+    // whole trailing run (`a.b..` -> `a.b`) removes the accidental match: the origin host (`a.b.`)
+    // no longer equals the correctly-normalised rpId (`a.b`), so this now refuses on the
+    // relation check instead of returning a broken value.
+    const { strapi, error } = buildStrapi({
+      'admin.absoluteUrl': 'https://a.b./x',
+      'admin.auth.mfa.webauthn.rpId': 'a.b..',
+    });
+
+    expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('is neither the relying party "a.b" nor a subdomain of it')
+    );
+  });
+
+  test('a leading double dot is refused the same way a single leading dot is', () => {
+    // `normalizeHost` only ever strips trailing dots, so a leading run of any length must still
+    // hit the same explicit leading-dot refusal as a single leading dot -- confirming that refusal
+    // has no single-vs-repeated gap of its own.
+    const { strapi, error } = buildStrapi({
+      'admin.absoluteUrl': 'https://cms.example.com/admin',
+      'admin.auth.mfa.webauthn.rpId': '..a.b',
+    });
+
+    expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('starts with "."'));
+  });
+
+  test.each([['.'], ['..']])(
+    'a configured rpId of only dots (%s) normalises to nothing and is refused, not accepted',
+    (dotsOnly) => {
+      // A host of only dots has no label left after the trailing-dot strip removes every dot in
+      // it, so it must fall into the same "cannot be derived" refusal as an empty rpId -- never
+      // survive as a truthy string that passes the later checks.
+      const { strapi, error } = buildStrapi({
+        'admin.absoluteUrl': 'https://cms.example.com/admin',
+        'admin.auth.mfa.webauthn.rpId': dotsOnly,
+      });
+
+      expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('admin.auth.mfa.webauthn.rpId'));
+    }
+  );
+
   test('a non-array origins config is refused rather than silently discarded', () => {
     // Finding 5: a bare string typo for `origins` used to fall through `Array.isArray` unnoticed
     // and fall back to the derived origin, with no refusal and no log -- the one misconfiguration
