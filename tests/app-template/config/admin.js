@@ -1,6 +1,16 @@
 module.exports = ({ env }) => ({
   auth: {
     secret: env('ADMIN_JWT_SECRET'),
+    // WebAuthn refuses an IP-literal relying-party id, and the harness serves this app on
+    // 127.0.0.1. `localhost` is the one dotless host browsers accept, so the passkey specs
+    // navigate there (see `mfa-passkeys.spec.ts`'s `test.use({ baseURL })`) and the expected
+    // origin is pinned to match. The port is per-worker; the harness sets PORT.
+    mfa: {
+      webauthn: {
+        rpId: 'localhost',
+        origins: [`http://localhost:${env.int('PORT', 1337)}`],
+      },
+    },
   },
   apiToken: {
     salt: env('API_TOKEN_SALT'),
